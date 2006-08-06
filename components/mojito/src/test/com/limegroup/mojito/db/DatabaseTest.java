@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import junit.framework.TestSuite;
 
@@ -444,14 +445,23 @@ public class DatabaseTest extends BaseTestCase {
         Map<KUID, DHTValue> view = database.get(valueId);
         assertEquals(10, view.size());
         
-        KUID nodeId = nodeIds.remove(nodeIds.size()/2);
-        DHTValue value = view.remove(nodeId);
-        
+        view.remove(nodeIds.remove(nodeIds.size()/2));
         assertEquals(1, database.getKeyCount());
         assertEquals(9, database.getValueCount());
         assertEquals(9, view.size());
         
-        for (Iterator<DHTValue> it = view.values().iterator(); it.hasNext(); ) {
+        view.keySet().remove(nodeIds.remove(nodeIds.size()/2));
+        assertEquals(1, database.getKeyCount());
+        assertEquals(8, database.getValueCount());
+        assertEquals(8, view.size());
+        
+        view.values().remove(view.get(nodeIds.remove(nodeIds.size()/2)));
+        assertEquals(1, database.getKeyCount());
+        assertEquals(7, database.getValueCount());
+        assertEquals(7, view.size());
+        
+        // Remove from EntrySet
+        for (Iterator it = view.entrySet().iterator(); it.hasNext(); ) {
             it.next();
             it.remove();
         }
@@ -459,6 +469,105 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
         assertEquals(0, view.size());
+        
+        // Remove from KeySet
+        for (int i = 0; i < 10; i++) {
+            KUID nodeId = KUID.createRandomNodeID();
+            DHTValue value = createDirectDHTValue(nodeId, 
+                    valueId, ("Lime-" + i).getBytes());
+            
+            database.store(value);
+        }
+        
+        assertEquals(1, database.getKeyCount());
+        assertEquals(10, database.getValueCount());
+        
+        view = database.get(valueId);
+        assertEquals(10, view.size());
+        
+        for (Iterator it = view.keySet().iterator(); it.hasNext(); ) {
+            it.next();
+            it.remove();
+        }
+        
+        assertEquals(0, database.getKeyCount());
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, view.size());
+        
+        // Remove from ValueCollection
+        for (int i = 0; i < 10; i++) {
+            KUID nodeId = KUID.createRandomNodeID();
+            DHTValue value = createDirectDHTValue(nodeId, 
+                    valueId, ("Lime-" + i).getBytes());
+            
+            database.store(value);
+        }
+        
+        assertEquals(1, database.getKeyCount());
+        assertEquals(10, database.getValueCount());
+        
+        view = database.get(valueId);
+        assertEquals(10, view.size());
+        
+        for (Iterator it = view.values().iterator(); it.hasNext(); ) {
+            it.next();
+            it.remove();
+        }
+        
+        assertEquals(0, database.getKeyCount());
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, view.size());
+        
+        // Removing the last item from the keys view
+        DHTValue value = createDirectDHTValue("Lime-".getBytes());
+        database.store(value);
+        assertEquals(1, database.getKeyCount());
+        assertEquals(1, database.getValueCount());
+        
+        view = database.get(value.getValueID());
+        assertEquals(1, view.size());
+        
+        Set<KUID> keys = view.keySet();
+        keys.remove(keys.iterator().next());
+        
+        assertEquals(0, database.getKeyCount());
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, view.size());
+        assertEquals(0, keys.size());
+        
+        // Removing the last item from the entries view
+        value = createDirectDHTValue("Lime-".getBytes());
+        database.store(value);
+        assertEquals(1, database.getKeyCount());
+        assertEquals(1, database.getValueCount());
+        
+        view = database.get(value.getValueID());
+        assertEquals(1, view.size());
+        
+        Set<Entry<KUID,DHTValue>> entries = view.entrySet();
+        entries.remove(entries.iterator().next());
+        
+        assertEquals(0, database.getKeyCount());
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, view.size());
+        assertEquals(0, entries.size());
+        
+        // Removing the last item from the values view
+        value = createDirectDHTValue("Lime-".getBytes());
+        database.store(value);
+        assertEquals(1, database.getKeyCount());
+        assertEquals(1, database.getValueCount());
+        
+        view = database.get(value.getValueID());
+        assertEquals(1, view.size());
+        
+        Collection<DHTValue> values = view.values();
+        values.remove(values.iterator().next());
+        
+        assertEquals(0, database.getKeyCount());
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, view.size());
+        assertEquals(0, values.size());
     }
     
     public void testValuesIterator() {
@@ -518,10 +627,13 @@ public class DatabaseTest extends BaseTestCase {
         Set<KUID> keys = database.keySet();
         assertEquals(7, keys.size());
         
-        keys.remove(keys.iterator().next());
+        KUID key = keys.iterator().next();
+        Map<KUID,DHTValue> view = database.get(key);
+        keys.remove(key);
         assertEquals(6, keys.size());
         assertEquals(6, database.getKeyCount());
-        assertEquals(9, database.getValueCount());
+        assertEquals(10-view.size(), database.getValueCount()); // 9 or 8
+        assertTrue(database.getValueCount() == 8 || database.getValueCount() == 9);
         
         for (Iterator it = keys.iterator(); it.hasNext(); ) {
             it.next();

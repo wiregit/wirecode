@@ -39,6 +39,8 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 
 /*
+ * Multiple values per key and one value per nodeId under a certain key
+ * 
  * valueId
  *   nodeId
  *     value
@@ -346,10 +348,25 @@ public class DatabaseImpl implements Database {
             }
             return value;
         }
+
+        @Override
+        public Set<KUID> keySet() {
+            return new Delegate<KUID>(this, super.keySet());
+        }
+        
+        @Override
+        public Set<Map.Entry<KUID, DHTValue>> entrySet() {
+            return new Delegate<Map.Entry<KUID, DHTValue>>(this, super.entrySet());
+        }
+        
+        @Override
+        public Collection<DHTValue> values() {
+            return new Delegate<DHTValue>(this, super.values());
+        }
     }
     
     /**
-     * A collection of DHTVales. It acts a view of the underlying Map.
+     * A collection of DHTValues. It acts a view of the underlying Map.
      */
     private class DHTValueCollection extends AbstractCollection<DHTValue> {
 
@@ -444,6 +461,119 @@ public class DatabaseImpl implements Database {
             if (lastBag.isEmpty()) {
                 lastBag = null;
             }
+        }
+    }
+    
+    /**
+     * This little delegation hack is necessary because the remove() 
+     * operators of the various views of Map (namely entrySet(), 
+     * keySet() and values()) do not call Map.remove() but rather do 
+     * call an internal method which we cannot overwrite.
+     * 
+     * That means if we're using a view to remove all items we'll end 
+     * up with empty DHTValueBag entries in the 'database' since
+     * DHTValueBag's remove() gets never called which would take care
+     * of cleaining everything up.
+     */
+    private class Delegate<E> implements Set<E>, Collection<E> {
+        
+        private DHTValueBag bag;
+        private Collection<E> view;
+        
+        @SuppressWarnings("unchecked")
+        public Delegate(DHTValueBag bag, Collection<? extends E> delegate) {
+            this.bag = bag;
+            this.view = (Collection<E>)delegate;
+        }
+        
+        public boolean add(E o) {
+            boolean wasEmpty = isEmpty();
+            boolean added = view.add(o);
+            if (added && wasEmpty && !isEmpty()) {
+                database.put(bag.valueId, bag);
+            }
+            return added;
+        }
+
+        public boolean addAll(Collection<? extends E> c) {
+            boolean wasEmpty = isEmpty();
+            boolean added = view.addAll(c);
+            if (added && wasEmpty && !isEmpty()) {
+                database.put(bag.valueId, bag);
+            }
+            return added;
+        }
+
+        public void clear() {
+            boolean wasEmpty = isEmpty();
+            view.clear();
+            if (!wasEmpty && isEmpty()) {
+                DHTValueBag r = database.remove(bag.valueId);
+                // Checking for null just in case Sun is
+                // changing the impl. of the views
+                assert (r == null || r == bag);
+            }
+        }
+
+        public boolean contains(Object o) {
+            return view.contains(o);
+        }
+
+        public boolean containsAll(Collection<?> c) {
+            return view.containsAll(c);
+        }
+
+        public boolean isEmpty() {
+            return view.isEmpty();
+        }
+
+        public Iterator<E> iterator() {
+            return view.iterator();
+        }
+
+        public boolean remove(Object o) {
+            boolean removed = view.remove(o);
+            if (removed && isEmpty()) {
+                DHTValueBag r = database.remove(bag.valueId);
+                // Checking for null just in case Sun is
+                // changing the impl. of the views
+                assert (r == null || r == bag);
+            }
+            return removed;
+        }
+
+        public boolean removeAll(Collection<?> c) {
+            boolean removed = view.removeAll(c);
+            if (removed && isEmpty()) {
+                DHTValueBag r = database.remove(bag.valueId);
+                // Checking for null just in case Sun is
+                // changing the impl. of the views
+                assert (r == null || r == bag);
+            }
+            return removed;
+        }
+
+        public boolean retainAll(Collection<?> c) {
+            boolean retained = view.retainAll(c);
+            if (retained && isEmpty()) {
+                DHTValueBag r = database.remove(bag.valueId);
+                // Checking for null just in case Sun is
+                // changing the impl. of the views
+                assert (r == null || r == bag);
+            }
+            return retained;
+        }
+
+        public int size() {
+            return view.size();
+        }
+
+        public Object[] toArray() {
+            return view.toArray();
+        }
+
+        public <T> T[] toArray(T[] a) {
+            return view.toArray(a);
         }
     }
 }
