@@ -518,10 +518,10 @@ public class DatabaseTest extends BaseTestCase {
         Set<KUID> keys = database.keySet();
         assertEquals(7, keys.size());
         
-        /*keys.remove(keys.iterator().next());
+        keys.remove(keys.iterator().next());
         assertEquals(6, keys.size());
         assertEquals(6, database.getKeyCount());
-        assertEquals(9, database.getValueCount());*/
+        assertEquals(9, database.getValueCount());
         
         for (Iterator it = keys.iterator(); it.hasNext(); ) {
             it.next();
