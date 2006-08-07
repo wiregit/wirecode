@@ -67,6 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="1"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SYSTEMUTILITIES_EXPORTS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"
@@ -147,7 +148,19 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
+				RelativePath=".\Firewall.h">
+			</File>
+			<File
+				RelativePath=".\Registry.h">
+			</File>
+			<File
+				RelativePath=".\Shell.h">
+			</File>
+			<File
 				RelativePath=".\stdafx.h">
+			</File>
+			<File
+				RelativePath=".\SystemUtilities.h">
 			</File>
 		</Filter>
 		<Filter

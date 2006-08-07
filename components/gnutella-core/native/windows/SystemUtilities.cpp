@@ -2,8 +2,9 @@
 // Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
 // LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
 
-// Include the standard Windows DLL header which we've edited to include the Java headers and more headers
+// Include the standard Windows DLL header and more headers
 #include "stdafx.h"
+#include "SystemUtilities.h"
 
 // A Windows DLL has a DllMain method that Windows calls when it loads the DLL
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

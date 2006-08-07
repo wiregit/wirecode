@@ -285,21 +285,40 @@ public class SystemUtils {
     }
 
     /**
+     * Opens a Web address using the default browser on the native platform.
+     * 
+     * This method returns immediately, not later after the browser exits.
+     * On Windows, this method does the same thing as Start, Run.
+     * 
+     * @param url The Web address to open, like "http://www.limewire.com/"
+     * @return    0, in place of the process exit code
+     */
+    public static int openURL(String url) {
+    	openURLNative(url);
+
+    	/*
+    	 * The program is probably still running, but calling code wants a return code.
+    	 * Return 0, the default success code.
+    	 */
+
+    	return 0;
+    }
+
+    /**
      * Runs a path using the default program on the native platform.
      * 
      * Given a path to a program, runs that program.
      * Given a path to a document, opens it in the default program for that kind of document.
-     * Given a Web address, navigates to it in the default browser.
      * Given a path to a folder, opens it in the shell.
      * 
      * This method returns immediately, not later after the program exits.
      * On Windows, this method does the same thing as Start, Run.
      * 
-     * @param path The complete path to run, like "C:\folder\file.ext" or "http://www.limewire.com/"
+     * @param path The complete path to run, like "C:\folder\file.ext"
      * @return     0, in place of the process exit code
      */
-    public static int run(String path) {
-    	runNative(path);
+    public static int openFile(String path) {
+    	openFileNative(path);
 
     	/*
     	 * The program is probably still running, but calling code wants a return code.
@@ -400,7 +419,8 @@ public class SystemUtils {
      */
 
     private static final native String getRunningPathNative();
-    private static final native void runNative(String path);
+    private static final native void openURLNative(String url);
+    private static final native void openFileNative(String path);
     private static final native boolean recycleNative(String path);
     private static final native int setFileWriteable(String path);
     private static final native long idleTime();

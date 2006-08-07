@@ -2,8 +2,10 @@
 // Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
 // LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
 
-// Include the standard Windows DLL header which we've edited to include the Java headers and more headers
+// Include the standard Windows DLL header and more headers
 #include "stdafx.h"
+#include "SystemUtilities.h"
+#include "Registry.h"
 
 // Takes a root key handle name, a key path, and a registry variable name
 // Gets the information from the registry

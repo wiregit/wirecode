@@ -2,8 +2,10 @@
 // Microsoft Visual Studio compiles this Windows native code into SystemUtilities.dll
 // LimeWire uses these functions from the class com.limegroup.gnutella.util.SystemUtils
 
-// Include the standard Windows DLL header which we've edited to include the Java headers and more headers
+// Include the standard Windows DLL header and more headers
 #include "stdafx.h"
+#include "SystemUtilities.h"
+#include "Shell.h"
 
 // Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
@@ -19,7 +21,10 @@ CString GetRunningPath() {
 
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
 // Opens it with the default program or the default Web browser
-JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_runNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url) {
+	Run(GetJavaString(e, url));
+}
+JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path) {
 	Run(GetJavaString(e, path));
 }
 void Run(LPCTSTR path) {

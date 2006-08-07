@@ -107,7 +107,7 @@ public final class Launcher {
 	 *  for any reason
 	 */
 	private static int openURLWindows(String url) {
-		return SystemUtils.run(url);
+		return SystemUtils.openURL(url);
 	}
 	
 	/**
@@ -227,7 +227,7 @@ public final class Launcher {
 	 * @return an int for the exit code of the native method
 	 */
 	private static int launchFileWindows(String path) {		
-		return SystemUtils.run(path);
+		return SystemUtils.openFile(path);
 	}
 
 	/**
