@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -77,26 +79,18 @@ public class UDPPushTest extends BaseTestCase {
 		
 	}
 	
-	public void setUp() {
-		try{
-			Map map = (Map)
-				PrivilegedAccessor.getValue(RouterService.getDownloadManager(),
-					"UDP_FAILOVER");
-			map.clear();
-		}catch(Exception tough){tough.printStackTrace();}
+	public void setUp() throws Exception {
+		Map map = (Map) PrivilegedAccessor.getValue(
+                RouterService.getDownloadManager(), "UDP_FAILOVER");
+        map.clear();
 		
 		long now = System.currentTimeMillis();
 		
 		Set proxies = new TreeSet(IpPort.COMPARATOR);
-        try {
-            proxies.add(new IpPortImpl(InetAddress.getLocalHost().getHostAddress(),10000));
-        } catch (UnknownHostException bad) {
-            ErrorService.error(bad);
-        }
+        proxies.add(new IpPortImpl(InetAddress.getLocalHost().getHostAddress(),10000));
+        
 		LimeXMLDocument doc = null;
 		Set urns = null;
-		
-
 		
 		rfd1 = new RemoteFileDesc(
 				"127.0.0.1",20000,30l,"file1",
@@ -126,11 +120,7 @@ public class UDPPushTest extends BaseTestCase {
 				proxies,now);
 		
 		Acceptor acc = RouterService.getAcceptor();
-		try{
-			PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
-		}catch(Exception bad) {
-			ErrorService.error(bad);
-		}
+		PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
 
 		assertTrue(RouterService.acceptedIncomingConnection());
 	}
@@ -220,7 +210,7 @@ public class UDPPushTest extends BaseTestCase {
 		PushRequest pr = (PushRequest)MessageFactory.read(bais);
 		assertEquals(rfd1.getIndex(),pr.getIndex());
 		
-		socket = new Socket(InetAddress.getLocalHost(),10000);
+		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
 		Socket other = serversocket.accept();
 		
 		
@@ -231,6 +221,7 @@ public class UDPPushTest extends BaseTestCase {
 		
 		
 		RouterService.getDownloadManager().acceptDownload(socket);
+        Thread.sleep(1000);
 		other.close();
 		
 		Thread.sleep(5000);
@@ -274,18 +265,20 @@ public class UDPPushTest extends BaseTestCase {
 		
 		Thread.sleep(2000);
 		
-		socket = new Socket(InetAddress.getLocalHost(),10000);
+		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
 		RouterService.getDownloadManager().acceptDownload(socket);
+        Thread.sleep(1000);
 		socket.close();
 		
-		socket = new Socket(InetAddress.getLocalHost(),10000);
+		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
 		other = serversocket.accept();
 		socket.setSoTimeout(1000);
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
 		RouterService.getDownloadManager().acceptDownload(socket);
+        Thread.sleep(1000);
 		socket.close();
 		Thread.sleep(5200);
 		
@@ -320,11 +313,12 @@ public class UDPPushTest extends BaseTestCase {
 		
 		Thread.sleep(2000);
 		
-		socket = new Socket(InetAddress.getLocalHost(),10000);
+		socket = new NIOSocket(InetAddress.getLocalHost(),10000);
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
 		RouterService.getDownloadManager().acceptDownload(socket);
+        Thread.sleep(1000);
 		socket.close();
 		
 		Thread.sleep(5200);
@@ -336,8 +330,8 @@ public class UDPPushTest extends BaseTestCase {
 	
 	
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{
-		Thread t = new Thread() {
-			public void run() {
+		Thread t = new ManagedThread() {
+			public void managedRun() {
 				RouterService.getDownloadManager().sendPush(rfd);
 			}
 		};
@@ -346,8 +340,8 @@ public class UDPPushTest extends BaseTestCase {
 	}
 	
 	static void sendGiv(final Socket sock,final String str) {
-		Thread t = new Thread() {
-			public void run()  {
+		Thread t = new ManagedThread() {
+            public void managedRun() {
 				try {
 					sock.getOutputStream().write(str.getBytes());
 				}catch(IOException e) {
