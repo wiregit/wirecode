@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UploadManager;
@@ -23,6 +26,8 @@ import com.limegroup.gnutella.UploadManager;
  */
 public class FileUtils {
     
+    private static final Log LOG = LogFactory.getLog(FileUtils.class);
+
     /**
      * Gets the canonical path, catching buggy Windows errors
      */
@@ -342,5 +347,81 @@ public class FileUtils {
         }
 
         return retArray;
+    }
+
+    /**
+     * Deletes the given file or directory, moving it to the trash can or recycle bin if the platform has one.
+     * 
+     * @param file The file or directory to trash or delete
+     * @return     true on success
+     */
+    public static boolean delete(File file) {
+    	if (!file.exists()) {
+    		return false; // Can't delete because no file is there, report error with false
+    	}
+    	if (CommonUtils.isMacOSX()) {
+    		if (moveToTrashOSX(file)) return true; // If platform-specific method fails, fall through to try to delete the file
+    	} else if (CommonUtils.isWindows()) {
+    		if (SystemUtils.recycle(file)) return true;
+    	}
+    	file.delete();
+    	return !file.exists(); // File still there after we tried to delete it, report error with false
+    }
+
+    /**
+     * Moves the given file or directory to Trash.
+     * 
+     * @param file The file or directory to move to Trash
+     * @throws IOException if the canonical path cannot be resolved
+     *          or if the move process is interrupted
+     * @return true on success
+     */
+    private static boolean moveToTrashOSX(File file) {
+    	try {
+    		String[] command = moveToTrashCommand(file);
+    		ProcessBuilder builder = new ProcessBuilder(command);
+    		builder.redirectErrorStream();
+    		Process process = builder.start();
+    		ProcessUtils.consumeAllInput(process);
+    		process.waitFor();
+    	} catch (InterruptedException err) {
+    		LOG.error("InterruptedException", err);
+    	} catch (IOException err) {
+    		LOG.error("IOException", err);
+    	}
+    	return !file.exists();
+    }
+
+    /**
+     * Creates and returns the the osascript command to move
+     * a file or directory to the Trash
+     * 
+     * @param file The file or directory to move to Trash
+     * @throws IOException if the canonical path cannot be resolved
+     * @return OSAScript command
+     */
+    private static String[] moveToTrashCommand(File file) {
+    	String path = null;
+    	try {
+    		path = file.getCanonicalPath();
+    	} catch (IOException err) {
+    		LOG.error("IOException", err);
+    		path = file.getAbsolutePath();
+    	}
+    	
+    	String fileOrFolder = (file.isFile() ? "file" : "folder");
+    	
+    	String[] command = new String[] { 
+    			"osascript", 
+    			"-e", "set unixPath to \"" + path + "\"",
+    			"-e", "set hfsPath to POSIX file unixPath",
+    			"-e", "tell application \"Finder\"", 
+    			"-e",    "if " + fileOrFolder + " hfsPath exists then", 
+    			"-e",        "move " + fileOrFolder + " hfsPath to trash",
+    			"-e",    "end if",
+    			"-e", "end tell" 
+    	};
+    	
+    	return command;
     }
 }

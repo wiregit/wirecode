@@ -329,86 +329,29 @@ public class SystemUtils {
     }
 
     /**
-     * Deletes the given file or directory.
-     */
-    public static boolean delete(File file) {
-        if (!file.exists()) {
-            return false;
-        }
-        
-        if (CommonUtils.isMacOSX()) {
-            return moveToTrashOSX(file);
-        } else if (CommonUtils.isWindows() && isLoaded) {
-            String path = null;
-            try {
-                path = file.getCanonicalPath();
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-                path = file.getAbsolutePath();
-            }
-        	return recycleNative(path);
-        } else {
-            file.delete();
-        }
-        
-        return !file.exists();
-    }
-    
-    /**
-     * Moves the given file or directory to Trash. 
+     * Moves a file to the platform-specific trash can or recycle bin.
      * 
-     * @param file The file or directory to move to Trash
-     * @throws IOException if the canonical path cannot be resolved 
-     *          or if the move process is interrupted
-     * @return true on success
+     * @param file The file to trash
+     * @return     True on success
      */
-    private static boolean moveToTrashOSX(File file) {
-        try {
-            String[] command = moveToTrashCommand(file);
-            ProcessBuilder builder = new ProcessBuilder(command);
-            builder.redirectErrorStream();
-            Process process = builder.start();
-            ProcessUtils.consumeAllInput(process);
-            process.waitFor();
-        } catch (InterruptedException err) {
-            LOG.error("InterruptedException", err);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
-        return !file.exists();
-    }
-    
-    /**
-     * Creates and returns the the osascript command to move
-     * a file or directory to the Trash
-     * 
-     * @param file The file or directory to move to Trash
-     * @throws IOException if the canonical path cannot be resolved
-     * @return OSAScript command
-     */
-    private static String[] moveToTrashCommand(File file) {
-        String path = null;
-        try {
-            path = file.getCanonicalPath();
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-            path = file.getAbsolutePath();
-        }
-        
-        String fileOrFolder = (file.isFile() ? "file" : "folder");
-        
-        String[] command = new String[] { 
-            "osascript", 
-            "-e", "set unixPath to \"" + path + "\"",
-            "-e", "set hfsPath to POSIX file unixPath",
-            "-e", "tell application \"Finder\"", 
-            "-e",    "if " + fileOrFolder + " hfsPath exists then", 
-            "-e",        "move " + fileOrFolder + " hfsPath to trash",
-            "-e",    "end if",
-            "-e", "end tell" 
-        };
-        
-        return command;
+    public static boolean recycle(File file) {
+    	if (CommonUtils.isWindows() && isLoaded) {
+
+    		// Get the path to the file
+    		String path = null;
+			try {
+				path = file.getCanonicalPath();
+			} catch (IOException err) {
+				LOG.error("IOException", err);
+				path = file.getAbsolutePath();
+			}
+
+			// Use native code to move the file at that path to the recycle bin
+			return recycleNative(path);
+
+    	} else {
+    		return false;
+    	}
     }
 
     /*
