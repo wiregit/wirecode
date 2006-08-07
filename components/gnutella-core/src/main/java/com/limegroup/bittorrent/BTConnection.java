@@ -22,6 +22,7 @@ import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Class wrapping a Bittorrent connection.
@@ -198,7 +199,7 @@ PieceSendListener, PieceReadListener {
 		try {
 			_socket.setSoTimeout(CONNECTION_TIMEOUT);
 		} catch (SocketException se){
-			ErrorService.error(se);
+			shutdown();
 		}
 		
 		_torrent = torrent;
@@ -293,7 +294,7 @@ PieceSendListener, PieceReadListener {
 		_reader.shutdown();
 		_writer.shutdown();
 		
-		_socket.close();
+		IOUtils.close(_socket);
 		
 		clearRequests();
 		cancelSlotRequest();
