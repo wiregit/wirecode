@@ -15,7 +15,9 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.ChannelReadObserver;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ThrottleReader;
+import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
@@ -182,7 +184,9 @@ PieceSendListener, PieceReadListener {
 		downLong = new SimpleBandwidthTracker(5000);
 		
 		_writer = new BTMessageWriter(this, this);
-		_reader = new BTMessageReader(this, this);
+		_reader = new BTMessageReader(this, this,
+				NIODispatcher.instance().getSchedulingThreadPool(),
+				NIODispatcher.instance().getBufferCache());
 
 	}
 
