@@ -54,8 +54,6 @@ public final class URN implements HTTPHeaderValue, Serializable {
 
         /** UrnType for an invalid Urn Type. */
         INVALID("Invalid");
-
-        private static final long serialVersionUID = -8211681448456483713L;
         
         private final String descriptor;
         

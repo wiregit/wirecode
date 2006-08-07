@@ -2532,8 +2532,7 @@ public abstract class MessageRouter {
                 ErrorService.error(t);
             }
         }
-
-    } //end QRPPropagator
+    }
 
 
     /**

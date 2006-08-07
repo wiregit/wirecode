@@ -54,7 +54,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     // ======================================================
     public void testInitialPeerMessages() throws Exception{
         Connection up=ULTRAPEER[0];
-        Thread.sleep( 5*1000 );
+        Thread.sleep( 10*1000 );
         parseWaitingMessages( up );
 
         // Check that initial messages are sent & received correctly
@@ -64,6 +64,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
         Message mPatch=getFirstMessageOfTypeFromQueue( PatchTableMessage.class );
         
         //  UP may support PONG CACHING so we don't send it an initial ping.
+        getFirstMessageOfTypeFromQueue( PingRequest.class );
         getFirstMessageOfTypeFromQueue( PingRequest.class );
         
         assertNotNull( mCapVM );
