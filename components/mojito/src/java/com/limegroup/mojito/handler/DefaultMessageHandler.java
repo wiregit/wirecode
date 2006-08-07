@@ -42,6 +42,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
+import com.limegroup.mojito.util.CollectionUtils;
 
 
 /**
@@ -141,12 +142,11 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     // and the closest is stale?
                     
                     List<Contact> closestNodesToKey = routeTable.select(valueId, k, false);
+                    System.out.println(CollectionUtils.toString(closestNodesToKey));
                     Contact closest = closestNodesToKey.get(0);
                     
                     if (context.isLocalNode(closest)   
-                            || ((node.equals(closest)
-                                //maybe we haven't added him to the routing table
-                                || node.getNodeID().isNearer(closest.getNodeID(), valueId)) 
+                            || (node.equals(closest)
                                 && (closestNodesToKey.size() > 1)
                                 && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         
@@ -157,21 +157,23 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
                         valuesToForward.addAll(database.get(valueId).values());
                         
-                    } else if (closestNodesToKey.size() == k) {
-                        //if we are the furthest node: delete non-local value from local db
-                        Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
-                        if (context.isLocalNode(furthest)) {
-                            int count = 0;
-                            for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
-                                DHTValue value = it.next();
-                                if (!value.isLocalValue()) {
-                                    it.remove();
-                                    count++;
-                                }
+                    } else if (closestNodesToKey.size() == k
+                            && !closestNodesToKey.contains(context.getLocalNode())) {
+                        
+                        int count = 0;
+                        for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
+                            DHTValue value = it.next();
+                            if (!value.isLocalValue()) {
+                                // Rather than to delete the DHTValue immediately we're
+                                // setting the flag that it's no longer nearby which will 
+                                // expire it faster. This way we can serve as a cache for
+                                // a while...
+                                value.setNearby(false);
+                                count++;
                             }
-                            
-                            databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                         }
+                        
+                        databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                     }
                 }
             }
