@@ -379,7 +379,7 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
-    public synchronized boolean isNearToLocal(KUID nodeId) {
+    public synchronized boolean isLocalBucket(KUID nodeId) {
         return bucketTrie.select(nodeId).contains(context.getLocalNodeID());
     }
     

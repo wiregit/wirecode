@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.FloatSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
@@ -76,4 +77,12 @@ public final class DatabaseSettings extends MojitoProps {
     public static final LongSetting REPUBLISH_PERIOD
         = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
                 "republish_period", 5L*60L*1000L, 60L*60L*1000L);
+    
+    /**
+     * Whether or not to delete a DHTValue from the Database if we're
+     * the furthest of the k closest Nodes and a new Node comes along
+     * that is closer
+     */
+    public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
+        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, "delete_value_if_furthest_node");
 }

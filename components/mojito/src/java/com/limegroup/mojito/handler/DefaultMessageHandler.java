@@ -39,10 +39,10 @@ import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
-import com.limegroup.mojito.util.CollectionUtils;
 
 
 /**
@@ -109,9 +109,9 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         // (we are (re)connecting to the network) or a node that is reconnecting
         Contact existing = routeTable.get(node.getNodeID());
         
-        //add node to the routing table -- update timestamp and info if needed
+        // add node to the routing table -- update timestamp and info if needed
         routeTable.add(node);
-
+        
         if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
             
             if (LOG.isTraceEnabled()) {
@@ -127,8 +127,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
+        List<Contact> nearestNodesToId = routeTable.select(node.getNodeID(), k, false);
+        
         // Are we one of the K closest nodes to the contact?
-        if (routeTable.isNearToLocal(node.getNodeID())) {
+        if (containsLocalNode(nearestNodesToId, context.getLocalNodeID())) {
             List<DHTValue> valuesToForward = new ArrayList<DHTValue>();
             
             Database database = context.getDatabase();
@@ -141,14 +143,17 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     // TODO: maybe relax this a little bit: what if we're not the closest 
                     // and the closest is stale?
                     
-                    List<Contact> closestNodesToKey = routeTable.select(valueId, k, false);
-                    System.out.println(CollectionUtils.toString(closestNodesToKey));
-                    Contact closest = closestNodesToKey.get(0);
+                    List<Contact> nearestNodesToKey = routeTable.select(valueId, k, false);
+                    Contact closest = nearestNodesToKey.get(0);
+                    
+                    //System.out.println(context.getLocalNode());
+                    //System.out.println(CollectionUtils.toString(nearestNodesToKey));
+                    //System.out.println();
                     
                     if (context.isLocalNode(closest)   
                             || (node.equals(closest)
-                                && (closestNodesToKey.size() > 1)
-                                && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
+                                && (nearestNodesToKey.size() > 1)
+                                && nearestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
@@ -157,8 +162,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
                         valuesToForward.addAll(database.get(valueId).values());
                         
-                    } else if (closestNodesToKey.size() == k
-                            && !closestNodesToKey.contains(context.getLocalNode())) {
+                    } else if (nearestNodesToKey.size() >= k
+                            && !containsLocalNode(nearestNodesToKey, context.getLocalNodeID())) {
+                        
+                        boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
                         
                         int count = 0;
                         for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
@@ -168,7 +175,15 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                                 // setting the flag that it's no longer nearby which will 
                                 // expire it faster. This way we can serve as a cache for
                                 // a while...
-                                value.setNearby(false);
+                                
+                                //System.out.println("\n" + value + "\n");
+                                
+                                if (delete) {
+                                    it.remove();
+                                } else {
+                                    value.setNearby(false);
+                                }
+                                
                                 count++;
                             }
                         }
@@ -194,5 +209,17 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 context.store(node, queryKey, valuesToForward);
             }
         }
+    }
+    
+    /**
+     * Returns whether or not the local Node is in the given List
+     */
+    private boolean containsLocalNode(List<Contact> nodes, KUID id) {
+        for (int i = nodes.size()-1; i >= 0; i--) {
+            if (id.equals(nodes.get(i).getNodeID())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
