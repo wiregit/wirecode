@@ -882,6 +882,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertEquals(1, _queryKeys.size());
         }
 
+        byte[] urnQueryGUID = null;
         { // confirm a URN query
             boolean gotQuery = false;
             while (!gotQuery) {
@@ -895,11 +896,16 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     QueryRequest qReq = (QueryRequest) m;
                     Set queryURNs = qReq.getQueryUrns();
                     gotQuery = queryURNs.contains(urn);
-                    if (gotQuery)
+                    if (gotQuery) {
                         gotQuery = qk.equals(qReq.getQueryKey());
+                        if(gotQuery)
+                            urnQueryGUID = qReq.getGUID();
+                    }
                 }
             }
         }
+        
+        assertNotNull(urnQueryGUID);
 
         long timeoutVal = 8000 - (System.currentTimeMillis() - currTime);
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
@@ -914,7 +920,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         { // send back a query request, the TestUploader should service upload
             rfd = makeRFD(urn, UPLOADER_PORT + 1);
             Response[] res = new Response[] { new Response(10, 10, "whatever") };
-            m = new QueryReply(qr.getGUID(), (byte) 1, UPLOADER_PORT+1, myIP(), 
+            m = new QueryReply(urnQueryGUID, (byte) 1, UPLOADER_PORT+1, myIP(), 
                                0, res, GUID.makeGuid(), new byte[0], false, 
                                false, true, true, false, false, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

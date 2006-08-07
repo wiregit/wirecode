@@ -757,7 +757,7 @@ public class UDPService implements ReadWriteObserver {
                                              (byte)1, (byte)0);
             
             pr.addIPRequest();
-            send(pr, ep.getAddress(), ep.getPort());
+            send(pr, ep.getInetAddress(), ep.getPort());
         }
     }
 

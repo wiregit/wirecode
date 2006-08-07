@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -16,8 +19,11 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutella.util.IpPort;
 
 public class OOBHandler implements MessageHandler, Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(OOBHandler.class);
 	
 	private final MessageRouter router;
 	
@@ -64,38 +70,61 @@ public class OOBHandler implements MessageHandler, Runnable {
 	}
 	
 	private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Handling reply: " + reply + ", from: " + handler);
+        
         ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
         // only account for OOB stuff if this was response to a 
         // OOB query, multicast stuff is sent over UDP too....
-        
-        int numResps = reply.getResultCount();
-        
-        if (!reply.isReplyToMulticastQuery())
+        if (!reply.isReplyToMulticastQuery()) {
+            int numResps = reply.getResultCount();
             OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-        
-        OOBSession session = new OOBSession(
-        		new GUID(reply.getGUID()),
-        		handler.getInetAddress(),
-        		handler.getPort());
-        
-        Integer numRequested = OOBSessions.get(session);
-        if (numRequested == null)
-        	return;
-        
-        numRequested -= numResps;
-        
-        if (numRequested > 0)
-        	OOBSessions.put(session, numRequested);
-        else {
-        	OOBSessions.remove(session);
-        	if (numRequested < 0) // too many, ignore.
-        		return;
+            GUID guid = new GUID(reply.getGUID());
+            OOBSession session = new OOBSession(
+                    guid,
+            		handler.getInetAddress(),
+            		handler.getPort());
+            
+            // Allow the router to handle the query reply in the
+            // following scenarios:
+            // a) We sent a Reply# message requesting the results,
+            //    and it sent back <= the number of results we
+            //    wanted.
+            // b) We sent a directed unicast query to that host
+            //    using this specific query GUID.
+    
+            Integer numRequested = OOBSessions.get(session);
+            if (numRequested == null) {
+                LOG.trace("Didn't request any OOB replies for this GUID from host");
+                if(!router.isHostUnicastQueried(guid, session)) {
+                    LOG.trace("Didn't directly unicast this host with this GUID");
+                    return;
+                }
+            } else {
+                numRequested -= numResps;
+                if (numRequested > 0) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Requested more than got (" + numRequested + " left over)");
+                	OOBSessions.put(session, numRequested);
+                } else {
+                	OOBSessions.remove(session);
+                	if (numRequested < 0) { // too many, ignore.
+                        if(LOG.isTraceEnabled())
+                            LOG.trace("Received more than requested (by" + (-numRequested) + ")");
+                		if(!router.isHostUnicastQueried(guid, session)) {
+                            LOG.trace("Didn't directly unicast this host with this GUID");
+                            return;
+                        }
+                    }
+                }
+            }
         }
         
+        LOG.trace("Handling the reply.");
         router.handleQueryReply(reply, handler);
 	}
 	
-	private class OOBSession {
+	private class OOBSession implements IpPort {
     	private final GUID g;
     	private final InetAddress addr;
     	private final int port;
@@ -126,6 +155,18 @@ public class OOBHandler implements MessageHandler, Runnable {
     	public boolean isExpired(long now) {
     		return now - this.now > router.getOOBExpireTime();
     	}
+
+        public String getAddress() {
+            return addr.getHostAddress();
+        }
+
+        public InetAddress getInetAddress() {
+            return addr;
+        }
+
+        public int getPort() {
+            return port;
+        }
 	}
 	
 	private void expire() {

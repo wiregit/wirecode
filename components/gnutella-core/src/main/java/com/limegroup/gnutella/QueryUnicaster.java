@@ -228,7 +228,7 @@ public final class QueryUnicaster {
                 if (!_queryKeys.containsKey(toQuery)) {
                     // send a QueryKey Request
                     PingRequest pr = PingRequest.createQueryKeyRequest();
-                    udpService.send(pr,toQuery.getAddress(), toQuery.getPort());
+                    udpService.send(pr,toQuery.getInetAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // QueryKey Reply!!
@@ -246,7 +246,7 @@ public final class QueryUnicaster {
                         else if (currQB._hostsQueried.contains(toQuery))
                             ; // don't send another....
                         else {
-							InetAddress ip = toQuery.getAddress();
+							InetAddress ip = toQuery.getInetAddress();
 							QueryRequest qrToSend = 
 								QueryRequest.createQueryKeyQuery(currQB._qr, 
 																 queryKey);
@@ -371,11 +371,11 @@ public final class QueryUnicaster {
 			   (_testUDPPingsSent < 10) &&
                !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
                  NetworkUtils.isCloseIP(RouterService.getAddress(),
-                                        endpoint.getAddress().getAddress())) ) {
+                                        endpoint.getInetAddress().getAddress())) ) {
 				PingRequest pr = 
                 new PingRequest(UDPService.instance().getSolicitedGUID().bytes(),
                                 (byte)1, (byte)0);
-                UDPService.instance().send(pr, endpoint.getAddress(), 
+                UDPService.instance().send(pr, endpoint.getInetAddress(), 
                                            endpoint.getPort());
 				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
@@ -512,7 +512,7 @@ public final class QueryUnicaster {
             synchronized (_pingList) {
                 if (!_pingList.contains(toReturn)) {
                     PingRequest pr = new PingRequest((byte)1);
-                    InetAddress ip = toReturn.getAddress();
+                    InetAddress ip = toReturn.getInetAddress();
                     UDPService.instance().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
 					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);

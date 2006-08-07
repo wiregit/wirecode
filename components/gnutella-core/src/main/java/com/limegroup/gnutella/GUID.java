@@ -442,6 +442,19 @@ public class GUID implements Comparable<GUID> {
         private final GUID _guid;
         public GUID getGUID() { return _guid; }
         private final long _creationTime;
+        
+        /**
+         * Constructs a TimedGUID that can be used to lookup
+         * other TimedGUIDs from HashMaps.  This shouldn't be
+         * used as an expiring GUID.
+         *  
+         * @param guid
+         */
+        public TimedGUID(GUID guid) {
+            _guid = guid;
+            MAX_LIFE = -1;
+            _creationTime = -1;
+        }
 
         /**
          * @param guid The GUID to 'time'.
@@ -472,11 +485,8 @@ public class GUID implements Comparable<GUID> {
 
         /** @return true if this bundle is greater than MAX_LIFE seconds old.
          */
-        public boolean shouldExpire() {
-            long currTime = System.currentTimeMillis();
-            if (currTime - _creationTime >= MAX_LIFE)
-                return true;
-            return false;
+        public boolean shouldExpire(long now) {
+            return now - _creationTime >= MAX_LIFE;
         }
     }
 

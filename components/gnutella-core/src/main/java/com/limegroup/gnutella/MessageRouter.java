@@ -75,6 +75,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.FixedsizeHashMap;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
@@ -733,7 +734,7 @@ public abstract class MessageRouter {
 		} else {
             return PingReply.createGUESSReply(guid, (byte)1, 
                                               endpoint.getPort(),
-                                              endpoint.getAddress().getAddress());
+                                              endpoint.getInetAddress().getAddress());
 		}
 	}
 
@@ -1156,8 +1157,15 @@ public abstract class MessageRouter {
             return false;
         }
     }
-
-
+    
+    /**
+     * Determines if we've sent a unicast OOB query to
+     * the given host using the given query GUID.
+     */
+    public boolean isHostUnicastQueried(GUID guid, IpPort host) {
+        return OnDemandUnicaster.isHostQueriedForGUID(guid, host);
+    }
+    
     /**
      * Forwards the UDPConnectBack to neighboring peers
      * as a UDPConnectBackRedirect request.
@@ -2755,8 +2763,9 @@ public abstract class MessageRouter {
             try {
                 Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
                 synchronized (_outOfBandReplies) {
+                    long now = System.currentTimeMillis();
                     for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
-                        if ((currQB != null) && (currQB.shouldExpire()))
+                        if ((currQB != null) && (currQB.shouldExpire(now)))
                             toRemove.add(currQB);
                     }
                     // done iterating through _outOfBandReplies, remove the 

@@ -2,11 +2,13 @@ package com.limegroup.gnutella.guess;
 
 import java.net.InetAddress;
 
+import com.limegroup.gnutella.util.IpPort;
+
 /**
  * Simple host/port pair for endpoints used in GUESS.  The use of the
  * <tt>InetAddress</tt> class allows easy migration to IPv6.
  */
-public final class GUESSEndpoint {
+public final class GUESSEndpoint implements IpPort {
 
 	/**
 	 * Constant for the <tt>InetAddress</tt> object.
@@ -29,13 +31,19 @@ public final class GUESSEndpoint {
 		ADDRESS = address;
 		PORT = port;
 	}
+    
+
+	/** Returns the address as a string. */
+    public String getAddress() {
+        return ADDRESS.getHostAddress();
+    }
 
 	/**
 	 * Accessor for the <tt>InetAddress</tt> instance for this endpoint.
 	 *
 	 * @return the <tt>InetAddress</tt> instance for this endpoint
 	 */
-	public InetAddress getAddress() {
+	public InetAddress getInetAddress() {
 		return ADDRESS;
 	}
 
@@ -70,7 +78,7 @@ public final class GUESSEndpoint {
     }
 
     public String toString() {
-        return "GUESSEndpoint: " + getAddress() + ":" + getPort();
+        return "GUESSEndpoint: " + getInetAddress() + ":" + getPort();
     }
 
 }

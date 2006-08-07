@@ -56,10 +56,11 @@ class GuidMapFactory {
                 for(Iterator<GuidMapImpl> i = toExpire.iterator(); i.hasNext(); ) {
                     GuidMapImpl next = i.next();
                     synchronized (next) {
+                        long now = System.currentTimeMillis();
                         Map<GUID.TimedGUID, GUID> currMap = next.getMap();
                         // and expire as many entries as possible....
                         for(Iterator<GUID.TimedGUID> j = currMap.keySet().iterator(); j.hasNext(); ) {
-                            if (j.next().shouldExpire())
+                            if (j.next().shouldExpire(now))
                                 j.remove();
                         }
                     }

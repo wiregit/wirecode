@@ -181,9 +181,7 @@ public class RouterService {
     /** Variable for the <tt>SecureMessageVerifier</tt> that verifies secure messages. */
     private static SecureMessageVerifier secureMessageVerifier = new SecureMessageVerifier();    
     
-    /**
-     * The content manager
-     */
+    /** The content manager */
     private static ContentManager contentManager = new ContentManager();
     
     /** The IP Filter to use. */
