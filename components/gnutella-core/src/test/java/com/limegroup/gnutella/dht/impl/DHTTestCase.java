@@ -9,8 +9,13 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.settings.ContextSettings;
 
 public abstract class DHTTestCase extends BaseTestCase {
     
@@ -60,4 +65,19 @@ public abstract class DHTTestCase extends BaseTestCase {
         BOOTSTRAP_DHT.stop();
     }
 
+    protected void fillRoutingTable(RouteTable rt, int numNodes) {
+        for(int i = 0; i < numNodes; i++) {
+            KUID kuid = KUID.createRandomNodeID();
+            ContactNode node = new ContactNode(
+                    new InetSocketAddress("localhost",4000+i),
+                    ContextSettings.VENDOR.getValue(),
+                    ContextSettings.VERSION.getValue(),
+                    kuid,
+                    new InetSocketAddress("localhost",4000+i),
+                    0,
+                    false,
+                    State.UNKNOWN);
+            rt.add(node);
+        }
+    }
 }

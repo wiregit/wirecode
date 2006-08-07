@@ -144,9 +144,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     Contact closest = closestNodesToKey.get(0);
                     
                     if (context.isLocalNode(closest)   
-                            || ((node.equals(closest)
-                                    //maybe we haven't added him to the routing table
-                                    || node.getNodeID().isNearer(closest.getNodeID(), bag.getKey())) 
+                            || (node.equals(closest)
                                     && (closestNodesToKey.size() > 1)
                                     && closestNodesToKey.get(1).equals(context.getLocalNode()))) {
                         

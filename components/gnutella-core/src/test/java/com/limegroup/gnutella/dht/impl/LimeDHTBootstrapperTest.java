@@ -14,10 +14,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.Contact.State;
-import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
-import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ArrayUtils;
 
@@ -61,7 +58,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     }
     
     public void testAddBootstrapHost() throws Exception{
-        fillRoutingTable(2);
+        fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap(dhtContext);
         DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
@@ -127,22 +124,4 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         port = addr.getPort();
         assertEquals(address+":"+port, hosts[2]);
     }
-    
-    private void fillRoutingTable(int numNodes) {
-        RouteTable rt = dhtContext.getRouteTable();
-        for(int i = 0; i < numNodes; i++) {
-            KUID kuid = KUID.createRandomNodeID();
-            ContactNode node = new ContactNode(
-                    new InetSocketAddress("localhost",4000+i),
-                    ContextSettings.VENDOR.getValue(),
-                    ContextSettings.VERSION.getValue(),
-                    kuid,
-                    new InetSocketAddress("localhost",4000+i),
-                    0,
-                    false,
-                    State.UNKNOWN);
-            rt.add(node);
-        }
-    }
-
 }
