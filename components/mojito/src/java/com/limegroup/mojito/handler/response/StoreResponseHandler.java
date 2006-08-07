@@ -82,21 +82,23 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, DHTValue value) {
-        this(context, null, null, Arrays.asList(new DHTValue[]{value}));
+        this(context, null, null, Arrays.asList(value));
     }
     
     @SuppressWarnings("unchecked")
-    public StoreResponseHandler(Context context, Collection<? extends DHTValue> values) {
+    public StoreResponseHandler(Context context, 
+            Collection<? extends DHTValue> values) {
         this(context, null, null, values);
     }
 
-    public StoreResponseHandler(Context context, Contact node, QueryKey queryKey, DHTValue value) {
-        this(context, node, queryKey, Arrays.asList(new DHTValue[]{value}));
+    public StoreResponseHandler(Context context, 
+            Contact node, QueryKey queryKey, DHTValue value) {
+        this(context, node, queryKey, Arrays.asList(value));
     }
     
     @SuppressWarnings("unchecked")
-    public StoreResponseHandler(Context context, Contact node, QueryKey queryKey, 
-            Collection<? extends DHTValue> values) {
+    public StoreResponseHandler(Context context, Contact node, 
+            QueryKey queryKey, Collection<? extends DHTValue> values) {
         super(context);
         
         assert (values != null && !values.isEmpty());
@@ -156,6 +158,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             for (Entry<Contact,QueryKey> entry : nodes) {
                 Contact node = entry.getKey();
+                
+                if (context.isLocalNode(node)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Skipping local Node");
+                    }
+                    continue;
+                }
+                
                 QueryKey queryKey = entry.getValue();
                 storeStates.add(new StoreState(node, queryKey, values));
             }
@@ -195,7 +205,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     protected synchronized void error(KUID nodeId, SocketAddress dst, 
             RequestMessage message, Exception e) {
         
-        if (activeStates.get(nodeId).error(e)) {
+        StoreState state = activeStates.get(nodeId);
+        if (state != null && state.error(e)) {
             activeStates.remove(nodeId);
         }
         
