@@ -193,7 +193,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
         
         private boolean startBootstrapLookups(Contact node) throws Exception{
-        	
+            
             phaseOne(node);
             
             if(LOG.isDebugEnabled()) {

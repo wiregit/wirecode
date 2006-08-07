@@ -82,6 +82,10 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
         
         this.dht = dht;
         
+        if(dht.isBootstrapped()) {
+            return;
+        }
+
         if(LOG.isDebugEnabled()) {
             LOG.debug("Starting bootstrap, bootstrapHosts: "+bootstrapHosts);
         }
@@ -112,6 +116,11 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
         }
         
         if(waiting.getAndSet(false) || bootstrappingFromRT.getAndSet(false)) {
+            //we may have bootstrapped (Mojito internal -- see RandomBucketRefresher.run()) 
+            //in the meanwhile
+            if(dht.isBootstrapped()) {
+                return;
+            }
             
             LOG.debug("Cancelling bootstrap and starting over");
 
@@ -178,9 +187,10 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
         }
         
         //each host in the list is responsible for a subspace of the keyspace
+        //first 4 bits responsible for dividing the keyspace
         int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
-        
-        int index = (int)((float)hostList.size()/15f * localPrefix) % hostList.size();
+        //now map to hostlist size
+        int index = (int)(((float)hostList.size()/16f) * localPrefix);
         return hostList.get(index);
     }
     

@@ -8,6 +8,14 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
 public class DHTControllerStub implements DHTController {
+    
+    private byte[] localNodeId;
+    
+    public DHTControllerStub() {};
+    
+    public DHTControllerStub(byte[] localNodeId) {
+        this.localNodeId = localNodeId;
+    }
 
     public void addDHTNode(SocketAddress hostAddress) {
     }

@@ -40,7 +40,7 @@ import com.limegroup.mojito.MojitoDHT;
  * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
  * 3) running and bootstrapped.
  * 
- * The current implementation is dependant on the MojitoDHT. 
+ * The current implementation is specific to the Mojito DHT. 
  */
 abstract class AbstractDHTController implements DHTController, LifecycleListener {
     
@@ -51,7 +51,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      */
     protected MojitoDHT dht;
 
-    private volatile boolean running = false;
+    private boolean running = false;
     
     protected final DHTBootstrapper dhtBootstrapper;
     

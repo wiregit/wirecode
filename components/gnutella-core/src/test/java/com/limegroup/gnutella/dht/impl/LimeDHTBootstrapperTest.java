@@ -6,8 +6,11 @@ import java.util.concurrent.Future;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
@@ -15,6 +18,8 @@ import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.NetworkSettings;
+import com.limegroup.mojito.util.ArrayUtils;
 
 public class LimeDHTBootstrapperTest extends DHTTestCase {
     
@@ -35,6 +40,8 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     }
     
     public static void globalSetUp() throws Exception {
+        NetworkSettings.MAX_TIMEOUT.setValue(500);
+        
         MojitoDHT dht = MojitoFactory.createDHT();
         dhtContext = (Context)dht;
     }
@@ -53,18 +60,28 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         dhtContext.stop();
     }
     
-    public void testCancelBootstrap() throws Exception{
+    public void testAddBootstrapHost() throws Exception{
         fillRoutingTable(2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap(dhtContext);
-        Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
+        DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         Thread.sleep(300);
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
         assertTrue("Should be bootstrapping from RT", bootstrapper.isBootstrappingFromRT());
         //now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue(future.isCancelled());
+        future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
+        Thread.sleep(3000);
+        //should be bootstrapping
+        assertTrue(dhtContext.isBootstrapping());
+        //now try adding more hosts -- should keep them but not bootstrap
+        for(int i = 0; i < 30; i++) {
+            bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
+        }
+        assertFalse(bootstrapper.isWaitingForNodes());
+        assertFalse(future.isCancelled());
     }
     
     public void testNotCancelBootstrap() throws Exception {
@@ -83,6 +100,34 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         assertFalse(future.isCancelled());
     }
     
+    public void testGetSimppHosts() throws Exception{
+        //set up SIMPP hosts
+        String[] hosts = new String[] {
+                "1.0.0.0.3:100","2.0.0.0.3:200","3.0.0.0.3:300"};
+        
+        DHTSettings.DHT_BOOTSTRAP_HOSTS.setValue(hosts);
+        
+        //only first hex counts
+        KUID id = KUID.createNodeID(ArrayUtils.parseHexString("03ED9650238A6C576C987793C01440A0EA91A1FB"));
+        Contact localNode = ContactNode.createLocalContact(0, 0, id, 0);
+        PrivilegedAccessor.setValue(dhtContext, "localNode", localNode);
+        
+        bootstrapper.bootstrap(dhtContext);
+        InetSocketAddress addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
+        String address = addr.getHostName();
+        int port = addr.getPort();
+        assertEquals(address+":"+port, hosts[0]);
+        
+        //change first hex. Should point to last elem of the list
+        id = KUID.createNodeID(ArrayUtils.parseHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB"));
+        localNode = ContactNode.createLocalContact(0, 0, id, 0);
+        PrivilegedAccessor.setValue(dhtContext, "localNode", localNode);
+        addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
+        address = addr.getHostName();
+        port = addr.getPort();
+        assertEquals(address+":"+port, hosts[2]);
+    }
+    
     private void fillRoutingTable(int numNodes) {
         RouteTable rt = dhtContext.getRouteTable();
         for(int i = 0; i < numNodes; i++) {
@@ -99,21 +144,5 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
             rt.add(node);
         }
     }
-    
-    //TODO: fix this
-//    public void testGetSimppHosts() throws Exception{
-//        LimeDHTBootstrapper bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub());
-//        //set up SIMPP hosts
-//        String[] hosts = new String[] {
-//                "86.25.22.3:84","1.0.0.0.3:300"};
-//        
-//        DHTSettings.DHT_BOOTSTRAP_HOSTS.setValue(hosts);
-//        
-//        MojitoDHT dht = MojitoFactory.createDHT();
-//        PrivilegedAccessor.setValue(bootstrapper, "dht", dht);
-//        
-//        SocketAddress addr = bootstrapper.getSIMPPHost();
-//        
-//    }
 
 }

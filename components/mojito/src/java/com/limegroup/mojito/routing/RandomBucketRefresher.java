@@ -81,8 +81,14 @@ public class RandomBucketRefresher implements Runnable {
         }
         
         if (!context.isBootstrapped()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info(context.getName() + " is bootstrapping, interrupting refresher");
+            if(context.isBootstrapping()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is bootstrapping, not running refresher");
+                }
+            } else {
+                //if we are not bootstrapped and have got some 
+                //nodes in our routing table, try bootstrapping
+                context.bootstrap(); //this will take some MRS nodes and bootstrap from them.
             }
             return;
         }
