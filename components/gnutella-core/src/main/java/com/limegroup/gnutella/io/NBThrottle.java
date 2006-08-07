@@ -297,6 +297,10 @@ public class NBThrottle implements Throttle {
     }
     
     public long nextTickTime() {
+    	synchronized(_requests) {
+    		if (_requests.isEmpty() && _interested.isEmpty())
+    			return Long.MAX_VALUE;
+    	}
     	return _nextTickTime;
     }
     

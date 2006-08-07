@@ -17,9 +17,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,7 +119,7 @@ public class NIODispatcher implements Runnable {
     /** The invokeLater queue. */
     private Collection <Runnable> LATER = new LinkedList<Runnable>();
     
-    private final Queue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
+    private final BlockingQueue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
     
     /** The throttle queue. */
     private final List <NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
@@ -335,12 +337,8 @@ public class NIODispatcher implements Runnable {
    public void invokeLater(Runnable runner) {
         if(Thread.currentThread() == dispatchThread) {
             runner.run();
-        } else {
-            synchronized(Q_LOCK) {
-                LATER.add(runner);
-            }
-            wakeup();
-        }
+        } else 
+            invokeReallyLater(runner);
     }
    
    /** Same as invokeLater, except forces the Runnable to be done later on. */
@@ -354,9 +352,8 @@ public class NIODispatcher implements Runnable {
 
    public java.util.concurrent.Future invokeLater(Runnable later, long delay) {
 	   DelayedRunnable ret = new DelayedRunnable(later, delay);
-	   synchronized(Q_LOCK) {
-		   DELAYED.add(ret);
-	   }
+	   DELAYED.add(ret);
+	   wakeup();
 	   return ret;
    }
    
@@ -491,13 +488,9 @@ public class NIODispatcher implements Runnable {
         synchronized(Q_LOCK) {
             localLater = LATER;
             LATER = new LinkedList<Runnable>();
-
-            DelayedRunnable delayed = null;
-            while ((delayed = DELAYED.poll()) != null) {
-            	if (!delayed.isCancelled() && !delayed.isDone())
-            		localLater.add(delayed);
-            }
         }
+        
+        DELAYED.drainTo(localLater);
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
             BUFFER_CACHE.clearCache();
@@ -589,15 +582,20 @@ public class NIODispatcher implements Runnable {
             runPendingTasks();
             
             Collection<SelectionKey> polled = pollOtherSelectors();
-            long nextTickDelay = nextTickDelay();
-            boolean immediate = !polled.isEmpty() || nextTickDelay == 0;
+            boolean immediate = !polled.isEmpty();
             try {
                 if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
                 
-                if(!immediate)
-                    primarySelector.select(Math.min(100,nextTickDelay));
-                else
+                if(!immediate) {
+                	long delay = nextSelectTimeout();
+                	if (delay == 0)
+                		immediate = true;
+                	else
+                		primarySelector.select(delay);
+                }
+                
+                if (immediate)
                     primarySelector.selectNow();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
@@ -667,13 +665,19 @@ public class NIODispatcher implements Runnable {
     }
     
     /**
-     * @return the time until the next throttle should tick.
+     * @return the timeout of the next select call. 0 if it should be immediate
      */
-    private long nextTickDelay() {
+    private long nextSelectTimeout() {
     	long next = Long.MAX_VALUE;
     	for (Throttle t: THROTTLE)
     		next = Math.min(next, t.nextTickTime());
-    	return Math.max(0, next - System.currentTimeMillis());
+    	next -= System.currentTimeMillis();
+    	if (next <= 0)
+    		return 0;
+    	Delayed nextScheduled = DELAYED.poll();
+    	if (nextScheduled != null)
+    		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));
+    	return Math.max(0, next);
     }
     
     /**
