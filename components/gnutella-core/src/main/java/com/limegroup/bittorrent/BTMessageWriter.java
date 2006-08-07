@@ -37,11 +37,6 @@ public class BTMessageWriter implements BTChannelWriter {
 	/** keepAlive for this writer */
 	private final ByteBuffer myKeepAlive = KEEP_ALIVE.duplicate();
 	
-	/**
-	 * How often to send keepalives.  2 minutes as suggested by spec.
-	 */
-	private static final int KEEP_ALIVE_INTERVAL = 2 * 60 * 1000; 
-	
 	// InterestWriteChannel to write to.
 	private InterestWriteChannel _channel;
 
@@ -85,6 +80,9 @@ public class BTMessageWriter implements BTChannelWriter {
 	/** A periodic keepalive sender */
 	private Periodic keepAliveSender;
 	
+	/** How often to send a keepalive if there is no other traffic */
+	private int keepAliveInterval;
+	
 	/**
 	 * Constructor
 	 */
@@ -96,7 +94,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		myKeepAlive.flip();
 	}
 
-	public void init(SchedulingThreadPool scheduler) {
+	public void init(SchedulingThreadPool scheduler, int keepAliveInterval) {
 		ThrottleWriter throttle = new ThrottleWriter(
 				RouterService.getBandwidthManager().getThrottle(false));
 		delayer = new DelayedBufferWriter(1400, 3000);
@@ -107,7 +105,8 @@ public class BTMessageWriter implements BTChannelWriter {
 				sendKeepAlive();
 			}
 		}, scheduler);
-		keepAliveSender.rescheduleIfLater(KEEP_ALIVE_INTERVAL);
+		this.keepAliveInterval = keepAliveInterval;
+		keepAliveSender.rescheduleIfLater(keepAliveInterval);
 	}
 	
 	/**
@@ -127,6 +126,7 @@ public class BTMessageWriter implements BTChannelWriter {
 				written += delayer.write(myKeepAlive);
 				if (myKeepAlive.hasRemaining()) // need to finish keepalive first.
 					return true;
+				needsFlush = true;
 			}
 			
 			if (_out[1] == null || _out[1].remaining() == 0) {
@@ -176,7 +176,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	 * @see com.limegroup.bittorrent.MessageWriter#enqueue(com.limegroup.bittorrent.messages.BTMessage)
 	 */
 	public void enqueue(BTMessage m) {
-		keepAliveSender.rescheduleIfLater(KEEP_ALIVE_INTERVAL);
+		keepAliveSender.rescheduleIfLater(keepAliveInterval);
 		_queue.addLast(m);
 		messageArrived(m);
 		

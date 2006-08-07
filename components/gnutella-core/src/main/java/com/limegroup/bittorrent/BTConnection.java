@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
@@ -19,7 +21,6 @@ import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.BitSet;
 
 /**
@@ -46,6 +47,12 @@ PieceSendListener, PieceReadListener {
 	 * connections that die after less than a minute won't be retried
 	 */
 	private static final long MIN_RETRYABLE_LIFE_TIME = 60 * 1000;
+	
+	/**
+	 * 2 minutes as suggested by spec + 5 seconds for network or
+	 * scheduling delays
+	 */
+	private static final int CONNECTION_TIMEOUT = 2 * 60 * 1000 + 5000; 
 	
 	/*
 	 * the NBSocket we're using
@@ -188,10 +195,16 @@ PieceSendListener, PieceReadListener {
 			return;
 		
 		_socket = socket;
+		try {
+			_socket.setSoTimeout(CONNECTION_TIMEOUT);
+		} catch (SocketException se){
+			ErrorService.error(se);
+		}
+		
 		_torrent = torrent;
 		_startTime = System.currentTimeMillis();
 		
-		_writer.init(torrent.getScheduler());
+		_writer.init(torrent.getScheduler(), CONNECTION_TIMEOUT - 5000);
 		
 		ThrottleReader readThrottle = new ThrottleReader(
 				RouterService.getBandwidthManager().getThrottle(true));
@@ -784,6 +797,12 @@ PieceSendListener, PieceReadListener {
 			b.append(" Seed");
 		if (usingSlot)
 			b.append(" U");
+		int requested = _requested.size();
+		if (requested > 0)
+			b.append(" Q").append(requested);
+		int requesting = _requesting.size();
+		if (requesting > 0)
+			b.append (" D").append(requesting);
 		b.append(")");
 		return b.toString();
 	}

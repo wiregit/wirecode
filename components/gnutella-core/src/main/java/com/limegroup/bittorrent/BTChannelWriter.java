@@ -20,7 +20,11 @@ public interface BTChannelWriter extends ChannelWriter {
 	
 	/**
 	 * Initializes this writer (optional)
+	 * @param scheduler the <tt>SchedulingThreadPool</tt> to use when performing
+	 * time-related tasks
+	 * @param keepAliveInterval how often to send keepalives if there is no
+	 * other traffic
 	 */
-	public void init(SchedulingThreadPool scheduler);
+	public void init(SchedulingThreadPool scheduler, int keepAliveInterval);
 
 }
