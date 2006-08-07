@@ -37,7 +37,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
 
@@ -223,7 +223,7 @@ public class MessageInputStream extends DataInputStream {
         return statistics;
     }
     
-    public StoreStatus readStoreStatus() throws IOException {
-        return StoreStatus.valueOf( readUnsignedByte() );
+    public Status readStoreStatus() throws IOException {
+        return Status.valueOf( readUnsignedByte() );
     }
 }

@@ -19,6 +19,8 @@
 
 package com.limegroup.mojito.manager;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -38,21 +40,48 @@ public class StoreManager extends AbstractManager<StoreEvent> {
         super(context);
     }
     
+    /**
+     * Stores a single DHTValue on the DHT
+     */
     public DHTFuture<StoreEvent> store(DHTValue value) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, value);
+        return store(Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    /**
+     * Stores a collection of DHTValues on the DHT. All DHTValues
+     * must have the same valueId!
+     */
+    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, values);
         StoreFuture future = new StoreFuture(handler);
         
         context.execute(future);
         return future;
     }
     
+    /**
+     * Stores a single DHTValue at the given Contact. 
+     */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, value);
+        return store(node, queryKey, Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    /**
+     * Stores a collection of DHTValues at the given Contact.
+     */
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
+        
+        StoreResponseHandler handler 
+            = new StoreResponseHandler(context, node, queryKey, values);
         StoreFuture future = new StoreFuture(handler);
         context.execute(future);
         return future;
     }
     
+    /**
+     * 
+     */
     private class StoreFuture extends AbstractDHTFuture {
         
         public StoreFuture(Callable<StoreEvent> callable) {

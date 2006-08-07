@@ -72,4 +72,10 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
         = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 10);
+    
+    /**
+     * The maximum number of parallel store requests
+     */
+    public static final IntSetting PARALLEL_STORES
+        = FACTORY.createIntSetting("PARALLEL_STORES", 5);
 }

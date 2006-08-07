@@ -28,7 +28,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * Factory class to construct DHTMessage(s)
@@ -62,7 +62,7 @@ public interface MessageFactory {
             QueryKey queryKey, DHTValue value);
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, StoreStatus status);
+            KUID valueId, Status status);
 
     public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
             int stats);

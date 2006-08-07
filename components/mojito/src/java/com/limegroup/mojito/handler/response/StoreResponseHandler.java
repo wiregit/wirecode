@@ -23,8 +23,13 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
@@ -37,10 +42,13 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
-import com.limegroup.mojito.util.EntryImpl;
+import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * 
@@ -49,107 +57,347 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
 
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
     
+    /** */
+    private KUID valueId;
+    
+    /** */
     private Contact node;
+    
+    /** */
     private QueryKey queryKey;
     
-    private DHTValue value;
+    /** */
+    private Collection<DHTValue> values;
     
-    private List<Contact> targets = new ArrayList<Contact>();
+    /** */
+    private List<StoreState> storeStates = new ArrayList<StoreState>();
     
-    private int countDown = 0;
+    /** */
+    private Iterator<StoreState> states = null;
+    
+    /** */
+    private Map<KUID, StoreState> activeStates = new HashMap<KUID, StoreState>();
+    
+    /** */
+    private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, DHTValue value) {
-        super(context);
-        this.value = value;
+        this(context, null, null, Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public StoreResponseHandler(Context context, Collection<? extends DHTValue> values) {
+        this(context, null, null, values);
     }
 
-    public StoreResponseHandler(Context context, Contact node, 
-            QueryKey queryKey, DHTValue value) {
+    public StoreResponseHandler(Context context, Contact node, QueryKey queryKey, DHTValue value) {
+        this(context, node, queryKey, Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public StoreResponseHandler(Context context, Contact node, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
         super(context);
+        
+        assert (values != null && !values.isEmpty());
         
         this.node = node;
         this.queryKey = queryKey;
-        this.value = value;
+        this.values = (Collection<DHTValue>)values;
+        
+        if (!isSingleNodeStore()) {
+            for (DHTValue value : values) {
+                if (valueId == null) {
+                    valueId = value.getValueID();
+                }
+                
+                if (!valueId.equals(value.getValueID())) {
+                    throw new AssertionError("All DHTValues must have the same ID");
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the Collection of DHTValues
+     */
+    public Collection<DHTValue> getValues() {
+        return values;
+    }
+    
+    /**
+     * Returns true if this handler is storing the DHTValues
+     * at a single Node in the DHT
+     */
+    private boolean isSingleNodeStore() {
+        return node != null;
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    protected void start() throws Exception {
-        
-        List<Entry<Contact,QueryKey>> nodes = null;
-        
-        if (node == null && queryKey == null) {
-            FindNodeResponseHandler handler 
-                = new FindNodeResponseHandler(context, value.getValueID().toNodeID());
-            nodes = handler.call().getNodes();   
-        } else {
-            Entry<Contact, QueryKey> entry 
-                = new EntryImpl<Contact, QueryKey>(node, queryKey);
-            nodes = Arrays.asList(entry);
-        }
-        
-        storeAt(nodes);
-    }
-    
-    private synchronized void storeAt(List<? extends Map.Entry<Contact,QueryKey>> nodes) throws Exception {
-        for (Entry<Contact, QueryKey> entry : nodes) {
-            Contact node = entry.getKey();
-            QueryKey queryKey = entry.getValue();
-            
-            if (context.isLocalNodeID(node.getNodeID())) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Skipping local Node as KeyValue is already stored at this Node");
-                }
-                
-                synchronized (targets) {
-                    targets.add(node);                    
-                }
-                continue;
+    protected synchronized void start() throws Exception {
+
+        if (isSingleNodeStore()) {
+            if (queryKey == null) {
+                GetQueryKeyHandler handler = new GetQueryKeyHandler(node);
+                queryKey = handler.call();
             }
             
             if (queryKey == null) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Cannot store " + value + " at " 
-                            + node + " because we have no QueryKey for it");
-                }
-                continue;
+                throw new Exception("QueryKey is null");
             }
             
-            StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), queryKey, value);
+            storeStates.add(new StoreState(node, queryKey, values));
             
-            context.getMessageDispatcher().send(node, request, this);
-            countDown++;
+        } else {
+            FindNodeResponseHandler handler 
+                = new FindNodeResponseHandler(context, valueId);
+            List<Entry<Contact,QueryKey>> nodes = handler.call().getNodes();
+            
+            for (Entry<Contact,QueryKey> entry : nodes) {
+                Contact node = entry.getKey();
+                QueryKey queryKey = entry.getValue();
+                storeStates.add(new StoreState(node, queryKey, values));
+            }
         }
         
-        fireEventIfFinished();
-    }
-
-    @Override
-    protected void response(ResponseMessage message, long time) throws IOException {
-        synchronized (targets) {
-            targets.add(message.getContact());
-        }
-        fireEventIfFinished();
+        states = storeStates.iterator();
+        sendNextAndExitIfDone();
     }
     
     @Override
-    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        fireEventIfFinished();
+    protected synchronized void response(ResponseMessage message, long time) throws IOException {
+        StoreResponse response = (StoreResponse)message;
+        StoreResponse.Status status = response.getStatus();
+        
+        Contact node = message.getContact();
+        KUID nodeId = node.getNodeID();
+        
+        if (activeStates.get(nodeId).response(status)) {
+            activeStates.remove(nodeId);
+        }
+        
+        sendNextAndExitIfDone();
+    }
+
+    @Override
+    protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
+        
+        if (activeStates.get(nodeId).timeout(nodeId, dst, message, time)) {
+            activeStates.remove(nodeId);
+        }
+        
+        sendNextAndExitIfDone();
     }
     
     @Override
-    protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        e.printStackTrace();
-        fireEventIfFinished();
+    protected synchronized void error(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, Exception e) {
+        
+        if (activeStates.get(nodeId).error(e)) {
+            activeStates.remove(nodeId);
+        }
+        
+        sendNextAndExitIfDone();
     }
 
-    private synchronized void fireEventIfFinished() {
-        assert (countDown >= 0);
-        if (countDown == 0) {
-            value.publishedTo(targets.size());
-            setReturnValue(new StoreEvent(value, targets));
+    /**
+     * Tries to maintain parallel store requests and fires
+     * an event if storing is done
+     */
+    private synchronized void sendNextAndExitIfDone() {
+        while(activeStates.size() < parallelism && states.hasNext()) {
+            StoreState state = states.next();
+            
+            try {
+                if (state.start()) {
+                    activeStates.put(state.node.getNodeID(), state);
+                }
+            } catch (IOException err) {
+                state.exception = err;
+                LOG.error("IOException", err);
+            }
         }
-        countDown--;
+        
+        // No active states left? We're done!
+        if (activeStates.isEmpty()) {
+            done();
+        }
+    }
+    
+    /**
+     * 
+     */
+    private synchronized void done() {
+        List<Contact> nodes = new ArrayList<Contact>();
+        Set<DHTValue> failed = new HashSet<DHTValue>();
+        
+        for (StoreState s : storeStates) {
+            nodes.add(s.node);
+            failed.addAll(s.getFailedValues());
+        }
+        
+        if (storeStates.size() == 1) {
+            StoreState s = storeStates.get(0);
+            if (s.exception != null) {
+                setException(s.exception);
+            } else if (s.timeout >= 0L) {
+                fireTimeoutException(s.nodeId, s.dst, s.message, s.timeout);
+            }
+        }
+        
+        setReturnValue(new StoreEvent(nodes, values, failed));
+    }
+    
+    /**
+     * 
+     */
+    private class StoreState {
+        
+        /* */
+        private Contact node;
+        private QueryKey queryKey;
+        
+        /* */
+        private Iterator<DHTValue> it;
+        
+        /* */
+        private DHTValue lastValue = null;
+        
+        /* */
+        private List<DHTValue> failed = new ArrayList<DHTValue>();
+        
+        /* */
+        private KUID nodeId;
+        private SocketAddress dst;
+        private RequestMessage message;
+        private long timeout = -1L;
+        
+        /* */
+        private Exception exception;
+        
+        @SuppressWarnings("unchecked")
+        private StoreState(Contact node, QueryKey queryKey, 
+                Collection<? extends DHTValue> values) {
+            this.node = node;
+            this.queryKey = queryKey;
+            this.it = (Iterator<DHTValue>)values.iterator();
+        }
+        
+        /**
+         * Starts the store process at the given Node
+         */
+        public boolean start() throws IOException {
+            return !response(StoreResponse.Status.SUCCEEDED);
+        }
+        
+        /**
+         * Handles a response and returns true if done
+         */
+        public boolean response(StoreResponse.Status status) throws IOException {
+            if (status != StoreResponse.Status.SUCCEEDED) {
+                if (lastValue != null) {
+                    failed.add(lastValue);
+                }
+            } else {
+                lastValue = null;
+            }
+            
+            if (!it.hasNext()) {
+                return true;
+            }
+            
+            lastValue = it.next();
+            StoreRequest request = context.getMessageHelper()
+                .createStoreRequest(node.getContactAddress(), queryKey, lastValue);
+            context.getMessageDispatcher().send(node, request, StoreResponseHandler.this);
+
+            return false;
+        }
+
+        /**
+         * Handles a timeout and returns true if done
+         */
+        public boolean timeout(KUID nodeId, SocketAddress dst, 
+                RequestMessage message, long timeout) throws IOException {
+            this.nodeId = nodeId;
+            this.dst = dst;
+            this.message = message;
+            this.timeout = timeout;
+            return true;
+        }
+        
+        /**
+         * Handles an error and returns true if done
+         */
+        public boolean error(Exception e) {
+            this.exception = e;
+            return true;
+        }
+        
+        /**
+         * Returns a list of all DHTValues that couldn't be
+         * stored at the given Node
+         */
+        public List<DHTValue> getFailedValues() {
+            if (lastValue != null) {
+                failed.add(lastValue);
+                lastValue = null;
+            }
+            
+            while(it.hasNext()) {
+                failed.add(it.next());
+            }
+            
+            return failed;
+        }
+    }
+    
+    /**
+     * GetQueryKeyHandler tries to get the QueryKey of a Node
+     */
+    private class GetQueryKeyHandler extends AbstractResponseHandler<QueryKey> {
+        
+        private Contact node;
+        
+        private GetQueryKeyHandler(Contact node) {
+            super(StoreResponseHandler.this.context);
+            
+            this.node = node;
+        }
+
+        @Override
+        protected void start() throws Exception {
+            RequestMessage request = context.getMessageHelper()
+                .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
+            context.getMessageDispatcher().send(node, request, this);
+        }
+
+        protected void response(ResponseMessage message, long time) throws IOException {
+            
+            FindNodeResponse response = (FindNodeResponse)message;
+            
+            Collection<Contact> nodes = response.getNodes();
+            for(Contact node : nodes) {
+                // We did a FIND_NODE lookup use the info
+                // to fill/update our routing table
+                context.getRouteTable().add(node);
+            }
+            
+            setReturnValue(response.getQueryKey());
+        }
+
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+            fireTimeoutException(nodeId, dst, message, time);
+        }
+
+        public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
+            }
+            
+            setException(e);
+        }
     }
 }

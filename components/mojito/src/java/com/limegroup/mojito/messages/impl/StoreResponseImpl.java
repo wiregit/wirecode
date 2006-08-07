@@ -37,11 +37,11 @@ public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
     private KUID valueId;
-    private StoreStatus status;
+    private Status status;
 
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            KUID valueId, StoreStatus status) {
+            KUID valueId, Status status) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId);
 
         this.valueId = valueId;
@@ -65,7 +65,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
         out.writeStoreStatus(status);
     }
 
-    public StoreStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
     

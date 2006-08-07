@@ -34,7 +34,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
@@ -163,7 +163,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeByte(opcode.getOpCode());
     }
     
-    public void writeStoreStatus(StoreStatus status) throws IOException {
+    public void writeStoreStatus(Status status) throws IOException {
         writeByte(status.getStatus());
     }
 }

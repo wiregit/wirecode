@@ -22,10 +22,8 @@ package com.limegroup.mojito.handler;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +42,6 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
-import com.limegroup.mojito.util.ContactUtils;
 
 
 /**
@@ -131,7 +128,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         
         // Are we one of the K closest nodes to the contact?
         if (routeTable.isNearToLocal(node.getNodeID())) {
-            List<Entry<KUID, DHTValue>> valuesToForward = new ArrayList<Entry<KUID, DHTValue>>();
+            List<DHTValue> valuesToForward = new ArrayList<DHTValue>();
             
             Database database = context.getDatabase();
             synchronized(database) {
@@ -158,17 +155,16 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         }
                         
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        valuesToForward.addAll(database.get(valueId).entrySet());
+                        valuesToForward.addAll(database.get(valueId).values());
                         
                     } else if (closestNodesToKey.size() == k) {
                         //if we are the furthest node: delete non-local value from local db
                         Contact furthest = closestNodesToKey.get(closestNodesToKey.size()-1);
                         if (context.isLocalNode(furthest)) {
-                            
                             int count = 0;
                             for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
-                                DHTValue chunk = it.next();
-                                if (!chunk.isLocalValue()) {
+                                DHTValue value = it.next();
+                                if (!value.isLocalValue()) {
                                     it.remove();
                                     count++;
                                 }
@@ -181,59 +177,19 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             }
             
             if (!valuesToForward.isEmpty()) {
+                QueryKey queryKey = null;
                 if (message instanceof FindNodeResponse) {
-                    store(message.getContact(), 
-                            ((FindNodeResponse)message).getQueryKey(), 
-                            valuesToForward);
-                } else {
-                    ResponseHandler handler = new GetQueryKeyHandler(valuesToForward);
-                    RequestMessage request = context.getMessageHelper()
-                        .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
+                    queryKey = ((FindNodeResponse)message).getQueryKey();
                     
-                    context.getMessageDispatcher().send(node, request, handler);
+                    if (queryKey == null) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info(node + " sent us a null QueryKey");
+                        }
+                        return;
+                    }
                 }
-            }
-        }
-    }
-    
-    private void store(Contact node, QueryKey queryKey, 
-            List<Entry<KUID, DHTValue>> valuesToForward) {
-        
-        for (Entry<KUID, DHTValue> entry : valuesToForward) {
-            context.store(node, queryKey, entry.getValue());
-        }
-    }
-    
-    private class GetQueryKeyHandler extends AbstractResponseHandler {
-        
-        private List<Entry<KUID, DHTValue>> valuesToForward;
-        
-        private GetQueryKeyHandler(List<Entry<KUID, DHTValue>> valuesToForward) {
-            super(DefaultMessageHandler.this.context);
-            this.valuesToForward = valuesToForward;
-        }
-
-        protected void response(ResponseMessage message, long time) throws IOException {
-            
-            FindNodeResponse response = (FindNodeResponse)message;
-            
-            Collection<Contact> nodes = response.getNodes();
-            for(Contact node : nodes) {
-                // We did a FIND_NODE lookup use the info
-                // to fill our routing table
-                context.getRouteTable().add(node);
-            }
-            
-            Contact node = message.getContact();
-            store(node, response.getQueryKey(), valuesToForward);
-        }
-
-        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        }
-
-        public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
+                
+                context.store(node, queryKey, valuesToForward);
             }
         }
     }

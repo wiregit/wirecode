@@ -48,7 +48,7 @@ import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * The default implementation of the MessageFactory
@@ -169,7 +169,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, StoreStatus status) {
+            KUID valueId, Status status) {
         return new StoreResponseImpl(context, contact, messageId, valueId, status);
     }
 }

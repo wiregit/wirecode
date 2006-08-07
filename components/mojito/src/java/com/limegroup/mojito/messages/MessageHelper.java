@@ -28,7 +28,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
@@ -87,7 +87,7 @@ public class MessageHelper {
 
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
         return factory.createFindNodeRequest(getLocalNode(), 
-                createMessageID(dst), lookupId.assertNodeID());
+                createMessageID(dst), lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 
@@ -98,7 +98,7 @@ public class MessageHelper {
 
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, Collection<KUID> keys) {
         return factory.createFindValueRequest(getLocalNode(), 
-                createMessageID(dst), lookupId.assertValueID(), keys);
+                createMessageID(dst), lookupId, keys);
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, 
@@ -110,7 +110,7 @@ public class MessageHelper {
         return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, value);
     }
 
-    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, StoreStatus status) {
+    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, Status status) {
         return factory.createStoreResponse(getLocalNode(), request.getMessageID(), 
                 valueId, status);
     }

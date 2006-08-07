@@ -770,15 +770,29 @@ public class Context implements MojitoDHT {
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(DHTValue dhtValue) {
-        return storeManager.store(dhtValue);
+    public DHTFuture<StoreEvent> store(DHTValue value) {
+        return storeManager.store(value);
     }
    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+        return storeManager.store(values);
+    }
+    
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue dhtValue) {
-        return storeManager.store(node, queryKey, dhtValue);
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+        return storeManager.store(node, queryKey, value);
+    }
+    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
+        return storeManager.store(node, queryKey, values);
     }
     
     public Set<KUID> keySet() {
