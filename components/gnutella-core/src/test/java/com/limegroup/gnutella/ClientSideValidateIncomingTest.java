@@ -19,6 +19,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
@@ -45,6 +46,12 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
+    }
+    
+    public void setUp() throws Exception {
+        super.setUp();
+        ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.setValue(true);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
     
     ///////////////////////// Actual Tests ////////////////////////////
@@ -102,59 +109,26 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         for (int i = 0; i < 2; i++) {
             Socket s = new Socket("localhost", PORT);
             s.close();
-            Thread.sleep(100);
+            Thread.sleep(100); 
+            // Socket must have said CONNECT BACK
+            assertFalse(RouterService.acceptedIncomingConnection());
+            
+            s = new Socket("localhost", PORT);
+            s.getOutputStream().write("CONNECT BACK\r\r".getBytes());
+            Thread.sleep(500);
+            s.close(); 
+            // Socket must have said CONNECT BACK
             assertTrue(RouterService.acceptedIncomingConnection());
             
             // wait until the expire time is realized
             Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME + 1000);
             
-            // query the Acceptor - it should send off more requests
+            // it should send off more requests
             assertFalse(RouterService.acceptedIncomingConnection());
-            Thread.sleep(100);
             Message m = null;
             do {
                 m = testUP[0].receive(TIMEOUT);
             } while (!(m instanceof TCPConnectBackVendorMessage)) ;
-        }
-    }
-
-    // make an incoming to the servent, wait a little, and then make sure
-    // it asks for a connect back again
-    public void testTCPInterleavingRequestsSent() throws Exception {
-        drainAll();
-        Random rand = new Random();
-        for (int i = 0; i < 6; i++) {
-            if (rand.nextBoolean()) {
-                Socket s = new Socket("localhost", PORT);
-                s.close();
-                Thread.sleep(100);
-                assertTrue(RouterService.acceptedIncomingConnection());
-            }
-            
-            // wait until the expire time is realized
-            Thread.sleep(MY_EXPIRE_TIME + MY_VALIDATE_TIME);
-            
-            // throw some randomness in there - if we get an incoming we should
-            // not send messages out
-            if (rand.nextBoolean()) {
-                Socket s = new Socket("localhost", PORT);
-                s.close();
-                Thread.sleep(100);
-                assertTrue(RouterService.acceptedIncomingConnection());
-                try {
-                    testUP[0].receive(TIMEOUT);
-                }
-                catch (InterruptedIOException expected) {}
-            }
-            else {
-                // query the Acceptor - it should send off more requests
-                assertFalse(RouterService.acceptedIncomingConnection());
-                Thread.sleep(100);
-                Message m = null;
-                do {
-                    m = testUP[0].receive(TIMEOUT);
-                } while (!(m instanceof TCPConnectBackVendorMessage)) ;
-            }
         }
     }
     
@@ -347,18 +321,13 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
 
 
     //////////////////////////////////////////////////////////////////
-    public static void doSettings() {
-        try {
+    public static void doSettings() throws Exception {
         PrivilegedAccessor.setValue(Acceptor.class, "INCOMING_EXPIRE_TIME",
                                     new Long(MY_EXPIRE_TIME));
         PrivilegedAccessor.setValue(Acceptor.class, "WAIT_TIME_AFTER_REQUESTS",
                                     new Long(MY_WAIT_TIME));
         PrivilegedAccessor.setValue(Acceptor.class, "TIME_BETWEEN_VALIDATES",
                                     new Long(MY_VALIDATE_TIME));
-        }
-        catch (Exception bad) {
-            assertTrue(false);
-        }
     }
 
     public static Integer numUPs() {
