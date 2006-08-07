@@ -113,9 +113,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	private volatile IOException storedException;
 	
 	/**
-	 * The <tt>ManagedTorrent</tt> this folder belongs to.
+	 * The <tt>DiskManagerListener</tt> to notify.
 	 */
-	private volatile ManagedTorrent torrent;
+	private volatile DiskManagerListener listener;
 	
 	/** Whether the files on disk are currently being verified */
 	private volatile boolean isVerifying;
@@ -175,11 +175,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	
-	public void writeBlock(BTPieceFactory factory) 
-	throws IOException {
-		IOException stored = storedException;
-		if (stored != null)
-			throw stored;
+	public void writeBlock(BTPieceFactory factory) {
+		if (storedException != null)
+			return;
 		QUEUE.invokeLater(new WriteJob(factory),_info.getURN());
 	}
 	
@@ -327,9 +325,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	private void notifyOfChunkCompletion(int pieceNum) {
-		ManagedTorrent t = torrent;
+		DiskManagerListener t = listener;
 		if (t != null)
-			t.notifyOfComplete(pieceNum);
+			t.chunkVerified(pieceNum);
 	}
 	
 	private void closeAnyCompletedFiles(int pieceNum) {
@@ -373,10 +371,10 @@ class VerifyingFolder implements TorrentDiskManager {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
-	public void open(final ManagedTorrent torrent) throws IOException {
+	public void open(final DiskManagerListener torrent) throws IOException {
 		diskController = new RAFDiskController<TorrentFile>(_files);
 		
-		this.torrent = torrent;
+		this.listener = torrent;
 		storedException = null;
 		
 		boolean wasVerifying = isVerifying;
@@ -431,7 +429,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 		diskController.close();
 		
-		torrent = null;
+		listener = null;
 		// kill all jobs for this torrent
 		VERIFY_QUEUE.clear(_info.getURN());
 		QUEUE.clear(_info.getURN());
@@ -448,10 +446,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.TorrentFileManager#requestPieceRead()
 	 */
-	public void requestPieceRead(BTInterval in, PieceReadListener c) throws IOException {
-		IOException e = storedException;
-		if (e != null)
-			throw e;
+	public void requestPieceRead(BTInterval in, PieceReadListener c) {
+		if (storedException != null)
+				return;
 		QUEUE.invokeLater(new SendJob(in, c),_info.getURN());
 	}
 	
@@ -492,7 +489,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	private void notifyDiskProblem() {
-		ManagedTorrent t = torrent;
+		DiskManagerListener t = listener;
 		if (t != null)
 			t.diskExceptionHappened();
 	}

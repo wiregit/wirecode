@@ -516,11 +516,8 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" requesting disk read for "+in);
 		
-		try {
-			_info.getDiskManager().requestPieceRead(in, this);
-		} catch (IOException bad) {
-			close();
-		}
+		_info.getDiskManager().requestPieceRead(in, this);
+		
 	}
 
 	/* (non-Javadoc)
@@ -697,15 +694,7 @@ PieceSendListener, PieceReadListener {
 	 * @see com.limegroup.bittorrent.BTMessageHandler#handlePiece(com.limegroup.bittorrent.BTPieceFactory)
 	 */
 	public void handlePiece(BTPieceFactory factory) {
-		try {
-			_info.getDiskManager().writeBlock(factory);
-		} catch (IOException ioe) {
-			close();
-			// inform the user and stop the download
-			IOUtils.handleException(ioe, null);
-			_torrent.diskExceptionHappened();
-			return;
-		}
+		_info.getDiskManager().writeBlock(factory);
 	}
 
 	/**

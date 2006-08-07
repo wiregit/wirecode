@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.ThreadPool;
  * It keeps track of the known and connected peers and contains the
  * logic for starting and stopping the torrent.
  */
-public class ManagedTorrent implements Torrent {
+public class ManagedTorrent implements Torrent, DiskManagerListener {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
@@ -229,9 +229,8 @@ public class ManagedTorrent implements Torrent {
 		stopImpl();
 	}
 	
-	/**
-	 * Notifies the torrent that a disk error has happened
-	 * and terminates it.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.DiskManagerListener#diskExceptionHappened()
 	 */
 	public void diskExceptionHappened() {
 		synchronized(_state) {
@@ -388,11 +387,10 @@ public class ManagedTorrent implements Torrent {
 			_state.setInt(VERIFYING);
 	}
 
-	/**
-	 * Notification that verification previously existing data
-	 * has completed.
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.DiskManagerListener#verificationComplete()
 	 */
-	void verificationComplete() {
+	public void verificationComplete() {
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
 				if (_state.getInt() != VERIFYING) 
@@ -404,11 +402,10 @@ public class ManagedTorrent implements Torrent {
 		});
 	}
 	
-	/**
-	 * notification that a chunk has been completed and verified
-	 * @param in the # of the verified chunk
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.DiskManagerListener#notifyOfComplete(int)
 	 */
-	void notifyOfComplete(int in) {
+	public void chunkVerified(int in) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("got completed chunk " + in);
 		
