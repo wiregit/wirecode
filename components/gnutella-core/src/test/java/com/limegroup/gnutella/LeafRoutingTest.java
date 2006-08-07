@@ -115,8 +115,6 @@ public class LeafRoutingTest extends BaseTestCase {
      ////////////////////////// Initialization ////////////////////////
 
      private static void connect() throws Exception {
-         debug("-Establish connections");
-
          ultrapeer1 = connect(6350, true);
          ultrapeer2 = connect(6351, true);
          old1 = connect(6352, true);
@@ -201,7 +199,6 @@ public class LeafRoutingTest extends BaseTestCase {
 
     public void testLeafBroadcast() 
             throws IOException, BadPacketException {
-        debug("-Leaf Broadcast test");        
         byte[] guid = RouterService.newQueryGUID();
         RouterService.query(guid, "crap");
 
@@ -244,8 +241,7 @@ public class LeafRoutingTest extends BaseTestCase {
      * Tests that the X-Try and X-Try-Ultrapeer headers are correctly
      * being transferred in connection headers.
      */
-    public void testRedirect() {
-        debug("-Test X-Try/X-Try-Ultrapeer headers");
+    public void testRedirect() throws Exception {
         Properties props = new Properties();
         
         props.put(HeaderNames.X_ULTRAPEER, "True");
@@ -262,7 +258,7 @@ public class LeafRoutingTest extends BaseTestCase {
             String hosts = c.headers().getProperty(HeaderNames.X_TRY_ULTRAPEERS);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
-            Set s=list2set(hosts);
+            Set s = list2set(hosts);
             assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+
                          hosts, 3, s.size());
             byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
@@ -365,11 +361,13 @@ public class LeafRoutingTest extends BaseTestCase {
 
     public void testLeafAnswersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(false);
+        RouterService.adjustSpamFilters();
         URNtest();
     }
     
     public void testLeafFiltersURNQueries() throws Exception {
         FilterSettings.FILTER_HASH_QUERIES.setValue(true);
+        RouterService.adjustSpamFilters();
         try {
             URNtest();
             fail("did not filter URN query");
@@ -380,7 +378,7 @@ public class LeafRoutingTest extends BaseTestCase {
         drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(RouterService.getFileManager().getNumFiles() == 2);
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // get the URNS for the files
         File berkeley = 
@@ -432,40 +430,26 @@ public class LeafRoutingTest extends BaseTestCase {
 
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
-    private Set /* of Endpoint */ list2set(String addresses) {
+    private Set /* of Endpoint */ list2set(String addresses) throws Exception {
         Set ret=new HashSet();
         StringTokenizer st = new StringTokenizer(addresses,
             Constants.ENTRY_SEPARATOR);
         while(st.hasMoreTokens()){
             //get an address
             String address = ((String)st.nextToken()).trim();
-            Endpoint e;
-            try {
-                e = new Endpoint(address);
-                ret.add(e);
-            } catch(IllegalArgumentException iae) {
-                assertTrue("Bad endpoint", false);
-            }
+            ret.add(new Endpoint(address));
         }
         return ret;
     }
 
     private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
-        debug("-Shutting down");
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) { }
         ultrapeer1.close();
         ultrapeer2.close();
         old1.close();
-    }
-
-    private static final boolean DEBUG = false;
-    
-    static void debug(String message) {
-        if(DEBUG) 
-            System.out.println(message);
     }
 
     private static class UltrapeerResponder implements HandshakeResponder {
