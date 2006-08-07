@@ -204,6 +204,7 @@ PieceSendListener, PieceReadListener {
 			_socket.setSoTimeout(CONNECTION_TIMEOUT);
 		} catch (SocketException se){
 			shutdown();
+			return;
 		}
 		
 		_torrent = torrent;
