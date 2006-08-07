@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
@@ -358,8 +359,9 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         
         public void start() throws Exception {
             observer = new SimpleAcceptObserver();
-            socket = new NIOServerSocket(LISTEN_PORT, observer);
+            socket = new NIOServerSocket(observer);
             socket.setReuseAddress(true);
+            socket.bind(new InetSocketAddress(LISTEN_PORT));
         }
         
         public void shutdown() throws Exception {
