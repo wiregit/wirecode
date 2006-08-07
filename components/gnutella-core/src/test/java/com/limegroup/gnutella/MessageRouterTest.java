@@ -122,6 +122,7 @@ public final class MessageRouterTest extends BaseTestCase {
      * Tests the method for creating <tt>QueryReply</tt> instances from
      * <tt>Response</tt> arrays.
      */
+    @SuppressWarnings("unused")
     public void testResponsesToQueryReplies() throws Exception {
         ConnectionSettings.LAST_FWT_STATE.setValue(true); 
 
@@ -144,12 +145,10 @@ public final class MessageRouterTest extends BaseTestCase {
             new Integer(10),
         };
 
-        Iterator iter = (Iterator)m.invoke(ROUTER, params);
+        Iterable iter = (Iterable)m.invoke(ROUTER, params);
         int size = 0;
-        while(iter.hasNext()) {
-            iter.next();
+        for(Object o : iter)
             size++;
-        }
 
         assertEquals("responses should have been put in 2 hits", 2, size);
         
@@ -158,20 +157,18 @@ public final class MessageRouterTest extends BaseTestCase {
         query.hop();
         query.hop();
 
-        iter = (Iterator)m.invoke(ROUTER, params);
+        iter = (Iterable)m.invoke(ROUTER, params);
         size = 0;
-        while(iter.hasNext()) {
-            iter.next();
+        for(Object o : iter) {
             size++;
         }
 
         assertEquals("responses should have been put in 1 hits", 1, size);
 
         params[2] = new Integer(1);
-        iter = (Iterator)m.invoke(ROUTER, params);
+        iter = (Iterable)m.invoke(ROUTER, params);
         size = 0;
-        while(iter.hasNext()) {
-            iter.next();
+        for(Object o : iter) {
             size++;
         }
 
