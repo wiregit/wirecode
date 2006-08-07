@@ -9,6 +9,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -32,7 +33,9 @@ public class MulticastTest extends BaseTestCase {
         
     private static MetaFileManager FMAN;
     
-    private static MulticastMessageRouter MESSAGE_ROUTER;
+    private static MulticastHandler M_HANDLER;
+    
+    private static UnicastedHandler U_HANDLER;
         
     private static RouterService ROUTER_SERVICE;
         
@@ -83,9 +86,10 @@ public class MulticastTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
         FMAN = new MetaFileManager();
-        MESSAGE_ROUTER = new MulticastMessageRouter();
         ROUTER_SERVICE = new RouterService(
-            CALLBACK, MESSAGE_ROUTER, FMAN);
+            CALLBACK, new StandardMessageRouter(), FMAN);
+        M_HANDLER = new MulticastHandler();
+        U_HANDLER = new UnicastedHandler();
     
         setSettings();
                 
@@ -95,13 +99,20 @@ public class MulticastTest extends BaseTestCase {
         
         // MUST SLEEP TO LET THE FILE MANAGER INITIALIZE
         sleep(2000);
+        
+        // Set these after RouterService is started & MessageRouter
+        // is initialized, or else they'll be erased.
+        RouterService.getMessageRouter().addMulticastMessageHandler(PushRequest.class, M_HANDLER);
+        RouterService.getMessageRouter().addMulticastMessageHandler(QueryRequest.class, M_HANDLER);
+        RouterService.getMessageRouter().addUDPMessageHandler(QueryReply.class, U_HANDLER);
+        RouterService.getMessageRouter().addUDPMessageHandler(PushRequest.class, U_HANDLER);
     }
 
     public void setUp() throws Exception {
         setSettings();
         
-        MESSAGE_ROUTER.multicasted.clear();
-        MESSAGE_ROUTER.unicasted.clear();
+        M_HANDLER.multicasted.clear();
+        U_HANDLER.unicasted.clear();
         
         assertEquals("unexpected number of shared files", 1,
             FMAN.getNumFiles() );
@@ -130,9 +141,9 @@ public class MulticastTest extends BaseTestCase {
         sleep(DELAY);
         
         assertEquals( "unexpected number of multicast messages", 1, 
-            MESSAGE_ROUTER.multicasted.size() );
+                M_HANDLER.multicasted.size() );
 
-        Message m = (Message)MESSAGE_ROUTER.multicasted.get(0);
+        Message m = (Message)M_HANDLER.multicasted.get(0);
         assertInstanceof( QueryRequest.class, m );
         QueryRequest qr = (QueryRequest)m;
         assertEquals("unexpected query", "sam", qr.getQuery() );
@@ -156,12 +167,12 @@ public class MulticastTest extends BaseTestCase {
         sleep(DELAY);
 
         assertEquals( "unexpected number of multicast messages", 1, 
-            MESSAGE_ROUTER.multicasted.size() );
+                M_HANDLER.multicasted.size() );
             
         assertEquals( "unexpected number of replies", 1,
-            MESSAGE_ROUTER.unicasted.size() );
+                U_HANDLER.unicasted.size() );
 
-        Message m = (Message)MESSAGE_ROUTER.unicasted.get(0);
+        Message m = (Message)U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         assertTrue("should have MCAST header", qr.isReplyToMulticastQuery());
@@ -198,11 +209,11 @@ public class MulticastTest extends BaseTestCase {
         RouterService.query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
-            MESSAGE_ROUTER.multicasted.size());
+                M_HANDLER.multicasted.size());
         assertEquals("should have gotten reply", 1,
-            MESSAGE_ROUTER.unicasted.size());
+                U_HANDLER.unicasted.size());
 
-        Message m = (Message)MESSAGE_ROUTER.unicasted.get(0);
+        Message m = (Message)U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         // Because we're acting as both the sender & receiver, our
@@ -220,8 +231,8 @@ public class MulticastTest extends BaseTestCase {
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
         // clear the data to make it easier to look at again...
-        MESSAGE_ROUTER.multicasted.clear();
-        MESSAGE_ROUTER.unicasted.clear();        
+        M_HANDLER.multicasted.clear();
+        U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
         RouterService.getDownloadManager().sendPush(rfd);
@@ -231,9 +242,9 @@ public class MulticastTest extends BaseTestCase {
         sleep(DELAY);
         
         assertEquals("should have sent & received push", 1,
-            MESSAGE_ROUTER.multicasted.size());
+                M_HANDLER.multicasted.size());
         // should be a push.
-        m = (Message)MESSAGE_ROUTER.multicasted.get(0);
+        m = (Message)M_HANDLER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
         PushRequest pr = (PushRequest)m;
         // note it was hopped.
@@ -244,7 +255,7 @@ public class MulticastTest extends BaseTestCase {
         assertEquals("wrong index", rfd.getIndex(), pr.getIndex());
         
         assertEquals("should not have unicasted anything", 0,
-            MESSAGE_ROUTER.unicasted.size());
+                U_HANDLER.unicasted.size());
 	}
     
     /**
@@ -261,11 +272,11 @@ public class MulticastTest extends BaseTestCase {
         RouterService.query(guid, "metadata");
         sleep(DELAY);
         assertEquals("should have sent query", 1,
-            MESSAGE_ROUTER.multicasted.size());
+                M_HANDLER.multicasted.size());
         assertEquals("should have gotten reply", 1,
-            MESSAGE_ROUTER.unicasted.size());
+                U_HANDLER.unicasted.size());
 
-        Message m = (Message)MESSAGE_ROUTER.unicasted.get(0);
+        Message m = (Message)U_HANDLER.unicasted.get(0);
         assertInstanceof( QueryReply.class, m);
         QueryReply qr = (QueryReply)m;
         // Because we're acting as both the sender & receiver, our
@@ -281,8 +292,8 @@ public class MulticastTest extends BaseTestCase {
         RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData());
         
         // clear the data to make it easier to look at again...
-        MESSAGE_ROUTER.multicasted.clear();
-        MESSAGE_ROUTER.unicasted.clear();
+        M_HANDLER.multicasted.clear();
+        U_HANDLER.unicasted.clear();
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());
@@ -296,41 +307,30 @@ public class MulticastTest extends BaseTestCase {
         sleep(10000);
         
         assertEquals("should have sent & received push", 1,
-            MESSAGE_ROUTER.multicasted.size());
+                M_HANDLER.multicasted.size());
         // should be a push.
-        m = (Message)MESSAGE_ROUTER.multicasted.get(0);
+        m = (Message)M_HANDLER.multicasted.get(0);
         assertInstanceof(PushRequest.class, m);
         
         assertEquals("should not have unicasted anything", 0,
-            MESSAGE_ROUTER.unicasted.size());
+                U_HANDLER.unicasted.size());
         
         assertTrue("file should have been downloaded & saved",
             new File(_savedDir, "metadata.mp3").exists());
 
-//  Get rid of this file, so the -Dtimes=X option works properly...  =)
-assertEquals("unexpected number of shared files", 2,
-    FMAN.getNumFiles() );
+        // Get rid of this file, so the -Dtimes=X option works properly... =)
+        assertEquals("unexpected number of shared files", 2, FMAN.getNumFiles());
 
-File temp=new File( _savedDir, "metadata.mp3");        
-if( temp.exists() ) {
-    FMAN.removeFileIfShared(temp);
-    temp.delete();
-}
-sleep(2*DELAY);
-assertFalse( "file should have been deleted",temp.exists() );
-
-assertEquals("unexpected number of shared files", 1,
-        FMAN.getNumFiles() );
-
-	}
-    
-    private static void setGUID(Message m, GUID g) {
-        try {
-            PrivilegedAccessor.invokeMethod( m, "setGUID", g );
-        } catch(Exception e) {
-            ErrorService.error(e);
+        File temp = new File(_savedDir, "metadata.mp3");
+        if (temp.exists()) {
+            FMAN.removeFileIfShared(temp);
+            temp.delete();
         }
-    }
+        sleep(2 * DELAY);
+        assertFalse("file should have been deleted", temp.exists());
+
+        assertEquals("unexpected number of shared files", 1, FMAN.getNumFiles());
+	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {
         PrivilegedAccessor.setValue(qr, "_address", new byte[4]);
@@ -338,30 +338,23 @@ assertEquals("unexpected number of shared files", 1,
     
     private static void reroutePush(byte[] guid) throws Exception {
         RouteTable rt = (RouteTable)PrivilegedAccessor.getValue(
-            MESSAGE_ROUTER, "_pushRouteTable");
+            RouterService.getMessageRouter(), "_pushRouteTable");
         rt.routeReply(guid, ForMeReplyHandler.instance());
     }
     
-    private static class MulticastMessageRouter extends StandardMessageRouter {
-
-        MulticastMessageRouter() {
-            super();
-        }
-
+    private static class MulticastHandler implements MessageHandler {
         List multicasted = new LinkedList();
-        List unicasted = new LinkedList();
-    
-        public void handleMulticastMessage(Message msg, InetSocketAddress addr) {
+
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             multicasted.add(msg);
-            // change the guid so we can pretend we've never seen it before
-            if( msg instanceof QueryRequest )
-                setGUID( msg, new GUID(RouterService.newQueryGUID()) );
-            super.handleMulticastMessage(msg, addr);
         }
+    }
+    
+    private static class UnicastedHandler implements MessageHandler {
+        List unicasted = new LinkedList();
         
-        public void handleUDPMessage(Message msg, InetSocketAddress addr) {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             unicasted.add(msg);
-            super.handleUDPMessage(msg, addr);
         }
 	}
         

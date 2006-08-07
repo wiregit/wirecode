@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -303,7 +304,6 @@ public abstract class MessageRouter {
      */
     protected MessageRouter() {
         _clientGUID=RouterService.getMyGUID();
-        
     }
 
     /**
@@ -337,14 +337,6 @@ public abstract class MessageRouter {
     }
     
     /**
-     * Helper method to get a MessageHandler from the provided Map
-     * for the provided Message Class
-     */
-    private static MessageHandler getHandler(Map<Class<? extends Message>, ? extends MessageHandler> messageHandlers, Class<? extends Message> clazz) {
-        return messageHandlers.get(clazz);
-    }
-    
-    /**
      * Installs a MessageHandler for "regular" Messages.
      * 
      * @link #handleMessage(Message, ManagedConnection)
@@ -358,11 +350,27 @@ public abstract class MessageRouter {
     }
     
     /**
+     * Adds the new handler as a handler in addition to other handlers.
+     * 
+     * @link #handleMessage(Message, ManagedConnection)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
+    public void addMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        synchronized (messageHandlers) {
+            MessageHandler existing = messageHandlers.get(clazz);
+            if(existing != null) 
+                handler = new DualMessageHandler(handler, existing);
+            messageHandlers = setHandler(messageHandlers, clazz, handler);
+        }
+    }
+    
+    /**
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
     public MessageHandler getMessageHandler(Class<? extends Message> clazz) {
-        return getHandler(messageHandlers, clazz);
+        return messageHandlers.get(clazz);
     }
     
     /**
@@ -379,11 +387,27 @@ public abstract class MessageRouter {
     }
     
     /**
+     * Adds the new handler as a handler in addition to other handlers for UDP messages.
+     * 
+     * @link #handleUDPMessage(Message, InetSocketAddress)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
+    public void addUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        synchronized (udpMessageHandlers) {
+            MessageHandler existing = udpMessageHandlers.get(clazz);
+            if(existing != null) 
+                handler = new DualMessageHandler(handler, existing);
+            udpMessageHandlers = setHandler(udpMessageHandlers, clazz, handler);
+        }
+    }
+    
+    /**
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
     public MessageHandler getUDPMessageHandler(Class<? extends Message> clazz) {
-        return getHandler(udpMessageHandlers, clazz);
+        return udpMessageHandlers.get(clazz);
     }
     
     /**
@@ -400,11 +424,27 @@ public abstract class MessageRouter {
     }
     
     /**
+     * Adds the new handler as a handler in addition to other handlers for multicast messages.
+     * 
+     * @link #handleMulticastMessage(Message, InetSocketAddress)
+     * @param clazz The Class of the Message
+     * @param handler The Handler of the Message
+     */
+    public void addMulticastMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
+        synchronized (multicastMessageHandlers) {
+            MessageHandler existing = multicastMessageHandlers.get(clazz);
+            if(existing != null) 
+                handler = new DualMessageHandler(handler, existing);
+            multicastMessageHandlers = setHandler(multicastMessageHandlers, clazz, handler);
+        }
+    }
+    
+    /**
      * Returns a MessageHandler for the specified Message Class
      * or null if no such MessageHandler exists.
      */
     public MessageHandler getMulticastMessageHandler(Class<? extends Message> clazz) {
-        return getHandler(multicastMessageHandlers, clazz);
+        return multicastMessageHandlers.get(clazz);
     }
     
     /**
@@ -1449,10 +1489,23 @@ public abstract class MessageRouter {
 		} 
 		
 		// always send the query to your multicast people
+        originateMulticastQuery(query);
+    }
+    
+    /**
+     * Originates a multicast query from this host.
+     * This will alter the GUID of the query and store it in a mapping
+     * of new -> old GUID.  When replies come in, if they have the new GUID,
+     * they are reset to be the old one and the multicast flag is allowed.
+     * 
+     * @param query
+     * @return the newGUID that the multicast query is using.
+     */
+    protected void originateMulticastQuery(QueryRequest query) {
         byte[] newGUID = GUID.makeGuid();
         QueryRequest mquery = QueryRequest.createMulticastQuery(newGUID, query);
         _multicastGuidMap.addMapping(query.getGUID(), newGUID, MULTICAST_GUID_EXPIRE_TIME);
-		multicastQueryRequest(mquery);		
+		multicastQueryRequest(mquery);
 	}
 
 	/**
