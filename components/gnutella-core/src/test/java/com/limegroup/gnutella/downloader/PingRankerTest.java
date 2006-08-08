@@ -638,7 +638,7 @@ public class PingRankerTest extends BaseTestCase {
     }
 
     private static void assertIpPortEquals(IpPort a, Object b) {
-        assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
+        assertTrue(IpPort.COMPARATOR.compare(a,(IpPort)b) == 0);
     }
     
     static class MockMesh implements MeshHandler {

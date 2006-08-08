@@ -33,6 +33,7 @@ public class FakeThrottle implements Throttle {
     void clear() { available = 0; interests = 0; didRequest = false; didRelease = false; }
     
     public void setRate(float rate) {}
+    public long nextTickTime() {return 0;}
 }
     
     
