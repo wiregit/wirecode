@@ -39,6 +39,7 @@ import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
@@ -65,7 +66,8 @@ public class CommandHandler {
             "firewalled",
             "exhaustive",
             "id .+",
-            "select .+"
+            "select .+",
+            "nextid"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -405,5 +407,9 @@ public class CommandHandler {
         
         RouteTable routeTable = ((Context)dht).getRouteTable();
         System.out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
+    }
+    
+    public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        ((ContactNode)((Context)dht).getLocalNode()).nextInstanceID();
     }
 }
