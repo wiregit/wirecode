@@ -357,15 +357,16 @@ public class FileUtils {
      */
     public static boolean delete(File file) {
     	if (!file.exists()) {
-    		return false; // Can't delete because no file is there, report error with false
+    		return false;
     	}
     	if (CommonUtils.isMacOSX()) {
-    		if (moveToTrashOSX(file)) return true; // If platform-specific method fails, fall through to try to delete the file
+    		return moveToTrashOSX(file);
     	} else if (CommonUtils.isWindows()) {
-    		if (SystemUtils.recycle(file)) return true;
+    		return SystemUtils.recycle(file);
+    	} else {
+    		file.delete();
+    		return !file.exists();
     	}
-    	file.delete();
-    	return !file.exists(); // File still there after we tried to delete it, report error with false
     }
 
     /**
