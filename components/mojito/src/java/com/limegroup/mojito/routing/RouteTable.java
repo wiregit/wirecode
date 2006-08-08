@@ -95,6 +95,14 @@ public interface RouteTable {
     public List<KUID> getRefreshIDs(boolean force);
     
     /**
+     * Returns whether or not the local Contact (i.e. we)
+     * are close to the provided KUID. In other words if
+     * the provided KUID is (hypothetically) in the same 
+     * Bucket in the RouteTable as the local Contact is.
+     */
+    public boolean isLocalBucket(KUID nodeId);
+    
+    /**
      * Clears all elements from the RoutingTable
      */
     public void clear();
