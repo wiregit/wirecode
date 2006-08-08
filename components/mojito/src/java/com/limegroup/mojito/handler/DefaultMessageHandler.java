@@ -97,7 +97,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         // never called
     }
     
-    private void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
+    private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
         if (node.isFirewalled()) {
             return;
@@ -109,17 +109,30 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         // (we are (re)connecting to the network) or a node that is reconnecting
         Contact existing = routeTable.get(node.getNodeID());
         
-        // add node to the routing table -- update timestamp and info if needed
-        routeTable.add(node);
-        
         if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
             
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
-            }
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            List<Contact> nodes = routeTable.select(node.getNodeID(), k, false);
             
-            forward(node, message);
+            // The following condition seems to be only true for the
+            // "nearest Node" forwards part and sometimes (mostly)
+            // false for the "furthest Node" removes part.
+            // TODO: check why?!
+            
+            // Are we one of the K nearest Nodes to the contact?
+            if (containsNodeID(nodes, context.getLocalNodeID())) {
+            //if (routeTable.isLocalBucket(node.getNodeID())) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
+                }
+                
+                forward(node, message);
+            }
         }
+        
+        // Add the Node to our RouteTable or if it's
+        // already there update its timeStamp and whatsoever
+        routeTable.add(node);
     }
     
     private void forward(Contact node, DHTMessage message) throws IOException {
@@ -127,94 +140,102 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        List<Contact> nearestNodesToId = routeTable.select(node.getNodeID(), k, false);
+        List<DHTValue> valuesToForward = new ArrayList<DHTValue>();
         
-        // Are we one of the K closest nodes to the contact?
-        if (containsLocalNode(nearestNodesToId, context.getLocalNodeID())) {
-            List<DHTValue> valuesToForward = new ArrayList<DHTValue>();
-            
-            Database database = context.getDatabase();
-            synchronized(database) {
-                for(KUID valueId : database.keySet()) {
+        Database database = context.getDatabase();
+        synchronized(database) {
+            for(KUID valueId : database.keySet()) {
+                
+                // To avoid redundant STORE forward, a node only transfers a value 
+                // if it is the closest to the key or if its ID is closer than any 
+                // other ID (except the new closest one of course)
+                // TODO: maybe relax this a little bit: what if we're not the closest 
+                // and the closest is stale?
+                
+                List<Contact> nodes = routeTable.select(valueId, k, false);
+                Contact closest = nodes.get(0);
+                Contact furthest = nodes.get(nodes.size()-1);
+                
+                //System.out.println(context.getLocalNode());
+                //System.out.println(node);
+                //System.out.println(CollectionUtils.toString(nodes));
+                //System.out.println();
+                
+                if (context.isLocalNode(closest)    // Re: Or-Condition; disabled 'cause 
+                        /*|| (node.equals(closest)  // we're adding the Node AFTER this
+                                && nodes.size() > 1 // method is called!
+                                && context.isLocalNode(nodes.get(1)))*/) {
                     
-                    // To avoid redundant STORE forward, a node only transfers a value 
-                    // if it is the closest to the key or if its ID is closer than any 
-                    // other ID (except the new closest one of course)
-                    // TODO: maybe relax this a little bit: what if we're not the closest 
-                    // and the closest is stale?
-                    
-                    List<Contact> nearestNodesToKey = routeTable.select(valueId, k, false);
-                    Contact closest = nearestNodesToKey.get(0);
-                    
+                    //System.out.println("CONDITION B");
                     //System.out.println(context.getLocalNode());
-                    //System.out.println(CollectionUtils.toString(nearestNodesToKey));
+                    //System.out.println(node);
+                    //System.out.println(CollectionUtils.toString(nodes));
                     //System.out.println();
                     
-                    if (context.isLocalNode(closest)   
-                            || (node.equals(closest)
-                                && (nearestNodesToKey.size() > 1)
-                                && nearestNodesToKey.get(1).equals(context.getLocalNode()))) {
-                        
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
-                        }
-                        
-                        databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        valuesToForward.addAll(database.get(valueId).values());
-                        
-                    } else if (nearestNodesToKey.size() >= k
-                            && !containsLocalNode(nearestNodesToKey, context.getLocalNodeID())) {
-                        
-                        boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
-                        
-                        int count = 0;
-                        for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
-                            DHTValue value = it.next();
-                            if (!value.isLocalValue()) {
-                                // Rather than to delete the DHTValue immediately we're
-                                // setting the flag that it's no longer nearby which will 
-                                // expire it faster. This way we can serve as a cache for
-                                // a while...
-                                
-                                //System.out.println("\n" + value + "\n");
-                                
-                                if (delete) {
-                                    it.remove();
-                                } else {
-                                    value.setNearby(false);
-                                }
-                                
-                                count++;
-                            }
-                        }
-                        
-                        databaseStats.STORE_FORWARD_REMOVALS.addData(count);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
                     }
+                    
+                    databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                    valuesToForward.addAll(database.get(valueId).values());
+                    
+                } else if (nodes.size() >= k && context.isLocalNode(furthest)) {
+                    
+                    //System.out.println("CONDITION C");
+                    //System.out.println(context.getLocalNode());
+                    //System.out.println(node);
+                    //System.out.println(CollectionUtils.toString(nodes));
+                    //System.out.println();
+                    
+                    boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
+                    
+                    int count = 0;
+                    for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
+                        DHTValue value = it.next();
+                        if (!value.isLocalValue()) {
+                            // Rather than to delete the DHTValue immediately we're
+                            // setting the flag that it's no longer nearby which will 
+                            // expire it faster. This way we can serve as a cache for
+                            // a while...
+                            
+                            //System.out.println("REMOVING: " + value + "\n");
+                            
+                            if (delete) {
+                                it.remove();
+                            } else {
+                                value.setNearby(false);
+                            }
+                            
+                            count++;
+                        }
+                    }
+                    
+                    databaseStats.STORE_FORWARD_REMOVALS.addData(count);
+                }
+            }
+        }
+        
+        if (!valuesToForward.isEmpty()) {
+            QueryKey queryKey = null;
+            if (message instanceof FindNodeResponse) {
+                queryKey = ((FindNodeResponse)message).getQueryKey();
+                
+                if (queryKey == null) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(node + " sent us a null QueryKey");
+                    }
+                    return;
                 }
             }
             
-            if (!valuesToForward.isEmpty()) {
-                QueryKey queryKey = null;
-                if (message instanceof FindNodeResponse) {
-                    queryKey = ((FindNodeResponse)message).getQueryKey();
-                    
-                    if (queryKey == null) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info(node + " sent us a null QueryKey");
-                        }
-                        return;
-                    }
-                }
-                
-                context.store(node, queryKey, valuesToForward);
-            }
+            context.store(node, queryKey, valuesToForward);
         }
     }
     
     /**
      * Returns whether or not the local Node is in the given List
      */
-    private boolean containsLocalNode(List<Contact> nodes, KUID id) {
+    private boolean containsNodeID(List<Contact> nodes, KUID id) {
         for (int i = nodes.size()-1; i >= 0; i--) {
             if (id.equals(nodes.get(i).getNodeID())) {
                 return true;
