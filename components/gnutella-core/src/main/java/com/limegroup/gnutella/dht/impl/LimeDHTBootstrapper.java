@@ -78,7 +78,7 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
      * the future.
      * 
      */
-    public void bootstrap(MojitoDHT dht) {
+    public synchronized void bootstrap(MojitoDHT dht) {
         
         this.dht = dht;
         
@@ -90,11 +90,9 @@ public class LimeDHTBootstrapper implements DHTBootstrapper{
             LOG.debug("Starting bootstrap, bootstrapHosts: "+bootstrapHosts);
         }
         
-        synchronized(bootstrapHosts) {
-            bootstrappingFromRT.set(bootstrapHosts.isEmpty());
-            bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTEventListener(new InitialBootstrapListener());
-        }
+        bootstrappingFromRT.set(bootstrapHosts.isEmpty());
+        bootstrapFuture = dht.bootstrap(bootstrapHosts);
+        bootstrapFuture.addDHTEventListener(new InitialBootstrapListener());
     }
     
     /**

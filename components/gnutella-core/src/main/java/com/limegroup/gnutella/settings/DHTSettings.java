@@ -20,19 +20,19 @@ public class DHTSettings extends LimeProps{
      * Setting to force DHT capability -- TODO for testing only - remove.
      */
     public static final BooleanSetting FORCE_DHT_CONNECT =
-    	FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", true, "DHTSettings.ForceDHTConnect"); //TODO: change this
+    	FACTORY.createSettableBooleanSetting("FORCE_DHT_CONNECT", false, "DHTSettings.ForceDHTConnect"); //TODO: change this
 
     /**
      * Setting for wether or not the DHT should be active at all.
      */
     public static final BooleanSetting DISABLE_DHT_USER =
-        FACTORY.createBooleanSetting("DISABLE_DHT_USER", false); //TODO: change this
+        FACTORY.createBooleanSetting("DISABLE_DHT_USER", true); //TODO: change this
 
     /**
      * Setting for wether or not the DHT should be active at all.
      */
     public static final BooleanSetting DISABLE_DHT_NETWORK =
-        FACTORY.createSettableBooleanSetting("DISABLE_DHT_NETWORK", false, "DHTSettings.DisableDHT");//TODO: change this
+        FACTORY.createSettableBooleanSetting("DISABLE_DHT_NETWORK", true, "DHTSettings.DisableDHT");//TODO: change this
     
     /**
      * Setting for the minimum average uptime (in seconds) required to join the DHT.

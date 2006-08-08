@@ -88,11 +88,11 @@ public interface RouteTable {
     
     /**
      * Returns a List of KUIDs that need to be looked up in order
-     * to refresh the RouteTable.
+     * to refresh (or bootstrap) the RouteTable.
      * 
-     * @param force whether or not the refresh is forced 
+     * @param bootstrapping whether or not this refresh is done during bootstrap
      */
-    public List<KUID> getRefreshIDs(boolean force);
+    public List<KUID> getRefreshIDs(boolean bootstrapping);
     
     /**
      * Returns whether or not the local Contact (i.e. we)

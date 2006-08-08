@@ -478,6 +478,18 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
+    /**
+     * Returns a List of KUIDs that need to be looked up in order
+     * to refresh the RouteTable.
+     * 
+     * If we are bootstrapping, we don't want to refresh the bucket
+     * that contains the local node ID, as phase 1 already takes 
+     * care of this. Additionally, when we bootstrap, we don't 
+     * look at the bucket's timestamp (isRefreshRequired) so 
+     * that we randomly fill up our routing table.
+     * 
+     * @param bootstrapping whether or not this refresh is done during bootstrap
+     */
     public synchronized List<KUID> getRefreshIDs(final boolean bootstrapping) {
         final List<KUID> randomIds = new ArrayList<KUID>();
         

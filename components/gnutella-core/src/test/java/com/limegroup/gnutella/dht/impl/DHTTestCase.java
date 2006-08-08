@@ -34,11 +34,12 @@ public abstract class DHTTestCase extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         //setup bootstrap node
         BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
-        InetSocketAddress addr = new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT);
+        InetSocketAddress addr = new InetSocketAddress(BOOTSTRAP_DHT_PORT);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();
         
         ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        ROUTER_SERVICE.start();
     }
     
     protected void setSettings() {
@@ -57,8 +58,6 @@ public abstract class DHTTestCase extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         //dht settings:
         DHTSettings.PERSIST_DHT.setValue(false);
-        DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
-        DHTSettings.DISABLE_DHT_USER.setValue(false);
     }
     
     public static void globalTearDown() throws Exception {

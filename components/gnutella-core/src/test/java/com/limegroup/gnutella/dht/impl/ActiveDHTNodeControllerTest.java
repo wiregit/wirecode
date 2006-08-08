@@ -6,10 +6,10 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -35,12 +35,10 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
-        super.setUp();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
     }
     
     public void testPersistence() throws Exception{
@@ -80,15 +78,18 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testGetActiveDHTNodes() throws Exception{
+        DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         ActiveDHTNodeController controller = new ActiveDHTNodeController();
         controller.start();
+        //TODO: remove this sleep call and understand why the future does not get cancelled
+        Thread.sleep(300);
         //bootstrap active node
-        controller.addDHTNode(BOOTSTRAP_DHT.getContactAddress());
+        controller.addDHTNode(new InetSocketAddress("localhost",3000));
         Thread.sleep(1000);
         //ask for active nodes -- should return only itself
         List<IpPort> l = controller.getActiveDHTNodes(10);
         assertEquals(1, l.size());
-        assertEquals(l.get(0), (IpPort)(new IpPortImpl("localhost")));
+        assertEquals(RouterService.getPort(), l.get(0).getPort());
     }
 
 }

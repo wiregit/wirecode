@@ -536,6 +536,10 @@ public class Context implements MojitoDHT {
             throw new IllegalArgumentException("Cannot bind Socket to Port " + port);
         }
         
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Binding DHT "+ name+ " to address: "+localAddress);
+        }
+        
         this.localAddress = localAddress;
         
         // If we not firewalled and the external port has not 
@@ -586,6 +590,10 @@ public class Context implements MojitoDHT {
     public synchronized void stop() {
         if (!isRunning()) {
             return;
+        }
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Stopping DHT "+name);
         }
         
         running = false;

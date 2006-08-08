@@ -89,6 +89,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         synchronized(lock) {
         	if(future != null) {
             	future.cancel(true);
+                future = null;
             }
             Bootstrapper bootstrapper = new Bootstrapper();
             future = new BootstrapFuture(bootstrapper);
@@ -103,6 +104,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         synchronized (lock) {
             if(future != null) {
             	future.cancel(true);
+                future = null;
             }
             // Preserve the order of the Set
             Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
@@ -151,9 +153,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             }
             
             if (node == null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Bootstrap failed: no bootstrap host");
-                }
+                LOG.debug("Bootstrap failed: no bootstrap host");
                 return new BootstrapEvent(failed, System.currentTimeMillis()-start);
             }
             
@@ -267,12 +267,20 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * and start the bootstrap all over again. 
          * A stale routing table can be detected by a high number of failures
          * during the lookup (alive hosts to expected result set size ratio).
+         * Note: this only applies to routing tables with more than 1 buckets,
+         * i.e. routing tables that have more than k nodes.
+         * 
          */
         private boolean phaseTwo(Contact node) throws Exception {
+            
             boolean foundNewContacts = false;
             int failures = 0;
             
             List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
+            if(randomId.size() == 0) {
+                return true;
+            }
+            
             for (KUID nodeId : randomId) {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
@@ -304,7 +312,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     		}
                     	}
                     	
-                    } else if (!foundNewContacts) {
+                    } else if (!foundNewContacts && !evt.getNodes().isEmpty()) {
                         foundNewContacts = true;
                     }
                 } catch (DHTException ignore) {

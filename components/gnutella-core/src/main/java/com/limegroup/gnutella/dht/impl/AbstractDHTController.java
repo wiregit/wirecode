@@ -80,11 +80,6 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             return;
         }
         
-        if(DHTSettings.DISABLE_DHT_NETWORK.getValue() 
-                || DHTSettings.DISABLE_DHT_USER.getValue()) { 
-            return;
-        }
-        
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
         }
