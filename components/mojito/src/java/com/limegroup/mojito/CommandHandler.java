@@ -42,6 +42,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
+import com.limegroup.mojito.util.CollectionUtils;
 
 public class CommandHandler {
     
@@ -63,7 +64,8 @@ public class CommandHandler {
             "restart",
             "firewalled",
             "exhaustive",
-            "id .+"
+            "id .+",
+            "select .+"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -395,5 +397,13 @@ public class CommandHandler {
         Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
         m.setAccessible(true);
         m.invoke(dht, new Object[]{nodeId});
+    }
+    
+    public static void select(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        KUID nodeId = KUID.createNodeID(ArrayUtils.parseHexString(args[1]));
+        System.out.println("Selecting: " + nodeId);
+        
+        RouteTable routeTable = ((Context)dht).getRouteTable();
+        System.out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
     }
 }
