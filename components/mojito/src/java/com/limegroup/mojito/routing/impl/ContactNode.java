@@ -164,7 +164,7 @@ public class ContactNode implements Contact, Serializable {
             rtt = existing.getRoundTripTime();
         }
         
-        if (!isAlive()) {
+        if (!isAlive() || (getTimeStamp() < existing.getTimeStamp())) {
             timeStamp = existing.getTimeStamp();
             lastFailedTime = existing.getLastFailedTime();
             failures = existing.getFailures();
