@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,7 +16,6 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 
@@ -103,9 +101,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
         if(!isRunning() || !dht.isBootstrapped()) {
             return Collections.emptyList();
         }
-        
-        //IF we are active and bootstrapped: we need only return ourselves
-        IpPort localNode = new IpPortContactNode(((Context)dht).getLocalNode());
-        return Arrays.asList(localNode);
+        //return our MRS nodes. We should be first in the list
+        return getMRSNodes(maxNodes, false);
     }
 }

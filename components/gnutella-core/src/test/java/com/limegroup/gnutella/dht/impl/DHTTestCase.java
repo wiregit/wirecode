@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -26,6 +28,8 @@ public abstract class DHTTestCase extends BaseTestCase {
     protected static MojitoDHT BOOTSTRAP_DHT;
     
     protected static final int BOOTSTRAP_DHT_PORT = 3000;
+    
+    protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
 
     public DHTTestCase(String name) {
         super(name);
@@ -37,6 +41,7 @@ public abstract class DHTTestCase extends BaseTestCase {
         InetSocketAddress addr = new InetSocketAddress(BOOTSTRAP_DHT_PORT);
         BOOTSTRAP_DHT.bind(addr);
         BOOTSTRAP_DHT.start();
+        DHT_LIST.add(BOOTSTRAP_DHT);
         
         ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
         ROUTER_SERVICE.start();
@@ -61,7 +66,10 @@ public abstract class DHTTestCase extends BaseTestCase {
     }
     
     public static void globalTearDown() throws Exception {
-        BOOTSTRAP_DHT.stop();
+        for(MojitoDHT dht : DHT_LIST) {
+            dht.stop();
+        }
+        RouterService.shutdown();
     }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {

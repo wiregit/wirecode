@@ -2998,9 +2998,6 @@ public abstract class MessageRouter {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             ManagedConnection c = (ManagedConnection)handler;
             c.handleVendorMessage((VendorMessage)msg);
-            //fire a vendor event
-            _manager.dispatchLifecycleEvent(new LifecycleEvent(MessageRouter.this, 
-                    LifeEvent.CONNECTION_VENDORED , c));
         }
     }
     

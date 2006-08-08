@@ -81,15 +81,14 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         ActiveDHTNodeController controller = new ActiveDHTNodeController();
         controller.start();
-        //TODO: remove this sleep call and understand why the future does not get cancelled
-        Thread.sleep(300);
         //bootstrap active node
         controller.addDHTNode(new InetSocketAddress("localhost",3000));
         Thread.sleep(1000);
-        //ask for active nodes -- should return only itself
+        //ask for active nodes -- should return itself and the bootstrap node
         List<IpPort> l = controller.getActiveDHTNodes(10);
-        assertEquals(1, l.size());
+        assertEquals(2, l.size());
         assertEquals(RouterService.getPort(), l.get(0).getPort());
+        assertEquals(3000, l.get(1).getPort());
     }
 
 }

@@ -5,24 +5,14 @@ import java.util.EventObject;
 public class LifecycleEvent extends EventObject {
     
     public static enum LifeEvent {
-        CONNECTING("connecting"), 
-        CONNECTED("connected"), 
-        DISCONNECTED("disconnected"), 
-        NO_INTERNET("no_internet"), 
-        CONNECTION_INITIALIZING("connection_initializing"), 
-        CONNECTION_INITIALIZED("connection_initialized"), 
-        CONNECTION_CLOSED("connection_closed"),
-        CONNECTION_VENDORED("connection_vendored");
-        
-        private final String name;
-        
-        LifeEvent(String name) {
-            this.name = name;
-        }
-        
-        public String getName() {
-            return name;
-        }
+        CONNECTING, 
+        CONNECTED, 
+        DISCONNECTED, 
+        NO_INTERNET, 
+        CONNECTION_INITIALIZING, 
+        CONNECTION_INITIALIZED, 
+        CONNECTION_CLOSED,
+        CONNECTION_CAPABILITIES;
     }
     
     private final ManagedConnection connection;
@@ -81,13 +71,13 @@ public class LifecycleEvent extends EventObject {
         return (type == LifeEvent.CONNECTION_INITIALIZED);
     }
     
-    public boolean isConnectionVendoredEvent() {
-        return (type == LifeEvent.CONNECTION_VENDORED);
+    public boolean isConnectionCapabilitiesEvent() {
+        return (type == LifeEvent.CONNECTION_CAPABILITIES);
     }
     
     public String toString() {
         StringBuffer buffer = new StringBuffer("LifecycleEvent: [event=");
-        buffer.append(type.getName());
+        buffer.append(type);
         buffer.append(", connection=");
         if(connection != null) {
             buffer.append(connection.toString());

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,11 +26,28 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.util.BucketUtils;
 
+/**
+ * Controlls a passive DHT node. 
+ * 
+ * As passive nodes are Gnutella ultrapeers, the passive node controller also
+ * maintains the list of this ultrapeer's leafs in a separate list. 
+ * These leaves are this node's most accurate knowledge of the DHT, as leaf 
+ * connections are statefull TCP, and they are therefore propagated in priority
+ * in the Gnutella network.
+ * 
+ * Persistence is implemented in order to be able to bootstrap next session 
+ * by saving a few (DHTSettings.NUM_PERSISTED_NODES) MRS nodes. It is not necessary
+ * to persist the entire DHT, because we don't want to keep the same nodeID at the next 
+ * session, and accuracy of the contacts in the RT is not guaranteed when a node 
+ * is passive (as it does not get contacted by the DHT). 
+ * 
+ *   
+ */
 class PassiveDHTNodeController extends AbstractDHTController{
     
-    private LimeDHTRoutingTable limeDHTRouteTable;
-    
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeController.class);
+    
+    private LimeDHTRoutingTable limeDHTRouteTable;
     
     /**
      * The file to persist the list of host
@@ -50,7 +67,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 ObjectInputStream oii = new ObjectInputStream(in);
                 Contact node;
                 while((node = (Contact)oii.readObject()) != null){
-                    addDHTNode(node.getContactAddress());
+                    limeDHTRouteTable.add(node);
                 }
             }
         } catch (ClassNotFoundException e) {
@@ -62,34 +79,39 @@ class PassiveDHTNodeController extends AbstractDHTController{
         }
     }
     
-    private synchronized void addLeafDHTNode(String host, int port) {
+    /**
+     * Adds a leaf DHT node to the list and then tries to bootstrap off it 
+     * if we are not bootstrapped yet.
+     * Note: This method makes sure the DHT is running already, as adding a node
+     * as a leaf involves sending it a DHT ping (in order to get its KUID).
+     * 
+     */
+    protected synchronized void addLeafDHTNode(String host, int port) {
         if(!isRunning()) {
             return;
         }
         
         InetSocketAddress addr = new InetSocketAddress(host, port);
-        if(dhtBootstrapper.isWaitingForNodes() || dhtBootstrapper.isBootstrappingFromRT()) {
-            
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Adding host: "+addr+" to leaf dht nodes");
-            }
-            
-            addDHTNode(addr);
-        } 
-        //add to our leaf nodes
-        limeDHTRouteTable.addLeafDHTNode(addr);
+        //add to bootstrap nodes if we need to.
+        addDHTNode(addr);
+        //add to our DHT leaves
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Adding host: "+addr+" to leaf dht nodes");
+        }
+        limeDHTRouteTable.addLeafDHTNode(host, port);
     }
     
-    private synchronized void removeLeafDHTNode(String host, int port) {
+    protected synchronized SocketAddress removeLeafDHTNode(String host, int port) {
         if(!isRunning()) {
-            return;
+            return null;
         }
         
-        IpPort removed = limeDHTRouteTable.removeLeafDHTNode(host, port);
+        SocketAddress removed = limeDHTRouteTable.removeLeafDHTNode(host, port);
 
         if(LOG.isDebugEnabled() && removed != null) {
             LOG.debug("Removed host: "+removed+" from leaf dht nodes");
         }
+        return removed;
     }
 
     @Override
@@ -142,28 +164,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
             return Collections.emptyList();
         }
         
-        //IF we have any DHT leaves we return them directly
-        if(limeDHTRouteTable.hasDHTLeaves()) {
-            List<IpPort> dhtLeaves = new ArrayList<IpPort>(limeDHTRouteTable.getDHTLeaves());
-            //size will be > 0
-            return dhtLeaves.subList(0,Math.min(maxNodes, dhtLeaves.size()));
-        }
-        
-        System.out.append("rout table:" + limeDHTRouteTable);
-        //ELSE return the MRS node of our routing table
-        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
-                limeDHTRouteTable.getLiveContacts(), maxNodes + 1); //it will add the local node!
-        
-        KUID localNode = dht.getLocalNodeID();
-        List<IpPort> ipps = new ArrayList<IpPort>();
-        for(Contact cn : nodes) {
-            if(cn.getNodeID().equals(localNode)) {
-                continue;
-            }
-            ipps.add(new IpPortContactNode(cn));
-        }
-        
-        return ipps;
+        //This should return the leafs first (they have the highest timestamp)
+        return getMRSNodes(maxNodes, true);
     }
     
     public void handleLifecycleEvent(LifecycleEvent evt) {
@@ -182,7 +184,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         if(evt.isConnectionClosedEvent()) {
             removeLeafDHTNode( host , port );
             
-        } else if(evt.isConnectionVendoredEvent()){
+        } else if(evt.isConnectionCapabilitiesEvent()){
             
             if(c.remostHostIsActiveDHTNode() > -1) {
                 addLeafDHTNode( host , port );

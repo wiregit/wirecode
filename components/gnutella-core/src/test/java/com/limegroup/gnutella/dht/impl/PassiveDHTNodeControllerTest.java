@@ -1,19 +1,24 @@
 package com.limegroup.gnutella.dht.impl;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.LimeDHTRoutingTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.routing.RouteTable;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
@@ -32,53 +37,93 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     public void setUp() throws Exception {
         setSettings();
         ROUTER_SERVICE.start();
-        ROUTER_SERVICE.clearHostCatcher();
-        ROUTER_SERVICE.connect();   
+        RouterService.clearHostCatcher();
+        RouterService.connect();   
         
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
     }
     
     public void tearDown() throws Exception {
-        ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
         Thread.sleep(300);
     }
     
     public void testNodesPersistence() throws Exception{
+        int numPersistedNodes = DHTSettings.NUM_PERSISTED_NODES.getValue();
         DHTSettings.PERSIST_DHT.setValue(true);
+        //first delete any previous file
+        File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
+        dhtFile.delete();
         PassiveDHTNodeController controller = new PassiveDHTNodeController();
-        controller.start();
-        Thread.sleep(300);
-//        assertTrue(controller.isWaiting());
-        controller.addDHTNode(BOOTSTRAP_DHT.getContactAddress());
-//        assertFalse(controller.isWaiting());
-        Thread.sleep(300);
+        Context context = (Context) controller.getMojitoDHT();
+        Contact localContact = context.getLocalNode();
+        KUID nodeID = context.getLocalNodeID();
+        RouteTable rt = context.getRouteTable();
+        //fill the routing table a bit
+        fillRoutingTable(rt, 2*numPersistedNodes);
         controller.stop();
-        //should have persisted the DHT
+        //now nodeID should have changed and we should have persisted SOME nodes
         controller = new PassiveDHTNodeController();
-        controller.start();
-//        assertFalse(controller.isWaiting());
-        Thread.sleep(300);
-        List<IpPort> nodes = controller.getActiveDHTNodes(1);
-        assertEquals(BOOTSTRAP_DHT_PORT, 
-                nodes.get(0).getPort());
-        controller.stop();
-        controller = new PassiveDHTNodeController();
-        controller.start();
-//        assertFalse(controller.isWaiting());
-        controller.stop();
-        //try a corrupt file
-        File file = new File(CommonUtils.getUserSettingsDir(), "dhtnodes.dat");
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-        bos.write("mark".getBytes());
-        bos.close();
-        controller = new PassiveDHTNodeController();
-        controller.start();
-        Thread.sleep(500);
-//        assertTrue(controller.isWaiting());
-        //this should delete the corrupted file
-        controller.stop();
-        assertFalse(file.exists());
+        context = (Context) controller.getMojitoDHT();
+        rt = context.getRouteTable();
+        assertNotEquals(nodeID, context.getLocalNodeID());
+        assertFalse(context.getRouteTable().select(nodeID).equals(localContact));
+        assertEquals(numPersistedNodes, context.getRouteTable().getLiveContacts().size());
     }
+    
+    public void testAddRemoveLeafDHTNode() throws Exception {
+        DHTSettings.FORCE_DHT_CONNECT.setValue(true);
+        PassiveControllerTest controller = new PassiveControllerTest();
+        controller.start();
+        Context context = (Context) controller.getMojitoDHT();
+        LimeDHTRoutingTable rt = (LimeDHTRoutingTable) context.getRouteTable();
+        MojitoDHT dht;
+        InetSocketAddress addr;
+        for(int i = 0; i < 20; i++) {
+            dht = MojitoFactory.createDHT("Mojito"+i);
+            addr = new InetSocketAddress(2000+i);
+            dht.bind(addr);
+            dht.start();
+            DHT_LIST.add(dht);
+            controller.addLeafDHTNode("localhost", addr.getPort());
+        }
+        assertTrue(rt.hasDHTLeaves());
+        assertEquals(rt.getDHTLeaves().size(), rt.getLiveContacts().size() - 1); //minus local node
+        //try removing nodes
+        assertNotNull(controller.removeLeafDHTNode("localhost",2000));
+        assertNotNull(controller.removeLeafDHTNode("localhost",2015));
+        //see if removed from leaf set
+        assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2000)));
+        assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2015)));
+        assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
+        //see if removed from the DHT RT
+        assertEquals(19, rt.getLiveContacts().size());
+        //getActive nodes should return leaf nodes
+        List<IpPort> l = controller.getActiveDHTNodes(30);
+        //and not local node
+        Contact localNode = context.getLocalNode();
+        addr = (InetSocketAddress) localNode.getContactAddress();
+        boolean found = false;
+        for(IpPort ipp: l) {
+            assertFalse(ipp.getPort() == 2000);
+            assertFalse(ipp.getPort() == 2015);
+            assertFalse(ipp.getPort() == addr.getPort());
+            found |= (ipp.getPort() == 2001);
+        }
+        assertTrue(found);
+    }
+    
+    private class PassiveControllerTest extends PassiveDHTNodeController {
 
+        @Override
+        protected synchronized void addLeafDHTNode(String host, int port) {
+            super.addLeafDHTNode(host, port);
+        }
+
+        @Override
+        protected synchronized SocketAddress removeLeafDHTNode(String host, int port) {
+            return super.removeLeafDHTNode(host, port);
+        }
+    }
 }

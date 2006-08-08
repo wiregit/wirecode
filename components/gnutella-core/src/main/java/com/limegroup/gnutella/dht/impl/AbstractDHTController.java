@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
@@ -22,7 +23,10 @@ import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The manager for the LimeWire Gnutella DHT. 
@@ -141,6 +145,30 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
     }
     
+    /**
+     * Returns a list of the Most Recently Seen nodes from the Mojito 
+     * routing table.
+     * 
+     * @param numNodes The number of nodes to return
+     * @param excludeLocal true to exclude the local node
+     * @return A list of DHT <tt>IpPorts</tt>
+     */
+    protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
+        Context dhtContext = (Context)dht; 
+        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
+                dhtContext.getRouteTable().getLiveContacts(), numNodes + 1); //it will add the local node!
+        
+        KUID localNode = dhtContext.getLocalNodeID();
+        List<IpPort> ipps = new ArrayList<IpPort>();
+        for(Contact cn : nodes) {
+            if(excludeLocal && cn.getNodeID().equals(localNode)) {
+                continue;
+            }
+            ipps.add(new IpPortContactNode(cn));
+        }
+        return ipps;
+    }
+    
     public boolean isRunning() {
         return running;
     }
@@ -195,7 +223,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     
     /*** End abstract methods ***/
     
-    protected static class IpPortContactNode implements IpPort {
+    public static class IpPortContactNode implements IpPort {
         
         private final InetAddress nodeAddress;
         
