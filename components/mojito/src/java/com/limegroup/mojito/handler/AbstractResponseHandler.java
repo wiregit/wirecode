@@ -63,6 +63,9 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     /** Whether or not this handler has been started */
     private volatile boolean started = false;
     
+    /** Whether or not this handler has finished */
+    private volatile boolean finished = false;
+    
     /** Whether or not this handler was cancelled */
     private volatile boolean cancelled = false;
     
@@ -94,7 +97,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         this.context = context;
         
         if (timeout < 0L) {
-            this.timeout = NetworkSettings.MAX_TIMEOUT.getValue();
+            this.timeout = NetworkSettings.TIMEOUT.getValue();
         } else {
             this.timeout = timeout;
         }
@@ -110,6 +113,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Is called by call()
      */
     protected void start() throws Exception {
+    }
+    
+    /**
+     * Is called by call()
+     */
+    protected void finish() {
+        
     }
     
     /**
@@ -262,7 +272,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * means if it has returnded a result or threw an
      * Exception
      */
-    private boolean isDone() {
+    protected boolean isDone() {
         return done;
     }
     
@@ -344,6 +354,16 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
             ex = err;
             cancelled();
             throw err;
+        } finally {
+            if (!finished) {
+                finished = true;
+                
+                try {
+                    finish();
+                } catch (Throwable t) {
+                    LOG.error("Throwable", t);
+                }
+            }
         }
     }
 

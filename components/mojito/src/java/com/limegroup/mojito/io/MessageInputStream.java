@@ -28,17 +28,20 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * The MessageInputStream reads (parses) a DHTMessage
@@ -72,31 +75,58 @@ public class MessageInputStream extends DataInputStream {
         return KUID.createValueID(readKUIDBytes());
     }
     
-    public KeyValue readKeyValue() throws IOException {
-        KUID key = readValueID();
-        byte[] value = new byte[readUnsignedShort()];
-        readFully(value);
+    public DHTValue readDHTValue(Contact sender) throws IOException {
+        Contact originator = readContact();
+        KUID valueId = readValueID();
+        byte[] data = null;
+        int length = readUnsignedShort();
+        if (length > 0) {
+            data = new byte[length];
+            readFully(data);
+        }
         
-        KUID nodeId = readNodeID();
-        SocketAddress address = readSocketAddress();
-        
-        PublicKey pubKey = readPublicKey();
-        byte[] signature = readSignature();
-        
-        return KeyValue.createRemoteKeyValue(key, value, nodeId, address, pubKey, signature);
+        return DHTValue.createRemoteValue(originator, sender, valueId, data);
     }
     
-    public List<KeyValue> readKeyValues() throws IOException {
+    public List<DHTValue> readDHTValues(Contact sender) throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
         }
         
-        KeyValue[] values = new KeyValue[size];
+        DHTValue[] values = new DHTValue[size];
         for(int i = 0; i < values.length; i++) {
-            values[i] = readKeyValue();
+            values[i] = readDHTValue(sender);
         }
         return Arrays.asList(values);
+    }
+    
+    public Collection<KUID> readValueIDs() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptySet();
+        }
+        
+        KUID[] keys = new KUID[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = readValueID();
+        }
+        
+        return Arrays.asList(keys);
+    }
+    
+    public Collection<KUID> readNodeIDs() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptySet();
+        }
+        
+        KUID[] keys = new KUID[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = readNodeID();
+        }
+        
+        return Arrays.asList(keys);
     }
     
     public PublicKey readPublicKey() throws IOException {
@@ -195,7 +225,19 @@ public class MessageInputStream extends DataInputStream {
         return statistics;
     }
     
-    public StoreStatus readStoreStatus() throws IOException {
-        return StoreStatus.valueOf( readUnsignedByte() );
+    @SuppressWarnings("unchecked")
+    public Collection<Entry<KUID, Status>> readStoreStatus() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptyList();
+        }
+        
+        Entry<KUID, Status>[] entries = new Entry[size];
+        for (int i = 0; i < entries.length; i++) {
+            KUID valueId = readValueID();
+            Status status = Status.valueOf( readUnsignedByte() );
+            entries[i] = new EntryImpl<KUID, Status>(valueId, status);
+        }
+        return Arrays.asList(entries);
     }
 }

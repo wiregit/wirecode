@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferInputStream;
@@ -31,7 +32,7 @@ import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -48,7 +49,7 @@ import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * The default implementation of the MessageFactory
@@ -135,13 +136,13 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
-            KUID lookupId) {
-        return new FindValueRequestImpl(context, contact, messageId, lookupId);
+            KUID lookupId, Collection<KUID> keys) {
+        return new FindValueRequestImpl(context, contact, messageId, lookupId, keys);
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KeyValue> values) {
-        return new FindValueResponseImpl(context, contact, messageId, values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values) {
+        return new FindValueResponseImpl(context, contact, messageId, keys, values);
     }
 
     public PingRequest createPingRequest(Contact contact, MessageID messageId) {
@@ -164,12 +165,12 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, KeyValue keyValue) {
-        return new StoreRequestImpl(context, contact, messageId, queryKey, keyValue);
+            QueryKey queryKey, Collection<? extends DHTValue> values) {
+        return new StoreRequestImpl(context, contact, messageId, queryKey, values);
     }
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, StoreStatus status) {
-        return new StoreResponseImpl(context, contact, messageId, valueId, status);
+            Collection<? extends Entry<KUID, Status>> status) {
+        return new StoreResponseImpl(context, contact, messageId, status);
     }
 }

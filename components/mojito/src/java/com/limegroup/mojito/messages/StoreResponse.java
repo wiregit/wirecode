@@ -19,17 +19,20 @@
  
 package com.limegroup.mojito.messages;
 
+import java.util.Collection;
+import java.util.Map.Entry;
+
 import com.limegroup.mojito.KUID;
 
 public interface StoreResponse extends ResponseMessage {
 
-    public static enum StoreStatus {
+    public static enum Status {
         FAILED(0x00),
         SUCCEEDED(0x01);
         
         private int status;
         
-        private StoreStatus(int status) {
+        private Status(int status) {
             this.status = status;
         }
         
@@ -37,24 +40,24 @@ public interface StoreResponse extends ResponseMessage {
             return status;
         }
         
-        private static StoreStatus[] STORESTATUS;
+        private static Status[] STATUS;
         
         static {
-            StoreStatus[] values = values();
-            STORESTATUS = new StoreStatus[values.length];
-            for (StoreStatus s : values) {
-                int index = s.status % STORESTATUS.length;
-                if (STORESTATUS[index] != null) {
+            Status[] values = values();
+            STATUS = new Status[values.length];
+            for (Status s : values) {
+                int index = s.status % STATUS.length;
+                if (STATUS[index] != null) {
                     // Check the enums for duplicate states
                     throw new IllegalStateException("StoreStatus collision: index=" + index 
-                            + ", STORESTATUS=" + STORESTATUS[index] + ", o=" + s);
+                            + ", STORESTATUS=" + STATUS[index] + ", o=" + s);
                 }
-                STORESTATUS[index] = s;
+                STATUS[index] = s;
             }
         }
         
-        public static StoreStatus valueOf(int status) throws MessageFormatException {
-            StoreStatus s = STORESTATUS[status % STORESTATUS.length];
+        public static Status valueOf(int status) throws MessageFormatException {
+            Status s = STATUS[status % STATUS.length];
             if (s != null && s.status == status) {
                 return s;
             }
@@ -62,7 +65,5 @@ public interface StoreResponse extends ResponseMessage {
         }
     }
     
-    public KUID getValueID();
-
-    public StoreStatus getStatus();
+    public Collection<Entry<KUID, Status>> getStatus();
 }

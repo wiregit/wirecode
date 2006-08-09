@@ -21,10 +21,13 @@ package com.limegroup.mojito.messages;
 
 import java.util.Collection;
 
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.db.DHTValue;
 
 
 public interface FindValueResponse extends LookupResponse {
-
-    public Collection<KeyValue> getValues();
+    
+    public Collection<KUID> getKeys();
+    
+    public Collection<DHTValue> getValues();
 }

@@ -22,7 +22,6 @@ package com.limegroup.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
 
 

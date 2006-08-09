@@ -37,7 +37,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     }
     
     public static void globalSetUp() throws Exception {
-        NetworkSettings.MAX_TIMEOUT.setValue(500);
+        NetworkSettings.TIMEOUT.setValue(500);
         
         MojitoDHT dht = MojitoFactory.createDHT();
         dhtContext = (Context)dht;

@@ -16,28 +16,37 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.util;
 
-import com.limegroup.mojito.KUID;
+package com.limegroup.mojito.exceptions;
 
-public class KUIDKeyCreator implements PatriciaTrie.KeyCreator<KUID> {
+import com.limegroup.mojito.Contact;
+
+@SuppressWarnings("serial")
+public class CollisionException extends Exception {
     
-    private static final long serialVersionUID = 6412279289438108492L;
-
-    public boolean isBitSet(KUID key, int bitIndex) {
-        return key.isBitSet(bitIndex);
+    private Contact collides;
+    
+    public CollisionException(Contact collides) {
+        super();
+        this.collides = collides;
     }
 
-    public int length() {
-        return KUID.LENGTH_IN_BITS;
+    public CollisionException(Contact collides, String message, Throwable cause) {
+        super(message, cause);
+        this.collides = collides;
+    }
+
+    public CollisionException(Contact collides, String message) {
+        super(message);
+        this.collides = collides;
+    }
+
+    public CollisionException(Contact collides, Throwable cause) {
+        super(cause);
+        this.collides = collides;
     }
     
-    public int bitIndex(KUID key, KUID found) {
-        if (found == null) {
-            found = KUID.MIN_NODE_ID;
-        }
-        
-        return key.bitIndex(found);
+    public Contact getCollideContact() {
+        return collides;
     }
 }

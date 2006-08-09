@@ -21,14 +21,15 @@ package com.limegroup.mojito.messages;
 
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
@@ -87,7 +88,7 @@ public class MessageHelper {
 
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
         return factory.createFindNodeRequest(getLocalNode(), 
-                createMessageID(dst), lookupId.assertNodeID());
+                createMessageID(dst), lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 
@@ -96,24 +97,26 @@ public class MessageHelper {
                 queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId) {
+    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
+            Collection<KUID> keys) {
+        
         return factory.createFindValueRequest(getLocalNode(), 
-                createMessageID(dst), lookupId.assertValueID());
+                createMessageID(dst), lookupId, keys);
     }
 
-    public FindValueResponse createFindValueResponse(RequestMessage request, Collection<KeyValue> values) {
-        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), 
-                values);
+    public FindValueResponse createFindValueResponse(RequestMessage request, 
+            Collection<KUID> keys, Collection<? extends DHTValue> values) {
+        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, values);
     }
 
-    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, KeyValue keyValue) {
-        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), 
-                queryKey, keyValue);
+    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
+        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, values);
     }
 
-    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, StoreStatus status) {
-        return factory.createStoreResponse(getLocalNode(), request.getMessageID(), 
-                valueId, status);
+    public StoreResponse createStoreResponse(RequestMessage request, 
+            Collection<? extends Entry<KUID, Status>> status) {
+        return factory.createStoreResponse(getLocalNode(), request.getMessageID(), status);
     }
 
     public StatsRequest createStatsRequest(SocketAddress dst, int request) {
@@ -122,7 +125,6 @@ public class MessageHelper {
     }
 
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
-        return factory.createStatsResponse(getLocalNode(), request.getMessageID(), 
-                statistics);
+        return factory.createStatsResponse(getLocalNode(), request.getMessageID(), statistics);
     }
 }

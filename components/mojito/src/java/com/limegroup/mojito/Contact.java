@@ -19,12 +19,13 @@
  
 package com.limegroup.mojito;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 
 /**
  *
  */
-public interface Contact {
+public interface Contact extends Serializable {
     
     /**
      * The state of this Contact

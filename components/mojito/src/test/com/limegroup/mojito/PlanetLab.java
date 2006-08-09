@@ -20,19 +20,15 @@
 package com.limegroup.mojito;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.StoreEvent;
@@ -52,7 +48,7 @@ public class PlanetLab {
     private static long maxChurn = 10L * 60L * 1000L;
     
     private static long minRepublisher = (long)(((float)2/3) * 
-        DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.getValue());
+        DatabaseSettings.VALUE_EXPIRATION_TIME.getValue());
     
     private static long minRetriever = 1L * 60L * 1000L;
     private static long maxRetriever = 5L * 60L * 1000L;
@@ -125,7 +121,7 @@ public class PlanetLab {
         
         if(testNumber == 4 || testNumber == 5) {
             //5 minutes expiration
-            DatabaseSettings.EXPIRATION_TIME_CLOSEST_NODE.setValue(5L * 60L * 1000L);
+            DatabaseSettings.VALUE_EXPIRATION_TIME.setValue(5L * 60L * 1000L);
         }
         
         long start = System.currentTimeMillis();
@@ -358,10 +354,10 @@ public class PlanetLab {
                             DHTFuture<FindValueEvent> future = dht.get(key);
                             future.addDHTEventListener(new FindValueListener() {
                                 public void handleResult(FindValueEvent result) {
-                                    if(result.getValues().isEmpty()) {
-                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
-                                    } else {
+                                    if(result.iterator().hasNext()) {
                                         planetlabStats.RETRIEVE_SUCCESS.incrementStat();
+                                    } else {
+                                        planetlabStats.RETRIEVE_FAILURES.incrementStat();
                                     }
                                     synchronized(lock2) {
                                         lock2.notify();
@@ -405,5 +401,4 @@ public class PlanetLab {
             }
         }
     }
-    
 }

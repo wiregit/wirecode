@@ -20,6 +20,7 @@
 package com.limegroup.mojito.settings;
 
 import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.FloatSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -43,31 +44,20 @@ public final class DatabaseSettings extends MojitoProps {
      * 
      * TODO reasonable min and max values
      */
-    public static final IntSetting MAX_KEY_VALUES
-        = FACTORY.createSettableIntSetting("MAX_KEY_VALUES", 5, "max_key_values", 1, 10);
+    public static final IntSetting MAX_VALUES_PER_KEY
+        = FACTORY.createSettableIntSetting("MAX_VALUES_PER_KEY", 5, "max_values_per_key", 1, 10);
     
     /**
-     * The maximum number of KeyValues that can be store-forwarded.
-     * 
-     * TODO reasonable min and max values
+     * The time after a non-local value expires
      */
-    public static final IntSetting MAX_STORE_FORWARD
-        = FACTORY.createSettableIntSetting("MAX_STORE_FORWARD", 16384, "max_store_forward", 16384, 65536);
+    public static final LongSetting VALUE_EXPIRATION_TIME
+        = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L* 1000L, "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L); //1 hour
     
     /**
-     * The maximum number of KeyValues a Node can request or send
-     * at once.
      * 
-     * TODO reasonable min and max values
      */
-    public static final IntSetting MAX_STORE_FORWARD_ONCE
-        = FACTORY.createSettableIntSetting("MAX_STORE_FORWARD_ONCE", 5, "max_store_forward_once", 1, 10);
-    
-    public static final LongSetting EXPIRATION_TIME_CLOSEST_NODE
-        = FACTORY.createLongSetting("EXPIRATION_TIME_CLOSEST_NODE", 60L * 60L * 1000L); //1 hour
-    
-    public static final LongSetting EXPIRATION_TIME_UNKNOWN
-        = FACTORY.createLongSetting("EXPIRATION_TIME_UNKNOWN", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2); //30 min
+    public static final FloatSetting NOT_NEARBY_EXPIRATION_TIME_RATIO
+        = FACTORY.createSettableFloatSetting("NOT_NEARBY_EXPIRATION_TIME_RATIO", 0.5F, "not_nearby_expiration_time_ratio", 0.01F, 1.0F); // expires 50% faster 
     
     public static final LongSetting MIN_REPUBLISH_INTERVAL
         = FACTORY.createLongSetting("MIN_REPUBLISH_INTERVAL", 2L * 60L * 1000L);
@@ -78,16 +68,21 @@ public final class DatabaseSettings extends MojitoProps {
      * TODO reasonable min and max values
      */
     public static final LongSetting REPUBLISH_INTERVAL
-        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", EXPIRATION_TIME_CLOSEST_NODE.getValue()/2 , 
+        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", VALUE_EXPIRATION_TIME.getValue()/2 , 
                 "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
-    
-    public static final LongSetting REPUBLISH_PERIOD
-        = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
-                "republish_period", 5L*60L*1000L, 30L*60L*1000L);
     
     /**
      * 
      */
-    public static final BooleanSetting SIGN_KEY_VALUES
-        = FACTORY.createBooleanSetting("SIGN_KEY_VALUES", false);
+    public static final LongSetting REPUBLISH_PERIOD
+        = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
+                "republish_period", 5L*60L*1000L, 60L*60L*1000L);
+    
+    /**
+     * Whether or not to delete a DHTValue from the Database if we're
+     * the furthest of the k closest Nodes and a new Node comes along
+     * that is closer
+     */
+    public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
+        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, "delete_value_if_furthest_node");
 }

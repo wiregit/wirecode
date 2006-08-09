@@ -19,7 +19,9 @@
  
 package com.limegroup.mojito.routing.impl;
 
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -35,7 +37,7 @@ import com.limegroup.mojito.util.ContactUtils;
 /**
  * 
  */
-public class ContactNode implements Contact, Serializable {
+public class ContactNode implements Contact {
     
     private static final long serialVersionUID = 833079992601013124L;
 
@@ -155,6 +157,13 @@ public class ContactNode implements Contact, Serializable {
         }
     }
 
+    private void init() {
+        sourceAddress = null;
+        rtt = -1;
+        state = State.UNKNOWN;
+        firewalled = false;
+    }
+    
     public void updateWithExistingContact(Contact existing) {
         if (!nodeId.equals(existing.getNodeID())) {
             throw new IllegalArgumentException("Node IDs do not match");
@@ -177,6 +186,10 @@ public class ContactNode implements Contact, Serializable {
 
     public int getVersion() {
         return version;
+    }
+    
+    public void setNodeID(KUID nodeId) {
+        this.nodeId = nodeId;
     }
     
     public KUID getNodeID() {
@@ -237,11 +250,11 @@ public class ContactNode implements Contact, Serializable {
     
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
-        long maxTimeout = NetworkSettings.MAX_TIMEOUT.getValue();
-        if(rtt <= 0L || isDead()) {
-            return maxTimeout;
+        long timeout = NetworkSettings.TIMEOUT.getValue();
+        if(rtt <= 0L || !isAlive()) {
+            return timeout;
         } else {
-            return Math.min(maxTimeout, 
+            return Math.min(timeout, 
                 ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * rtt) + failures * rtt));
         }
     }
@@ -334,5 +347,14 @@ public class ContactNode implements Contact, Serializable {
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        init(); // Init transient fields
+        in.defaultReadObject();
     }
 }

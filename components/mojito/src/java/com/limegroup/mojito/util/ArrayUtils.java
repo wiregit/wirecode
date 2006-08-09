@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.util;
 
+
 /**
  * Miscellaneous utilities for Arrays
  */
@@ -38,31 +39,58 @@ public final class ArrayUtils {
     
     private ArrayUtils() {}
     
-    public static boolean isNull(byte[] data) {
-        if (data == null 
-                || data.length == 0) {
-            return true;
-        }
-        
-        int sum = 0;
-        for(int i = data.length; i >= 0; --i) {
-            sum += (int)(data[i] & 0xFF);
-        }
-        return sum == 0;
+    /**
+     * Returns data as a HEX String
+     */
+    public static String toHexString(byte[] data) {
+        return toHexString(data, -1);
     }
     
-    public static String toHexString(byte[] data) {
+    /**
+     * Returns data as a HEX String and inserts new lines
+     * every wrapAtColumn
+     */
+    public static String toHexString(byte[] data, int wrapAtColumn) {
         StringBuilder buffer = new StringBuilder(data.length * 2);
+        
+        int column = 0;
         for(int i = 0; i < data.length; i++) {
+            
+            if (wrapAtColumn > 0 && column > wrapAtColumn) {
+                buffer.append("\n");
+                column = 0;
+            }
+            
             buffer.append(HEX[(data[i] >> 4) & 0xF]).append(HEX[data[i] & 0xF]);
+            column += 2;
         }
         return buffer.toString();
     }
     
+    /**
+     * Returns data as BIN String
+     */
     public static String toBinString(byte[] data) {
+        return toBinString(data, -1);
+    }
+    
+    /**
+     * Returns data as BIN String and inserts new lines
+     * every wrapAtColumn
+     */
+    public static String toBinString(byte[] data, int wrapAtColumn) {
         StringBuilder buffer = new StringBuilder(data.length * 8);
+        
+        int column = 0;
         for(int i = 0; i < data.length; i++) {
+            
+            if (wrapAtColumn > 0 && column >= wrapAtColumn) {
+                buffer.append("\n");
+                column = 0;
+            }
+            
             buffer.append(BIN[(data[i] >> 4) & 0xF]).append(BIN[data[i] & 0xF]).append(" ");
+            column += 9;
         }
         
         if (buffer.length() > 0) {
@@ -71,7 +99,14 @@ public final class ArrayUtils {
         return buffer.toString();
     }
     
+    /**
+     * Converts a HEX String to a byte value
+     */
     public static byte[] parseHexString(String data) {
+        if (data.length() % 2 != 0) {
+            data = "0" + data;
+        }
+        
         byte[] buffer = new byte[data.length()/2];
         for(int i = 0, j = 0; i < buffer.length; i++) {
             int hi = parseHexChar(data.charAt(j++));

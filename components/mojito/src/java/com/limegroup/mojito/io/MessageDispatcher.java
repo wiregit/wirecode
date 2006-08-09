@@ -39,7 +39,8 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.DefaultMessageHandler;
 import com.limegroup.mojito.handler.RequestHandler;
 import com.limegroup.mojito.handler.ResponseHandler;
-import com.limegroup.mojito.handler.request.LookupRequestHandler;
+import com.limegroup.mojito.handler.request.FindNodeRequestHandler;
+import com.limegroup.mojito.handler.request.FindValueRequestHandler;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.handler.request.StatsRequestHandler;
 import com.limegroup.mojito.handler.request.StoreRequestHandler;
@@ -95,7 +96,8 @@ public abstract class MessageDispatcher implements Runnable {
     
     private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
-    private LookupRequestHandler lookupHandler;
+    private FindNodeRequestHandler findNodeHandler;
+    private FindValueRequestHandler findValueHandler;
     private StoreRequestHandler storeHandler;
     private StatsRequestHandler statsHandler;
     
@@ -110,7 +112,8 @@ public abstract class MessageDispatcher implements Runnable {
         
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
-        lookupHandler = new LookupRequestHandler(context);
+        findNodeHandler = new FindNodeRequestHandler(context);
+        findValueHandler = new FindValueRequestHandler(context, findNodeHandler);
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
@@ -192,7 +195,8 @@ public abstract class MessageDispatcher implements Runnable {
         DHTMessage message = tag.getMessage();
         
         // Make sure we're not sending messages to ourself
-        if (context.isLocalNode(nodeId, dst)) {
+        if (context.isLocalNode(nodeId, dst)
+                && !(message instanceof PingRequest)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
@@ -323,7 +327,8 @@ public abstract class MessageDispatcher implements Runnable {
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getContactAddress();
         
-        if (context.isLocalNode(nodeId, src)) {
+        if (context.isLocalNode(nodeId, src)
+                && !(message instanceof PingResponse)) {
             
             if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
@@ -390,7 +395,13 @@ public abstract class MessageDispatcher implements Runnable {
             processResponse(receipt, response);
             
         } else if (message instanceof RequestMessage) {
-            processRequest((RequestMessage)message);
+            if (context.getLocalNode().isFirewalled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.trace("Local Node is firewalled, dropping " + message);
+                }
+            } else {
+                processRequest((RequestMessage)message);
+            }
             
         } else if (LOG.isFatalEnabled()) {
             LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
@@ -559,6 +570,7 @@ public abstract class MessageDispatcher implements Runnable {
     /**
      * A map of MessageID -> Receipts
      */
+    @SuppressWarnings("serial")
     private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> {
         
         public ReceiptMap(int maxSize) {
@@ -702,9 +714,10 @@ public abstract class MessageDispatcher implements Runnable {
             
             if (request instanceof PingRequest) {
                 requestHandler = pingHandler;
-            } else if (request instanceof FindNodeRequest
-                    || request instanceof FindValueRequest) {
-                requestHandler = lookupHandler;
+            } else if (request instanceof FindNodeRequest) {
+                requestHandler = findNodeHandler;
+            } else if (request instanceof FindValueRequest) {
+                requestHandler = findValueHandler;
             } else if (request instanceof StoreRequest) {
                 requestHandler = storeHandler;
             } else if (request instanceof StatsRequest) {

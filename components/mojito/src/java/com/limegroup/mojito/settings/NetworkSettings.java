@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.settings;
 
-import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -28,24 +27,29 @@ public final class NetworkSettings extends MojitoProps {
     
     private NetworkSettings() {}
     
-    public static final IntSetting PORT
-        = FACTORY.createIntSetting("PORT", 31337);
+    /**
+     * The amout of time we're waiting for a response
+     * before giving up
+     */
+    public static final LongSetting TIMEOUT
+        = FACTORY.createSettableLongSetting("TIMEOUT", 10000L, "timeout", 10L, 30000L);
     
-    public static final LongSetting MAX_TIMEOUT
-        = FACTORY.createSettableLongSetting("MAX_TIMEOUT", 10000L, "max_timeout", 10L, 30000L);
-    
+    /**
+     * 
+     */
     public static final IntSetting MIN_TIMEOUT_RTT_FACTOR
         = FACTORY.createSettableIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, "min_timeout_rtt_factor", 1, 10);
     
-    public static final IntSetting MIN_RETRIES
-        = FACTORY.createSettableIntSetting("MIN_RETRIES", 0, "min_retries", 0, 10);
-    
+    /**
+     * The maximum number of times we're trying to re-send a
+     * request before geiving up
+     */
     public static final IntSetting MAX_ERRORS
         = FACTORY.createSettableIntSetting("MAX_ERRORS", 3, "max_errors", 0, 10);
     
-    public static final BooleanSetting ALLOW_MULTIPLE_NODES
-        = FACTORY.createBooleanSetting("ALLOW_MULTIPLE_NODES", false);
-    
+    /**
+     * The maximum size of a serialized message
+     */
     public static final IntSetting MAX_MESSAGE_SIZE
         = FACTORY.createSettableIntSetting("MAX_MESSAGE_SIZE", 1492, "max_message_size", 512, 64*1024);
 }

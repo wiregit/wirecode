@@ -107,6 +107,10 @@ public class RouteTableImpl implements RouteTable {
          * A non-live Contact will never replace a live Contact!
          */
         
+        if (existing.isAlive() && !node.isAlive()) {
+            return;
+        }
+        
         if (!existing.isAlive() 
                 || context.isLocalNode(node)
                 || existing.equals(node) // <- checks nodeId + address!
@@ -121,16 +125,14 @@ public class RouteTableImpl implements RouteTable {
             Contact replaced = bucket.updateContact(node);
             assert (replaced == existing);
             
-            if (node.isAlive()) {
-                // a good time to ping least recently seen node if we know we
-                // have a node alive in the replacement cache. Don't do this too often!
-                long delay = System.currentTimeMillis() - bucket.getTimeStamp();
-                if(bucket.containsCachedContact(node.getNodeID())
-                        && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getValue())) {
-                    pingLeastRecentlySeenNode(bucket);
-                }
-                touchBucket(bucket);
+            // a good time to ping least recently seen node if we know we
+            // have a node alive in the replacement cache. Don't do this too often!
+            long delay = System.currentTimeMillis() - bucket.getTimeStamp();
+            if(bucket.containsCachedContact(node.getNodeID())
+                    && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getValue())) {
+                pingLeastRecentlySeenNode(bucket);
             }
+            touchBucket(bucket);
             
         } else if (node.isAlive() 
                 && !existing.hasBeenRecentlyAlive()) {
@@ -380,7 +382,7 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
-    public synchronized boolean isNearToLocal(KUID nodeId) {
+    public synchronized boolean isLocalBucket(KUID nodeId) {
         return bucketTrie.select(nodeId).contains(context.getLocalNodeID());
     }
     

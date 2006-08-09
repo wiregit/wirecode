@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.routing.RouteTable;
 
 
@@ -55,11 +55,10 @@ public class DHTNodeStat implements DHTStats{
     }
     
     public void dumpDataBase(Writer writer) throws IOException{
-        Collection KeyVals = context.getDatabase().getValues();
+        Collection<DHTValue> values = context.getDatabase().values();
         writer.write(nodeID+"\n");
-        for (Iterator iter = KeyVals.iterator(); iter.hasNext();) {
-            KeyValue keyval = (KeyValue) iter.next();
-            writer.write(keyval.toString());
+        for (DHTValue value : values) {
+            writer.write(value.toString());
             writer.write("\n");
         }
         writer.write("--------------------------------------------\n");

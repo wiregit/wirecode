@@ -19,13 +19,15 @@
 
 package com.limegroup.mojito.manager;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
@@ -38,21 +40,48 @@ public class StoreManager extends AbstractManager<StoreEvent> {
         super(context);
     }
     
-    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, keyValue);
+    /**
+     * Stores a single DHTValue on the DHT
+     */
+    public DHTFuture<StoreEvent> store(DHTValue value) {
+        return store(Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    /**
+     * Stores a collection of DHTValues on the DHT. All DHTValues
+     * must have the same valueId!
+     */
+    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+        StoreResponseHandler handler = new StoreResponseHandler(context, values);
         StoreFuture future = new StoreFuture(handler);
         
         context.execute(future);
         return future;
     }
     
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, node, queryKey, keyValue);
+    /**
+     * Stores a single DHTValue at the given Contact. 
+     */
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+        return store(node, queryKey, Arrays.asList(new DHTValue[]{value}));
+    }
+    
+    /**
+     * Stores a collection of DHTValues at the given Contact.
+     */
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
+        
+        StoreResponseHandler handler 
+            = new StoreResponseHandler(context, node, queryKey, values);
         StoreFuture future = new StoreFuture(handler);
         context.execute(future);
         return future;
     }
     
+    /**
+     * 
+     */
     private class StoreFuture extends AbstractDHTFuture {
         
         public StoreFuture(Callable<StoreEvent> callable) {

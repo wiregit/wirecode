@@ -29,20 +29,21 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.Future;
 
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
+import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
+import com.limegroup.mojito.util.CollectionUtils;
 
 public class CommandHandler {
     
@@ -63,7 +64,10 @@ public class CommandHandler {
             "stats",
             "restart",
             "firewalled",
-            "exhaustive"
+            "exhaustive",
+            "id .+",
+            "select .+",
+            "nextid"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -98,7 +102,8 @@ public class CommandHandler {
     public static void info(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         out.println("Local ContactNode: " + ((Context)dht).getLocalNode());
         out.println("Is running: " + dht.isRunning());
-        out.println("Database Size: " + ((Context)dht).getDatabase().size());
+        out.println("Database Size (Keys): " + ((Context)dht).getDatabase().getKeyCount());
+        out.println("Database Size (Values): " + ((Context)dht).getDatabase().getValueCount());
         out.println("RouteTable Size: " + ((Context)dht).getRouteTable().size());
         out.println("Estimated DHT Size: " + dht.size());
     }
@@ -120,14 +125,12 @@ public class CommandHandler {
         StringBuilder buffer = new StringBuilder("\n");
         
         Database database = ((Context)dht).getDatabase();
-        Collection values = database.getValues();
-        for(Iterator it = values.iterator(); it.hasNext(); ) {
-            KeyValue value = (KeyValue)it.next();
-            
+        for(DHTValue value : database.values()) {    
             buffer.append("VALUE: ").append(value).append("\n\n");
         }
         buffer.append("-------------\n");
-        buffer.append("TOTAL: " + values.size()).append("\n");
+        buffer.append("TOTAL: ").append(database.getKeyCount())
+            .append("/").append(database.getValueCount()).append("\n");
         
         out.println(buffer);
     }
@@ -188,12 +191,14 @@ public class CommandHandler {
         
         SocketAddress addr = new InetSocketAddress(host, port);
         
-        out.println("Bootstraping... " + addr);
+        out.println("Bootstrapping... " + addr);
         
         BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
-                out.println("Bootstraping finished:\n" + result);
-                out.flush();
+                if (result.getType() == Type.SUCCEEDED) {
+                    out.println("Bootstraping finished:\n" + result);
+                    out.flush();
+                }
             }
             
             public void handleThrowable(Throwable ex) {
@@ -330,9 +335,9 @@ public class CommandHandler {
                 }
             });*/
             
-            long start = System.currentTimeMillis();
+            //long start = System.currentTimeMillis();
             FindValueEvent evt = dht.get(key).get();
-            long time = System.currentTimeMillis() - start;
+            /*long time = System.currentTimeMillis() - start;
             
             if (!evt.getValues().isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
@@ -342,7 +347,14 @@ public class CommandHandler {
                 out.println(buffer.toString());
             } else {
                 out.println(key + " was not found after " + time + "ms");
+            }*/
+            
+            StringBuilder buffer = new StringBuilder();
+            int i = 0;
+            for (DHTValue value : evt) {
+                buffer.append(i).append(": ").append(value).append("\n");
             }
+            out.println(buffer.toString());
             
             out.println();
             
@@ -379,5 +391,25 @@ public class CommandHandler {
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         DHTStats stats = ((Context)dht).getDHTStats();
         stats.dumpStats(out, true);
+    }
+    
+    public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        KUID nodeId = KUID.createNodeID(ArrayUtils.parseHexString(args[1]));
+        System.out.println("Setting NodeID to: " + nodeId);
+        Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
+        m.setAccessible(true);
+        m.invoke(dht, new Object[]{nodeId});
+    }
+    
+    public static void select(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        KUID nodeId = KUID.createNodeID(ArrayUtils.parseHexString(args[1]));
+        System.out.println("Selecting: " + nodeId);
+        
+        RouteTable routeTable = ((Context)dht).getRouteTable();
+        System.out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
+    }
+    
+    public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        ((ContactNode)((Context)dht).getLocalNode()).nextInstanceID();
     }
 }

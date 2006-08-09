@@ -25,21 +25,22 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.routing.impl.ContactNode;
 
-public class DataBaseTest extends BaseTestCase {
+public class DatabaseTest extends BaseTestCase {
     
     private static InetSocketAddress addr = new InetSocketAddress("localhost",3000);
     
     private MojitoDHT dht = null;
     
-    public DataBaseTest(String name) {
+    public DatabaseTest(String name) {
         super(name);
     }
 
     public static TestSuite suite() {
-        return buildTestSuite(DataBaseTest.class);
+        return buildTestSuite(DatabaseTest.class);
     }
 
     public static void main(String[] args) {
@@ -65,16 +66,27 @@ public class DataBaseTest extends BaseTestCase {
     
     public void testRemoveValueDB() throws Exception {
         Database db = ((Context)dht).getDatabase();
-        KUID key = KUID.createValueID(KUID.createUnknownID().getBytes());
+        KUID key = KUID.createRandomNodeID();
         byte[] value = "test".getBytes("UTF-8");
         
         KUID nodeId = KUID.createRandomNodeID();
-        KeyValue keyValue = KeyValue.createRemoteKeyValue(key, value, nodeId, addr, null, null);
-        db.add(keyValue);
-        assertEquals(1, db.size());
+        Contact originator = ContactNode.createLocalContact(0, 0, nodeId, 0);
+        DHTValue dhtValue1 = DHTValue.createLocalValue(originator, key, value);
+        db.store(dhtValue1);
+        assertEquals(1, db.getKeyCount());
         
-        keyValue = KeyValue.createRemoteKeyValue(key, new byte[0], nodeId, addr, null, null);
-        db.add(keyValue);
-        assertEquals(0, db.size());
+        // Direct remove request -> remove
+        DHTValue dhtValue2 = DHTValue.createRemoteValue(originator, originator, key, new byte[0]);
+        db.store(dhtValue2);
+        assertEquals(0, db.getKeyCount());
+        
+        db.store(dhtValue1);
+        assertEquals(1, db.getKeyCount());
+        
+        // Indirect remove request -> don't remove
+        Contact sender = ContactNode.createLocalContact(0, 0, KUID.createRandomNodeID(), 0);
+        DHTValue dhtValue3 = DHTValue.createRemoteValue(originator, sender, key, new byte[0]);
+        db.store(dhtValue3);
+        assertEquals(1, db.getKeyCount());
     }
 }

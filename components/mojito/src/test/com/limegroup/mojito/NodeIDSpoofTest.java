@@ -96,7 +96,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
     
     public void testReplace() throws Exception {
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
-        NetworkSettings.MAX_TIMEOUT.setValue(100L);
+        NetworkSettings.TIMEOUT.setValue(100L);
         
         MojitoDHT bootstrap = null, original = null, replacement = null;
         
@@ -123,7 +123,7 @@ public class NodeIDSpoofTest extends BaseTestCase {
             replacement.start();
             replacement.bootstrap(new InetSocketAddress("localhost", PORT));
             
-            Thread.sleep(4L * NetworkSettings.MAX_TIMEOUT.getValue());
+            Thread.sleep(4L * NetworkSettings.TIMEOUT.getValue());
             
             Context context = MojitoHelper.getContext(bootstrap);
             List<Contact> nodes = context.getRouteTable().getContacts();

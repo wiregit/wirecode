@@ -19,36 +19,67 @@
 
 package com.limegroup.mojito.event;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 
 public class StoreEvent {
     
-    private KeyValue value;
+    private Collection<Contact> nodes;
     
-    private List<Contact> nodes;
+    private Collection<DHTValue> values;
+    
+    private Collection<DHTValue> failed;
     
     @SuppressWarnings("unchecked")
-    public StoreEvent(KeyValue value, List<? extends Contact> nodes) {
-        this.value = value;
-        this.nodes = (List<Contact>)nodes;
+    public StoreEvent(List<? extends Contact> nodes, 
+            Collection<? extends DHTValue> values, 
+            Collection<? extends DHTValue> failed) {
+        
+        this.nodes = (Collection<Contact>)nodes;
+        this.values = (Collection<DHTValue>)values;
+        this.failed = (Collection<DHTValue>)failed;
     }
     
-    public KeyValue getKeyValue() {
-        return value;
-    }
-    
-    public List<Contact> getNodes() {
+    public Collection<Contact> getNodes() {
         return nodes;
+    }
+    
+    public Collection<DHTValue> getValues() {
+        return values;
+    }
+    
+    public Collection<DHTValue> getFailed() {
+        return failed;
+    }
+    
+    public Collection<DHTValue> getSucceeded() {
+        Set<DHTValue> succeeded = new HashSet<DHTValue>(getValues());
+        succeeded.removeAll(getFailed());
+        return succeeded;
     }
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(value).append("\n");
         
+        buffer.append("SUCEEDED").append("\n");
         int i = 0;
+        for (DHTValue value : getSucceeded()) {
+            buffer.append("  ").append(i++).append(": ").append(value).append("\n");
+        }
+        
+        buffer.append("FAILED:").append("\n");
+        i = 0;
+        for (DHTValue value : getFailed()) {
+            buffer.append("  ").append(i++).append(": ").append(value).append("\n");
+        }
+        
+        buffer.append("NODES:").append("\n");
+        i = 0;
         for (Contact node : nodes) {
             buffer.append("  ").append(i++).append(": ").append(node).append("\n");
         }

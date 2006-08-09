@@ -40,7 +40,7 @@ abstract class AbstractResponseMessage extends AbstractDHTMessage
     }
     
     public AbstractResponseMessage(Context context, OpCode opcode, 
-            MessageID messageId, int version, SocketAddress src, MessageInputStream in) throws IOException {
+            SocketAddress src, MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, opcode, src, messageId, version, in);
     }
 }

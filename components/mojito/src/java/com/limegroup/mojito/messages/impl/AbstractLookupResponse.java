@@ -42,6 +42,6 @@ abstract class AbstractLookupResponse extends AbstractResponseMessage
     public AbstractLookupResponse(Context context, 
             OpCode opcode, SocketAddress src, 
             MessageID messageId, int version, MessageInputStream in) throws IOException {
-        super(context, opcode, messageId, version, src, in);
+        super(context, opcode, src, messageId, version, in);
     }
 }

@@ -27,11 +27,9 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,11 +49,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.db.KeyValuePublisher;
+import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTEventListener;
+import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
@@ -75,7 +75,6 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -99,15 +98,12 @@ public class Context implements MojitoDHT {
     private SocketAddress localAddress;
     
     private SocketAddress tmpExternalAddress;
-
-    private final Object keyPairLock = new Object();
-    private volatile KeyPair keyPair;
     
     private Database database;
     private RouteTable routeTable;
-    private volatile MessageDispatcher messageDispatcher;
+    private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
-    private KeyValuePublisher publisher;
+    private DHTValuePublisher publisher;
     private RandomBucketRefresher bucketRefresher;
     
     private PingManager pingManager;
@@ -130,15 +126,14 @@ public class Context implements MojitoDHT {
     private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
     private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
-    private ThreadFactory threadFactory = new DefaultThreadFactory();
+    private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
     
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    Context(String name, Contact localNode, KeyPair keyPair) {
+    Context(String name, Contact localNode) {
         this.name = name;
         this.localNode = localNode;
-        this.keyPair = keyPair;
         
         PublicKey masterKey = null;
         try {
@@ -157,12 +152,12 @@ public class Context implements MojitoDHT {
         globalLookupStats = new GlobalLookupStatisticContainer(this);
         databaseStats = new DatabaseStatisticContainer(this);
         
-        database = new Database(this);
+        database = new DatabaseImpl();
         routeTable = new RouteTableImpl(this);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
-        publisher = new KeyValuePublisher(this);
+        publisher = new DHTValuePublisher(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
         
@@ -174,17 +169,7 @@ public class Context implements MojitoDHT {
         
         // Add the local to the RouteTable
         localNode.setTimeStamp(Long.MAX_VALUE);
-        routeTable.add(localNode);
-        
-        // Clear the firewalled flag for a moment so that we can
-        // add the local node to the Route Table
-        if (localNode.isFirewalled()) {
-            ((ContactNode)localNode).setFirewalled(false);
-            routeTable.add(localNode);
-            ((ContactNode)localNode).setFirewalled(true);
-        } else {
-            routeTable.add(localNode);
-        }
+        initRouteTable();
     }
     
     private void initContextTimer() {
@@ -216,62 +201,7 @@ public class Context implements MojitoDHT {
     public String getName() {
         return name;
     }
-    
-    /**
-     * Installs a custom MessageDispatcher implementation. The
-     * passed Class must be a subclass of MessageDispatcher.
-     */
-    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
-        }
 
-        if (clazz == null) {
-            clazz = MessageDispatcherImpl.class;
-        }
-        
-        try {
-            Constructor c = clazz.getConstructor(Context.class);
-            messageDispatcher = (MessageDispatcher)c.newInstance(this);
-            return messageDispatcher;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
-    }
-    
-    /**
-     * Installs a custom RouteTable implementation. The
-     * passed Class must be a subclass of <tt>RouteTable</tt>.
-     */
-    public synchronized RouteTable setRoutingTable(Class<? extends RouteTable> clazz) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
-        }
-
-        if (clazz == null) {
-            clazz = RouteTableImpl.class;
-        }
-        
-        try {
-            Constructor c = clazz.getConstructor(Context.class);
-            routeTable = (RouteTable)c.newInstance(this);
-            
-            // Clear the firewalled flag for a moment so that we can
-            // add the local node to the Route Table
-            if (localNode.isFirewalled()) {
-                ((ContactNode)localNode).setFirewalled(false);
-                routeTable.add(localNode);
-                ((ContactNode)localNode).setFirewalled(true);
-            } else {
-                routeTable.add(localNode);
-            }
-            
-            return routeTable;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
-    }
-    
     public DHTStats getDHTStats() {
         return dhtStats;
     }
@@ -299,34 +229,74 @@ public class Context implements MojitoDHT {
         this.masterKeyPair = masterKeyPair;
     }
     
-    public void createNewKeyPair() {
-        setKeyPair(null);
+    public Contact getLocalNode() {
+        return localNode;
     }
     
-    public void setKeyPair(KeyPair keyPair) {
-        synchronized (keyPairLock) {
-            if (keyPair == null) {
-                this.keyPair = CryptoHelper.createKeyPair();
-            } else {
-                this.keyPair = keyPair;
+    /**
+     * Clears the RouteTable, generates a new random Node ID
+     * for the local Node and adds the (new) Node to the RouteTable.
+     * 
+     * WARNING: Meant to be called only by BootstrapManager!
+     */
+    public void changeNodeID() {
+        setLocalNodeID(KUID.createRandomNodeID());
+    }
+    
+    /**
+     * Sets the local Node ID to the given ID. See also 
+     * changeNodeID() !
+     */
+    private void setLocalNodeID(KUID nodeId) {
+        if (!nodeId.equals(getLocalNodeID())) {
+            routeTable.clear();
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
+            }
+            
+            Database database = getDatabase();
+            
+            // Get all local DHTValues and clear the Database
+            List<DHTValue> values = new ArrayList<DHTValue>();
+            synchronized (database) {
+                for (DHTValue value : database.values()) {
+                    if (value.isLocalValue()) {
+                        values.add(value);
+                    }
+                }
+                database.clear();
+            }
+            
+            ((ContactNode)localNode).setNodeID(nodeId);
+            initRouteTable();
+            
+            // Add the local DHTValues under the new Node ID
+            synchronized (database) {
+                for (DHTValue value : values) {
+                    value.setOriginator(localNode); // this is technically
+                                                    // not necessary as they're
+                                                    // already holding a reference
+                                                    // to localNode and the new ID
+                                                    // gets reflected to them
+                    database.add(value);
+                }
             }
         }
     }
     
-    public KeyPair getKeyPair() {
-        return keyPair;
-    }
-    
-    public PublicKey getPublicKey() {
-        return keyPair.getPublic();
-    }
-    
-    public PrivateKey getPrivateKey() {
-        return keyPair.getPrivate();
-    }
-    
-    public Contact getLocalNode() {
-        return localNode;
+    /**
+     * Adds the local Node to the RouteTable
+     */
+    private void initRouteTable() {
+        // Clear the firewalled flag for a moment so that we can
+        // add the local node to the Route Table
+        if (localNode.isFirewalled()) {
+            ((ContactNode)localNode).setFirewalled(false);
+            routeTable.add(localNode);
+            ((ContactNode)localNode).setFirewalled(true);
+        } else {
+            routeTable.add(localNode);
+        }    
     }
     
     public boolean isLocalNode(Contact node) {
@@ -334,19 +304,159 @@ public class Context implements MojitoDHT {
     }
     
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
-        return isLocalNodeID(nodeId) || isLocalAddress(addr);
+        return isLocalNodeID(nodeId) && isLocalContactAddress(addr);
     }
     
     public boolean isLocalNodeID(KUID nodeId) {
         return nodeId != null && nodeId.equals(localNode.getNodeID());
     }
     
-    public boolean isLocalAddress(SocketAddress address) {
-        return localNode.getSourceAddress().equals(address);
+    public boolean isLocalContactAddress(SocketAddress address) {
+        return localNode.getContactAddress().equals(address);
     }
     
     public KUID getLocalNodeID() {
         return localNode.getNodeID();
+    }
+    
+    public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = MessageDispatcherImpl.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(Context.class);
+            messageDispatcher = (MessageDispatcher)c.newInstance(this);
+            return messageDispatcher;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
+    /**
+     * Returns the MessageDispatcher
+     */
+    public MessageDispatcher getMessageDispatcher() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageDispatcher
+        return messageDispatcher;
+    }
+    
+    public synchronized RouteTable setRouteTable(Class<? extends RouteTable> clazz) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
+        }
+
+        if (clazz == null) {
+            clazz = RouteTableImpl.class;
+        }
+        
+        try {
+            Constructor c = clazz.getConstructor(Context.class);
+            routeTable = (RouteTable)c.newInstance(this);
+            initRouteTable();
+            
+            return routeTable;
+        } catch (Exception err) {
+            throw new RuntimeException(err);
+        }
+    }
+    
+    /**
+     * Returns the RouteTable
+     */
+    public RouteTable getRouteTable() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the RouteTable
+        return routeTable;
+    }
+    
+    public synchronized void setDatabase(Database database) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch Database while DHT is running");
+        }
+        
+        if (database == null) {
+            database = new DatabaseImpl();
+        }
+        
+        this.database = database;
+        
+        // Make sure all local values have the local Node
+        // as originator
+        for (DHTValue value : database.values()) {
+            if (value.isLocalValue()) {
+                value.setOriginator(localNode);
+            }
+        }
+    }
+    
+    /**
+     * Returns the Database
+     */
+    public Database getDatabase() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the Database
+        return database;
+    }
+    
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        if (threadFactory == null) {
+            threadFactory = new DefaultThreadFactory();
+        }
+        
+        this.threadFactory = threadFactory;
+    }
+    
+    /**
+     * Returns the current ThreadFactory
+     */
+    public ThreadFactory getThreadFactory() {
+        return threadFactory;
+    }
+    
+    public synchronized void setMessageFactory(MessageFactory messageFactory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
+        }
+        
+        messageHelper.setMessageFactory(messageFactory);
+    }
+    
+    /**
+     * Returns the current MessageFactory. In most cases you want to use
+     * the MessageHelper instead which is a simplified version of the
+     * MessageFactory.
+     */
+    public MessageFactory getMessageFactory() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageHelper
+        return messageHelper.getMessageFactory();
+    }
+    
+    /**
+     * Sets the MessageHelper
+     */
+    public synchronized void setMessageHelper(MessageHelper messageHelper) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
+        }
+        
+        this.messageHelper = messageHelper;
+    }
+    
+    /**
+     * Returns the current MessageHelper which is a simplified
+     * MessageFactory
+     */
+    public MessageHelper getMessageHelper() {
+        // Not synchronized 'cause only called when Mojito is running and 
+        // while Mojito is running you cannot change the MessageHelper
+        return messageHelper;
     }
     
     public synchronized void setExternalPort(int port) {
@@ -368,6 +478,10 @@ public class Context implements MojitoDHT {
         }
         
         ((ContactNode)localNode).setContactAddress(externalAddress);
+        
+        // NOTE: local DHTValues are holding a reference to
+        // 'localNode' and setting the originator is not
+        // neccessary thus.
     }
     
     public SocketAddress getLocalAddress() {
@@ -408,46 +522,6 @@ public class Context implements MojitoDHT {
         return localNode.isFirewalled();
     }
     
-    public Database getDatabase() {
-        return database;
-    }
-    
-    public RouteTable getRouteTable() {
-        return routeTable;
-    }
-    
-    public MessageDispatcher getMessageDispatcher() {
-        return messageDispatcher;
-    }
-    
-    public KeyValuePublisher getPublisher() {
-        return publisher;
-    }
-    
-    public synchronized void setMessageHelper(MessageHelper messageHelper) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
-        }
-        
-        this.messageHelper = messageHelper;
-    }
-    
-    public MessageHelper getMessageHelper() {
-        return messageHelper;
-    }
-    
-    public synchronized void setMessageFactory(MessageFactory messageFactory) {
-        if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
-        }
-        
-        messageHelper.setMessageFactory(messageFactory);
-    }
-    
-    public MessageFactory getMessageFactory() {
-        return messageHelper.getMessageFactory();
-    }
-    
     public int getReceivedMessagesCount() {
         return messageDispatcher.getReceivedMessagesCount();
     }
@@ -463,26 +537,7 @@ public class Context implements MojitoDHT {
     public long getSentMessagesSize() {
         return messageDispatcher.getSentMessagesSize();
     }
-    
-    /**
-     * Sets the ThreadFactory. A null value will re-set the
-     * current ThreadFactory
-     */
-    public void setThreadFactory(ThreadFactory threadFactory) {
-        if (threadFactory == null) {
-            threadFactory = new DefaultThreadFactory();
-        }
-        
-        this.threadFactory = threadFactory;
-    }
-    
-    /**
-     * Returns the current ThreadFactory
-     */
-    public ThreadFactory getThreadFactory() {
-        return threadFactory;
-    }
-    
+
     /**
      * Returns whether or not the MessageDispatcher has
      * an open DatagramChannel
@@ -674,6 +729,11 @@ public class Context implements MojitoDHT {
         return pingManager.ping(node);
     }
     
+    /** Sends a special collision test Ping to the given Node */
+    public DHTFuture<Contact> collisionPing(Contact node) {
+        return pingManager.collisionPing(node);
+    }
+    
     /** Starts a value for the given KUID */
     public DHTFuture<FindValueEvent> get(KUID key) {
         if(!isBootstrapped()) {
@@ -686,6 +746,11 @@ public class Context implements MojitoDHT {
         Set<SocketAddress> set = new HashSet<SocketAddress>();
         set.add(address);
         return bootstrap(set);
+    }
+
+    /** Starts a lookup for the given KUID */
+    public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
+        return findNodeManager.lookup(lookupId);
     }
     
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
@@ -700,91 +765,53 @@ public class Context implements MojitoDHT {
     }
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
-        return put(key, value, null);
-    }
-    
-    public DHTFuture<StoreEvent> put(KUID key, byte[] value, PrivateKey privateKey) {
-        
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException("put");
-        }
-        
-        try {
-            KeyValue keyValue = 
-                KeyValue.createLocalKeyValue(key, value, getLocalNode());
-            
-            if (privateKey == null) {
-                if (DatabaseSettings.SIGN_KEY_VALUES.getValue()) {
-                    keyValue.sign(getPrivateKey());
-                    keyValue.setPublicKey(getPublicKey());
-                }
-            } else {
-                keyValue.sign(privateKey);
-                
-                if (!keyValue.verify(getMasterKey())) {
-                    throw new SignatureException("Cannot store " + keyValue 
-                            + " because signature does not match with the master key");
-                }
-            }
-            
-            Database database = getDatabase();
-            synchronized(database) {
-                if (database.add(keyValue) 
-                        || database.isTrustworthy(keyValue)) {
-                    
-                    // Create a new KeyPair every time we have removed
-                    // all local KeyValues.
-                    if (database.getLocalValueCount() == 0) {
-                        createNewKeyPair();
-                    }
-                    
-                    return store(keyValue);
-                }
-            }
-        } catch (InvalidKeyException e) {
-            LOG.error("InvalidKeyException", e);
-        } catch (SignatureException e) {
-            LOG.error("SignatureException", e);
-        }
-        
-        return null;
+        DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
+        database.store(dhtValue);
+        return store(dhtValue);
     }
     
     public DHTFuture<StoreEvent> remove(KUID key) {
-        return remove(key, null);
-    }
-
-    public DHTFuture<StoreEvent> remove(KUID key, PrivateKey privateKey) {
         // To remove a KeyValue you just store an empty value!
-        return put(key, new byte[0], privateKey);
+        return put(key, DHTValue.EMPTY_DATA);
     }
     
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(KeyValue keyValue) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
-        }
-        return storeManager.store(keyValue);
+    public DHTFuture<StoreEvent> store(DHTValue value) {
+        return storeManager.store(value);
     }
    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+        return storeManager.store(values);
+    }
+    
     /** 
      * Stores the given KeyValue 
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, KeyValue keyValue) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+        return storeManager.store(node, queryKey, value);
+    }
+    
+    /**
+     * 
+     */
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
+        return storeManager.store(node, queryKey, values);
+    }
+    
+    public Set<KUID> keySet() {
+        return getDatabase().keySet();
+    }
+    
+    public Collection<DHTValue> getValues() {
+        Database database = getDatabase();
+        synchronized (database) {
+            return new ArrayList<DHTValue>(database.values());
         }
-        return storeManager.store(node, queryKey, keyValue);
-    }
-    
-    public Set<KUID> getKeys() {
-        return getDatabase().getKeys();
-    }
-    
-    public Collection<KeyValue> getValues() {
-        return getDatabase().getValues();
     }
     
     /**

@@ -27,14 +27,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
@@ -62,23 +63,26 @@ public class MessageOutputStream extends DataOutputStream {
         messageId.write(this);
     }
     
-    public void writeKeyValue(KeyValue keyValue) throws IOException {
-        writeKUID(keyValue.getKey());
-        byte[] b = keyValue.getValue();
-        writeShort(b.length);
-        write(b, 0, b.length);
+    public void writeDHTValue(DHTValue value) throws IOException {
+        writeContact(value.getOriginator());
+        value.getValueID().write(this);
         
-        writeKUID(keyValue.getNodeID());
-        writeSocketAddress(keyValue.getSocketAddress());
-        
-        writePublicKey(keyValue.getPublicKey());
-        writeSignature(keyValue.getSignature());
+        byte[] data = value.getData();
+        writeShort(data.length);
+        write(data, 0, data.length);
     }
     
-    public void writeKeyValues(Collection<? extends KeyValue> values) throws IOException {
-        writeByte(values.size());
-        for(KeyValue kv : values) {
-            writeKeyValue(kv);
+    public void writeKUIDs(Collection<KUID> keys) throws IOException {
+        writeCollectionSize(keys);
+        for (KUID k : keys) {
+            k.write(this);
+        }
+    }
+    
+    public void writeDHTValues(Collection<? extends DHTValue> values) throws IOException {
+        writeCollectionSize(values);
+        for(DHTValue value : values) {
+            writeDHTValue(value);
         }
     }
     
@@ -109,7 +113,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeContacts(Collection<? extends Contact> nodes) throws IOException {
-        writeByte(nodes.size());
+        writeCollectionSize(nodes);
         for(Contact node : nodes) {
             writeContact(node);
         }
@@ -160,7 +164,20 @@ public class MessageOutputStream extends DataOutputStream {
         writeByte(opcode.getOpCode());
     }
     
-    public void writeStoreStatus(StoreStatus status) throws IOException {
-        writeByte(status.getStatus());
+    public void writeStoreStatus(Collection<? extends Entry<KUID, Status>> status) throws IOException {
+        writeCollectionSize(status);
+        for (Entry<KUID, Status> e : status) {
+            writeKUID(e.getKey());
+            writeByte(e.getValue().getStatus());
+        }
+    }
+    
+    private void writeCollectionSize(Collection c) throws IOException {
+        int size = c.size();
+        if (size > 0xFF) {
+            throw new IOException("Too many elements: " + size);
+        }
+        
+        writeByte(size);
     }
 }

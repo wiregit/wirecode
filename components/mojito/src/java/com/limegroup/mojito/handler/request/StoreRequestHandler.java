@@ -20,7 +20,10 @@
 package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,14 +32,15 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * The StoreRequestHandler handles incoming store requests as
@@ -55,6 +59,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         this.networkStats = context.getNetworkStats();
     }
     
+    @Override
     public void request(RequestMessage message) throws IOException {
         
         StoreRequest request = (StoreRequest)message;
@@ -83,38 +88,44 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        KeyValue keyValue = request.getKeyValue();
-        KUID valueId = keyValue.getKey();
+        List<Entry<KUID,Status>> status = new ArrayList<Entry<KUID,Status>>();
         
-        // under the assumption that the requester sent us a lookup before
-        // check if we are part of the closest alive nodes to this value
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List<Contact> nodes = context.getRouteTable().select(valueId, k, false);
-        
-        if (!nodes.contains(context.getLocalNode())) {
-            //try getting only nodes that have never failed, i.e. a larger key-space
-            nodes = context.getRouteTable().select(valueId, k, true);
+        Collection<DHTValue> values = request.getDHTValues();
+        for (DHTValue value : values) {
+            KUID valueId = value.getValueID();
+            
+            // under the assumption that the requester sent us a lookup before
+            // check if we are part of the closest alive nodes to this value
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            List<Contact> nodes = context.getRouteTable().select(valueId, k, false);
+            
             if (!nodes.contains(context.getLocalNode())) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("We are not close to " + keyValue.getKey() 
-                            + ". KeyValue will expire faster!");
+                //try getting only nodes that have never failed, i.e. a larger key-space
+                nodes = context.getRouteTable().select(valueId, k, true);
+                if (!nodes.contains(context.getLocalNode())) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("We are not nearby to " + valueId 
+                                + ". The value will expire faster!");
+                    }
+                    
+                    context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
+                    value.setNearby(false);
                 }
-                
-                context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
-                keyValue.setNearby(false);
             }
-        }
-        
-        StoreStatus status = StoreStatus.FAILED;
-        if (context.getDatabase().add(keyValue)) {
-            networkStats.STORE_REQUESTS_OK.incrementStat();
-            status = StoreStatus.SUCCEEDED;
-        } else {
-            networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+            
+            Status s = Status.FAILED;
+            if (context.getDatabase().add(value)) {
+                networkStats.STORE_REQUESTS_OK.incrementStat();
+                s = Status.SUCCEEDED;
+            } else {
+                networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+            }
+            
+            status.add(new EntryImpl<KUID,Status>(valueId, s));
         }
         
         StoreResponse response 
-            = context.getMessageHelper().createStoreResponse(request, valueId, status);
+            = context.getMessageHelper().createStoreResponse(request, status);
         context.getMessageDispatcher().send(request.getContact(), response);
     }
 }

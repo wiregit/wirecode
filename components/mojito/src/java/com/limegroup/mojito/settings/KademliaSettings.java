@@ -38,10 +38,16 @@ public class KademliaSettings extends MojitoProps {
         = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
     
     /**
-     * The number of parallel lookups
+     * The number of parallel FIND_NODE lookups
      */
-    public static final IntSetting LOOKUP_PARAMETER
-        = FACTORY.createIntSetting("LOOKUP_PARAMETER", 5);
+    public static final IntSetting FIND_NODE_PARALLEL_LOOKUPS
+        = FACTORY.createSettableIntSetting("FIND_NODE_PARALLEL_LOOKUPS", 5, "find_node_parallel_lookups", 1, 15);
+    
+    /**
+     * The number of parallel FIND_VALUE lookups
+     */
+    public static final IntSetting FIND_VALUE_PARALLEL_LOOKUPS
+        = FACTORY.createSettableIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, "find_value_parallel_lookups", 1, 30);
     
     /**
      * The number of pings to send in parallel
@@ -52,14 +58,14 @@ public class KademliaSettings extends MojitoProps {
     /**
      * The FIND_NODE lookup timeout
      */
-    public static final LongSetting NODE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("NODE_LOOKUP_TIMEOUT", 30L*1000L);
+    public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
+        = FACTORY.createSettableLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, "find_node_lookup_timeout", 30L*1000L, 3L*60L*1000L);
     
     /**
      * The FIND_VALUE lookup timeout
      */
-    public static final LongSetting VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createLongSetting("VALUE_LOOKUP_TIMEOUT", 45L*1000L);
+    public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
+        = FACTORY.createSettableLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, "find_value_lookup_timeout", 45L*1000L, 3L*80L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive
@@ -80,4 +86,10 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final FloatSetting BOOTSTRAP_RATIO
     	= FACTORY.createFloatSetting("BOOTSTRAP_RATIO", 0.5F);
+    
+    /**
+     * The maximum number of parallel store requests
+     */
+    public static final IntSetting PARALLEL_STORES
+        = FACTORY.createIntSetting("PARALLEL_STORES", 5);
 }

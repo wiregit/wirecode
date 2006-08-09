@@ -38,6 +38,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
+import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
@@ -57,9 +58,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
 	 * 
 	 */
 	private static final int MAX_NODE_FAILED_PER_LOOKUP = 
-		(int)((KademliaSettings.NODE_LOOKUP_TIMEOUT.getValue()
-				 / NetworkSettings.MAX_TIMEOUT.getValue())
-				 * KademliaSettings.LOOKUP_PARAMETER.getValue()); 
+		(int)((KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue()
+				 / NetworkSettings.TIMEOUT.getValue())
+				 * KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue()); 
     
     private Object lock = new Object();
     
@@ -158,7 +159,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             }
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstraping phase 1 from node: "+node);
+                LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
             future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
@@ -192,9 +193,17 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         
-        private boolean startBootstrapLookups(Contact node) throws Exception{
+        private boolean startBootstrapLookups(Contact node) throws Exception {
             
-            phaseOne(node);
+            while(true) {
+                try {
+                    phaseOne(node);
+                    break;
+                } catch (CollisionException err) {
+                    LOG.error("CollisionException", err);
+                    handleCollision(err.getCollideContact());
+                }
+            }
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Bootstraping phase 2 from node: "+node);
@@ -202,6 +211,10 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             phaseTwoStart = System.currentTimeMillis();
             return phaseTwo(node);
+        }
+        
+        private void handleCollision(Contact collide) {
+            context.changeNodeID();
         }
         
         /**
@@ -257,6 +270,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         private FindNodeEvent phaseOne(Contact node) throws Exception {
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
+            handler.setCollisionCheckEnabled(true);
             return handler.call();
         }
         

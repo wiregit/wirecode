@@ -19,6 +19,11 @@
  
 package com.limegroup.mojito.messages;
 
+import java.util.Collection;
+
+import com.limegroup.mojito.KUID;
+
 public interface FindValueRequest extends LookupRequest {
     
+    public Collection<KUID> getKeys();
 }

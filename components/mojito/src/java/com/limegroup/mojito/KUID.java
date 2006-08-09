@@ -24,9 +24,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -34,7 +31,6 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Map.Entry;
 
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.PatriciaTrie.KeyCreator;
 
@@ -49,11 +45,11 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     private static final long serialVersionUID = 633717248208386374L;
     
+    private static final Random GENERATOR = new Random();
+    
     public static final int LENGTH = 20;
     
     public static final int LENGTH_IN_BITS = LENGTH * 8; // 160 bit
-    
-    private static final Random GENERATOR = new Random();
     
     private static final int[] BITS = {
         0x80,
@@ -68,17 +64,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     /** Types of KUIDs that exist */
     public static enum Type {
-        UNKNOWN_ID,
         NODE_ID,
         VALUE_ID,
-        MESSAGE_ID;
+        UNKNOWN_ID;
     }
-    
-    /** All bits 0 Unknown ID */
-    public static final KUID MIN_UNKNOWN_ID;
-    
-    /** All bits 1 Unknown ID */
-    public static final KUID MAX_UNKNOWN_ID;
     
     /** All bits 0 Node ID */
     public static final KUID MIN_NODE_ID;
@@ -91,38 +80,18 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     /** All bits 1 Value ID */
     public static final KUID MAX_VALUE_ID;
-    
-    /** All bits 0 Message ID */
-    public static final KUID MIN_MESSAGE_ID;
-    
-    /** All bits 1 Message ID */
-    public static final KUID MAX_MESSAGE_ID;
-    
-    /**
-     * A random pad we're using to obfuscate the actual
-     * QueryKey. Nodes must do a lookup to get the QK!
-     */
-    private static final byte[] RANDOM_PAD = new byte[4];
-                                                
+                                               
     static {
         byte[] min = new byte[LENGTH];
         
         byte[] max = new byte[LENGTH];
         Arrays.fill(max, (byte)0xFF);
         
-        MIN_UNKNOWN_ID = new KUID(Type.UNKNOWN_ID, min);
-        MAX_UNKNOWN_ID = new KUID(Type.UNKNOWN_ID, max);
-        
         MIN_NODE_ID = new KUID(Type.NODE_ID, min);
         MAX_NODE_ID = new KUID(Type.NODE_ID, max);
         
         MIN_VALUE_ID = new KUID(Type.VALUE_ID, min);
         MAX_VALUE_ID = new KUID(Type.VALUE_ID, max);
-        
-        MIN_MESSAGE_ID = new KUID(Type.MESSAGE_ID, min);
-        MAX_MESSAGE_ID = new KUID(Type.MESSAGE_ID, max);
-        
-        GENERATOR.nextBytes(RANDOM_PAD);
     }
     
     private Type type;
@@ -144,23 +113,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * 
-     * @param out
-     * @throws IOException
+     * Writes the ID to the OutputStream
      */
     public void write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
-    }
-    
-    /**
-     * Returns the identity and throws an AssertionError
-     * if this isn't a Node ID.
-     */
-    public KUID assertNodeID() throws AssertionError {
-        if (!isNodeID()) {
-            throw new AssertionError(this + " is not a NODE_ID");
-        }
-        return this;
     }
     
     /**
@@ -171,46 +127,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Returns the identity and throws an AssertionError
-     * if this isn't a Value ID.
-     */
-    public KUID assertValueID() throws AssertionError {
-        if (!isValueID()) {
-            throw new AssertionError(this + " is not a VALUE_ID");
-        }
-        return this;
-    }
-    
-    /**
      * Returns true if this is a Value ID
      */
     public boolean isValueID() {
         return type == Type.VALUE_ID;
-    }
-    
-    /**
-     * Returns the identity and throws an AssertionError
-     * if this isn't a Message ID.
-     */
-    public KUID assertMessageID() throws AssertionError {
-        if (!isMessageID()) {
-            throw new AssertionError(this + " is not a MESSAGE_ID");
-        }
-        return this;
-    }
-    
-    /**
-     * Returns true if this is a Message ID
-     */
-    public boolean isMessageID() {
-        return type == Type.MESSAGE_ID;
-    }
-    
-    /**
-     * Returns true if this is a Unknown ID
-     */
-    public boolean isUnknownID() {
-        return type == Type.UNKNOWN_ID;
     }
     
     public boolean isBitSet(int bitIndex) {
@@ -397,8 +317,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * KUIDs are equal if they're of the same type and 
-     * if their IDs are equal.
+     * Returns whether or not both KUIDs are equal
      */
     public boolean equals(Object o) {
         if (o == this) {
@@ -406,25 +325,10 @@ public class KUID implements Comparable<KUID>, Serializable {
         } if (!(o instanceof KUID)) {
             return false;
         } else {
-            KUID other = (KUID)o;
-            return type == other.type && Arrays.equals(id, other.id);
+            return Arrays.equals(id, ((KUID)o).id);
         }
     }
-    
-    /**
-     * Converts the current KUID into a Node ID if it isn't already.
-     */
-    public KUID toNodeID() {
-        return (isNodeID() ? this : new KUID(Type.NODE_ID, id));
-    }
-    
-    /**
-     * Converts the current KUID into a Value ID if it isn't already.
-     */
-    public KUID toValueID() {
-        return (isValueID() ? this : new KUID(Type.VALUE_ID, id));
-    }
-    
+
     /**
      * Returns the current KUID as hex String
      */
@@ -442,9 +346,8 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Returns the current KUID as BigInteger
      */
-    public BigInteger toBigInteger() {
-        // unsigned!        
-        return new BigInteger(1, id);
+    public BigInteger toBigInteger() {    
+        return new BigInteger(1 /* unsigned! */, id);
     }
     
     /**
@@ -517,15 +420,6 @@ public class KUID implements Comparable<KUID>, Serializable {
         };
         
         /*
-         * Our obfuscation pad. 4 random bytes!
-         */
-        MessageDigestInput randomPad = new MessageDigestInput() {
-            public void update(MessageDigest md) {
-                md.update(RANDOM_PAD);
-            }
-        };
-        
-        /*
          * VM/machine dependent pseudo time.
          */
         MessageDigestInput nanos = new MessageDigestInput() {
@@ -550,7 +444,6 @@ public class KUID implements Comparable<KUID>, Serializable {
                 properties, 
                 randomNumbers, 
                 millis, 
-                randomPad, 
                 nanos
         };
         
@@ -605,17 +498,11 @@ public class KUID implements Comparable<KUID>, Serializable {
         return new KUID(Type.NODE_ID, id);
     }
     
-    private static byte[] getBytes(ByteBuffer data) {
-        byte[] id = new byte[LENGTH];
-        data.get(id);
-        return id;
-    }
-    
     /**
-     * Creates and returns a Node ID from the ByteBuffer (relative get)
+     * Creates and returns a Node ID from a hex encoded String
      */
-    public static KUID createNodeID(ByteBuffer data) {
-        return new KUID(Type.NODE_ID, getBytes(data));
+    public static KUID createNodeID(String id) {
+        return createNodeID(ArrayUtils.parseHexString(id));
     }
     
     /**
@@ -626,84 +513,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Creates and returns a Value ID from the ByteBuffer (relative get)
+     * Creates and returns a Value ID from a hex encoded String
      */
-    public static KUID createValueID(ByteBuffer data) {
-        return new KUID(Type.VALUE_ID, getBytes(data));
-    }
-    
-    /**
-     * Creates a random message ID.
-     */
-    public static KUID createRandomMessageID() {
-        return createRandomMessageID(null);
-    }
-    
-    /**
-     * Creates a random message ID and piggy packs a QueryKey to it.
-     */
-    public static KUID createRandomMessageID(SocketAddress dest) {
-        byte[] id = new byte[LENGTH];
-        GENERATOR.nextBytes(id);
-        
-        if (dest instanceof InetSocketAddress) {
-            byte[] queryKey = QueryKey.getQueryKey(dest).getBytes();
-            
-            // Obfuscate it with our random pad!
-            for(int i = 0; i < RANDOM_PAD.length; i++) {
-                queryKey[i] ^= RANDOM_PAD[i];
-            }
-            
-            System.arraycopy(queryKey, 0, id, 0, queryKey.length);
-        }
-        
-        return createMessageID(id);
-    }
-    
-    /**
-     * Extracts and returns the QueryKey from the KUID if the
-     * KUID is a message ID and null if it's a KUID of a different
-     * type.
-     */
-    private QueryKey getQueryKey() {
-        if (!isMessageID()) {
-            return null;
-        }
-        
-        byte[] queryKey = new byte[4];
-        System.arraycopy(id, 0, queryKey, 0, queryKey.length);
-        
-        // De-Obfuscate it with our random pad!
-        for(int i = 0; i < RANDOM_PAD.length; i++) {
-            queryKey[i] ^= RANDOM_PAD[i];
-        }
-        
-        return QueryKey.getQueryKey(queryKey, true);
-    }
-    
-    /**
-     * Returns wheather or not we're the originator of the message ID.
-     */
-    public boolean verifyQueryKey(SocketAddress src) {
-        if (!isMessageID() || !(src instanceof InetSocketAddress)) {
-            return false;
-        }
-        
-        return getQueryKey().isFor(src);
-    }
-    
-    /**
-     * Creates and returns a Message ID from the byte array
-     */
-    public static KUID createMessageID(byte[] id) {
-        return new KUID(Type.MESSAGE_ID, id);
-    }
-    
-    /**
-     * Creates and returns a Message ID from the ByteBuffer (relative get)
-     */
-    public static KUID createMessageID(ByteBuffer data) {
-        return new KUID(Type.MESSAGE_ID, getBytes(data));
+    public static KUID createValueID(String id) {
+        return createValueID(ArrayUtils.parseHexString(id));
     }
     
     /**
@@ -713,7 +526,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      * @return a random KUID starting with the given prefix
      */
     public static KUID createPrefxNodeID(KUID prefix, int depth) {
-        byte[] random = new byte[20];
+        byte[] random = new byte[LENGTH];
         GENERATOR.nextBytes(random);
         return createPrefxNodeID(prefix, depth, random);
     }
@@ -739,21 +552,5 @@ public class KUID implements Comparable<KUID>, Serializable {
         }
         
         return KUID.createNodeID(random);
-    }
-    
-    /**
-     * Creates and returns an Unknown ID
-     */
-    public static KUID createUnknownID() {
-        byte[] id = new byte[LENGTH];
-        GENERATOR.nextBytes(id);
-        return createUnknownID(id);
-    }
-    
-    /**
-     * Creates and returns an Unknown ID from the byte array
-     */
-    public static KUID createUnknownID(byte[] id) {
-        return new KUID(Type.UNKNOWN_ID, id);
     }
 }

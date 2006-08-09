@@ -23,12 +23,13 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.KeyValue;
-import com.limegroup.mojito.messages.StoreResponse.StoreStatus;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
  * Factory class to construct DHTMessage(s)
@@ -53,16 +54,16 @@ public interface MessageFactory {
             QueryKey queryKey, Collection<? extends Contact> nodes);
 
     public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
-            KUID lookupId);
+            KUID lookupId, Collection<KUID> keys);
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KeyValue> values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values);
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, KeyValue keyValue);
+            QueryKey queryKey, Collection<? extends DHTValue> values);
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, StoreStatus status);
+            Collection<? extends Entry<KUID, Status>> status);
 
     public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
             int stats);

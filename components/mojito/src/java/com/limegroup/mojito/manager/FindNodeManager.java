@@ -35,6 +35,8 @@ public class FindNodeManager extends AbstractLookupManager<FindNodeEvent> {
 
     @Override
     protected FindNodeResponseHandler createLookupHandler(KUID lookupId, int count) {
-        return new FindNodeResponseHandler(context, lookupId.assertNodeID(), count);
+        return new FindNodeResponseHandler(context, lookupId, count);
     }
+    
+    
 }
