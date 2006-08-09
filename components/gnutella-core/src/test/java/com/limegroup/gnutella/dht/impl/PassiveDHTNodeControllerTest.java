@@ -8,7 +8,6 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.LimeDHTRoutingTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -77,7 +76,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         PassiveControllerTest controller = new PassiveControllerTest();
         controller.start();
         Context context = (Context) controller.getMojitoDHT();
-        LimeDHTRoutingTable rt = (LimeDHTRoutingTable) context.getRouteTable();
+        LimeDHTRouteTable rt = (LimeDHTRouteTable) context.getRouteTable();
         MojitoDHT dht;
         InetSocketAddress addr;
         for(int i = 0; i < 20; i++) {
