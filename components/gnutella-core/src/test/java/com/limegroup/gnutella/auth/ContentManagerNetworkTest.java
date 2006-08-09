@@ -45,6 +45,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
+        RouterService.getMessageRouter().initialize();
         
         new Acceptor().setListeningPort(LISTEN_PORT);
         UDPService.instance().start();

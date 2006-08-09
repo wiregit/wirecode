@@ -12,12 +12,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -282,16 +283,16 @@ public abstract class MessageRouter {
     private long _lastQueryKeyTime;
     
     /** Handlers for TCP messages. */
-    private volatile Map<Class<? extends Message>, MessageHandler> messageHandlers =
-        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
+    private ConcurrentMap<Class<? extends Message>, MessageHandler> messageHandlers =
+        new ConcurrentHashMap<Class<? extends Message>, MessageHandler>(30, 0.75f, 3);
     
     /** Handler for UDP messages. */
-    private volatile Map<Class<? extends Message>, MessageHandler> udpMessageHandlers =
-        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
+    private ConcurrentMap<Class<? extends Message>, MessageHandler> udpMessageHandlers =
+        new ConcurrentHashMap<Class<? extends Message>, MessageHandler>(15, 0.75f, 3);
     
     /** Handler for TCP messages. */
-    private volatile Map<Class<? extends Message>, MessageHandler> multicastMessageHandlers =
-        new IdentityHashMap<Class<? extends Message>, MessageHandler>();
+    private ConcurrentMap<Class<? extends Message>, MessageHandler> multicastMessageHandlers =
+        new ConcurrentHashMap<Class<? extends Message>, MessageHandler>(5, 0.75f, 3);
     
     /** Map for Multicast morphed GUIDs. */
     private GuidMap _multicastGuidMap = GuidMapFactory.getMap();
@@ -305,35 +306,40 @@ public abstract class MessageRouter {
     protected MessageRouter() {
         _clientGUID=RouterService.getMyGUID();
     }
-
-    /**
-     * Helper method to install a MessageHandler in the provided Map 
-     * for the provided Message Class.
+    
+    /** Sets a new handler to the given handlerMap, for the given class. */
+    private void setHandler(ConcurrentMap<Class<? extends Message>, MessageHandler> handlerMap,
+                            Class<? extends Message> clazz, MessageHandler handler) {
+        MessageHandler old = handlerMap.put(clazz, handler);
+        if(old != null)
+            LOG.warn("Ejecting old handler: " + old + " for clazz: " + clazz);
+    }
+    
+    /** 
+     * Adds the given handler to the handlerMap for the given class.
+     * If a handler already existed, this will construct a DualMessageHandler
+     * so that both are handlers are notified.
      * 
-     * See setMessageHandler(), setUDPMessageHandler() and 
-     * setMulticastMessageHandler() for implementation details.
+     * @param handlerMap
+     * @param clazz
+     * @param handler
      */
-    private static Map<Class<? extends Message>, MessageHandler> setHandler(
-      Map<Class<? extends Message>, ? extends MessageHandler> handlerMap,
-      Class<? extends Message> clazz, MessageHandler handler) {
-        if (clazz == null) {
-            throw new NullPointerException("Class is null");
+    private void addHandler(ConcurrentMap<Class<? extends Message>, MessageHandler> handlerMap,
+                            Class<? extends Message> clazz, MessageHandler handler) {
+        MessageHandler existing = handlerMap.get(clazz);
+        if(existing != null) {
+            // non-blocking addition -- continue trying until we succesfully
+            // replace the prior handler w/ a dual version of that handler
+            while(true) {
+                MessageHandler dual = new DualMessageHandler(handler, existing);
+                if(handlerMap.replace(clazz, existing, dual))
+                    break;
+                existing = handlerMap.get(clazz);
+                dual = new DualMessageHandler(handler, existing);
+            }
+        } else {
+            setHandler(handlerMap, clazz, handler);
         }
-        
-        if (handler == null) {
-            throw new NullPointerException("MessageHandler is null");
-        }
-        
-        Map<Class<? extends Message>, MessageHandler> copy =
-            new IdentityHashMap<Class<? extends Message>, MessageHandler>(handlerMap);
-        Object o = copy.put(clazz, handler);
-        
-        if (o != null && LOG.isErrorEnabled()) {
-            LOG.error("There was already a MessageHandler of type " 
-                + o.getClass() + " registered for " + clazz);
-        }
-        
-        return copy;
     }
     
     /**
@@ -344,9 +350,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (messageHandlers) {
-            messageHandlers = setHandler(messageHandlers, clazz, handler);
-        }
+        setHandler(messageHandlers, clazz, handler);
     }
     
     /**
@@ -357,12 +361,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void addMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (messageHandlers) {
-            MessageHandler existing = messageHandlers.get(clazz);
-            if(existing != null) 
-                handler = new DualMessageHandler(handler, existing);
-            messageHandlers = setHandler(messageHandlers, clazz, handler);
-        }
+        addHandler(messageHandlers, clazz, handler);
     }
     
     /**
@@ -381,9 +380,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (udpMessageHandlers) {
-            udpMessageHandlers = setHandler(udpMessageHandlers, clazz, handler);
-        }
+        setHandler(udpMessageHandlers, clazz, handler);
     }
     
     /**
@@ -394,12 +391,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void addUDPMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (udpMessageHandlers) {
-            MessageHandler existing = udpMessageHandlers.get(clazz);
-            if(existing != null) 
-                handler = new DualMessageHandler(handler, existing);
-            udpMessageHandlers = setHandler(udpMessageHandlers, clazz, handler);
-        }
+        addHandler(udpMessageHandlers, clazz, handler);
     }
     
     /**
@@ -418,9 +410,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void setMulticastMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (multicastMessageHandlers) {
-            multicastMessageHandlers = setHandler(multicastMessageHandlers, clazz, handler);
-        }
+        setHandler(multicastMessageHandlers, clazz, handler);
     }
     
     /**
@@ -431,12 +421,7 @@ public abstract class MessageRouter {
      * @param handler The Handler of the Message
      */
     public void addMulticastMessageHandler(Class<? extends Message> clazz, MessageHandler handler) {
-        synchronized (multicastMessageHandlers) {
-            MessageHandler existing = multicastMessageHandlers.get(clazz);
-            if(existing != null) 
-                handler = new DualMessageHandler(handler, existing);
-            multicastMessageHandlers = setHandler(multicastMessageHandlers, clazz, handler);
-        }
+        addHandler(multicastMessageHandlers, clazz, handler);
     }
     
     /**
@@ -641,7 +626,6 @@ public abstract class MessageRouter {
 	 *  port of the client node
      */	
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
-        
 	    // Increment hops and decrement TTL.
 	    msg.hop();
 
@@ -669,6 +653,11 @@ public abstract class MessageRouter {
         MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
+        }  else if (msg instanceof VendorMessage) {
+            msgHandler = getUDPMessageHandler(VendorMessage.class);
+            if (msgHandler != null) {
+                msgHandler.handleMessage(msg, addr, replyHandler);
+            }
         }
         
         notifyMessageListener(msg, replyHandler);
@@ -714,6 +703,11 @@ public abstract class MessageRouter {
         MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
         if (msgHandler != null) {
             msgHandler.handleMessage(msg, addr, replyHandler);
+        } else if (msg instanceof VendorMessage) {
+            msgHandler = getMulticastMessageHandler(VendorMessage.class);
+            if (msgHandler != null) {
+                msgHandler.handleMessage(msg, addr, replyHandler);
+            }
         }
 
         notifyMessageListener(msg, replyHandler);
