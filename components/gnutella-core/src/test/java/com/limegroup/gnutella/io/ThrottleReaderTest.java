@@ -75,7 +75,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         assertEquals(0, THROTTLE.getAvailable()); // all throttle used up.
         assertEquals(500, SOURCE.getBuffer().remaining()); // data still in source
         assertEquals(2, THROTTLE.interests()); // is interested in more events.
-        assertFalse(SOURCE.isInterested());
+        assertTrue(SOURCE.isInterested()); // channel is still interested
     }
 
     public void testHandleReadSourceEmptiesWithLeftover() throws Exception {
@@ -128,7 +128,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         assertEquals(0, BUFFER.remaining());
         assertEquals(225, THROTTLE.getAvailable());
         assertEquals(2, THROTTLE.interests());
-        assertFalse(SOURCE.isInterested());
+        assertTrue(SOURCE.isInterested());
         
         BUFFER.limit(150);
         THROTTLE.clear();
@@ -156,6 +156,28 @@ public final class ThrottleReaderTest extends BaseTestCase {
         assertFalse(READER.bandwidthAvailable());
         assertFalse(SOURCE.isInterested());
     }   
+    
+    public void testInterestOffWhenNoBW() throws Exception {
+    	assertFalse(SOURCE.isInterested());
+        SOURCE.setBuffer(buffer(data(100)));
+        READER.interest(true);
+        READER.bandwidthAvailable();
+        assertEquals(1, THROTTLE.interests()); 
+        THROTTLE.setAvailable(1);
+        ByteBuffer buf = buffer (data (10)); 
+        doRead(buf, false);
+        assertTrue(SOURCE.isInterested());
+        assertEquals(2, THROTTLE.interests()); 
+        
+        // if there is no bandwidth available, the reader should
+        // turn interest in the source off
+        // (read calls w/o bandwidth come from the selector, not the throttle)
+        READER.read(buf);
+        assertFalse(SOURCE.isInterested());
+        
+        // and interest itself for when there is bandwidth later
+        assertEquals(3, THROTTLE.interests()); 
+    }
 
 	private byte[] data(int size) {
 	    byte[] data = new byte[size];
