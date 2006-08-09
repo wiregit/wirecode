@@ -112,12 +112,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
             
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            List<Contact> nodes = routeTable.select(node.getNodeID(), k, false);
-            
-            // The following condition seems to be only true for the
-            // "nearest Node" forwards part and sometimes (mostly)
-            // false for the "furthest Node" removes part.
-            // TODO: check why?!
+            //we select the 2*k closest nodes in order to also check those values
+            //where the local node is part of the k closest to the value but not part
+            //of the k closest to the new joining node.
+            List<Contact> nodes = routeTable.select(node.getNodeID(), 2*k, false);
             
             // Are we one of the K nearest Nodes to the contact?
             if (containsNodeID(nodes, context.getLocalNodeID())) {

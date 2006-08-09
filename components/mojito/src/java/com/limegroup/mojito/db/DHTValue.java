@@ -246,7 +246,7 @@ public class DHTValue implements Serializable {
             buffer.append(valueId).append(", originator=")
                 .append(getOriginator()).append(" (REMOVE)");
         } else {
-            buffer.append(valueId).append("\n")
+            buffer.append(valueId).append(" (nearby=").append(nearby).append(")\n")
                 .append("Originator: ").append(getOriginator()).append("\n")
                 .append("Sender: ").append(getSender()).append("\n")
                 //.append("Hex: ").append(ArrayUtils.toHexString(data, 80));

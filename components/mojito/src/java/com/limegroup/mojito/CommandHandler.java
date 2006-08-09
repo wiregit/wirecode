@@ -336,11 +336,11 @@ public class CommandHandler {
                 }
             });*/
             
-            long start = System.currentTimeMillis();
+            //long start = System.currentTimeMillis();
             FindValueEvent evt = dht.get(key).get();
-            long time = System.currentTimeMillis() - start;
+            /*long time = System.currentTimeMillis() - start;
             
-            /*if (!evt.getValues().isEmpty()) {
+            if (!evt.getValues().isEmpty()) {
                 StringBuffer buffer = new StringBuffer();
                 buffer.append(key).append(" in ").append(time).append("ms\n");
                 buffer.append(evt);
@@ -351,8 +351,9 @@ public class CommandHandler {
             }*/
             
             StringBuilder buffer = new StringBuilder();
+            int i = 0;
             for (DHTValue value : evt) {
-                buffer.append(value).append("\n");
+                buffer.append(i).append(": ").append(value).append("\n");
             }
             out.println(buffer.toString());
             
