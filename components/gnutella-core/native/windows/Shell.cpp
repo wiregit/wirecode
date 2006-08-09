@@ -7,6 +7,9 @@
 #include "SystemUtilities.h"
 #include "Shell.h"
 
+// Access the program, window, and icon handles
+extern CSystemUtilities Handle;
+
 // Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
 	return MakeJavaString(e, GetRunningPath());
@@ -124,22 +127,40 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	HWND window = GetJavaWindowHandle(e, c, frame, bin, &message);
 	if (!window) return message; // Return the message that tells what happened
 
-	// Open the .ico file, getting handles to the large and small icons inside it
-	HICON bigicon   = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-	HICON smallicon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
-	if (!bigicon || !smallicon) return "Unable to open icon file";
-
-	/*
-	 * It is important that you do not call this function repeatedly.
-	 * Each LoadImage call above creates a HICON that leads to an icon resource.
-	 * Windows graphics resources like icons take up a lot of memory.
-	 * A Windows program should free icons with a call to DestroyIcon(HICON).
-	 * We can't free them now, because they are on display in our window.
-	 * When the Windows process exits, Windows will free the two icons.
-	 */
+	// If we don't already have the icons, load them from the given .ico file, or from our running .exe
+	GetIcons(icon);
 
 	// Set both sizes of the window's icon
-	SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)bigicon);
-	SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)smallicon);
+	if (Handle.Icon)      SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)Handle.Icon);
+	if (Handle.SmallIcon) SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)Handle.SmallIcon);
 	return ""; // Return blank on success
+}
+
+// Takes a path to a .ico file on the disk, or blank to load the icons from our running .exe
+// Loads the icons, keeping their handles in Handle.Icon and Handle.SmallIcon
+void GetIcons(LPCTSTR icon) {
+
+	// Don't load the icons twice
+	if (Handle.Icon || Handle.SmallIcon) return;
+
+	// No path to .ico file, we should load the icon from the .exe launcher
+	if (CString(icon) == CString("")) {
+
+		// Get the path to the program that is us running
+		CString path = GetRunningPath();
+
+		// Load the large and small icons from the program
+		ExtractIconEx(
+			path,                // Path to the .exe file with the icon
+			0,                   // Extract the first icon in the program
+			&(Handle.Icon),      // Handle for large icon
+			&(Handle.SmallIcon), // Handle for small icon
+			1);                  // Extract 1 set of icons
+
+	// Load the icons from the given .ico file on the disk
+	} else {
+
+		Handle.Icon      = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+		Handle.SmallIcon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	}
 }

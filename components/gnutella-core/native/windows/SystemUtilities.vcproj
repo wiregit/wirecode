@@ -142,6 +142,9 @@
 			<File
 				RelativePath=".\SystemUtilities.cpp">
 			</File>
+			<File
+				RelativePath=".\Tray.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -161,6 +164,9 @@
 			</File>
 			<File
 				RelativePath=".\SystemUtilities.h">
+			</File>
+			<File
+				RelativePath=".\Tray.h">
 			</File>
 		</Filter>
 		<Filter
