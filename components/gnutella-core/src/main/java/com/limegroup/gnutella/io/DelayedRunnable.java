@@ -62,9 +62,14 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	}
 	
 	public long getDelay(TimeUnit arg0) {
-		if (arg0 == TimeUnit.MILLISECONDS)
-			return time - System.currentTimeMillis();
-		else if (arg0 == TimeUnit.NANOSECONDS)
+		if (arg0 == TimeUnit.MILLISECONDS) {
+			// round off to the next or previous millisecond
+			long nanoDelay = getDelay(TimeUnit.NANOSECONDS);
+			long milliDelay = nanoDelay / 1000000;
+			milliDelay += (nanoDelay > 0 ? 1 : -1) *
+			 (nanoDelay % 1000000 == 0 ? 0 : 1);
+			return milliDelay;
+		} else if (arg0 == TimeUnit.NANOSECONDS)
 			return nanoTime - System.nanoTime() + NANO_BASE;
 		else 
 			throw new IllegalArgumentException();

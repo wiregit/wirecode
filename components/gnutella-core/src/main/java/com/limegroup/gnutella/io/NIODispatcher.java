@@ -684,9 +684,10 @@ public class NIODispatcher implements Runnable {
     	if (next <= 0)
     		return 0;
     	
-    	// then seee when the next scheduled task is due
-    	Delayed nextScheduled = DELAYED.poll();
-    	if (nextScheduled != null)
+    	// then see when the next scheduled task is due
+    	// Note: DelayedQueue.peek() returns the element even if not expired.
+    	Delayed nextScheduled = DELAYED.peek(); 
+    	if (nextScheduled != null) 
     		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));
     	return Math.max(0, next);
     }
