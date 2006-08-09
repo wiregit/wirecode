@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
-import com.limegroup.gnutella.dht.LimeDHTRoutingTable;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -47,7 +46,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeController.class);
     
-    private LimeDHTRoutingTable limeDHTRouteTable;
+    private LimeDHTRouteTable limeDHTRouteTable;
     
     /**
      * The file to persist the list of host
@@ -58,7 +57,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     public void init() {
         dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
         
-        limeDHTRouteTable = (LimeDHTRoutingTable) dht.setRouteTable(LimeDHTRoutingTable.class);
+        limeDHTRouteTable = (LimeDHTRouteTable) dht.setRouteTable(LimeDHTRouteTable.class);
         setLimeMessageDispatcher();
         //load the small list of MRS nodes for bootstrap
         try {
