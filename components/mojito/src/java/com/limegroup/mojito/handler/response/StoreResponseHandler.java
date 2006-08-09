@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -158,14 +159,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             for (Entry<Contact,QueryKey> entry : nodes) {
                 Contact node = entry.getKey();
-                
-                if (context.isLocalNode(node)) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Skipping local Node");
-                    }
-                    continue;
-                }
-                
                 QueryKey queryKey = entry.getValue();
                 storeStates.add(new StoreState(node, queryKey, values));
             }
@@ -293,7 +286,28 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 Collection<? extends DHTValue> values) {
             this.node = node;
             this.queryKey = queryKey;
-            this.it = (Iterator<DHTValue>)values.iterator();
+            
+            if (context.isLocalNode(node)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Skipping local Node");
+                }
+                
+                this.it = new Iterator<DHTValue>() {
+                    public boolean hasNext() {
+                        return false;
+                    }
+                    
+                    public DHTValue next() {
+                        throw new NoSuchElementException();
+                    }
+                    
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
+            } else {
+                this.it = (Iterator<DHTValue>)values.iterator();
+            }
         }
         
         /**
