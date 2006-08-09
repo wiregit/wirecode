@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
@@ -40,6 +41,7 @@ import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * The MessageInputStream reads (parses) a DHTMessage
@@ -223,7 +225,19 @@ public class MessageInputStream extends DataInputStream {
         return statistics;
     }
     
-    public Status readStoreStatus() throws IOException {
-        return Status.valueOf( readUnsignedByte() );
+    @SuppressWarnings("unchecked")
+    public Collection<Entry<KUID, Status>> readStoreStatus() throws IOException {
+        int size = readUnsignedByte();
+        if (size == 0) {
+            return Collections.emptyList();
+        }
+        
+        Entry<KUID, Status>[] entries = new Entry[size];
+        for (int i = 0; i < entries.length; i++) {
+            KUID valueId = readValueID();
+            Status status = Status.valueOf( readUnsignedByte() );
+            entries[i] = new EntryImpl<KUID, Status>(valueId, status);
+        }
+        return Arrays.asList(entries);
     }
 }

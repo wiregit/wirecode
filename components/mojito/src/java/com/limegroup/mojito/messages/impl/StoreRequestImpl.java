@@ -21,6 +21,7 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
@@ -39,15 +40,16 @@ public class StoreRequestImpl extends AbstractRequestMessage
 
     private QueryKey queryKey;
     
-    private DHTValue value;
+    private Collection<DHTValue> values;
     
+    @SuppressWarnings("unchecked")
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            QueryKey queryKey, DHTValue value) {
+            QueryKey queryKey, Collection<? extends DHTValue> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.queryKey = queryKey;
-        this.value = value;
+        this.values = (Collection<DHTValue>)values;
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
@@ -55,23 +57,23 @@ public class StoreRequestImpl extends AbstractRequestMessage
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();
-        this.value = in.readDHTValue(getContact());
+        this.values = in.readDHTValues(getContact());
     }
     
     public QueryKey getQueryKey() {
         return queryKey;
     }
 
-    public DHTValue getDHTValue() {
-        return value;
+    public Collection<DHTValue> getDHTValues() {
+        return values;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeQueryKey(queryKey);
-        out.writeDHTValue(value);
+        out.writeDHTValues(values);
     }
 
     public String toString() {
-        return "StoreRequest: " + value;
+        return "StoreRequest: " + values;
     }
 }

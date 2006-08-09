@@ -21,6 +21,8 @@ package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -36,40 +38,39 @@ import com.limegroup.mojito.messages.StoreResponse;
 public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
-    private KUID valueId;
-    private Status status;
+    private Collection<Entry<KUID, Status>> status;
 
+    @SuppressWarnings("unchecked")
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            KUID valueId, Status status) {
+            Collection<? extends Entry<KUID, Status>> status) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId);
 
-        this.valueId = valueId;
-        this.status = status;
+        this.status = (Collection<Entry<KUID, Status>>)status;
     }
 
     public StoreResponseImpl(Context context, SocketAddress src, 
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_RESPONSE, src, messageId, version, in);
         
-        this.valueId = in.readValueID();
         this.status = in.readStoreStatus();
-    }
-    
-    public KUID getValueID() {
-        return valueId;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeKUID(valueId);
         out.writeStoreStatus(status);
     }
 
-    public Status getStatus() {
+    public Collection<Entry<KUID, Status>> getStatus() {
         return status;
     }
     
     public String toString() {
-        return "StoreResponse: valueId=" + valueId + ", status=" + status;
+        StringBuilder buffer = new StringBuilder("StoreResponse:\n");
+        int i = 0;
+        for (Entry<KUID, Status> e : status) {
+            buffer.append(i++).append(": valueId=").append(e.getKey())
+                .append(", status=").append(e.getValue()).append("\n");
+        }
+        return buffer.toString();
     }
 }

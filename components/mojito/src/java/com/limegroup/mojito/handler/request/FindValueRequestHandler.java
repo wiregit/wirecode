@@ -77,8 +77,11 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             
             Collection<KUID> nodeIds = request.getKeys();
             if (nodeIds.isEmpty()) {
+                // Nothing requested? Send just the keys back!
                 keys = map.keySet();
             } else {
+                // Send all requested values back.
+                // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
                 values = new ArrayList<DHTValue>(nodeIds.size());
                 for (KUID nodeId : nodeIds) {
                     DHTValue value = map.get(nodeId);

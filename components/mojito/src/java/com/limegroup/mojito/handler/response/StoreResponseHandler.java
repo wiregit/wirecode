@@ -48,6 +48,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
@@ -171,7 +172,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     @Override
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         StoreResponse response = (StoreResponse)message;
-        StoreResponse.Status status = response.getStatus();
+        Collection<Entry<KUID,Status>> status = response.getStatus();
         
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
@@ -313,19 +314,25 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         /**
          * Starts the store process at the given Node
          */
+        @SuppressWarnings("unchecked")
         public boolean start() throws IOException {
-            return !response(StoreResponse.Status.SUCCEEDED);
+            return !response(null);
         }
         
         /**
          * Handles a response and returns true if done
          */
-        public boolean response(StoreResponse.Status status) throws IOException {
-            if (status != StoreResponse.Status.SUCCEEDED) {
-                if (lastValue != null) {
+        public boolean response(Collection<? extends Entry<KUID,Status>> status) throws IOException {
+            if (lastValue != null) {
+                if (status != null && status.size() == 1) {
+                    Entry<KUID,Status> e = status.iterator().next();
+                    if (e.getValue() != StoreResponse.Status.SUCCEEDED) {
+                        failed.add(lastValue);
+                    }
+                } else {
                     failed.add(lastValue);
                 }
-            } else {
+                
                 lastValue = null;
             }
             
@@ -333,9 +340,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 return true;
             }
             
+            // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
+            
             lastValue = it.next();
             StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), queryKey, lastValue);
+                .createStoreRequest(node.getContactAddress(), queryKey, Arrays.asList(lastValue));
             context.getMessageDispatcher().send(node, request, StoreResponseHandler.this);
 
             return false;

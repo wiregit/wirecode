@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+import java.util.Collection;
+import java.util.Map.Entry;
+
 import com.limegroup.mojito.KUID;
 
 public interface StoreResponse extends ResponseMessage {
@@ -62,7 +65,5 @@ public interface StoreResponse extends ResponseMessage {
         }
     }
     
-    public KUID getValueID();
-
-    public Status getStatus();
+    public Collection<Entry<KUID, Status>> getStatus();
 }

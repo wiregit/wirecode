@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
@@ -59,10 +60,10 @@ public interface MessageFactory {
             Collection<KUID> keys, Collection<? extends DHTValue> values);
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, DHTValue value);
+            QueryKey queryKey, Collection<? extends DHTValue> values);
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, Status status);
+            Collection<? extends Entry<KUID, Status>> status);
 
     public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
             int stats);

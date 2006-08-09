@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferInputStream;
@@ -164,12 +165,12 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, DHTValue value) {
-        return new StoreRequestImpl(context, contact, messageId, queryKey, value);
+            QueryKey queryKey, Collection<? extends DHTValue> values) {
+        return new StoreRequestImpl(context, contact, messageId, queryKey, values);
     }
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            KUID valueId, Status status) {
-        return new StoreResponseImpl(context, contact, messageId, valueId, status);
+            Collection<? extends Entry<KUID, Status>> status) {
+        return new StoreResponseImpl(context, contact, messageId, status);
     }
 }

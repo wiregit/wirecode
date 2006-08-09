@@ -27,6 +27,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PublicKey;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
@@ -72,14 +73,14 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeKUIDs(Collection<KUID> keys) throws IOException {
-        writeByte(keys.size());
+        writeCollectionSize(keys);
         for (KUID k : keys) {
             k.write(this);
         }
     }
     
     public void writeDHTValues(Collection<? extends DHTValue> values) throws IOException {
-        writeByte(values.size());
+        writeCollectionSize(values);
         for(DHTValue value : values) {
             writeDHTValue(value);
         }
@@ -112,7 +113,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeContacts(Collection<? extends Contact> nodes) throws IOException {
-        writeByte(nodes.size());
+        writeCollectionSize(nodes);
         for(Contact node : nodes) {
             writeContact(node);
         }
@@ -163,7 +164,20 @@ public class MessageOutputStream extends DataOutputStream {
         writeByte(opcode.getOpCode());
     }
     
-    public void writeStoreStatus(Status status) throws IOException {
-        writeByte(status.getStatus());
+    public void writeStoreStatus(Collection<? extends Entry<KUID, Status>> status) throws IOException {
+        writeCollectionSize(status);
+        for (Entry<KUID, Status> e : status) {
+            writeKUID(e.getKey());
+            writeByte(e.getValue().getStatus());
+        }
+    }
+    
+    private void writeCollectionSize(Collection c) throws IOException {
+        int size = c.size();
+        if (size > 0xFF) {
+            throw new IOException("Too many elements: " + size);
+        }
+        
+        writeByte(size);
     }
 }

@@ -21,6 +21,7 @@ package com.limegroup.mojito.messages;
 
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -96,7 +97,9 @@ public class MessageHelper {
                 queryKey, nodes);
     }
 
-    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, Collection<KUID> keys) {
+    public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
+            Collection<KUID> keys) {
+        
         return factory.createFindValueRequest(getLocalNode(), 
                 createMessageID(dst), lookupId, keys);
     }
@@ -106,13 +109,14 @@ public class MessageHelper {
         return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, values);
     }
 
-    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, DHTValue value) {
-        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, value);
+    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
+        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, values);
     }
 
-    public StoreResponse createStoreResponse(RequestMessage request, KUID valueId, Status status) {
-        return factory.createStoreResponse(getLocalNode(), request.getMessageID(), 
-                valueId, status);
+    public StoreResponse createStoreResponse(RequestMessage request, 
+            Collection<? extends Entry<KUID, Status>> status) {
+        return factory.createStoreResponse(getLocalNode(), request.getMessageID(), status);
     }
 
     public StatsRequest createStatsRequest(SocketAddress dst, int request) {
@@ -121,7 +125,6 @@ public class MessageHelper {
     }
 
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {
-        return factory.createStatsResponse(getLocalNode(), request.getMessageID(), 
-                statistics);
+        return factory.createStatsResponse(getLocalNode(), request.getMessageID(), statistics);
     }
 }
