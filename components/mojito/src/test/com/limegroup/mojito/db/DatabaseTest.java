@@ -58,7 +58,7 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
-        Contact node = ContactNode.createLocalContact(0, 0, nodeId, 0);
+        Contact node = ContactNode.createLocalContact(0, 0, nodeId, 0, false);
         return DHTValue.createLocalValue(node, valueId, value);
     }
     

@@ -77,11 +77,7 @@ public class MojitoFactory {
             KUID nodeId = KUID.createRandomNodeID();
             int instanceId = 0;
             
-            localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
-            
-            if (firewalled) {
-                ((ContactNode)localNode).setFirewalled(true);
-            }
+            localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId, firewalled);
         }
 
         Context context = new Context(name, localNode);
@@ -192,10 +188,13 @@ public class MojitoFactory {
         int instanceId = ois.readUnsignedByte();
         boolean firewalled = ois.readBoolean();
         
-        boolean timeout = (System.currentTimeMillis()-time) 
-                            >= ContextSettings.NODE_ID_TIMEOUT.getValue();
-        KUID nodeId;
-        
+        boolean timeout = false;
+        if ((System.currentTimeMillis() - time) 
+                >= ContextSettings.NODE_ID_TIMEOUT.getValue()) {
+            timeout = true;
+        }
+                            
+        KUID nodeId = null;
         if (timeout) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(oldNodeId + " has timed out. Clearing database and rebuilding route table");
@@ -207,7 +206,8 @@ public class MojitoFactory {
             nodeId = oldNodeId;
         }
         
-        Contact localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
+        Contact localNode = ContactNode.createLocalContact(
+                vendor, version, nodeId, instanceId, firewalled);
         
         Context dht = create(name, localNode, firewalled);
         

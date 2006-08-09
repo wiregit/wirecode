@@ -70,7 +70,7 @@ public class DatabaseTest extends BaseTestCase {
         byte[] value = "test".getBytes("UTF-8");
         
         KUID nodeId = KUID.createRandomNodeID();
-        Contact originator = ContactNode.createLocalContact(0, 0, nodeId, 0);
+        Contact originator = ContactNode.createLocalContact(0, 0, nodeId, 0, false);
         DHTValue dhtValue1 = DHTValue.createLocalValue(originator, key, value);
         db.store(dhtValue1);
         assertEquals(1, db.getKeyCount());
@@ -84,7 +84,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, db.getKeyCount());
         
         // Indirect remove request -> don't remove
-        Contact sender = ContactNode.createLocalContact(0, 0, KUID.createRandomNodeID(), 0);
+        Contact sender = ContactNode.createLocalContact(0, 0, KUID.createRandomNodeID(), 0, false);
         DHTValue dhtValue3 = DHTValue.createRemoteValue(originator, sender, key, new byte[0]);
         db.store(dhtValue3);
         assertEquals(1, db.getKeyCount());

@@ -167,8 +167,7 @@ public class Context implements MojitoDHT {
         storeManager = new StoreManager(this);
         bootstrapManager = new BootstrapManager(this);
         
-        // Add the local to the RouteTable
-        localNode.setTimeStamp(Long.MAX_VALUE);
+        // Init the RouteTable with the local Node
         initRouteTable();
     }
     

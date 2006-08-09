@@ -24,7 +24,7 @@ public class BucketNodeTest extends TestCase {
         KUID nodeId = KUID.createRandomNodeID();
         int instanceId = 0;
         
-        localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId);
+        localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId, false);
     }
 
     @Override

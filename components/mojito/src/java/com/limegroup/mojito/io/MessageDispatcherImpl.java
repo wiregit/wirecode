@@ -112,13 +112,22 @@ public class MessageDispatcherImpl extends MessageDispatcher {
             if (selector != null) {
                 selector.close();
                 getDatagramChannel().close();
+                selector = null;
             }
         } catch (IOException err) {
             LOG.error("An error occured during stopping", err);
         }
         
-        thread.interrupt();
-        executor.shutdownNow();
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
+        }
+        
+        if (executor != null) {
+            executor.shutdownNow();
+            executor = null;
+        }
+        
         clear();
     }
     

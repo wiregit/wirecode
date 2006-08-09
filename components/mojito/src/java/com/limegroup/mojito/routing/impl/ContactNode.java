@@ -35,7 +35,7 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * 
+ * An implementation of Contact
  */
 public class ContactNode implements Contact {
     
@@ -68,19 +68,35 @@ public class ContactNode implements Contact {
     private transient boolean firewalled = false;
     
     /**
+     * Creates and returns a local Contact
      * 
+     * @param vendor Our vendor ID
+     * @param version The version
+     * @param nodeId Our Node ID
+     * @param firewalled whether or not we're firewalled
      */
     public static Contact createLocalContact(int vendor, int version, 
-            KUID nodeId, int instanceId) {
+            KUID nodeId, int instanceId, boolean firewalled) {
         
         SocketAddress addr = new InetSocketAddress("localhost", 0);
         
-        return new ContactNode(null, vendor, version, 
-                nodeId, addr, instanceId, false, State.UNKNOWN);
+        ContactNode local = new ContactNode(null, vendor, version, 
+                nodeId, addr, instanceId, firewalled, State.UNKNOWN);
+        local.setTimeStamp(Long.MAX_VALUE);
+        return local;
     }
     
     /**
+     * Creates and returns a live Contact. A live Contact is a Node
+     * that send us a Message
      * 
+     * @param sourceAddress The source address
+     * @param vendor The Vendor ID of the Node
+     * @param version The Version
+     * @param nodeId The NodeID of the Contact
+     * @param contactAddress The address where to send requests and responses
+     * @param instanceId The instanceId of the Node
+     * @param whether or not the Node is firewalled
      */
     public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
             int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
@@ -109,7 +125,12 @@ public class ContactNode implements Contact {
     }
     
     /**
+     * Creates and returns an unknown Contact
      * 
+     * @param vendor The Vendor ID of the Node
+     * @param version The Version
+     * @param nodeId The NodeID of the Contact
+     * @param contactAddress The address where to send requests and responses
      */
     public static Contact createUnknownContact(int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress) {
