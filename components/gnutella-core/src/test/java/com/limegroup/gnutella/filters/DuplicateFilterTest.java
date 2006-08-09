@@ -62,6 +62,7 @@ public class DuplicateFilterTest extends BaseTestCase {
     public void testQueryStringDuplicate() throws Exception {
         qr=QueryRequest.createQuery("search1", (byte)2);
         assertTrue(filter.allow(qr));
+        qr=QueryRequest.createQuery("search1", (byte)2);
         assertTrue(!filter.allow(qr));
         qr=QueryRequest.createQuery("search2", (byte)2);
         assertTrue(filter.allow(qr));
@@ -74,6 +75,7 @@ public class DuplicateFilterTest extends BaseTestCase {
         }
 
         assertTrue(filter.allow(qr));
+        qr=QueryRequest.createQuery("search2", (byte)2);
         assertTrue(!filter.allow(qr));
         qr=QueryRequest.createQuery("search3",(byte)2);
         assertTrue(filter.allow(qr));

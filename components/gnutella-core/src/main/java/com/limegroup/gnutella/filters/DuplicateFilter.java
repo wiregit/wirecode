@@ -239,6 +239,7 @@ final class QueryPair {
             return false;
             
         QueryPair other=(QueryPair)o;
+        
         return this.hops==other.hops && 
                this.metaMask == other.metaMask && 
                this.URNs.equals(other.URNs) &&
@@ -260,6 +261,6 @@ final class QueryPair {
     }
     
     public String toString() {
-        return "[\""+query+"\", "+hops+"]";
+        return "QP: [hops: " + hops + ", metaMask: " + metaMask + ", URNs: " + URNs + ", query: " + query + ", xml: " + xml + "]";
     }
 }

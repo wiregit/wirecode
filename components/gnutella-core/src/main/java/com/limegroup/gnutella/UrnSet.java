@@ -51,6 +51,12 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         return c;
     }
     
+    /** Returns the hashcode for this UrnSet. */
+    public int hashCode() {
+        return sha1 == null ? 0 : sha1.hashCode();
+    }
+    
+    
     /**
      * Determines if this set contains all the same objects
      * as another set.
