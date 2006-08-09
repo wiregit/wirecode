@@ -19,8 +19,6 @@
 
 package com.limegroup.mojito.handler.response;
 
-import static com.limegroup.mojito.handler.response.StoreResponseHandler.LOG;
-
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
