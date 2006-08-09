@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -114,23 +113,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * 
-     * @param out
-     * @throws IOException
+     * Writes the ID to the OutputStream
      */
     public void write(OutputStream out) throws IOException {
         out.write(id, 0, id.length);
-    }
-    
-    /**
-     * Returns the identity and throws an AssertionError
-     * if this isn't a Node ID.
-     */
-    public KUID assertNodeID() throws AssertionError {
-        if (!isNodeID()) {
-            throw new AssertionError(this + " is not a NODE_ID");
-        }
-        return this;
     }
     
     /**
@@ -138,17 +124,6 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     public boolean isNodeID() {
         return type == Type.NODE_ID;
-    }
-    
-    /**
-     * Returns the identity and throws an AssertionError
-     * if this isn't a Value ID.
-     */
-    public KUID assertValueID() throws AssertionError {
-        if (!isValueID()) {
-            throw new AssertionError(this + " is not a VALUE_ID");
-        }
-        return this;
     }
     
     /**
@@ -353,21 +328,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             return Arrays.equals(id, ((KUID)o).id);
         }
     }
-    
-    /**
-     * Converts the current KUID into a Node ID if it isn't already.
-     */
-    public KUID toNodeID() {
-        return (isNodeID() ? this : new KUID(Type.NODE_ID, id));
-    }
-    
-    /**
-     * Converts the current KUID into a Value ID if it isn't already.
-     */
-    public KUID toValueID() {
-        return (isValueID() ? this : new KUID(Type.VALUE_ID, id));
-    }
-    
+
     /**
      * Returns the current KUID as hex String
      */
@@ -385,9 +346,8 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Returns the current KUID as BigInteger
      */
-    public BigInteger toBigInteger() {
-        // unsigned!        
-        return new BigInteger(1, id);
+    public BigInteger toBigInteger() {    
+        return new BigInteger(1 /* unsigned! */, id);
     }
     
     /**
@@ -538,10 +498,11 @@ public class KUID implements Comparable<KUID>, Serializable {
         return new KUID(Type.NODE_ID, id);
     }
     
-    private static byte[] getBytes(ByteBuffer data) {
-        byte[] id = new byte[LENGTH];
-        data.get(id);
-        return id;
+    /**
+     * Creates and returns a Node ID from a hex encoded String
+     */
+    public static KUID createNodeID(String id) {
+        return createNodeID(ArrayUtils.parseHexString(id));
     }
     
     /**
@@ -552,10 +513,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Creates and returns a Value ID from the ByteBuffer (relative get)
+     * Creates and returns a Value ID from a hex encoded String
      */
-    public static KUID createValueID(ByteBuffer data) {
-        return new KUID(Type.VALUE_ID, getBytes(data));
+    public static KUID createValueID(String id) {
+        return createValueID(ArrayUtils.parseHexString(id));
     }
     
     /**
@@ -565,7 +526,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      * @return a random KUID starting with the given prefix
      */
     public static KUID createPrefxNodeID(KUID prefix, int depth) {
-        byte[] random = new byte[20];
+        byte[] random = new byte[LENGTH];
         GENERATOR.nextBytes(random);
         return createPrefxNodeID(prefix, depth, random);
     }

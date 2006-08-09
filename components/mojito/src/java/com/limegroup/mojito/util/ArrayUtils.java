@@ -103,6 +103,10 @@ public final class ArrayUtils {
      * Converts a HEX String to a byte value
      */
     public static byte[] parseHexString(String data) {
+        if (data.length() % 2 != 0) {
+            data = "0" + data;
+        }
+        
         byte[] buffer = new byte[data.length()/2];
         for(int i = 0, j = 0; i < buffer.length; i++) {
             int hi = parseHexChar(data.charAt(j++));
