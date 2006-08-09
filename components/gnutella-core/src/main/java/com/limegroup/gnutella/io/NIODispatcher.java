@@ -668,12 +668,23 @@ public class NIODispatcher implements Runnable {
      * @return the timeout of the next select call. 0 if it should be immediate
      */
     private long nextSelectTimeout() {
+    	// first see when the next throttle should tick
     	long next = Long.MAX_VALUE;
     	for (Throttle t: THROTTLE)
     		next = Math.min(next, t.nextTickTime());
-    	next -= System.currentTimeMillis();
+    	long now = System.currentTimeMillis(); 
+    	next -= now;
     	if (next <= 0)
     		return 0;
+    	
+    	// then check when the next timeout is due
+    	long timeout = TIMEOUTER.getNextExpireTime();
+    	if (timeout > -1)
+    		next = Math.min(next, timeout - now);
+    	if (next <= 0)
+    		return 0;
+    	
+    	// then seee when the next scheduled task is due
     	Delayed nextScheduled = DELAYED.poll();
     	if (nextScheduled != null)
     		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));

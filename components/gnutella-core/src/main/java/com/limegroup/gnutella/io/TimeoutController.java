@@ -58,7 +58,7 @@ public class TimeoutController {
         timedout.clear();
     }
     
-    /** Gets the length of time till the next timeoutable expires. -1 for never. */
+    /** Gets the time the next timeoutable expires. -1 for never. */
     public synchronized long getNextExpireTime() {
         if(items.isEmpty())
             return -1;
