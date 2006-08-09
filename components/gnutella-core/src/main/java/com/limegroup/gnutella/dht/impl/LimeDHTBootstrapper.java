@@ -17,7 +17,6 @@ import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
-import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapEvent;

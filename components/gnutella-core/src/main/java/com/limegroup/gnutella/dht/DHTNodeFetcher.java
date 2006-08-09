@@ -33,8 +33,6 @@ import com.limegroup.gnutella.util.IpPort;
  */
 public class DHTNodeFetcher {
     
-    private final long FETCH_DELAY = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
-    
     private final DHTBootstrapper bootstrapper;
     
     private volatile long lastRequest = 0L;
@@ -78,7 +76,7 @@ public class DHTNodeFetcher {
         
         //We don't have active hosts --> send UDP pings
         long now = System.currentTimeMillis();
-        if(now - lastRequest < FETCH_DELAY) {
+        if(now - lastRequest < DHTSettings.DHT_NODE_FETCHER_TIME.getValue()) {
             return;
         }
         
@@ -98,7 +96,8 @@ public class DHTNodeFetcher {
     
     public void startTimerTask() {
         fetcher = new TimedFetcher();
-        RouterService.schedule(fetcher, FETCH_DELAY, FETCH_DELAY);
+        RouterService.schedule(fetcher, DHTSettings.DHT_NODE_FETCHER_TIME.getValue(),
+                DHTSettings.DHT_NODE_FETCHER_TIME.getValue());
     }
     
     private class TimedFetcher implements Runnable {
@@ -133,7 +132,8 @@ public class DHTNodeFetcher {
             List<IpPort> l = reply.getPackedDHTIPPorts();
             
             for (IpPort ipp : l) {
-                bootstrapper.addBootstrapHost(new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+                bootstrapper.addBootstrapHost(
+                        new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
             }
         }
         public void registered(byte[] guid) {}
