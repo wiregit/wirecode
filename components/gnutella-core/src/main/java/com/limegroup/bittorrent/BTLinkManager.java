@@ -2,6 +2,7 @@ package com.limegroup.bittorrent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.limegroup.bittorrent.messages.BTHave;
@@ -36,9 +37,11 @@ class BTLinkManager implements Shutdownable {
 	}
 	
 	public void shutdown() {
-		List<BTLink> copy = new ArrayList<BTLink>(_connections);
-		for(BTLink con : copy) 
-			con.shutdown(); 
+		for (Iterator<BTLink> iter = _connections.iterator();iter.hasNext();){
+			BTLink toShut = iter.next();
+			iter.remove();
+			toShut.shutdown();
+		}
 	}
 	
 	public void sendHave(BTHave have) {

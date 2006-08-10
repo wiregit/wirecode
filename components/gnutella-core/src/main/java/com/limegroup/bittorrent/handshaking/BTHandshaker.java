@@ -127,7 +127,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 				
 				// add the connection and re-schedule fetching.
 				if (torrent.addConnection(btc))
-					btc.init(sock, torrent);
+					btc.init(sock, torrent, torrent.getScheduler());
 				observer.handshakerDone(this);
 			}
 			else {

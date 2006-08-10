@@ -43,7 +43,8 @@ import com.limegroup.gnutella.util.ThreadPool;
  * It keeps track of the known and connected peers and contains the
  * logic for starting and stopping the torrent.
  */
-public class ManagedTorrent implements Torrent, DiskManagerListener {
+public class ManagedTorrent implements Torrent, DiskManagerListener,
+BTLinkListener {
 	
 	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
@@ -342,7 +343,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	/**
 	 * notification that a connection was closed.
 	 */
-	void connectionClosed(BTLink btc) {
+	public void linkClosed(BTLink btc) {
 		if (btc.isWorthRetrying()) {
 			// this forgets any strikes on the location
 			TorrentLocation ep = new TorrentLocation(btc.getEndpoint());
@@ -357,6 +358,16 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 		int state = _state.getInt();
 		if (state == DOWNLOADING || state == CONNECTING) 
 			_connectionFetcher.fetch();
+	}
+
+	public void linkInterested(BTLink interested) {
+		if (!interested.isChoked())
+			rechoke();
+	}
+
+	public void linkNotInterested(BTLink notInterested) {
+		if (!notInterested.isChoked())
+			rechoke();
 	}
 
 	/**
@@ -663,7 +674,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	/**
 	 * trigger a rechoking of the connections
 	 */
-	void rechoke() {
+	private void rechoke() {
 		choker.rechoke();
 	}
 	
