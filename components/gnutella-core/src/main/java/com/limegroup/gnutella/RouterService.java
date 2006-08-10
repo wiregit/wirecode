@@ -308,7 +308,7 @@ public class RouterService {
         manager.registerLifecycleListener(dhtManager);
         
         nodeAssigner = new NodeAssigner(uploadManager, 
-                                        downloader, 
+                                        downloadManager, 
                                         manager);
   	}
 
@@ -1047,39 +1047,14 @@ public class RouterService {
      * Count up all the messages on active connections
      */
     public static int getActiveConnectionMessages() {
-<<<<<<< RouterService.java
-		int count = 0;
-
-        // Count the messages on initialized connections
-        for(ManagedConnection c : manager.getInitializedConnections()) {
-            count += c.getNumMessagesSent();
-            count += c.getNumMessagesReceived();
-        }
-		return count;
-=======
 		return manager.getActiveConnectionMessages();
->>>>>>> 1.319.4.4
     }
 
     /**
      * Count how many connections have already received N messages
      */
     public static int countConnectionsWithNMessages(int messageThreshold) {
-<<<<<<< RouterService.java
-		int count = 0;
-		int msgs; 
-
-        // Count the messages on initialized connections
-        for(ManagedConnection c : manager.getInitializedConnections()) {
-            msgs = c.getNumMessagesSent();
-            msgs += c.getNumMessagesReceived();
-			if ( msgs > messageThreshold )
-				count++;
-        }
-		return count;
-=======
 		return manager.countConnectionsWithNMessages(messageThreshold);
->>>>>>> 1.319.4.4
     }
 
     /**
