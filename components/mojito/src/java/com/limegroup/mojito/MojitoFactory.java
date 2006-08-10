@@ -40,7 +40,7 @@ public class MojitoFactory {
     
     private static final Log LOG = LogFactory.getLog(MojitoFactory.class);
     
-    private static final long SERIAL_VERSION_UID = 0;
+    private static final long VERSION_NUMBER = 0;
     
     private static final String DEFAULT_NAME = "DHT";
     
@@ -87,7 +87,7 @@ public class MojitoFactory {
         
         synchronized (context) {
             // SERIAL_VERSION_UID
-            oos.writeLong(SERIAL_VERSION_UID);
+            oos.writeLong(VERSION_NUMBER);
             
             // Time
             oos.writeLong(System.currentTimeMillis());
@@ -114,9 +114,9 @@ public class MojitoFactory {
         
         ObjectInputStream ois = new ObjectInputStream(in);
         
-        // SERIAL_VERSION_UID
+        // Version Number
         @SuppressWarnings("unused")
-        long serialVersionUID = ois.readLong();
+        long versionNumber = ois.readLong();
         
         // Time
         long time = ois.readLong();
