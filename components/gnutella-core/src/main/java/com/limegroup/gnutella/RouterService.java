@@ -24,6 +24,8 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -131,7 +133,7 @@ public class RouterService {
 	 */
     private static ConnectionManager manager = new ConnectionManager();
 
-	/**
+    /**
 	 * <tt>HostCatcher</tt> that handles Gnutella pongs.  Only not final
      * for tests.
 	 */
@@ -208,6 +210,16 @@ public class RouterService {
      */
     private static UDPMultiplexor UDP_MULTIPLEXOR;
     
+    /**
+     * Initialize the class that manages the DHT.
+     */
+    private static DHTManager dhtManager = new LimeDHTManager();
+    
+    /**
+     * The Node assigner class
+     * 
+     */
+    private static NodeAssigner nodeAssigner;
     
     static {
         // Link the multiplexor & NIODispatcher together.
@@ -290,7 +302,14 @@ public class RouterService {
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
-  		RouterService.router = router;
+        RouterService.router = router;
+
+        manager.registerLifecycleListener(callback);
+        manager.registerLifecycleListener(dhtManager);
+        
+        nodeAssigner = new NodeAssigner(uploadManager, 
+                                        downloader, 
+                                        manager);
   	}
 
   	/**
@@ -388,12 +407,9 @@ public class RouterService {
     		downloadManager.initialize(); 
     		LOG.trace("STOP DownloadManager");
     		
-    		LOG.trace("START SupernodeAssigner");
-    		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
-    													 downloadManager, 
-    													 manager);
-    		sa.start();
-    		LOG.trace("STOP SupernodeAssigner");
+    		LOG.trace("START NodeAssigner");
+    		nodeAssigner.start();
+    		LOG.trace("STOP NodeAssigner");
 			
             // THIS MUST BE BEFORE THE CONNECT (below)
             // OTHERWISE WE WILL ALWAYS CONNECT TO GWEBCACHES
@@ -534,6 +550,13 @@ public class RouterService {
         }
     }
 
+    /**
+     * Accessor for the <tt>LimeDHTManager</tt> instance.
+     */
+    public static DHTManager getDHTManager() {
+        return dhtManager;
+    }
+    
 	/**
 	 * Accessor for the <tt>MessageRouter</tt> instance.
 	 *
@@ -892,6 +915,8 @@ public class RouterService {
                 return;
                 
             _state = 3;
+
+            dhtManager.stop();
             
             getAcceptor().shutdown();
             
@@ -925,6 +950,7 @@ public class RouterService {
             LicenseFactory.persistCache();
             
             contentManager.shutdown();
+ 
             
             runShutdownItems();
             
@@ -1021,6 +1047,7 @@ public class RouterService {
      * Count up all the messages on active connections
      */
     public static int getActiveConnectionMessages() {
+<<<<<<< RouterService.java
 		int count = 0;
 
         // Count the messages on initialized connections
@@ -1029,12 +1056,16 @@ public class RouterService {
             count += c.getNumMessagesReceived();
         }
 		return count;
+=======
+		return manager.getActiveConnectionMessages();
+>>>>>>> 1.319.4.4
     }
 
     /**
      * Count how many connections have already received N messages
      */
     public static int countConnectionsWithNMessages(int messageThreshold) {
+<<<<<<< RouterService.java
 		int count = 0;
 		int msgs; 
 
@@ -1046,6 +1077,9 @@ public class RouterService {
 				count++;
         }
 		return count;
+=======
+		return manager.countConnectionsWithNMessages(messageThreshold);
+>>>>>>> 1.319.4.4
     }
 
     /**
@@ -1568,7 +1602,33 @@ public class RouterService {
     public static boolean isSupernode() {
         return manager.isSupernode();
     }
-
+    
+    /**
+     * Tells whether this node is (actively or passively) connected to the DHT or not
+     * @return true if connected to the DHT, false otherwise
+     */
+    public static boolean isDHTNode() {
+        if(dhtManager != null) {
+            return dhtManager.isRunning();
+        } else return false;
+    }
+    
+    /**
+     * Tells whether this node is *actively* connected to the DHT or 
+     * is *passively* connected to the DHT, i.e. can perform queries
+     * and store requests but is not part of the DHT routing table 
+     * (does not store data or respond to queries). Note: This 
+     * also returns false if the node is not connected to the DHT.
+     * 
+     */
+    public static boolean isActiveDHTNode() {
+        return dhtManager.isActiveNode();
+    }
+    
+    public static void switchMode(boolean toActiveNode) {
+        dhtManager.switchMode(toActiveNode);
+    }
+    
 	/**
 	 * Accessor for whether or not this node is a shielded leaf.
 	 *
@@ -1639,8 +1699,9 @@ public class RouterService {
      */
     public static boolean addressChanged() {
         if(callback != null)
-            callback.addressStateChanged();        
+            callback.handleAddressStateChanged();        
         
+        dhtManager.addressChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1681,8 +1742,7 @@ public class RouterService {
      */
     public static boolean incomingStatusChanged() {
         if(callback != null)
-            callback.addressStateChanged();
-            
+            callback.handleAddressStateChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1818,5 +1878,13 @@ public class RouterService {
     
     public static int getNumberOfPendingTimeouts() {
         return NIODispatcher.instance().getNumPendingTimeouts();
+    }
+    
+    public static void startDHT(boolean activeMode) {
+        dhtManager.start(activeMode);
+    }
+    
+    public static void shutdownDHT() {
+        dhtManager.stop();
     }
 }

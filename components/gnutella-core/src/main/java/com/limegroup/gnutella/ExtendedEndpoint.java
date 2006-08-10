@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.Buffer;
@@ -82,6 +83,10 @@ public class ExtendedEndpoint extends Endpoint {
     /** the locale of the client that this endpoint represents */
     private String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
+    
+    private int _dhtVersion = -1;
+    
+    private DHTMode _dhtMode;
         
     /**
      * The number of times this has failed while attempting to connect
@@ -215,6 +220,26 @@ public class ExtendedEndpoint extends Endpoint {
         _clientLocale = l;
     }
     
+    public void setDHTVersion(int dhtVersion) {
+        _dhtVersion = dhtVersion;
+    }
+    
+    public boolean supportsDHT() {
+        return _dhtVersion > -1;
+    }
+    
+    public void setDHTMode(DHTMode mode) {
+        _dhtMode = mode;
+    }
+    
+    public DHTMode getDHTMode() {
+        return _dhtMode;
+    }
+    
+    public int getDHTVersion() {
+        return _dhtVersion;
+    }
+    
     /**
      * Determines if this is an ExtendedEndpoint for a UDP Host Cache.
      */
@@ -326,8 +351,18 @@ public class ExtendedEndpoint extends Endpoint {
         out.write(FIELD_SEPARATOR);
         out.write(_clientLocale);
         out.write(FIELD_SEPARATOR);
-        if(isUDPHostCache())
+        if(isUDPHostCache()) {
             out.write(udpHostCacheFailures + "");
+        }
+        out.write(FIELD_SEPARATOR);
+        if(supportsDHT()) {
+            out.write(_dhtVersion + "");
+            out.write(FIELD_SEPARATOR);
+            if(_dhtVersion > -1 && _dhtMode!= null) {
+                out.write(_dhtMode.toString());
+            }
+        }
+        out.write(FIELD_SEPARATOR);
         out.write(EOL);
     }
 
@@ -438,6 +473,19 @@ public class ExtendedEndpoint extends Endpoint {
                 if(i >= 0)
                     ret.udpHostCacheFailures = i;
             } catch(NumberFormatException nfe) {}
+        }
+        //8. DHT host
+        if(linea.length>=8) {
+            try {
+                int i = Integer.parseInt(linea[7]);
+                if(i >= -1) {
+                    ret.setDHTVersion(i);
+                    DHTMode mode = DHTMode.valueOf(linea[8]);
+                    ret.setDHTMode(mode);
+                }
+            } 
+            catch(NumberFormatException nfe) {}
+            catch(IllegalArgumentException iae) {};
         }
         
         // validate address if numeric.

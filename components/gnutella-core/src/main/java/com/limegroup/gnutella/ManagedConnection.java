@@ -12,6 +12,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.LifecycleEvent.LifeEvent;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.DeflaterWriter;
@@ -1057,6 +1058,9 @@ public class ManagedConnection extends Connection
                 send(new UpdateRequest());
             else if(currentId == latestId)
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+            //fire a vendor event
+            _manager.dispatchLifecycleEvent(new LifecycleEvent(this, 
+                    LifeEvent.CONNECTION_CAPABILITIES , this));
                 
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        

@@ -16,6 +16,7 @@ import com.limegroup.gnutella.GUID;
  * and replies (pong, search results).  Message are mostly immutable;
  * only the TTL, hops, and priority field can be changed.
  */
+
 public abstract class Message implements Comparable<Message> {
     
     // Functional IDs defined by Gnutella protocol.
@@ -120,7 +121,7 @@ public abstract class Message implements Comparable<Message> {
      * Writes a message quickly, without using temporary buffers or crap.
      */
     public void writeQuickly(OutputStream out) throws IOException {
-        out.write(guid, 0, 16);
+        out.write(guid, 0, guid.length /* 16 */);
         out.write(func);
         out.write(ttl);
         out.write(hops);

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -41,6 +42,11 @@ public final class CapabilitiesVM extends VendorMessage {
      * The bytes for the LMUP message.
      */
     private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    
+    /**
+     * The bytes for the Mojito DHT Capable message.
+     */
+    private static final byte[] LIME_DHT_ACTIVE_CAPABLE_BYTES = { 'M', 'D', 'H', 'T' };
     
     /**
      * The current version of this message.
@@ -124,6 +130,13 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
                                         UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
+        
+        if(RouterService.isActiveDHTNode()) {
+            smp = new SupportedMessageBlock(LIME_DHT_ACTIVE_CAPABLE_BYTES,
+                                            RouterService.getDHTManager().getVersion());
+            hashSet.add(smp);
+        }
+        
     }
 
 
@@ -179,6 +192,13 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public int supportsUpdate() {
         return supportsCapability(LIME_UPDATE_BYTES);
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int supportsDHT() {
+        return supportsCapability(LIME_DHT_ACTIVE_CAPABLE_BYTES);
     }
 
     // override super

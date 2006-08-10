@@ -19,6 +19,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
@@ -36,9 +37,14 @@ import com.limegroup.gnutella.util.NetworkUtils;
 public class PingReply extends Message implements Serializable, IpPort {
     
     /**
-     * The list of extra ip/ports contained in this reply.
+     * The list of extra Gnutella ip/ports contained in this reply.
      */
     private final List<IpPort> PACKED_IP_PORTS;
+    
+    /**
+     * The list of extra DHT ip/ports contained in this reply.
+     */
+    private final List<IpPort> PACKED_DHT_IP_PORTS;
     
     /**
      * The list of extra ip/ports contained in this reply.
@@ -128,6 +134,16 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Constant for the query key reported for the pong.
      */
     private final QueryKey QUERY_KEY;
+    
+    /**
+     * Constant for the DHT Version. 
+     */
+    private final int DHT_VERSION;
+    
+    /**
+     * Contant for the DHT mode (active/passive/none)
+     */
+    private final DHTMode DHT_MODE;
 
     /**
      * Constant boolean for whether or not this pong contains any GGEP
@@ -169,14 +185,15 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      */
     public static PingReply create(byte[] guid, byte ttl) {
-        return create(guid, ttl, IpPort.EMPTY_LIST);
+        return create(guid, ttl, IpPort.EMPTY_LIST, IpPort.EMPTY_LIST);
     }
     
     /**
      * Creates a new <tt>PingReply</tt> for this host with the specified
      * GUID, TTL & packed hosts.
      */
-    public static PingReply create(byte[] guid, byte ttl, Collection<? extends IpPort> hosts) {
+    public static PingReply create(byte[] guid, byte ttl, Collection<? extends IpPort> gnutHosts, 
+            Collection<? extends IpPort> dhtHosts) {
         return create(
             guid,
             ttl,
@@ -192,24 +209,26 @@ public class PingReply extends Message implements Serializable, IpPort {
                 ApplicationSettings.LANGUAGE.getValue(),
             RouterService.getConnectionManager()
                 .getNumLimeWireLocalePrefSlots(),
-            hosts);
+            gnutHosts, dhtHosts);
     }
  
      /**
      * Creates a new PingReply for this host with the specified
      * GUID, TTL & return address.
-     */   
+     */ 
     public static PingReply create(byte[] guid, byte ttl, IpPort addr) {
-        return create(guid, ttl, addr, IpPort.EMPTY_LIST);
+        return create(guid, ttl, addr, IpPort.EMPTY_LIST, IpPort.EMPTY_LIST);
     }
     
     
     /**
      * Creates a new PingReply for this host with the specified
-     * GUID, TTL, return address & packed hosts.
+     * GUID, TTL, return address & packed hosts. Either collection 
+     * of hosts can be null!
      */
     public static PingReply create(byte[] guid, byte ttl,
-                                   IpPort returnAddr, Collection<? extends IpPort> hosts) {
+                                   IpPort returnAddr, Collection<? extends IpPort> gnutHosts, 
+                                   Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(Statistics.instance().calculateDailyUptime(),
                             RouterService.isSupernode(),
                             UDPService.instance().isGUESSCapable());
@@ -221,7 +240,9 @@ public class PingReply extends Message implements Serializable, IpPort {
                                         .getNumLimeWireLocalePrefSlots());
                                         
         addAddress(ggep, returnAddr);
-        addPackedHosts(ggep, hosts);
+        
+        addPackedHosts(ggep, gnutHosts, dhtHosts);
+        
         return create(guid,
                       ttl,
                       RouterService.getPort(),
@@ -426,7 +447,8 @@ public class PingReply extends Message implements Serializable, IpPort {
       boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
       String locale, int slots) {    
         return create(guid, ttl, port, ip, files, kbytes, isUltrapeer,
-                      dailyUptime, isGuessCapable, locale, slots, IpPort.EMPTY_LIST);
+                      dailyUptime, isGuessCapable, locale, slots, IpPort.EMPTY_LIST,
+                      IpPort.EMPTY_LIST);
     }
     
     /**
@@ -450,16 +472,18 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param isGuessCapable guess capable
      * @param locale the locale 
      * @param slots the number of locale preferencing slots available
-     * @param hosts the hosts to pack into this PingReply
+     * @param gnutHosts the Gnutella hosts to pack into this PingReply
+     * @param dhtHosts the DHT hosts to pack into this PingReply
      */
     public static PingReply
         create(byte[] guid, byte ttl,
                int port, byte[] ip, long files, long kbytes,
                boolean isUltrapeer, int dailyUptime, boolean isGuessCapable,
-               String locale, int slots, Collection<? extends IpPort> hosts) {
+               String locale, int slots, Collection<? extends IpPort> gnutHosts, 
+               Collection<? extends IpPort> dhtHosts) {
         GGEP ggep = newGGEP(dailyUptime, isUltrapeer, isGuessCapable);
         addLocale(ggep, locale, slots);
-        addPackedHosts(ggep, hosts);
+        addPackedHosts(ggep, gnutHosts , dhtHosts);
         return create(guid,
                       ttl,
                       port,
@@ -700,8 +724,12 @@ public class PingReply extends Message implements Serializable, IpPort {
         InetAddress myIP=null;
         int myPort=0;
         List<IpPort> packedIPs = Collections.emptyList();
+        List<IpPort> packedDHTIPs = Collections.emptyList();
         List<IpPort> packedCaches = Collections.emptyList();
         String cacheAddress = null;
+        
+        int dhtVersion = -1;
+        DHTMode dhtMode = null;
         
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
@@ -742,6 +770,23 @@ public class PingReply extends Message implements Serializable, IpPort {
                     if(bytes.length >= 3) {
                         freeLeafSlots = bytes[1];
                         freeUltrapeerSlots = bytes[2];
+                    }
+                } catch (BadGGEPPropertyException e) {}
+            }
+            
+            if(ggep.hasKey((GGEP.GGEP_HEADER_DHT_SUPPORT))) {
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
+                    if(bytes.length >= 3) {
+                        dhtVersion = ByteOrder.beb2short(bytes, 0);
+                        byte mode = (byte) (bytes[2] & DHTMode.DHT_MODE_MASK);
+                        if( mode == DHTMode.NONE.getByte()) {
+                            dhtMode = DHTMode.NONE;
+                        } else if(mode == DHTMode.ACTIVE.getByte()) {
+                            dhtMode = DHTMode.ACTIVE;
+                        } else if(mode == DHTMode.PASSIVE.getByte()) {
+                            dhtMode = DHTMode.PASSIVE;
+                        }
                     }
                 } catch (BadGGEPPropertyException e) {}
             }
@@ -803,6 +848,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                 } catch(BadPacketException bpe) {}
             }
             
+            if(ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS)) {
+                try {
+                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_DHT_IPPORTS);
+                    packedDHTIPs = NetworkUtils.unpackIps(data);
+                } catch(BadGGEPPropertyException bad) {
+                } catch(BadPacketException bpe) {}
+            }
+            
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
                     String data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
@@ -829,7 +882,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         else
             UDP_CACHE_ADDRESS = cacheAddress;
         PACKED_IP_PORTS = packedIPs;
+        PACKED_DHT_IP_PORTS = packedDHTIPs;
         PACKED_UDP_HOST_CACHES = packedCaches;
+        DHT_VERSION = dhtVersion;
+        DHT_MODE = dhtMode;
     }
 
 
@@ -852,6 +908,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         // indicate UP support
         if (isUltrapeer)
             addUltrapeerExtension(ggep);
+        
+        // add DHT support
+        addDHTExtension(ggep);
         
         // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
@@ -906,11 +965,17 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Adds the packed hosts into this GGEP.
      */
-    private static GGEP addPackedHosts(GGEP ggep, Collection<? extends IpPort> hosts) {
-        if(hosts == null || hosts.isEmpty())
-            return ggep;
-            
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(hosts));
+    private static GGEP addPackedHosts(GGEP ggep,  Collection<? extends IpPort> gnutHosts, 
+            Collection<? extends IpPort> dhtHosts) {
+        
+        if(gnutHosts != null && !gnutHosts.isEmpty()) {
+            ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(gnutHosts));
+        }
+        
+        if(dhtHosts != null && !dhtHosts.isEmpty()) {
+            ggep.put(GGEP.GGEP_HEADER_DHT_IPPORTS, NetworkUtils.packIpPorts(dhtHosts));
+        }
+        
         return ggep;
     }
 
@@ -932,6 +997,31 @@ public class PingReply extends Message implements Serializable, IpPort {
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
+    }
+    
+    /**
+     * Adds the DHT GGEP extension to the pong.  This has the version of
+     * the DHT that we support as well as the mode of this node (active/passive).
+     * 
+     * @param ggep the <tt>GGEP</tt> instance to add the extension to
+     */
+    private static void addDHTExtension(GGEP ggep) {
+        byte[] payload = new byte[3];
+        // put version
+        ByteOrder.short2beb((short)RouterService.getDHTManager().getVersion(), 
+                             payload, 0);
+        if(RouterService.isDHTNode()) {
+            if(RouterService.isActiveDHTNode()) {
+                payload[2] = DHTMode.ACTIVE.getByte();
+            } else {
+                payload[2] = DHTMode.PASSIVE.getByte();
+            }
+        } else {
+            payload[2] = DHTMode.NONE.getByte();
+        }
+
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_DHT_SUPPORT, payload);
     }
 
     /** puts major as the high order bits, minor as the low order bits.
@@ -1131,10 +1221,25 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
     
     /**
+     * Gets the list of packed DHT IP/Ports.
+     */
+    public List<IpPort> getPackedDHTIPPorts() {
+        return PACKED_DHT_IP_PORTS;
+    }
+    
+    /**
      * Gets a list of packed IP/Ports of UDP Host Caches.
      */
     public List<IpPort> getPackedUDPHostCaches() {
         return PACKED_UDP_HOST_CACHES;
+    }
+    
+    public DHTMode getDHTMode() {
+        return DHT_MODE;
+    }
+    
+    public int getDHTVersion() {
+        return DHT_VERSION;
     }
 
     /**

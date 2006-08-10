@@ -1,0 +1,57 @@
+package com.limegroup.gnutella.dht;
+
+import java.net.SocketAddress;
+import java.util.List;
+
+import com.limegroup.gnutella.LifecycleListener;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.mojito.MojitoDHT;
+
+public interface DHTManager extends LifecycleListener{
+    
+    public static enum DHTMode {
+        NONE((byte)0x00),ACTIVE((byte)0x01),PASSIVE((byte)0x20);
+        
+        public static final byte DHT_MODE_MASK = 0x0F;
+        
+        private byte mode;
+        
+        DHTMode(byte mode){
+            this.mode = mode;
+        }
+        
+        public byte getByte() {
+            return mode;
+        }
+        
+        public boolean isActive() {
+            return ((mode & DHT_MODE_MASK) == ACTIVE.getByte());
+        }
+        
+    }
+    
+    public static final byte DHT_MODE_MASK = 0x0F;
+    
+    public void start(boolean activeMode);
+
+    public void stop();
+    
+    public void switchMode(boolean toActiveMode);
+
+    public void addDHTNode(SocketAddress hostAddress);
+    
+    public void addressChanged();
+
+    public List<IpPort> getActiveDHTNodes(int maxNodes);
+
+    public boolean isActiveNode();
+    
+    public boolean isRunning();
+    
+    public boolean isWaitingForNodes();
+    
+    public MojitoDHT getMojitoDHT();
+    
+    public int getVersion();
+
+}

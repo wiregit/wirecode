@@ -206,7 +206,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = MessageFactory.read(in, Message.N_MULTICAST, HEADER_BUF);
+                    Message message = MessageFactory.read(in, HEADER_BUF, Message.N_MULTICAST);
                     if(message == null)
                         continue;
                     MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());

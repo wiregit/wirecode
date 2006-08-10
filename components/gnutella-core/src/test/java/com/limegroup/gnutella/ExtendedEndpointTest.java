@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
@@ -102,12 +103,14 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         e.recordConnectionFailure();
         TestExtendedEndpoint.now+=ExtendedEndpoint.WINDOW_TIME; //1x
         e.recordConnectionFailure();
+        e.setDHTVersion(0);
+        e.setDHTMode(DHTMode.NONE);
         StringWriter out=new StringWriter();
         e.write(out);
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,3492,1,100,86400113;113,"
                      + ApplicationSettings.DEFAULT_LOCALE.getValue() 
-                     + ",\n",
+                     + ",,0,NONE,\n",
                      out.toString());
     }
 
@@ -140,7 +143,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,,"+timeString+",,"
                      + "," + ApplicationSettings.DEFAULT_LOCALE.getValue()
-                     + ",\n",
+                     + ",,,\n",
                      out.toString());
     }
 
@@ -159,6 +162,11 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(86400113, ((Long)iter.next()).longValue());
         assertEquals(113, ((Long)iter.next()).longValue());
         assertTrue(!iter.hasNext());
+        e=ExtendedEndpoint.read(
+            "127.0.0.1:6348,,A,, 86400113;113,,,3,ACTIVE,\n");
+        assertTrue(e.supportsDHT());
+        assertEquals(3, e.getDHTVersion());
+        assertEquals(DHTMode.ACTIVE, e.getDHTMode());
     }
 
    public void testReadOldStyle() throws Exception {
@@ -186,13 +194,13 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(0, e.getUDPHostCacheFailures());
         StringWriter writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,0\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,0,,\n", writer.toString());
         e.recordUDPHostCacheFailure();
         e.recordUDPHostCacheFailure();
         e.recordUDPHostCacheFailure();
         writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,3\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,3,,\n", writer.toString());
         e.setUDPHostCache(false);
         assertFalse(e.isUDPHostCache());
         try {
@@ -205,9 +213,9 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         } catch(AssertFailure expected) {}
         writer = new StringWriter();
         e.write(writer);
-        assertEquals("1.3.4.5:6348,,1097611864117,,,en,\n", writer.toString());
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,,,\n", writer.toString());
         
-        e = ExtendedEndpoint.read("www.limewire.org:6346,,,,,en,0");
+        e = ExtendedEndpoint.read("www.limewire.org:6346,,,,,en,0,");
         assertTrue(e.isUDPHostCache());
         assertEquals(0, e.getUDPHostCacheFailures());
     }

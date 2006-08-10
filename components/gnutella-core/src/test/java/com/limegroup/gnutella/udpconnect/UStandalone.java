@@ -19,6 +19,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
@@ -389,15 +390,8 @@ public class UStandalone extends ActivityCallbackStub
 
     /////////////////////////// ActivityCallback methods //////////////////////
 
-    public void connectionInitializing(Connection c) {
-    }
-
-    public void connectionInitialized(Connection c) {
-    }
-
-    public void connectionClosed(Connection c) {
-    }
-
+    public void handleLifecycleEvent(LifecycleEvent evt) {}
+    
     public void knownHost(Endpoint e) {
     }
 
@@ -425,7 +419,7 @@ public class UStandalone extends ActivityCallbackStub
 		t.printStackTrace();
     }
 
-    public void addressStateChanged() {}
+    public void handleAddressStateChanged() {}
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -500,4 +494,5 @@ public class UStandalone extends ActivityCallbackStub
 	}
 
 	public void acceptedIncomingChanged(boolean status) { }
+
 }

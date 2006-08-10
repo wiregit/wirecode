@@ -299,10 +299,16 @@ public final class ConnectionSettings extends LimeProps {
     	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",85000l);
     
     /**
-     * How many pongs to send back for each ping.
+     * How many packed IPP of hosts to send back in each pong.
      */
-    public static final IntSetting NUM_RETURN_PONGS =
+    public static final IntSetting NUM_HOSTS_PONG =
         FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",5,25);
+    
+    /**
+     * The percentage of dht hosts to gnutella hosts in pongs 
+     */
+    public static final IntSetting DHT_TO_GNUT_HOSTS_PONG = 
+        FACTORY.createSettableIntSetting("DHT_TO_GNUT_HOSTS_PONG", 50, "dht_gnutella_hosts_pong", 0, 100);
     
     /**
      * Setting to disable bootstrapping.. used only in tests.
@@ -363,6 +369,13 @@ public final class ConnectionSettings extends LimeProps {
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
         FACTORY.createSettablePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
                 "ConnectionSettings.QRTSizeInKibiEntries", 64, 256);
+    
+    public static final IntSetting STABLE_PERCONNECT_MESSAGES_THRESHOLD =
+        FACTORY.createIntSetting("STABLE_MESSAGES_THRESHOLD", 5);
+    
+    public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD =
+        FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
+    
     
     /**
      * Helper method left from Settings Manager
