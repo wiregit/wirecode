@@ -41,12 +41,14 @@ import com.limegroup.mojito.util.Trie.Cursor;
 
 public class RouteTableImpl implements RouteTable {
     
+    private static final long serialVersionUID = -7351267868357880369L;
+
     private static final Log LOG = LogFactory.getLog(RouteTableImpl.class);
     
     /**
      * The <tt>StatisticsContainer</tt> for the routing table stats.
      */
-    private RoutingStatisticContainer routingStats;
+    private transient RoutingStatisticContainer routingStats;
     
     /**
      * Trie of Buckets and the Buckets are a Trie of Contacts
@@ -66,7 +68,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * A reference to the RouteTable callback
      */
-    private Callback callback;
+    private transient Callback callback;
     
     public RouteTableImpl() {
         bucketTrie = new PatriciaTrie<KUID, Bucket>();
@@ -118,18 +120,24 @@ public class RouteTableImpl implements RouteTable {
         assert (existing.getNodeID().equals(node.getNodeID()));
         
         /*
+         * The other Node collides with our Node ID! Do nothing,
+         * the other guy will change its Node ID!
+         */
+        if (isLocalNode(existing) && !isLocalNode(node)) {
+            return;
+        }
+        
+        /*
          * A non-live Contact will never replace a live Contact!
          */
-        
-        if (existing.isAlive() && !node.isAlive()) {
+        if (existing.isAlive() && !node.isAlive() ) {
             return;
         }
         
         if (!existing.isAlive() 
                 || isLocalNode(node)
-                || existing.equals(node) // <- checks nodeId + address!
+                || existing.equals(node) // <- checks only nodeId + address!
                 || ContactUtils.areLocalContacts(existing, node)) {
-            
             
             /*
              * See JIRA issue MOJITO-54
