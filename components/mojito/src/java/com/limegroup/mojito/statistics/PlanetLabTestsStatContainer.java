@@ -22,13 +22,13 @@ package com.limegroup.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.KUID;
 
 
 public class PlanetLabTestsStatContainer extends StatisticContainer {
 
-    public PlanetLabTestsStatContainer(MojitoDHT dht) {
-        super(dht);
+    public PlanetLabTestsStatContainer(KUID nodeId) {
+        super(nodeId);
     }
 
     public void writeStats(Writer writer) throws IOException {

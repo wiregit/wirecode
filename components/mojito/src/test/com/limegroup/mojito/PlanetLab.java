@@ -301,7 +301,7 @@ public class PlanetLab {
             
             this.value = value;
             
-            planetlabStats = new PlanetLabTestsStatContainer(dht);
+            planetlabStats = new PlanetLabTestsStatContainer(dht.getLocalNodeID());
         }
         
         public void run() {

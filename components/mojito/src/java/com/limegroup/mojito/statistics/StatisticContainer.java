@@ -23,32 +23,45 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.mojito.MojitoDHT;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.mojito.KUID;
 
 
-public abstract class StatisticContainer{
+public abstract class StatisticContainer {
 
-    public StatisticContainer(MojitoDHT dht) {
-        dht.getDHTStats().addStatisticContainer(this);
-    }
+    private static final Log LOG = LogFactory.getLog(StatisticContainer.class);
     
-    protected StatisticContainer() {}
+    public StatisticContainer(KUID nodeId) {
+        DHTStats stats = DHTStatsFactory.getInstance(nodeId);
+        if (stats != null) {
+            stats.addStatisticContainer(this);
+        } else {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("No DHTStats registered for " + nodeId);
+            }
+        }
+    }
     
     public void writeStats(Writer writer) throws IOException {
         String delimiter = DHTNodeStat.FILE_DELIMITER;
         Class superclass = getClass().getSuperclass();
         Class declaringClass = getClass().getDeclaringClass();
-        List fieldsList = new LinkedList();
+        List<Field> fieldsList = new ArrayList<Field>();
+        
         if(superclass != null) {
             fieldsList.addAll(Arrays.asList(superclass.getFields()));
         }
+        
         if(declaringClass != null) {
             fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
         }
+        
         fieldsList.addAll(Arrays.asList(getClass().getFields()));
         Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
         for(int i=0; i<fields.length; i++) {

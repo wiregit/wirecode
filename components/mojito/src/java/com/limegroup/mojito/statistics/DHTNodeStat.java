@@ -31,32 +31,30 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.routing.RouteTable;
 
 
-public class DHTNodeStat implements DHTStats{
+public class DHTNodeStat implements DHTStats {
 
     public static final String FILE_DELIMITER = "\t";
     
-    private final Context context;
+    Context context;
     
-    private String nodeID;
-
     /**
      * <tt>List</tt> of all statistics classes.
      */
-    private List DHT_STATS = new LinkedList();
+    private List<StatisticContainer> dhtStats = new LinkedList<StatisticContainer>();
     
-    public DHTNodeStat(Context context) {
+    DHTNodeStat(Context context) {
         this.context = context;
     }
     
     public void addStatisticContainer(StatisticContainer statsContainer) {
-        synchronized (DHT_STATS) {
-            DHT_STATS.add(statsContainer);
+        synchronized (dhtStats) {
+            dhtStats.add(statsContainer);
         }
     }
     
     public void dumpDataBase(Writer writer) throws IOException{
         Collection<DHTValue> values = context.getDatabase().values();
-        writer.write(nodeID+"\n");
+        writer.write(context.getLocalNodeID() + "\n");
         for (DHTValue value : values) {
             writer.write(value.toString());
             writer.write("\n");
@@ -66,12 +64,9 @@ public class DHTNodeStat implements DHTStats{
     }
     
     public void dumpStats(Writer writer, boolean writeSingleLookups) throws IOException{
-        if(nodeID == null) {
-            nodeID = context.getLocalNodeID().toHexString();
-        }
-        writer.write(nodeID+"\n");
-        synchronized (DHT_STATS) {
-            for (Iterator iter = DHT_STATS.iterator(); iter.hasNext();) {
+        writer.write(context.getLocalNodeID() + "\n");
+        synchronized (dhtStats) {
+            for (Iterator iter = dhtStats.iterator(); iter.hasNext();) {
                 StatisticContainer stat = (StatisticContainer) iter.next();
                 if(!writeSingleLookups && (stat instanceof GlobalLookupStatisticContainer)) {
                     GlobalLookupStatisticContainer lookupStat = (GlobalLookupStatisticContainer) stat;
@@ -87,11 +82,8 @@ public class DHTNodeStat implements DHTStats{
 
     public void dumpRouteTable(Writer writer) throws IOException{
         RouteTable routeTable = context.getRouteTable();
-        if(nodeID == null) {
-            nodeID = context.getLocalNodeID().toHexString();
-        }
-        writer.write(nodeID);
-        writer.write(FILE_DELIMITER+routeTable.toString());
+        writer.write(context.getLocalNodeID().toString());
+        writer.write(FILE_DELIMITER + routeTable.toString());
         writer.write("\n");
         writer.flush();
     }

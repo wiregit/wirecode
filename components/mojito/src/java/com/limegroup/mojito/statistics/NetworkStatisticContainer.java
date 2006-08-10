@@ -22,13 +22,13 @@ package com.limegroup.mojito.statistics;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
 
 
 public class NetworkStatisticContainer extends StatisticContainer {
 
-    public NetworkStatisticContainer(Context context) {
-        super(context);
+    public NetworkStatisticContainer(KUID nodeId) {
+        super(nodeId);
     }
     
     public void writeStats(Writer writer) throws IOException {

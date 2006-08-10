@@ -76,8 +76,8 @@ import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.statistics.DHTNodeStat;
 import com.limegroup.mojito.statistics.DHTStats;
+import com.limegroup.mojito.statistics.DHTStatsFactory;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
@@ -123,8 +123,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private long lastEstimateTime = 0L;
     private int estimatedSize = 0;
     
-    private LinkedList<Integer> localSizeHistory = new LinkedList<Integer>();
-    private LinkedList<Integer> remoteSizeHistory = new LinkedList<Integer>();
+    private List<Integer> localSizeHistory = new LinkedList<Integer>();
+    private List<Integer> remoteSizeHistory = new LinkedList<Integer>();
     
     private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
     
@@ -146,11 +146,11 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
-        dhtStats = new DHTNodeStat(this);
+        dhtStats = DHTStatsFactory.newInstance(this);
         
-        networkStats = new NetworkStatisticContainer(this);
-        globalLookupStats = new GlobalLookupStatisticContainer(this);
-        databaseStats = new DatabaseStatisticContainer(this);
+        networkStats = new NetworkStatisticContainer(localNode.getNodeID());
+        globalLookupStats = new GlobalLookupStatisticContainer(localNode.getNodeID());
+        databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
         
         database = new DatabaseImpl();
         routeTable = new RouteTableImpl();
@@ -842,7 +842,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             remoteSizeHistory.add(new Integer(remoteSize));
             if (remoteSizeHistory.size() 
                     >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
-                remoteSizeHistory.removeFirst();
+                remoteSizeHistory.remove(0);
             }
         }
     }
@@ -893,7 +893,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         synchronized (localSizeHistory) {
             localSizeHistory.add(new Integer(estimatedSize));
             if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
-                localSizeHistory.removeFirst();
+                localSizeHistory.remove(0);
             }
         
             int localSizeSum = 0;

@@ -34,6 +34,7 @@ import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
+import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.PatriciaTrie;
 import com.limegroup.mojito.util.Trie.Cursor;
@@ -45,7 +46,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * The <tt>StatisticsContainer</tt> for the routing table stats.
      */
-    //private RoutingStatisticContainer routingStats;
+    private RoutingStatisticContainer routingStats;
     
     /**
      * Trie of Buckets and the Buckets are a Trie of Contacts
@@ -81,6 +82,9 @@ public class RouteTableImpl implements RouteTable {
     }
     
     public void setRouteTableCallback(Callback callback) {
+        if (routingStats == null && callback != null) {
+            routingStats = new RoutingStatisticContainer(callback.getLocalNode().getNodeID());
+        }
         this.callback = callback;
     }
 
@@ -158,10 +162,9 @@ public class RouteTableImpl implements RouteTable {
                     LOG.warn(node + " is trying to spoof " + result);
                 }
                 
-                // DO NOTHING! The DefaultMessageHandler 
-                // takes care of everything else!
-                
-                //TODO add spoofer to ban list
+                // DO NOTHING! The DefaultMessageHandler takes care 
+                // of everything else! DO NOT BAN THE NODE!!!
+                // Reason: It was maybe just a Node ID collision!
             }
             
             public void handleThrowable(Throwable ex) {
@@ -214,11 +217,13 @@ public class RouteTableImpl implements RouteTable {
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
         bucket.addLiveContact(node);
         
-        /*if (node.isAlive()) {
-            routingStats.LIVE_NODE_COUNT.incrementStat();
-        } else {
-            routingStats.UNKNOWN_NODE_COUNT.incrementStat();
-        }*/
+        if (routingStats != null) {
+            if (node.isAlive()) {
+                routingStats.LIVE_NODE_COUNT.incrementStat();
+            } else {
+                routingStats.UNKNOWN_NODE_COUNT.incrementStat();
+            }
+        }
     }
     
     protected synchronized boolean split(Bucket bucket) {
@@ -263,7 +268,9 @@ public class RouteTableImpl implements RouteTable {
             assert (oldRight == null);
             
             // Increment by one 'cause see above.
-            //routingStats.BUCKET_COUNT.incrementStat();
+            if (routingStats != null) {
+                routingStats.BUCKET_COUNT.incrementStat();
+            }
             
             // WHOHOOO! WE SPLIT THE BUCKET!!!
             return true;
@@ -286,7 +293,11 @@ public class RouteTableImpl implements RouteTable {
                 
                 bucket.addLiveContact(node);
                 touchBucket(bucket);
-                //routingStats.LIVE_NODE_COUNT.incrementStat();
+                
+                if (routingStats != null) {
+                    routingStats.LIVE_NODE_COUNT.incrementStat();
+                }
+                
                 return;
             }
         }
@@ -298,7 +309,10 @@ public class RouteTableImpl implements RouteTable {
         // If the cache is full the least recently seen
         // node will be evicted!
         bucket.addCachedContact(node);
-        //routingStats.REPLACEMENT_COUNT.incrementStat();
+        
+        if (routingStats != null) {
+            routingStats.REPLACEMENT_COUNT.incrementStat();
+        }
         
         pingLeastRecentlySeenNode(bucket);
     }
@@ -344,7 +358,10 @@ public class RouteTableImpl implements RouteTable {
         
         node.handleFailure();
         if (node.isDead()) {
-            //routingStats.DEAD_NODE_COUNT.incrementStat();
+            
+            if (routingStats != null) {
+                routingStats.DEAD_NODE_COUNT.incrementStat();
+            }
             
             if (bucket.containsLiveContact(nodeId)) {
                 if (LOG.isTraceEnabled()) {
@@ -525,7 +542,10 @@ public class RouteTableImpl implements RouteTable {
             }
         });
         
-        //routingStats.BUCKET_REFRESH_COUNT.addData(randomIds.size());
+        if (routingStats != null) {
+            routingStats.BUCKET_REFRESH_COUNT.addData(randomIds.size());
+        }
+        
         return randomIds;
     }
     

@@ -23,8 +23,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -36,7 +36,7 @@ import com.limegroup.gnutella.util.IntBuffer;
  * history for the given statistic, providing access to the average
  * value, the maximum value, etc.
  */
-public abstract class AbstractStatistic implements Statistic {
+abstract class AbstractStatistic implements Statistic {
 
 	/**
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
@@ -192,14 +192,17 @@ public abstract class AbstractStatistic implements Statistic {
 					if(_fileName == null || _fileName.equals("")) {
 						Class superclass = getClass().getSuperclass();
 						Class declaringClass = getClass().getDeclaringClass();
-						List fieldsList = new LinkedList();
-						if(superclass != null) {
+						List<Field> fieldsList = new ArrayList<Field>();
+						
+                        if(superclass != null) {
 							fieldsList.addAll(Arrays.asList(superclass.getFields()));
 						}
+                        
 						if(declaringClass != null) {
 							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
 						}
-						fieldsList.addAll(Arrays.asList(getClass().getFields()));
+						
+                        fieldsList.addAll(Arrays.asList(getClass().getFields()));
 						Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
 						for(int i=0; i<fields.length; i++) {
 							try {

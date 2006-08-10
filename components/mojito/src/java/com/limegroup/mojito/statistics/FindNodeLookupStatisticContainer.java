@@ -54,8 +54,6 @@ public class FindNodeLookupStatisticContainer extends SingleLookupStatisticConta
     public Statistic FIND_NODE_LOOKUP_TIME =
         new SimpleStatistic();
     
-    
-    
     public FindNodeLookupStatisticContainer(Context context, KUID lookupKey) {
         super(context, lookupKey);
     }

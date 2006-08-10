@@ -25,7 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-
+import java.util.List;
 
 
 public class StatsManager {
@@ -38,7 +38,7 @@ public class StatsManager {
     
     private static final String ROUTINGTABLE_FILE = "routingTable";
     
-    private final ArrayList dhtNodeStats = new ArrayList();
+    private final List<DHTStats> dhtNodeStats = new ArrayList<DHTStats>();
     
     private String outputDir = "";
     

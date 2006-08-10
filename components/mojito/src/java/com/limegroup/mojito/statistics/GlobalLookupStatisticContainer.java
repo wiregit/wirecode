@@ -21,20 +21,21 @@ package com.limegroup.mojito.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 
-import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
 
 
 public class GlobalLookupStatisticContainer extends StatisticContainer {
     
     private static final int MAX_LOOKUPS = 20;
-    private LinkedList singleLookups = new LinkedList();
+    private List<StatisticContainer> singleLookups = new ArrayList<StatisticContainer>();
     
 
-    public GlobalLookupStatisticContainer(Context context) {
-        super(context);
+    public GlobalLookupStatisticContainer(KUID nodeId) {
+        super(nodeId);
     }
     
     /**
@@ -83,7 +84,7 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
        synchronized (singleLookups) {
            singleLookups.add(lookupStat);
            if(singleLookups.size() > MAX_LOOKUPS) {
-               singleLookups.removeFirst();
+               singleLookups.remove(0);
            }
        }
    }
