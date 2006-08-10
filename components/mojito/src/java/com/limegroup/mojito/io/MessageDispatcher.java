@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.security.PublicKey;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -52,7 +51,6 @@ import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
-import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageFormatException;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
@@ -63,7 +61,6 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
@@ -97,8 +94,6 @@ public abstract class MessageDispatcher implements Runnable {
     
     protected final Context context;
     
-    private Callback callback;
-    
     private DefaultMessageHandler defaultHandler;
     private PingRequestHandler pingHandler;
     private FindNodeRequestHandler findNodeHandler;
@@ -123,14 +118,6 @@ public abstract class MessageDispatcher implements Runnable {
         statsHandler = new StatsRequestHandler(context);
         
         buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
-    }
-    
-    public void setMessageDispatcherCallback(Callback callback) {
-        this.callback = callback;
-    }
-    
-    public Callback getMessageDispatcherCallback() {
-        return callback;
     }
     
     public abstract void bind(SocketAddress address) throws IOException;
@@ -208,7 +195,7 @@ public abstract class MessageDispatcher implements Runnable {
         DHTMessage message = tag.getMessage();
         
         // Make sure we're not sending messages to ourself
-        if (isLocalNode(nodeId, dst)
+        if (context.isLocalNode(nodeId, dst)
                 && !(message instanceof PingRequest)) {
             
             if (LOG.isErrorEnabled()) {
@@ -281,7 +268,7 @@ public abstract class MessageDispatcher implements Runnable {
      * A helper method to serialize DHTMessage(s)
      */
     protected final ByteBuffer serialize(SocketAddress dst, DHTMessage message) throws IOException {
-        return getMessageFactory().writeMessage(dst, message);
+        return context.getMessageFactory().writeMessage(dst, message);
     }
     
     /**
@@ -289,7 +276,7 @@ public abstract class MessageDispatcher implements Runnable {
      */
     protected final DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
-        return getMessageFactory().createMessage(src, data);
+        return context.getMessageFactory().createMessage(src, data);
     }
     
     /**
@@ -340,7 +327,7 @@ public abstract class MessageDispatcher implements Runnable {
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getContactAddress();
         
-        if (isLocalNode(nodeId, src)
+        if (context.isLocalNode(nodeId, src)
                 && !(message instanceof PingResponse)) {
             
             if (LOG.isErrorEnabled()) {
@@ -408,7 +395,7 @@ public abstract class MessageDispatcher implements Runnable {
             processResponse(receipt, response);
             
         } else if (message instanceof RequestMessage) {
-            if (getLocalNode().isFirewalled()) {
+            if (context.getLocalNode().isFirewalled()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.trace("Local Node is firewalled, dropping " + message);
                 }
@@ -427,7 +414,7 @@ public abstract class MessageDispatcher implements Runnable {
     private void processResponse(Receipt receipt, ResponseMessage response) {
         ResponseProcessor processor = new ResponseProcessor(receipt, response);
         if (response instanceof DHTSecureMessage) {
-            if (callback.getMasterKey() != null) {
+            if (context.getMasterKey() != null) {
                 verify((DHTSecureMessage)response, processor);
             } else if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping secure response " 
@@ -444,7 +431,7 @@ public abstract class MessageDispatcher implements Runnable {
     private void processRequest(RequestMessage request) {
         RequestProcessor processor = new RequestProcessor(request);
         if (request instanceof DHTSecureMessage) {
-            if (callback.getMasterKey() != null) {
+            if (context.getMasterKey() != null) {
                 verify((DHTSecureMessage)request, processor);
             } else if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping secure request " 
@@ -580,26 +567,6 @@ public abstract class MessageDispatcher implements Runnable {
         }
     }
     
-    protected Contact getLocalNode() {
-        return callback.getLocalNode();
-    }
-    
-    protected MessageFactory getMessageFactory() {
-        return callback.getMessageFactory();
-    }
-    
-    protected boolean isLocalNode(Contact node) {
-        return node.equals(getLocalNode());
-    }
-    
-    protected boolean isLocalNode(KUID nodeId, SocketAddress addr) {
-        if (nodeId == null) {
-            return false;
-        }
-        Contact local = getLocalNode();
-        return nodeId.equals(local.getNodeID()) && addr.equals(local.getContactAddress());
-    }
-    
     /**
      * A map of MessageID -> Receipts
      */
@@ -709,7 +676,7 @@ public abstract class MessageDispatcher implements Runnable {
             }
             
             networkStats.LATE_MESSAGES_COUNT.incrementStat();
-            callback.getRouteTable().add(node);
+            context.getRouteTable().add(node);
         }
     }
     
@@ -795,16 +762,5 @@ public abstract class MessageDispatcher implements Runnable {
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
         }
-    }
-    
-    public static interface Callback {
-        
-        public Contact getLocalNode();
-        
-        public PublicKey getMasterKey();
-        
-        public RouteTable getRouteTable();
-        
-        public MessageFactory getMessageFactory();
     }
 }
