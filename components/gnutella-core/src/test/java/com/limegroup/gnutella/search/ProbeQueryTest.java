@@ -107,14 +107,12 @@ public final class ProbeQueryTest extends BaseTestCase {
         }                   
 
         QueryRequest query = QueryRequest.createQuery("test");
-        List[] queryLists = 
-            (List[])CREATE_PROBE_LISTS.invoke(null, 
+        List<List> queryLists = 
+            (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
 
-        System.out.println("TTL=1: "+queryLists[0].size()); 
-        System.out.println("TTL=2: "+queryLists[1].size()); 
-        assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
-        assertTrue("should not be too many ttl=1", queryLists[0].size() < 15);
+        assertTrue("should not be any ttl=2 queries", queryLists.get(1).isEmpty());
+        assertTrue("should not be too many ttl=1", queryLists.get(0).size() < 15);
     }
 
     /**
@@ -133,12 +131,12 @@ public final class ProbeQueryTest extends BaseTestCase {
         }                   
 
         QueryRequest query = QueryRequest.createQuery("test");
-        List[] queryLists = 
-            (List[])CREATE_PROBE_LISTS.invoke(null, 
+        List<List> queryLists = 
+            (List<List>)CREATE_PROBE_LISTS.invoke(null, 
                                               new Object[]{connections, query}); 
 
-        assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
-        assertEquals("should not be only 1 ttl=1 query", queryLists[0].size(), 1);
+        assertTrue("should not be any ttl=2 queries", queryLists.get(1).isEmpty());
+        assertEquals("should not be only 1 ttl=1 query", queryLists.get(0).size(), 1);
     }
 
     /**
