@@ -1063,6 +1063,12 @@ public class QueryRequest extends Message implements Serializable{
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
+        
+        // make sure the query is normalized.
+        // (this may have been normalized elsewhere, but it's okay to do it again)
+        if(query != null)
+            query = I18NConvert.instance().getNorm(query);
+        
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
 		   (queryUrns == null || queryUrns.size() == 0)) {

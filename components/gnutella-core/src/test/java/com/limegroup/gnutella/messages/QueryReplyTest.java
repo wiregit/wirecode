@@ -894,7 +894,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     public void testQueryReplyHasAlternates() throws Exception {
-	addFilesToLibrary();
+        addFilesToLibrary();
         addAlternateLocationsToFiles();
         
         boolean checked = false;
@@ -916,8 +916,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
-			if ( hits.length != 1 ) continue;
-			checked = true;
+            if(hits.length == 0)
+                fail("no hit for query: " + qr);
+			if ( hits.length != 1 )
+                continue;
+            
+            checked = true;
 			
 			// first check basic stuff on the response.
 			assertEquals("responses should be equal", testResponse, hits[0]);
@@ -957,7 +961,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			FileDesc fd = fman.get(i);
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = new Response(fd);
-			assertEquals(expectTime, testResponse.getCreateTime());
+			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
             
             String name = fd.getFileName();
             char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
@@ -973,13 +977,16 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
-			if ( hits.length != 1 ) continue;
+            if(hits.length == 0)
+                fail("no reply for query: " + qr);
+			if ( hits.length != 1 )
+                continue;
 			checked = true;
 			
 			// first check basic stuff on the response.
 			assertEquals("responses should be equal", testResponse, hits[0]);
             assertEquals("wrong creation time", expectTime,
-                                                hits[i].getCreateTime());
+                                                hits[0].getCreateTime());
 			    
 			// then actually create a QueryReply and read it, to make
 			// sure we can write & read stuff correctly.
@@ -997,7 +1004,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             List readHits = readQR.getResultsAsList();
             assertEquals("wrong # of results", hits.length, readHits.size());
             Response hit = (Response)readHits.get(0);
-            assertEquals("wrong creation time", expectTime,
+            // rounds off to seconds (drops milliseconds)
+            assertEquals("wrong creation time", expectTime / 1000 * 1000,
                                                 hit.getCreateTime());
 		}
         
