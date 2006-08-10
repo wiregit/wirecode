@@ -231,7 +231,9 @@ public class NodeAssigner {
 
         //if we're an ultrapeer, connect to the DHT in passive mode
         //or if we were allready connected active before, switch to passive mode
-        if(RouterService.isSupernode()) {
+        if(RouterService.isSupernode() 
+                && !DHTSettings.DISABLE_DHT_NETWORK.getValue()
+                && !DHTSettings.DISABLE_DHT_USER.getValue()) {
             if(!RouterService.isDHTNode()) {
                 RouterService.startDHT(false);
             } else if(RouterService.isActiveDHTNode()) {
