@@ -86,7 +86,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The Context is the heart of Mojito where everything comes 
  * together. 
  */
-public class Context implements MojitoDHT, RouteTable.Callback {
+public class Context implements MojitoDHT, RouteTable.Callback, MessageDispatcher.Callback {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -156,6 +156,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         routeTable = new RouteTableImpl();
         
         messageDispatcher = new MessageDispatcherImpl(this);
+        messageDispatcher.setMessageDispatcherCallback(this);
+        
         messageHelper = new MessageHelper(this);
         publisher = new DHTValuePublisher(this);
 
@@ -334,6 +336,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         try {
             Constructor c = clazz.getConstructor(Context.class);
             messageDispatcher = (MessageDispatcher)c.newInstance(this);
+            messageDispatcher.setMessageDispatcherCallback(this);
             return messageDispatcher;
         } catch (Exception err) {
             throw new RuntimeException(err);
