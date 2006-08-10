@@ -10,6 +10,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
@@ -353,18 +355,19 @@ public class NIODispatcherTest extends BaseTestCase {
     	while(t.get() != null)
     		Thread.sleep(10);
     	
-    	
+    	final CountDownLatch executed = new CountDownLatch(1);
     	java.util.concurrent.Future f = NIODispatcher.instance().invokeLater(new Runnable() {
     		public void run() {
     			// should be executed on the dispatch thread
     			assertSame(t.get(), Thread.currentThread());
+    			executed.countDown();
     		}
     	}, 500);
 
     	// and not get executed until the timeout elapses
-    	Thread.sleep(490);
+    	assertFalse(executed.await(495,TimeUnit.MILLISECONDS));
     	assertFalse(f.isDone());
-    	Thread.sleep(20);
+    	assertTrue(executed.await(10,TimeUnit.MILLISECONDS));
     	assertTrue(f.isDone());
     }
     
