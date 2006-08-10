@@ -53,7 +53,7 @@ class IncomingBTHandshaker extends BTHandshaker {
 						LOG.debug("incoming connection for unknown torrent");
 					return false;
 				}
-				else if (torrent.isConnectedTo(loc))
+				else if (torrent.shouldAddConnection(loc))
 					return false;
 				else {
 					observer = torrent.getFetcher();

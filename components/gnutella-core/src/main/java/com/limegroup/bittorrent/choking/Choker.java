@@ -10,9 +10,10 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
-public abstract class Choker implements Runnable {
+public abstract class Choker implements Runnable, Shutdownable {
 	
 	private static final Log LOG = LogFactory.getLog(Choker.class);
 	/*
@@ -35,7 +36,7 @@ public abstract class Choker implements Runnable {
 	/**
 	 * Stops this choker, cancelling any scheduled choking.
 	 */
-	public void stop() {
+	public void shutdown() {
 		if (periodic != null)
 			periodic.cancel(false);
 	}
@@ -44,7 +45,7 @@ public abstract class Choker implements Runnable {
 	 * Starts this choker
 	 */
 	public void start() {
-		stop();
+		shutdown();
 		periodic = invoker.invokeLater(this, RECHOKE_TIMEOUT);
 	}
 
