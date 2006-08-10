@@ -41,11 +41,7 @@ public class BucketNodeTest extends TestCase {
             public Contact getLocalNode() {
                 return localNode;
             }
-
-            public boolean isLocalNode(Contact node) {
-                return node.equals(localNode);
-            }
-
+            
             public DHTFuture<Contact> ping(Contact node) {
                 throw new UnsupportedOperationException();
             }
