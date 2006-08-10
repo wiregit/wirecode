@@ -25,7 +25,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.NameValue;
 
 /**
@@ -354,8 +353,11 @@ public class MetaFileManager extends FileManager {
      */
     protected void buildQRT() {
         super.buildQRT();
-        for(String string : new MultiIterable<String>(getXMLKeyWords(), getXMLIndivisibleKeyWords()))
+        for(String string : getXMLKeyWords())
             _queryRouteTable.add(string);
+        
+        for(String string : getXMLIndivisibleKeyWords())
+            _queryRouteTable.addIndivisible(string);
     }
 
     /**
