@@ -179,6 +179,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"18.239.0.144"});
         IPFilter filter = RouterService.getIpFilter();
+        filter.refreshHosts();
         assertTrue(filter.allow("18.240.0.0"));
         assertTrue(! filter.allow("18.239.0.142"));
         assertTrue(filter.allow("18.239.0.144"));
