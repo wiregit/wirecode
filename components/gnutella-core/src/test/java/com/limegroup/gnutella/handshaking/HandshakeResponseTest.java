@@ -15,6 +15,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -88,7 +89,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         RouterService.getHostCatcher().clear();
         assertEquals(0, RouterService.getHostCatcher().getNumHosts());
         List ipPorts = new LinkedList();
-        ipPorts.add(new Connection("24.67.85.4", 6346));
+        ipPorts.add(new ManagedConnection("24.67.85.4", 6346));
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
             "_initializedConnections", ipPorts);
         
