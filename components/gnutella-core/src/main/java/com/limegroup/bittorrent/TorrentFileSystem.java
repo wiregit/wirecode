@@ -118,9 +118,9 @@ public class TorrentFileSystem implements Serializable {
 			// add the beginning and ending chunks for each file.
 			long position = 0;
 			for (TorrentFile file : files) {
-				file.begin = (int) (position / pieceLength);
+				file.setBegin((int) (position / pieceLength));
 				position += file.length();
-				file.end = (int) (position / pieceLength);
+				file.setEnd((int) (position / pieceLength));
 			}
 			
 			_files = files;
@@ -134,8 +134,8 @@ public class TorrentFileSystem implements Serializable {
 			try {
 				TorrentFile f = new TorrentFile(length, _completeFile
 						.getCanonicalPath());
-				f.begin = 0;
-				f.end = numHashes;
+				f.setBegin(0);
+				f.setEnd(numHashes);
 				_files.add(f);
 			} catch (IOException bad) {
 				throw new ValueException("bad path");
@@ -338,8 +338,8 @@ public class TorrentFileSystem implements Serializable {
 			TorrentFile current = l.get(i);
 			TorrentFile updated = new TorrentFile(current.length(), newPath
 					+ current.getPath().substring(offset));
-			updated.begin = current.begin;
-			updated.end = current.end;
+			updated.setBegin(current.getBegin());
+			updated.setEnd(current.getEnd());
 			l.set(i,updated);
 		}
 	}

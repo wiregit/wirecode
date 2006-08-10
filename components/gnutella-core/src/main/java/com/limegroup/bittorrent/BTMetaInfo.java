@@ -34,6 +34,8 @@ import com.limegroup.gnutella.util.StringUtils;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.bittorrent.bencoding.Token;
+import com.limegroup.bittorrent.disk.DiskManagerFactory;
+import com.limegroup.bittorrent.disk.TorrentDiskManager;
 
 /**
  * Contains information usually parsed in a .torrent file
@@ -262,7 +264,7 @@ public class BTMetaInfo implements Serializable {
 	 * private utility method for initializing the DiskManager
 	 */
 	private void initializeDiskManager(Map data, boolean complete) {
-		_folder = new VerifyingFolder(this, complete, data);
+		_folder = DiskManagerFactory.instance().getManager(this, data, complete);
 	}
 
 	/**

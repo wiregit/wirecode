@@ -5,7 +5,7 @@ import java.io.File;
 /*
  * simple class holding the length and the path of a file
  */
-class TorrentFile extends File {
+public class TorrentFile extends File {
 	private static final long serialVersionUID = 4051327846800962608L;
 
 	private final long length;
@@ -14,7 +14,7 @@ class TorrentFile extends File {
 	 * The indices of the first and last blocks 
 	 * of the torrent this file occupies
 	 */
-	int begin, end;
+	private int begin, end;
 
 	TorrentFile(long length, String path) {
 		super(path);
@@ -25,6 +25,22 @@ class TorrentFile extends File {
 	
 	public long length() {
 		return length;
+	}
+	
+	public void setBegin(int begin) {
+		this.begin = begin;
+	}
+	
+	public int getBegin() {
+		return begin;
+	}
+	
+	public void setEnd(int end) {
+		this.end = end;
+	}
+	
+	public int getEnd() {
+		return end;
 	}
 	
 }

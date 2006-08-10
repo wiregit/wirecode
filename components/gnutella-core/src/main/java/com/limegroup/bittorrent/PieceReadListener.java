@@ -3,7 +3,7 @@ package com.limegroup.bittorrent;
 /**
  * Listener for a disk read event for a piece 
  */
-interface PieceReadListener {
+public interface PieceReadListener {
 
 	/**
 	 * Notification that the disk read has completed.

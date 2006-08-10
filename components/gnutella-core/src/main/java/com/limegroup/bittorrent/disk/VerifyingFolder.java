@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.disk;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -17,6 +17,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.BTInterval;
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.BTPiece;
+import com.limegroup.bittorrent.BTPieceFactory;
+import com.limegroup.bittorrent.PieceReadListener;
+import com.limegroup.bittorrent.TorrentFile;
+import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
@@ -123,7 +130,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	/**
 	 * Disk controller for performing the reads and writes.
 	 */
-	private DiskController<TorrentFile> diskController;
+	private final DiskController<TorrentFile> diskController;
 
 	/**
 	 * constructs instance of this
@@ -131,7 +138,10 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @param info a BTMetaInfo for which to create this Folder.
 	 * @param complete if the download is completed
 	 */
-	public VerifyingFolder(BTMetaInfo info, boolean complete, Map data) {
+	VerifyingFolder(BTMetaInfo info, 
+			boolean complete, 
+			Map data,
+			DiskController<TorrentFile> diskController) {
 		TorrentFileSystem system = info.getFileSystem();
 		_files = complete? system.getFiles() : system.getIncompleteFiles();
 		_info = info;
@@ -139,6 +149,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		partialBlocks = new BlockRangeMap();
 		requestedRanges = new BlockRangeMap();
 		pendingRanges = new BlockRangeMap();
+		this.diskController = diskController;
 		
 		requestedAndPartial = 
 			new MultiIterable<Integer>(partialBlocks.keySet(), 
@@ -333,9 +344,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	private void closeAnyCompletedFiles(int pieceNum) {
 		List<TorrentFile> possiblyCompleted = null;
 		for (TorrentFile t : _files) {
-			if (t.begin > pieceNum)
+			if (t.getBegin() > pieceNum)
 				continue;
-			if (t.end < pieceNum)
+			if (t.getEnd() < pieceNum)
 				break;
 			
 			if (possiblyCompleted == null)
@@ -349,7 +360,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		
 		for (TorrentFile file : possiblyCompleted) {
 			boolean done = true;
-			for(int i = file.begin; i <= file.end; i++) {
+			for(int i = file.getBegin(); i <= file.getEnd(); i++) {
 				if (!hasBlock(i)) {
 					done = false;
 					break;
@@ -372,8 +383,6 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @see com.limegroup.bittorrent.TorrentFileManager#open(com.limegroup.bittorrent.ManagedTorrent)
 	 */
 	public void open(final DiskManagerListener torrent) throws IOException {
-		diskController = new RAFDiskController<TorrentFile>(_files);
-		
 		this.listener = torrent;
 		storedException = null;
 		
@@ -381,7 +390,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		// whether the data on disk should be re-verified
 		isVerifying |= (getBlockSize() == 0);
 		
-		List<TorrentFile> filesToVerify = diskController.open(isComplete(), isVerifying);
+		List<TorrentFile> filesToVerify = diskController.open(_files, isComplete(), isVerifying);
 		
 		// verify any files that needed verification
 		if (filesToVerify != null) {
@@ -731,7 +740,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			lastSet = verifiedBlocks.length();
 		}
 		for (TorrentFile f : l) {
-			for (int i = Math.max(lastSet,f.begin); i <= f.end; i++) 
+			for (int i = Math.max(lastSet,f.getBegin()); i <= f.getEnd(); i++) 
 				VERIFY_QUEUE.invokeLater(new VerifyJob(i),_info.getURN());
 		}
 	}
@@ -851,21 +860,21 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 		
 		public void addInterval(BTInterval in) {
-			IntervalSet s = get(in.blockId);
+			IntervalSet s = get(in.getBlockId());
 			if (s == null) {
 				s = new IntervalSet();
-				put(in.blockId,s);
+				put(in.getBlockId(),s);
 			}
 			s.add(in);
 		}
 		
 		public void removeInterval(BTInterval in) {
-			IntervalSet s = get(in.blockId);
+			IntervalSet s = get(in.getBlockId());
 			if (s == null)
 				return;
 			s.delete(in);
 			if (s.isEmpty())
-				remove(in.blockId);
+				remove(in.getBlockId());
 		}
 		
 		public long byteSize() {

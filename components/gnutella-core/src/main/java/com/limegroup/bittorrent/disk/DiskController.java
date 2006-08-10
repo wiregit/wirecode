@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.disk;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,13 +19,14 @@ interface DiskController<F extends File> {
 
 	/**
 	 * 
+	 * @param files the files this will be controlling
 	 * @param isVerifying if the file should force verification.
 	 * @param complete true if the torrent is complete
-	 * @return List of <tt>TorrentFile</tt> that should be verified,
-	 * null if none
+	 * @return List of files> that should be verified,
+	 * null if none, always a subset of the provided list 
 	 * @throws IOException if a problem occurs.
 	 */
-	public List<F> open(boolean complete, boolean isVerifying)
+	public List<F> open(List<F> files, boolean complete, boolean isVerifying)
 			throws IOException;
 
 	/**

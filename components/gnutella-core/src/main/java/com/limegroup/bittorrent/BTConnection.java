@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
@@ -19,6 +18,7 @@ import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
+import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.BitField;

@@ -17,6 +17,8 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
+import com.limegroup.bittorrent.disk.DiskManagerListener;
+import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;

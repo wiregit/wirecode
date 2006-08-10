@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.disk;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,7 +26,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	/*
 	 * The files of this torrent as an array
 	 */
-	private final List<F> _files;
+	private List<F> _files;
 
 	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
@@ -38,10 +38,6 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	 * a marker that the current file is currently opening.
 	 */
 	private static final RandomAccessFile[] OPENING = new RandomAccessFile[0];
-	
-	RAFDiskController(List<F> files) {
-		_files = files;
-	}
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskController#write(long, byte[])
@@ -80,7 +76,8 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskController#open(boolean, boolean)
 	 */
-	public List<F> open(boolean complete, boolean isVerifying) throws IOException {
+	public List<F> open(List<F> files, boolean complete, boolean isVerifying) throws IOException {
+		_files = files;
 		synchronized(this) {
 			if (_fos != null)
 				throw new IOException("Files already open(ing)!");

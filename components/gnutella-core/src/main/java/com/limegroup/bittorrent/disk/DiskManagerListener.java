@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.disk;
 
 /**
  * Listener for callbacks from a <tt>TorrentDiskManager</tt>

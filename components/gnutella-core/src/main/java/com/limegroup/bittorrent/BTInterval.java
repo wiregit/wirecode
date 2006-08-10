@@ -6,7 +6,7 @@ import com.limegroup.gnutella.downloader.Interval;
  * An interval within a block. 
  */
 public class BTInterval extends Interval {
-	final Integer blockId;
+	private final Integer blockId;
 	
 	private int hashCode;
 
@@ -48,6 +48,10 @@ public class BTInterval extends Interval {
 			hashCode *= 37 + high;
 		}
 		return hashCode; 
+	}
+	
+	public int getBlockId() {
+		return blockId;
 	}
 	
 	public String toString() {

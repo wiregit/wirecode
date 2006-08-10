@@ -1,9 +1,12 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.disk;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.limegroup.bittorrent.BTInterval;
+import com.limegroup.bittorrent.BTPieceFactory;
+import com.limegroup.bittorrent.PieceReadListener;
 import com.limegroup.gnutella.util.BitField;
 
 /**
