@@ -270,7 +270,7 @@ public class HeadTest extends BaseTestCase {
 		assertFalse(pong.isDownloading());
 		
 		//restore the original download manager
-		PrivilegedAccessor.setValue(RouterService.class,"downloader",originalDM);
+		PrivilegedAccessor.setValue(RouterService.class,"downloadManager",originalDM);
 	}
 	/**
 	 * tests requesting ranges from complete, incomplete files
