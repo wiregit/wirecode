@@ -27,37 +27,73 @@ import com.limegroup.gnutella.settings.LongSetting;
 import com.limegroup.gnutella.settings.StringSetting;
 
 /**
- * 
+ * Misc Context Settings
  */
 public class ContextSettings extends MojitoProps {
     
     private ContextSettings() {}
     
+    /**
+     * The time interval to compute the estimated Network size
+     */
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
         = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L * 1000L);
     
+    /**
+     * The maximum number of locally estimated Network sizes to
+     * keep in Memory and to use as basis for the local estimation.
+     */
     public static final IntSetting MAX_LOCAL_HISTORY_SIZE
         = FACTORY.createIntSetting("MAX_LOCAL_HISTORY_SIZE", 20);
     
+    /**
+     * The maximum number of remotely estimated Network sizes to
+     * keep in Memory and to use as basis for the local estimation.
+     */
     public static final IntSetting MAX_REMOTE_HISTORY_SIZE
         = FACTORY.createIntSetting("MAX_REMOTE_HISTORY_SIZE", 10);
     
+    /**
+     * Whether or not to estimate the Network size
+     */
     public static final BooleanSetting COUNT_REMOTE_SIZE
         = FACTORY.createSettableBooleanSetting("COUNT_REMOTE_SIZE", true, "count_remote_size");
     
+    /**
+     * The name of the master key file
+     */
     public static final StringSetting MASTER_KEY
         = FACTORY.createStringSetting("MASTER_KEY", "public.key");
     
+    /**
+     * The time 
+     */
     public static final LongSetting NODE_ID_TIMEOUT
         = FACTORY.createSettableLongSetting("NODE_ID_TIMEOUT", 14L*24L*60L*60L*1000L, 
-                "node_id_timeout", 0L, 24L*60L*60L*1000L);
+                "node_id_timeout", 0L, 14L*24L*60L*60L*1000L);
     
-    public static final IntSetting VENDOR
-        = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
-    
+    /**
+     * The maximum time to wait on an Object
+     */
     public static final LongSetting WAIT_ON_LOCK
         = FACTORY.createLongSetting("WAIT_ON_LOCK", 3L*60L*1000L);
     
+    /**
+     * This Node's Vendor code
+     */
+    public static final IntSetting VENDOR
+        = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
+    
+    /**
+     * This Node's Version
+     */
+    public static final IntSetting VERSION
+        = FACTORY.createIntSetting("VERSION", 0);
+    
+    /**
+     * A helper method to convert a 4 character ASCII String
+     * into an Interger
+     */
     public static int parseVendorID(String vendorId) {
         char[] chars = vendorId.toCharArray();
         if (chars.length != 4) {
@@ -71,6 +107,10 @@ public class ContextSettings extends MojitoProps {
         return id;
     }
     
+    /**
+     * A helper method to convert each of vendorId's 4 bytes
+     * into an ASCII character and to return them as String
+     */
     public static String toVendorString(int vendorId) {
         try {
             byte[] name = new byte[]{
@@ -84,7 +124,4 @@ public class ContextSettings extends MojitoProps {
             throw new RuntimeException(e);
         }
     }
-    
-    public static final IntSetting VERSION
-        = FACTORY.createIntSetting("VERSION", 0);
 }

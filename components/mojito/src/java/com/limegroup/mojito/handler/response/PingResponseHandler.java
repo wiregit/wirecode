@@ -76,8 +76,11 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         PingRequest request = null;
         
         if (sender == null) {
+            // Regular Ping
             request = context.getMessageHelper().createPingRequest(address);
         } else {
+            // Node ID collision test Ping
+            assert (sender.isFirewalled());
             request = context.getMessageFactory().createPingRequest(sender, MessageID.create(address));
         }
         
@@ -93,6 +96,22 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         Contact node = response.getContact();
         if (node.getContactAddress().equals(externalAddress)) {
             setException(new Exception(node + " is trying to set our external address to its address!"));
+            return;
+        }
+        
+        // Check if the other Node has the same ID as we do
+        if (context.isLocalNodeID(node.getNodeID())) {
+            
+            // If so check if this was a Node ID collision
+            // test ping. To do so see if we've set a customized
+            // sender which has a different Node ID than our
+            // actual Node ID
+            
+            if (sender == null) {
+                setException(new Exception(node + " is trying to spoof our Node ID"));
+            } else {
+                setReturnValue(message.getContact());
+            }
             return;
         }
         

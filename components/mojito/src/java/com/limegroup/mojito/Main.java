@@ -138,28 +138,28 @@ public class Main {
         
         Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
         
-                        /*SocketAddress[] hosts = { 
-                    new InetSocketAddress("www.apple.com", 80), 
-                    new InetSocketAddress("www.microsoft.com", 80), 
-                    new InetSocketAddress("www.google.com", 80),
-                    new InetSocketAddress("www.t-mobile.com", 80),
-                    new InetSocketAddress("www.verizon.com", 80),
-                    new InetSocketAddress("www.limewire.org", 80),
-                    new InetSocketAddress("www.cnn.com", 80), 
-                    new InetSocketAddress("www.scifi.com", 80), 
-                    new InetSocketAddress("192.168.1.5", 80),
-                    new InetSocketAddress("www.gnutella.com", 80),
-                    new InetSocketAddress("www.limewire.org", 80), 
-                    new InetSocketAddress("slashdot.org", 80), 
-                    new InetSocketAddress("www.altavista.com", 80), 
-                    new InetSocketAddress("www.ask.com", 80),
-                    new InetSocketAddress("www.vodafone.co.uk", 80),
-                    new InetSocketAddress("www.n-tv.de", 80),
-                    new InetSocketAddress("www.n24.de", 80), 
-                    host
-                };
-                
-                future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
+        /*SocketAddress[] hosts = { 
+            new InetSocketAddress("www.apple.com", 80), 
+            new InetSocketAddress("www.microsoft.com", 80), 
+            new InetSocketAddress("www.google.com", 80),
+            new InetSocketAddress("www.t-mobile.com", 80),
+            new InetSocketAddress("www.verizon.com", 80),
+            new InetSocketAddress("www.limewire.org", 80),
+            new InetSocketAddress("www.cnn.com", 80), 
+            new InetSocketAddress("www.scifi.com", 80), 
+            new InetSocketAddress("192.168.1.5", 80),
+            new InetSocketAddress("www.gnutella.com", 80),
+            new InetSocketAddress("www.limewire.org", 80), 
+            new InetSocketAddress("slashdot.org", 80), 
+            new InetSocketAddress("www.altavista.com", 80), 
+            new InetSocketAddress("www.ask.com", 80),
+            new InetSocketAddress("www.vodafone.co.uk", 80),
+            new InetSocketAddress("www.n-tv.de", 80),
+            new InetSocketAddress("www.n24.de", 80), 
+            host
+        };
+        
+        future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
         
         if(bootstrapHost != null) {
             bootstrapHostSet.add(bootstrapHost);
@@ -225,6 +225,17 @@ public class Main {
                     out.println("quit");
                     out.println("switch \\d");
                     CommandHandler.handle(dht, line, out);
+                } else if (line.indexOf("load") >= 0) {
+                    MojitoDHT d = CommandHandler.load(dht, line.split(" "), out);
+                    dht.stop();
+                    dhts.set(current, d);
+                    d.setThreadFactory(dht.getThreadFactory());
+                    //System.out.println(dht.getLocalAddress());
+                    //System.out.println(d.getLocalAddress());
+                    d.bind(dht.getLocalAddress());
+                    d.start();
+                    dht = d;
+                    CommandHandler.info(dht, null, out);
                 } else {
                     CommandHandler.handle(dht, line, out);
                 }

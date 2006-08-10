@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.routing;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 import java.util.List;
 
@@ -30,7 +31,7 @@ import com.limegroup.mojito.KUID;
  * RouteTable interface that all LimeDHT route table implementations
  * must implement.
  */
-public interface RouteTable {
+public interface RouteTable extends Serializable {
     
     /**
      * Adds a new Contact or if it's already in the RouteTable updates 

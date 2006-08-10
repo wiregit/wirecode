@@ -65,7 +65,7 @@ public class ContactNode implements Contact {
     
     private transient State state = State.UNKNOWN;
     
-    private transient boolean firewalled = false;
+    private boolean firewalled = false;
     
     /**
      * Creates and returns a local Contact
@@ -182,7 +182,10 @@ public class ContactNode implements Contact {
         sourceAddress = null;
         rtt = -1;
         state = State.UNKNOWN;
-        firewalled = false;
+    }
+    
+    public void resetContactAddress() {
+        this.contactAddress = new InetSocketAddress("localhost", 0);
     }
     
     public void updateWithExistingContact(Contact existing) {
@@ -375,7 +378,7 @@ public class ContactNode implements Contact {
     }
     
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        init(); // Init transient fields
         in.defaultReadObject();
+        init(); // Init transient fields
     }
 }

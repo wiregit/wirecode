@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,10 +41,12 @@ import com.limegroup.mojito.util.TrieUtils;
 import com.limegroup.mojito.util.Trie.Cursor;
 
 /**
- * 
+ * An implementation of Bucket
  */
 class BucketNode implements Bucket {
     
+    private static final long serialVersionUID = -4116522147032657308L;
+
     private RouteTable routeTable;
     
     private KUID bucketId;
@@ -50,7 +55,7 @@ class BucketNode implements Bucket {
     
     private PatriciaTrie<KUID, Contact> nodeTrie;
     
-    private Map<KUID, Contact> cache = Collections.emptyMap();
+    private transient Map<KUID, Contact> cache;
     
     private long timeStamp = 0L;
     
@@ -60,6 +65,11 @@ class BucketNode implements Bucket {
         this.depth = depth;
         
         nodeTrie = new PatriciaTrie<KUID, Contact>();
+        init();
+    }
+    
+    private void init() {
+        cache = Collections.emptyMap();
     }
     
     public KUID getBucketID() {
@@ -395,5 +405,15 @@ class BucketNode implements Bucket {
         }
         
         return buffer.toString();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        init();
     }
 }

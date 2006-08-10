@@ -24,16 +24,14 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * 
@@ -85,11 +83,6 @@ public class MojitoFactory {
     }
     
     static void store(Context context, OutputStream out) throws IOException {
-        store(context, out, true, true);
-    }
-    
-    static void store(Context context, OutputStream out, 
-            boolean storeRouteTable, boolean storeDatabase) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(out);
         
         synchronized (context) {
@@ -102,65 +95,14 @@ public class MojitoFactory {
             // Name
             oos.writeObject(context.getName());
             
-            // ContactNode
-            Contact localNode = context.getLocalNode();
-            oos.writeInt(localNode.getVendor());
-            oos.writeShort(localNode.getVersion());
-            oos.writeObject(localNode.getNodeID());
-            oos.writeByte(localNode.getInstanceID());
-            oos.writeBoolean(localNode.isFirewalled());
+            // Contact
+            oos.writeObject(context.getLocalNode());
             
-            if (localNode.isFirewalled()) {
-                storeDatabase = false;
-            }
-            
-            // Store the RouteTable
-            oos.writeBoolean(storeRouteTable);
-            if (storeRouteTable) {
-                List<Contact> nodes = context.getRouteTable().getLiveContacts();
-                
-                KUID nodeId = localNode.getNodeID();
-                for(Contact node : nodes) {
-                    if (!node.getNodeID().equals(nodeId)) {
-                        oos.writeObject(node);
-                    }
-                }
-                
-                // Terminator
-                oos.writeObject(null); 
-            }
+            // RouteTable
+            oos.writeObject(context.getRouteTable());
 
-            // Store the Database
-            oos.writeBoolean(storeDatabase);
-            boolean anyLocalKeyValue = false;
-            
-            /*if (storeDatabase) {
-                Collection<KeyValue> keyValues = context.getDatabase().getValues();
-                
-                for(KeyValue keyValue : keyValues) {
-                    if (!storeRouteTable 
-                            && !keyValue.isLocalKeyValue()) {
-                        continue;
-                    }
-                    
-                    if (!anyLocalKeyValue 
-                            && keyValue.isLocalKeyValue()) {
-                        anyLocalKeyValue = true;
-                    }
-                    
-                    oos.writeObject(keyValue);
-                }
-                
-                // Terminator
-                oos.writeObject(null);
-            }
-            
-            // Store the KeyPair if there are any local KeyValues
-            if (storeDatabase && anyLocalKeyValue) {
-                oos.writeObject(context.getKeyPair());
-            } else {
-                oos.writeObject(null);
-            }*/
+            // Database
+            oos.writeObject(context.getDatabase());
         }
     }
     
@@ -173,6 +115,7 @@ public class MojitoFactory {
         ObjectInputStream ois = new ObjectInputStream(in);
         
         // SERIAL_VERSION_UID
+        @SuppressWarnings("unused")
         long serialVersionUID = ois.readLong();
         
         // Time
@@ -181,85 +124,32 @@ public class MojitoFactory {
         // Name
         String name = (String)ois.readObject();
         
-        // ContactNode
-        int vendor = ois.readInt();
-        int version = ois.readUnsignedShort();
-        KUID oldNodeId = (KUID)ois.readObject();
-        int instanceId = ois.readUnsignedByte();
-        boolean firewalled = ois.readBoolean();
+        // Contact
+        Contact localNode = (Contact)ois.readObject();
+        ((ContactNode)localNode).resetContactAddress();
+        
+        // RouteTable
+        RouteTable routeTable = (RouteTable)ois.readObject();
+        
+        // Database
+        Database database = (Database)ois.readObject();
         
         boolean timeout = false;
         if ((System.currentTimeMillis() - time) 
                 >= ContextSettings.NODE_ID_TIMEOUT.getValue()) {
             timeout = true;
         }
-                            
-        KUID nodeId = null;
+        
+        Context context = new Context(name, localNode, routeTable, database);
+        
         if (timeout) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(oldNodeId + " has timed out. Clearing database and rebuilding route table");
+                LOG.info(localNode + " has timed out. Clearing Database and rebuilding RouteTable");
             }
             
-            nodeId = KUID.createRandomNodeID();
-            instanceId = 0;
-        } else {
-            nodeId = oldNodeId;
+            context.changeNodeID();
         }
         
-        Contact localNode = ContactNode.createLocalContact(
-                vendor, version, nodeId, instanceId, firewalled);
-        
-        Context dht = create(name, localNode, firewalled);
-        
-        // Load the RouteTable
-        boolean storeRouteTable = ois.readBoolean();
-        if (storeRouteTable) {
-            RouteTable routeTable = dht.getRouteTable();
-            
-            Contact node = null;
-            while((node = (Contact)ois.readObject()) != null) {
-            	node.setState(State.UNKNOWN);
-                routeTable.add(node);
-            }
-            
-            if(timeout) { 
-                //we changed our local node ID! rebuild the table
-                List<Contact> nodesList = routeTable.getContacts();
-                routeTable.clear();
-                //sort the nodes list (because rebuilding the table with the
-                //new nodeID will probably evict some nodes)
-                nodesList = BucketUtils.sortAliveToFailed(nodesList);
-                //now insert everything again except the old local node
-                for(Contact contact : nodesList) {
-                    
-                    if(!contact.getNodeID().equals(oldNodeId)) {
-                        routeTable.add(contact);
-                    }
-                }
-            }
-        }
-        
-        // Load the Database
-        /*boolean storeDatabase = ois.readBoolean();
-        if (storeDatabase) {
-            Database database = dht.getDatabase();
-            
-            KeyValue keyValue = null;
-            while((keyValue = (KeyValue)ois.readObject()) != null) {
-                if (!timeout || keyValue.isLocalKeyValue()) {
-                    database.add(keyValue);
-                }
-            }
-        }
-        
-        // Load the KeyPair. If null then create a new KeyPair!
-        KeyPair keyPair = (KeyPair)ois.readObject();
-        if (!storeDatabase || keyPair == null) {
-            keyPair = CryptoHelper.createKeyPair();
-        }
-        dht.setKeyPair(keyPair);
-        */
-        
-        return dht;
+        return context;
     }
 }

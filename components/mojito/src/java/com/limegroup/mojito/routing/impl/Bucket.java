@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,7 +29,7 @@ import com.limegroup.mojito.KUID;
 /**
  * An interface for Buckets
  */
-public interface Bucket {
+public interface Bucket extends Serializable {
 
     /**
      * Returns the Bucket KUID

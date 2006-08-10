@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +50,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
@@ -81,6 +83,7 @@ import com.limegroup.mojito.statistics.DHTStatsFactory;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.BucketUtils;
 
 /**
  * The Context is the heart of Mojito where everything comes 
@@ -132,6 +135,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private ExecutorService contextExecutor;
     
     Context(String name, Contact localNode) {
+        this(name, localNode, null, null);
+    }
+    
+    Context(String name, Contact localNode, RouteTable routeTable, Database database) {
         this.name = name;
         this.localNode = localNode;
         
@@ -152,8 +159,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         globalLookupStats = new GlobalLookupStatisticContainer(localNode.getNodeID());
         databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
         
-        database = new DatabaseImpl();
-        routeTable = new RouteTableImpl();
+        setRouteTable(routeTable);
+        setDatabase(database);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -236,7 +243,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Clears the RouteTable, generates a new random Node ID
      * for the local Node and adds the (new) Node to the RouteTable.
      * 
-     * WARNING: Meant to be called only by BootstrapManager!
+     * WARNING: Meant to be called only by BootstrapManager 
+     *          or MojitoFactory!
      */
     public void changeNodeID() {
         setLocalNodeID(KUID.createRandomNodeID());
@@ -248,37 +256,67 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      */
     private void setLocalNodeID(KUID nodeId) {
         if (!nodeId.equals(getLocalNodeID())) {
-            routeTable.clear();
+            
             if (LOG.isInfoEnabled()) {
                 LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
             }
             
-            Database database = getDatabase();
-            
-            // Get all local DHTValues and clear the Database
-            List<DHTValue> values = new ArrayList<DHTValue>();
-            synchronized (database) {
-                for (DHTValue value : database.values()) {
-                    if (value.isLocalValue()) {
-                        values.add(value);
+            synchronized (routeTable) {
+                // Backup the current Node ID and all live Contacts
+                KUID oldNodeId = localNode.getNodeID();
+                List<Contact> backup = new ArrayList<Contact>(routeTable.getLiveContacts());
+                
+                // Change the Node ID
+                ((ContactNode)localNode).setNodeID(nodeId);
+                ((ContactNode)localNode).nextInstanceID();
+                
+                // Clear the RouteTable and add the local Node with our
+                // new Node ID
+                routeTable.clear();
+                initRouteTable();
+                
+                // Sort the Nodes list (because rebuilding the table with 
+                // the new Node ID will probably evict some nodes)
+                backup = BucketUtils.sortAliveToFailed(backup);
+                
+                // Re-add the Contacts but set their state to Unknown
+                // so that they can be easily replaced by new live 
+                // Contacts
+                for (Contact node : backup) {
+                    if (!oldNodeId.equals(node.getNodeID())) {
+                        node.setState(State.UNKNOWN);
+                        routeTable.add(node);
                     }
                 }
-                database.clear();
             }
             
-            ((ContactNode)localNode).setNodeID(nodeId);
-            initRouteTable();
-            
-            // Add the local DHTValues under the new Node ID
             synchronized (database) {
-                for (DHTValue value : values) {
-                    value.setOriginator(localNode); // this is technically
-                                                    // not necessary as they're
-                                                    // already holding a reference
-                                                    // to localNode and the new ID
-                                                    // gets reflected to them
-                    database.add(value);
+                // And finally clean up the Database
+                int oldValueCount = database.getValueCount();
+                int removedCount = 0;
+                for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
+                    DHTValue value = it.next();
+                    if (value.isLocalValue()) {
+                        // This is technically not necessary as they're 
+                        // already holding a reference to localNode and 
+                        // the new ID gets reflected to them
+                        value.setOriginator(localNode);
+                    } else {
+                        
+                        // Remove all non local DHTValues. We're assuming
+                        // the Node IDs are totally random so chances are 
+                        // slim to none that we're responsible for the values
+                        // again. Even if we are there's no way to test
+                        // it until we've re-bootstrapped in which case the
+                        // the other guys will send us anyways DHTValues to
+                        // store. So, any work would be redundant!
+                        it.remove();
+                        removedCount++;
+                    }
                 }
+                
+                // Make sure we've really removed the values
+                assert (database.getValueCount() == (oldValueCount - removedCount));
             }
         }
     }
@@ -287,10 +325,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Adds the local Node to the RouteTable
      */
     private void initRouteTable() {
-        
-        // Context is the RouteTable callback
-        routeTable.setRouteTableCallback(this);
-        
         // Clear the firewalled flag for a moment so that we can
         // add the local node to the Route Table
         if (localNode.isFirewalled()) {
@@ -303,7 +337,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
     
     public boolean isLocalNode(Contact node) {
-        return isLocalNode(node.getNodeID(), node.getContactAddress());
+        return node.equals(getLocalNode());
     }
     
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
@@ -358,6 +392,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             routeTable = new RouteTableImpl();
         }
         
+        routeTable.setRouteTableCallback(this);
+        this.routeTable = routeTable;
         initRouteTable();
     }
     
@@ -383,9 +419,12 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         // Make sure all local values have the local Node
         // as originator
-        for (DHTValue value : database.values()) {
+        for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
+            DHTValue value = it.next();
             if (value.isLocalValue()) {
                 value.setOriginator(localNode);
+            } else {
+                value.setNearby(false);
             }
         }
     }

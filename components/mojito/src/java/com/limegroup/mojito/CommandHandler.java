@@ -109,10 +109,11 @@ public class CommandHandler {
     }
     
     public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+        boolean current = KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
         KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
                 !KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         
-        out.println("Exhaustive: " + KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
+        out.println("Exhaustive: " + current + " -> " + KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {

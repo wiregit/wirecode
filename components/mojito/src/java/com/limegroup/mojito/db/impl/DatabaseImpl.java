@@ -23,13 +23,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.AbstractCollection;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -58,7 +56,7 @@ public class DatabaseImpl implements Database {
 
     private static final long serialVersionUID = -4857315774747734947L;
     
-    private transient Map<KUID,DHTValueBag> database = new HashMap<KUID,DHTValueBag>();
+    private DHTValueDatabase database;
     
     private transient DHTValueCollection values = null;
     
@@ -73,11 +71,8 @@ public class DatabaseImpl implements Database {
     public DatabaseImpl(int maxDatabaseSize, int maxValuesPerKey) {
         this.maxDatabaseSize = maxDatabaseSize;
         this.maxValuesPerKey = maxValuesPerKey;
-    }
-    
-    private void init() {
-        database = new HashMap<KUID,DHTValueBag>();
-        values = null;
+        
+        database = new DHTValueDatabase();
     }
     
     public synchronized int getKeyCount() {
@@ -197,48 +192,56 @@ public class DatabaseImpl implements Database {
         return values;
     }
     
-    private synchronized void writeObject(ObjectOutputStream out) throws IOException {
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        
-        List<DHTValue> values = null;
-        for (DHTValue value : values()) {
-            if (value.isLocalValue()) {
-                if (values == null) {
-                    values = new ArrayList<DHTValue>();
-                }
-                values.add(value);
-            }
-        }
-        out.writeObject(values);
     }
     
-    @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
-        
         in.defaultReadObject();
         
-        init(); // Init transient fields
-        
-        List<DHTValue> values = (List<DHTValue>)in.readObject();
-        if (values != null) {
-            for (DHTValue value : values) {
-                assert (value.isLocalValue());
-                store(value);
+        // Iterarte though all DHTValues and remove all
+        // non local DHTValues that have expired
+        for (Iterator<DHTValue> it = values().iterator(); it.hasNext(); ) {
+            DHTValue value = it.next();
+            if (!value.isLocalValue() && value.isExpired()) {
+                it.remove();
             }
         }
     }
     
-    @SuppressWarnings("serial")
+    /**
+     * 
+     */
+    private class DHTValueDatabase extends HashMap<KUID, DHTValueBag> {
+
+        private static final long serialVersionUID = 2646628989065603637L;
+        
+    }
+    
+    /**
+     * 
+     */
     private class DHTValueBag extends LinkedHashMap<KUID, DHTValue> {
+        
+        private static final long serialVersionUID = 3677203930910637434L;
 
         private KUID valueId;
         
-        private int modCount = 0;
+        private transient int modCount = 0;
+        
+        private transient Object removeLock;
+        private transient boolean removeEmptyBag;
         
         public DHTValueBag(KUID valueId) {
             super(5, 0.75f, true);
             this.valueId = valueId;
+            initValueBag();
+        }
+        
+        private void initValueBag() {
+            removeLock = new Object();
+            removeEmptyBag = true;
         }
         
         public boolean add(DHTValue value) {
@@ -326,9 +329,6 @@ public class DatabaseImpl implements Database {
             return true;
         }
         
-        private Object removeLock = new Object();
-        private boolean removeEmptyBag = true;
-        
         @Override
         public DHTValue remove(Object key) {
             if (key instanceof DHTValue) {
@@ -362,6 +362,16 @@ public class DatabaseImpl implements Database {
         @Override
         public Collection<DHTValue> values() {
             return new Delegate<DHTValue>(this, super.values());
+        }
+        
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            out.defaultWriteObject();
+        }
+        
+        private void readObject(ObjectInputStream in)
+                throws IOException, ClassNotFoundException {
+            in.defaultReadObject();
+            initValueBag();
         }
     }
     

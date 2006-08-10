@@ -161,6 +161,11 @@ public interface MojitoDHT {
     public void setThreadFactory(ThreadFactory threadFactory);
     
     /**
+     * 
+     */
+    public ThreadFactory getThreadFactory();
+    
+    /**
      * Sets the MessageFactory
      */
     public void setMessageFactory(MessageFactory messageFactory);
