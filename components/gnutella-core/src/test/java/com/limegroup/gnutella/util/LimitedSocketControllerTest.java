@@ -111,7 +111,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     }
     
     public void testRemoveObserverWithProxies() throws Exception {
-        ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
+        ConnectionSettings.PROXY_HOST.setValue("www.google.com");
         ConnectionSettings.PROXY_PORT.setValue(LISTEN_PORT);
         ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
         
