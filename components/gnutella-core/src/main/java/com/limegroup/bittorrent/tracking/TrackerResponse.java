@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.tracking;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -15,13 +15,15 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.bittorrent.TorrentLocation;
+import com.limegroup.bittorrent.ValueException;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * Class parsing the response from a tracker
  */
-public class TrackerResponse {
+class TrackerResponse {
 	private static final Log LOG = LogFactory.getLog(TrackerResponse.class);
 
 	/**
@@ -123,7 +125,7 @@ public class TrackerResponse {
 		}
 	}
 
-	TrackerResponse(List peers, int interval, int numPeers, int donePeers,
+	TrackerResponse(List<TorrentLocation> peers, int interval, int numPeers, int donePeers,
 			String failureReason) {
 		PEERS = peers;
 		INTERVAL = Math.min(Math.max(interval,

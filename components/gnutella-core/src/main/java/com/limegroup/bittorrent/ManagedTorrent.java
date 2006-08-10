@@ -15,7 +15,13 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
+import com.limegroup.bittorrent.choking.Choker;
+import com.limegroup.bittorrent.choking.ChokerFactory;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
+import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.bittorrent.tracking.TrackerManager;
+import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
@@ -115,15 +121,15 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 		_folder = info.getDiskManager();
 		_connections = Collections.synchronizedList(new ArrayList<BTLink>());
 		_peers = Collections.EMPTY_SET;
-		trackerManager = new TrackerManager(this);
-		choker = new LeechChoker(_connections, networkInvoker);
+		trackerManager = TrackerManagerFactory.instance().getTrackerManager(this);
+		choker = ChokerFactory.instance().getChoker(_connections, networkInvoker, false);
 		this.dispatcher = dispatcher;
 	}
 
 	/**
 	 * notification that a request to the tracker(s) has started.
 	 */
-	void setScraping() {
+	public void setScraping() {
 		synchronized(_state) {
 			if (_state.getInt() == WAITING_FOR_TRACKER)
 				_state.setInt(SCRAPING);
@@ -358,7 +364,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	private void initializeTorrent() {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
 
-		_connectionFetcher = new BTConnectionFetcher(this, networkInvoker);
+		_connectionFetcher = 
+			BTConnectionFetcherFactory.instance().getBTConnectionFetcher(this, networkInvoker);
 	}
 
 	/**
@@ -463,7 +470,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	/**
 	 * Stops the torrent because of tracker failure.
 	 */
-	void stopVoluntarily() {
+	public void stopVoluntarily() {
 		synchronized(_state) {
 			if (!isActive())
 				return;
@@ -593,7 +600,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 		
 		// switch the choker logic and resume uploads
 		choker.stop();
-		choker = new SeedChoker(_connections,networkInvoker);
+		choker = ChokerFactory.instance().getChoker(_connections,networkInvoker, true);
 		choker.start();
 		choker.rechoke();
 		
@@ -659,7 +666,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	/**
 	 * @return a peer we should try to connect to next
 	 */
-	TorrentLocation getTorrentLocation() {
+	public TorrentLocation getTorrentLocation() {
 		long now = System.currentTimeMillis();
 		TorrentLocation ret = null;
 		synchronized(_peers) {
@@ -802,7 +809,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 		totalDown += amount;
 	}
 	
-	long getTotalUploaded(){
+	public long getTotalUploaded(){
 		return _info.getAmountUploaded();
 	}
 	
@@ -827,7 +834,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 		return _folder.getNumCorruptedBytes();
 	}
 	
-	boolean hasNonBusyLocations() {
+	public boolean hasNonBusyLocations() {
 		long now = System.currentTimeMillis();
 		synchronized(_peers) {
 			for (TorrentLocation to : _peers) {
@@ -858,7 +865,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener {
 	/**
 	 * @return true if continuing is hopeless
 	 */
-	boolean shouldStop() {
+	public boolean shouldStop() {
 		return _connections.size() == 0 && _peers.size() == 0;
 	}
 	

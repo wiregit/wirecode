@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.choking;
 
 import java.util.Comparator;
 import java.util.List;
@@ -7,11 +7,12 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
-abstract class Choker implements Runnable {
+public abstract class Choker implements Runnable {
 	
 	private static final Log LOG = LogFactory.getLog(Choker.class);
 	/*
@@ -26,7 +27,7 @@ abstract class Choker implements Runnable {
 	private volatile Future periodic;
 	private final Runnable immediateChoker = new ImmediateChoker();
 	
-	public Choker(List<? extends Chokable>chokables, SchedulingThreadPool invoker) {
+	Choker(List<? extends Chokable>chokables, SchedulingThreadPool invoker) {
 		this.invoker = invoker;
 		this.chokables = chokables;
 	}

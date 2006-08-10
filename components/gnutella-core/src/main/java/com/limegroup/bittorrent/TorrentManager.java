@@ -12,9 +12,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.NIOSocket;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.*;
-import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
+import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -157,9 +157,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void acceptConnection(String word, Socket sock) {
-		IncomingBTHandshaker shaker = 
-			new IncomingBTHandshaker((NIOSocket)sock, this);
-		shaker.startHandshaking();
+		IncomingConnectionHandler.instance().handleIncoming(
+				(AbstractNBSocket)sock, this);
 	}
 
 	private synchronized void torrentComplete(ManagedTorrent t) {

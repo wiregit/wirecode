@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.BTConnection;
-import com.limegroup.bittorrent.BTHandshakeObserver;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.io.AbstractNBSocket;
@@ -22,7 +21,7 @@ import com.limegroup.gnutella.io.InterestScatteringByteChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.util.IpPort;
 
-public abstract class BTHandshaker implements  
+abstract class BTHandshaker implements  
 ChannelWriter, ChannelReadObserver, IpPort {
 
 	private static final Log LOG = LogFactory.getLog(BTHandshaker.class);

@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.handshaking;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,9 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.bittorrent.handshaking.BTHandshaker;
-import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
-import com.limegroup.bittorrent.handshaking.OutgoingBTHandshaker;
+import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -29,7 +28,7 @@ import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
-public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
+public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnectionFetcher.class);
 	
@@ -161,7 +160,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable  {
 			LOG.debug("starting a connector to "+ep.getAddress()+" total "+connecting.size());
 	}
 	
-	void shutdown() {
+	public void shutdown() {
 		if (shutdown)
 			return;
 		synchronized(this) {

@@ -10,7 +10,7 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 
-public class IncomingBTHandshaker extends BTHandshaker {
+class IncomingBTHandshaker extends BTHandshaker {
 
 	private static final Log LOG = LogFactory.getLog(IncomingBTHandshaker.class);
 	

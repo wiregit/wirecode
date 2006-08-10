@@ -1,10 +1,11 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.choking;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.limegroup.bittorrent.Chokable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**

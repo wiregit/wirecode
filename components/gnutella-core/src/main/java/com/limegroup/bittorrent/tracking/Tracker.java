@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.tracking;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -11,6 +11,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -21,7 +23,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.StringUtils;
 
-public class Tracker {
+class Tracker {
 	private static final Log LOG = LogFactory.getLog(Tracker.class);
 
 	/* 25 seconds */

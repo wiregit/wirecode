@@ -11,7 +11,7 @@ import com.limegroup.gnutella.util.BitField;
  * belonging to a torrent and keeps track of which ranges are
  * verified, missing, requested, verified.
  */
-interface TorrentDiskManager {
+public interface TorrentDiskManager {
 
 	/**
 	 * Opens this TorrentDiskManager.  MUST be called before anything

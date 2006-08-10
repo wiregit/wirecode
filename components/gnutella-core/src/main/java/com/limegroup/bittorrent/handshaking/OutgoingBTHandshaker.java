@@ -7,12 +7,11 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.bittorrent.BTConnectionFetcher;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 
-public class OutgoingBTHandshaker extends BTHandshaker {
+class OutgoingBTHandshaker extends BTHandshaker {
 	private static final Log LOG = LogFactory.getLog(OutgoingBTHandshaker.class);
 	
 	/**

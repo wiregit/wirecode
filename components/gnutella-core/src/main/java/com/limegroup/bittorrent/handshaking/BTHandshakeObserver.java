@@ -1,12 +1,9 @@
-package com.limegroup.bittorrent;
-
-import com.limegroup.bittorrent.handshaking.BTHandshaker;
-import com.limegroup.bittorrent.handshaking.IncomingBTHandshaker;
+package com.limegroup.bittorrent.handshaking;
 
 /**
  * An observer for events that happen to BTHandshakers
  */
-public interface BTHandshakeObserver {
+interface BTHandshakeObserver {
 
 	/**
 	 * Notification that the following incoming handshaker

@@ -1,4 +1,4 @@
-package com.limegroup.bittorrent;
+package com.limegroup.bittorrent.tracking;
 
 import java.util.Collection;
 import java.util.TimerTask;
@@ -7,6 +7,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
@@ -39,7 +42,7 @@ public class TrackerManager {
 	
 	private volatile TimerTask scheduledAnnounce;
 	
-	public TrackerManager(ManagedTorrent torrent) {
+	TrackerManager(ManagedTorrent torrent) {
 		this.torrent = torrent;
 		BTMetaInfo info = torrent.getMetaInfo();
 		for (int i = 0; i < info.getTrackers().length;i++) 
@@ -151,7 +154,7 @@ public class TrackerManager {
 		_nextTrackerRequestTime = System.currentTimeMillis() + minDelay;
 	}
 	
-	long getNextTrackerRequestTime() {
+	public long getNextTrackerRequestTime() {
 		return _nextTrackerRequestTime;
 	}
 	
