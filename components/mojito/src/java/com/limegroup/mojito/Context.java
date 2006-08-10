@@ -160,7 +160,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
         
         setRouteTable(routeTable);
-        setDatabase(database);
+        setDatabase(database, false);
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -407,6 +407,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
     
     public synchronized void setDatabase(Database database) {
+        setDatabase(database, true);
+    }
+    
+    private synchronized void setDatabase(Database database, boolean remove) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch Database while DHT is running");
         }
@@ -423,8 +427,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             DHTValue value = it.next();
             if (value.isLocalValue()) {
                 value.setOriginator(localNode);
-            } else {
-                value.setNearby(false);
+            } else if (remove) {
+                
+                // See setLocalNodeID(KUID)
+                it.remove();
             }
         }
     }
