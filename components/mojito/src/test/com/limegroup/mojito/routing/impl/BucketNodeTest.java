@@ -6,8 +6,11 @@ import java.net.SocketAddress;
 import junit.framework.TestCase;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.Callback;
 import com.limegroup.mojito.settings.ContextSettings;
 
 public class BucketNodeTest extends TestCase {
@@ -33,8 +36,24 @@ public class BucketNodeTest extends TestCase {
     }
     
     public void testPurge() {
+        RouteTable routeTable = new RouteTableImpl();
+        routeTable.setRouteTableCallback(new Callback() {
+            public Contact getLocalNode() {
+                return localNode;
+            }
+
+            public boolean isLocalNode(Contact node) {
+                return node.equals(localNode);
+            }
+
+            public DHTFuture<Contact> ping(Contact node) {
+                throw new UnsupportedOperationException();
+            }
+            
+        });
+        
         SocketAddress address = new InetSocketAddress("localhost", 2000);
-        Bucket bucket = new BucketNode(localNode.getNodeID(), KUID.MIN_NODE_ID, 0);
+        Bucket bucket = new BucketNode(routeTable, KUID.MIN_NODE_ID, 0);
         bucket.addLiveContact(localNode);
         //try purging bucket with only local node
         bucket.purge();

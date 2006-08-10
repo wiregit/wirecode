@@ -175,7 +175,7 @@ public interface MojitoDHT {
      * Sets and returns the RouteTable. The class must be a sub-class of
      * <tt>RouteTable</tt>
      */
-    public RouteTable setRouteTable(Class<? extends RouteTable> routeTable);
+    public void setRouteTable(RouteTable routeTable);
     
     /**
      * Sets the Database

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
@@ -41,7 +42,7 @@ import com.limegroup.mojito.util.Trie.Cursor;
  */
 class BucketNode implements Bucket {
     
-    private KUID nodeId;
+    private RouteTable routeTable;
     
     private KUID bucketId;
     
@@ -49,18 +50,16 @@ class BucketNode implements Bucket {
     
     private PatriciaTrie<KUID, Contact> nodeTrie;
     
-    private Map<KUID, Contact> cache;
+    private Map<KUID, Contact> cache = Collections.emptyMap();
     
     private long timeStamp = 0L;
     
-    public BucketNode(KUID nodeId, KUID bucketId, int depth) {
-        this.nodeId = nodeId;
+    public BucketNode(RouteTable routeTable, KUID bucketId, int depth) {
+        this.routeTable = routeTable;
         this.bucketId = bucketId;
         this.depth = depth;
         
         nodeTrie = new PatriciaTrie<KUID, Contact>();
-        
-        cache = Collections.emptyMap();
     }
     
     public KUID getBucketID() {
@@ -252,9 +251,9 @@ class BucketNode implements Bucket {
         return mostRecentlySeen[0];
     }
     
-    public void purge(){
+    public void purge() {
         for (Contact node : nodeTrie.values()) {
-            if(!node.isAlive() && !nodeId.equals(node.getNodeID())) {
+            if(!node.isAlive() && !routeTable.isLocalNode(node)) {
                 nodeTrie.remove(node.getNodeID());
             }
         }
@@ -297,8 +296,8 @@ class BucketNode implements Bucket {
 
         assert (getCachedContacts().isEmpty() == true);
         
-        Bucket left = new BucketNode(nodeId, bucketId, depth+1);
-        Bucket right = new BucketNode(nodeId, bucketId.set(depth), depth+1);
+        Bucket left = new BucketNode(routeTable, bucketId, depth+1);
+        Bucket right = new BucketNode(routeTable, bucketId.set(depth), depth+1);
         
         for (Contact node : getLiveContacts()) {
             KUID nodeId = node.getNodeID();

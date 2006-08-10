@@ -57,15 +57,17 @@ class PassiveDHTNodeController extends AbstractDHTController{
     public void init() {
         dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
         
-        limeDHTRouteTable = (LimeDHTRouteTable) dht.setRouteTable(LimeDHTRouteTable.class);
+        limeDHTRouteTable = new LimeDHTRouteTable(dht);
+        dht.setRouteTable(limeDHTRouteTable);
+        
         setLimeMessageDispatcher();
         //load the small list of MRS nodes for bootstrap
         try {
             if (FILE.exists() && FILE.isFile()) {
                 FileInputStream in = new FileInputStream(FILE);
-                ObjectInputStream oii = new ObjectInputStream(in);
-                Contact node;
-                while((node = (Contact)oii.readObject()) != null){
+                ObjectInputStream ois = new ObjectInputStream(in);
+                Contact node = null;
+                while((node = (Contact)ois.readObject()) != null){
                     limeDHTRouteTable.add(node);
                 }
             }

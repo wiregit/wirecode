@@ -11,8 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
@@ -22,8 +22,10 @@ class LimeDHTRouteTable extends RouteTableImpl {
     
     private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
 
-    public LimeDHTRouteTable(Context context) {
-        super(context);
+    private MojitoDHT dht;
+    
+    public LimeDHTRouteTable(MojitoDHT dht) {
+        this.dht = dht;
     }
     
     /**
@@ -39,7 +41,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
         
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
-            Contact node = context.ping(addr).get();
+            Contact node = dht.ping(addr).get();
             if(node != null) {
                 synchronized (this) {
                     leafDHTNodes.put(addr, node.getNodeID());

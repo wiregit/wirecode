@@ -86,7 +86,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The Context is the heart of Mojito where everything comes 
  * together. 
  */
-public class Context implements MojitoDHT {
+public class Context implements MojitoDHT, RouteTable.Callback {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -153,7 +153,7 @@ public class Context implements MojitoDHT {
         databaseStats = new DatabaseStatisticContainer(this);
         
         database = new DatabaseImpl();
-        routeTable = new RouteTableImpl(this);
+        routeTable = new RouteTableImpl();
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -206,11 +206,11 @@ public class Context implements MojitoDHT {
     }
     
     public int getVendor() {
-        return ContextSettings.VENDOR.getValue();
+        return localNode.getVendor();
     }
     
     public int getVersion() {
-        return ContextSettings.VERSION.getValue();
+        return localNode.getVersion();
     }
     
     public PublicKey getMasterKey() {
@@ -287,6 +287,10 @@ public class Context implements MojitoDHT {
      * Adds the local Node to the RouteTable
      */
     private void initRouteTable() {
+        
+        // Context is the RouteTable callback
+        routeTable.setRouteTableCallback(this);
+        
         // Clear the firewalled flag for a moment so that we can
         // add the local node to the Route Table
         if (localNode.isFirewalled()) {
@@ -295,7 +299,7 @@ public class Context implements MojitoDHT {
             ((ContactNode)localNode).setFirewalled(true);
         } else {
             routeTable.add(localNode);
-        }    
+        }
     }
     
     public boolean isLocalNode(Contact node) {
@@ -345,24 +349,16 @@ public class Context implements MojitoDHT {
         return messageDispatcher;
     }
     
-    public synchronized RouteTable setRouteTable(Class<? extends RouteTable> clazz) {
+    public synchronized void setRouteTable(RouteTable routeTable) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
         }
 
-        if (clazz == null) {
-            clazz = RouteTableImpl.class;
+        if (routeTable == null) {
+            routeTable = new RouteTableImpl();
         }
         
-        try {
-            Constructor c = clazz.getConstructor(Context.class);
-            routeTable = (RouteTable)c.newInstance(this);
-            initRouteTable();
-            
-            return routeTable;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
+        initRouteTable();
     }
     
     /**

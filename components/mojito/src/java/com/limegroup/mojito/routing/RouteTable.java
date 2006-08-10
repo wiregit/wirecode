@@ -23,6 +23,7 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 
 /**
@@ -116,4 +117,33 @@ public interface RouteTable {
      * Returns the number of live and cached Contacts in the Route Table
      */
     public int size();
+    
+    /**
+     * Returns whether or not the given Contact is the local
+     * Node
+     */
+    public boolean isLocalNode(Contact node);
+    
+    /**
+     * Returns the local Node
+     */
+    public Contact getLocalNode();
+    
+    /**
+     * Sets the RouteTable Callback
+     */
+    public void setRouteTableCallback(Callback callback);
+    
+    /**
+     * An interface utilized by the RouteTable to access 
+     * external resources
+     */
+    public static interface Callback {
+        
+        /** Returns the local Node */
+        public Contact getLocalNode();
+        
+        /** Sends a PING to the given Node */
+        public DHTFuture<Contact> ping(Contact node);
+    }
 }
