@@ -21,6 +21,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.gnutella.util.Trie.Cursor;
+import com.limegroup.gnutella.util.Trie.Cursor.SelectStatus;
 
 public class PatriciaTrieTest extends BaseTestCase {
 
@@ -953,6 +954,46 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertFalse(iter.hasNext());
     }
 
+    public void testTraverseWithAllNullBitKey() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        // Trie.traverse() throws a NPE if there's only
+        // a single entry in the Trie and if all bits
+        // of the key are zero. That means it's stored
+        // at the root of the Trie.
+        
+        //trie.put("", "All Bits Are Zero");
+        trie.put("\0", "All Bits Are Zero");
+        
+        final List<String> strings = new ArrayList<String>();
+        trie.traverse(new Cursor<String, String>() {
+            public SelectStatus select(Entry<? extends String, ? extends String> entry) {
+                strings.add(entry.getValue());
+                return SelectStatus.CONTINUE;
+            }
+        });
+        
+        assertEquals(1, strings.size());
+    }
+    
+    public void testSelectWithAllNullBitKey() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        // trie.put("", "All Bits Are Zero");
+        trie.put("\0", "All Bits Are Zero");
+        
+        final List<String> strings = new ArrayList<String>();
+        trie.select("Hello", new Cursor<String, String>() {
+            public SelectStatus select(Entry<? extends String, ? extends String> entry) {
+                strings.add(entry.getValue());
+                return SelectStatus.CONTINUE;
+            }
+        });
+        
+        assertEquals(1, strings.size());
+    }
     
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;

@@ -879,7 +879,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // If there's no data at all, exit.
-        if(current.isEmpty()) {
+        if(/*current == null || */ current.isEmpty()) {
             return null;
         }
         
