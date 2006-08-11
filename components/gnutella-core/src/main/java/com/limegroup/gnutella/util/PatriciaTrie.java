@@ -859,10 +859,6 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private TrieEntry<K, V> nextEntryImpl(TrieEntry<K, V> start, TrieEntry<K, V> previous, TrieEntry<K, V> tree) {
         TrieEntry<K, V> current = start;
 
-        if (current == null) {
-            return null;
-        }
-        
         // Only look at the left if this was a recursive or
         // the first check, otherwise we know we've already looked
         // at the left.
@@ -888,6 +884,11 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         }
         
         // If nothing valid on the left, try the right.
+        if (current.right == null) {
+            assert (current == root);
+            return null;
+        }
+        
         if(previous != current.right) {
             // See if it immediately is valid.
             if(isValidUplink(current.right, current)) {
