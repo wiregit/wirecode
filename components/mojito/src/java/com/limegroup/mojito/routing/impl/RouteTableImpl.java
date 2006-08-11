@@ -421,7 +421,7 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).contains(getLocalNode().getNodeID());
     }
     
-    protected synchronized Bucket getBucket(KUID nodeId) {
+    public synchronized Bucket getBucket(KUID nodeId) {
         return bucketTrie.select(nodeId);
     }
     

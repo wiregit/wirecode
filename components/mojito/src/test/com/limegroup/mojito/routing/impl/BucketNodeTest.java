@@ -3,8 +3,9 @@ package com.limegroup.mojito.routing.impl;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
@@ -13,11 +14,23 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.Callback;
 import com.limegroup.mojito.settings.ContextSettings;
 
-public class BucketNodeTest extends TestCase {
+public class BucketNodeTest extends BaseTestCase {
     
     private Contact localNode;
     
     private int vendor,version;
+    
+    public BucketNodeTest(String name) {
+        super(name);
+    }
+
+    public static TestSuite suite() {
+        return buildTestSuite(BucketNodeTest.class);
+    }
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
     
     @Override
     protected void setUp() throws Exception {
