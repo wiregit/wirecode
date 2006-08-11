@@ -129,7 +129,7 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The number value stored there, or 0 on error
      */
-    private static final int registryReadNumber(String root, String path, String name) {
+    public static final int registryReadNumber(String root, String path, String name) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadNumberNative(root, path, name);
     	else
@@ -144,7 +144,7 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The text value stored there, or blank on error
      */
-    private static final String registryReadText(String root, String path, String name) {
+    public static final String registryReadText(String root, String path, String name) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadTextNative(root, path, name);
     	else
@@ -160,7 +160,7 @@ public class SystemUtils {
      * @param value The number value to set there
      * @return      False on error
      */
-    private static final boolean registryWriteNumber(String root, String path, String name, int value) {
+    public static final boolean registryWriteNumber(String root, String path, String name, int value) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryWriteNumberNative(root, path, name, value);
     	else
@@ -176,7 +176,7 @@ public class SystemUtils {
      * @param value The text value to set there
      * @return      False on error
      */
-    private static final boolean registryWriteText(String root, String path, String name, String value) {
+    public static final boolean registryWriteText(String root, String path, String name, String value) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryWriteTextNative(root, path, name, value);
     	else
@@ -191,7 +191,7 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     False on error
      */
-    private static final boolean registryDelete(String root, String path, String name) {
+    public static final boolean registryDelete(String root, String path, String name) {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryDeleteNative(root, path, name);
     	else
