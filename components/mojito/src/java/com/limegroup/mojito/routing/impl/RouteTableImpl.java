@@ -504,7 +504,7 @@ public class RouteTableImpl implements RouteTable {
      * 
      * @param bootstrapping whether or not this refresh is done during bootstrap
      */
-    public synchronized List<KUID> getRefreshIDs(final boolean bootstrapping) {
+    public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
         List<KUID> randomIds = new ArrayList<KUID>();
         for (Bucket bucket : bucketTrie.values()) {
             
