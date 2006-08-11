@@ -434,12 +434,28 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).get(nodeId);
     }
     
-    public synchronized List<Contact> select(final KUID nodeId, final int count) {
+    public synchronized List<Contact> select(KUID nodeId, int count) {
+        return select(nodeId, count, false);
+    }
+    
+    public synchronized List<Contact> select(final KUID nodeId, final int count, 
+            final boolean liveContacts) {
+        
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
-                nodes.addAll(bucket.select(nodeId, count - nodes.size()));
+                List<Contact> list = bucket.select(nodeId, count - nodes.size());
+                
+                if (liveContacts) {
+                    for(Contact contact : list) {
+                        if (!contact.hasFailed()) {
+                            nodes.add(contact);
+                        }
+                    }
+                } else {
+                    nodes.addAll(list);
+                }
                 
                 if (nodes.size() < count) {
                     return SelectStatus.CONTINUE;
@@ -447,44 +463,6 @@ public class RouteTableImpl implements RouteTable {
                 return SelectStatus.EXIT;
             }
         });
-        return nodes;
-    }
-    
-    
-    public synchronized List<Contact> select(final KUID nodeId, final int count, 
-            final boolean liveContacts) {
-        
-        final List<Contact> nodes = new ArrayList<Contact>(count);
-        
-        if (liveContacts) {
-            bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
-                    Bucket bucket = entry.getValue();
-                    for(Contact contact : bucket.select(nodeId, count - nodes.size())) {
-                        if (!contact.hasFailed()) {
-                            nodes.add(contact);
-                        }
-                    }
-                    
-                    if (nodes.size() < count) {
-                        return SelectStatus.CONTINUE;
-                    }
-                    return SelectStatus.EXIT;
-                }
-            });
-        } else {
-            bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
-                    Bucket bucket = entry.getValue();
-                    nodes.addAll(bucket.select(nodeId, count - nodes.size()));
-                    
-                    if (nodes.size() < count) {
-                        return SelectStatus.CONTINUE;
-                    }
-                    return SelectStatus.EXIT;
-                }
-            });
-        }
         return nodes;
     }
     
@@ -499,31 +477,18 @@ public class RouteTableImpl implements RouteTable {
     }
     
     public synchronized List<Contact> getLiveContacts() {
-        final List<Contact> nodes = new ArrayList<Contact>();
-        bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
-                Bucket bucket = entry.getValue();
-                // This should be faster than addAll() as all  
-                // elements are added straight to the 'nodes'
-                // List but Cursors have on small sets an
-                // overhead that does not pay off.
-                //TrieUtils.values(bucket.trie(), nodes);
-                nodes.addAll(bucket.getLiveContacts());
-                return SelectStatus.CONTINUE;
-            }
-        });
+        List<Contact> nodes = new ArrayList<Contact>();
+        for (Bucket bucket : bucketTrie.values()) {
+            nodes.addAll(bucket.getLiveContacts());
+        }
         return nodes;
     }
     
     public synchronized List<Contact> getCachedContacts() {
-        final List<Contact> nodes = new ArrayList<Contact>();
-        bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
-                Bucket bucket = entry.getValue();
-                nodes.addAll(bucket.getCachedContacts());
-                return SelectStatus.CONTINUE;
-            }
-        });
+        List<Contact> nodes = new ArrayList<Contact>();
+        for (Bucket bucket : bucketTrie.values()) {
+            nodes.addAll(bucket.getCachedContacts());
+        }
         return nodes;
     }
     
@@ -540,27 +505,30 @@ public class RouteTableImpl implements RouteTable {
      * @param bootstrapping whether or not this refresh is done during bootstrap
      */
     public synchronized List<KUID> getRefreshIDs(final boolean bootstrapping) {
-        final List<KUID> randomIds = new ArrayList<KUID>();
-        
-        bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
-                Bucket bucket = entry.getValue();
-                if (!bucket.contains(getLocalNode().getNodeID()) || !bootstrapping) {
-                    if (bootstrapping || bucket.isRefreshRequired()) {
-                        
-                        // Select a random ID with this prefix
-                        KUID randomId = KUID.createPrefxNodeID(bucket.getBucketID(), bucket.getDepth());
-                        
-                        if(LOG.isTraceEnabled()) {
-                            LOG.trace("Refreshing bucket:" + bucket + " with random ID: " + randomId);
-                        }
-                        
-                        randomIds.add(randomId);
-                    }
-                }
-                return SelectStatus.CONTINUE;
+        List<KUID> randomIds = new ArrayList<KUID>();
+        for (Bucket bucket : bucketTrie.values()) {
+            
+            if (bootstrapping 
+                    && bucket.contains(getLocalNode().getNodeID())) {
+                // Don't refresh the local Bucket if we're bootstrapping
+                // since phase one takes already care of it.
+                continue;
             }
-        });
+            
+            if (bootstrapping || bucket.isRefreshRequired()) {
+                
+                // Select a random ID with this prefix
+                KUID randomId = KUID.createPrefxNodeID(
+                        bucket.getBucketID(), bucket.getDepth());
+                
+                if(LOG.isTraceEnabled()) {
+                    LOG.trace("Refreshing bucket:" + bucket 
+                            + " with random ID: " + randomId);
+                }
+                
+                randomIds.add(randomId);
+            }
+        }
         
         if (routingStats != null) {
             routingStats.BUCKET_REFRESH_COUNT.addData(randomIds.size());
