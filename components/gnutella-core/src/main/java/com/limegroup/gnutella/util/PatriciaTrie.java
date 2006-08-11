@@ -883,12 +883,19 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null;
         }
         
-        // If nothing valid on the left, try the right.
-        if (current.right == null) {
-            assert (current == root);
+        // If we've already returned the left,
+        // and the immediate right is null,
+        // there's only one entry in the Trie
+        // which is stored at the root.
+        //
+        //  / ("")   <-- root
+        //  \_/  \
+        //       null <-- 'current'
+        //
+        if(current.right == null)
             return null;
-        }
         
+        // If nothing valid on the left, try the right.
         if(previous != current.right) {
             // See if it immediately is valid.
             if(isValidUplink(current.right, current)) {
@@ -1045,6 +1052,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             this.parent = null;
             this.left = this;
             this.right = null;
+            this.predecessor = this;
         }
         
         public boolean equals(Object o) {
@@ -1603,12 +1611,17 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         int keyLength = length(key);
         
         if (keyLength == 0) {
-            if(!root.isEmpty())
+            if(!root.isEmpty()) {
+                // If data in root, and more after -- return it.
+                if(size() > 1) {
+                    return nextEntry(root);
+                } else { // If no more after, no higher entry.
+                    return null;
+                }
+            } else {
+                // Root is empty & we want something after empty, return first.
                 return firstEntry();
-            else if(size() > 1)
-                return nextEntry(firstEntry());
-            else
-                return null;
+            }
         }
         
         TrieEntry<K, V> found = getNearestEntryForKey(key, keyLength);
@@ -1821,6 +1834,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return null;
         
         int offsetLength = offset + length;
+        
+        // if root && length of root is less than length of lookup,
+        // there's nothing.
+        // (this prevents returning the whole subtree if root has an empty
+        //  string and we want to lookup things with "\0")
+        if(entry == root && length(entry.getKey()) < offsetLength)
+            return null;
         
         // Found key's length-th bit differs from our key
         // which means it cannot be the prefix...
