@@ -64,7 +64,7 @@ class BucketNode implements Bucket {
         this.bucketId = bucketId;
         this.depth = depth;
         
-        nodeTrie = new PatriciaTrie<KUID, Contact>();
+        nodeTrie = new PatriciaTrie<KUID, Contact>(KUID.KEY_CREATOR);
         init();
     }
     

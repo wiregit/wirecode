@@ -553,4 +553,30 @@ public class KUID implements Comparable<KUID>, Serializable {
         
         return KUID.createNodeID(random);
     }
+    
+    public static final KeyCreator<KUID> KEY_CREATOR = new KUIDKeyCreator();
+    
+    /**
+     * A PATRICIA Trie KeyCreator for KUIDs
+     */
+    private static class KUIDKeyCreator implements KeyCreator<KUID> {
+        
+        private static final long serialVersionUID = 6412279289438108492L;
+
+        public boolean isBitSet(KUID key, int bitIndex) {
+            return key.isBitSet(bitIndex);
+        }
+
+        public int length() {
+            return KUID.LENGTH_IN_BITS;
+        }
+        
+        public int bitIndex(KUID key, KUID found) {
+            if (found == null) {
+                found = KUID.MIN_NODE_ID;
+            }
+            
+            return key.bitIndex(found);
+        }
+    }
 }

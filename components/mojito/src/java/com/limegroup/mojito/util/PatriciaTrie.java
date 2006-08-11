@@ -40,10 +40,6 @@ public class PatriciaTrie<K, V> implements Trie<K, V>, Serializable {
     
     private final KeyCreator<K> keyCreator;
     
-    public PatriciaTrie() {
-        this(new KUIDKeyCreator());
-    }
-    
     @SuppressWarnings("unchecked")
     public PatriciaTrie(KeyCreator keyCreator) {
         this.keyCreator = keyCreator;

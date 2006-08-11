@@ -53,7 +53,7 @@ public class PatriciaTest extends BaseTestCase {
                 "Banane", "Blabla", "Amber", "Ammun", "Akka", "Akko",
                 "Albertoo", "Amma" };
 
-        Trie<KUID, String> trie = new PatriciaTrie<KUID, String>();
+        Trie<KUID, String> trie = new PatriciaTrie<KUID, String>(KUID.KEY_CREATOR);
         for (int i = 0; i < keys.length; i++) {
             trie.put(toKUID(keys[i]), keys[i]);
         }
@@ -87,7 +87,7 @@ public class PatriciaTest extends BaseTestCase {
     }
     
     public void testRange() {
-        PatriciaTrie trie = new PatriciaTrie();
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
         for(int i = 0; i < 50; i++) {
             KUID id = KUID.createRandomNodeID();
             trie.put(id, id);
@@ -130,7 +130,7 @@ public class PatriciaTest extends BaseTestCase {
             "F735922C5C8B54FFD9424EB46066236E7D5BBA8D"
         };
         
-        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>();
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_CREATOR);
         for(int i = 0; i < nodes.length; i++) {
             KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
@@ -165,7 +165,7 @@ public class PatriciaTest extends BaseTestCase {
             "94850358CEFD33CD0BDE1F468AEA1E646B3F8724"
         };
         
-        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>();
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_CREATOR);
         for(int i = 0; i < nodes.length; i++) {
             KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
@@ -206,7 +206,7 @@ public class PatriciaTest extends BaseTestCase {
     
     // Not an unit test!
     private void /*test*/RandomRemove() {
-        PatriciaTrie trie = new PatriciaTrie();
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
         
         for(int i = 0; i < 100000; i++) {
             Set keys = new HashSet();

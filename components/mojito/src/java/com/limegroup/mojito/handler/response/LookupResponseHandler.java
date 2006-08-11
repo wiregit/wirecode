@@ -66,10 +66,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of Contacts we're going to query */
-    protected Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>();
+    protected Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>(KUID.KEY_CREATOR);
     
     /** Trie of Contacts that did respond */
-    protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>();
+    protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_CREATOR);
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();

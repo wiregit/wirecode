@@ -71,7 +71,7 @@ public class RouteTableImpl implements RouteTable {
     private transient Callback callback;
     
     public RouteTableImpl() {
-        bucketTrie = new PatriciaTrie<KUID, Bucket>();
+        bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_CREATOR);
         init();
     }
     

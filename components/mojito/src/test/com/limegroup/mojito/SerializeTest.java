@@ -46,7 +46,7 @@ public class SerializeTest {
     }
     
     public static void testSerializePatriciaTrie() throws Exception{
-        PatriciaTrie trie = new PatriciaTrie();
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
         for(int i = 0; i < 300; i++) {
             KUID nodeId = KUID.createRandomNodeID();
             Contact node = new ContactNode(0, 0, nodeId, new InetSocketAddress(i), State.UNKNOWN);
