@@ -878,8 +878,19 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             }
         }
         
+        // If 'current' is null we've the situation
+        // that there's only one entry in the Trie
+        // which is stored at the root. We walked
+        // once to the left (loopback) and continued
+        // towards right...
+        //
+        //  / ("")   <-- root
+        //  \_/  \
+        //       null <-- 'current'
+        //
+        
         // If there's no data at all, exit.
-        if(/*current == null || */ current.isEmpty()) {
+        if(current == null || current.isEmpty()) {
             return null;
         }
         

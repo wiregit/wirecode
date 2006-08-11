@@ -958,13 +958,19 @@ public class PatriciaTrieTest extends BaseTestCase {
         PatriciaTrie<String, String> trie 
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
-        // Trie.traverse() throws a NPE if there's only
-        // a single entry in the Trie and if all bits
-        // of the key are zero. That means it's stored
-        // at the root of the Trie.
+        //
+        // One entry in the Trie
+        // Entry is stored at the root
+        //
         
-        //trie.put("", "All Bits Are Zero");
+        // trie.put("", "All Bits Are Zero");
         trie.put("\0", "All Bits Are Zero");
+        
+        //
+        //  / ("")   <-- root
+        //  \_/  \
+        //       null
+        //
         
         final List<String> strings = new ArrayList<String>();
         trie.traverse(new Cursor<String, String>() {
@@ -974,6 +980,12 @@ public class PatriciaTrieTest extends BaseTestCase {
             }
         });
         
+        assertEquals(1, strings.size());
+        
+        strings.clear();
+        for (String s : trie.values()) {
+            strings.add(s);
+        }
         assertEquals(1, strings.size());
     }
     
@@ -991,7 +1003,6 @@ public class PatriciaTrieTest extends BaseTestCase {
                 return SelectStatus.CONTINUE;
             }
         });
-        
         assertEquals(1, strings.size());
     }
     
