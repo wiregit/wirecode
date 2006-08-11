@@ -21,7 +21,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.gnutella.util.Trie.Cursor;
-import com.limegroup.gnutella.util.Trie.Cursor.SelectStatus;
 
 public class PatriciaTrieTest extends BaseTestCase {
 
@@ -634,6 +633,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
         final String[] keys = new String[]{
+                "", 
                 "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
                 "Alberts", "Allie", "Alliese", "Alabama", "Banane",
                 "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
@@ -778,6 +778,9 @@ public class PatriciaTrieTest extends BaseTestCase {
         } catch(ConcurrentModificationException expected) {}
         assertEquals("Amber", map.firstKey());
         assertEquals("Ammun", map.lastKey());
+        
+        map = trie.getPrefixedBy("Ak\0");
+        assertTrue(map.isEmpty());
         
         map = trie.getPrefixedBy("Ak");
         assertEquals(2, map.size());
