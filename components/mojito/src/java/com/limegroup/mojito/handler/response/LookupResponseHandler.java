@@ -35,6 +35,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -48,9 +51,6 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
-import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.Trie;
-import com.limegroup.mojito.util.TrieUtils;
 
 public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
 
@@ -66,10 +66,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of Contacts we're going to query */
-    protected Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>(KUID.KEY_CREATOR);
+    protected Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_CREATOR);
+    protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_ANALYZER);
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();

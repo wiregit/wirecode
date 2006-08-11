@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -34,7 +35,6 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
-import com.limegroup.mojito.util.TrieUtils;
 
 /**
  * 

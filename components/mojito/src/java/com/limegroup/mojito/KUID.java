@@ -31,8 +31,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.PatriciaTrie.KeyCreator;
 
 
 /**
@@ -211,11 +211,11 @@ public class KUID implements Comparable<KUID>, Serializable {
         }
         
         if (allNull) {
-            return KeyCreator.NULL_BIT_KEY;
+            return KeyAnalyzer.NULL_BIT_KEY;
         }
         
         if (bitIndex == LENGTH_IN_BITS) {
-            return KeyCreator.EQUAL_BIT_KEY;
+            return KeyAnalyzer.EQUAL_BIT_KEY;
         }
         
         return bitIndex;
@@ -554,29 +554,41 @@ public class KUID implements Comparable<KUID>, Serializable {
         return KUID.createNodeID(random);
     }
     
-    public static final KeyCreator<KUID> KEY_CREATOR = new KUIDKeyCreator();
+    public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyCreator();
     
     /**
      * A PATRICIA Trie KeyCreator for KUIDs
      */
-    private static class KUIDKeyCreator implements KeyCreator<KUID> {
+    private static class KUIDKeyCreator implements KeyAnalyzer<KUID> {
         
         private static final long serialVersionUID = 6412279289438108492L;
 
-        public boolean isBitSet(KUID key, int bitIndex) {
-            return key.isBitSet(bitIndex);
-        }
-
-        public int length() {
-            return KUID.LENGTH_IN_BITS;
-        }
-        
-        public int bitIndex(KUID key, KUID found) {
+        public int bitIndex(KUID key, int keyStart, int keyLength, KUID found, int foundStart, int foundLength) {
             if (found == null) {
                 found = KUID.MIN_NODE_ID;
             }
             
             return key.bitIndex(found);
+        }
+
+        public int bitsPerElement() {
+            return 1;
+        }
+
+        public boolean isBitSet(KUID key, int keyLength, int bitIndex) {
+            return key.isBitSet(bitIndex);
+        }
+
+        public boolean isPrefix(KUID prefix, int offset, int length, KUID key) {
+            return false;
+        }
+
+        public int length(KUID key) {
+            return KUID.LENGTH;
+        }
+
+        public int compare(KUID o1, KUID o2) {
+            return o1.compareTo(o2);
         }
     }
 }

@@ -30,15 +30,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.TrieUtils;
+import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.FixedSizeHashMap;
-import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.TrieUtils;
-import com.limegroup.mojito.util.Trie.Cursor;
 
 /**
  * An implementation of Bucket
@@ -64,7 +64,7 @@ class BucketNode implements Bucket {
         this.bucketId = bucketId;
         this.depth = depth;
         
-        nodeTrie = new PatriciaTrie<KUID, Contact>(KUID.KEY_CREATOR);
+        nodeTrie = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
         init();
     }
     
@@ -234,13 +234,13 @@ class BucketNode implements Bucket {
     public Contact getLeastRecentlySeenLiveContact() {
         final Contact[] leastRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
+            public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 Contact lrs = leastRecentlySeen[0];
                 if (lrs == null || node.getTimeStamp() < lrs.getTimeStamp()) {
                     leastRecentlySeen[0] = node;
                 }
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         return leastRecentlySeen[0];
@@ -249,22 +249,23 @@ class BucketNode implements Bucket {
     public Contact getMostRecentlySeenLiveContact() {
         final Contact[] mostRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
+            public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 Contact mrs = mostRecentlySeen[0];
                 if (mrs == null || node.getTimeStamp() > mrs.getTimeStamp()) {
                     mostRecentlySeen[0] = node;
                 }
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         return mostRecentlySeen[0];
     }
     
     public void purge() {
-        for (Contact node : nodeTrie.values()) {
+        for (Iterator<Contact> it = nodeTrie.values().iterator(); it.hasNext(); ) {
+            Contact node = it.next();
             if(!node.isAlive() && !routeTable.isLocalNode(node)) {
-                nodeTrie.remove(node.getNodeID());
+                it.remove();
             }
         }
         
@@ -333,12 +334,12 @@ class BucketNode implements Bucket {
     private int getLiveNotDeadCount() {
         final int[] notDead = new int[]{ 0 };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
-            public boolean select(Map.Entry<? extends KUID, ? extends Contact> entry) {
+            public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
                 Contact node = entry.getValue();
                 if (!node.isDead()) {
                     notDead[0]++;
                 }
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         return notDead[0];

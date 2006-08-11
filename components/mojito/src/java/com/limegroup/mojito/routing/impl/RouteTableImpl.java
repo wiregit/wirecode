@@ -21,12 +21,15 @@ package com.limegroup.mojito.routing.impl;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
@@ -36,8 +39,6 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
-import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.Trie.Cursor;
 
 public class RouteTableImpl implements RouteTable {
     
@@ -71,7 +72,7 @@ public class RouteTableImpl implements RouteTable {
     private transient Callback callback;
     
     public RouteTableImpl() {
-        bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_CREATOR);
+        bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
     }
     
@@ -436,10 +437,14 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> select(final KUID nodeId, final int count) {
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 nodes.addAll(bucket.select(nodeId, count - nodes.size()));
-                return nodes.size() >= count;
+                
+                if (nodes.size() < count) {
+                    return SelectStatus.CONTINUE;
+                }
+                return SelectStatus.EXIT;
             }
         });
         return nodes;
@@ -453,23 +458,30 @@ public class RouteTableImpl implements RouteTable {
         
         if (liveContacts) {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+                public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                     Bucket bucket = entry.getValue();
                     for(Contact contact : bucket.select(nodeId, count - nodes.size())) {
                         if (!contact.hasFailed()) {
                             nodes.add(contact);
                         }
                     }
-                    return nodes.size() >= count;
+                    
+                    if (nodes.size() < count) {
+                        return SelectStatus.CONTINUE;
+                    }
+                    return SelectStatus.EXIT;
                 }
             });
         } else {
             bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
-                public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+                public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                     Bucket bucket = entry.getValue();
                     nodes.addAll(bucket.select(nodeId, count - nodes.size()));
                     
-                    return nodes.size() >= count;
+                    if (nodes.size() < count) {
+                        return SelectStatus.CONTINUE;
+                    }
+                    return SelectStatus.EXIT;
                 }
             });
         }
@@ -489,7 +501,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> getLiveContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 // This should be faster than addAll() as all  
                 // elements are added straight to the 'nodes'
@@ -497,7 +509,7 @@ public class RouteTableImpl implements RouteTable {
                 // overhead that does not pay off.
                 //TrieUtils.values(bucket.trie(), nodes);
                 nodes.addAll(bucket.getLiveContacts());
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         return nodes;
@@ -506,10 +518,10 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> getCachedContacts() {
         final List<Contact> nodes = new ArrayList<Contact>();
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 nodes.addAll(bucket.getCachedContacts());
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         return nodes;
@@ -531,7 +543,7 @@ public class RouteTableImpl implements RouteTable {
         final List<KUID> randomIds = new ArrayList<KUID>();
         
         bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 if (!bucket.contains(getLocalNode().getNodeID()) || !bootstrapping) {
                     if (bootstrapping || bucket.isRefreshRequired()) {
@@ -546,7 +558,7 @@ public class RouteTableImpl implements RouteTable {
                         randomIds.add(randomId);
                     }
                 }
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
         
@@ -557,7 +569,7 @@ public class RouteTableImpl implements RouteTable {
         return randomIds;
     }
     
-    public synchronized List<Bucket> getBuckets() {
+    public synchronized Collection<Bucket> getBuckets() {
         return bucketTrie.values();
     }
     
@@ -596,10 +608,10 @@ public class RouteTableImpl implements RouteTable {
     
     public synchronized void purge() {
     	bucketTrie.traverse(new Cursor<KUID, Bucket>() {
-            public boolean select(Entry<? extends KUID, ? extends Bucket> entry) {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 bucket.purge();
-                return false;
+                return SelectStatus.CONTINUE;
             }
         });
     }
