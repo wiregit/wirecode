@@ -859,6 +859,10 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private TrieEntry<K, V> nextEntryImpl(TrieEntry<K, V> start, TrieEntry<K, V> previous, TrieEntry<K, V> tree) {
         TrieEntry<K, V> current = start;
 
+        if (current == null) {
+            return null;
+        }
+        
         // Only look at the left if this was a recursive or
         // the first check, otherwise we know we've already looked
         // at the left.
