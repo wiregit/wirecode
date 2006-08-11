@@ -144,7 +144,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         messageId.write(out); // 0-15
         out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
-        out.writeShort(getContact().getVendor()); //17-18
+        out.writeShort(getContact().getVersion()); //17-18
         
         out.write((payload.length      ) & 0xFF); // 19-22
         out.write((payload.length >>  8) & 0xFF);
