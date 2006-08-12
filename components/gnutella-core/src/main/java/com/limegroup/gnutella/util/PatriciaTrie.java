@@ -108,6 +108,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
         root.parent = null;
         root.left = root;
         root.right = null;
+        root.predecessor = root;
         
         size = 0;
         incrementModCount();
