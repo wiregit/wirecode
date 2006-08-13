@@ -66,7 +66,8 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createStringSetting("MASTER_KEY", "public.key");
     
     /**
-     * The time 
+     * The maximum time a Node may stay inactive before
+     * the Node ID becomes invalid a new ID is generated.
      */
     public static final LongSetting NODE_ID_TIMEOUT
         = FACTORY.createSettableLongSetting("NODE_ID_TIMEOUT", 14L*24L*60L*60L*1000L, 

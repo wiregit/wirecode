@@ -98,6 +98,14 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     }
 
     /**
+     * Creates and returns a MessageID from the given
+     * hex encoded String
+     */
+    public static MessageID create(String id) {
+        return create(ArrayUtils.parseHexString(id));
+    }
+    
+    /**
      * Writes this MessageID to the OutputStream
      */
     public void write(OutputStream os) throws IOException {

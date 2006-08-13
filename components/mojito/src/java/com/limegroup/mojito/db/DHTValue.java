@@ -31,7 +31,10 @@ import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 
 /**
- * 
+ * The DHTValue class represents a <key, value> tuple that
+ * is stored on the DHT. Besides the actual <key, value> tuple 
+ * it's also storing the originator of the DHTValue as well as
+ * the sender of the DHTValue.
  */
 public class DHTValue implements Serializable {
     
@@ -196,11 +199,11 @@ public class DHTValue implements Serializable {
         }
         
         long t = (long)((locations 
-                * DatabaseSettings.REPUBLISH_INTERVAL.getValue()) 
+                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());
         
         // never republish more than every X minutes
-        long nextPublishTime = Math.max(t, DatabaseSettings.MIN_REPUBLISH_INTERVAL.getValue());
+        long nextPublishTime = Math.max(t, DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
         long time = lastRepublishingTime + nextPublishTime;
 
         return System.currentTimeMillis() >= time;

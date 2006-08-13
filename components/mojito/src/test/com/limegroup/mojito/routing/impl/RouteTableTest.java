@@ -459,7 +459,7 @@ public class RouteTableTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        localNode = ContactNode.createLocalContact(0, 0, KUID.createNodeID(NODE_IDS[0]), 0, false);
+        localNode = ContactNode.createLocalContact(0, 0, KUID.create(NODE_IDS[0]), 0, false);
         ((ContactNode)localNode).setContactAddress(new InetSocketAddress("localhost", PORT));
         
         toPing.clear();
@@ -480,7 +480,7 @@ public class RouteTableTest extends BaseTestCase {
         
         for (int i = 1; i < NODE_IDS.length; i++) {
             SocketAddress src = new InetSocketAddress("localhost", PORT+i);
-            KUID nodeId = KUID.createNodeID(NODE_IDS[i]);
+            KUID nodeId = KUID.create(NODE_IDS[i]);
             int vendor = 0;
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
@@ -510,18 +510,18 @@ public class RouteTableTest extends BaseTestCase {
         
         // Check if all Buckets exist
         for (int i = 0; i < BUCKET_IDS.length; i++) {
-            KUID nodeId = KUID.createNodeID(BUCKET_IDS[i]);
+            KUID nodeId = KUID.create(BUCKET_IDS[i]);
             Bucket b = routeTable.getBucket(nodeId);
             assertEquals(nodeId, b.getBucketID());
         }
         
         // Check if the local Node is in the right Bucket
         Bucket bucket = routeTable.getBucket(localNode.getNodeID());
-        assertEquals(KUID.createNodeID(LOCAL_NODE_BUCKET_ID), bucket.getBucketID());
+        assertEquals(KUID.create(LOCAL_NODE_BUCKET_ID), bucket.getBucketID());
         
         // Check if the live Nodes are in the right Buckets
         for (int i = 0; i < LIVE_NODE_IDS.length; i++) {
-            KUID nodeId = KUID.createNodeID(LIVE_NODE_IDS[i]);
+            KUID nodeId = KUID.create(LIVE_NODE_IDS[i]);
             Contact node1 = routeTable.select(nodeId);
             assertEquals(nodeId, node1.getNodeID());
             
@@ -532,7 +532,7 @@ public class RouteTableTest extends BaseTestCase {
         
         // Check if the cached Nodes are in the right Buckets
         for (int i = 0; i < CACHED_NODE_IDS.length; i++) {
-            KUID nodeId = KUID.createNodeID(CACHED_NODE_IDS[i]);
+            KUID nodeId = KUID.create(CACHED_NODE_IDS[i]);
             Contact node1 = routeTable.get(nodeId);
             assertNotNull(node1);
             assertEquals(nodeId, node1.getNodeID());
@@ -580,14 +580,14 @@ public class RouteTableTest extends BaseTestCase {
             String line = null;
             
             while((line = in.readLine()) != null) {
-                KUID key = KUID.createNodeID(line);
+                KUID key = KUID.create(line);
                 String[] tmp = in.readLine().split(",");
                 assertEquals(K, tmp.length);
                 
                 KUID[] selected = new KUID[tmp.length];
                 
                 for (int i = 0; i < tmp.length; i++) {
-                    selected[i] = KUID.createNodeID(tmp[i]);
+                    selected[i] = KUID.create(tmp[i]);
                 }
                 entries.add(new EntryImpl<KUID, KUID[]>(key, selected));
             }

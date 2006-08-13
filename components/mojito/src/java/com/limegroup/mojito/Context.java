@@ -284,7 +284,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 // Contacts
                 for (Contact node : backup) {
                     if (!oldNodeId.equals(node.getNodeID())) {
-                        node.setState(State.UNKNOWN);
+                        ((ContactNode)node).setState(State.UNKNOWN);
                         routeTable.add(node);
                     }
                 }

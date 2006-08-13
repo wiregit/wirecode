@@ -53,10 +53,8 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
         
         switch(opcode) {
             case FIND_NODE_REQUEST:
-                lookupId = in.readNodeID();
-                break;
             case FIND_VALUE_REQUEST:
-                lookupId = in.readValueID();
+                lookupId = in.readKUID();
                 break;
             default:
                 throw new IOException("Unknown opcode for lookup request: " + opcode);

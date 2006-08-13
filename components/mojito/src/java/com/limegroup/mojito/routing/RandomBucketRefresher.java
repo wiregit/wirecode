@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.routing;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -43,19 +44,25 @@ public class RandomBucketRefresher implements Runnable {
     
     private volatile ScheduledFuture future;
     
+    private long period = 0L;
+    
+    private long end = 0L;
+    
     public RandomBucketRefresher(Context context) {
         this.context = context;
     }
     
     public synchronized void start() {
         if (future == null) {
-            long period = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
+            period = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
             long delay = period;
             
             if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
-                delay = (long)(delay * Math.random());
+                //delay = (long)(period * Math.random());
+                delay = period + (long)(period * Math.random());
             }
             
+            end = 0L;
             future = context.scheduleAtFixedRate(this, delay, period, TimeUnit.MILLISECONDS);
         }
     }
@@ -81,14 +88,29 @@ public class RandomBucketRefresher implements Runnable {
         }
         
         if (!context.isBootstrapped()) {
-            if(context.isBootstrapping()) {
+            if (context.isBootstrapping()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info(context.getName() + " is bootstrapping, not running refresher");
                 }
             } else {
-                //if we are not bootstrapped and have got some 
-                //nodes in our routing table, try bootstrapping
-                context.bootstrap(); //this will take some MRS nodes and bootstrap from them.
+                // If we are not bootstrapped and have got some 
+                // Nodes in our RouteTable, try bootstrapping
+                // this will take some MRS nodes and bootstraps
+                // from them.
+                context.bootstrap(); 
+            }
+            return;
+        }
+        
+        // Scheduled Tasks have the side effect that if the last
+        // iteration took longer than the schedule period it will
+        // re-shedule the task immediately causing the Task being
+        // executed continuously without a delay. 
+        long timeSinceLastRefresh = System.currentTimeMillis() - end;
+        if (timeSinceLastRefresh < period) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Skipping this refresh interval: " 
+                        + timeSinceLastRefresh + " < " + period);
             }
             return;
         }
@@ -96,12 +118,21 @@ public class RandomBucketRefresher implements Runnable {
         List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
         
         try {
-            for(KUID nodeId : ids) {
-                FindNodeResponseHandler handler = new FindNodeResponseHandler(context, nodeId);
-                handler.call();
+            for(Iterator<KUID> it = ids.iterator(); it.hasNext(); ) {
+                KUID nodeId = it.next();
+                
+                try {
+                    FindNodeResponseHandler handler 
+                        = new FindNodeResponseHandler(context, nodeId);
+                    handler.call();
+                } finally {
+                    it.remove();
+                }
             }
         } catch (Exception err) {
             LOG.error("Exception", err);
         }
+        
+        end = System.currentTimeMillis();
     }
 }

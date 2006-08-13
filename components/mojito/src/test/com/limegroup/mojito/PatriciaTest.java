@@ -83,7 +83,7 @@ public class PatriciaTest extends BaseTestCase {
         byte[] id = new byte[20];
         System.arraycopy(b, 0, id, 0, Math.min(b.length, id.length));
         
-        return KUID.createNodeID(id);
+        return KUID.create(id);
     }
     
     public void testRange() {
@@ -132,7 +132,7 @@ public class PatriciaTest extends BaseTestCase {
         
         Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_ANALYZER);
         for(int i = 0; i < nodes.length; i++) {
-            KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
+            KUID kuid = KUID.create(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
             
             System.out.println(kuid + " = " + kuid.toBinString());
@@ -140,7 +140,7 @@ public class PatriciaTest extends BaseTestCase {
         
         //System.out.println(trie);
         
-        KUID key = KUID.createNodeID(ArrayUtils.parseHexString(lookup));
+        KUID key = KUID.create(ArrayUtils.parseHexString(lookup));
         List<KUID> items = TrieUtils.select(trie, key, nodes.length);
         
         System.out.println();
@@ -154,7 +154,7 @@ public class PatriciaTest extends BaseTestCase {
     
     // Not an unit test!
     private void /*test*/Select() {
-        KUID lookup = KUID.createNodeID(ArrayUtils.parseHexString("C814CF8CF039760D1399720BDBBD10F5327DB5A9"));
+        KUID lookup = KUID.create(ArrayUtils.parseHexString("C814CF8CF039760D1399720BDBBD10F5327DB5A9"));
         KUID inverted = lookup.invert();
         
         String[] nodes = {
@@ -167,7 +167,7 @@ public class PatriciaTest extends BaseTestCase {
         
         Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_ANALYZER);
         for(int i = 0; i < nodes.length; i++) {
-            KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
+            KUID kuid = KUID.create(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
             
             System.out.println(kuid + " = " + kuid.toBinString());

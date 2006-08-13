@@ -23,25 +23,44 @@ import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
+/**
+ * Miscellaneous RouteTable related settings
+ */
 public final class RouteTableSettings extends MojitoProps {
 
     private RouteTableSettings() {}
     
-    // TODO reasonable min and max values
+    /**
+     * The maximum number of Contacts we're keeping in the
+     * Bucket replacement cache.
+     */
     public static final IntSetting MAX_CACHE_SIZE
-        = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 16, "max_cache_size", 1, 256);
+        = FACTORY.createSettableIntSetting("MAX_CACHE_SIZE", 16, 
+                "max_cache_size", 1, 256);
     
-    // TODO reasonable min and max values
+    /**
+     * The maximum number of errors that may occur before an
+     * alive Contact is considered as dead.
+     */
     public static final IntSetting MAX_LIVE_NODE_FAILURES
-        = FACTORY.createSettableIntSetting("MAX_LIVE_NODE_FAILURES", 4, "max_live_node_failures", 4, 10);
+        = FACTORY.createSettableIntSetting("MAX_LIVE_NODE_FAILURES", 4, 
+                "max_live_node_failures", 4, 10);
    
-    // TODO reasonable min and max values
+    /**
+     * The maximum number of errors that may occur before an
+     * unknown Contact is considered as dead.
+     */
     public static final IntSetting MAX_UNKNOWN_NODE_FAILURES
-        = FACTORY.createSettableIntSetting("MAX_UNKNOWN_NODE_FAILURES", 2, "max_unknown_node_failures", 2, 10);
+        = FACTORY.createSettableIntSetting("MAX_UNKNOWN_NODE_FAILURES", 2, 
+                "max_unknown_node_failures", 2, 10);
     
-    // TODO reasonable min and max values
+    /**
+     * The minimum time that must pass since the last successful contact 
+     * before we're contacting a Node for RouteTable maintenance reasons.
+     */
     public static final LongSetting MIN_RECONNECTION_TIME
-        = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, "min_reconnect_time", 0, 1L*60L);
+        = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, 
+                "min_reconnect_time", 0, 1L*60L);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step
@@ -49,10 +68,12 @@ public final class RouteTableSettings extends MojitoProps {
     public static final IntSetting DEPTH_LIMIT //a.k.a B
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
-    // TODO reasonable min and max values
-    // 30 minutes for now
+    /**
+     * The period of the RandomBucketRefresher
+     */
     public static final LongSetting BUCKET_REFRESH_PERIOD
-        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, "bucket_refresh_period", 15L*60L*1000L, 120L*60L*1000L);
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, 
+                "bucket_refresh_period", 15L*60L*1000L, 120L*60L*1000L);
     
     /**
      * This setting is primarily for testing. It makes sure that
@@ -69,6 +90,12 @@ public final class RouteTableSettings extends MojitoProps {
     public static final LongSetting BUCKET_PING_LIMIT
         = FACTORY.createLongSetting("BUCKET_PING_LIMIT", 30L * 1000L);
     
+    /**
+     * The maximum number of consecutive failures that may occur
+     * in a row before we're suspending all maintenance operations
+     * (we're maybe no longer connected to the Internet and we'd
+     * kill our RouteTable).
+     */
     public static final IntSetting MAX_CONSECUTIVE_FAILURES
         = FACTORY.createIntSetting("MAX_CONSECUTIVE_FAILURES", 100);
 }

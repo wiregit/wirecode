@@ -23,16 +23,33 @@ import java.io.Serializable;
 import java.net.SocketAddress;
 
 /**
- *
+ * A Contact is a Node in the DHT. The Contact interface
+ * encapsulates all required informations to contact the
+ * remote Node or to keep track of its current State in
+ * our RouteTable.
  */
 public interface Contact extends Serializable {
     
     /**
-     * The state of this Contact
+     * Various states a Contact may have
      */
     public static enum State {
-        ALIVE,
+        // A Contact is alive either if we 
+        // got a response to a request or 
+        // we received a request from the Contact
+        ALIVE, 
+        
+        // A Contact is dead if it fails to respond
+        // a certain number of times to our requests
         DEAD,
+        
+        // An unknown Contact is neither dead nor
+        // alive. Unknown Contacts are Contacts
+        // we're receiving with FIND_NODE and FIND_VALUE
+        // requests. We're using them to fill up our
+        // RouteTable but they'll never replace alive
+        // or dead Contacts in our RouteTable. An alive
+        // Contact will always replace an unknown Contact!
         UNKNOWN;
     }
     
@@ -54,7 +71,7 @@ public interface Contact extends Serializable {
     /**
      * Returns the contact address. Use the contact
      * address to send requests or responses to the
-     * Node.
+     * remote Node.
      */
     public SocketAddress getContactAddress();
     
@@ -163,6 +180,4 @@ public interface Contact extends Serializable {
      * The latter three only if this Contact is not alive.
      */
     public void updateWithExistingContact(Contact existing);
-    
-    public void setState(State state);
 }

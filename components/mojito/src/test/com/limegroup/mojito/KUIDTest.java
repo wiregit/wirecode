@@ -45,16 +45,16 @@ public class KUIDTest extends BaseTestCase {
     
     public void testIsNearer() {
         
-        KUID lookup = KUID.createNodeID(ArrayUtils.parseHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB"));
-        KUID worst = KUID.createNodeID(ArrayUtils.parseHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868"));
-        KUID best = KUID.createNodeID(ArrayUtils.parseHexString("F2617265969422D11CFB73C75EE8B649132DFB37"));
+        KUID lookup = KUID.create(ArrayUtils.parseHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB"));
+        KUID worst = KUID.create(ArrayUtils.parseHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868"));
+        KUID best = KUID.create(ArrayUtils.parseHexString("F2617265969422D11CFB73C75EE8B649132DFB37"));
         
         assertTrue(worst.isNearer(best, lookup));
     }
     
     public void testCompareTo() {
-        KUID a = KUID.createNodeID(ArrayUtils.parseHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB"));
-        KUID b = KUID.createNodeID(ArrayUtils.parseHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868"));
+        KUID a = KUID.create(ArrayUtils.parseHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB"));
+        KUID b = KUID.create(ArrayUtils.parseHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868"));
         
         assertEquals(0, a.compareTo(a));
         assertEquals(-1, a.compareTo(b));

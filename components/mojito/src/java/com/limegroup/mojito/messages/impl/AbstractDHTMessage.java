@@ -99,7 +99,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         this.messageId = messageId;
         
         int vendor = in.readInt();
-        KUID nodeId = in.readNodeID();
+        KUID nodeId = in.readKUID();
         SocketAddress contactAddress = in.readSocketAddress();
         
         if (contactAddress == null) {

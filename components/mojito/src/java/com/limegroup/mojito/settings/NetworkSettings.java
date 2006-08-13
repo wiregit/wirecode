@@ -22,7 +22,9 @@ package com.limegroup.mojito.settings;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
-
+/**
+ * Miscellaneous Network settings
+ */
 public final class NetworkSettings extends MojitoProps {
     
     private NetworkSettings() {}
@@ -35,10 +37,11 @@ public final class NetworkSettings extends MojitoProps {
         = FACTORY.createSettableLongSetting("TIMEOUT", 10000L, "timeout", 10L, 30000L);
     
     /**
-     * 
+     * A multiplication factor for the RTT.
      */
     public static final IntSetting MIN_TIMEOUT_RTT_FACTOR
-        = FACTORY.createSettableIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, "min_timeout_rtt_factor", 1, 10);
+        = FACTORY.createSettableIntSetting("MIN_TIMEOUT_RTT_FACTOR", 2, 
+                "min_timeout_rtt_factor", 1, 10);
     
     /**
      * The maximum number of times we're trying to re-send a
