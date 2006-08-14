@@ -34,7 +34,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.TrieUtils;
@@ -51,8 +50,10 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
+import com.limegroup.mojito.util.ContactUtils.CollisionVerifyer;
 
-public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
+public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> 
+        implements CollisionVerifyer {
 
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
@@ -253,49 +254,17 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             Collection<Contact> nodes = response.getNodes();
             for(Contact node : nodes) {
                 
-                if (!NetworkUtils.isValidSocketAddress(node.getContactAddress())) {
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(response.getContact() 
-                                + " sent us a Contact with an invalid IP/Port " + node);
+                if (!ContactUtils.isValidContact(contact, node)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Dropping " + node);
                     }
                     continue;
                 }
                 
-                if (context.isLocalNodeID(node.getNodeID())) {
-                    // If same address then just skip it
-                    if (context.isLocalContactAddress(node.getContactAddress())) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Skipping local node");
-                        }
-                    } else { // there might be a NodeID collision
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(node + " seems to collide with " + context.getLocalNode());
-                        }
-                        
-                        // Continue with the lookup but run in parallel a
-                        // collision check.
-                        if (isCollisionCheckEnabled()) {
-                            doCollisionCheck(node);
-                        }
+                if (ContactUtils.isLocalNode(context, node, this)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Dropping " + node);
                     }
-                    
-                    continue;
-                }
-                
-                // Imagine you have two Nodes that have each other in
-                // their RouteTable. The first Node quits and restarts
-                // with a new Node ID. The second Node pings the first
-                // Node and we add it to the RouteTable. The first Node
-                // starts a lookup and we get a Set of contacts from
-                // the second Node which contains our old Contact (different 
-                // Node ID but same IPP). So what happens now is that
-                // we're sending a lookup to that Node which is the same
-                // as sending the lookup to ourself (loopback).
-                if (context.isLocalContactAddress(node.getContactAddress())) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(node + " has the same Contact addess as we do " + context.getLocalNode());
-                    }
-                    
                     continue;
                 }
                 
@@ -499,7 +468,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * 
      * Called only if the collisionCheck is enabled!
      */
-    protected void doCollisionCheck(Contact node) throws IOException {
+    public void doCollisionCheck(Contact node) throws IOException {
+        
+        if (!isCollisionCheckEnabled()) {
+            return;
+        }
         
         PingListener listener = new PingListener() {
             public void handleResult(Contact result) {

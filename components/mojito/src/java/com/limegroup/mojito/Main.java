@@ -76,11 +76,11 @@ public class Main {
         }
         
         List<MojitoDHT> dhts = standalone(null, port, count);
-        for (MojitoDHT dht: dhts) {
+        /*for (MojitoDHT dht: dhts) {
             InetSocketAddress addr = (InetSocketAddress)dht.getContactAddress();
             addr = new InetSocketAddress(bootstrapHost.getAddress(), addr.getPort());
             ((Context)dht).setContactAddress(addr);
-        }
+        }*/
         
         //List<MojitoDHT> dhts = limewire(null, port);
         run(port, dhts, bootstrapHost);
@@ -173,6 +173,7 @@ public class Main {
             bootstrapHostSet.add(new InetSocketAddress("localhost", port));
         }
         
+        System.out.println(bootstrapHostSet);
         int start = (bootstrapHost != null ? 0 : 1);
         for(int i = start; i < dhts.size(); i++) {
             

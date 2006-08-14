@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 
 /**
@@ -87,5 +88,87 @@ public final class ContactUtils {
         }
         
         return false;
+    }
+    
+    /**
+     * Checks whether or not 'node' is a valid Contact. Valid 
+     * in sense of having a correct IP:Port and depending on
+     * the ConnectionSettings.LOCAL_IS_PRIVATE setting whether or
+     * not its IP is a non-private Address.
+     * 
+     * @param src The source that send the 'node'
+     * @param node The Contact to verify
+     * @return Whether or not 'node' is a valid Contact
+     */
+    public static boolean isValidContact(Contact src, Contact node) {
+        if (!NetworkUtils.isValidSocketAddress(node.getContactAddress())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(src + " sent us a Contact with an invalid IP:Port " + node);
+            }
+            return false;
+        }
+        
+        // NOTE: NetworkUtils.isPrivateAddress() is checking internally
+        // if ConnectionSettings.LOCAL_IS_PRIVATE is true!
+        if (NetworkUtils.isPrivateAddress(node.getContactAddress())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(src + " sent us a Contact with a private IP:Port " + node);
+            }
+            return false;
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * 
+     */
+    public static boolean isLocalNode(Context context, Contact node, 
+            CollisionVerifyer verifyer) throws IOException {
+        
+        if (context.isLocalNodeID(node.getNodeID())) {
+            // If same address then just skip it
+            if (context.isLocalContactAddress(node.getContactAddress())) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Skipping local node");
+                }
+            } else { // there might be a NodeID collision
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(node + " seems to collide with " + context.getLocalNode());
+                }
+                
+                // Continue with the lookup but run in parallel a
+                // collision check.
+                if (verifyer != null) {
+                    verifyer.doCollisionCheck(node);
+                }
+            }
+            
+            return true;
+        }
+        
+        // Imagine you have two Nodes that have each other in
+        // their RouteTable. The first Node quits and restarts
+        // with a new Node ID. The second Node pings the first
+        // Node and we add it to the RouteTable. The first Node
+        // starts a lookup and we get a Set of contacts from
+        // the second Node which contains our old Contact (different 
+        // Node ID but same IPP). So what happens now is that
+        // we're sending a lookup to that Node which is the same
+        // as sending the lookup to ourself (loopback).
+        if (context.isLocalContactAddress(node.getContactAddress())) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(node + " has the same Contact addess as we do " + context.getLocalNode());
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static interface CollisionVerifyer {
+        public void doCollisionCheck(Contact node) throws IOException;
     }
 }
