@@ -49,7 +49,6 @@ import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.util.CollectionUtils;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
 
@@ -201,11 +200,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Get the first round of alpha nodes and send them requests
         List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, getParallelLookups());
         
-        System.out.println(CollectionUtils.toString(toQuery.values()));
-        System.out.println(CollectionUtils.toString(alphaList));
-        
         // Make sure the forcedContact is in the alpha list
-        if (forcedContact != null && !alphaList.contains(forcedContact)) {
+        if (forcedContact != null 
+                && !alphaList.contains(forcedContact)
+                && !forcedContact.equals(context.getLocalNode())) {
+            
             alphaList.add(0, forcedContact);
             hopMap.put(forcedContact.getNodeID(), currentHop+1);
             
