@@ -30,6 +30,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact.CollisionVerifyer;
 
 /**
  * 
@@ -122,9 +123,10 @@ public final class ContactUtils {
     
     
     /**
-     * 
+     * Checks whether or not 'node' is the local Node and
+     * triggers Node ID collision verification respectively.
      */
-    public static boolean isLocalNode(Context context, Contact node, 
+    public static boolean isLocalContact(Context context, Contact node, 
             CollisionVerifyer verifyer) throws IOException {
         
         if (context.isLocalNodeID(node.getNodeID())) {
@@ -166,9 +168,5 @@ public final class ContactUtils {
         }
         
         return false;
-    }
-    
-    public static interface CollisionVerifyer {
-        public void doCollisionCheck(Contact node) throws IOException;
     }
 }

@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.SocketAddress;
 
@@ -180,4 +181,12 @@ public interface Contact extends Serializable {
      * The latter three only if this Contact is not alive.
      */
     public void updateWithExistingContact(Contact existing);
+    
+    /**
+     * An interface to check whether or not 'node' collides
+     * with the local Node
+     */
+    public static interface CollisionVerifyer {
+        public void doCollisionCheck(Contact node) throws IOException;
+    }
 }

@@ -40,6 +40,7 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.Contact.CollisionVerifyer;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
@@ -50,7 +51,6 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
-import com.limegroup.mojito.util.ContactUtils.CollisionVerifyer;
 
 public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> 
         implements CollisionVerifyer {
@@ -261,7 +261,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                     continue;
                 }
                 
-                if (ContactUtils.isLocalNode(context, node, this)) {
+                if (ContactUtils.isLocalContact(context, node, this)) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Dropping " + node);
                     }

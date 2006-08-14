@@ -422,7 +422,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                     continue;
                 }
                 
-                if (ContactUtils.isLocalNode(context, node, null)) {
+                if (ContactUtils.isLocalContact(context, node, null)) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Dropping " + node);
                     }
