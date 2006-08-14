@@ -233,7 +233,16 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         decrementActiveSearches();
         
         Contact contact = message.getContact();
-        currentHop = hopMap.remove(contact.getNodeID()).intValue();
+        
+        Integer hop = hopMap.remove(contact.getNodeID());
+        if (hop == null) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Hop counter is messed up for " + contact);
+            }
+            hop = new Integer(0);
+        }
+        
+        currentHop = hop.intValue();
         
         if (message instanceof FindNodeResponse) {
             FindNodeResponse response = (FindNodeResponse)message;
@@ -323,13 +332,21 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         assert (hasActiveSearches());
         decrementActiveSearches();
-        
+
         if (LOG.isTraceEnabled()) {
             LOG.trace(ContactUtils.toString(nodeId, dst) 
                     + " did not respond to our " + message);
         }
         
-        currentHop = hopMap.remove(nodeId).intValue();
+        Integer hop = hopMap.remove(nodeId);
+        if (hop == null) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Hop counter is messed up for " + ContactUtils.toString(nodeId, dst));
+            }
+            hop = new Integer(0);
+        }
+        
+        currentHop = hop.intValue();
         nextLookupStep();
         finishIfDone();
     }
