@@ -173,7 +173,6 @@ public class Main {
             bootstrapHostSet.add(new InetSocketAddress("localhost", port));
         }
         
-        System.out.println(bootstrapHostSet);
         int start = (bootstrapHost != null ? 0 : 1);
         for(int i = start; i < dhts.size(); i++) {
             
