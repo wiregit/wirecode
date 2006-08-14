@@ -59,25 +59,17 @@ public class MessageInputStream extends DataInputStream {
         return buf;
     }
     
-    private byte[] readKUIDBytes() throws IOException {
-        return readBytes(KUID.LENGTH);
-    }
-    
-    public KUID readNodeID() throws IOException {
-        return KUID.createNodeID(readKUIDBytes());
+    public KUID readKUID() throws IOException {
+        return KUID.create(readBytes(KUID.LENGTH));
     }
     
     public MessageID readMessageID() throws IOException {
         return MessageID.create(readBytes(MessageID.LENGTH));
     }
     
-    public KUID readValueID() throws IOException {
-        return KUID.createValueID(readKUIDBytes());
-    }
-    
     public DHTValue readDHTValue(Contact sender) throws IOException {
         Contact originator = readContact();
-        KUID valueId = readValueID();
+        KUID valueId = readKUID();
         byte[] data = null;
         int length = readUnsignedShort();
         if (length > 0) {
@@ -109,7 +101,7 @@ public class MessageInputStream extends DataInputStream {
         
         KUID[] keys = new KUID[size];
         for (int i = 0; i < size; i++) {
-            keys[i] = readValueID();
+            keys[i] = readKUID();
         }
         
         return Arrays.asList(keys);
@@ -123,7 +115,7 @@ public class MessageInputStream extends DataInputStream {
         
         KUID[] keys = new KUID[size];
         for (int i = 0; i < size; i++) {
-            keys[i] = readNodeID();
+            keys[i] = readKUID();
         }
         
         return Arrays.asList(keys);
@@ -154,7 +146,7 @@ public class MessageInputStream extends DataInputStream {
     public Contact readContact() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
-        KUID nodeId = readNodeID();
+        KUID nodeId = readKUID();
         SocketAddress addr = readSocketAddress();
         
         if (addr == null) {
@@ -234,7 +226,7 @@ public class MessageInputStream extends DataInputStream {
         
         Entry<KUID, Status>[] entries = new Entry[size];
         for (int i = 0; i < entries.length; i++) {
-            KUID valueId = readValueID();
+            KUID valueId = readKUID();
             Status status = Status.valueOf( readUnsignedByte() );
             entries[i] = new EntryImpl<KUID, Status>(valueId, status);
         }

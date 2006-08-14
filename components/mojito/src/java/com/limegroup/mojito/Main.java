@@ -58,7 +58,7 @@ public class Main {
         int count = 0;
         int port = 0;
         
-        SocketAddress bootstrapHost = null;
+        InetSocketAddress bootstrapHost = null;
         
         if (args.length != 2 && args.length != 4) {
             System.out.println("java1 Main count port");
@@ -76,6 +76,12 @@ public class Main {
         }
         
         List<MojitoDHT> dhts = standalone(null, port, count);
+        /*for (MojitoDHT dht: dhts) {
+            InetSocketAddress addr = (InetSocketAddress)dht.getContactAddress();
+            addr = new InetSocketAddress(bootstrapHost.getAddress(), addr.getPort());
+            ((Context)dht).setContactAddress(addr);
+        }*/
+        
         //List<MojitoDHT> dhts = limewire(null, port);
         run(port, dhts, bootstrapHost);
     }

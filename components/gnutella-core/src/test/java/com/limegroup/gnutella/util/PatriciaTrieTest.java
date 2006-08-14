@@ -633,6 +633,7 @@ public class PatriciaTrieTest extends BaseTestCase {
             = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
         final String[] keys = new String[]{
+                "", 
                 "Albert", "Xavier", "XyZ", "Anna", "Alien", "Alberto",
                 "Alberts", "Allie", "Alliese", "Alabama", "Banane",
                 "Blabla", "Amber", "Ammun", "Akka", "Akko", "Albertoo",
@@ -777,6 +778,9 @@ public class PatriciaTrieTest extends BaseTestCase {
         } catch(ConcurrentModificationException expected) {}
         assertEquals("Amber", map.firstKey());
         assertEquals("Ammun", map.lastKey());
+        
+        map = trie.getPrefixedBy("Ak\0");
+        assertTrue(map.isEmpty());
         
         map = trie.getPrefixedBy("Ak");
         assertEquals(2, map.size());
@@ -953,6 +957,57 @@ public class PatriciaTrieTest extends BaseTestCase {
         assertFalse(iter.hasNext());
     }
 
+    public void testTraverseWithAllNullBitKey() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        //
+        // One entry in the Trie
+        // Entry is stored at the root
+        //
+        
+        // trie.put("", "All Bits Are Zero");
+        trie.put("\0", "All Bits Are Zero");
+        
+        //
+        //  / ("")   <-- root
+        //  \_/  \
+        //       null
+        //
+        
+        final List<String> strings = new ArrayList<String>();
+        trie.traverse(new Cursor<String, String>() {
+            public SelectStatus select(Entry<? extends String, ? extends String> entry) {
+                strings.add(entry.getValue());
+                return SelectStatus.CONTINUE;
+            }
+        });
+        
+        assertEquals(1, strings.size());
+        
+        strings.clear();
+        for (String s : trie.values()) {
+            strings.add(s);
+        }
+        assertEquals(1, strings.size());
+    }
+    
+    public void testSelectWithAllNullBitKey() {
+        PatriciaTrie<String, String> trie 
+            = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        
+        // trie.put("", "All Bits Are Zero");
+        trie.put("\0", "All Bits Are Zero");
+        
+        final List<String> strings = new ArrayList<String>();
+        trie.select("Hello", new Cursor<String, String>() {
+            public SelectStatus select(Entry<? extends String, ? extends String> entry) {
+                strings.add(entry.getValue());
+                return SelectStatus.CONTINUE;
+            }
+        });
+        assertEquals(1, strings.size());
+    }
     
     private static class TestCursor implements Cursor<Object, Object> {
         private List<Object> keys;

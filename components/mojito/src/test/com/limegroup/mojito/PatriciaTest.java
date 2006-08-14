@@ -27,10 +27,10 @@ import java.util.Set;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.PatriciaTrie;
-import com.limegroup.mojito.util.Trie;
-import com.limegroup.mojito.util.TrieUtils;
 
 
 public class PatriciaTest extends BaseTestCase {
@@ -53,7 +53,7 @@ public class PatriciaTest extends BaseTestCase {
                 "Banane", "Blabla", "Amber", "Ammun", "Akka", "Akko",
                 "Albertoo", "Amma" };
 
-        Trie<KUID, String> trie = new PatriciaTrie<KUID, String>(KUID.KEY_CREATOR);
+        Trie<KUID, String> trie = new PatriciaTrie<KUID, String>(KUID.KEY_ANALYZER);
         for (int i = 0; i < keys.length; i++) {
             trie.put(toKUID(keys[i]), keys[i]);
         }
@@ -83,11 +83,11 @@ public class PatriciaTest extends BaseTestCase {
         byte[] id = new byte[20];
         System.arraycopy(b, 0, id, 0, Math.min(b.length, id.length));
         
-        return KUID.createNodeID(id);
+        return KUID.create(id);
     }
     
     public void testRange() {
-        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_ANALYZER);
         for(int i = 0; i < 50; i++) {
             KUID id = KUID.createRandomNodeID();
             trie.put(id, id);
@@ -130,9 +130,9 @@ public class PatriciaTest extends BaseTestCase {
             "F735922C5C8B54FFD9424EB46066236E7D5BBA8D"
         };
         
-        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_CREATOR);
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_ANALYZER);
         for(int i = 0; i < nodes.length; i++) {
-            KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
+            KUID kuid = KUID.create(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
             
             System.out.println(kuid + " = " + kuid.toBinString());
@@ -140,7 +140,7 @@ public class PatriciaTest extends BaseTestCase {
         
         //System.out.println(trie);
         
-        KUID key = KUID.createNodeID(ArrayUtils.parseHexString(lookup));
+        KUID key = KUID.create(ArrayUtils.parseHexString(lookup));
         List<KUID> items = TrieUtils.select(trie, key, nodes.length);
         
         System.out.println();
@@ -154,7 +154,7 @@ public class PatriciaTest extends BaseTestCase {
     
     // Not an unit test!
     private void /*test*/Select() {
-        KUID lookup = KUID.createNodeID(ArrayUtils.parseHexString("C814CF8CF039760D1399720BDBBD10F5327DB5A9"));
+        KUID lookup = KUID.create(ArrayUtils.parseHexString("C814CF8CF039760D1399720BDBBD10F5327DB5A9"));
         KUID inverted = lookup.invert();
         
         String[] nodes = {
@@ -165,9 +165,9 @@ public class PatriciaTest extends BaseTestCase {
             "94850358CEFD33CD0BDE1F468AEA1E646B3F8724"
         };
         
-        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_CREATOR);
+        Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_ANALYZER);
         for(int i = 0; i < nodes.length; i++) {
-            KUID kuid = KUID.createNodeID(ArrayUtils.parseHexString(nodes[i]));
+            KUID kuid = KUID.create(ArrayUtils.parseHexString(nodes[i]));
             trie.put(kuid, kuid);
             
             System.out.println(kuid + " = " + kuid.toBinString());
@@ -206,7 +206,7 @@ public class PatriciaTest extends BaseTestCase {
     
     // Not an unit test!
     private void /*test*/RandomRemove() {
-        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_ANALYZER);
         
         for(int i = 0; i < 100000; i++) {
             Set keys = new HashSet();

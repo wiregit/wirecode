@@ -25,7 +25,7 @@ import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
 /**
- * Settings for Database, KeyValues and for the republisher 
+ * Settings for the Database, DHTValue and for the DHTValueRepublisher 
  */
 public final class DatabaseSettings extends MojitoProps {
     
@@ -45,34 +45,42 @@ public final class DatabaseSettings extends MojitoProps {
      * TODO reasonable min and max values
      */
     public static final IntSetting MAX_VALUES_PER_KEY
-        = FACTORY.createSettableIntSetting("MAX_VALUES_PER_KEY", 5, "max_values_per_key", 1, 10);
+        = FACTORY.createSettableIntSetting("MAX_VALUES_PER_KEY", 5, 
+                "max_values_per_key", 1, 10);
     
     /**
      * The time after a non-local value expires
      */
     public static final LongSetting VALUE_EXPIRATION_TIME
-        = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L* 1000L, "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L); //1 hour
+        = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L* 1000L, 
+                "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L); //1 hour
     
     /**
-     * 
+     * A multiplication factor in which
      */
     public static final FloatSetting NOT_NEARBY_EXPIRATION_TIME_RATIO
-        = FACTORY.createSettableFloatSetting("NOT_NEARBY_EXPIRATION_TIME_RATIO", 0.5F, "not_nearby_expiration_time_ratio", 0.01F, 1.0F); // expires 50% faster 
+        = FACTORY.createSettableFloatSetting("NOT_NEARBY_EXPIRATION_TIME_RATIO", 0.5F, 
+                "not_nearby_expiration_time_ratio", 0.01F, 1.0F); // expires 50% faster 
     
-    public static final LongSetting MIN_REPUBLISH_INTERVAL
-        = FACTORY.createLongSetting("MIN_REPUBLISH_INTERVAL", 2L * 60L * 1000L);
+    /**
+     * The lower bound republishing interval for a DHTValue. That
+     * means a DHTValue cannot be republished more often than this
+     * interval.
+     */
+    public static final LongSetting MIN_VALUE_REPUBLISH_INTERVAL
+        = FACTORY.createLongSetting("MIN_VALUE_REPUBLISH_INTERVAL", 2L*60L*1000L);
     
     /**
      * The republishing interval in milliseconds.
      * 
      * TODO reasonable min and max values
      */
-    public static final LongSetting REPUBLISH_INTERVAL
-        = FACTORY.createSettableLongSetting("REPUBLISH_INTERVAL", VALUE_EXPIRATION_TIME.getValue()/2 , 
-                "republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+    public static final LongSetting VALUE_REPUBLISH_INTERVAL
+        = FACTORY.createSettableLongSetting("VALUE_REPUBLISH_INTERVAL", VALUE_EXPIRATION_TIME.getValue()/2 , 
+                "value_republish_interval", 3L*60L*1000L, 3L*60L*1000L);
     
     /**
-     * 
+     * The period of the DHTValuePublisher
      */
     public static final LongSetting REPUBLISH_PERIOD
         = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
@@ -81,8 +89,9 @@ public final class DatabaseSettings extends MojitoProps {
     /**
      * Whether or not to delete a DHTValue from the Database if we're
      * the furthest of the k closest Nodes and a new Node comes along
-     * that is closer
+     * that is nearer
      */
     public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
-        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, "delete_value_if_furthest_node");
+        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, 
+                "delete_value_if_furthest_node");
 }

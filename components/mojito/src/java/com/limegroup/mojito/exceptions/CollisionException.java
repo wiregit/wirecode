@@ -21,6 +21,10 @@ package com.limegroup.mojito.exceptions;
 
 import com.limegroup.mojito.Contact;
 
+/**
+ * The CollisionException is thrown if this Node detects
+ * a Node ID collision with an another DHT Node.
+ */
 @SuppressWarnings("serial")
 public class CollisionException extends Exception {
     

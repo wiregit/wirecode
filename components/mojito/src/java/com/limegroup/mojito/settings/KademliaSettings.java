@@ -25,7 +25,7 @@ import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
 /**
- * 
+ * Various Kademlia related Settings
  */
 public class KademliaSettings extends MojitoProps {
     
@@ -41,31 +41,36 @@ public class KademliaSettings extends MojitoProps {
      * The number of parallel FIND_NODE lookups
      */
     public static final IntSetting FIND_NODE_PARALLEL_LOOKUPS
-        = FACTORY.createSettableIntSetting("FIND_NODE_PARALLEL_LOOKUPS", 5, "find_node_parallel_lookups", 1, 15);
+        = FACTORY.createSettableIntSetting("FIND_NODE_PARALLEL_LOOKUPS", 5, 
+                "find_node_parallel_lookups", 1, 15);
     
     /**
      * The number of parallel FIND_VALUE lookups
      */
     public static final IntSetting FIND_VALUE_PARALLEL_LOOKUPS
-        = FACTORY.createSettableIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, "find_value_parallel_lookups", 1, 30);
+        = FACTORY.createSettableIntSetting("FIND_VALUE_PARALLEL_LOOKUPS", 10, 
+                "find_value_parallel_lookups", 1, 30);
     
     /**
      * The number of pings to send in parallel
      */
     public static final IntSetting PARALLEL_PINGS
-        = FACTORY.createSettableIntSetting("PARALLEL_PINGS", 15, "parallel_pings", 1, 30);
+        = FACTORY.createSettableIntSetting("PARALLEL_PINGS", 15, 
+                "parallel_pings", 1, 30);
     
     /**
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT
-        = FACTORY.createSettableLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, "find_node_lookup_timeout", 30L*1000L, 3L*60L*1000L);
+        = FACTORY.createSettableLongSetting("FIND_NODE_LOOKUP_TIMEOUT", 30L*1000L, 
+                "find_node_lookup_timeout", 30L*1000L, 3L*60L*1000L);
     
     /**
      * The FIND_VALUE lookup timeout
      */
     public static final LongSetting FIND_VALUE_LOOKUP_TIMEOUT
-        = FACTORY.createSettableLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, "find_value_lookup_timeout", 45L*1000L, 3L*80L*1000L);
+        = FACTORY.createSettableLongSetting("FIND_VALUE_LOOKUP_TIMEOUT", 45L*1000L, 
+                "find_value_lookup_timeout", 45L*1000L, 3L*80L*1000L);
     
     /**
      * Whether or not a value lookup is exhaustive

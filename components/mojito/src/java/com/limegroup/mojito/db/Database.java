@@ -27,7 +27,10 @@ import java.util.Set;
 import com.limegroup.mojito.KUID;
 
 /**
- * 
+ * An interface to implement Databases. Mojito ships
+ * with an in-memory Database but you may use this
+ * interface to implement a custom Database that is
+ * build on top of BDBJE for example.
  */
 public interface Database extends Serializable {
     

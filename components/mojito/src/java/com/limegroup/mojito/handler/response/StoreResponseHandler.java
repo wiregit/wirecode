@@ -414,8 +414,24 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             Collection<Contact> nodes = response.getNodes();
             for(Contact node : nodes) {
+                
+                if (!ContactUtils.isValidContact(response.getContact(), node)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Dropping " + node);
+                    }
+                    continue;
+                }
+                
+                if (ContactUtils.isLocalContact(context, node, null)) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Dropping " + node);
+                    }
+                    continue;
+                }
+                
                 // We did a FIND_NODE lookup use the info
                 // to fill/update our routing table
+                assert (node.isAlive() == false);
                 context.getRouteTable().add(node);
             }
             

@@ -31,8 +31,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.mojito.util.ArrayUtils;
-import com.limegroup.mojito.util.PatriciaTrie.KeyCreator;
 
 
 /**
@@ -62,44 +62,29 @@ public class KUID implements Comparable<KUID>, Serializable {
         0x1
     };
     
-    /** Types of KUIDs that exist */
-    public static enum Type {
-        NODE_ID,
-        VALUE_ID,
-        UNKNOWN_ID;
-    }
+    /** All 160 bits are 0 */
+    public static final KUID MINIMUM;
     
-    /** All bits 0 Node ID */
-    public static final KUID MIN_NODE_ID;
-    
-    /** All bits 1 Node ID */
-    public static final KUID MAX_NODE_ID;
-    
-    /** All bits 0 Value ID */
-    public static final KUID MIN_VALUE_ID;
-    
-    /** All bits 1 Value ID */
-    public static final KUID MAX_VALUE_ID;
-                                               
+    /** All 160 bits are 1 */
+    public static final KUID MAXIMUM;
+                                           
     static {
         byte[] min = new byte[LENGTH];
         
         byte[] max = new byte[LENGTH];
         Arrays.fill(max, (byte)0xFF);
         
-        MIN_NODE_ID = new KUID(Type.NODE_ID, min);
-        MAX_NODE_ID = new KUID(Type.NODE_ID, max);
-        
-        MIN_VALUE_ID = new KUID(Type.VALUE_ID, min);
-        MAX_VALUE_ID = new KUID(Type.VALUE_ID, max);
+        MINIMUM = new KUID(min);
+        MAXIMUM = new KUID(max);
     }
     
-    private Type type;
+    /** The id */
     private byte[] id;
     
-    private int hashCode = -1;
+    /** Lazyly initialized hashCode */
+    private volatile int hashCode = -1;
     
-    protected KUID(Type type, byte[] id) {
+    protected KUID(byte[] id) {
         if (id == null) {
             throw new NullPointerException("ID is null");
         }
@@ -108,7 +93,6 @@ public class KUID implements Comparable<KUID>, Serializable {
             throw new IllegalArgumentException("ID must be " + LENGTH + " bytes long");
         }
         
-        this.type = type;
         this.id = id;
     }
     
@@ -120,20 +104,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Returns true if this is a Node ID
+     * Returns whether or not the 'bitIndex' th bit is set
      */
-    public boolean isNodeID() {
-        return type == Type.NODE_ID;
-    }
-    
-    /**
-     * Returns true if this is a Value ID
-     */
-    public boolean isValueID() {
-        return type == Type.VALUE_ID;
-    }
-    
     public boolean isBitSet(int bitIndex) {
+        // Take advantage of rounding errors!
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
         return (id[index] & BITS[bit]) != 0;
@@ -155,7 +129,11 @@ public class KUID implements Comparable<KUID>, Serializable {
         return set(bit, false);
     }
     
+    /**
+     * Sets or unsets the 'bitIndex' th bit
+     */
     private KUID set(int bitIndex, boolean set) {
+        // Take advantage of rounding errors!
         int index = (int) (bitIndex / BITS.length);
         int bit = (int) (bitIndex - index * BITS.length);
         boolean isBitSet = (id[index] & BITS[bit]) != 0;
@@ -169,7 +147,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             } else {
                 id[index] &= ~BITS[bit];
             }
-            return new KUID(type, id);
+            return new KUID(id);
         } else {
             return this;
         }
@@ -188,6 +166,12 @@ public class KUID implements Comparable<KUID>, Serializable {
         return bits;
     }
     
+    /**
+     * Returns the first bit that differs in this KUID
+     * and the given KUID or KeyAnalyzer.NULL_BIT_KEY
+     * if all 160 bits are zero or KeyAnalyzer.EQUAL_BIT_KEY
+     * if both KUIDs are equal
+     */
     public int bitIndex(KUID nodeId) {
         boolean allNull = true;
         
@@ -211,18 +195,18 @@ public class KUID implements Comparable<KUID>, Serializable {
         }
         
         if (allNull) {
-            return KeyCreator.NULL_BIT_KEY;
+            return KeyAnalyzer.NULL_BIT_KEY;
         }
         
         if (bitIndex == LENGTH_IN_BITS) {
-            return KeyCreator.EQUAL_BIT_KEY;
+            return KeyAnalyzer.EQUAL_BIT_KEY;
         }
         
         return bitIndex;
     }
     
     /**
-     * Returns the xor distance between the current and passed KUID.
+     * Returns the xor distance between the current and given KUID.
      */
     public KUID xor(KUID nodeId) {
         byte[] result = new byte[id.length];
@@ -230,8 +214,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             result[i] = (byte)(id[i] ^ nodeId.id[i]);
         }
         
-        Type t = (type == nodeId.type) ? type : Type.UNKNOWN_ID;
-        return new KUID(t, result);
+        return new KUID(result);
     }
     
     /**
@@ -242,7 +225,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         for(int i = 0; i < result.length; i++) {
             result[i] = (byte)~id[i];
         }
-        return new KUID(type, result);
+        return new KUID(result);
     }
     
     /**
@@ -271,14 +254,9 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Returns the type of the current KUID
-     */
-    public Type getType() {
-        return type;
-    }
-    
-    /**
-     * Returns the raw bytes of the current KUID
+     * Returns the raw bytes of the current KUID. The
+     * returned byte[] array is a copy and modifications
+     * are not reflected to this KUID
      */
     public byte[] getBytes() {
         return getBytes(0, new byte[id.length], 0, id.length);
@@ -359,7 +337,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     public String toString() {
-        return type + ": " + toHexString();
+        return toHexString();
     }
     
     /**
@@ -441,10 +419,10 @@ public class KUID implements Comparable<KUID>, Serializable {
          * index (i.e. shuffle the array).
          */
         MessageDigestInput[] input = { 
-                properties, 
-                randomNumbers, 
-                millis, 
-                nanos
+            properties, 
+            randomNumbers, 
+            millis, 
+            nanos
         };
         
         Arrays.sort(input);
@@ -470,7 +448,7 @@ public class KUID implements Comparable<KUID>, Serializable {
                 md.update((byte)((mdi.rnd      ) & 0xFFL));
             }
             
-            return createNodeID(md.digest());
+            return create(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -492,31 +470,17 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Creates and returns a Node ID from a byte array
+     * Creates and returns a KUID from a byte array
      */
-    public static KUID createNodeID(byte[] id) {
-        return new KUID(Type.NODE_ID, id);
+    public static KUID create(byte[] id) {
+        return new KUID(id);
     }
     
     /**
-     * Creates and returns a Node ID from a hex encoded String
+     * Creates and returns a KUID from a hex encoded String
      */
-    public static KUID createNodeID(String id) {
-        return createNodeID(ArrayUtils.parseHexString(id));
-    }
-    
-    /**
-     * Creates and returns a Value ID from a byte array
-     */
-    public static KUID createValueID(byte[] id) {
-        return new KUID(Type.VALUE_ID, id);
-    }
-    
-    /**
-     * Creates and returns a Value ID from a hex encoded String
-     */
-    public static KUID createValueID(String id) {
-        return createValueID(ArrayUtils.parseHexString(id));
+    public static KUID create(String id) {
+        return create(ArrayUtils.parseHexString(id));
     }
     
     /**
@@ -551,32 +515,54 @@ public class KUID implements Comparable<KUID>, Serializable {
             random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
         }
         
-        return KUID.createNodeID(random);
+        return KUID.create(random);
     }
     
-    public static final KeyCreator<KUID> KEY_CREATOR = new KUIDKeyCreator();
+    /**
+     * The default KeyAnalyer for KUIDs
+     */
+    public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyCreator();
     
     /**
      * A PATRICIA Trie KeyCreator for KUIDs
      */
-    private static class KUIDKeyCreator implements KeyCreator<KUID> {
+    private static class KUIDKeyCreator implements KeyAnalyzer<KUID> {
         
         private static final long serialVersionUID = 6412279289438108492L;
 
-        public boolean isBitSet(KUID key, int bitIndex) {
-            return key.isBitSet(bitIndex);
-        }
-
-        public int length() {
-            return KUID.LENGTH_IN_BITS;
-        }
-        
-        public int bitIndex(KUID key, KUID found) {
+        public int bitIndex(KUID key, int keyStart, int keyLength, KUID found, int foundStart, int foundLength) {
             if (found == null) {
-                found = KUID.MIN_NODE_ID;
+                found = KUID.MINIMUM;
             }
             
             return key.bitIndex(found);
+        }
+
+        public int bitsPerElement() {
+            return 1;
+        }
+
+        public boolean isBitSet(KUID key, int keyLength, int bitIndex) {
+            return key.isBitSet(bitIndex);
+        }
+
+        public boolean isPrefix(KUID prefix, int offset, int length, KUID key) {
+            int end = offset + length;
+            for (int i = offset; i < end; i++) {
+                if (prefix.isBitSet(i) != key.isBitSet(i)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        public int length(KUID key) {
+            return KUID.LENGTH;
+        }
+
+        public int compare(KUID o1, KUID o2) {
+            return o1.compareTo(o2);
         }
     }
 }

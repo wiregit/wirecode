@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -100,6 +101,18 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
         if (node.isFirewalled()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(node + " is firewalled");
+            }
+            return;
+        }
+        
+        // NOTE: NetworkUtils.isPrivateAddress() is checking internally
+        // if ConnectionSettings.LOCAL_IS_PRIVATE is true!
+        if (NetworkUtils.isPrivateAddress(node.getContactAddress())) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(node + " has a private address");
+            }
             return;
         }
         

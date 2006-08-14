@@ -336,10 +336,16 @@ public class ContactNode implements Contact {
         return failures > 0;
     }
     
+    /**
+     * Returns the State of this Contact
+     */
     public State getState() {
         return state;
     }
     
+    /**
+     * Sets the State of this Contact
+     */
     public void setState(State state) {
         if (state == null) {
             state = State.UNKNOWN;

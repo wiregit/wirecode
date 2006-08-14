@@ -38,7 +38,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
 
 /**
- * 
+ * The public interface of the Mojito DHT
  */
 public interface MojitoDHT {
     

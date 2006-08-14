@@ -81,7 +81,7 @@ public class PlanetLab {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             byte[] bytes = getBytes(value);
             byte[] digest = md.digest(bytes);
-            return KUID.createValueID(digest);
+            return KUID.create(digest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

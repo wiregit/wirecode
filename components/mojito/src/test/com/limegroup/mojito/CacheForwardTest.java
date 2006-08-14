@@ -64,7 +64,7 @@ public class CacheForwardTest extends BaseTestCase {
             // 
             byte[] valueID = firstStorer.getLocalNodeID().getBytes();
             //replace with first bits of first storer to make sure it lands there first
-            originalRequesterDHT.put(KUID.createValueID(valueID), "test".getBytes("UTF-8"));
+            originalRequesterDHT.put(KUID.create(valueID), "test".getBytes("UTF-8"));
             Thread.sleep(1000);
             
             //try the normal store forward

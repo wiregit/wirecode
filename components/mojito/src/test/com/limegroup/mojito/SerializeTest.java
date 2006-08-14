@@ -27,10 +27,10 @@ import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.zip.GZIPOutputStream;
 
+import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
-import com.limegroup.mojito.util.PatriciaTrie;
 
 
 public class SerializeTest {
@@ -46,7 +46,7 @@ public class SerializeTest {
     }
     
     public static void testSerializePatriciaTrie() throws Exception{
-        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_CREATOR);
+        PatriciaTrie trie = new PatriciaTrie(KUID.KEY_ANALYZER);
         for(int i = 0; i < 300; i++) {
             KUID nodeId = KUID.createRandomNodeID();
             Contact node = new ContactNode(0, 0, nodeId, new InetSocketAddress(i), State.UNKNOWN);
