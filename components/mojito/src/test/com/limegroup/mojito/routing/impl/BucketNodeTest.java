@@ -62,7 +62,7 @@ public class BucketNodeTest extends BaseTestCase {
         });
         
         SocketAddress address = new InetSocketAddress("localhost", 2000);
-        Bucket bucket = new BucketNode(routeTable, KUID.MIN_NODE_ID, 0);
+        Bucket bucket = new BucketNode(routeTable, KUID.MINIMUM, 0);
         bucket.addLiveContact(localNode);
         //try purging bucket with only local node
         bucket.purge();

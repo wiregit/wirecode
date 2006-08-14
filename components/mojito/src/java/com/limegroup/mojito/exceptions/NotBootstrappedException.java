@@ -23,6 +23,7 @@ package com.limegroup.mojito.exceptions;
 public class NotBootstrappedException extends RuntimeException{
     
     public NotBootstrappedException(String failedOperation) {
-        super("Attempting to execute a "+failedOperation+" while not bootstrapped to the network");
+        super("Attempting to execute a " + failedOperation 
+                + " while not bootstrapped to the network");
     }
 }

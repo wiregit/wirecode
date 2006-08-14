@@ -930,7 +930,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         int estimatedSize = 0;
         if (!sum1.equals(BigInteger.ZERO)) {
-            estimatedSize = KUID.MAX_NODE_ID.toBigInteger().multiply(sum2).divide(sum1).intValue();
+            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(sum1).intValue();
         }
         estimatedSize = Math.max(1, estimatedSize);
         

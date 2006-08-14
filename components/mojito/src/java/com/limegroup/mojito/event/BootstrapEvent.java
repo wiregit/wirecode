@@ -25,6 +25,9 @@ import java.util.List;
 
 import com.limegroup.mojito.util.CollectionUtils;
 
+/**
+ * 
+ */
 public class BootstrapEvent {
     
     public static enum Type {

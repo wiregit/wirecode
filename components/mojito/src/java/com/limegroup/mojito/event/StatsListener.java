@@ -19,11 +19,12 @@
  
 package com.limegroup.mojito.event;
 
+import com.limegroup.mojito.messages.StatsResponse;
+
 
 /**
  * 
  */
-@Deprecated
-public interface StatsListener extends ResponseListener {
+public interface StatsListener extends DHTEventListener<StatsResponse> {
 
 }

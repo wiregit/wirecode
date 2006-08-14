@@ -34,7 +34,7 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
- * 
+ * A Factory class to create or load MojitoDHTs
  */
 public class MojitoFactory {
     
@@ -86,7 +86,7 @@ public class MojitoFactory {
         ObjectOutputStream oos = new ObjectOutputStream(out);
         
         synchronized (context) {
-            // SERIAL_VERSION_UID
+            // VERSION_NUMBER
             oos.writeLong(VERSION_NUMBER);
             
             // Time
