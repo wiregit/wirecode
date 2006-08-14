@@ -983,16 +983,23 @@ public class ManagedConnection extends Connection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
+    	boolean checkOOB = true;
         if (_guidMap != null) {
             byte[] origGUID = _guidMap.getOriginalGUID(queryReply.getGUID());
             if (origGUID != null) { 
+            	checkOOB = false;
                 byte prevHops = queryReply.getHops();
                 queryReply = new QueryReply(origGUID, queryReply);
                 queryReply.setTTL((byte)2); // we ttl 1 more than necessary
                 queryReply.setHops(prevHops);
-            }
+            }  
             // ---------------------
         }
+        
+        // drop UDP replies that are not being proxied.
+        if (checkOOB && queryReply.isUDP() 
+        		&& !queryReply.isReplyToMulticastQuery()) 
+        	return;
         
         send(queryReply);
     }
