@@ -354,40 +354,12 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
             
-            // send a ReplyNumberVM
-            ReplyNumberVendorMessage replyNum = 
-                new ReplyNumberVendorMessage(new GUID(proxiedGuid), 1);
-            
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            replyNum.write(baos);
-            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
-                                                     baos.toByteArray().length,
-                                                     InetAddress.getLocalHost(),
-                                                     PORT);
-            UDP_ACCESS.send(pack);
-
-            // we expect an ACK
-            LimeACKVendorMessage ack = null;
-            while (ack == null) {
-                pack = new DatagramPacket(new byte[1000], 1000);
-                try {
-                    UDP_ACCESS.receive(pack);
-                }
-                catch (IOException bad) {
-                    fail("Did not get ack", bad);
-                }
-                InputStream in = new ByteArrayInputStream(pack.getData());
-                Message mTemp = MessageFactory.read(in);
-                if (mTemp instanceof LimeACKVendorMessage)
-                    ack = (LimeACKVendorMessage) mTemp;
-            }
-            assertEquals(new GUID(proxiedGuid), new GUID(ack.getGUID()));
-            assertEquals(1, ack.getNumResults());
+            exchangeRNVMACK(proxiedGuid);
             
             // send off the reply
-            baos = new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             m.write(baos);
-            pack = new DatagramPacket(baos.toByteArray(), 
+            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
                                       InetAddress.getLocalHost(),
                                       PORT);
@@ -463,6 +435,93 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             assertEquals(2, queryRep.getTTL());
             assertEquals(1, queryRep.getHops());
         }
+    }
+    
+    /**
+     * Tests that results arriving through OOB for non-proxied queries
+     * are dropped
+     */
+    public void testDropUnsolicited() throws Exception {
+    	drainAll();
+    	QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 3,  
+                "not proxied", null, null, null, 
+                null, false, 
+                Message.N_UNKNOWN, false, 0,
+                true, 0);
+    	
+    	sendF(LEAF[0], query);
+        
+        Thread.sleep(1000);
+
+        // the Ultrapeer should get it and not modify the guid
+        QueryRequest queryRec = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
+                                                         QueryRequest.class);
+        assertNotNull(queryRec);
+        assertTrue(queryRec.doNotProxy());
+        assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
+
+        // go through the RNVM and ACK
+        // (make sure this test breaks should we decide to intercept
+        // unwelcome responses earlier in the protocol)
+        exchangeRNVMACK(query.getGUID());
+        
+        // create a bunch of responses for that guid 
+        Response[] res = new Response[1];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "not proxied");
+        Message m = 
+            new QueryReply(query.getGUID(), (byte) 3, 6356, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        // and send them OOB 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        m.write(baos);
+        DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+                baos.toByteArray().length,
+                InetAddress.getLocalHost(),
+                PORT);
+        UDP_ACCESS.send(pack);
+        
+        Thread.sleep(1000);
+        
+        try {
+        	LEAF[0].receive(1000);
+        	fail("nothing should have arrived");
+        } catch (IOException expected){}
+    }
+
+    private void exchangeRNVMACK(byte[] guid) throws Exception {
+    	// send a ReplyNumberVM
+    	ReplyNumberVendorMessage replyNum = 
+    		new ReplyNumberVendorMessage(new GUID(guid), 1);
+
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	replyNum.write(baos);
+    	DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+    			baos.toByteArray().length,
+    			InetAddress.getLocalHost(),
+    			PORT);
+    	UDP_ACCESS.send(pack);
+
+    	// we expect an ACK
+    	LimeACKVendorMessage ack = null;
+    	while (ack == null) {
+    		pack = new DatagramPacket(new byte[1000], 1000);
+    		try {
+    			UDP_ACCESS.receive(pack);
+    		}
+    		catch (IOException bad) {
+    			fail("Did not get ack", bad);
+    		}
+    		InputStream in = new ByteArrayInputStream(pack.getData());
+    		Message mTemp = MessageFactory.read(in);
+    		if (mTemp instanceof LimeACKVendorMessage)
+    			ack = (LimeACKVendorMessage) mTemp;
+    	}
+    	assertEquals(new GUID(guid), new GUID(ack.getGUID()));
+    	assertEquals(1, ack.getNumResults());
     }
 
     // tests that the expirer works
