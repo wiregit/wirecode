@@ -16,7 +16,7 @@ class GuidMapFactory {
     private static long EXPIRE_POLL_TIME = 2 * 60 * 1000;
     
     /** A listing of all GuidMaps that have atleast one GUID that needs expiry. */
-    private static List<GuidMapImpl> toExpire = new LinkedList<GuidMapImpl>();
+    private static List toExpire = new LinkedList();
     /** Whether or not we've scheduled our cleaner. */
     private static boolean scheduled = false;
 
@@ -53,14 +53,14 @@ class GuidMapFactory {
         public void run() {
             synchronized (GuidMapFactory.class) {
                 // iterator through all the maps....
-                for(Iterator<GuidMapImpl> i = toExpire.iterator(); i.hasNext(); ) {
-                    GuidMapImpl next = i.next();
+                for(Iterator i = toExpire.iterator(); i.hasNext(); ) {
+                    GuidMapImpl next = (GuidMapImpl) i.next();
                     synchronized (next) {
-                        long now = System.currentTimeMillis();
-                        Map<GUID.TimedGUID, GUID> currMap = next.getMap();
+                        Map currMap = next.getMap();
                         // and expire as many entries as possible....
-                        for(Iterator<GUID.TimedGUID> j = currMap.keySet().iterator(); j.hasNext(); ) {
-                            if (j.next().shouldExpire(now))
+                        for(Iterator j = currMap.keySet().iterator(); j.hasNext(); ) {
+                        	GUID.TimedGUID g = (GUID.TimedGUID) j.next();
+                            if (g.shouldExpire())
                                 j.remove();
                         }
                     }
@@ -77,14 +77,14 @@ class GuidMapFactory {
         private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
         
         /** Mapping between new & old GUID.  Lazily constructed. */
-        private Map<GUID.TimedGUID, GUID> map;
+        private Map map;
         
         public String toString() {
             return "impl, map: " + map;
         }
         
         /** Returns the mapping between the two GUIDs. */
-        Map<GUID.TimedGUID, GUID> getMap() {
+        Map getMap() {
             return map;
         }
 
@@ -97,7 +97,7 @@ class GuidMapFactory {
             boolean created = false;
             synchronized(this) {
                 if(map == null) {
-                    map = new HashMap<GUID.TimedGUID, GUID>();
+                    map = new HashMap();
                     created = true;
                 }
                 
@@ -112,7 +112,7 @@ class GuidMapFactory {
         public synchronized byte[] getOriginalGUID(byte[] newGUID) {
             if(map != null) {
                 GUID.TimedGUID wrapper = new GUID.TimedGUID(new GUID(newGUID), 0);
-                GUID orig = map.get(wrapper);
+                GUID orig = (GUID) map.get(wrapper);
                 if(orig != null)
                     return orig.bytes();
             }
@@ -122,10 +122,13 @@ class GuidMapFactory {
 
         public synchronized GUID getNewGUID(GUID origGUID) {
             if(map != null) {
-                for(Iterator<Map.Entry<GUID.TimedGUID, GUID>> i = map.entrySet().iterator(); i.hasNext(); ) {
-                    Map.Entry<GUID.TimedGUID, GUID> next = i.next();
-                    if(next.getValue().equals(origGUID))
-                        return next.getKey().getGUID();
+                for(Iterator i = map.entrySet().iterator(); i.hasNext(); ) {
+                    Map.Entry next = (Map.Entry)i.next();
+                    GUID val = (GUID) next.getValue();
+                    if(val.equals(origGUID)) {
+                    	GUID.TimedGUID key = (GUID.TimedGUID) next.getKey();
+                        return key.getGUID();
+                    }
                 }
             }
             

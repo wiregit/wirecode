@@ -51,7 +51,8 @@ public final class QueryStatusResponse extends VendorMessage {
         return ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
     }
 
-    /** The query guid that this response refers to.
+    /**
+     * The query guid that this response refers to.
      */
     public GUID getQueryGUID() {
         return new GUID(getGUID());

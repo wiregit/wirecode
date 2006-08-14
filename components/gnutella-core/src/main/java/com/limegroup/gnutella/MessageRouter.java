@@ -300,6 +300,12 @@ public abstract class MessageRouter {
      */
     private volatile Map multicastMessageHandlers = new IdentityHashMap();
     
+    /** Map for Multicast morphed GUIDs. */
+    private GuidMap _multicastGuidMap = GuidMapFactory.getMap();
+    
+    /** The length of time a multicast guid should stay alive. */
+    private static final long MULTICAST_GUID_EXPIRE_TIME = 60 * 1000;
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -607,6 +613,13 @@ public abstract class MessageRouter {
             RouterService.getUDPMultiplexor().routeMessage(
                     (UDPConnectionMessage) msg, addr);
             return;
+        } else if(msg instanceof QueryReply) {
+            // check to see if it was from the multicast map.
+            byte[] origGUID = _multicastGuidMap.getOriginalGUID(msg.getGUID());
+            if(origGUID != null) {
+                msg = new QueryReply(origGUID, (QueryReply)msg);
+                ((QueryReply)msg).setMulticastAllowed(true);
+            }
         }
 
         // note: validity of addr/port are checked when message is constructed
@@ -1436,7 +1449,10 @@ public abstract class MessageRouter {
 		} 
 		
 		// always send the query to your multicast people
-		multicastQueryRequest(QueryRequest.createMulticastQuery(query));		
+        byte[] newGUID = GUID.makeGuid();
+        QueryRequest mquery = QueryRequest.createMulticastQuery(newGUID, query);
+        _multicastGuidMap.addMapping(query.getGUID(), newGUID, MULTICAST_GUID_EXPIRE_TIME);
+		multicastQueryRequest(mquery);		
 	}
 
 	/**
@@ -1596,7 +1612,6 @@ public abstract class MessageRouter {
      * Send the query to the multicast group.
      */
     protected void multicastQueryRequest(QueryRequest query) {
-        
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 		// record the stat

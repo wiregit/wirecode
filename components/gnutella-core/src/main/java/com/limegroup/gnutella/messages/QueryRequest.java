@@ -793,7 +793,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @throws <tt>NullPointerException</tt> if the <tt>qr</tt> argument
 	 *  is <tt>null</tt> 
 	 */
-	public static QueryRequest createMulticastQuery(QueryRequest qr) {
+	public static QueryRequest createMulticastQuery(byte[] guid, QueryRequest qr) {
 		if(qr == null)
 			throw new NullPointerException("null query");
 
@@ -804,7 +804,7 @@ public class QueryRequest extends Message implements Serializable{
         newPayload[0] |= SPECIAL_XML_MASK;
         
         try {
-            return createNetworkQuery(qr.getGUID(), (byte)1, qr.getHops(),
+            return createNetworkQuery(guid, (byte)1, qr.getHops(),
                                       newPayload, Message.N_MULTICAST);
         } catch (BadPacketException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());

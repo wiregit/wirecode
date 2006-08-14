@@ -94,6 +94,9 @@ public class QueryReply extends Message implements SecureMessage {
     /** The parsed query reply data. */
     private volatile QueryReplyData _data;
     
+    /** Whether or not this reply is allowed to have MCAST. */
+    private volatile boolean _multicastAllowed = false;
+    
     /** The cached clientGUID. */  
     private byte[] clientGUID = null;    
 
@@ -483,7 +486,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Sets this reply to be considered a 'browse host' reply.
      */
     public void setBrowseHostReply(boolean isBH) {
-	parseResults();
+        parseResults();
         _data.setBrowseHostReply(isBH);
     }
     
@@ -492,7 +495,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Gets whether or not this reply is from a browse host request.
      */
     public boolean isBrowseHostReply() {
-	parseResults();
+        parseResults();
         return _data.isBrowseHostReply();
     }
 
@@ -757,7 +760,18 @@ public class QueryReply extends Message implements SecureMessage {
      */
     public boolean isReplyToMulticastQuery() {
         parseResults();
-        return _data.isReplyToMulticast();
+        return _multicastAllowed && _data.isReplyToMulticast();
+    }
+    
+    /** Sets whether or not this reply is allowed to have an MCAST field. */
+    public void setMulticastAllowed(boolean allowed) {
+        _multicastAllowed = allowed;
+    }
+    
+    /** Returns true if this reply tried to fake an MCAST field. */
+    public boolean isFakeMulticast() {
+        parseResults();
+        return !_multicastAllowed && _data.isReplyToMulticast();
     }
 
     /**

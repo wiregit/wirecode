@@ -99,6 +99,10 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
 		if(handler != null && handler.isPersonalSpam(reply)) return;
 		
+        // do not allow a faked multicast reply.
+        if(reply.isFakeMulticast())
+            return;
+        
 		// Drop if it's a reply to mcast and conditions aren't met ...
         if( reply.isReplyToMulticastQuery() ) {
             if( reply.isTCP() )
