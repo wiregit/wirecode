@@ -247,8 +247,9 @@ public final class QueryRequestTest extends BaseTestCase {
 		qr = QueryRequest.createQuery("blah");
 		assertEquals("queries should be equal", "blah", qr.getQuery());
 
+        // will normalize to lowercase.
 		qr = QueryRequest.createQuery("ZZZ");
-		assertEquals("queries should be equal", "ZZZ", qr.getQuery());
+		assertEquals("queries should be equal", "zzz", qr.getQuery());
 
         //String is single null-terminated.
 		byte[] payload = new byte[2+2];

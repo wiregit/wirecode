@@ -116,7 +116,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         }            
 
         // add a Query
-		QueryRequest qr = QueryRequest.createQuery("Susheel", (byte)2);
+		QueryRequest qr = QueryRequest.createQuery("susheel", (byte)2);
         
 		assertEquals("unexpected number of queries",
 		    0, QueryUnicaster.instance().getQueryNumber() );
@@ -138,7 +138,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             numMessages++;
             if (currMessage instanceof QueryRequest) {
                 QueryRequest currQR = (QueryRequest) currMessage;
-                assertEquals("unexpected query", "Susheel", currQR.getQuery() );
+                assertEquals("unexpected query", "susheel", currQR.getQuery() );
                 numQRs++;
             }
             else if (currMessage instanceof PingRequest) {

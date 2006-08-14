@@ -831,7 +831,7 @@ public class QueryRequest extends Message implements Serializable{
 				FileManager.INDEXING_QUERY, "", 
                 URN.Type.ANY_TYPE_SET, URN.NO_URN_SET, null,
                 !RouterService.acceptedIncomingConnection(), 
-				Message.N_UNKNOWN, false, 0, false, 0);
+				Message.N_UNKNOWN, false, 0, false, 0, false);
 	}
 	
 
@@ -1033,7 +1033,25 @@ public class QueryRequest extends Message implements Serializable{
                         int metaFlagMask) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
              queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
-             featureSelector, doNotProxy, metaFlagMask);
+             featureSelector, doNotProxy, metaFlagMask, true);
+    }
+    
+    /**
+     * Constructs a query with an optional 'normalize' parameter, which if false,
+     * does not normalize the query string.
+     */
+    private QueryRequest(byte[] guid, byte ttl,  
+                        String query, String richQuery, 
+                        Set<URN.Type> requestedUrnTypes,
+                        Set<? extends URN> queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies,
+                        int featureSelector, boolean doNotProxy,
+                        int metaFlagMask,
+                        boolean normalize) {
+        this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             featureSelector, doNotProxy, metaFlagMask, normalize);
     }
 
     /**
@@ -1060,13 +1078,42 @@ public class QueryRequest extends Message implements Serializable{
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
+        this(guid, ttl, minSpeed, query, richQuery, requestedUrnTypes,
+             queryUrns, queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             featureSelector, doNotProxy, metaFlagMask, true);
+    }
+    
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+     * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+     * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+     *  query string, and the urns are all empty, or if the capability selector
+     *  is bad
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed,
+                        String query, String richQuery, 
+                        Set<URN.Type> requestedUrnTypes,
+                        Set<? extends URN> queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies,
+                        int featureSelector, boolean doNotProxy,
+                        int metaFlagMask, boolean normalize) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
         
         // make sure the query is normalized.
         // (this may have been normalized elsewhere, but it's okay to do it again)
-        if(query != null)
+        if(normalize && query != null)
             query = I18NConvert.instance().getNorm(query);
         
 		if((query == null || query.length() == 0) &&
