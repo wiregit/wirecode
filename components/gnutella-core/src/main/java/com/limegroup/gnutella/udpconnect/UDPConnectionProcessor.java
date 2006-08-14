@@ -46,7 +46,7 @@ public class UDPConnectionProcessor {
     
     /** Define the maximum time that we'll allow a connection to remain
      *  open through keep-alives alone. */
-    private static final long MAX_KEEPALIVE_TIME      = 60 * 1000;
+    private static final long MAX_KEEPALIVE_TIME      = 2 * 60 * 60 * 1000;
 
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
