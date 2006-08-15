@@ -13,6 +13,8 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
@@ -570,7 +572,7 @@ public class RouteTableTest extends BaseTestCase {
         }*/
     }
     
-    private void select(RouteTableImpl routeTable, String name) throws Exception {
+    private List<Entry<KUID, KUID[]>> load(String name) throws Exception {
         File file = CommonUtils.getResourceFile("com/limegroup/mojito/routing/impl/" + name);
         BufferedReader in = null;
         
@@ -595,6 +597,11 @@ public class RouteTableTest extends BaseTestCase {
             if (in != null) { in.close(); };
         }
         
+        return entries;
+    }
+    
+    private void select(RouteTableImpl routeTable, String name) throws Exception {
+        List<Entry<KUID, KUID[]>> entries = load(name);
         for (Entry<KUID, KUID[]> entry : entries) {
             KUID key = entry.getKey();
             KUID[] nodeIds = entry.getValue();
@@ -605,6 +612,44 @@ public class RouteTableTest extends BaseTestCase {
             // Checks also the order
             for (int i = 0; i < nodeIds.length; i++) {
                 assertEquals(nodeIds[i], nodes.get(i).getNodeID());
+            }
+        }
+    }
+    
+    /**
+     * A test to check if selecting Buckets from a Trie of 
+     * Buckets and subselecting Contacts from the Buckets
+     * Trie returns the same result as a pure Trie of Contacts.
+     * 
+     * That's an interesting property for future RouteTable
+     * designs!
+     */
+    public void testRouteTableVsPatricia() throws Exception {
+        List<Contact> nodes = routeTable.getLiveContacts();
+        PatriciaTrie<KUID, Contact> trie = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
+        
+        for (Contact node : nodes) {
+            trie.put(node.getNodeID(), node);
+        }
+        
+        assert (nodes.size() == trie.size());
+        
+        List<Entry<KUID, KUID[]>> entries = load("select_real_keys.txt");
+        for (Entry<KUID, KUID[]> entry : entries) {
+            KUID key = entry.getKey();
+            KUID[] nodeIds = entry.getValue();
+            
+            List<Contact> nodes1 = routeTable.select(key, K);
+            assertEquals(nodeIds.length, nodes1.size());
+            
+            List<Contact> nodes2 = TrieUtils.select(trie, key, K);
+            assertEquals(nodeIds.length, nodes2.size());
+            
+            // Checks also the order
+            for (int i = 0; i < nodeIds.length; i++) {
+                assertEquals(nodeIds[i], nodes1.get(i).getNodeID());
+                assertEquals(nodeIds[i], nodes2.get(i).getNodeID());
+                assertEquals(nodes1.get(i).getNodeID(), nodes2.get(i).getNodeID());
             }
         }
     }
