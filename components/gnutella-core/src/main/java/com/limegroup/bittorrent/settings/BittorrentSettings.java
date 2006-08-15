@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.settings;
 import java.io.File;
 
 // TODO: move non-gnutella specific settings out
+import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.FileSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LimeProps;
@@ -16,6 +17,13 @@ public class BittorrentSettings extends LimeProps {
 		// empty constructor
 	}
 
+	/**
+	 * Setting whether LimeWire should manage the BT settings
+	 * automatically.
+	 */
+	public static BooleanSetting AUTOMATIC_SETTINGS = 
+		FACTORY.createBooleanSetting("BT_AUTOMATIC_SETTINGS", true);
+				
 	/**
 	 * minimum tracker reask delay in seconds that we will use
 	 */
