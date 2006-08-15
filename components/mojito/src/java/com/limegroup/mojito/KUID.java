@@ -51,6 +51,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     public static final int LENGTH_IN_BITS = LENGTH * 8; // 160 bit
     
+    /** Bits from MSB to LSB */
     private static final int[] BITS = {
         0x80,
         0x40,
