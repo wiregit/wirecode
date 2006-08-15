@@ -170,7 +170,8 @@ public class DHTValue implements Serializable {
     }
     
     /** 
-     * Returns true if this DHTValue has expired
+     * Returns true if this DHTValue has expired. Returns
+     * always false if this is a local value.
      */ 
     public boolean isExpired() {
         if (isLocalValue()) {
@@ -191,7 +192,8 @@ public class DHTValue implements Serializable {
     }
     
     /**
-     * Returns true if this DHTValue requires republishing
+     * Returns true if this DHTValue requires republishing. Returns
+     * always false if this is a non-local value.
      */
     public boolean isRepublishingRequired() {
         if (!isLocalValue()) {

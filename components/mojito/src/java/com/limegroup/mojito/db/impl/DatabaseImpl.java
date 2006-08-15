@@ -125,6 +125,10 @@ public class DatabaseImpl implements Database {
             return true;
         }
         
+        if (value.isExpired()) {
+            return false;
+        }
+        
         KUID valueId = value.getValueID();
         KUID nodeId = value.getOriginatorID();
         Map<KUID, DHTValue> map = database.get(valueId);
