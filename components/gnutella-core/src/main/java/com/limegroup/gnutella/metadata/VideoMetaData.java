@@ -63,6 +63,8 @@ public abstract class VideoMetaData extends MetaData {
 			return new OGMMetaData(file);
 	    else if(LimeXMLUtils.isWMVFile(file))
 	        return new WMVMetaData(file);
+        else if(LimeXMLUtils.isMPEGFile(file))
+            return new MPEGMetaData(file);
 			
 		return null;
 	}

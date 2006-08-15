@@ -364,6 +364,15 @@ public class LimeXMLUtils {
         return in.endsWith(".asf") || in.endsWith(".wm");
     }
     
+    public static boolean isMPEGFile(File f) {
+        return isMPEGFile(f.getName());
+    }
+    
+    public static boolean isMPEGFile(String in) {
+        in = in.toLowerCase(Locale.US);
+        return in.endsWith(".mpg") || in.endsWith(".mpeg");
+    }
+    
     /** 
      * Returns true if LimeWire might be able to read the Meta Data of 
      * this Audio file (for example ID3 tags).
@@ -393,7 +402,7 @@ public class LimeXMLUtils {
      * this Video file.
      */
     public static boolean isSupportedVideoFormat(String file) {
-        return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file);
+        return isRIFFFile(file) || isOGMFile(file) || isWMVFile(file) || isMPEGFile(file);
     }
     
     /** 
