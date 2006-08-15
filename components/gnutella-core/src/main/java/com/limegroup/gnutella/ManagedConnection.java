@@ -273,6 +273,9 @@ public class ManagedConnection extends Connection
 
     /** Whether or not the HandshakeResponder should use locale preferencing during handshaking. */
     private boolean _useLocalPreference;
+    
+    /** The number of queryReplies received through this connection */
+    private volatile long queryReplies;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -835,8 +838,11 @@ public class ManagedConnection extends Connection
 			ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             _connectionStats.addReceivedDropped();
         } else {
-            if(m instanceof QueryReply && m.getHops() == 0)
-                clientGUID = ((QueryReply)m).getClientGUID();
+            if(m instanceof QueryReply){ 
+            	queryReplies++;
+            	if(m.getHops() == 0)
+            		clientGUID = ((QueryReply)m).getClientGUID();
+            }
         
             //special handling for proxying.
             if(supernodeClientAtLooping) {
@@ -847,6 +853,10 @@ public class ManagedConnection extends Connection
             }
             MessageDispatcher.instance().dispatchTCP(m, this);
         }
+    }
+    
+    public long getNumQueryReplies() {
+    	return queryReplies;
     }
     
     /**

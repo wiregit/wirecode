@@ -36,15 +36,21 @@ public class UDPCrawlerPing extends VendorMessage {
 	
 	public static final byte PLAIN = 0x0;
 	
-	public static final byte CONNECTION_TIME = 0x1;
-	public static final byte LOCALE_INFO = 0x2;
-	public static final byte NEW_ONLY = 0x4;
-	public static final byte USER_AGENT = 0x8;
-    public static final byte NODE_UPTIME = 0x10;
-    //public static final byte SAMPLE_FEATURE = 0x10; //its a bitmask, so the next feature would be 0x16, etc.
+	public static final byte CONNECTION_TIME = 0x1 << 0;
+	public static final byte LOCALE_INFO = 0x1 << 1;
+	public static final byte NEW_ONLY = 0x1 << 2;
+	public static final byte USER_AGENT = 0x1 << 3;
+    public static final byte NODE_UPTIME = 0x1 << 4;
+    public static final byte REPLIES = 0x1 << 5;
 	
 	//all features OR'd.
-	public static final byte FEATURE_MASK = 0x1F; 
+    public static final byte FEATURE_MASK = 
+    	CONNECTION_TIME |
+    	LOCALE_INFO |
+    	NEW_ONLY |
+    	USER_AGENT |
+    	NODE_UPTIME |
+    	REPLIES; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
@@ -179,6 +185,14 @@ public class UDPCrawlerPing extends VendorMessage {
 	 */
 	public boolean hasUserAgent() {
 		return (byte)(USER_AGENT & _format) == USER_AGENT;
+	}
+	
+	/**
+	 * @return whether the ping wants the number of replies received
+	 * over each connection
+	 */
+	public boolean hasReplies() {
+		return hasFeature(REPLIES);
 	}
 	
 	/**

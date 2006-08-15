@@ -428,6 +428,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertFalse(req.hasConnectionTime());
     	assertFalse(req.hasLocaleInfo());
         assertFalse(req.hasNodeUptime());
+        assertFalse(req.hasReplies());
     	assertTrue(req.hasFeature(UDPCrawlerPing.PLAIN));
     	testWrite(req);
     	testRead(req);

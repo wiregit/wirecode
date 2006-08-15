@@ -5,31 +5,26 @@
  */
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
 public class UDPCrawlerPong extends VendorMessage {
 	
@@ -135,6 +130,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			bytesPerResult+=2;
 		if (request.hasLocaleInfo())
 			bytesPerResult+=2;
+		if (request.hasReplies())
+			bytesPerResult += 4;
 
         int index;
 		if(request.hasNodeUptime()) {
@@ -167,7 +164,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		iter = endpointsUP.iterator();
 		while(iter.hasNext()) {
 			//pack each entry into a 6 byte array and add it to the result.
-			Connection c = (Connection)iter.next();
+			ManagedConnection c = (ManagedConnection)iter.next();
 			System.arraycopy(
 					packIPAddress(c.getInetAddress(),c.getPort()),
 					0,
@@ -190,6 +187,12 @@ public class UDPCrawlerPong extends VendorMessage {
 				index+=2;
 			}
 			
+			if (request.hasReplies()) {
+				// pack the # of replies as reported up to Integer.MAX_VALUE
+				ByteOrder.int2leb(ByteOrder.long2int(c.getNumQueryReplies()),
+						result,index);
+				index += 4;
+			}			
 		}
 		
 		//if the ping asked for user agents, copy the reported strings verbatim
