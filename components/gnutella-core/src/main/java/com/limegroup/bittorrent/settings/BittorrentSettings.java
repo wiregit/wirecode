@@ -2,12 +2,9 @@ package com.limegroup.bittorrent.settings;
 
 import java.io.File;
 
-// TODO: move non-gnutella specific settings out
 import com.limegroup.gnutella.settings.BooleanSetting;
-import com.limegroup.gnutella.settings.FileSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LimeProps;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * Bittorrent settings
@@ -52,27 +49,11 @@ public class BittorrentSettings extends LimeProps {
 	 * max connections per torrent
 	 */
 	public static IntSetting TORRENT_MAX_CONNECTIONS = FACTORY
-			.createIntSetting("TORRENT_MAX_CONNECTIONS", 100);
-
+			.createIntSetting("TORRENT_MAX_CONNECTIONS", 150);
+	
 	/**
-	 * number of reserved LIME slots
+	 * max active torrents
 	 */
-	public static IntSetting TORRENT_RESERVED_LIME_SLOTS = FACTORY
-			.createIntSetting("TORRENT_RESERVED_LIME_SLOTS", 5);
-
-	/**
-	 * A file with a snapshot of current downloading torrents.
-	 */
-	public static final FileSetting TORRENT_SNAPSHOT_FILE = FACTORY
-			.createFileSetting("TORRENT_SNAPSHOT_FILE", (new File(
-					SharingSettings.INCOMPLETE_DIRECTORY.getValue(),
-					"torrents.dat")));
-
-	/**
-	 * A file with a snapshot of current downloading torrents.
-	 */
-	public static final FileSetting TORRENT_SNAPSHOT_BACKUP_FILE = FACTORY
-			.createFileSetting("TORRENT_SNAPSHOT_BACKUP_FILE", (new File(
-					SharingSettings.INCOMPLETE_DIRECTORY.getValue(),
-					"torrents.bak")));
+	public static IntSetting MAX_ACTIVE_TORRENTS = 
+		FACTORY.createIntSetting("MAX_TORRENTS", 0);
 }

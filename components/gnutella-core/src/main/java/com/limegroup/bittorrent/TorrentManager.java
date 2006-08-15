@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.*;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
+import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -88,6 +89,9 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	 * probably be a setting
 	 */
 	private static int getMaxActiveTorrents() {
+		if (!BittorrentSettings.AUTOMATIC_SETTINGS.getValue())
+			return BittorrentSettings.MAX_ACTIVE_TORRENTS.getValue(); 
+		
 		// windows 98 has very small connection limit, allow a single torrent only
 		if (CommonUtils.isWindows() && !CommonUtils.isWindowsNTor2000orXP())
 			return 1;
@@ -108,6 +112,9 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	 * This is somewhat arbitrary
 	 */
 	public static int getMaxTorrentConnections() {
+		if (!BittorrentSettings.AUTOMATIC_SETTINGS.getValue())
+			return BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
+		
 		// windows 98 50 connection limit
 		if (CommonUtils.isWindows() && !CommonUtils.isWindowsNTor2000orXP())
 			return 30;
@@ -115,7 +122,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		if (ConnectionSettings.CONNECTION_SPEED.getValue() <= 
 			SpeedConstants.MODEM_SPEED_INT)
 			return 40;
-		return 150;
+		return BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
 	}
 	
 	public void addEventListener(TorrentEventListener listener) {
