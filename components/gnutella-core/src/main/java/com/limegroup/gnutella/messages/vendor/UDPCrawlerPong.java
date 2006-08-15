@@ -45,14 +45,14 @@ public class UDPCrawlerPong extends VendorMessage {
 		byte format = (byte)(request.getFormat() & UDPCrawlerPing.FEATURE_MASK);
 		
 		//get a list of all ultrapeers and leafs we have connections to
-		List<Connection> endpointsUP = new LinkedList<Connection>();
-		List<Connection> endpointsLeaf = new LinkedList<Connection>();
+		List<ManagedConnection> endpointsUP = new LinkedList<ManagedConnection>();
+		List<ManagedConnection> endpointsLeaf = new LinkedList<ManagedConnection>();
 		
 		//add only good ultrapeers or just those who support UDP pinging
 		//(they support UDP ponging, obviously)
 		boolean newOnly = request.hasNewOnly();
 		
-        for(Connection c : RouterService.getConnectionManager().getInitializedConnections()) {
+        for(ManagedConnection c : RouterService.getConnectionManager().getInitializedConnections()) {
 			if (newOnly) {  
 				if (c.remoteHostSupportsUDPCrawling() >= 1)
 					endpointsUP.add(c);
@@ -62,7 +62,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		}
 		
 		//add all leaves.. or not?
-        for(Connection c : RouterService.getConnectionManager().getInitializedClientConnections()) {
+        for(ManagedConnection c : RouterService.getConnectionManager().getInitializedClientConnections()) {
 			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
 				endpointsLeaf.add(c);
 		}
@@ -94,14 +94,14 @@ public class UDPCrawlerPong extends VendorMessage {
 			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
 			List<ManagedConnection> prefedcons =
                 RouterService.getConnectionManager().getInitializedConnectionsMatchLocale(myLocale);
-			for(Connection c : prefedcons) {
+			for(ManagedConnection c : prefedcons) {
 			    endpointsUP.remove(c);
                 endpointsUP.add(0, c);
             }
 			
 			prefedcons =
                 RouterService.getConnectionManager().getInitializedClientConnectionsMatchLocale(myLocale);
-            for(Connection c : prefedcons) {
+            for(ManagedConnection c : prefedcons) {
                 endpointsLeaf.remove(c);
                 endpointsLeaf.add(0, c);
             }
@@ -121,6 +121,8 @@ public class UDPCrawlerPong extends VendorMessage {
 			bytesPerResult+=2;
 		if (request.hasLocaleInfo())
 			bytesPerResult+=2;
+		if (request.hasReplies())
+			bytesPerResult += 4;
 
         int index;
 		if(request.hasNodeUptime()) {
@@ -150,7 +152,7 @@ public class UDPCrawlerPong extends VendorMessage {
         //cache the call to currentTimeMillis() cause its not always cheap
 		long now = System.currentTimeMillis();
 		
-        for(Connection c : endpointsUP) {
+        for(ManagedConnection c : endpointsUP) {
 			//pack each entry into a 6 byte array and add it to the result.
 			System.arraycopy(
 					packIPAddress(c.getInetAddress(),c.getPort()),
@@ -174,6 +176,12 @@ public class UDPCrawlerPong extends VendorMessage {
 				index+=2;
 			}
 			
+			if (request.hasReplies()) {
+				// pack the # of replies as reported up to Integer.MAX_VALUE
+				ByteOrder.int2leb(ByteOrder.long2int(c.getNumQueryReplies()),
+						result,index);
+				index += 4;
+			}			
 		}
 		
 		//if the ping asked for user agents, copy the reported strings verbatim

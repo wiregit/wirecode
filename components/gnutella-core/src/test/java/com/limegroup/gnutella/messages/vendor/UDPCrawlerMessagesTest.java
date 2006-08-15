@@ -23,12 +23,15 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -525,6 +528,56 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         Endpoint e = new Endpoint(combo.getInetAddress(),combo.getPort());
         assertEquals(UP1.getInetAddress(),e.getInetAddress());
         assertTrue(e.getPort() == UP1.getPort());
+    }
+    
+    public void testQueryReplies() throws Exception {
+    	// try w/o any query replies
+    	UDPCrawlerPing repliesPing = new UDPCrawlerPing(new GUID(GUID.makeGuid()),
+    			UDPCrawlerPing.ALL,
+    			UDPCrawlerPing.ALL,
+    			UDPCrawlerPing.REPLIES);
+    	UDPCrawlerPong repliesPong = new UDPCrawlerPong(repliesPing);
+    	byte [] payload = repliesPong.getPayload();
+    	byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
+    	assertTrue((format & UDPCrawlerPing.REPLIES) == UDPCrawlerPing.REPLIES);
+    	assertEquals((3 + 6 * (6  + 4)), payload.length);
+    	for (int i = 9; i < payload.length; i += 6) {
+    		assertEquals(0, ByteOrder.leb2int(payload, i));
+    		i += 4;
+    	}
+    	
+    	// send a few query replies on each conn
+    	Response[] res = new Response[1];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "not proxied");
+        Message reply = 
+            new QueryReply(GUID.makeGuid(), (byte) 3, 6356, InetAddress.getLocalHost().getAddress(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        int [] sent = new int[]{1,2,3,1,2,3};
+        LEAF_1.send(reply);LEAF_1.flush();
+        LEAF_2.send(reply);
+        LEAF_2.send(reply);LEAF_2.flush();
+        LEAF_3.send(reply);
+        LEAF_3.send(reply);
+        LEAF_3.send(reply);LEAF_3.flush();
+        UP1.send(reply);UP1.flush();
+        UP2.send(reply);
+        UP2.send(reply);UP2.flush();
+        UP3.send(reply);
+        UP3.send(reply);
+        UP3.send(reply);UP3.flush();
+        Thread.sleep(100);
+        
+        repliesPong = new UDPCrawlerPong(repliesPing);
+        payload = repliesPong.getPayload();
+        
+        int current = 0;
+        for (int i = 9; i < payload.length; i += 6) {
+    		assertEquals(sent[current++], ByteOrder.leb2int(payload, i));
+    		i += 4;
+    	}
     }
     
  	private void tryMessage() throws Exception {
