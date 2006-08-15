@@ -436,16 +436,16 @@ public class KUID implements Comparable<KUID>, Serializable {
                 
                 // Hash also the identity hash code
                 int hashCode = System.identityHashCode(mdi);
-                md.update((byte)((hashCode >> 24) & 0xFFL));
-                md.update((byte)((hashCode >> 16) & 0xFFL));
-                md.update((byte)((hashCode >>  8) & 0xFFL));
-                md.update((byte)((hashCode      ) & 0xFFL));
+                md.update((byte)((hashCode >> 24) & 0xFF));
+                md.update((byte)((hashCode >> 16) & 0xFF));
+                md.update((byte)((hashCode >>  8) & 0xFF));
+                md.update((byte)((hashCode      ) & 0xFF));
                 
                 // and the random index
-                md.update((byte)((mdi.rnd >> 24) & 0xFFL));
-                md.update((byte)((mdi.rnd >> 16) & 0xFFL));
-                md.update((byte)((mdi.rnd >>  8) & 0xFFL));
-                md.update((byte)((mdi.rnd      ) & 0xFFL));
+                md.update((byte)((mdi.rnd >> 24) & 0xFF));
+                md.update((byte)((mdi.rnd >> 16) & 0xFF));
+                md.update((byte)((mdi.rnd >>  8) & 0xFF));
+                md.update((byte)((mdi.rnd      ) & 0xFF));
             }
             
             return create(md.digest());
