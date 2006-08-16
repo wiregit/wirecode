@@ -11,6 +11,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import com.limegroup.gnutella.util.Pools;
+
 /**
  * A metadata parser for files that are using the QuickTime File Format
  * to store metadata. Such files are .mov and .m4v (MPEG-4/Podcasts) for
@@ -148,30 +150,34 @@ public class MOVMetaData extends VideoMetaData {
         byte[] compressed = new byte[(int)(cmvd.remaining - 4)];
         in.readFully(compressed);
         
-        Inflater decompresser = new Inflater();
-        decompresser.setInput(compressed);
-        
-        byte[] decompressed = new byte[decompressedSize];
-        int num = -1;
+        Inflater decompresser = Pools.getInflaterPool().borrowObject();
         try {
-            num = decompresser.inflate(decompressed);
-        } catch (DataFormatException e) {
-            throw new IOException(e.getMessage());
+            decompresser.setInput(compressed);
+            
+            byte[] decompressed = new byte[decompressedSize];
+            int num = -1;
+            try {
+                num = decompresser.inflate(decompressed);
+            } catch (DataFormatException e) {
+                throw new IOException(e.getMessage());
+            } finally {
+                decompresser.end();
+            }
+            
+            if (num < decompressedSize) {
+                throw new EOFException("Decompressed size is less than expected: " 
+                        + num + " < " + decompressedSize);
+            }
+            
+            ByteArrayInputStream bais = new ByteArrayInputStream(decompressed);
+            DataInputStream dis = new DataInputStream(bais);
+            try {
+                parseAtoms(dis);
+            } finally {
+                dis.close();
+            }
         } finally {
-            decompresser.end();
-        }
-        
-        if (num < decompressedSize) {
-            throw new EOFException("Decompressed size is less than expected: " 
-                    + num + " < " + decompressedSize);
-        }
-        
-        ByteArrayInputStream bais = new ByteArrayInputStream(decompressed);
-        DataInputStream dis = new DataInputStream(bais);
-        try {
-            parseAtoms(dis);
-        } finally {
-            dis.close();
+            Pools.getInflaterPool().returnObject(decompresser);
         }
     }
     
