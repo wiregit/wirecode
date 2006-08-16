@@ -268,19 +268,20 @@ public class DatabaseImpl implements Database {
             assert (valueId.equals(value.getValueID()));
             assert (key.equals(value.getOriginatorID()));
             
-            DHTValue current = null;
             if ((value.isDirect() && putDirectDHTValue(key, value)) 
                     || (!value.isDirect() && putIndirectDHTValue(key, value))) {
                 
                 if (isEmpty() && !database.containsKey(valueId)) {
+                    // Register this Bag under the valueId if
+                    // it isn't already.
                     database.put(valueId, this);
                 }
                 
-                current = super.put(key, value);
                 modCount++;
+                return super.put(key, value);
             }
             
-            return current;
+            return null;
         }
         
         /**
