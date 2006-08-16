@@ -64,7 +64,7 @@ public final class UltrapeerSettings extends LimeProps {
      * qualify for Ultrapeer status.
      */
     public static final IntSetting MIN_CONNECT_TIME =
-        FACTORY.createSettableIntSetting("MIN_CONNECT_TIME",10,"UltrapeerSettings.MinConnectTime",0,30);
+        FACTORY.createSettableIntSetting("MIN_CONNECT_TIME",10,"UltrapeerSettings.MinConnectTime",0,15);
     
     /**
      * The minimum current uptime in seconds that a node must have to qualify for Ultrapeer status.
