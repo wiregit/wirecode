@@ -259,7 +259,7 @@ public class MOVMetaData extends VideoMetaData {
      * Reads the next Atom from the DataInput
      */
     private Atom nextAtom(DataInput in) throws IOException {
-        long size = (long)(in.readInt() & 0xFFFFFFFFL);
+        long size = in.readInt() & 0xFFFFFFFFL;
         if (size == 0L) {
             return null;
         }
