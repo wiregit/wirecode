@@ -66,9 +66,6 @@ public class DHTValue implements Serializable {
     /** Whether or not this DHTValue is a local value */
     private boolean isLocalValue = true;
     
-    /** Whether or not this DHTValue is nearby to our NodeID */
-    private boolean nearby = true;
-    
     /** The hashCode, lazy initialization */
     private int hashCode = -1;
     
@@ -159,38 +156,6 @@ public class DHTValue implements Serializable {
         return isLocalValue;
     }
     
-    /** Sets whether or not this DHTValue is nearby to us */
-    public void setNearby(boolean nearby) {
-        this.nearby = nearby;
-    }
-    
-    /** Returns whether or not this DHTValue is nearby to us */
-    public boolean isNearby() {
-        return nearby;
-    }
-    
-    /** 
-     * Returns true if this DHTValue has expired. Returns
-     * always false if this is a local value.
-     */ 
-    public boolean isExpired() {
-        if (isLocalValue()) {
-            return false;
-        }
-
-        long expirationTime = 0L;
-        if (isNearby()) {
-            expirationTime = getCreationTime()
-                + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
-        } else {
-            expirationTime = getCreationTime()
-                + (long)(DatabaseSettings.VALUE_EXPIRATION_TIME.getValue()
-                    * DatabaseSettings.NOT_NEARBY_EXPIRATION_TIME_RATIO.getValue());
-        }
-        
-        return System.currentTimeMillis() >= expirationTime;
-    }
-    
     /**
      * Returns true if this DHTValue requires republishing. Returns
      * always false if this is a non-local value.
@@ -251,7 +216,7 @@ public class DHTValue implements Serializable {
             buffer.append(valueId).append(", originator=")
                 .append(getOriginator()).append(" (REMOVE)");
         } else {
-            buffer.append(valueId).append(" (nearby=").append(nearby).append(")\n")
+            buffer.append(valueId).append("\n")
                 .append("Originator: ").append(getOriginator()).append("\n")
                 .append("Sender: ").append(getSender()).append("\n")
                 //.append("Hex: ").append(ArrayUtils.toHexString(data, 80));

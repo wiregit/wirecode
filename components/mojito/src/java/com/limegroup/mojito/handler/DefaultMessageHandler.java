@@ -200,28 +200,25 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     
                     boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
                     
-                    int count = 0;
-                    for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
-                        DHTValue value = it.next();
-                        if (!value.isLocalValue()) {
-                            // Rather than to delete the DHTValue immediately we're
-                            // setting the flag that it's no longer nearby which will 
-                            // expire it faster. This way we can serve as a cache for
-                            // a while...
-                            
-                            //System.out.println("REMOVING: " + value + "\n");
-                            
-                            if (delete) {
+                    if (delete) {
+                        int count = 0;
+                        for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
+                            DHTValue value = it.next();
+                            if (!value.isLocalValue()) {
+                                // Rather than to delete the DHTValue immediately we're
+                                // setting the flag that it's no longer nearby which will 
+                                // expire it faster. This way we can serve as a cache for
+                                // a while...
+                                
+                                //System.out.println("REMOVING: " + value + "\n");
+                                
                                 it.remove();
-                            } else {
-                                value.setNearby(false);
+                                count++;
                             }
-                            
-                            count++;
                         }
+                        
+                        databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                     }
-                    
-                    databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                 }
             }
         }

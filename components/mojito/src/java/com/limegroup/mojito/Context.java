@@ -77,6 +77,7 @@ import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DHTStatsFactory;
@@ -417,22 +418,29 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         if (database == null) {
             database = new DatabaseImpl();
+            
+        } else {
+            
+            synchronized (database) {
+                for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
+                    DHTValue value = it.next();
+                    
+                    // Make sure all local values have the local Node
+                    // as originator
+                    if (value.isLocalValue()) {
+                        value.setOriginator(localNode);
+                        
+                    // Else prune out either all non-local values or
+                    // remove them if they've expired.
+                    } else if (remove 
+                            || (!value.isLocalValue() && isExpired(value))) {
+                        it.remove();
+                    }
+                }
+            }
         }
         
         this.database = database;
-        
-        // Make sure all local values have the local Node
-        // as originator
-        for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
-            DHTValue value = it.next();
-            if (value.isLocalValue()) {
-                value.setOriginator(localNode);
-            } else if (remove) {
-                
-                // See setLocalNodeID(KUID)
-                it.remove();
-            }
-        }
     }
     
     /**
@@ -444,6 +452,39 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return database;
     }
     
+    /**
+     * Returns whether or not the given DHTValue has expired
+     */
+    public boolean isExpired(DHTValue value) {
+        if (value.isLocalValue()) {
+            return false;
+        }
+        
+        KUID valueId = value.getValueID();
+        
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        List<Contact> nodes = getRouteTable().select(valueId, k, false);
+        
+        long creationTime = value.getCreationTime();
+        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
+        
+        long expiresAt = 0L;
+        
+        if (nodes.size() < k || nodes.contains(getLocalNode())) {
+            expiresAt = creationTime + expirationTime;
+            
+        } else {
+            KUID nearestId = nodes.get(0).getNodeID();
+            KUID localId = getLocalNodeID();
+            KUID xor = localId.xor(nearestId);
+            int log2 = xor.log2();
+            
+            expiresAt = creationTime + (expirationTime / KUID.LENGTH_IN_BITS * log2);
+        }
+        
+        return System.currentTimeMillis() >= expiresAt;
+    }
+
     public void setThreadFactory(ThreadFactory threadFactory) {
         if (threadFactory == null) {
             threadFactory = new DefaultThreadFactory();

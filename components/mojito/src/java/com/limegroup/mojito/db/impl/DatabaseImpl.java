@@ -125,10 +125,6 @@ public class DatabaseImpl implements Database {
             return true;
         }
         
-        if (value.isExpired()) {
-            return false;
-        }
-        
         KUID valueId = value.getValueID();
         KUID nodeId = value.getOriginatorID();
         Map<KUID, DHTValue> map = database.get(valueId);
@@ -203,15 +199,6 @@ public class DatabaseImpl implements Database {
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
-        // Iterarte though all DHTValues and remove all
-        // non local DHTValues that have expired
-        for (Iterator<DHTValue> it = values().iterator(); it.hasNext(); ) {
-            DHTValue value = it.next();
-            if (!value.isLocalValue() && value.isExpired()) {
-                it.remove();
-            }
-        }
     }
     
     /**
@@ -261,8 +248,7 @@ public class DatabaseImpl implements Database {
          */
         public DHTValue remoteRemove(DHTValue value) {
             if (value.isDirect() 
-                    || value.isLocalValue() 
-                    || value.isExpired()) {
+                    || value.isLocalValue()) {
                 
                 KUID originatorId = value.getOriginatorID();
                 DHTValue current = get(originatorId);

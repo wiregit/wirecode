@@ -96,7 +96,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            /*int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             List<Contact> nodes = context.getRouteTable().select(valueId, k, false);
             
             if (!nodes.contains(context.getLocalNode())) {
@@ -111,7 +111,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                     context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
                     value.setNearby(false);
                 }
-            }
+            }*/
             
             Status s = Status.FAILED;
             if (context.getDatabase().add(value)) {

@@ -107,7 +107,7 @@ public class DHTValuePublisher implements Runnable {
                 return;
             }
             
-            if (value.isExpired()) {
+            if (context.isExpired(value)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(value + " is expired!");
                 }
