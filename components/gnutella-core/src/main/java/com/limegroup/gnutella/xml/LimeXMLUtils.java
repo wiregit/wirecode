@@ -379,7 +379,7 @@ public class LimeXMLUtils {
     
     public static boolean isQuickTimeFile(String in) {
         in = in.toLowerCase(Locale.US);
-        return in.endsWith(".mov") || in.endsWith(".m4v");
+        return in.endsWith(".mov") || in.endsWith(".m4v") || in.endsWith(".3gp");
     }
     
     /** 
