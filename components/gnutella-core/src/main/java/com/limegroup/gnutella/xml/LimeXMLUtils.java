@@ -373,6 +373,15 @@ public class LimeXMLUtils {
         return in.endsWith(".mpg") || in.endsWith(".mpeg");
     }
     
+    public static boolean isQuickTimeFile(File f) {
+        return isQuickTimeFile(f.getName());
+    }
+    
+    public static boolean isQuickTimeFile(String in) {
+        in = in.toLowerCase(Locale.US);
+        return in.endsWith(".mov") || in.endsWith(".m4v");
+    }
+    
     /** 
      * Returns true if LimeWire might be able to read the Meta Data of 
      * this Audio file (for example ID3 tags).
