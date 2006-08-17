@@ -101,25 +101,6 @@ public class ContactNode implements Contact {
     public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
             int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
         
-        if (contactAddress != null) {
-            int port = ((InetSocketAddress)contactAddress).getPort();
-            if (port == 0) {
-                if (!firewalled && LOG.isErrorEnabled()) {
-                    LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
-                            + " contact address is set to Port 0 but it is not marked as firewalled");
-                }
-                
-                contactAddress = sourceAddress;
-                firewalled = true;
-            } else {
-                contactAddress = new InetSocketAddress(
-                        ((InetSocketAddress)sourceAddress).getAddress(), port);
-            }
-        } else {
-            contactAddress = sourceAddress;
-            firewalled = true; // force firewalled
-        }
-        
         return new ContactNode(sourceAddress, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled, State.ALIVE);
     }
@@ -175,9 +156,38 @@ public class ContactNode implements Contact {
         
         if (state == State.ALIVE) {
             this.timeStamp = System.currentTimeMillis();
+            
+            fixSourceAndContactAddress(sourceAddress);
         }
     }
 
+    /**
+     * This method takes the InetAddress from the sourceAddress and 
+     * the Port number from the contactAddress and combines them
+     * to the new contactAddress. When the Port number is 0 it will
+     * set the sourceAddress as contactAddress and marks this Contact
+     * as firewalled.
+     */
+    public void fixSourceAndContactAddress(SocketAddress sourceAddress) {
+        if (sourceAddress != null) {
+            this.sourceAddress = sourceAddress;
+            
+            int port = ((InetSocketAddress)contactAddress).getPort();
+            if (port == 0) {
+                if (!firewalled && LOG.isErrorEnabled()) {
+                    LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
+                            + " contact address is set to Port 0 but it is not marked as firewalled");
+                }
+                
+                contactAddress = sourceAddress;
+                firewalled = true;
+            } else {
+                contactAddress = new InetSocketAddress(
+                        ((InetSocketAddress)sourceAddress).getAddress(), port);
+            }
+        }
+    }
+    
     private void init() {
         sourceAddress = null;
         rtt = -1;
