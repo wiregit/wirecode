@@ -38,6 +38,9 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.handler.response.StatsResponseHandler;
+import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.ContactNode;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -183,7 +186,31 @@ public class CommandHandler {
         return future;
     }
     
-    public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        Context context = (Context)dht;
+        
+        String host = args[1];
+        int port = Integer.parseInt(args[2]);
+        
+        SocketAddress dst = new InetSocketAddress(host, port);
+        int requestId = 0;
+        if (args[3].equals("stats")) {
+            requestId = StatsRequest.STATS;
+        } else if (args[3].equals("rt")) {
+            requestId = StatsRequest.RT;
+        } else if (args[3].equals("db")) {
+            requestId = StatsRequest.DB;
+        }
+        
+        StatsResponseHandler handler = new StatsResponseHandler(context);
+        StatsRequest request = context.getMessageHelper().createStatsRequest(dst, requestId);
+        context.getMessageDispatcher().send(dst, request, handler);
+        
+        StatsResponse response = handler.call();
+        
+        out.write(response.getContact().toString());
+        out.write("\n");
+        out.write(response.getStatistics());
     }
     
     public static void bootstrap(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
