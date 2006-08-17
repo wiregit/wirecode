@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -20,8 +17,6 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 
 class ActiveDHTNodeController extends AbstractDHTController {
-    
-    private static final Log LOG = LogFactory.getLog(ActiveDHTNodeController.class);
     
     /**
      * The file to persist this Mojito DHT

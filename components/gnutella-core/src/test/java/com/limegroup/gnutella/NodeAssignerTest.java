@@ -112,7 +112,7 @@ public class NodeAssignerTest extends BaseTestCase {
     
     private void setDHTCapabilities() throws Exception{
         setHardcoreCapabilities();
-        ApplicationSettings.AVERAGE_UPTIME.setValue(DHTSettings.MIN_DHT_AVG_UPTIME.getValue());
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_DHT_AVG_UPTIME.getValue());
         PrivilegedAccessor.setValue(ASSIGNER,"_currentUptime",
                                     new Long(DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
     }

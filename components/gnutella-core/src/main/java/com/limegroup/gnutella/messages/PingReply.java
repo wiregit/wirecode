@@ -1002,6 +1002,8 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Adds the DHT GGEP extension to the pong.  This has the version of
      * the DHT that we support as well as the mode of this node (active/passive).
+     * A node only advertises itself as an active node if it is already bootstrapped
+     * to the network!
      * 
      * @param ggep the <tt>GGEP</tt> instance to add the extension to
      */
@@ -1011,9 +1013,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         ByteOrder.short2beb((short)RouterService.getDHTManager().getVersion(), 
                              payload, 0);
         if(RouterService.isDHTNode()) {
-            if(RouterService.isActiveDHTNode()) {
+            if(RouterService.isMemberOfDHT()) {
                 payload[2] = DHTMode.ACTIVE.getByte();
-            } else {
+            } else if(!RouterService.isActiveDHTNode()){
                 payload[2] = DHTMode.PASSIVE.getByte();
             }
         } else {

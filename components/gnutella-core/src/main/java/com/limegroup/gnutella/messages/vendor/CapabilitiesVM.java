@@ -44,9 +44,9 @@ public final class CapabilitiesVM extends VendorMessage {
     private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
     
     /**
-     * The bytes for the Mojito DHT Capable message.
+     * The bytes for the Mojito DHT active node message.
      */
-    private static final byte[] LIME_DHT_ACTIVE_CAPABLE_BYTES = { 'M', 'D', 'H', 'T' };
+    private static final byte[] LIME_ACTIVE_DHT_NODE = { 'M', 'D', 'H', 'T' };
     
     /**
      * The current version of this message.
@@ -131,8 +131,8 @@ public final class CapabilitiesVM extends VendorMessage {
                                         UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
         
-        if(RouterService.isActiveDHTNode()) {
-            smp = new SupportedMessageBlock(LIME_DHT_ACTIVE_CAPABLE_BYTES,
+        if(RouterService.isMemberOfDHT()) {
+            smp = new SupportedMessageBlock(LIME_ACTIVE_DHT_NODE,
                                             RouterService.getDHTManager().getVersion());
             hashSet.add(smp);
         }
@@ -197,8 +197,8 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * Returns the current DHT version if this node is an active DHT node
      */
-    public int supportsDHT() {
-        return supportsCapability(LIME_DHT_ACTIVE_CAPABLE_BYTES);
+    public int isActiveDHTNode() {
+        return supportsCapability(LIME_ACTIVE_DHT_NODE);
     }
 
     // override super

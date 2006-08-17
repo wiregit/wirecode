@@ -210,6 +210,10 @@ public class NodeAssigner {
         ULTRAPEER_OS &&
         //AND I do not have a private address
         !NetworkUtils.isPrivate());
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Hardcore capable: "+_isHardcoreCapable);
+        }
     }
     
     /**
@@ -362,7 +366,7 @@ public class NodeAssigner {
     private static void assignDHTNode() {
         
         //make sure that the node has had the time to try to connect as an ultrapeer
-        Assert.that((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue() > 
+        Assert.that(((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L) > 
                      UltrapeerSettings.MIN_CONNECT_TIME.getValue()), "Wrong minimum initial uptime");
         
         if (DHTSettings.DISABLE_DHT_USER.getValue() 
@@ -371,21 +375,26 @@ public class NodeAssigner {
             RouterService.shutdownDHT();
             return;
         }
-
+        
+        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        
         boolean isActiveDHTCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime AND current uptime high enough?
-            (ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue() >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
-                    && _currentUptime >= DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
+            (averageTime >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
+                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L)));
                      
-        //don't give active capability to ultrapeers
+        //don't give active capability to active ultrapeers
         if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                && (RouterService.isSupernode() || _willTryToBeUltrapeer)){
+                && (RouterService.getConnectionManager().isActiveSupernode() 
+                        || _willTryToBeUltrapeer)){
             isActiveDHTCapable = false;
         }
-                     
+        
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Node is "+(isActiveDHTCapable?"":"NOT")+" DHT capable");
+            LOG.debug("Node is "+(isActiveDHTCapable?"":"NOT")+" DHT capable\n average time: "+averageTime
+                    +"\n currentUptime: "+_currentUptime);
         }
 
         DHTSettings.ACTIVE_DHT_CAPABLE.setValue(isActiveDHTCapable);

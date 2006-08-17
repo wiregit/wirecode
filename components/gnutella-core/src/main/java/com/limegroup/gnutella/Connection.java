@@ -1101,7 +1101,7 @@ public class Connection implements IpPort {
      */
     public int remostHostIsActiveDHTNode() {
         if(_capabilities != null) 
-            return _capabilities.supportsDHT();
+            return _capabilities.isActiveDHTNode();
         return -1;
     }
 

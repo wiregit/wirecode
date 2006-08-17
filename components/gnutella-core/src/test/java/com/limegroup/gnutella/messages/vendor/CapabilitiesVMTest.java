@@ -62,7 +62,7 @@ public class CapabilitiesVMTest
         
         CapabilitiesVM.reconstructInstance();
         vmp = CapabilitiesVM.instance();
-        assertGreaterThan(-1, vmp.supportsDHT());
+        assertGreaterThan(-1, vmp.isActiveDHTNode());
     }
 
     public void testNetworkConstructor() throws Exception {

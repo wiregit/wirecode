@@ -36,13 +36,18 @@ class LimeDHTRouteTable extends RouteTableImpl {
      */
     public void addLeafDHTNode(String host, int port) {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Pinging node: " + host);
+            LOG.debug("Pinging leaf: " + host + ": " + port);
         }
         
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
             Contact node = dht.ping(addr).get();
             if(node != null) {
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Ping succeeded to: " + host + ": " + port);
+                }
+                
                 synchronized (this) {
                     leafDHTNodes.put(addr, node.getNodeID());
                     
@@ -62,6 +67,11 @@ class LimeDHTRouteTable extends RouteTableImpl {
      * 
      */
     public synchronized SocketAddress removeLeafDHTNode(String host, int port) {
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Removing leaf: " + host + ": " + port);
+        }
+        
         SocketAddress addr = new InetSocketAddress(host, port);
         KUID nodeId = leafDHTNodes.remove(addr);
         if(nodeId != null) {

@@ -48,7 +48,7 @@ import com.limegroup.mojito.util.BucketUtils;
  */
 abstract class AbstractDHTController implements DHTController, LifecycleListener {
     
-    private static final Log LOG = LogFactory.getLog(AbstractDHTController.class);
+    protected final Log LOG = LogFactory.getLog(getClass());
     
     /**
      * The instance of the DHT
@@ -112,12 +112,23 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
             return;
         }
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Shutting down DHT");
+        LOG.debug("Shutting down DHT Controller");
+        
+        if(LOG.isTraceEnabled()) {
+            StringBuilder s = new StringBuilder();
+            StackTraceElement[] e = Thread.currentThread().getStackTrace();
+            for(StackTraceElement elem: e) {
+                s.append(elem.toString());
+                s.append("\n");
+            }
+            LOG.trace(s.toString());
         }
         
         dhtBootstrapper.stop();
-        dhtNodeAdder.stop();
+        
+        if(dhtNodeAdder != null) {
+            dhtNodeAdder.stop();
+        }
         
         if(dht != null) {
             dht.stop();
@@ -136,9 +147,10 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      */
     public void addDHTNode(SocketAddress hostAddress) {
         if(dht.isBootstrapped()) {
-            if(dhtNodeAdder == null || dhtNodeAdder.isRunning()) {
+            if(dhtNodeAdder == null) {
                 dhtNodeAdder = new RandomNodeAdder();
             }
+            dhtNodeAdder.start();
             dhtNodeAdder.addDHTNode(hostAddress);
         } else {
             dhtBootstrapper.addBootstrapHost(hostAddress);
@@ -258,12 +270,16 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         
         private Set<SocketAddress> dhtNodes;
         
-        private boolean stopped;
+        private boolean running;
         
         public RandomNodeAdder() {
             dhtNodes = new FixedSizeLIFOSet<SocketAddress>(30);
             long delay = DHTSettings.DHT_NODE_ADDER.getValue();
             RouterService.schedule(this, delay, delay);
+        }
+        
+        public synchronized void start() {
+            running = true;
         }
         
         public void addDHTNode(SocketAddress address) {
@@ -273,7 +289,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         
         public void run() {
-            if(stopped) {
+            if(!running) {
                 return;
             }
             synchronized(dhtNodes) {
@@ -284,11 +300,12 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         }
         
         public boolean isRunning() {
-            return !stopped;
+            return running;
         }
         
-        public void stop() {
-            stopped = true;
+        //TODO: Use zlati's cancellable timer task when merging back
+        public synchronized void stop() {
+            running = false;
         }
     }
 }

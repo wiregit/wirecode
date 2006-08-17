@@ -1044,6 +1044,13 @@ public class RouterService {
         dumpConnections(manager.getInitializedClientConnections());
     }
     
+    public static void dumpConnections(StringBuffer buf) {
+        buf.append("UltraPeer connections").append("\n");
+        dumpConnections(manager.getInitializedConnections(), buf);
+        buf.append("Leaf connections").append("\n");
+        dumpConnections(manager.getInitializedClientConnections(), buf);
+    }
+    
     /**
      * Prints out the passed collection of connections
      * @param connections The collection(of Connection) 
@@ -1053,6 +1060,12 @@ public class RouterService {
     {
         for(Iterator iterator = connections.iterator(); iterator.hasNext();) {
             System.out.println(iterator.next().toString());
+        }
+    }
+    
+    private static void dumpConnections(Collection connections, StringBuffer buf) {
+        for(Iterator iterator = connections.iterator(); iterator.hasNext();) {
+            buf.append(iterator.next().toString()).append("\n");
         }
     }
     
@@ -1573,6 +1586,17 @@ public class RouterService {
      */
     public static boolean isActiveDHTNode() {
         return dhtManager.isActiveNode();
+    }
+    
+    /**
+     * Returns whether this node is currently a member of the DHT or not.
+     * In order to be part of the DHT, a node has to be active AND bootstrapped.
+     * 
+     */
+    public static boolean isMemberOfDHT() {
+        return (dhtManager.isActiveNode() 
+                && dhtManager.isRunning()
+                && dhtManager.getMojitoDHT().isBootstrapped());
     }
     
     public static void switchMode(boolean toActiveNode) {
