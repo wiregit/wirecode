@@ -20,8 +20,6 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -34,8 +32,6 @@ import com.limegroup.mojito.messages.MessageFactory;
  */
 class LimeDHTMessageParser implements MessageParser {
     
-    private static final SocketAddress ADDRESS = new InetSocketAddress(0);
-    
     private MessageFactory factory;
     
     LimeDHTMessageParser(MessageFactory factory) {
@@ -45,7 +41,7 @@ class LimeDHTMessageParser implements MessageParser {
     public Message parse(byte[] header, byte[] payload, 
             byte softMax, int network) throws BadPacketException, IOException {
         
-        return (Message)factory.createMessage(ADDRESS, 
+        return (Message)factory.createMessage(null, 
                 ByteBuffer.wrap(header), 
                 ByteBuffer.wrap(payload));
     }
