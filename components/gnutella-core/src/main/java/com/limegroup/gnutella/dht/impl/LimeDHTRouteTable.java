@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,10 +49,12 @@ class LimeDHTRouteTable extends RouteTableImpl {
                 }
                 
                 synchronized (this) {
-                    leafDHTNodes.put(addr, node.getNodeID());
+                    KUID previous = leafDHTNodes.put(addr, node.getNodeID());
                     
-                    node.setTimeStamp(Long.MAX_VALUE);
-                    add(node);
+                    if(previous == null || !previous.equals(node.getNodeID())) {
+                        node.setTimeStamp(Long.MAX_VALUE);
+                        add(node);
+                    }
                 }
             }
 
@@ -86,7 +87,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
         return null;
     }
     
-    protected synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
+    private void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);
         assert (removed == true);
