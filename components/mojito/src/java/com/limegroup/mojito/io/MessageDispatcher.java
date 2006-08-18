@@ -219,10 +219,15 @@ public abstract class MessageDispatcher implements Runnable {
         ByteBuffer data = serialize(dst, message);
         int size = data.remaining();
         if (size >= MAX_MESSAGE_SIZE) {
-            IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
+            /*IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
                     + size + " >= " + MAX_MESSAGE_SIZE);
             tag.handleError(iox);
-            return false;
+            return false;*/
+            
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Message (" + message.getClass().getName()  + ") is too large: " 
+                    + size + " >= " + MAX_MESSAGE_SIZE);
+            }
         }
         
         tag.setData(data);
