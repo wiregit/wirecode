@@ -140,10 +140,6 @@ public class ContactNode implements Contact {
             }
         }
     }
-
-    public void resetContactAddress() {
-        this.contactAddress = new InetSocketAddress("localhost", 0);
-    }
     
     public void updateWithExistingContact(Contact existing) {
         if (!nodeId.equals(existing.getNodeID())) {
@@ -181,17 +177,9 @@ public class ContactNode implements Contact {
         return contactAddress;
     }
     
-    /*public void setContactAddress(SocketAddress contactAddress) {
-        this.contactAddress = contactAddress;
-    }*/
-
     public SocketAddress getSourceAddress() {
         return sourceAddress;
     }
-    
-    /*public void setSourceAddress(SocketAddress sourceAddress) {
-        this.sourceAddress = sourceAddress;
-    }*/
     
     public long getRoundTripTime() {
         return rtt;

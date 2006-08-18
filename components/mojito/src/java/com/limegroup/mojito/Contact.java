@@ -48,7 +48,7 @@ public interface Contact extends Serializable {
         // An unknown Contact is neither dead nor
         // alive. Unknown Contacts are Contacts
         // we're receiving with FIND_NODE and FIND_VALUE
-        // requests. We're using them to fill up our
+        // responses. We're using them to fill up our
         // RouteTable but they'll never replace alive
         // or dead Contacts in our RouteTable. An alive
         // Contact will always replace an unknown Contact!
@@ -76,11 +76,6 @@ public interface Contact extends Serializable {
      * remote Node.
      */
     public SocketAddress getContactAddress();
-    
-    /**
-     * Sets the contact address.
-     */
-    //public void setContactAddress(SocketAddress contactAddress);
     
     /**
      * Returns the source address. The is the address
@@ -130,11 +125,6 @@ public interface Contact extends Serializable {
      * Returns whether or not this Contact has been recently alive 
      */
     public boolean hasBeenRecentlyAlive();
-    
-    /**
-     * Sets whether or not this Contact is firewalled
-     */
-    //public void setFirewalled(boolean firewalled);
     
     /**
      * Returns whether or not this Contact is firewalled

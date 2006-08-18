@@ -31,7 +31,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * 
+ * A Contact for the local Node. 
  */
 public class LocalContactImpl implements Contact {
 
@@ -66,7 +66,6 @@ public class LocalContactImpl implements Contact {
     
     private void init() {
         contactAddress = new InetSocketAddress("localhost", 0);
-        //tmpExternalAddress = null;
     }
     
     public int getVendor() {
@@ -103,6 +102,7 @@ public class LocalContactImpl implements Contact {
         }
         
         this.contactAddress = contactAddress;
+        this.tmpExternalAddress = null;
     }
     
     public synchronized void setExternalPort(int port) {
@@ -126,10 +126,16 @@ public class LocalContactImpl implements Contact {
         return firewalled;
     }
 
+    /**
+     * Sets whether or not this Contact is firewalled
+     */
     public void setFirewalled(boolean firewalled) {
         this.firewalled = firewalled;
     }
     
+    /**
+     * Sets the external Address of the local Node.
+     */
     public synchronized void setExternalAddress(SocketAddress externalSocketAddress) {
         if (externalSocketAddress == null) {
             return;

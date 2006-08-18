@@ -137,7 +137,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         this(name, localNode, null, null);
     }
     
-    Context(String name, LocalContactImpl localNode, RouteTable routeTable, Database database) {
+    Context(String name, LocalContactImpl localNode, 
+            RouteTable routeTable, Database database) {
+        
         this.name = name;
         this.localNode = localNode;
         
@@ -358,6 +360,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         try {
             Constructor<? extends MessageDispatcher> c = clazz.getConstructor(Context.class);
+            c.setAccessible(true);
             messageDispatcher = c.newInstance(this);
             return messageDispatcher;
         } catch (Exception err) {
@@ -442,6 +445,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return database;
     }
     
+    /**
+     * Returns the expiration time of the given DHTValue
+     */
     public long getExpirationTime(DHTValue value) {
         if (value.isLocalValue()) {
             return Long.MAX_VALUE;
