@@ -89,7 +89,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         InetSocketAddress addr = new InetSocketAddress(host, port);
         //add to bootstrap nodes if we need to.
-        addDHTNode(addr);
+        addDHTNode(addr, false);
         //add to our DHT leaves
         if(LOG.isDebugEnabled()) {
             LOG.debug("Adding host: "+addr+" to leaf dht nodes");
@@ -180,13 +180,24 @@ class PassiveDHTNodeController extends AbstractDHTController{
         int port = c.getPort();
         
         if(evt.isConnectionClosedEvent()) {
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Got a connection closed event for connection: "+ c);
+            }
+            
             removeLeafDHTNode( host , port );
             
         } else if(evt.isConnectionCapabilitiesEvent()){
             
             if(c.remostHostIsActiveDHTNode() > -1) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Connection is active capable: "+ c);
+                }
                 addLeafDHTNode( host , port );
             } else {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Connection is NOT active capable: "+ c);
+                }
                 removeLeafDHTNode( host , port );
             }
         } 

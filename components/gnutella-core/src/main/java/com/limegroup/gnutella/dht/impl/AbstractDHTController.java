@@ -115,13 +115,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         LOG.debug("Shutting down DHT Controller");
         
         if(LOG.isTraceEnabled()) {
-            StringBuilder s = new StringBuilder();
-            StackTraceElement[] e = Thread.currentThread().getStackTrace();
-            for(StackTraceElement elem: e) {
-                s.append(elem.toString());
-                s.append("\n");
-            }
-            LOG.trace(s.toString());
+            LOG.trace("Shut down trace: ", new Exception());
         }
         
         dhtBootstrapper.stop();
@@ -145,16 +139,20 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
      * 
      * @param hostAddress The SocketAddress of the DHT host.
      */
-    public void addDHTNode(SocketAddress hostAddress) {
-        if(dht.isBootstrapped()) {
+    public void addDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
+        if(!dht.isBootstrapped()){
+            dhtBootstrapper.addBootstrapHost(hostAddress);
+        } else if(addToDHTNodeAdder){
             if(dhtNodeAdder == null) {
                 dhtNodeAdder = new RandomNodeAdder();
             }
             dhtNodeAdder.start();
             dhtNodeAdder.addDHTNode(hostAddress);
-        } else {
-            dhtBootstrapper.addBootstrapHost(hostAddress);
         }
+    }
+    
+    public void addDHTNode(SocketAddress hostAddress) {
+        addDHTNode(hostAddress, true);
     }
     
     /**
@@ -227,7 +225,7 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     public abstract void init();
     
     public abstract boolean isActiveNode();
-
+    
     /**
      * Sends the updated capabilities to our ultrapeers -- only if we are an active node!
      */

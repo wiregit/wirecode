@@ -115,8 +115,9 @@ public class DHTNodeFetcher {
     
     public void startTimerTask() {
         fetcher = new TimedFetcher();
-        RouterService.schedule(fetcher, DHTSettings.DHT_NODE_FETCHER_TIME.getValue(),
-                DHTSettings.DHT_NODE_FETCHER_TIME.getValue());
+        long fetcherTime = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
+        long initialFetch = (long) (Math.random() * fetcherTime);
+        RouterService.schedule(fetcher, initialFetch, fetcherTime);
     }
     
     private class TimedFetcher implements Runnable {
