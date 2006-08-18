@@ -50,7 +50,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
@@ -73,7 +72,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.impl.LocalContactImpl;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -98,10 +97,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     private String name;
     
-    private Contact localNode;
-    private SocketAddress localAddress;
+    private LocalContactImpl localNode;
     
-    private SocketAddress tmpExternalAddress;
+    private SocketAddress localAddress;
     
     private Database database;
     private RouteTable routeTable;
@@ -135,11 +133,11 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    Context(String name, Contact localNode) {
+    Context(String name, LocalContactImpl localNode) {
         this(name, localNode, null, null);
     }
     
-    Context(String name, Contact localNode, RouteTable routeTable, Database database) {
+    Context(String name, LocalContactImpl localNode, RouteTable routeTable, Database database) {
         this.name = name;
         this.localNode = localNode;
         
@@ -268,8 +266,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 List<Contact> backup = new ArrayList<Contact>(routeTable.getLiveContacts());
                 
                 // Change the Node ID
-                ((ContactNode)localNode).setNodeID(nodeId);
-                ((ContactNode)localNode).nextInstanceID();
+                localNode.setNodeID(nodeId);
+                localNode.nextInstanceID();
                 
                 // Clear the RouteTable and add the local Node with our
                 // new Node ID
@@ -285,7 +283,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 // Contacts
                 for (Contact node : backup) {
                     if (!oldNodeId.equals(node.getNodeID())) {
-                        ((ContactNode)node).setState(State.UNKNOWN);
+                        node.unknown();
                         routeTable.add(node);
                     }
                 }
@@ -326,15 +324,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Adds the local Node to the RouteTable
      */
     private void initRouteTable() {
-        // Clear the firewalled flag for a moment so that we can
-        // add the local node to the Route Table
-        if (localNode.isFirewalled()) {
-            ((ContactNode)localNode).setFirewalled(false);
-            routeTable.add(localNode);
-            ((ContactNode)localNode).setFirewalled(true);
-        } else {
-            routeTable.add(localNode);
-        }
+        routeTable.add(localNode);
     }
     
     public boolean isLocalNode(Contact node) {
@@ -367,8 +357,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
         
         try {
-            Constructor c = clazz.getConstructor(Context.class);
-            messageDispatcher = (MessageDispatcher)c.newInstance(this);
+            Constructor<? extends MessageDispatcher> c = clazz.getConstructor(Context.class);
+            messageDispatcher = c.newInstance(this);
             return messageDispatcher;
         } catch (Exception err) {
             throw new RuntimeException(err);
@@ -452,12 +442,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return database;
     }
     
-    /**
-     * Returns whether or not the given DHTValue has expired
-     */
-    public boolean isExpired(DHTValue value) {
+    public long getExpirationTime(DHTValue value) {
         if (value.isLocalValue()) {
-            return false;
+            return Long.MAX_VALUE;
         }
         
         KUID valueId = value.getValueID();
@@ -482,7 +469,14 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             expiresAt = creationTime + (expirationTime / KUID.LENGTH_IN_BITS * log2);
         }
         
-        return System.currentTimeMillis() >= expiresAt;
+        return expiresAt;
+    }
+    
+    /**
+     * Returns whether or not the given DHTValue has expired
+     */
+    public boolean isExpired(DHTValue value) {
+        return System.currentTimeMillis() >= getExpirationTime(value);
     }
 
     public void setThreadFactory(ThreadFactory threadFactory) {
@@ -540,63 +534,28 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return messageHelper;
     }
     
-    public synchronized void setExternalPort(int port) {
-        InetSocketAddress addr = (InetSocketAddress)localNode.getContactAddress();
-        setContactAddress(new InetSocketAddress(addr.getAddress(), port));
+    public void setExternalPort(int port) {
+        localNode.setExternalPort(port);
     }
     
-    public synchronized int getExternalPort() {
-        return ((InetSocketAddress)localNode.getContactAddress()).getPort();
+    public int getExternalPort() {
+        return localNode.getExternalPort();
     }
     
-    public synchronized SocketAddress getContactAddress() {
+    public SocketAddress getContactAddress() {
         return localNode.getContactAddress();
     }
     
-    public synchronized void setContactAddress(SocketAddress externalAddress) {
-        if (isFirewalled() && ((InetSocketAddress)externalAddress).getPort() != 0) {
-            throw new IllegalStateException();
-        }
-        
-        ((ContactNode)localNode).setContactAddress(externalAddress);
-        
-        // NOTE: local DHTValues are holding a reference to
-        // 'localNode' and setting the originator is not
-        // neccessary thus.
+    public void setContactAddress(SocketAddress externalAddress) {
+        localNode.setContactAddress(externalAddress);
     }
     
     public SocketAddress getLocalAddress() {
         return localAddress;
     }
     
-    public void setExternalSocketAddress(SocketAddress externalSocketAddress)
-            throws IOException {
-        if (externalSocketAddress == null) {
-            return;
-        }
-        
-        // --- DOES NOT CHANGE THE PORT! ---
-        
-        InetAddress externalAddress = ((InetSocketAddress)externalSocketAddress).getAddress();
-        //int externalPort = ((InetSocketAddress)externalSocketAddress).getPort();
-        
-        InetAddress currentAddress = ((InetSocketAddress)localNode.getContactAddress()).getAddress();
-        int currentPort = ((InetSocketAddress)localNode.getContactAddress()).getPort();
-        
-        if (externalAddress.equals(currentAddress)) {
-            return;
-        }
-        
-        InetSocketAddress addr = new InetSocketAddress(externalAddress, currentPort);
-        
-        if (tmpExternalAddress == null 
-                || tmpExternalAddress.equals(addr)) {
-            setContactAddress(addr);
-            
-            //if (externalPort == currentPort) {}
-        }
-        
-        tmpExternalAddress = addr;
+    public void setExternalAddress(SocketAddress externalSocketAddress) {
+        localNode.setExternalAddress(externalSocketAddress);
     }
     
     public boolean isFirewalled() {
@@ -685,8 +644,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             setExternalPort(((InetSocketAddress)localAddress).getPort());
         }
         
-        ((ContactNode)localNode).setSourceAddress(localAddress);
-        ((ContactNode)localNode).nextInstanceID();
+        localNode.setSourceAddress(localAddress);
+        localNode.nextInstanceID();
         
         messageDispatcher.bind(localAddress);
     }
@@ -703,8 +662,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             LOG.error("DHT is already running!");
             return;
         }
-        
-        tmpExternalAddress = null;
         
         initContextTimer();
         initContextExecutor();

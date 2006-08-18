@@ -20,11 +20,9 @@
 package com.limegroup.mojito;
 
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.ContactNode;
 
 class MojitoHelper {
     
@@ -51,8 +49,7 @@ class MojitoHelper {
         int vendor = context.getVendor();
         int version = context.getVersion();
         
-        Contact node = ContactNode.createLocalContact(vendor, version, nodeId, 0, false);
-        node.setTimeStamp(Long.MAX_VALUE);
+        Contact node = ContactFactory.createLocalContact(vendor, version, nodeId, 0, false);
         routeTable.add(node);
         
         try {

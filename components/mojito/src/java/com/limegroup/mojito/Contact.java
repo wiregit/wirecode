@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.SocketAddress;
 
+
 /**
  * A Contact is a Node in the DHT. The Contact interface
  * encapsulates all required informations to contact the
@@ -77,6 +78,11 @@ public interface Contact extends Serializable {
     public SocketAddress getContactAddress();
     
     /**
+     * Sets the contact address.
+     */
+    //public void setContactAddress(SocketAddress contactAddress);
+    
+    /**
      * Returns the source address. The is the address
      * as read from the IP packet. Depending on the
      * network configuration of the remote Host it's
@@ -128,7 +134,7 @@ public interface Contact extends Serializable {
     /**
      * Sets whether or not this Contact is firewalled
      */
-    public void setFirewalled(boolean firewalled);
+    //public void setFirewalled(boolean firewalled);
     
     /**
      * Returns whether or not this Contact is firewalled
@@ -167,6 +173,11 @@ public interface Contact extends Serializable {
      * Returns whether or not this Contact is in unknown state
      */
     public boolean isUnknown();
+    
+    /**
+     * Sets the Contact state to Unknown
+     */
+    public void unknown();
     
     /**
      * Updates this Contact with information from an existing Contact.

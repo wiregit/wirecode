@@ -39,7 +39,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreResponse.Status;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.util.EntryImpl;
 
@@ -153,7 +153,7 @@ public class MessageInputStream extends DataInputStream {
             throw new UnknownHostException("SocketAddress is null");
         }
         
-        return ContactNode.createUnknownContact(vendor, version, nodeId, addr);
+        return ContactFactory.createUnknownContact(vendor, version, nodeId, addr);
     }
     
     public List<Contact> readContacts() throws IOException {

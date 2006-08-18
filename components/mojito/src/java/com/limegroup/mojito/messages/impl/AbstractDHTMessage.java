@@ -35,7 +35,7 @@ import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.ContactFactory;
 
 /**
  * An abstract implementation of DHTMessage
@@ -111,7 +111,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         
         boolean firewalled = (flags & FIREWALLED) != 0;
         
-        this.contact = ContactNode.createLiveContact(src, vendor, version, 
+        this.contact = ContactFactory.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled);
         
         int extensions = in.readUnsignedShort();

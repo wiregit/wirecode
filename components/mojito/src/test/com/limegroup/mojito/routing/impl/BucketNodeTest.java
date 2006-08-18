@@ -10,6 +10,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.Callback;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -40,7 +41,7 @@ public class BucketNodeTest extends BaseTestCase {
         KUID nodeId = KUID.createRandomNodeID();
         int instanceId = 0;
         
-        localNode = ContactNode.createLocalContact(vendor, version, nodeId, instanceId, false);
+        localNode = ContactFactory.createLocalContact(vendor, version, nodeId, instanceId, false);
     }
 
     @Override
@@ -69,26 +70,31 @@ public class BucketNodeTest extends BaseTestCase {
         assertTrue("should contain local node", bucket.getLiveContacts().contains(localNode));
         
         //now add dead and unknown nodes
-        Contact node = ContactNode.createUnknownContact(vendor, version, KUID.createRandomNodeID(), 
-                address);
+        Contact node = ContactFactory.createUnknownContact(
+                vendor, version, KUID.createRandomNodeID(), address);
+        
         bucket.addLiveContact(node);
         Contact node2 = new ContactNode(address, vendor, version, 
                 KUID.createRandomNodeID(), address, 0, false, State.DEAD);
+        
         bucket.addLiveContact(node2);
         assertEquals(bucket.getLiveContacts().size(), 3);
         bucket.purge();
         assertTrue("should contain local node", bucket.getLiveContacts().contains(localNode));
         assertEquals(bucket.getLiveContacts().size(), 1);
         //now add cached node
-        node = ContactNode.createUnknownContact(vendor, version, KUID.createRandomNodeID(), 
-                address);
+        node = ContactFactory.createUnknownContact(
+                vendor, version, KUID.createRandomNodeID(), address);
+        
         bucket.addLiveContact(node);
         node2 = new ContactNode(address, vendor, version, 
                 KUID.createRandomNodeID(), address, 0, false, State.DEAD);
         bucket.addLiveContact(node2);
+        
         Contact node3 = new ContactNode(address, vendor, version, 
                 KUID.createRandomNodeID(), address, 0, false, State.ALIVE);
         bucket.addCachedContact(node3);
+        
         assertEquals(bucket.getLiveContacts().size(), 3);
         bucket.purge();
         assertTrue(bucket.getLiveContacts().contains(node3));

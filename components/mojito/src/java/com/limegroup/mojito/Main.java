@@ -75,6 +75,8 @@ public class Main {
             }*/
         }
         
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        
         List<MojitoDHT> dhts = standalone(null, port, count);
         /*for (MojitoDHT dht: dhts) {
             InetSocketAddress addr = (InetSocketAddress)dht.getContactAddress();
