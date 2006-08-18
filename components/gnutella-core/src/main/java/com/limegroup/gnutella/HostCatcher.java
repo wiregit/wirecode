@@ -568,7 +568,7 @@ public class HostCatcher {
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(pr.getDHTMode());
             //if active DHT endpoint, immediately send to dht manager
-            if(endpoint.getDHTMode() == DHTMode.ACTIVE) {
+            if(endpoint.getDHTMode().isActive()) {
                 SocketAddress address = new InetSocketAddress(
                         endpoint.getAddress(), endpoint.getPort());
                 RouterService.getDHTManager().addDHTNode(address);

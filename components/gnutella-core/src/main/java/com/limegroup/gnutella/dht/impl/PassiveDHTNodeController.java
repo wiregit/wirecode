@@ -12,9 +12,6 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -43,8 +40,6 @@ import com.limegroup.mojito.util.BucketUtils;
  *   
  */
 class PassiveDHTNodeController extends AbstractDHTController{
-    
-    private static final Log LOG = LogFactory.getLog(PassiveDHTNodeController.class);
     
     private LimeDHTRouteTable limeDHTRouteTable;
     
@@ -166,6 +161,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
         }
         
         //This should return the leafs first (they have the highest timestamp)
+        //TODO: Although a passive node does not have accurate info in its RT 
+        //(except for direct leafs), we still return nodes. Maybe be stricter here?
         return getMRSNodes(maxNodes, true);
     }
     

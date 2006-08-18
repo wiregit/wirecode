@@ -3,6 +3,9 @@ package com.limegroup.gnutella.dht;
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
@@ -33,6 +36,8 @@ import com.limegroup.gnutella.util.IpPort;
  */
 public class DHTNodeFetcher {
     
+    private static final Log LOG = LogFactory.getLog(DHTNodeFetcher.class);
+    
     private final DHTBootstrapper bootstrapper;
     
     private volatile long lastRequest = 0L;
@@ -49,6 +54,9 @@ public class DHTNodeFetcher {
      * or by the timer task.
      */
     public synchronized void requestDHTHosts() {
+        
+        LOG.debug("Requesting DHT hosts");
+        
         if(!RouterService.isConnected()) {
             return;
         }
@@ -63,6 +71,11 @@ public class DHTNodeFetcher {
         boolean haveActive = false;
         for(ExtendedEndpoint ep : dhtHosts) {
             if(ep.getDHTMode().isActive()) {
+                
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("Adding active host from HostCatcher: "+ ep.getAddress());
+                }
+                
                 haveActive = true;
                 bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
             } else {
@@ -84,10 +97,16 @@ public class DHTNodeFetcher {
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
         
         if(!dhtHosts.isEmpty()) { 
+            
+            LOG.debug("Sending ping to dht capable hosts");
+            
             //we don't have active hosts but have hosts that support dht
             RouterService.getHostCatcher().sendMessage(m, dhtHosts, 
                     new DHTNodesRequestListener(), new UDPPingCanceller());
         } else {
+            
+            LOG.debug("Sending ping to all hosts");
+            
             //send to all hosts
             RouterService.getHostCatcher().sendMessage(m, 
                     new DHTNodesRequestListener(), new UDPPingCanceller());
@@ -128,8 +147,13 @@ public class DHTNodeFetcher {
                 return;
             }
             
+            
             PingReply reply = (PingReply) m;
             List<IpPort> l = reply.getPackedDHTIPPorts();
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Received ping reply from "+reply.getAddress());
+            }
             
             for (IpPort ipp : l) {
                 bootstrapper.addBootstrapHost(
