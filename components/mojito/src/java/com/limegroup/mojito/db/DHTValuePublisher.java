@@ -181,10 +181,10 @@ public class DHTValuePublisher implements Runnable {
         published = 0;
         evicted = 0;
         
-        synchronized (getClass()) {
+        /*synchronized (getClass()) {
             convoyEffectCounter++;
             System.out.println("DHTValuePublisher: " + convoyEffectCounter);
-        }
+        }*/
         
         List<DHTValue> values = null;
         Database database = context.getDatabase();
@@ -207,10 +207,10 @@ public class DHTValuePublisher implements Runnable {
             }
         }
         
-        synchronized (getClass()) {
+        /*synchronized (getClass()) {
             convoyEffectCounter--;
         }
         
-        end = System.currentTimeMillis();
+        end = System.currentTimeMillis();*/
     }
 }
