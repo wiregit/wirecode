@@ -11,8 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
@@ -39,13 +41,12 @@ class LimeDHTRouteTable extends RouteTableImpl {
             LOG.debug("Pinging leaf: " + host + ": " + port);
         }
         
-        try {
-            InetSocketAddress addr = new InetSocketAddress(host, port);
-            Contact node = dht.ping(addr).get();
-            if(node != null) {
-                
+        final InetSocketAddress addr = new InetSocketAddress(host, port);
+        DHTFuture<Contact> future = dht.ping(addr);
+        future.addDHTEventListener(new DHTEventListener<Contact>() {
+            public void handleResult(Contact node) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Ping succeeded to: " + host + ": " + port);
+                    LOG.debug("Ping succeeded to: " + node);
                 }
                 
                 synchronized (this) {
@@ -55,11 +56,14 @@ class LimeDHTRouteTable extends RouteTableImpl {
                     add(node);
                 }
             }
-        } catch (InterruptedException err) {
-            LOG.error("InterruptedException", err);
-        } catch (ExecutionException err) {
-            LOG.error("ExecutionException", err);
-        } 
+
+            public void handleThrowable(Throwable ex) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Ping failed to: " + addr, ex);
+                }
+            }
+            
+        });
     }
     
     /**
@@ -68,13 +72,14 @@ class LimeDHTRouteTable extends RouteTableImpl {
      */
     public synchronized SocketAddress removeLeafDHTNode(String host, int port) {
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Removing leaf: " + host + ": " + port);
-        }
-        
         SocketAddress addr = new InetSocketAddress(host, port);
         KUID nodeId = leafDHTNodes.remove(addr);
         if(nodeId != null) {
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Removed leaf: " + host + ": " + port, new Exception()); //TODO remove exception
+            }
+            
             removeAndReplaceWithMRSCachedContact(nodeId);
             return addr;
         }
