@@ -72,7 +72,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.LocalContactImpl;
+import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -97,7 +97,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     private String name;
     
-    private LocalContactImpl localNode;
+    private LocalContact localNode;
     
     private SocketAddress localAddress;
     
@@ -133,11 +133,11 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    Context(String name, LocalContactImpl localNode) {
+    Context(String name, LocalContact localNode) {
         this(name, localNode, null, null);
     }
     
-    Context(String name, LocalContactImpl localNode, 
+    Context(String name, LocalContact localNode, 
             RouteTable routeTable, Database database) {
         
         this.name = name;

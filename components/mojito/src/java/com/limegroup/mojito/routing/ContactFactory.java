@@ -25,7 +25,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.impl.ContactNode;
-import com.limegroup.mojito.routing.impl.LocalContactImpl;
+import com.limegroup.mojito.routing.impl.LocalContact;
 
 /**
  * A Factory class to create Contacts
@@ -44,7 +44,7 @@ public class ContactFactory {
      */
     public static Contact createLocalContact(int vendor, int version, 
             KUID nodeId, int instanceId, boolean firewalled) {
-        return new LocalContactImpl(vendor, version, nodeId, instanceId, firewalled);
+        return new LocalContact(vendor, version, nodeId, instanceId, firewalled);
     }
     
     /**

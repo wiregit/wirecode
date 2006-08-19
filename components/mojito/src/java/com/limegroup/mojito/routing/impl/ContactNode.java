@@ -143,7 +143,7 @@ public class ContactNode implements Contact {
     
     public void updateWithExistingContact(Contact existing) {
         if (!nodeId.equals(existing.getNodeID())) {
-            throw new IllegalArgumentException("Node IDs do not match");
+            throw new IllegalArgumentException("Node IDs do not match: " + this + " vs. " + existing);
         }
         
         if (rtt < 0L) {

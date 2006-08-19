@@ -454,7 +454,7 @@ public class RouteTableTest extends BaseTestCase {
 
     private static final int PORT = 10000;
     
-    private LocalContactImpl localNode = null;
+    private LocalContact localNode = null;
     private RouteTableImpl routeTable = null;
     private List<Contact> toPing = new ArrayList<Contact>();
     
@@ -462,7 +462,7 @@ public class RouteTableTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        localNode = (LocalContactImpl)ContactFactory.createLocalContact(
+        localNode = (LocalContact)ContactFactory.createLocalContact(
                 0, 0, KUID.create(NODE_IDS[0]), 0, false);
         localNode.setExternalPort(PORT);
         

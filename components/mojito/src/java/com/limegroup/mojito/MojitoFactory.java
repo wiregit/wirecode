@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.LocalContactImpl;
+import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
@@ -63,7 +63,7 @@ public class MojitoFactory {
         return create(name, null, true);
     }
     
-    private static Context create(String name, LocalContactImpl localNode, boolean firewalled) {
+    private static Context create(String name, LocalContact localNode, boolean firewalled) {
         
         if (name == null) {
             name = DEFAULT_NAME;
@@ -76,7 +76,7 @@ public class MojitoFactory {
             KUID nodeId = KUID.createRandomNodeID();
             int instanceId = 0;
             
-            localNode = (LocalContactImpl)ContactFactory
+            localNode = (LocalContact)ContactFactory
                 .createLocalContact(vendor, version, nodeId, instanceId, firewalled);
         }
 
@@ -127,7 +127,7 @@ public class MojitoFactory {
         String name = (String)ois.readObject();
         
         // Contact
-        LocalContactImpl localNode = (LocalContactImpl)ois.readObject();
+        LocalContact localNode = (LocalContact)ois.readObject();
         
         // RouteTable
         RouteTable routeTable = (RouteTable)ois.readObject();
