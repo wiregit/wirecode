@@ -99,8 +99,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     private LocalContact localNode;
     
-    private SocketAddress localAddress;
-    
     private Database database;
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
@@ -557,7 +555,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
     
     public SocketAddress getLocalAddress() {
-        return localAddress;
+        return localNode.getSourceAddress();
     }
     
     public void setExternalAddress(SocketAddress externalSocketAddress) {
@@ -640,8 +638,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Binding DHT "+ name+ " to address: "+localAddress);
         }
-        
-        this.localAddress = localAddress;
         
         // If we not firewalled and the external port has not 
         // been set yet then set it to the same port as the 
