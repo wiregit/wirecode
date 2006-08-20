@@ -109,9 +109,11 @@ public class DefaultMessageFactory implements MessageFactory {
                     throw new IOException("Unhandled OpCode " + opcode);
             }
         } catch (IllegalArgumentException err) {
-            throw new MessageFormatException(err);
+            String msg = (src != null) ? src.toString() : null;
+            throw new MessageFormatException(msg, err);
         } catch (IOException err) {
-            throw new MessageFormatException(err);
+            String msg = (src != null) ? src.toString() : null;
+            throw new MessageFormatException(msg, err);
         } finally {
             in.close();
         }
