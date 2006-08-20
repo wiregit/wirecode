@@ -45,5 +45,9 @@ public class DHTStatsFactory {
         return STATS.get(nodeId);
     }
     
+    public static synchronized void clear() {
+        STATS.clear();
+    }
+    
     private DHTStatsFactory() {}
 }

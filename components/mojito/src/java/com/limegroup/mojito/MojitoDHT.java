@@ -72,9 +72,9 @@ public interface MojitoDHT {
     public KUID getLocalNodeID();
     
     /**
-     * 
+     * Returns the local Node's Contact
      */
-    //public Contact getLocalNode();
+    public Contact getLocalNode();
     
     /**
      * Returns whether or not this DHT is firewalled
@@ -143,11 +143,6 @@ public interface MojitoDHT {
     public int getExternalPort();
     
     /**
-     * Sets the external (forced) contact address
-     */
-    //public void setContactAddress(SocketAddress addr);
-    
-    /**
      * Returns the external (forced) contact address
      */
     public SocketAddress getContactAddress();
@@ -165,7 +160,7 @@ public interface MojitoDHT {
     public void setThreadFactory(ThreadFactory threadFactory);
     
     /**
-     * 
+     * Returns the ThreadFactory that's used to create Threads
      */
     public ThreadFactory getThreadFactory();
     
@@ -190,11 +185,6 @@ public interface MojitoDHT {
      * Sets the Database
      */
     public void setDatabase(Database database);
-    
-    /**
-     * Tries to (re-)bootstrap from the RouteTable
-     */
-    //public DHTFuture<BootstrapEvent> bootstrap();
     
     /**
      * Tries to bootstrap from the given SocketAddress

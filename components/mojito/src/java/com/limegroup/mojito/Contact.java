@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.SocketAddress;
 
+
 /**
  * A Contact is a Node in the DHT. The Contact interface
  * encapsulates all required informations to contact the
@@ -47,7 +48,7 @@ public interface Contact extends Serializable {
         // An unknown Contact is neither dead nor
         // alive. Unknown Contacts are Contacts
         // we're receiving with FIND_NODE and FIND_VALUE
-        // requests. We're using them to fill up our
+        // responses. We're using them to fill up our
         // RouteTable but they'll never replace alive
         // or dead Contacts in our RouteTable. An alive
         // Contact will always replace an unknown Contact!
@@ -126,11 +127,6 @@ public interface Contact extends Serializable {
     public boolean hasBeenRecentlyAlive();
     
     /**
-     * Sets whether or not this Contact is firewalled
-     */
-    public void setFirewalled(boolean firewalled);
-    
-    /**
      * Returns whether or not this Contact is firewalled
      */
     public boolean isFirewalled();
@@ -167,6 +163,11 @@ public interface Contact extends Serializable {
      * Returns whether or not this Contact is in unknown state
      */
     public boolean isUnknown();
+    
+    /**
+     * Sets the Contact state to Unknown
+     */
+    public void unknown();
     
     /**
      * Updates this Contact with information from an existing Contact.

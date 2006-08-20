@@ -18,6 +18,7 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.util.EntryImpl;
 
@@ -453,7 +454,7 @@ public class RouteTableTest extends BaseTestCase {
 
     private static final int PORT = 10000;
     
-    private Contact localNode = null;
+    private LocalContact localNode = null;
     private RouteTableImpl routeTable = null;
     private List<Contact> toPing = new ArrayList<Contact>();
     
@@ -461,8 +462,9 @@ public class RouteTableTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        localNode = ContactNode.createLocalContact(0, 0, KUID.create(NODE_IDS[0]), 0, false);
-        ((ContactNode)localNode).setContactAddress(new InetSocketAddress("localhost", PORT));
+        localNode = (LocalContact)ContactFactory.createLocalContact(
+                0, 0, KUID.create(NODE_IDS[0]), 0, false);
+        localNode.setExternalPort(PORT);
         
         toPing.clear();
         routeTable = new RouteTableImpl();
@@ -489,7 +491,8 @@ public class RouteTableTest extends BaseTestCase {
             int instanceId = 0;
             boolean firewalled = false;
             
-            Contact node = ContactNode.createLiveContact(src, vendor, version, nodeId, con, instanceId, firewalled);
+            Contact node = ContactFactory.createLiveContact(
+                    src, vendor, version, nodeId, con, instanceId, firewalled);
             nodes.add(node);
         }
         

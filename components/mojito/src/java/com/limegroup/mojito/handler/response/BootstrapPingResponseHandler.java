@@ -126,7 +126,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             LOG.debug("Got bootstrap ping response from " + message.getContact());
         }
         
-        context.setExternalSocketAddress(externalAddress);
+        context.setExternalAddress(externalAddress);
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
         setReturnValue(message.getContact());

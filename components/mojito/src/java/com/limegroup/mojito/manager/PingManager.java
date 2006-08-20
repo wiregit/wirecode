@@ -29,7 +29,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
@@ -85,7 +85,7 @@ public class PingManager extends AbstractManager<Contact> {
         int version = context.getVersion();
         KUID nodeId = context.getLocalNodeID().invert();
         SocketAddress addr = context.getContactAddress();
-        Contact sender = ContactNode.createLiveContact(addr, vendor, version, nodeId, addr, 0, true);
+        Contact sender = ContactFactory.createLiveContact(addr, vendor, version, nodeId, addr, 0, true);
         
         return ping(sender, node.getNodeID(), node.getContactAddress());
     }

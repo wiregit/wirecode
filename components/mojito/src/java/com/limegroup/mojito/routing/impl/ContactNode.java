@@ -41,7 +41,7 @@ public class ContactNode implements Contact {
     
     private static final long serialVersionUID = 833079992601013124L;
 
-    private static final Log LOG = LogFactory.getLog(ContactNode.class);
+    private static final Log LOG = LogFactory.getLog(Contact.class);
     
     private KUID nodeId;
     
@@ -66,59 +66,6 @@ public class ContactNode implements Contact {
     private transient State state = State.UNKNOWN;
     
     private boolean firewalled = false;
-    
-    /**
-     * Creates and returns a local Contact
-     * 
-     * @param vendor Our vendor ID
-     * @param version The version
-     * @param nodeId Our Node ID
-     * @param firewalled whether or not we're firewalled
-     */
-    public static Contact createLocalContact(int vendor, int version, 
-            KUID nodeId, int instanceId, boolean firewalled) {
-        
-        SocketAddress addr = new InetSocketAddress("localhost", 0);
-        
-        ContactNode local = new ContactNode(null, vendor, version, 
-                nodeId, addr, instanceId, firewalled, State.UNKNOWN);
-        local.setTimeStamp(Long.MAX_VALUE);
-        return local;
-    }
-    
-    /**
-     * Creates and returns a live Contact. A live Contact is a Node
-     * that send us a Message
-     * 
-     * @param sourceAddress The source address
-     * @param vendor The Vendor ID of the Node
-     * @param version The Version
-     * @param nodeId The NodeID of the Contact
-     * @param contactAddress The address where to send requests and responses
-     * @param instanceId The instanceId of the Node
-     * @param whether or not the Node is firewalled
-     */
-    public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
-            int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
-        
-        return new ContactNode(sourceAddress, vendor, version, 
-                nodeId, contactAddress, instanceId, firewalled, State.ALIVE);
-    }
-    
-    /**
-     * Creates and returns an unknown Contact
-     * 
-     * @param vendor The Vendor ID of the Node
-     * @param version The Version
-     * @param nodeId The NodeID of the Contact
-     * @param contactAddress The address where to send requests and responses
-     */
-    public static Contact createUnknownContact(int vendor, int version, 
-            KUID nodeId, SocketAddress contactAddress) {
-        
-        return new ContactNode(null, vendor, version, 
-                nodeId, contactAddress, 0, false, State.UNKNOWN);
-    }
     
     /**
      * 
@@ -160,6 +107,12 @@ public class ContactNode implements Contact {
             fixSourceAndContactAddress(sourceAddress);
         }
     }
+    
+    private void init() {
+        sourceAddress = null;
+        rtt = -1;
+        state = State.UNKNOWN;
+    }
 
     /**
      * This method takes the InetAddress from the sourceAddress and 
@@ -188,19 +141,9 @@ public class ContactNode implements Contact {
         }
     }
     
-    private void init() {
-        sourceAddress = null;
-        rtt = -1;
-        state = State.UNKNOWN;
-    }
-    
-    public void resetContactAddress() {
-        this.contactAddress = new InetSocketAddress("localhost", 0);
-    }
-    
     public void updateWithExistingContact(Contact existing) {
         if (!nodeId.equals(existing.getNodeID())) {
-            throw new IllegalArgumentException("Node IDs do not match");
+            throw new IllegalArgumentException("Node IDs do not match: " + this + " vs. " + existing);
         }
         
         if (rtt < 0L) {
@@ -221,11 +164,7 @@ public class ContactNode implements Contact {
     public int getVersion() {
         return version;
     }
-    
-    public void setNodeID(KUID nodeId) {
-        this.nodeId = nodeId;
-    }
-    
+
     public KUID getNodeID() {
         return nodeId;
     }
@@ -234,24 +173,12 @@ public class ContactNode implements Contact {
         return instanceId;
     }
     
-    public void nextInstanceID() {
-        this.instanceId = (instanceId + 1) % 0xFF;
-    }
-
     public SocketAddress getContactAddress() {
         return contactAddress;
     }
     
-    public void setContactAddress(SocketAddress contactAddress) {
-        this.contactAddress = contactAddress;
-    }
-
     public SocketAddress getSourceAddress() {
         return sourceAddress;
-    }
-    
-    public void setSourceAddress(SocketAddress sourceAddress) {
-        this.sourceAddress = sourceAddress;
     }
     
     public long getRoundTripTime() {
@@ -277,11 +204,7 @@ public class ContactNode implements Contact {
     public boolean isFirewalled() {
         return firewalled;
     }
-    
-    public void setFirewalled(boolean firewalled) {
-        this.firewalled = firewalled;
-    }
-    
+
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
         long timeout = NetworkSettings.TIMEOUT.getValue();
@@ -377,6 +300,15 @@ public class ContactNode implements Contact {
                 && contactAddress.equals(c.getContactAddress());
     }
     
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        init();
+    }
+    
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))
@@ -387,14 +319,5 @@ public class ContactNode implements Contact {
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        init(); // Init transient fields
     }
 }

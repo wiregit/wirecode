@@ -36,7 +36,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.ContactFactory;
 
 public class DatabaseTest extends BaseTestCase {
     
@@ -58,7 +58,7 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
-        Contact node = ContactNode.createLocalContact(0, 0, nodeId, 0, false);
+        Contact node = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
         return DHTValue.createLocalValue(node, valueId, value);
     }
     
@@ -69,7 +69,7 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact node = ContactNode.createLiveContact(addr, 0, 0, nodeId, addr, 0, false);
+        Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false);
         return DHTValue.createRemoteValue(node, node, valueId, value);
     }
     
@@ -80,8 +80,8 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createIndirectDHTValue(KUID origId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact orig = ContactNode.createLiveContact(addr, 0, 0, origId, addr, 0, false);
-        Contact sender = ContactNode.createLiveContact(addr, 0, 0, senderId, addr, 0, false);   
+        Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, false);
+        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, false);   
         return DHTValue.createRemoteValue(orig, sender, valueId, value);
     }
     

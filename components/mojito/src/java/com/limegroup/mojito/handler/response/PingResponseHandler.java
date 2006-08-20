@@ -115,7 +115,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
             return;
         }
         
-        context.setExternalSocketAddress(externalAddress);
+        context.setExternalAddress(externalAddress);
         context.addEstimatedRemoteSize(response.getEstimatedSize());
         
         setReturnValue(message.getContact());

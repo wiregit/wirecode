@@ -19,6 +19,8 @@ import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 class LimeDHTRouteTable extends RouteTableImpl {
     
+    private static final long serialVersionUID = 707016966528414433L;
+
     private static final Log LOG = LogFactory.getLog(LimeDHTRouteTable.class);
     
     private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();

@@ -14,7 +14,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ArrayUtils;
 
@@ -106,7 +106,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //only first hex counts
         KUID id = KUID.create(ArrayUtils.parseHexString("03ED9650238A6C576C987793C01440A0EA91A1FB"));
-        Contact localNode = ContactNode.createLocalContact(0, 0, id, 0, false);
+        Contact localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext, "localNode", localNode);
         
         bootstrapper.bootstrap(dhtContext);
@@ -117,7 +117,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //change first hex. Should point to last elem of the list
         id = KUID.create(ArrayUtils.parseHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB"));
-        localNode = ContactNode.createLocalContact(0, 0, id, 0, false);
+        localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext, "localNode", localNode);
         addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
         address = addr.getHostName();
