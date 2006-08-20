@@ -20,6 +20,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.statistics.DHTStatsFactory;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -50,6 +51,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public void init() {
+        
+        DHTStatsFactory.clear();
         dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
         
         limeDHTRouteTable = new LimeDHTRouteTable(dht);

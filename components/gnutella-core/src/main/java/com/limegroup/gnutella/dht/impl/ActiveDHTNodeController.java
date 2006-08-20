@@ -15,6 +15,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.statistics.DHTStatsFactory;
 
 class ActiveDHTNodeController extends AbstractDHTController {
     
@@ -24,6 +25,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
 
     public void init() {
+        
+        DHTStatsFactory.clear();
+        
         MojitoDHT mojitoDHT = null;
         if (DHTSettings.PERSIST_DHT.getValue() && 
                 FILE.exists() && FILE.isFile()) {
