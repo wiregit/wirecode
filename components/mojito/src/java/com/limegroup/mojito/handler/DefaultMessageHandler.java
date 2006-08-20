@@ -205,11 +205,6 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
                             DHTValue value = it.next();
                             if (!value.isLocalValue()) {
-                                // Rather than to delete the DHTValue immediately we're
-                                // setting the flag that it's no longer nearby which will 
-                                // expire it faster. This way we can serve as a cache for
-                                // a while...
-                                
                                 //System.out.println("REMOVING: " + value + "\n");
                                 
                                 it.remove();
