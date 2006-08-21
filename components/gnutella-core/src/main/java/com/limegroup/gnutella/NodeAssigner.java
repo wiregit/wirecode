@@ -99,12 +99,6 @@ public class NodeAssigner {
     private static int _ultrapeerTries = 0;
     
     /**
-     * Wether or not the NodeAssigner is trying to promote this node to Ultrapeer.
-     * 
-     */
-    private static boolean _willTryToBeUltrapeer;
-    
-    /**
      * Wether or not this node is "Hardcore" capable
      */
     private static boolean _isHardcoreCapable;
@@ -227,7 +221,6 @@ public class NodeAssigner {
     private static void assignUltrapeerNode() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
-            _willTryToBeUltrapeer = false;
             return;
         }
 
@@ -280,11 +273,10 @@ public class NodeAssigner {
                 switchFromActiveDHTNode()) {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Node WILL become an ultrapeer");
+                LOG.debug("Node WILL try to become an ultrapeer");
             }
             
             _ultrapeerTries++;
-            _willTryToBeUltrapeer = true;
             // try to become an Ultrapeer -- how persistent we are depends on
             // how many times we've tried, and so how long we've been
             // running for
@@ -302,7 +294,6 @@ public class NodeAssigner {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Node will not try to become an ultrapeer");
         }
-        _willTryToBeUltrapeer = false;
         //here: we are not an ultrapeer and will not try to connect as one
         //maybe a demotion from ultrapeer to leaf --> disconnect the DHT if it is the case
         if(RouterService.isDHTNode() && !RouterService.isActiveDHTNode()) {
@@ -387,8 +378,7 @@ public class NodeAssigner {
                      
         //don't give active capability to active ultrapeers
         if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                && (RouterService.isActiveSuperNode()
-                        || _willTryToBeUltrapeer)){
+                && RouterService.isActiveSuperNode()){
             isActiveDHTCapable = false;
         }
         
