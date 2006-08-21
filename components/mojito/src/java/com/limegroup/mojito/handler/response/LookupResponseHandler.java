@@ -577,4 +577,16 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         responseCount++;
     }
+    
+    protected String getState() {
+        long time = time();
+        boolean timeout = isGlobalTimeout(time);
+        int activeSearches = this.activeSearches;
+        
+        return "Class: " + getClass().getName() 
+            + ", lookup: " + lookupId 
+            + ", time: " + time 
+            + ", timeout: " + timeout 
+            + ", activeSearches: " + activeSearches;
+    }
 }

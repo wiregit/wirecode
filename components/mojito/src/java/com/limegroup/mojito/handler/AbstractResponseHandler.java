@@ -331,7 +331,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                     // Woke up but still not done nor cancelled?
                     // Must be the timeout -> throw an Exception!
                     if (!done && !cancelled) {
-                        setException(new LockTimeoutException("Timeout: " + timeout));
+                        String state = getState();
+                        
+                        if (state == null) {
+                            setException(new LockTimeoutException("Timeout: " + timeout));
+                        } else {
+                            setException(new LockTimeoutException("Timeout: " + timeout + ", State: " + state));
+                        }
                     }
                 }
     
@@ -371,6 +377,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Called if this handler was cancelled externally (interrupted)
      */
     protected void cancelled() throws Exception {
+    }
+    
+    /**
+     * 
+     */
+    protected String getState() {
+        return null;
     }
     
     /**
