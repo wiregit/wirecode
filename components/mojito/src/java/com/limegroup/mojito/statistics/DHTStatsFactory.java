@@ -19,15 +19,15 @@
 
 package com.limegroup.mojito.statistics;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 
 public class DHTStatsFactory {
     
-    private static final Map<KUID, DHTNodeStat> STATS = new HashMap<KUID, DHTNodeStat>();
+    private static final Map<KUID, DHTNodeStat> STATS = new WeakHashMap<KUID, DHTNodeStat>();
     
     public static synchronized DHTStats newInstance(Context context) {
         KUID nodeId = context.getLocalNodeID();
