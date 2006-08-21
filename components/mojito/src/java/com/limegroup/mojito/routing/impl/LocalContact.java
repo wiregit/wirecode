@@ -107,10 +107,6 @@ public class LocalContact implements Contact {
      * Sets the local Node's Contact (external) Address
      */
     public synchronized void setContactAddress(SocketAddress contactAddress) {
-        if (isFirewalled() && ((InetSocketAddress)contactAddress).getPort() != 0) {
-            throw new IllegalStateException();
-        }
-        
         this.contactAddress = contactAddress;
         this.tmpExternalAddress = null;
     }
@@ -173,7 +169,7 @@ public class LocalContact implements Contact {
         
         if (tmpExternalAddress == null 
                 || tmpExternalAddress.equals(addr)) {
-            setContactAddress(addr);
+            contactAddress = addr;
             
             //if (externalPort == currentPort) {}
         }
