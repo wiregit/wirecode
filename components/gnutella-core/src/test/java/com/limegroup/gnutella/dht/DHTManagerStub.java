@@ -16,7 +16,7 @@ public class DHTManagerStub implements DHTManager {
 
     public MojitoDHT getMojitoDHT() {return null;}
 
-    public boolean isActiveNode() {return false;}
+    public boolean isActiveNode() {return true;}
 
     public boolean isRunning() {return true;}
 
@@ -27,7 +27,7 @@ public class DHTManagerStub implements DHTManager {
     public void stop() {}
 
     public boolean isBootstrapped() {
-        return false;
+        return true;
     }
 
     public void handleLifecycleEvent(LifecycleEvent evt) {}

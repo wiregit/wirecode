@@ -46,6 +46,8 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub());
+        MojitoDHT dht = MojitoFactory.createDHT();
+        dhtContext = (Context)dht;
         dhtContext.bind(new InetSocketAddress("localhost", 2000));
         dhtContext.start();
     }
