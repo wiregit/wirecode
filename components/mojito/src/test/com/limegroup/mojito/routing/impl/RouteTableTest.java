@@ -469,10 +469,6 @@ public class RouteTableTest extends BaseTestCase {
         toPing.clear();
         routeTable = new RouteTableImpl();
         routeTable.setRouteTableCallback(new RouteTable.Callback() {
-            public Contact getLocalNode() {
-                return localNode;
-            }
-            
             public DHTFuture<Contact> ping(Contact node) {
                 toPing.add(node);
                 return null;

@@ -119,6 +119,7 @@ public class Main {
         return dhts;
     }
     
+    @SuppressWarnings("unused")
     private static List<MojitoDHT> limewire(InetAddress addr, int port) throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);

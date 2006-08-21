@@ -55,8 +55,6 @@ public class DHTValuePublisher implements Runnable {
     
     private long end = 0L;
     
-    private static volatile int convoyEffectCounter = 0;
-    
     public DHTValuePublisher(Context context) {
         this.context = context;
         
@@ -181,11 +179,6 @@ public class DHTValuePublisher implements Runnable {
         published = 0;
         evicted = 0;
         
-        /*synchronized (getClass()) {
-            convoyEffectCounter++;
-            System.out.println("DHTValuePublisher: " + convoyEffectCounter);
-        }*/
-        
         List<DHTValue> values = null;
         Database database = context.getDatabase();
         synchronized (database) {
@@ -206,11 +199,5 @@ public class DHTValuePublisher implements Runnable {
                 LOG.error("Exception", err);
             }
         }
-        
-        /*synchronized (getClass()) {
-            convoyEffectCounter--;
-        }
-        
-        end = System.currentTimeMillis();*/
     }
 }

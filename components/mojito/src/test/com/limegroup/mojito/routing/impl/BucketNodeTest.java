@@ -11,7 +11,6 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.ContactFactory;
-import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.Callback;
 import com.limegroup.mojito.settings.ContextSettings;
 

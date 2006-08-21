@@ -5,8 +5,6 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.Random;
 
-import com.limegroup.mojito.messages.DHTMessage;
-
 /**
  * A small app to test the robustness of the IO component.
  * It sends random data over UDP to the specified host.

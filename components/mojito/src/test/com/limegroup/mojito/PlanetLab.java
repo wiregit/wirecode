@@ -38,7 +38,7 @@ import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.mojito.statistics.StatsManager;
 
-
+@SuppressWarnings("unused")
 public class PlanetLab {
     
     private static long minOffline = 1L * 60L * 1000L;
@@ -93,7 +93,7 @@ public class PlanetLab {
     
     public static List createDHTs(int port, int number) {
         
-        List dhts = new ArrayList(number);
+        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(number);
         for(int i = 0; i < number; i++) {
             try {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);

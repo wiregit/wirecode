@@ -48,8 +48,6 @@ public class RandomBucketRefresher implements Runnable {
     
     private long end = 0L;
     
-    private static volatile int convoyEffectCounter = 0;
-    
     public RandomBucketRefresher(Context context) {
         this.context = context;
     }
@@ -117,11 +115,6 @@ public class RandomBucketRefresher implements Runnable {
             return;
         }
         
-        /*synchronized (getClass()) {
-            convoyEffectCounter++;
-            System.out.println("RandomBucketRefresher: " + convoyEffectCounter);
-        }*/
-        
         List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
         
         try {
@@ -139,11 +132,5 @@ public class RandomBucketRefresher implements Runnable {
         } catch (Exception err) {
             LOG.error("Exception", err);
         }
-        
-        /*synchronized (getClass()) {
-            convoyEffectCounter--;
-        }
-        
-        end = System.currentTimeMillis();*/
     }
 }

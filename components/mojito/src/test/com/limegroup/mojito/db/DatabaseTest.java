@@ -591,7 +591,8 @@ public class DatabaseTest extends BaseTestCase {
         Collection<DHTValue> view = database.values();
         
         int count = 0;
-        for (DHTValue v : view) {
+        for (@SuppressWarnings("unused")
+        DHTValue v : view) {
             count++;
         }
         assertEquals(10, count);
