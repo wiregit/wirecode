@@ -7,7 +7,7 @@ import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
-public class DHTManagerStub extends Object implements DHTManager {
+public class DHTManagerStub implements DHTManager {
     public void addDHTNode(SocketAddress hostAddress) {}
 
     public void addressChanged() {}
@@ -26,7 +26,9 @@ public class DHTManagerStub extends Object implements DHTManager {
 
     public void stop() {}
 
-    public void switchMode(boolean toActiveMode) {}
+    public boolean isBootstrapped() {
+        return false;
+    }
 
     public void handleLifecycleEvent(LifecycleEvent evt) {}
 

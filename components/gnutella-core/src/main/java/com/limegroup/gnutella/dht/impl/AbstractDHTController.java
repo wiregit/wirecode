@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.LifecycleEvent;
-import com.limegroup.gnutella.LifecycleListener;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
@@ -46,7 +45,7 @@ import com.limegroup.mojito.util.BucketUtils;
  * 
  * The current implementation is specific to the Mojito DHT. 
  */
-abstract class AbstractDHTController implements DHTController, LifecycleListener {
+abstract class AbstractDHTController implements DHTController {
     
     protected final Log LOG = LogFactory.getLog(getClass());
     
@@ -187,20 +186,6 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
         return dhtBootstrapper.isWaitingForNodes();
     }
     
-    /**
-     * Shuts the DHT down if we got disconnected from the network.
-     * The nodeAssigner will take care of restarting this DHT node if 
-     * it still qualifies.
-     * 
-     */
-    public void handleLifecycleEvent(LifecycleEvent evt) {
-        if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(running && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                stop();
-            }
-        }
-    }
-    
     public MojitoDHT getMojitoDHT() {
         return dht;
     }
@@ -225,6 +210,8 @@ abstract class AbstractDHTController implements DHTController, LifecycleListener
     public abstract void init();
     
     public abstract boolean isActiveNode();
+    
+    public abstract void handleConnectionLifecycleEvent(LifecycleEvent evt);
     
     /**
      * Sends the updated capabilities to our ultrapeers -- only if we are an active node!

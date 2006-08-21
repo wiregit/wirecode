@@ -169,10 +169,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         return getMRSNodes(maxNodes, true);
     }
     
-    public void handleLifecycleEvent(LifecycleEvent evt) {
-        //handle network connections - disconnections
-        super.handleLifecycleEvent(evt);
-        
+    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();
         if( c == null) {

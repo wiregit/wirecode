@@ -32,7 +32,7 @@ public class DHTControllerStub implements DHTController {
         return null;
     }
 
-    public void handleLifecycleEvent(LifecycleEvent evt) {
+    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
     }
 
     public void init() {

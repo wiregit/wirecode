@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -24,6 +25,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
 
+    @Override
     public void init() {
         
         DHTStatsFactory.clear();
@@ -91,9 +93,13 @@ class ActiveDHTNodeController extends AbstractDHTController {
         RouterService.getConnectionManager().sendUpdatedCapabilities();
     }
 
+    @Override
     public boolean isActiveNode() {
         return true;
     }
+
+    @Override
+    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {}
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {

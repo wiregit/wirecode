@@ -1585,11 +1585,24 @@ public class RouterService {
 	}
 
     /**
-     * Tells whether the node is a supernode or not
+     * Tells whether the node is a supernode or not.
+     * NOTE: This will return true if this node is capable
+     * of being a supernode but is not yet connected to 
+     * the network as one (and is not a shielded leaf either).
+     * 
      * @return true, if supernode, false otherwise
      */
     public static boolean isSupernode() {
         return manager.isSupernode();
+    }
+    
+    /**
+     * Tells whether the node is currently connected to the network
+     * as a supernode or not.
+     * @return true, if active supernode, false otherwise
+     */
+    public static boolean isActiveSuperNode() {
+        return manager.isActiveSupernode();
     }
     
     /**
@@ -1622,11 +1635,7 @@ public class RouterService {
     public static boolean isMemberOfDHT() {
         return (dhtManager.isActiveNode() 
                 && dhtManager.isRunning()
-                && dhtManager.getMojitoDHT().isBootstrapped());
-    }
-    
-    public static void switchMode(boolean toActiveNode) {
-        dhtManager.switchMode(toActiveNode);
+                && dhtManager.isBootstrapped());
     }
     
 	/**

@@ -75,6 +75,10 @@ public class LifecycleEvent extends EventObject {
         return (type == LifeEvent.CONNECTION_CAPABILITIES);
     }
     
+    public boolean isConnectionLifecycleEvent() {
+        return connection != null;
+    }
+    
     public String toString() {
         StringBuffer buffer = new StringBuffer("LifecycleEvent: [event=");
         buffer.append(type);

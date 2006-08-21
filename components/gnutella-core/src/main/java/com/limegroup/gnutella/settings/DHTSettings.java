@@ -37,17 +37,21 @@ public class DHTSettings extends LimeProps{
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT.
      * 
+     * TODO:rechange -- tests only!
+     * 
      */
     public static final LongSetting MIN_DHT_AVG_UPTIME =
         FACTORY.createSettableLongSetting("MIN_DHT_AVG_UPTIME",120*60*1000L,
-                "DHTSettings.MinDHTAvgUptime",10*60*1000L,48*3600*1000L);
+                "DHTSettings.MinDHTAvgUptime",0*60*1000L,48*3600*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT.
+     * 
+     * rechange -- tests only!
      */
     public static final LongSetting MIN_DHT_INITIAL_UPTIME =
         FACTORY.createSettableLongSetting("MIN_DHT_INITIAL_UPTIME",120*60*1000L,
-                "DHTSettings.MinDHTInitialUptime",10*60*1000L,48*3600*1000L);
+                "DHTSettings.MinDHTInitialUptime",0*60*1000L,48*3600*1000L);
     
     /**
      * Setting for whether or not an ultrapeer can join the DHT.
@@ -57,6 +61,8 @@ public class DHTSettings extends LimeProps{
     
     /**
      * Setting for the probability to switch from DHT node to Ultrapeer node
+     * 
+     * TODO: rechange -- tests only!
      */
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createSettableFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0.5F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);

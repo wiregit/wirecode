@@ -883,8 +883,10 @@ public final class MessageRouterTest extends BaseTestCase {
         public void stop() {}
 
         public void start(boolean activeMode) {}
-
-        public void switchMode(boolean toActiveMode) {}
+        
+        public boolean isBootstrapped() {
+            return false;
+        }
 
         public void handleLifecycleEvent(LifecycleEvent evt) {}
         
@@ -892,8 +894,5 @@ public final class MessageRouterTest extends BaseTestCase {
             return 0;
         }
 
-        public boolean isWaiting() {
-            return false;
-        }
     }
 }

@@ -30,8 +30,8 @@ public interface DHTController {
     public int getDHTVersion();
     
     //TODO: remove! for testing only 
-    public MojitoDHT getMojitoDHT();
+    MojitoDHT getMojitoDHT();
     
-    public void handleLifecycleEvent(LifecycleEvent evt);
+    public void handleConnectionLifecycleEvent(LifecycleEvent evt);
     
 }

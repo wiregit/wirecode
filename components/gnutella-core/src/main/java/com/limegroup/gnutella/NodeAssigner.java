@@ -233,15 +233,16 @@ public class NodeAssigner {
             return;
         }
 
-        //if we're an ultrapeer, connect to the DHT in passive mode
-        //or if we were allready connected active before, switch to passive mode
-        if(RouterService.isSupernode() 
-                && !DHTSettings.DISABLE_DHT_NETWORK.getValue()
-                && !DHTSettings.DISABLE_DHT_USER.getValue()) {
-            if(!RouterService.isDHTNode()) {
+        if(RouterService.isSupernode()) {
+            //if we're already an ultrapeer, connect to the DHT in passive mode
+            //or if we were connected as active node before, switch to passive mode
+            if(RouterService.isActiveSuperNode()
+                    && !DHTSettings.DISABLE_DHT_NETWORK.getValue()
+                    && !DHTSettings.DISABLE_DHT_USER.getValue()
+                    && (!RouterService.isDHTNode() || RouterService.isActiveDHTNode())) {
+
                 RouterService.startDHT(false);
-            } else if(RouterService.isActiveDHTNode()) {
-                RouterService.switchMode(false);
+                
             }
             return;
         }
@@ -336,7 +337,6 @@ public class NodeAssigner {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");
                 }
-                RouterService.switchMode(false);
                 return true;
             } else {
                 return false;
@@ -387,7 +387,7 @@ public class NodeAssigner {
                      
         //don't give active capability to active ultrapeers
         if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                && (RouterService.getConnectionManager().isActiveSupernode() 
+                && (RouterService.isActiveSuperNode()
                         || _willTryToBeUltrapeer)){
             isActiveDHTCapable = false;
         }

@@ -36,8 +36,6 @@ public interface DHTManager extends LifecycleListener{
 
     public void stop();
     
-    public void switchMode(boolean toActiveMode);
-
     public void addDHTNode(SocketAddress hostAddress);
     
     public void addressChanged();
@@ -47,6 +45,8 @@ public interface DHTManager extends LifecycleListener{
     public boolean isActiveNode();
     
     public boolean isRunning();
+    
+    public boolean isBootstrapped();
     
     public boolean isWaitingForNodes();
     
