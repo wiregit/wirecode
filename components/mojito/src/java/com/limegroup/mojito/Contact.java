@@ -55,6 +55,8 @@ public interface Contact extends Serializable {
         UNKNOWN;
     }
     
+    //public boolean isLocalNode();
+    
     /**
      * Returns the Vendor of this Contact
      */

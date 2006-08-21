@@ -172,9 +172,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         findValueManager = new FindValueManager(this);
         storeManager = new StoreManager(this);
         bootstrapManager = new BootstrapManager(this);
-        
-        // Init the RouteTable with the local Node
-        initRouteTable();
     }
     
     private void initContextTimer() {
@@ -253,7 +250,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Sets the local Node ID to the given ID. See also 
      * changeNodeID() !
      */
-    private void setLocalNodeID(KUID nodeId) {
+    private synchronized void setLocalNodeID(KUID nodeId) {
         if (!nodeId.equals(getLocalNodeID())) {
             
             if (LOG.isInfoEnabled()) {
@@ -272,7 +269,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 // Clear the RouteTable and add the local Node with our
                 // new Node ID
                 routeTable.clear();
-                initRouteTable();
+                routeTable.add(localNode);
                 
                 // Sort the Nodes list (because rebuilding the table with 
                 // the new Node ID will probably evict some nodes)
@@ -318,13 +315,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 assert (database.getValueCount() == (oldValueCount - removedCount));
             }
         }
-    }
-    
-    /**
-     * Adds the local Node to the RouteTable
-     */
-    private void initRouteTable() {
-        routeTable.add(localNode);
     }
     
     public boolean isLocalNode(Contact node) {
@@ -384,9 +374,16 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             routeTable = new RouteTableImpl();
         }
         
+        // Initialize the RouteTable with the local Node and
+        // if it's pre-initialized then get the local Node
+        if (routeTable.size() == 0) {
+            routeTable.add(localNode);
+        } else {
+            localNode = (LocalContact)routeTable.getLocalNode();
+        }
+        
         routeTable.setRouteTableCallback(this);
         this.routeTable = routeTable;
-        initRouteTable();
     }
     
     /**

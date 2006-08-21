@@ -50,24 +50,22 @@ public class BucketNodeTest extends BaseTestCase {
     }
     
     public void testPurge() {
-        RouteTable routeTable = new RouteTableImpl();
+        RouteTableImpl routeTable = new RouteTableImpl();
         routeTable.setRouteTableCallback(new Callback() {
-            public Contact getLocalNode() {
-                return localNode;
-            }
-            
             public DHTFuture<Contact> ping(Contact node) {
                 throw new UnsupportedOperationException();
             }
             
         });
         
-        SocketAddress address = new InetSocketAddress("localhost", 2000);
-        Bucket bucket = new BucketNode(routeTable, KUID.MINIMUM, 0);
-        bucket.addLiveContact(localNode);
+        routeTable.add(localNode);
+        Bucket bucket = routeTable.getBucket(localNode.getNodeID());
+        
         //try purging bucket with only local node
         bucket.purge();
         assertTrue("should contain local node", bucket.getLiveContacts().contains(localNode));
+        
+        SocketAddress address = new InetSocketAddress("localhost", 2000);
         
         //now add dead and unknown nodes
         Contact node = ContactFactory.createUnknownContact(
@@ -101,5 +99,4 @@ public class BucketNodeTest extends BaseTestCase {
         assertFalse(bucket.getCachedContacts().contains(node3));
         
     }
-
 }

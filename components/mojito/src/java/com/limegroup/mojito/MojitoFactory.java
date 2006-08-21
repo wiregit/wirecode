@@ -79,7 +79,7 @@ public class MojitoFactory {
             localNode = (LocalContact)ContactFactory
                 .createLocalContact(vendor, version, nodeId, instanceId, firewalled);
         }
-
+        
         Context context = new Context(name, localNode);
         return context;
     }
@@ -131,6 +131,7 @@ public class MojitoFactory {
         
         // RouteTable
         RouteTable routeTable = (RouteTable)ois.readObject();
+        assert (localNode == routeTable.get(localNode.getNodeID()));
         
         // Database
         Database database = (Database)ois.readObject();

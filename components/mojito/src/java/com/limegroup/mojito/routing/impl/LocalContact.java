@@ -302,7 +302,9 @@ public class LocalContact implements Contact {
     }
     
     public boolean equals(Object o) {
-        if (!(o instanceof Contact)) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof LocalContact)) {
             return false;
         }
         

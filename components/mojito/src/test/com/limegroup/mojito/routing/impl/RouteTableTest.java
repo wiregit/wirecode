@@ -506,6 +506,35 @@ public class RouteTableTest extends BaseTestCase {
         assertEquals(PING_NODE_IDS.length, toPing.size());
     }
 
+    public void testInitRouteTable() {
+        RouteTable routeTable = new RouteTableImpl();
+        
+        try {
+            routeTable.add(ContactFactory.createLiveContact(
+                    null, 0, 0, KUID.createRandomNodeID(), 
+                    new InetSocketAddress(0), 0, false));
+            fail("Contact should have been rejected");
+        } catch (Exception err) {}
+        
+        try {
+            routeTable.add(ContactFactory.createUnknownContact(
+                    0, 0, KUID.createRandomNodeID(), new InetSocketAddress(0)));
+            fail("Contact should have been rejected");
+        } catch (Exception err) {}
+        
+        Contact localNode1 = ContactFactory.createLocalContact(
+                0, 0, KUID.createRandomNodeID(), 0, false);
+        routeTable.add(localNode1);
+        
+        Contact localNode2 = ContactFactory.createLocalContact(
+                1, 1, localNode1.getNodeID(), 0, false);
+        routeTable.add(localNode2);
+        
+        Contact test = routeTable.get(localNode1.getNodeID());
+        assertTrue(test != localNode1);
+        assertTrue(test == localNode2);
+    }
+    
     /**
      * Tests whether or not a RouteTable which was filled with
      * predefined keys in a predefined order has a predefined

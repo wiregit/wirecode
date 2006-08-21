@@ -71,6 +71,11 @@ public class RouteTableImpl implements RouteTable {
      */
     private transient Callback callback;
     
+    /**
+     * 
+     */
+    private Contact localNode;
+    
     public RouteTableImpl() {
         bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
@@ -85,14 +90,25 @@ public class RouteTableImpl implements RouteTable {
     }
     
     public void setRouteTableCallback(Callback callback) {
-        if (routingStats == null && callback != null) {
-            routingStats = new RoutingStatisticContainer(callback.getLocalNode().getNodeID());
-        }
         this.callback = callback;
     }
 
     public synchronized void add(Contact node) {
         
+        // The first Node we're adding to the RouteTable
+        // is the local Node. Anyting else makes no sense
+        // since all subsequent RouteTable operations
+        // depend on the local Node.
+        if (localNode == null) {
+            if (!(node instanceof LocalContact)) {
+                throw new IllegalArgumentException("The first Contact must be the local Contact: " + node);
+            }
+            
+            routingStats = new RoutingStatisticContainer(node.getNodeID());    
+            this.localNode = node;
+        }
+        
+        // Don't add firewalled Nodes except if it's the local Node
         if (node.isFirewalled() && !isLocalNode(node)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace(node + " is firewalled");
@@ -120,11 +136,35 @@ public class RouteTableImpl implements RouteTable {
     protected synchronized void updateContactInBucket(Bucket bucket, Contact existing, Contact node) {
         assert (existing.getNodeID().equals(node.getNodeID()));
         
-        /*
-         * The other Node collides with our Node ID! Do nothing,
-         * the other guy will change its Node ID!
-         */
-        if (isLocalNode(existing) && !isLocalNode(node)) {
+        if (isLocalNode(existing)) {
+            // The other Node collides with our Node ID! Do nothing,
+            // the other guy will change its Node ID! If it doesn't
+            // everybody who has us in their RouteTable will ping us
+            // to check if we're alive and we're hopefully able to
+            // respond. Besides that there isn't much we can do. :-/
+            if (!isLocalNode(node)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.debug(node + " collides with " + existing);
+                }
+                
+            // Must be of instance LocalContact!
+            } else if (!(node instanceof LocalContact)) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Attempting to replace the local Node " 
+                            + existing + " with " + node);
+                }
+                
+            // Alright, replace the existing Contact with the new
+            // LocalContact. Log a warning... 
+            } else {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Updating " + existing + " with " + node);
+                }
+                
+                bucket.updateContact(node);
+                this.localNode = node;
+            }
+            
             return;
         }
         
@@ -558,7 +598,10 @@ public class RouteTableImpl implements RouteTable {
     }
     
     public Contact getLocalNode() {
-        return callback.getLocalNode();
+        if (localNode == null) {
+            throw new IllegalStateException("RouteTable is not initialized");
+        }
+        return localNode;
     }
     
     public boolean isLocalNode(Contact node) {
@@ -571,6 +614,7 @@ public class RouteTableImpl implements RouteTable {
     
     public synchronized void clear() {
         bucketTrie.clear();
+        localNode = null;
         init();
     }
     

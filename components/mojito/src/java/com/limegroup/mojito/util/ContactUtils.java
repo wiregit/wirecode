@@ -110,11 +110,20 @@ public final class ContactUtils {
         }
         
         // NOTE: NetworkUtils.isPrivateAddress() is checking internally
-        // if ConnectionSettings.LOCAL_IS_PRIVATE is true!
+        // if ConnectionSettings.LOCAL_IS_PRIVATE is true! If you're planning
+        // to run the DHT on a Local Area Network (LAN) you want to set
+        // LOCAL_IS_PRIVATE to false!
         if (NetworkUtils.isPrivateAddress(node.getContactAddress())) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(src + " sent us a Contact with a private IP:Port " + node);
+            if (src.getNodeID().equals(node.getNodeID())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(src + " does not know its external address");
+                }
+            } else {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(src + " sent us a Contact with a private IP:Port " + node);
+                }
             }
+            
             return false;
         }
         
@@ -133,7 +142,7 @@ public final class ContactUtils {
             // If same address then just skip it
             if (context.isLocalContactAddress(node.getContactAddress())) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Skipping local node");
+                    LOG.info("Skipping local Node");
                 }
             } else { // there might be a NodeID collision
                 if (LOG.isWarnEnabled()) {

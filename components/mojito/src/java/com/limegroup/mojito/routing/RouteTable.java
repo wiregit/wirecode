@@ -141,9 +141,6 @@ public interface RouteTable extends Serializable {
      */
     public static interface Callback {
         
-        /** Returns the local Node */
-        public Contact getLocalNode();
-        
         /** Sends a PING to the given Node */
         public DHTFuture<Contact> ping(Contact node);
     }
