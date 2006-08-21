@@ -384,6 +384,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         routeTable.setRouteTableCallback(this);
         this.routeTable = routeTable;
+        
+        // TODO: Cleanup the Database?
     }
     
     /**
