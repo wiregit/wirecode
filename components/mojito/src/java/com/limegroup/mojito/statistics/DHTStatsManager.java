@@ -22,32 +22,25 @@ package com.limegroup.mojito.statistics;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 
-public class DHTStatsFactory {
+public class DHTStatsManager {
     
-    private static final Map<KUID, DHTNodeStat> STATS = new WeakHashMap<KUID, DHTNodeStat>();
-    
-    public static synchronized DHTStats newInstance(Context context) {
-        KUID nodeId = context.getLocalNodeID();
-        DHTNodeStat stat = STATS.get(nodeId);
-        if (stat == null) {
-            stat = new DHTNodeStat(context);
-            STATS.put(nodeId, stat);
-        }
-        
-        assert (context == stat.context);
-        return stat;
-    }
+    private static final Map<KUID, DHTStats> STATS = new WeakHashMap<KUID, DHTStats>();
     
     public static synchronized DHTStats getInstance(KUID nodeId) {
-        return STATS.get(nodeId);
+        DHTStats stats = STATS.get(nodeId);
+        if (stats == null) {
+            stats = new DHTStatsImpl(nodeId);
+            STATS.put(nodeId, stats);
+        }
+        
+        return stats;
     }
     
     public static synchronized void clear() {
         STATS.clear();
     }
     
-    private DHTStatsFactory() {}
+    private DHTStatsManager() {}
 }

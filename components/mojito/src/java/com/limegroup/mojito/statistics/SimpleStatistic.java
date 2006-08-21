@@ -19,7 +19,7 @@
  
 package com.limegroup.mojito.statistics;
 
-public class SimpleStatistic extends AbstractStatistic {
+class SimpleStatistic extends AbstractStatistic {
     
     protected SimpleStatistic() {};
 

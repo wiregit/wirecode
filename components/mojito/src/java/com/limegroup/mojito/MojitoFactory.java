@@ -29,9 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
@@ -52,7 +50,11 @@ public class MojitoFactory {
     }
     
     public static MojitoDHT createDHT(String name) {
-        return create(name, null, false);
+        return create(name, false);
+    }
+    
+    public static MojitoDHT createDHT(String name, int vendor, int version) {
+        return create(name, vendor, version, false);
     }
     
     public static MojitoDHT createFirewalledDHT() {
@@ -60,28 +62,27 @@ public class MojitoFactory {
     }
     
     public static MojitoDHT createFirewalledDHT(String name) {
-        return create(name, null, true);
+        return create(name, true);
     }
     
-    private static Context create(String name, LocalContact localNode, boolean firewalled) {
+    public static MojitoDHT createFirewalledDHT(String name, int vendor, int version) {
+        return create(name, vendor, version, true);
+    }
+    
+    private static Context create(String name, boolean firewalled) {
+        return create(name, 
+                ContextSettings.VENDOR.getValue(), 
+                ContextSettings.VERSION.getValue(),
+                firewalled);
+    }
+    
+    private static Context create(String name, int vendor, int version, boolean firewalled) {
         
         if (name == null) {
             name = DEFAULT_NAME;
         }
         
-        if (localNode == null) {
-            int vendor = ContextSettings.VENDOR.getValue();
-            int version = ContextSettings.VERSION.getValue();
-            
-            KUID nodeId = KUID.createRandomNodeID();
-            int instanceId = 0;
-            
-            localNode = (LocalContact)ContactFactory
-                .createLocalContact(vendor, version, nodeId, instanceId, firewalled);
-        }
-        
-        Context context = new Context(name, localNode);
-        return context;
+        return new Context(name, vendor, version, firewalled);
     }
     
     static void store(Context context, OutputStream out) throws IOException {
@@ -98,7 +99,7 @@ public class MojitoFactory {
             oos.writeObject(context.getName());
             
             // Contact
-            oos.writeObject(context.getLocalNode());
+//            oos.writeObject(context.getLocalNode());
             
             // RouteTable
             oos.writeObject(context.getRouteTable());
@@ -127,11 +128,19 @@ public class MojitoFactory {
         String name = (String)ois.readObject();
         
         // Contact
-        LocalContact localNode = (LocalContact)ois.readObject();
+//        LocalContact localNode = (LocalContact)ois.readObject();
         
         // RouteTable
         RouteTable routeTable = (RouteTable)ois.readObject();
-        assert (localNode == routeTable.get(localNode.getNodeID()));
+//      assert (localNode == routeTable.get(localNode.getNodeID()));
+        
+        // This happens if you do something stupid like:
+        // MojitoDHT.getRouteTable().clear();
+        // MojitoDHT.store(OutputStream);
+        if (routeTable.size() == 0) {
+            //routeTable.add(localNode);
+            throw new IOException("The RouteTable is in an inconsistent state");
+        }
         
         // Database
         Database database = (Database)ois.readObject();
@@ -142,11 +151,11 @@ public class MojitoFactory {
             timeout = true;
         }
         
-        Context context = new Context(name, localNode, routeTable, database);
+        Context context = new Context(name, routeTable, database);
         
         if (timeout) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(localNode + " has timed out. Clearing Database and rebuilding RouteTable");
+                LOG.info(context.getLocalNode() + " has timed out. Clearing Database and rebuilding RouteTable");
             }
             
             context.changeNodeID();

@@ -35,6 +35,7 @@ import java.util.Set;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.util.CollectionUtils;
 
 /*
  * Multiple values per key and one value per nodeId under a certain key
@@ -190,6 +191,10 @@ public class DatabaseImpl implements Database {
             values = new DHTValueCollection();
         }
         return values;
+    }
+    
+    public synchronized String toString() {
+        return CollectionUtils.toString(values());
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {

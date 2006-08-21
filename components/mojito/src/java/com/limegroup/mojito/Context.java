@@ -70,6 +70,7 @@ import com.limegroup.mojito.manager.PingManager;
 import com.limegroup.mojito.manager.StoreManager;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
@@ -79,7 +80,7 @@ import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
-import com.limegroup.mojito.statistics.DHTStatsFactory;
+import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
@@ -114,8 +115,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     private volatile boolean running = false;
     
-    private DHTStats dhtStats = null;
-    
+    private DHTStats stats;
     private NetworkStatisticContainer networkStats;
     private GlobalLookupStatisticContainer globalLookupStats;
     private DatabaseStatisticContainer databaseStats;
@@ -131,16 +131,35 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    Context(String name, LocalContact localNode) {
-        this(name, localNode, null, null);
+    /**
+     * Constructor to create a new Context
+     */
+    Context(String name, int vendor, int version, boolean firewalled) {
+        this.name = name;
+        this.localNode = (LocalContact)ContactFactory
+            .createLocalContact(vendor, version, firewalled);
+        
+        init();
     }
     
-    Context(String name, LocalContact localNode, 
-            RouteTable routeTable, Database database) {
-        
+    /**
+     * Constructor to create a Context from a pre-existing
+     * RouteTable and Database.
+     */
+    Context(String name, RouteTable routeTable, Database database) {
         this.name = name;
-        this.localNode = localNode;
         
+        assert (routeTable != null);
+        assert (database != null);
+        
+        this.localNode = (LocalContact)routeTable.getLocalNode();
+        this.routeTable = routeTable;
+        this.database = database;
+        
+        init();
+    }
+    
+    private void init() {
         PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
@@ -148,18 +167,19 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 masterKey = CryptoHelper.loadMasterKey(file);
             }
         } catch (Exception err) {
-            LOG.fatal("Loading the MasterKey failed!", err);
+            LOG.error("Loading the MasterKey failed!", err);
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
-        dhtStats = DHTStatsFactory.newInstance(this);
+        initStats();
         
-        networkStats = new NetworkStatisticContainer(localNode.getNodeID());
-        globalLookupStats = new GlobalLookupStatisticContainer(localNode.getNodeID());
-        databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
+        if (routeTable == null) {
+            setRouteTable(null);
+        }
         
-        setRouteTable(routeTable);
-        setDatabase(database, false);
+        if (database == null) {
+            setDatabase(null, false);
+        }
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -174,11 +194,18 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         bootstrapManager = new BootstrapManager(this);
     }
     
+    private void initStats() {
+        stats = DHTStatsManager.getInstance(localNode.getNodeID());
+        networkStats = new NetworkStatisticContainer(localNode.getNodeID());
+        globalLookupStats = new GlobalLookupStatisticContainer(localNode.getNodeID());
+        databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
+    }
+    
     private void initContextTimer() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-ContextTimer");
+                thread.setName(getName() + "-ContextScheduledThreadPool");
                 thread.setDaemon(true);
                 return thread;
             }
@@ -191,7 +218,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-ContextExecutor");
+                thread.setName(getName() + "-ContextCachedThreadPool");
                 thread.setDaemon(true);
                 return thread;
             }
@@ -205,7 +232,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
 
     public DHTStats getDHTStats() {
-        return dhtStats;
+        return stats;
     }
     
     public int getVendor() {
@@ -259,8 +286,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             
             synchronized (routeTable) {
                 // Backup the current Node ID and all live Contacts
-                KUID oldNodeId = localNode.getNodeID();
                 List<Contact> backup = new ArrayList<Contact>(routeTable.getLiveContacts());
+                backup.remove(localNode);
                 
                 // Change the Node ID
                 localNode.setNodeID(nodeId);
@@ -279,41 +306,12 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 // so that they can be easily replaced by new live 
                 // Contacts
                 for (Contact node : backup) {
-                    if (!oldNodeId.equals(node.getNodeID())) {
-                        node.unknown();
-                        routeTable.add(node);
-                    }
+                    node.unknown();
+                    routeTable.add(node);
                 }
             }
             
-            synchronized (database) {
-                // And finally clean up the Database
-                int oldValueCount = database.getValueCount();
-                int removedCount = 0;
-                for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
-                    DHTValue value = it.next();
-                    if (value.isLocalValue()) {
-                        // This is technically not necessary as they're 
-                        // already holding a reference to localNode and 
-                        // the new ID gets reflected to them
-                        value.setOriginator(localNode);
-                    } else {
-                        
-                        // Remove all non local DHTValues. We're assuming
-                        // the Node IDs are totally random so chances are 
-                        // slim to none that we're responsible for the values
-                        // again. Even if we are there's no way to test
-                        // it until we've re-bootstrapped in which case the
-                        // the other guys will send us anyways DHTValues to
-                        // store. So, any work would be redundant!
-                        it.remove();
-                        removedCount++;
-                    }
-                }
-                
-                // Make sure we've really removed the values
-                assert (database.getValueCount() == (oldValueCount - removedCount));
-            }
+            purgeDatabase(true);
         }
     }
     
@@ -385,7 +383,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         routeTable.setRouteTableCallback(this);
         this.routeTable = routeTable;
         
-        // TODO: Cleanup the Database?
+        if (database != null) {
+            purgeDatabase(true);
+        }
     }
     
     /**
@@ -410,27 +410,47 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             database = new DatabaseImpl();
             
         } else {
-            
-            synchronized (database) {
-                for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
-                    DHTValue value = it.next();
-                    
-                    // Make sure all local values have the local Node
-                    // as originator
-                    if (value.isLocalValue()) {
-                        value.setOriginator(localNode);
-                        
-                    // Else prune out either all non-local values or
-                    // remove them if they've expired.
-                    } else if (remove 
-                            || (!value.isLocalValue() && isExpired(value))) {
-                        it.remove();
-                    }
-                }
-            }
+            purgeDatabase(remove);
         }
         
         this.database = database;
+    }
+    
+    /**
+     * 
+     * @param remove
+     */
+    private void purgeDatabase(boolean remove) {
+        
+        synchronized (database) {
+            int oldValueCount = database.getValueCount();
+            int removedCount = 0;
+            for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
+                DHTValue value = it.next();
+                if (value.isLocalValue()) {
+                    // Make sure all local DHTValues have the
+                    // local Node as the originator
+                    value.setOriginator(localNode);
+                } else {
+                    
+                    // Remove all non local DHTValues. We're assuming
+                    // the Node IDs are totally random so chances are 
+                    // slim to none that we're responsible for the values
+                    // again. Even if we are there's no way to test
+                    // it until we've re-bootstrapped in which case the
+                    // the other guys will send us anyways DHTValues to
+                    // store. So, any work would be redundant!
+                    
+                    if (remove || isExpired(value)) {
+                        it.remove();
+                        removedCount++;
+                    }
+                }
+            }
+            
+            // Make sure we've really removed the values
+            assert (database.getValueCount() == (oldValueCount - removedCount));
+        }
     }
     
     /**
@@ -460,7 +480,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         long expiresAt = 0L;
         
-        if (nodes.size() < k || nodes.contains(getLocalNode())) {
+        if (nodes.size() <= k || nodes.contains(getLocalNode())) {
             expiresAt = creationTime + expirationTime;
             
         } else {

@@ -42,6 +42,18 @@ public class ContactFactory {
      * @param nodeId Our Node ID
      * @param firewalled whether or not we're firewalled
      */
+    public static Contact createLocalContact(int vendor, int version, boolean firewalled) {
+        return createLocalContact(vendor, version, KUID.createRandomNodeID(), 0, firewalled);
+    }
+    
+    /**
+     * Creates and returns a local Contact
+     * 
+     * @param vendor Our vendor ID
+     * @param version The version
+     * @param nodeId Our Node ID
+     * @param firewalled whether or not we're firewalled
+     */
     public static Contact createLocalContact(int vendor, int version, 
             KUID nodeId, int instanceId, boolean firewalled) {
         return new LocalContact(vendor, version, nodeId, instanceId, firewalled);

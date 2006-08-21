@@ -27,32 +27,27 @@ public class FindNodeLookupStatisticContainer extends SingleLookupStatisticConta
     /**
      * <tt>Statistic</tt> for all outgoing lookup messages for this lookup.
      */
-    public Statistic FIND_NODE_LOOKUP_REQUESTS =
-        new SimpleStatistic();
+    public Statistic FIND_NODE_LOOKUP_REQUESTS = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for all incoming lookup messages for this lookup.
      */
-    public Statistic FIND_NODE_LOOKUP_REPLIES =
-        new SimpleStatistic();
+    public Statistic FIND_NODE_LOOKUP_REPLIES = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for timeouts for this lookup.
      */
-    public Statistic FIND_NODE_LOOKUP_TIMEOUTS=
-        new SimpleStatistic();
+    public Statistic FIND_NODE_LOOKUP_TIMEOUTS= new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the number of hops for this lookup.
      */
-    public Statistic FIND_NODE_LOOKUP_HOPS =
-        new SimpleStatistic();
+    public Statistic FIND_NODE_LOOKUP_HOPS = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the time of this lookup.
      */
-    public Statistic FIND_NODE_LOOKUP_TIME =
-        new SimpleStatistic();
+    public Statistic FIND_NODE_LOOKUP_TIME = new SimpleStatistic();
     
     public FindNodeLookupStatisticContainer(Context context, KUID lookupKey) {
         super(context, lookupKey);

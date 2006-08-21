@@ -16,19 +16,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
 
 public interface DHTStats {
-
-    public void dumpRouteTable(Writer writer) throws IOException;
     
-    public void dumpDataBase(Writer writer) throws IOException;
+    public void addStatisticContainer(StatisticContainer container);
     
-    public void addStatisticContainer(StatisticContainer statsContainer);
-    
-    public void dumpStats(Writer writer, boolean writeSingLookups) throws IOException;
+    public void dump(Writer writer, boolean writeSingLookups) throws IOException;
 }

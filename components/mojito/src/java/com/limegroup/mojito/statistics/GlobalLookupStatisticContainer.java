@@ -27,10 +27,10 @@ import java.util.List;
 
 import com.limegroup.mojito.KUID;
 
-
 public class GlobalLookupStatisticContainer extends StatisticContainer {
     
     private static final int MAX_LOOKUPS = 20;
+    
     private List<StatisticContainer> singleLookups = new ArrayList<StatisticContainer>();
     
 
@@ -41,49 +41,42 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
     /**
     * <tt>Statistic</tt> for all outgoing lookup messages
     */
-   public Statistic GLOBAL_LOOKUP_REQUESTS =
-       new SimpleStatistic();
+   public Statistic GLOBAL_LOOKUP_REQUESTS = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for all incoming lookup messages
     */
-   public Statistic GLOBAL_LOOKUP_REPLIES =
-       new SimpleStatistic();
+   public Statistic GLOBAL_LOOKUP_REPLIES = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for timeouts
     */
-   public Statistic GLOBAL_LOOKUP_TIMEOUTS=
-       new SimpleStatistic();
+   public Statistic GLOBAL_LOOKUP_TIMEOUTS = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for the number of hops
     */
-   public Statistic GLOBAL_LOOKUP_HOPS =
-       new SimpleStatistic();
+   public Statistic GLOBAL_LOOKUP_HOPS = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for the time
     */
-   public Statistic GLOBAL_LOOKUP_TIME =
-       new SimpleStatistic();
+   public Statistic GLOBAL_LOOKUP_TIME = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for the FIND_VALUE times
     */
-   public Statistic GLOBAL_FIND_VALUE_LOOKUP_TIME =
-       new SimpleStatistic();
+   public Statistic GLOBAL_FIND_VALUE_LOOKUP_TIME = new SimpleStatistic();
    
    /**
     * <tt>Statistic</tt> for the FIND_VALUE hops
     */
-   public Statistic GLOBAL_FIND_VALUE_LOOKUP_HOPS =
-       new SimpleStatistic();
+   public Statistic GLOBAL_FIND_VALUE_LOOKUP_HOPS = new SimpleStatistic();
    
    public void addSingleLookupStatistic(SingleLookupStatisticContainer lookupStat) {
        synchronized (singleLookups) {
            singleLookups.add(lookupStat);
-           if(singleLookups.size() > MAX_LOOKUPS) {
+           if (singleLookups.size() > MAX_LOOKUPS) {
                singleLookups.remove(0);
            }
        }

@@ -16,7 +16,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.statistics.DHTStatsFactory;
+import com.limegroup.mojito.statistics.DHTStatsManager;
 
 class ActiveDHTNodeController extends AbstractDHTController {
     
@@ -28,7 +28,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     @Override
     public void init() {
         
-        DHTStatsFactory.clear();
+        DHTStatsManager.clear();
         
         MojitoDHT mojitoDHT = null;
         if (DHTSettings.PERSIST_DHT.getValue() && 

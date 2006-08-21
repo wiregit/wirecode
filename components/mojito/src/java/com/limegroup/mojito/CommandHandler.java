@@ -391,7 +391,7 @@ public class CommandHandler {
     
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         DHTStats stats = ((Context)dht).getDHTStats();
-        stats.dumpStats(out, true);
+        stats.dump(out, true);
     }
     
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {

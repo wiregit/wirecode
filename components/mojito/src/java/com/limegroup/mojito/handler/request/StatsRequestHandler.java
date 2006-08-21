@@ -63,13 +63,13 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         
         switch(request.getRequest()) {
             case StatsRequest.STATS:
-                context.getDHTStats().dumpStats(writer, false);
+                context.getDHTStats().dump(writer, false);
                 break;
             case StatsRequest.DB:
-                context.getDHTStats().dumpDataBase(writer);
+                writer.write(context.getDatabase().toString());
                 break;
             case StatsRequest.RT:
-                context.getDHTStats().dumpRouteTable(writer);
+                writer.write(context.getRouteTable().toString());
                 break;
             default:
                 if (LOG.isErrorEnabled()) {

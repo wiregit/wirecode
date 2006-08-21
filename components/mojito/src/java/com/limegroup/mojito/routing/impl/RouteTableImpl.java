@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,8 +107,8 @@ public class RouteTableImpl implements RouteTable {
                 throw new IllegalArgumentException("The first Contact must be the local Contact: " + node);
             }
             
-            routingStats = new RoutingStatisticContainer(node.getNodeID());    
             this.localNode = node;
+            routingStats = new RoutingStatisticContainer(localNode.getNodeID());
         }
         
         // Don't add firewalled Nodes except if it's the local Node
@@ -615,6 +618,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized void clear() {
         bucketTrie.clear();
         localNode = null;
+        routingStats = null;
         init();
     }
     
@@ -640,5 +644,18 @@ public class RouteTableImpl implements RouteTable {
         buffer.append("Total Live Contacts: ").append(getLiveContacts().size()).append("\n");
         buffer.append("Total Cached Contacts: ").append(getCachedContacts().size()).append("\n");
         return buffer.toString();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        
+        if (localNode != null) {
+            routingStats = new RoutingStatisticContainer(localNode.getNodeID());
+        }
     }
 }

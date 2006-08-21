@@ -25,12 +25,10 @@ import java.io.Writer;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 
-
-public abstract class SingleLookupStatisticContainer extends StatisticContainer {
+abstract class SingleLookupStatisticContainer extends StatisticContainer {
     
     protected final KUID lookupKey;
     private final GlobalLookupStatisticContainer globalLookupStats;
-    
     
     protected SingleLookupStatisticContainer(Context context, KUID lookupKey) {
         super(context.getLocalNodeID());

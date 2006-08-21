@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
+
 package com.limegroup.mojito.statistics;
 
 import java.io.IOException;
@@ -27,59 +27,50 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.mojito.KUID;
 
-
-public abstract class StatisticContainer {
-
-    private static final Log LOG = LogFactory.getLog(StatisticContainer.class);
+class StatisticContainer {
     
     public StatisticContainer(KUID nodeId) {
-        DHTStats stats = DHTStatsFactory.getInstance(nodeId);
-        if (stats != null) {
-            stats.addStatisticContainer(this);
-        } else {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("No DHTStats registered for " + nodeId);
-            }
-        }
+        DHTStatsManager.getInstance(nodeId).addStatisticContainer(this);
     }
     
     public void writeStats(Writer writer) throws IOException {
-        String delimiter = DHTNodeStat.FILE_DELIMITER;
+        
+        List<Field> fields = new ArrayList<Field>();
+
         Class superclass = getClass().getSuperclass();
         Class declaringClass = getClass().getDeclaringClass();
-        List<Field> fieldsList = new ArrayList<Field>();
         
-        if(superclass != null) {
-            fieldsList.addAll(Arrays.asList(superclass.getFields()));
+        if (superclass != null) {
+            fields.addAll(Arrays.asList(superclass.getFields()));
         }
         
-        if(declaringClass != null) {
-            fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
+        if (declaringClass != null) {
+            fields.addAll(Arrays.asList(declaringClass.getFields()));
         }
         
-        fieldsList.addAll(Arrays.asList(getClass().getFields()));
-        Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
-        for(int i=0; i<fields.length; i++) {
+        fields.addAll(Arrays.asList(getClass().getFields()));
+        
+        for (Field field : fields) {
             try {
-                if(Modifier.isTransient(fields[i].getModifiers())){
+                if(Modifier.isTransient(field.getModifiers())){
                     continue;
                 }
-                Object fieldObject = fields[i].get(this);
-                if(fieldObject instanceof Statistic) {
-                    Statistic stat = (Statistic) fieldObject;
-                    writer.write(fields[i].getName()+delimiter);
-                    stat.storeStats(writer);
-                    writer.write("\n");
+                
+                Object value = field.get(this);
+                if (!(value instanceof Statistic)) {
+                    continue;
                 }
+                
+                Statistic stat = (Statistic) value;
+                writer.write(field.getName() + "\t");
+                stat.storeStats(writer);
+                writer.write("\n");
+                
             } catch(IllegalAccessException e) {
                 continue;
             }
         }
     }
-    
 }

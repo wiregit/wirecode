@@ -27,51 +27,41 @@ public class FindValueLookupStatisticContainer extends SingleLookupStatisticCont
     /**
      * <tt>Statistic</tt> for all outgoing lookup messages for this lookup.
      */
-    public Statistic FIND_VALUE_LOOKUP_REQUESTS =
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_LOOKUP_REQUESTS = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for all incoming lookup messages for this lookup.
      */
-    public Statistic FIND_VALUE_LOOKUP_REPLIES =
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_LOOKUP_REPLIES = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for timeouts for this lookup.
      */
-    public Statistic FIND_VALUE_LOOKUP_TIMEOUTS=
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_LOOKUP_TIMEOUTS= new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the number of hops for this lookup.
      */
-    public Statistic FIND_VALUE_LOOKUP_HOPS =
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_LOOKUP_HOPS = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the time of this lookup.
      */
-    public Statistic FIND_VALUE_LOOKUP_TIME =
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_LOOKUP_TIME = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the values found.
      */
-    public Statistic FIND_VALUE_OK =
-        new SimpleStatistic();
+    public Statistic FIND_VALUE_OK = new SimpleStatistic();
     
     /**
      * <tt>Statistic</tt> for the values not found.
      */
-    public Statistic FIND_VALUE_FAILURE =
-        new SimpleStatistic();
-    
-    
+    public Statistic FIND_VALUE_FAILURE = new SimpleStatistic();
     
     public FindValueLookupStatisticContainer(Context context, KUID lookupKey) {
         super(context, lookupKey);
     }
-
 
     public void setHops(int hops, boolean findValue) {
         super.setHops(hops, true);
