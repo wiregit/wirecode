@@ -263,6 +263,21 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         error(nodeId, dst, message, e);
     }
     
+    /**
+     * 
+     */
+    protected void tick() {
+    }
+    
+    public void handleTick() {
+        
+        if (isCancelled() || isDone()) {
+            return;
+        }
+        
+        tick();
+    }
+
     public boolean isCancelled() {
         return cancelled;            
     }

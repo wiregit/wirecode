@@ -76,4 +76,9 @@ public interface ResponseHandler {
      * @param e
      */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
+    
+    /**
+     * 
+     */
+    public void handleTick();
 }

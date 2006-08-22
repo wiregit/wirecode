@@ -98,6 +98,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         // never called
     }
     
+    public void handleTick() {
+        // never called
+    }
+    
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
         if (node.isFirewalled()) {

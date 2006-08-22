@@ -283,5 +283,11 @@ public class Tag {
                 responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
             }
         }
+        
+        public void handleTick() {
+            if (responseHandler != null) {
+                responseHandler.handleTick();
+            }
+        }
     }
 }

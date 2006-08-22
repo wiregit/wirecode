@@ -596,6 +596,8 @@ public abstract class MessageDispatcher implements Runnable {
                     networkStats.RECEIPTS_TIMEOUT.incrementStat();
                     
                     process(new TimeoutProcessor(receipt));
+                } else {
+                    receipt.handleTick();
                 }
             }
         }
