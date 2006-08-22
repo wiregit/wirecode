@@ -104,10 +104,14 @@ public class MessageDispatcherImpl extends MessageDispatcher {
         thread.setName(context.getName() + "-MessageDispatcherThread");
         //thread.setDaemon(true);
         thread.start();
+        
+        super.start();
     }
     
     @Override
     public synchronized void stop() {
+        super.stop();
+        
         try {
             if (selector != null) {
                 selector.close();
@@ -182,8 +186,6 @@ public class MessageDispatcherImpl extends MessageDispatcher {
     
     public void run() {
         
-        long lastCleanup = System.currentTimeMillis();
-        
         while(isRunning()) {
             
             try {
@@ -195,11 +197,6 @@ public class MessageDispatcherImpl extends MessageDispatcher {
                 // WRITE
                 handleWrite();
                 
-                // CLEANUP
-                if (System.currentTimeMillis()-lastCleanup >= CLEANUP) {
-                    handleCleanup();
-                    lastCleanup = System.currentTimeMillis();
-                }
             } catch (ClosedSelectorException err) {
                 // thrown as close() is called asynchronously
                 //LOG.error(err);

@@ -24,8 +24,11 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,18 +77,22 @@ public abstract class MessageDispatcher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
-    protected static final int INPUT_BUFFER_SIZE = 64 * 1024;
-    protected static final int OUTPUT_BUFFER_SIZE = 64 * 1024;
+    protected static final int INPUT_BUFFER_SIZE 
+        = NetworkSettings.INPUT_BUFFER_SIZE.getValue();
+    
+    protected static final int OUTPUT_BUFFER_SIZE 
+        = NetworkSettings.OUTPUT_BUFFER_SIZE.getValue();
     
     /** The maximum size of a serialized Message we can send */
     private static final int MAX_MESSAGE_SIZE
         = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
     
     /** The recommended interval to call handleCleanup() */
-    protected static final long CLEANUP = 100L;
+    private static final long CLEANUP_RECEIPTS_INTERVAL 
+        = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
     
     /** Queue of things we have to send */
-    private LinkedList<Tag> outputQueue = new LinkedList<Tag>();
+    private Queue<Tag> outputQueue = new ConcurrentLinkedQueue<Tag>();
     
     /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
@@ -105,6 +112,8 @@ public abstract class MessageDispatcher implements Runnable {
     
     private ByteBuffer buffer;
     
+    private ScheduledFuture future;
+    
     public MessageDispatcher(Context context) {
         this.context = context;
         
@@ -120,12 +129,41 @@ public abstract class MessageDispatcher implements Runnable {
         buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
     }
     
+    /**
+     * Binds the DatagramSocket to the given SocketAddress
+     */
     public abstract void bind(SocketAddress address) throws IOException;
     
-    public abstract void start();
+    /**
+     * Starts the MessageDispatcher
+     */
+    public void start() {
+        synchronized (receiptMap) {
+            if (future != null) {
+                future.cancel(true);
+                future = null;
+            }
+            
+            future = context.scheduleAtFixedRate(
+                    receiptMap, CLEANUP_RECEIPTS_INTERVAL, CLEANUP_RECEIPTS_INTERVAL, TimeUnit.MILLISECONDS);
+        }
+    }
     
-    public abstract void stop();
+    /**
+     * Stops the MessageDispatcher
+     */
+    public void stop() {
+        synchronized (receiptMap) {
+            if (future != null) {
+                future.cancel(true);
+                future = null;
+            }
+        }
+    }
     
+    /**
+     * Returns whether or not the MessageDispatcher is running
+     */
     public abstract boolean isRunning();
     
     public int getReceivedMessagesCount() {
@@ -144,19 +182,31 @@ public abstract class MessageDispatcher implements Runnable {
         return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
     }
     
+    /**
+     * Sets the DatagramChannel
+     */
     public void setDatagramChannel(DatagramChannel channel) {
         this.channel = channel;
     }
     
+    /**
+     * Returns the DatagramChannel
+     */
     public DatagramChannel getDatagramChannel() {
         return channel;
     }
     
+    /**
+     * Returns whether or not the DatagramChannel is open
+     */
     public boolean isOpen() {
         DatagramChannel c = channel;
         return c != null && c.isOpen();
     }
     
+    /**
+     * Returns the DatagramChannel Socket's local SocketAddress
+     */
     public SocketAddress getLocalSocketAddress() {
         DatagramChannel c = channel;
         if (c != null) {
@@ -165,26 +215,44 @@ public abstract class MessageDispatcher implements Runnable {
         return null;
     }
     
+    /**
+     * Sends a ResponseMessage to the given Contact
+     */
     public boolean send(Contact contact, ResponseMessage response) 
             throws IOException {
         return send(new Tag(contact, response)); 
     }
     
+    /**
+     * Sends a RequestMessage to the given SocketAddress and registers
+     * a ResponseHandler
+     */
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
         return send(new Tag(dst, request, responseHandler));
     }
     
+    /**
+     * Sends a RequestMessage to the given SocketAddress and registers
+     * a ResponseHandler
+     */
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
         return send(new Tag(nodeId, dst, request, responseHandler));
     }
     
+    /**
+     * Sends a RequestMessage to the given Contact and registers
+     * a ResponseHandler
+     */
     public boolean send(Contact contact, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
         return send(new Tag(contact, request, responseHandler));
     }
     
+    /**
+     * The actual send method.
+     */
     protected boolean send(Tag tag) throws IOException {
         if (!isOpen()) {
             throw new IOException("Channel is not open!");
@@ -241,8 +309,8 @@ public abstract class MessageDispatcher implements Runnable {
         synchronized(outputQueue) {
             outputQueue.add(tag);
             interestWrite(true);
+            return true;
         }
-        return true;
     }
     
     /**
@@ -453,38 +521,45 @@ public abstract class MessageDispatcher implements Runnable {
      * Messages were left in the output queue.
      */
     public boolean handleWrite() throws IOException {
-        synchronized (outputQueue) {
-            while(!outputQueue.isEmpty() && isRunning()) {
-                Tag tag = outputQueue.removeFirst();
-                
-                if (tag.isCancelled()) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(tag + " was cancelled");
-                    }
-                    continue;
-                }
-                
-                try {
-                    SocketAddress dst = tag.getSocketAddres();
-                    ByteBuffer data = tag.getData();
-                    assert data != null : "Somebody set Data to null";
-
-                    if (send(channel, dst, data)) {
-                        // Wohoo! Message was sent!
-                        registerInput(tag);
-                    } else {
-                        // Dang! Re-Try next time!
-                        outputQueue.addFirst(tag);
-                        break;
-                    }
-                } catch (IOException err) {
-                    LOG.error("IOException", err);
-                    tag.handleError(err);
-                }
+        
+        // We're using Queue.peek() + Queue.remove() instead of
+        // Queue.poll() because DatagramChannel.send() may not
+        // be able to send a Message and we'd have to re-enqeue
+        // the Message at the head of the Queue which is not
+        // possible (Queue supports insertions only at the tail).
+        
+        Tag tag = null;
+        while((tag = outputQueue.peek()) != null && isRunning()) {
+            
+            if (tag.isCancelled()) {
+                outputQueue.remove(tag);
+                continue;
             }
             
-            interestWrite(!outputQueue.isEmpty());
-            return !outputQueue.isEmpty();
+            try {
+                SocketAddress dst = tag.getSocketAddres();
+                ByteBuffer data = tag.getData();
+                assert data != null : "Somebody set Data to null";
+
+                if (send(channel, dst, data)) {
+                    // Wohoo! Message was sent!
+                    outputQueue.remove(tag);
+                    registerInput(tag);
+                } else {
+                    // Dang! Re-Try next time!
+                    break;
+                }
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                outputQueue.remove(tag);
+                tag.handleError(err);
+            }
+        }
+        
+        synchronized (outputQueue) {
+            boolean isEmpty = outputQueue.isEmpty();
+            interestWrite(!isEmpty);
+            return !isEmpty;
         }
     }
     
@@ -513,19 +588,6 @@ public abstract class MessageDispatcher implements Runnable {
         
         networkStats.SENT_MESSAGES_COUNT.incrementStat();
         networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
-    }
-    
-    /**
-     * Starts a cleanup process
-     */
-    protected void handleCleanup() {
-        process(new Runnable() {
-            public void run() {
-                synchronized (receiptMap) {
-                    receiptMap.cleanup();
-                }
-            }
-        });
     }
     
     /** Called to indicate an interest in reading */
@@ -563,20 +625,30 @@ public abstract class MessageDispatcher implements Runnable {
      * Clears the output queue and receipt map
      */
     protected void clear() {
-        synchronized (outputQueue) {
+        synchronized(outputQueue) {
             outputQueue.clear();
+            interestWrite(false);
         }
         
         synchronized (receiptMap) {
             receiptMap.clear();
+            interestRead(false);
         }
+    }
+    
+    /**
+     * Cleans up the receipt mapping. Meant for
+     * internal use only! DO NOT CALL!
+     */
+    protected void cleanup() {
+        receiptMap.run();
     }
     
     /**
      * A map of MessageID -> Receipts
      */
     @SuppressWarnings("serial")
-    private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> {
+    private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> implements Runnable {
         
         public ReceiptMap(int maxSize) {
             super(maxSize);
@@ -586,9 +658,13 @@ public abstract class MessageDispatcher implements Runnable {
             put(receipt.getMessageID(), receipt);
         }
         
-        public void cleanup() {
+        /**
+         * Cleans up the Map and kicks off Ticks. Meant to be
+         * called by a scheduled task.
+         */
+        public synchronized void run() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
-                Receipt receipt = it.next();
+                final Receipt receipt = it.next();
                 
                 if (receipt.timeout()) {
                     receipt.received();
@@ -597,7 +673,7 @@ public abstract class MessageDispatcher implements Runnable {
                     
                     process(new TimeoutProcessor(receipt));
                 } else {
-                    receipt.handleTick();
+                    process(new TickProcessor(receipt));
                 }
             }
         }
@@ -768,6 +844,22 @@ public abstract class MessageDispatcher implements Runnable {
                 receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
+        }
+    }
+    
+    /**
+     * An implementation of Runnable to handle Ticks.
+     */
+    private class TickProcessor implements Runnable {
+        
+        private Receipt receipt;
+        
+        private TickProcessor(Receipt receipt) {
+            this.receipt = receipt;
+        }
+        
+        public void run() {
+            receipt.handleTick();
         }
     }
 }

@@ -55,4 +55,22 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final IntSetting MAX_MESSAGE_SIZE
         = FACTORY.createSettableIntSetting("MAX_MESSAGE_SIZE", 1492, "max_message_size", 512, 64*1024);
+    
+    /**
+     * The cleanup rate for Receipts
+     */
+    public static final LongSetting CLEANUP_RECEIPTS_INTERVAL
+        = FACTORY.createLongSetting("CLEANUP_RECEIPTS_INTERVAL", 50L);
+    
+    /**
+     * The buffer size for incoming messages
+     */
+    public static final IntSetting INPUT_BUFFER_SIZE
+        = FACTORY.createIntSetting("INPUT_BUFFER_SIZE", 64*1024);
+    
+    /**
+     * The buffer size for outgoing messages
+     */
+    public static final IntSetting OUTPUT_BUFFER_SIZE
+        = FACTORY.createIntSetting("OUTPUT_BUFFER_SIZE", 64*1024);
 }

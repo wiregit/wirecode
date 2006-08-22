@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,9 +67,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private ProcessingQueue processingQueue;
     
-    private boolean running = false;
-    
-    private volatile ScheduledFuture future;
+    private volatile boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
@@ -115,15 +111,15 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     public void start() {
         running = true;
-        startCleanupTask();
+        super.start();
     }
     
     @Override
     public void stop() {
         running = false;
-        processingQueue.clear();
-        stopCleanupTask();
+        super.stop();
         
+        processingQueue.clear();
         clear();
     }
 
@@ -199,25 +195,5 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     // This is not running as a Thread!
     public void run() {
-    }
-    
-    private synchronized void startCleanupTask() {
-        // Install cleanup task
-        if (future == null) {
-            future = context.scheduleAtFixedRate(new Runnable() {
-                public void run() {
-                    if (isRunning()) {
-                        handleCleanup();
-                    }
-                }
-            }, CLEANUP, CLEANUP, TimeUnit.MILLISECONDS);
-        }
-    }
-    
-    private synchronized void stopCleanupTask() {
-        if (future != null) {
-            future.cancel(true);
-            future = null;
-        }
     }
 }
