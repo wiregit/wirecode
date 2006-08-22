@@ -117,9 +117,8 @@ public class CommandHandler {
     }
     
     public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        //dht.setFirewalled(!dht.isFirewalled());
-        //out.println("Firewalled: " + dht.isFirewalled());
-        out.println("Switching between firewalled and not firewalled is not possible");
+        ((LocalContact)dht.getLocalNode()).setFirewalled(!dht.isFirewalled());
+        out.println("Firewalled: " + dht.isFirewalled());
     }
     
     public static void database(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {

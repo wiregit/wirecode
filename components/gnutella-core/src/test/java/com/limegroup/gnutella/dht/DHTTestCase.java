@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;

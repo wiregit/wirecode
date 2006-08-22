@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht.impl;
 
+import com.limegroup.gnutella.dht.DHTTestCase;
+
 import junit.framework.Test;
 
 public class AbstractDHTControllerTest extends DHTTestCase {

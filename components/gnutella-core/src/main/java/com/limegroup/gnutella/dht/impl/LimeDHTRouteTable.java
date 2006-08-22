@@ -80,7 +80,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
         if(nodeId != null) {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Removed leaf: " + host + ": " + port, new Exception()); //TODO remove exception
+                LOG.debug("Removed leaf: " + host + ": " + port);
             }
             
             removeAndReplaceWithMRSCachedContact(nodeId);

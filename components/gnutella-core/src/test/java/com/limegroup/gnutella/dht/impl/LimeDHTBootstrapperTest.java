@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
+import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.Contact;

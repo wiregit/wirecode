@@ -7,6 +7,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
