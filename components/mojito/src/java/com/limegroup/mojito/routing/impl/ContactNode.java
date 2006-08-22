@@ -190,6 +190,7 @@ public class ContactNode implements Contact {
     }
     
     public void setTimeStamp(long timeStamp) {
+        assert (timeStamp != LOCAL_CONTACT);
         this.timeStamp = timeStamp;
     }
     

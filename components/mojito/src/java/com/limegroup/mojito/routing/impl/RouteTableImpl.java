@@ -347,7 +347,7 @@ public class RouteTableImpl implements RouteTable {
             if (!isLocalNode(leastRecentlySeen) 
                     && (leastRecentlySeen.isUnknown() 
                             || leastRecentlySeen.isDead() 
-                            || (node.getTimeStamp() == Long.MAX_VALUE))) {
+                            || (node.getTimeStamp() == Contact.PRIORITY_CONTACT))) {
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);

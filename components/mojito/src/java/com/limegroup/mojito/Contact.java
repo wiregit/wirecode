@@ -55,7 +55,18 @@ public interface Contact extends Serializable {
         UNKNOWN;
     }
     
-    //public boolean isLocalNode();
+    /**
+     * 
+     */
+    public static final long LOCAL_CONTACT = Long.MAX_VALUE;
+    
+    /**
+     * A constant for the the time stamp field to indicate 
+     * that a Contact is a priority Contact which means it
+     * may replace any live Contact (except for the local
+     * Contact) in a Bucket
+     */
+    public static final long PRIORITY_CONTACT = Long.MAX_VALUE-1L;
     
     /**
      * Returns the Vendor of this Contact

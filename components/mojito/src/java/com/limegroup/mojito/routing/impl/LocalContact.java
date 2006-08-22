@@ -211,10 +211,10 @@ public class LocalContact implements Contact {
     }
     
     /** 
-     * Hard coded to return Long.MAX_VALUE (future)
+     * Hard coded to return @see #LOCAL_CONTACT
      */
     public long getTimeStamp() {
-        return Long.MAX_VALUE;
+        return LOCAL_CONTACT;
     }
     
     /**
