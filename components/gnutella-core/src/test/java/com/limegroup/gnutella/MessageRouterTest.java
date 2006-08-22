@@ -866,7 +866,9 @@ public final class MessageRouterTest extends BaseTestCase {
             return ipps;
         }
 
-        public void addDHTNode(SocketAddress hostAddress) {}
+        public void addActiveDHTNode(SocketAddress hostAddress) {}
+        
+        public void addPassiveDHTNode(SocketAddress hostAddress) {}
 
         public void addressChanged() {}
         

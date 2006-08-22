@@ -17,7 +17,9 @@ public interface DHTController {
 
     public List<IpPort> getActiveDHTNodes(int maxNodes);
     
-    public void addDHTNode(SocketAddress hostAddress);
+    public void addActiveDHTNode(SocketAddress hostAddress);
+    
+    public void addPassiveDHTNode(SocketAddress hostAddress);
     
     public void sendUpdatedCapabilities();
     

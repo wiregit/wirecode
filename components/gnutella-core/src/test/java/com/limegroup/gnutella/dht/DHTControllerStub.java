@@ -17,7 +17,10 @@ public class DHTControllerStub implements DHTController {
         this.localNodeId = localNodeId;
     }
 
-    public void addDHTNode(SocketAddress hostAddress) {
+    public void addActiveDHTNode(SocketAddress hostAddress) {
+    }
+    
+    public void addPassiveDHTNode(SocketAddress hostAddress) {
     }
 
     public List<IpPort> getActiveDHTNodes(int maxNodes) {

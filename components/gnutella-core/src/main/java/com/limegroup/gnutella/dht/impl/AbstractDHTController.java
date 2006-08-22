@@ -17,6 +17,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
@@ -138,7 +139,7 @@ abstract class AbstractDHTController implements DHTController {
      * 
      * @param hostAddress The SocketAddress of the DHT host.
      */
-    public void addDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
+    public void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
         if(!dht.isBootstrapped()){
             dhtBootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
@@ -150,8 +151,15 @@ abstract class AbstractDHTController implements DHTController {
         }
     }
     
-    public void addDHTNode(SocketAddress hostAddress) {
-        addDHTNode(hostAddress, true);
+    public void addActiveDHTNode(SocketAddress hostAddress) {
+        addActiveDHTNode(hostAddress, true);
+    }
+    
+    public void addPassiveDHTNode(SocketAddress hostAddress) {
+        if(dht.isBootstrapped()) {
+            return;
+        }
+        dhtBootstrapper.addPassiveNode(hostAddress);
     }
     
     /**
@@ -203,6 +211,15 @@ abstract class AbstractDHTController implements DHTController {
         });
     }
     
+    /**
+     * Sends the updated capabilities to our connections
+     */
+    public void sendUpdatedCapabilities() {
+        CapabilitiesVM.reconstructInstance();
+        RouterService.getConnectionManager().sendUpdatedCapabilities();
+    }
+    
+    
     /*** Abstract methods: ***/
     
     public abstract List<IpPort> getActiveDHTNodes(int maxNodes);
@@ -212,11 +229,6 @@ abstract class AbstractDHTController implements DHTController {
     public abstract boolean isActiveNode();
     
     public abstract void handleConnectionLifecycleEvent(LifecycleEvent evt);
-    
-    /**
-     * Sends the updated capabilities to our ultrapeers -- only if we are an active node!
-     */
-    public abstract void sendUpdatedCapabilities();
     
     /*** End abstract methods ***/
     

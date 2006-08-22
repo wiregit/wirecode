@@ -1104,6 +1104,17 @@ public class Connection implements IpPort {
             return _capabilities.isActiveDHTNode();
         return -1;
     }
+    
+    /**
+     * Returns the DHT version if the remote host is a passive DHT node
+     * or -1 if it is not.
+     * 
+     */
+    public int remostHostIsPassiveDHTNode() {
+        if(_capabilities != null) 
+            return _capabilities.isPassiveDHTNode();
+        return -1;
+    }
 
     /**
      * Returns whether or not this connection represents a local address.

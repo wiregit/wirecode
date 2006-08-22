@@ -702,11 +702,15 @@ public class HostCatcherTest extends BaseTestCase {
         assertEquals(0, hc.getDHTSupportEndpoint(0).size());
         
         ExtendedEndpoint ep;
-        //dht passive nodes
-        for(int i=6300; i < 6304 ; i++) {
+        //dht nodes
+        for(int i=6300; i < 6309 ; i++) {
             ep = new ExtendedEndpoint("18.239.0.100", i);
             ep.setDHTVersion(2);
-            ep.setDHTMode(DHTMode.NONE);
+            if((i % 2) == 0) {
+                ep.setDHTMode(DHTMode.NONE);
+            } else {
+                ep.setDHTMode(DHTMode.PASSIVE);
+            }
             hc.add(ep, false);
         }
         
@@ -717,14 +721,21 @@ public class HostCatcherTest extends BaseTestCase {
         hc.add(ep, false);
         
         List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
-        assertEquals(5, hostList.size());
+        assertEquals(10, hostList.size());
         ep = hostList.get(0);
         assertEquals("18.239.0.101", ep.getAddress());
         assertTrue(ep.getDHTMode().isActive());
         
+        hostList.remove(0);
+        ep = hostList.iterator().next();
+        assertTrue(ep.getDHTMode().isPassive());
+        ep = hostList.get(hostList.size()-1);
+        assertFalse(ep.getDHTMode().isPassive());
+        assertTrue(ep.getDHTMode().isNone());
+        
         //try excluding version
         hostList = hc.getDHTSupportEndpoint(2);
-        assertEquals(4, hostList.size());
+        assertEquals(9, hostList.size());
         assertEquals("18.239.0.100", hostList.get(0).getAddress());
     }
         

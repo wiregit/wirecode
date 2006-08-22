@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +18,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 
 /**
  * This class takes care of fetching DHT hosts from the Gnutella network. 
@@ -112,6 +115,25 @@ public class DHTNodeFetcher {
             RouterService.getHostCatcher().sendMessage(m, 
                     new DHTNodesRequestListener(), new UDPPingCanceller());
         }
+    }
+    
+    public void requestDHTHosts(SocketAddress hostAddress) {
+        
+        LOG.debug("Requesting DHT hosts from host " + hostAddress);
+        
+        if(!RouterService.isConnected()) {
+            return;
+        }   
+        
+        if(!(hostAddress instanceof InetSocketAddress)) {
+            return;
+        }
+        
+        IpPort ipp = new IpPortImpl((InetSocketAddress)hostAddress);
+        
+        Message m = PingRequest.createUDPingWithDHTIPPRequest();
+        RouterService.getHostCatcher().sendMessage(m, Arrays.asList(ipp), 
+                new DHTNodesRequestListener(), new UDPPingCanceller());
     }
     
     public void startTimerTask() {

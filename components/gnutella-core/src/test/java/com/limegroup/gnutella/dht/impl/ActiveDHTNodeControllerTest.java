@@ -83,7 +83,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         ActiveDHTNodeController controller = new ActiveDHTNodeController();
         controller.start();
         //bootstrap active node
-        controller.addDHTNode(new InetSocketAddress("localhost",3000));
+        controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));
         Thread.sleep(1000);
         //ask for active nodes -- should return itself and the bootstrap node
         List<IpPort> l = controller.getActiveDHTNodes(10);

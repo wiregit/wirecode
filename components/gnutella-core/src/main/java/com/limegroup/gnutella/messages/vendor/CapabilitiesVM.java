@@ -46,7 +46,12 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * The bytes for the Mojito DHT active node message.
      */
-    private static final byte[] LIME_ACTIVE_DHT_NODE = { 'M', 'D', 'H', 'T' };
+    private static final byte[] LIME_ACTIVE_DHT_NODE = { 'A', 'D', 'H', 'T' };
+    
+    /**
+     * The bytes for the Mojito DHT passive node message.
+     */
+    private static final byte[] LIME_PASSIVE_DHT_NODE = { 'P', 'D', 'H', 'T' };
     
     /**
      * The current version of this message.
@@ -132,8 +137,13 @@ public final class CapabilitiesVM extends VendorMessage {
         hashSet.add(smp);
         
         if(RouterService.isMemberOfDHT()) {
-            smp = new SupportedMessageBlock(LIME_ACTIVE_DHT_NODE,
-                                            RouterService.getDHTManager().getVersion());
+            if(RouterService.isActiveDHTNode()) {
+                smp = new SupportedMessageBlock(LIME_ACTIVE_DHT_NODE,
+                        RouterService.getDHTManager().getVersion());
+            } else {
+                smp = new SupportedMessageBlock(LIME_PASSIVE_DHT_NODE,
+                        RouterService.getDHTManager().getVersion());
+            }
             hashSet.add(smp);
         }
         
@@ -199,6 +209,13 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public int isActiveDHTNode() {
         return supportsCapability(LIME_ACTIVE_DHT_NODE);
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int isPassiveDHTNode() {
+        return supportsCapability(LIME_PASSIVE_DHT_NODE);
     }
 
     // override super

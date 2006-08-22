@@ -1606,8 +1606,8 @@ public class RouterService {
     }
     
     /**
-     * Tells whether this node is (actively or passively) connected to the DHT or not
-     * @return true if connected to the DHT, false otherwise
+     * Tells whether this node is an active or passive DHT node
+     * @return true if this is a DHT node, false otherwise
      */
     public static boolean isDHTNode() {
         if(dhtManager != null) {
@@ -1620,7 +1620,7 @@ public class RouterService {
      * is *passively* connected to the DHT, i.e. can perform queries
      * and store requests but is not part of the DHT routing table 
      * (does not store data or respond to queries). Note: This 
-     * also returns false if the node is not connected to the DHT.
+     * also returns false if the node is not running.
      * 
      */
     public static boolean isActiveDHTNode() {
@@ -1628,13 +1628,12 @@ public class RouterService {
     }
     
     /**
-     * Returns whether this node is currently a member of the DHT or not.
-     * In order to be part of the DHT, a node has to be active AND bootstrapped.
+     * Returns whether this node is currently a member of (connect to) the DHT or not.
+     * In order to be part of the DHT, a node has to be bootstrapped.
      * 
      */
     public static boolean isMemberOfDHT() {
-        return (dhtManager.isActiveNode() 
-                && dhtManager.isRunning()
+        return (dhtManager.isRunning()
                 && dhtManager.isBootstrapped());
     }
     

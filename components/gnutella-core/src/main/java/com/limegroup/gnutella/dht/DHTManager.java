@@ -10,7 +10,7 @@ import com.limegroup.mojito.MojitoDHT;
 public interface DHTManager extends LifecycleListener{
     
     public static enum DHTMode {
-        NONE((byte)0x00),ACTIVE((byte)0x01),PASSIVE((byte)0x20);
+        NONE((byte)0x00),ACTIVE((byte)0x01),PASSIVE((byte)0x02);
         
         public static final byte DHT_MODE_MASK = 0x0F;
         
@@ -28,6 +28,14 @@ public interface DHTManager extends LifecycleListener{
             return ((mode & DHT_MODE_MASK) == ACTIVE.getByte());
         }
         
+        public boolean isPassive() {
+            return ((mode & DHT_MODE_MASK) == PASSIVE.getByte());
+        }
+        
+        public boolean isNone() {
+            return ((mode & DHT_MODE_MASK) == NONE.getByte());
+        }
+        
     }
     
     public static final byte DHT_MODE_MASK = 0x0F;
@@ -36,7 +44,9 @@ public interface DHTManager extends LifecycleListener{
 
     public void stop();
     
-    public void addDHTNode(SocketAddress hostAddress);
+    public void addActiveDHTNode(SocketAddress hostAddress);
+    
+    public void addPassiveDHTNode(SocketAddress hostAddress);
     
     public void addressChanged();
 

@@ -1012,10 +1012,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         // put version
         ByteOrder.short2beb((short)RouterService.getDHTManager().getVersion(), 
                              payload, 0);
-        if(RouterService.isDHTNode()) {
-            if(RouterService.isMemberOfDHT()) {
+        if(RouterService.isDHTNode() && RouterService.isMemberOfDHT()) {
+            if(RouterService.isActiveDHTNode()) {
                 payload[2] = DHTMode.ACTIVE.getByte();
-            } else if(!RouterService.isActiveDHTNode()){
+            } else { //passive node
                 payload[2] = DHTMode.PASSIVE.getByte();
             }
         } else {

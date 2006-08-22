@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -73,7 +75,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     public synchronized void stop() {
         super.stop();
         
-        //Notify our connections that we disconnected
+        //Notify our ultrapeers that we disconnected
         sendUpdatedCapabilities();
         
         try {
@@ -88,18 +90,41 @@ class ActiveDHTNodeController extends AbstractDHTController {
     }
     
     @Override
-    public void sendUpdatedCapabilities() {
-        CapabilitiesVM.reconstructInstance();
-        RouterService.getConnectionManager().sendUpdatedCapabilities();
-    }
-
-    @Override
     public boolean isActiveNode() {
         return true;
     }
 
     @Override
-    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {}
+    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
+        //handle connection specific events
+        Connection c = evt.getConnection();
+        String host = c.getAddress();
+        int port = c.getPort();
+
+        if(evt.isConnectionCapabilitiesEvent()){
+            
+            if(c.remostHostIsPassiveDHTNode() > -1) {
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Connection is passive dht node: "+ c);
+                }
+                addPassiveDHTNode(new InetSocketAddress(host, port));
+                
+            } else if(c.remostHostIsActiveDHTNode() > -1) {
+                
+                if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
+                    //this should never happen if ultrapeers are excluded 
+                    //(i.e. they are never active) because as a leaf, we only receive
+                    //capabilities VMs from our ultrapeer.
+                    LOG.error("Got an ACTIVE CAPABLE VM");
+                    throw new IllegalStateException("Active DHT node got an impossible capabilities VM");
+                } else {
+                    addActiveDHTNode(new InetSocketAddress(host, port));
+                }
+            } 
+        }
+        
+    }
 
     @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {

@@ -35,12 +35,18 @@ public class LimeDHTManager implements DHTManager {
         dhtController.start();
     }
     
-    public void addDHTNode(SocketAddress hostAddress) {
+    public void addActiveDHTNode(SocketAddress hostAddress) {
         if (dhtController != null) {
-            dhtController.addDHTNode(hostAddress);
+            dhtController.addActiveDHTNode(hostAddress);
         }
     }
     
+    public void addPassiveDHTNode(SocketAddress hostAddress) {
+        if (dhtController != null) {
+            dhtController.addPassiveDHTNode(hostAddress);
+        }
+    }
+
     public synchronized void addressChanged() {
         if(dhtController == null || !dhtController.isRunning()) {
             return;

@@ -127,6 +127,13 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         }
     }
     
+    public void addPassiveNode(SocketAddress hostAddress) {
+        if(dhtNodeFetcher == null || !waiting.get()) {
+            return;
+        }
+        dhtNodeFetcher.requestDHTHosts(hostAddress);
+    }
+
     public synchronized void stop() {
         
         LOG.debug("Stoping");
@@ -192,7 +199,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     }
     
     private void handleSuccess() {
-        //Notify our connections that we are now a full DHT node 
+        //Notify our connections that we are now a bootstrapped DHT node 
         controller.sendUpdatedCapabilities();
     }
     

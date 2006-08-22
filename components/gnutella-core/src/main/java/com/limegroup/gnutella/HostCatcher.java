@@ -125,14 +125,16 @@ public class HostCatcher {
      */
     public static final int NORMAL_PRIORITY = 0;
     
-    private static final Comparator<ExtendedEndpoint> DHT_ACTIVE_COMPARATOR = 
+    private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {
             public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
                 DHTMode mode1 = e1.getDHTMode();
                 DHTMode mode2 = e2.getDHTMode();
-                if(mode1.isActive() && !mode2.isActive()) {
+                if(mode1.isActive() && !mode2.isActive()
+                        || mode1.isPassive() && mode2.isNone()) {
                     return -1;
-                } else if(mode2.isActive() && !mode1.isActive()) {
+                } else if(mode2.isActive() && !mode1.isActive()
+                        || mode2.isPassive() && mode1.isNone()) {
                     return 1;
                 } else {
                     return 0;
@@ -416,7 +418,7 @@ public class HostCatcher {
                 hostsList.add(host);
             }
         }
-        Collections.sort(hostsList, DHT_ACTIVE_COMPARATOR);
+        Collections.sort(hostsList, DHT_COMPARATOR);
         return hostsList;
     }
     
@@ -571,7 +573,11 @@ public class HostCatcher {
             if(endpoint.getDHTMode().isActive()) {
                 SocketAddress address = new InetSocketAddress(
                         endpoint.getAddress(), endpoint.getPort());
-                RouterService.getDHTManager().addDHTNode(address);
+                RouterService.getDHTManager().addActiveDHTNode(address);
+            } else if(endpoint.getDHTMode().isPassive()) {
+                SocketAddress address = new InetSocketAddress(
+                        endpoint.getAddress(), endpoint.getPort());
+                RouterService.getDHTManager().addPassiveDHTNode(address);
             }
         }
         

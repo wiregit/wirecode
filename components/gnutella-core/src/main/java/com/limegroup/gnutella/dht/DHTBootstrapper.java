@@ -22,6 +22,14 @@ public interface DHTBootstrapper {
     public void addBootstrapHost(SocketAddress hostAddress);
     
     /**
+     * If the bootstrapper is waiting for nodes, pings this host 
+     * in order to acquire DHT bootstrap hosts
+     * 
+     * @param hostAddress The <tt>SocketAddress</tt> of the host to ping
+     */
+    public void addPassiveNode (SocketAddress hostAddress);
+    
+    /**
      * Stops the bootstrap process
      */
     public void stop();
