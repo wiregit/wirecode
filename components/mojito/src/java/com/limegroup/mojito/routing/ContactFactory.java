@@ -39,7 +39,6 @@ public class ContactFactory {
      * 
      * @param vendor Our vendor ID
      * @param version The version
-     * @param nodeId Our Node ID
      * @param firewalled whether or not we're firewalled
      */
     public static Contact createLocalContact(int vendor, int version, boolean firewalled) {
