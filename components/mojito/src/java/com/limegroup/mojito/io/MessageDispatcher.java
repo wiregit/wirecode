@@ -627,12 +627,10 @@ public abstract class MessageDispatcher implements Runnable {
     protected void clear() {
         synchronized(outputQueue) {
             outputQueue.clear();
-            interestWrite(false);
         }
         
         synchronized (receiptMap) {
             receiptMap.clear();
-            interestRead(false);
         }
     }
     
@@ -664,7 +662,7 @@ public abstract class MessageDispatcher implements Runnable {
          */
         public synchronized void run() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
-                final Receipt receipt = it.next();
+                Receipt receipt = it.next();
                 
                 if (receipt.timeout()) {
                     receipt.received();
