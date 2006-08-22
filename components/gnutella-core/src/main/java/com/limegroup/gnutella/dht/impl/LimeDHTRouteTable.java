@@ -54,6 +54,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
                     KUID previous = leafDHTNodes.put(addr, node.getNodeID());
                     
                     if(previous == null || !previous.equals(node.getNodeID())) {
+                        //add it as a priority node
                         node.setTimeStamp(Long.MAX_VALUE);
                         add(node);
                     }

@@ -65,7 +65,8 @@ public class DHTNodeFetcher {
         List<ExtendedEndpoint> dhtHosts = 
             RouterService.getHostCatcher().getDHTSupportEndpoint(0);
         
-        //first see if we have any active dht node in our HostCatcher.
+        //first see if we have any active dht node in our HostCatcher and add them all 
+        //to the bootstrapper.
         //The list is ordered by Active nodes first so as soon as we get an inactive
         //node we can exit the loop.
         boolean haveActive = false;
@@ -135,9 +136,13 @@ public class DHTNodeFetcher {
             long delay = System.currentTimeMillis() - lastRequest;
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
-            return (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
-                    || !RouterService.isConnected()
-                    || (!bootstrapper.isWaitingForNodes());
+            boolean cancel = (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
+                                        || !RouterService.isConnected()
+                                        || (!bootstrapper.isWaitingForNodes());
+            if(cancel && LOG.isDebugEnabled()){
+                LOG.debug("Cancelling UDP ping after "+delay+" ms");
+            }
+            return cancel;
         }
     }
     
