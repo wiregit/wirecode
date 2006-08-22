@@ -56,7 +56,8 @@ public interface Contact extends Serializable {
     }
     
     /**
-     * 
+     * A constant for the time stamp that may only be used
+     * for the local Contact.
      */
     public static final long LOCAL_CONTACT = Long.MAX_VALUE;
     
