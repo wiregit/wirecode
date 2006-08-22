@@ -335,10 +335,20 @@ public class RouteTableImpl implements RouteTable {
         
         if (node.isAlive()) {
             Contact leastRecentlySeen = bucket.getLeastRecentlySeenLiveContact();
-            //is the least recently seen node in UNKNOWN or DEAD state OR is the 
-            //new node a priority node
-            if (leastRecentlySeen.isUnknown() || leastRecentlySeen.isDead() 
-                    || (node.getTimeStamp() == Long.MAX_VALUE)) {
+            
+            // If all Contacts in the given Bucket have the same time
+            // stamp as the local Node then it's possible that the lrs
+            // Contact is the local Contact in which case we don't want 
+            // to replace the local Contact with the given Contact
+            
+            // Is the least recently seen node in UNKNOWN or DEAD state OR is the 
+            // new Node a priority Node AND the lrs Node is NOT the local Node
+            
+            if (!isLocalNode(leastRecentlySeen) 
+                    && (leastRecentlySeen.isUnknown() 
+                            || leastRecentlySeen.isDead() 
+                            || (node.getTimeStamp() == Long.MAX_VALUE))) {
+                
                 if (LOG.isTraceEnabled()) {
                     LOG.info("Replacing " + leastRecentlySeen + " with " + node);
                 }
@@ -596,7 +606,10 @@ public class RouteTableImpl implements RouteTable {
     }
     
     private void pingLeastRecentlySeenNode(Bucket bucket) {
-        ping(bucket.getLeastRecentlySeenLiveContact());
+        Contact lrs = bucket.getLeastRecentlySeenLiveContact();
+        if (!isLocalNode(lrs)) {
+            ping(lrs);
+        }
     }
     
     DHTFuture<Contact> ping(Contact node) {
