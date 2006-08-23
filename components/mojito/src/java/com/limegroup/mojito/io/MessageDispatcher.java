@@ -145,7 +145,10 @@ public abstract class MessageDispatcher implements Runnable {
             }
             
             future = context.scheduleAtFixedRate(
-                    receiptMap, CLEANUP_RECEIPTS_INTERVAL, CLEANUP_RECEIPTS_INTERVAL, TimeUnit.MILLISECONDS);
+                    receiptMap, 
+                    CLEANUP_RECEIPTS_INTERVAL, 
+                    CLEANUP_RECEIPTS_INTERVAL, 
+                    TimeUnit.MILLISECONDS);
         }
     }
     
@@ -165,22 +168,6 @@ public abstract class MessageDispatcher implements Runnable {
      * Returns whether or not the MessageDispatcher is running
      */
     public abstract boolean isRunning();
-    
-    public int getReceivedMessagesCount() {
-        return (int)networkStats.RECEIVED_MESSAGES_COUNT.getTotal();
-    }
-    
-    public long getReceivedMessagesSize() {
-        return (long)networkStats.RECEIVED_MESSAGES_SIZE.getTotal();
-    }
-    
-    public int getSentMessagesCount() {
-        return (int)networkStats.SENT_MESSAGES_COUNT.getTotal();
-    }
-    
-    public long getSentMessagesSize() {
-        return (long)networkStats.SENT_MESSAGES_SIZE.getTotal();
-    }
     
     /**
      * Sets the DatagramChannel

@@ -230,25 +230,24 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Compares this KUID with with targetId and nodeId with targetId
-     * and returns true if this KUID is nearer to targetId than nodeId
-     * is.
+     * Returns true if this KUID is nearer to <tt>targetId</tt> than
+     * <tt>otherId</tt>.
      * 
-     * @param nodeId the KUID to compare to
-     * @param targetId the target ID
+     * @param targetId The target ID
+     * @param otherId The other KUID to compare to
+     * 
      * @return true if this KUID is nearer to targetID, false otherwise
      */
-    public boolean isNearer(KUID nodeId, KUID targetId) {
+    public boolean isNearerTo(KUID targetId, KUID otherId) {
         for (int i = 0; i < id.length; i++){
-            int dSelf = (id[i] ^ targetId.id[i]) & 0xFF;
-            int dOther = (nodeId.id[i] ^ targetId.id[i]) & 0xFF;
-            int diff = dOther - dSelf;
+            int xorToSelf = (id[i] ^ targetId.id[i]) & 0xFF;
+            int xorToOther = (otherId.id[i] ^ targetId.id[i]) & 0xFF;
             
-            if (diff > 0) {
+            if (xorToSelf < xorToOther) {
                 return true;
-            } else if (diff < 0) {
+            } else if (xorToSelf > xorToOther) {
                 return false;
-            } 
+            } // else continue
         }
         
         return false;

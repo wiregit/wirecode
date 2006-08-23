@@ -402,7 +402,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 best = toQuery.select(lookupId).getNodeID();
             }
             
-            if (best == null || worst.isNearer(best, lookupId)) {
+            if (best == null || worst.isNearerTo(lookupId, best)) {
                 if (!hasActiveSearches()) {
                     if (LOG.isTraceEnabled()) {
                         Contact bestResponse = responses.select(lookupId).getKey();

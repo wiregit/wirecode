@@ -584,22 +584,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     public boolean isFirewalled() {
         return localNode.isFirewalled();
     }
-    
-    public int getReceivedMessagesCount() {
-        return messageDispatcher.getReceivedMessagesCount();
-    }
-    
-    public long getReceivedMessagesSize() {
-        return messageDispatcher.getReceivedMessagesSize();
-    }
-    
-    public int getSentMessagesCount() {
-        return messageDispatcher.getSentMessagesCount();
-    }
-    
-    public long getSentMessagesSize() {
-        return messageDispatcher.getSentMessagesSize();
-    }
 
     /**
      * Returns whether or not the MessageDispatcher has
