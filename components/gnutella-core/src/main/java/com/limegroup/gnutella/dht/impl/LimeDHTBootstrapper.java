@@ -269,7 +269,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             }
         }
         public void handleThrowable(Throwable ex) {
-            LOG.debug(ex);
+            LOG.error("Throwable", ex);
             stop();
         }
     }

@@ -196,7 +196,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 addPassiveDHTNode(new InetSocketAddress(host, port));
             } else {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Connection is NOT capable: "+ c);
+                    LOG.debug("Connection is DHT node not connected to the network: "+ c);
                 }
                 removeLeafDHTNode( host , port );
             }

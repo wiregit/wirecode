@@ -179,7 +179,7 @@ public class NodeAssigner {
         //check if became ultrapeer capable
         assignUltrapeerNode();
         //check if became DHT capable
-        assignDHTNode();
+        assignActiveDHTNode();
     }
     
     /**
@@ -354,7 +354,7 @@ public class NodeAssigner {
      * are not met and disconnects the node from the DHT.  
      * If the user has disabled DHT support, sets EVER_DHT_CAPABLE to false.
      */
-    private static void assignDHTNode() {
+    private static void assignActiveDHTNode() {
         
         //make sure that the node has had the time to try to connect as an ultrapeer
         Assert.that(((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L) > 

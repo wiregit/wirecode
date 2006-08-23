@@ -48,7 +48,7 @@ public class DHTNodeFetcher {
     
     private TimedFetcher fetcher = null;
     
-    private AtomicBoolean pinging = new AtomicBoolean(false);
+    private AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
         this.bootstrapper = bootstrapper;
@@ -100,33 +100,33 @@ public class DHTNodeFetcher {
             return;
         }
         
-        if(pinging.getAndSet(true)) {
+        if(pingingSingleHost.get()) {
             return;
         }
         
         lastRequest = now;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
-
+        MessageListener listener = new UDPPingerRequestListener();
+        Cancellable canceller = new UDPPingRankerCanceller();
+        
         if(!dhtHosts.isEmpty()) { 
             
             LOG.debug("Sending ping to dht capable hosts");
             
             //we don't have active hosts but have hosts that support dht
             RouterService.getHostCatcher().sendMessage(m, dhtHosts, 
-                    new DHTNodesRequestListener(), new UDPPingCanceller());
+                    listener, canceller);
         } else {
             
             LOG.debug("Sending ping to all hosts");
             
             //send to all hosts
             RouterService.getHostCatcher().sendMessage(m, 
-                    new DHTNodesRequestListener(), new UDPPingCanceller());
+                    listener, canceller);
         }
     }
     
     public void requestDHTHosts(SocketAddress hostAddress) {
-        
-        LOG.debug("Requesting DHT hosts from host " + hostAddress);
         
         if(!RouterService.isConnected()) {
             return;
@@ -137,12 +137,19 @@ public class DHTNodeFetcher {
             return;
         }
         
-        IpPort ipp = new IpPortImpl((InetSocketAddress)hostAddress);
+        IpPort ipp = new IpPortImpl((InetSocketAddress) hostAddress);
         
-        if(!pinging.getAndSet(true)) {
+        //this should preempt over ping ranker, as we know this hostAddress
+        //can send back DHT hosts
+        if(!pingingSingleHost.getAndSet(true)) {
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Requesting DHT hosts from host " + hostAddress);
+            }
+            
             Message m = PingRequest.createUDPingWithDHTIPPRequest();
             RouterService.getHostCatcher().sendMessage(m, Arrays.asList(ipp), 
-                    new DHTNodesRequestListener(), new UDPPingCanceller());
+                    new SinglePingRequestListener(), null);
         }
     }
     
@@ -151,6 +158,24 @@ public class DHTNodeFetcher {
         long fetcherTime = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
         long initialFetch = (long) (Math.random() * fetcherTime);
         RouterService.schedule(fetcher, initialFetch, fetcherTime);
+    }
+    
+    private void processPingReply(Message m) {
+        if(!(m instanceof PingReply)) {
+            return;
+        }
+        
+        PingReply reply = (PingReply) m;
+        List<IpPort> l = reply.getPackedDHTIPPorts();
+
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Received ping reply from "+reply.getAddress());
+        }
+        
+        for (IpPort ipp : l) {
+            bootstrapper.addBootstrapHost(
+                    new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
+        }
     }
     
     private class TimedFetcher implements Runnable {
@@ -162,49 +187,49 @@ public class DHTNodeFetcher {
         }
     }
     
-    private class UDPPingCanceller implements Cancellable{
+    private class UDPPingRankerCanceller implements Cancellable{
+        
         /** Cancels the HostCatcher pings **/
         public boolean isCancelled() {
+            //disregard delay if this is a ping to a single host
             long delay = System.currentTimeMillis() - lastRequest;
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
-            boolean cancel = (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
+            boolean cancel = (pingingSingleHost.get() 
+                                        ||delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
                                         || !RouterService.isConnected()
                                         || (!bootstrapper.isWaitingForNodes());
             if(cancel){
-                pinging.set(false);
-                
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Cancelling UDP ping after "+delay+" ms");
+                    LOG.debug("Cancelling UDP ping after "+delay+" ms, connected: "
+                            +RouterService.isConnected()+", waiting: "+bootstrapper.isWaitingForNodes());
                 }
             }
             return cancel;
         }
     }
     
-    private class DHTNodesRequestListener implements MessageListener{
+    private class UDPPingerRequestListener implements MessageListener{
         /** Response to our UDP ping **/
         public void processMessage(Message m, ReplyHandler handler) {
-            if(!(m instanceof PingReply)) {
-                return;
-            }
-            
-            
-            PingReply reply = (PingReply) m;
-            List<IpPort> l = reply.getPackedDHTIPPorts();
-
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Received ping reply from "+reply.getAddress());
-            }
-            
-            for (IpPort ipp : l) {
-                bootstrapper.addBootstrapHost(
-                        new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
-            }
+            processPingReply(m);
         }
         public void registered(byte[] guid) {}
+        public void unregistered(byte[] guid) {}
+    }
+
+    
+    /**
+     * In the case of a single ping, we have to handle the deregistration
+     */
+    private class SinglePingRequestListener extends UDPPingerRequestListener{
+        @Override
         public void unregistered(byte[] guid) {
-            pinging.set(false);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Unregistering guid " + guid);
+            }
+            pingingSingleHost.set(false);
         }
+        
     }
 }
