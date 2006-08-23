@@ -233,7 +233,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     @Override
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         
-        assert (hasActiveSearches());
         decrementActiveSearches();
         
         Contact contact = message.getContact();
@@ -302,7 +301,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
 
     @Override
     protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        assert (hasActiveSearches());
+        
         decrementActiveSearches();
 
         if (LOG.isTraceEnabled()) {
@@ -519,6 +518,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Decrements the 'activeSearches' counter by one
      */
     private void decrementActiveSearches() {
+        assert (hasActiveSearches());
         activeSearches--;
     }
     
