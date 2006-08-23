@@ -234,7 +234,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         
         decrementActiveSearches();
-        
         Contact contact = message.getContact();
         
         Integer hop = hopMap.remove(contact.getNodeID());
@@ -303,7 +302,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         
         decrementActiveSearches();
-
         if (LOG.isTraceEnabled()) {
             LOG.trace(ContactUtils.toString(nodeId, dst) 
                     + " did not respond to our " + message);
@@ -416,7 +414,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             }
         }
         
-        int numLookups = getParallelLookups() - activeSearches;
+        int numLookups = getParallelLookups() - getActiveSearches();
         if (numLookups > 0) {
             List<Contact> toQueryList = TrieUtils.select(toQuery, lookupId, numLookups);
             for (Contact node : toQueryList) {
@@ -518,7 +516,13 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Decrements the 'activeSearches' counter by one
      */
     private void decrementActiveSearches() {
-        assert (hasActiveSearches());
+        if (activeSearches == 0) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("ActiveSearches counter is already 0");
+            }
+            return;
+        }
+        
         activeSearches--;
     }
     
@@ -526,7 +530,15 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Sets the 'activeSearches' counter to zero
      */
     private void killActiveSearches() {
-        this.activeSearches = 0;
+        activeSearches = 0;
+    }
+    
+    /**
+     * Returns the number of current number of active
+     * searches
+     */
+    private int getActiveSearches() {
+        return activeSearches;
     }
     
     /**
@@ -534,7 +546,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * searches active
      */
     private boolean hasActiveSearches() {
-        return activeSearches > 0;
+        return getActiveSearches() > 0;
     }
     
     /** Returns whether or not the Node has been queried */
@@ -581,7 +593,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected String getState() {
         long time = time();
         boolean timeout = isGlobalTimeout(time);
-        int activeSearches = this.activeSearches;
+        int activeSearches = getActiveSearches();
         
         return "Class: " + getClass().getName() 
             + ", lookup: " + lookupId 
