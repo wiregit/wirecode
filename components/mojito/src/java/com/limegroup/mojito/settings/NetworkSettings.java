@@ -44,6 +44,13 @@ public final class NetworkSettings extends MojitoProps {
                 "min_timeout_rtt_factor", 1, 10);
     
     /**
+     * A multiplication factor for the RTT.
+     */
+    public static final LongSetting MIN_TIMEOUT_RTT
+        = FACTORY.createSettableLongSetting("MIN_TIMEOUT_RTT", 1000L, 
+                "min_timeout_rtt", 10L, 30L*1000L);
+    
+    /**
      * The maximum number of times we're trying to re-send a
      * request before geiving up
      */

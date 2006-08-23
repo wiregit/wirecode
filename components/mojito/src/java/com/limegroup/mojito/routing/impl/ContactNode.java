@@ -212,8 +212,10 @@ public class ContactNode implements Contact {
         if(rtt <= 0L || !isAlive()) {
             return timeout;
         } else {
-            return Math.min(timeout, 
-                ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * rtt) + failures * rtt));
+            //should be NetworkSettings.MIN_TIMEOUT_RTT < t < NetworkSettings.TIMEOUT
+            return Math.max(Math.min(timeout, 
+                ((NetworkSettings.MIN_TIMEOUT_RTT_FACTOR.getValue() * rtt) + failures * rtt)),
+                NetworkSettings.MIN_TIMEOUT_RTT.getValue());
         }
     }
     
