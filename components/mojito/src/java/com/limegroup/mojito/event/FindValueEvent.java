@@ -54,13 +54,19 @@ public class FindValueEvent implements Iterable<DHTValue> {
     
     private List<FindValueResponse> responses;
     
+    private long time;
+    
+    private int hop;
+    
     @SuppressWarnings("unchecked")
     public FindValueEvent(Context context, KUID lookupId, 
-            List<? extends FindValueResponse> values) {
+            List<? extends FindValueResponse> values, long time, int hop) {
         
         this.context = context;
         this.lookupId = lookupId;
         this.responses = (List<FindValueResponse>)values;
+        this.time = time;
+        this.hop = hop;
     }
     
     public KUID getLookupID() {
@@ -71,12 +77,20 @@ public class FindValueEvent implements Iterable<DHTValue> {
         return new ResponseIterator();
     }
     
+    public long getTime() {
+        return time;
+    }
+    
+    public int getHop() {
+        return hop;
+    }
+    
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append("\n");
-        
-        for (FindValueResponse reponse : responses) {
-            buffer.append(reponse).append("\n");
+        buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
+        int i = 0;
+        for (DHTValue value : this) {
+            buffer.append(i++).append(": ").append(value).append("\n");
         }
         return buffer.toString();
     }

@@ -136,8 +136,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
 
     @Override
     protected void finishLookup() {
-        //long time = time();
-        //int hop = getCurrentHop();
+        long time = time();
+        int hop = getCurrentHop();
         
         if (responses.isEmpty()) {
             lookupStat.FIND_VALUE_FAILURE.incrementStat();
@@ -145,6 +145,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
         
-        setReturnValue(new FindValueEvent(context, getLookupID(), responses));
+        setReturnValue(new FindValueEvent(context, getLookupID(), responses, time, hop));
     }
 }

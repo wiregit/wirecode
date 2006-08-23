@@ -35,10 +35,16 @@ public class FindNodeEvent {
     
     private List<Entry<Contact, QueryKey>> nodes;
     
+    private long time;
+    
+    private int hop;
+    
     @SuppressWarnings("unchecked")
-    public FindNodeEvent(KUID lookupId, List<? extends Entry<Contact, QueryKey>> nodes) {
+    public FindNodeEvent(KUID lookupId, List<? extends Entry<Contact, QueryKey>> nodes, long time, int hop) {
         this.lookupId = lookupId;
         this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
+        this.time = time;
+        this.hop = hop;
     }
     
     public KUID getLooupID() {
@@ -49,9 +55,17 @@ public class FindNodeEvent {
         return nodes;
     }
     
+    public long getTime() {
+        return time;
+    }
+    
+    public int getHop() {
+        return hop;
+    }
+    
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append("\n");
+        buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
         int i = 0;
         for (Entry<Contact, QueryKey> entry : nodes) {
             buffer.append(i++).append(": ").append(entry.getKey())

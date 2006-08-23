@@ -335,28 +335,8 @@ public class CommandHandler {
                 }
             });*/
             
-            //long start = System.currentTimeMillis();
             FindValueEvent evt = dht.get(key).get();
-            /*long time = System.currentTimeMillis() - start;
-            
-            if (!evt.getValues().isEmpty()) {
-                StringBuffer buffer = new StringBuffer();
-                buffer.append(key).append(" in ").append(time).append("ms\n");
-                buffer.append(evt);
-                buffer.append("\n");
-                out.println(buffer.toString());
-            } else {
-                out.println(key + " was not found after " + time + "ms");
-            }*/
-            
-            StringBuilder buffer = new StringBuilder();
-            int i = 0;
-            for (DHTValue value : evt) {
-                buffer.append(i).append(": ").append(value).append("\n");
-            }
-            out.println(buffer.toString());
-            
-            out.println();
+            out.println(evt.toString());
             
         } catch (Exception e) {
             e.printStackTrace(out);
