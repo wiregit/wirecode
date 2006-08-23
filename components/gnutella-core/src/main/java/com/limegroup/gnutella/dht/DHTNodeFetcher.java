@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +47,8 @@ public class DHTNodeFetcher {
     private volatile long lastRequest = 0L;
     
     private TimedFetcher fetcher = null;
+    
+    private AtomicBoolean pinging = new AtomicBoolean(false);
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
         this.bootstrapper = bootstrapper;
@@ -97,9 +100,13 @@ public class DHTNodeFetcher {
             return;
         }
         
+        if(pinging.getAndSet(true)) {
+            return;
+        }
+        
         lastRequest = now;
         Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        
+
         if(!dhtHosts.isEmpty()) { 
             
             LOG.debug("Sending ping to dht capable hosts");
@@ -125,15 +132,18 @@ public class DHTNodeFetcher {
             return;
         }   
         
+        
         if(!(hostAddress instanceof InetSocketAddress)) {
             return;
         }
         
         IpPort ipp = new IpPortImpl((InetSocketAddress)hostAddress);
         
-        Message m = PingRequest.createUDPingWithDHTIPPRequest();
-        RouterService.getHostCatcher().sendMessage(m, Arrays.asList(ipp), 
-                new DHTNodesRequestListener(), new UDPPingCanceller());
+        if(!pinging.getAndSet(true)) {
+            Message m = PingRequest.createUDPingWithDHTIPPRequest();
+            RouterService.getHostCatcher().sendMessage(m, Arrays.asList(ipp), 
+                    new DHTNodesRequestListener(), new UDPPingCanceller());
+        }
     }
     
     public void startTimerTask() {
@@ -161,8 +171,12 @@ public class DHTNodeFetcher {
             boolean cancel = (delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
                                         || !RouterService.isConnected()
                                         || (!bootstrapper.isWaitingForNodes());
-            if(cancel && LOG.isDebugEnabled()){
-                LOG.debug("Cancelling UDP ping after "+delay+" ms");
+            if(cancel){
+                pinging.set(false);
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Cancelling UDP ping after "+delay+" ms");
+                }
             }
             return cancel;
         }
@@ -189,6 +203,8 @@ public class DHTNodeFetcher {
             }
         }
         public void registered(byte[] guid) {}
-        public void unregistered(byte[] guid) {}
+        public void unregistered(byte[] guid) {
+            pinging.set(false);
+        }
     }
 }
