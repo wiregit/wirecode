@@ -540,6 +540,10 @@ public abstract class MessageDispatcher implements Runnable {
                 LOG.error("IOException", err);
                 outputQueue.remove(tag);
                 tag.handleError(err);
+                
+            // TODO: remove when finished testing!?
+            } catch (Throwable t) {
+                LOG.fatal("Throwable", t);
             }
         }
         
