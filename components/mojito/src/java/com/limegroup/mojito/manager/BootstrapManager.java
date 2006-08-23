@@ -175,7 +175,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             if(!foundNewContacts) {
             	if(LOG.isDebugEnabled()) {
-                    LOG.debug("Bootstrap failed: did not receive any response from phase 2!");
+                    LOG.debug("Bootstrap failed at phase 1 or phase 2");
                 }
                 return new BootstrapEvent(failed, phaseOneTime+phaseTwoTime+phaseZeroTime);
             }
@@ -193,11 +193,23 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         
+        /**
+         * Starts phase 1 (local ID lookup) and phase 2 (random ids lookup) of the 
+         * bootstrap process.
+         * 
+         * @param node The node to bootstrap from
+         * @return true if phase 1 and phase 2 succeeded, false in case of failure
+         * @throws Exception
+         */
         private boolean startBootstrapLookups(Contact node) throws Exception {
             
             while(true) {
                 try {
-                    phaseOne(node);
+                    FindNodeEvent findNode = phaseOne(node);
+                    if(findNode.getNodes().size() == 0) {
+                        failed.add(node.getContactAddress());
+                        return false;
+                    }
                     break;
                 } catch (CollisionException err) {
                     LOG.error("CollisionException", err);

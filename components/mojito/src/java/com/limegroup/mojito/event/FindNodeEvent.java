@@ -47,7 +47,7 @@ public class FindNodeEvent {
         this.hop = hop;
     }
     
-    public KUID getLooupID() {
+    public KUID getLookupID() {
         return lookupId;
     }
     
