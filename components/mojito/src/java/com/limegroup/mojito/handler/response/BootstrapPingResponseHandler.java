@@ -105,6 +105,13 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
     }
 
     @Override
+    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
+        // Synchronizing handleResponse() so that response()
+        // doesn't get called if this Handler isDone or isCancelled
+        super.handleResponse(response, time);
+    }
+
+    @Override
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         PingResponse response = (PingResponse)message;
         SocketAddress externalAddress = response.getExternalAddress();
@@ -133,22 +140,10 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
     }
 
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Timeout on bootstrap ping to " + ContactUtils.toString(nodeId, dst));
-        }
-        
-        // this is to make sure hostsToPing is a true Set (i.e. contains no publicates)
-        assert (!failedHosts.contains(dst)); 
-        failedHosts.add(dst);
-        activePings--;
-        
-        if(shouldStop()) {
-            setException(new BootstrapTimeoutException(failedHosts));
-            return;
-        }
-        sendPings();
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        // Synchronizing handleError() so that error()
+        // doesn't get called if this Handler isDone or isCancelled
+        super.handleError(nodeId, dst, message, e);
     }
     
     @Override
@@ -171,5 +166,31 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         } else {
             setException(e);
         }
+    }
+    
+    @Override
+    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
+        // Synchronizing handleTimeout() so that timeout()
+        // doesn't get called if this Handler isDone or isCancelled
+        super.handleTimeout(nodeId, dst, request, time);
+    }
+    
+    @Override
+    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Timeout on bootstrap ping to " + ContactUtils.toString(nodeId, dst));
+        }
+        
+        // this is to make sure hostsToPing is a true Set (i.e. contains no publicates)
+        assert (!failedHosts.contains(dst)); 
+        failedHosts.add(dst);
+        activePings--;
+        
+        if(shouldStop()) {
+            setException(new BootstrapTimeoutException(failedHosts));
+            return;
+        }
+        sendPings();
     }
 }
