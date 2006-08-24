@@ -27,7 +27,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -112,6 +115,7 @@ public abstract class MessageDispatcher implements Runnable {
     
     private ByteBuffer buffer;
     
+    private ScheduledExecutorService executor;
     private ScheduledFuture future;
     
     public MessageDispatcher(Context context) {
@@ -139,16 +143,27 @@ public abstract class MessageDispatcher implements Runnable {
      */
     public void start() {
         synchronized (receiptMap) {
-            if (future != null) {
-                future.cancel(true);
-                future = null;
+            
+            if (executor == null) {
+                ThreadFactory factory = new ThreadFactory() {
+                    public Thread newThread(Runnable r) {
+                        Thread thread = context.getThreadFactory().newThread(r);
+                        thread.setName(context.getName() + "-CleanupExecutor");
+                        thread.setDaemon(true);
+                        return thread;
+                    }
+                };
+                
+                executor = Executors.newSingleThreadScheduledExecutor(factory);
             }
             
-            future = context.scheduleAtFixedRate(
-                    receiptMap, 
-                    CLEANUP_RECEIPTS_INTERVAL, 
-                    CLEANUP_RECEIPTS_INTERVAL, 
-                    TimeUnit.MILLISECONDS);
+            if (future == null) {
+                future = executor.scheduleAtFixedRate(
+                        receiptMap, 
+                        CLEANUP_RECEIPTS_INTERVAL, 
+                        CLEANUP_RECEIPTS_INTERVAL, 
+                        TimeUnit.MILLISECONDS);
+            }
         }
     }
     
@@ -160,6 +175,11 @@ public abstract class MessageDispatcher implements Runnable {
             if (future != null) {
                 future.cancel(true);
                 future = null;
+            }
+            
+            if (executor != null) {
+                executor.shutdownNow();
+                executor = null;
             }
         }
     }
@@ -513,7 +533,8 @@ public abstract class MessageDispatcher implements Runnable {
         // Queue.poll() because DatagramChannel.send() may not
         // be able to send a Message and we'd have to re-enqeue
         // the Message at the head of the Queue which is not
-        // possible (Queue supports insertions only at the tail).
+        // possible because Queue supports insertions only at 
+        // the tail.
         
         Tag tag = null;
         while((tag = outputQueue.peek()) != null && isRunning()) {
@@ -530,13 +551,9 @@ public abstract class MessageDispatcher implements Runnable {
 
                 if (send(channel, dst, data)) {
                     // Wohoo! Message was sent!
-                    outputQueue.remove(tag);
+                    outputQueue.remove();
                     registerInput(tag);
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Could not send " + tag.getMessage() 
-                                + " to " + ContactUtils.toString(tag.getNodeID(), dst));
-                    }
                     // Dang! Re-Try next time!
                     break;
                 }
@@ -544,10 +561,6 @@ public abstract class MessageDispatcher implements Runnable {
                 LOG.error("IOException", err);
                 outputQueue.remove(tag);
                 tag.handleError(err);
-                
-            // TODO: remove when finished testing!?
-            } catch (Throwable t) {
-                LOG.fatal("Throwable", t);
             }
         }
         
