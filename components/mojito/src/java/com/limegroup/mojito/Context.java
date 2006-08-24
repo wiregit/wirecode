@@ -175,6 +175,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         if (routeTable == null) {
             setRouteTable(null);
+        } else {
+            routeTable.setRouteTableCallback(this);
         }
         
         if (database == null) {
