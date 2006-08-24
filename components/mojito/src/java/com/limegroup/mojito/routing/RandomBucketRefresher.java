@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
@@ -58,7 +59,6 @@ public class RandomBucketRefresher implements Runnable {
             long delay = period;
             
             if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
-                //delay = (long)(period * Math.random());
                 delay = period + (long)(period * Math.random());
             }
             
@@ -122,9 +122,20 @@ public class RandomBucketRefresher implements Runnable {
                 KUID nodeId = it.next();
                 
                 try {
+                    
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Starting bucket refresh lookup: "+ nodeId);
+                    }
+                    
                     FindNodeResponseHandler handler 
                         = new FindNodeResponseHandler(context, nodeId);
-                    handler.call();
+                    
+                    FindNodeEvent event = handler.call();
+                    
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Finished refresh with " + event.getNodes().size() + " nodes");
+                    }
+                    
                 } finally {
                     it.remove();
                 }

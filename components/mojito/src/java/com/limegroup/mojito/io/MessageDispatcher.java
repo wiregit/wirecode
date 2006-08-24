@@ -533,8 +533,8 @@ public abstract class MessageDispatcher implements Runnable {
                     outputQueue.remove(tag);
                     registerInput(tag);
                 } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Could not send " + tag.getMessage() 
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Could not send " + tag.getMessage() 
                                 + " to " + ContactUtils.toString(tag.getNodeID(), dst));
                     }
                     // Dang! Re-Try next time!
