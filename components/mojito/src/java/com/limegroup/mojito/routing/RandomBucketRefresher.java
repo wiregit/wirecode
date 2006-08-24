@@ -19,7 +19,6 @@
  
 package com.limegroup.mojito.routing;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -118,26 +117,20 @@ public class RandomBucketRefresher implements Runnable {
         List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
         
         try {
-            for(Iterator<KUID> it = ids.iterator(); it.hasNext(); ) {
-                KUID nodeId = it.next();
+            for(int i = 0; i < ids.size(); i++) {
+                KUID nodeId = ids.get(i);
                 
-                try {
-                    
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Starting bucket refresh lookup: "+ nodeId);
-                    }
-                    
-                    FindNodeResponseHandler handler 
-                        = new FindNodeResponseHandler(context, nodeId);
-                    
-                    FindNodeEvent event = handler.call();
-                    
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Finished refresh with " + event.getNodes().size() + " nodes");
-                    }
-                    
-                } finally {
-                    it.remove();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Starting bucket refresh lookup ("+i+"/"+ids.size()+"): " + nodeId);
+                }
+                
+                FindNodeResponseHandler handler 
+                    = new FindNodeResponseHandler(context, nodeId);
+                
+                FindNodeEvent event = handler.call();
+                
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Finished refresh ("+i+"/"+ids.size()+") with " + event.getNodes().size() + " nodes");
                 }
             }
         } catch (Exception err) {
