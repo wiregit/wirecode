@@ -2,9 +2,10 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +30,7 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
 
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeRouteTable.class);
     
-    private Map<SocketAddress, KUID> leafDHTNodes = new ConcurrentHashMap<SocketAddress, KUID>();
+    private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
 
     private MojitoDHT dht;
     
@@ -56,7 +57,7 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
                     LOG.debug("Ping succeeded to: " + node);
                 }
                 
-                synchronized (this) {
+                synchronized (PassiveDHTNodeRouteTable.this) {
                     KUID previous = leafDHTNodes.put(addr, node.getNodeID());
                     
                     if (previous == null || !previous.equals(node.getNodeID())) {
@@ -118,8 +119,10 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
     
     /**
      * Returns the IP:Ports of this Untrapeer's DHT enabled leaves
+     * 
+     * Hold a lock on 'this' when using the Iterator! 
      */
     public synchronized Set<SocketAddress> getDHTLeaves() {
-        return leafDHTNodes.keySet();
+        return Collections.unmodifiableSet(leafDHTNodes.keySet());
     }
 }
