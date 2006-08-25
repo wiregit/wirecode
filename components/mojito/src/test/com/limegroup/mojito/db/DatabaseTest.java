@@ -645,4 +645,30 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
     }
+    
+    /*public void testCreateOnGetAndAdd() {
+        KUID valueId = KUID.createRandomNodeID();
+        
+        Database database = new DatabaseImpl();
+        Map<KUID, DHTValue> map = database.get(valueId);
+        
+        assertNotNull(map);
+        assertEquals(0, map.size());
+        assertEquals(0, database.getKeyCount());
+        
+        KUID nodeId = KUID.createRandomNodeID();
+        DHTValue value = createDirectDHTValue(nodeId, valueId, "Hello World".getBytes());
+        map.put(nodeId, value);
+        
+        assertEquals(1, map.size());
+        assertEquals(1, database.getKeyCount());
+        
+        assertTrue(map == database.get(valueId));
+        
+        map.remove(nodeId);
+        assertEquals(0, map.size());
+        assertEquals(0, database.getKeyCount());
+        
+        assertTrue(map != database.get(valueId));
+    }*/
 }

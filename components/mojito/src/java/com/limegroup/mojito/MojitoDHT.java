@@ -52,14 +52,14 @@ public interface MojitoDHT {
     public String getName();
     
     /**
-     * Returns the version of the DHT
-     */
-    public int getVersion();
-    
-    /**
      * Returns the vendor of the DHT
      */
     public int getVendor();
+    
+    /**
+     * Returns the version of the DHT
+     */
+    public int getVersion();
     
     /**
      * Returns the DHT stats

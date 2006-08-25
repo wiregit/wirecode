@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -59,7 +58,7 @@ public class DatabaseImpl implements Database {
     
     private DHTValueDatabase database;
     
-    private transient DHTValueCollection values = null;
+    private transient volatile DHTValueCollection values = null;
     
     private int maxDatabaseSize = -1;
     
@@ -114,10 +113,15 @@ public class DatabaseImpl implements Database {
         
         if (bag == null) {
             bag = new DHTValueBag(valueId);
-            database.put(valueId, bag);
         }
         
-        return bag.add(value);
+        if (bag.add(value)) {
+            if (!database.containsKey(valueId)) {
+                database.put(valueId, bag);
+            }
+            return true;
+        }
+        return false;
     }
     
     protected boolean canAddValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
@@ -218,7 +222,7 @@ public class DatabaseImpl implements Database {
     /**
      * 
      */
-    private class DHTValueBag extends LinkedHashMap<KUID, DHTValue> {
+    private class DHTValueBag extends HashMap<KUID, DHTValue> {
         
         private static final long serialVersionUID = 3677203930910637434L;
 
@@ -230,7 +234,6 @@ public class DatabaseImpl implements Database {
         private transient boolean removeEmptyBag;
         
         public DHTValueBag(KUID valueId) {
-            super(5, 0.75f, true);
             this.valueId = valueId;
             initValueBag();
         }
@@ -270,8 +273,13 @@ public class DatabaseImpl implements Database {
         
         @Override
         public DHTValue put(KUID key, DHTValue value) {
-            assert (valueId.equals(value.getValueID()));
-            assert (key.equals(value.getOriginatorID()));
+            if (!valueId.equals(value.getValueID())) {
+                throw new IllegalArgumentException("Value ID must be " + valueId);
+            }
+            
+            if (!key.equals(value.getOriginatorID())) {
+                throw new IllegalArgumentException("Originator ID must be " + key);
+            }
             
             if ((value.isDirect() && putDirectDHTValue(key, value)) 
                     || (!value.isDirect() && putIndirectDHTValue(key, value))) {
@@ -383,11 +391,19 @@ public class DatabaseImpl implements Database {
 
         @Override
         public boolean contains(Object o) {
+            if (!(o instanceof DHTValue)) {
+                return false;
+            }
+            
             return DatabaseImpl.this.contains((DHTValue)o);
         }
 
         @Override
         public boolean remove(Object o) {
+            if (!(o instanceof DHTValue)) {
+                return false;
+            }
+            
             return DatabaseImpl.this.remove((DHTValue)o);
         }
 
@@ -412,60 +428,62 @@ public class DatabaseImpl implements Database {
         
         private Iterator<DHTValue> values = null;
         
-        private DHTValueBag lastBag = null;
+        private DHTValueBag currentBag = null;
         
-        private DHTValue lastValue = null;
+        private DHTValue currentValue = null;
         
         public boolean hasNext() {
             if (values != null && values.hasNext()) {
                 return true;
             }
-            return bags.hasNext();
+            
+            if (bags.hasNext()) {
+                currentBag = bags.next();
+                values = currentBag.values().iterator();
+                return hasNext();
+            }
+            
+            return false;
         }
 
         public DHTValue next() {
-            if (values == null || !values.hasNext()) {
-                if (!bags.hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                
-                lastBag = bags.next();
-                values = lastBag.values().iterator();
+            if (!hasNext()) {
+                throw new NoSuchElementException();
             }
             
-            lastValue = values.next();
-            return lastValue;
+            currentValue = values.next();
+            return currentValue;
         }
 
         public void remove() {
-            if (lastBag == null || lastValue == null) {
+            if (currentBag == null || currentValue == null) {
                 throw new IllegalStateException();
             }
             
-            synchronized (lastBag.removeLock) {
+            synchronized (currentBag.removeLock) {
                 try {
-                    // Disable the auto removal of bags from the 
-                    // database Map when the bag becomes empty
-                    // as we're holding an iterator of the
-                    // database Map which would throw an
-                    // ConcurrentModificationException as soon
-                    // as we're modifying the Map directly
-                    lastBag.removeEmptyBag = false;
+                    // Disable the auto removal of bags from the database 
+                    // Map when the bag becomes empty as we're holding an 
+                    // iterator of the database Map which would throw an
+                    // ConcurrentModificationException as soon as we're 
+                    // modifying the Map directly. Use Iterator.remove() 
+                    // instead to remove empty DHTValueBags manually.
+                    currentBag.removeEmptyBag = false;
                     
                     values.remove();
-                    lastValue = null;
+                    currentValue = null;
                     
-                    if (lastBag.isEmpty()) {
+                    if (currentBag.isEmpty()) {
                         bags.remove();
                     }
                 } finally {
                     // and enable it again
-                    lastBag.removeEmptyBag = true;
+                    currentBag.removeEmptyBag = true;
                 }
             }
             
-            if (lastBag.isEmpty()) {
-                lastBag = null;
+            if (currentBag.isEmpty()) {
+                currentBag = null;
             }
         }
     }
