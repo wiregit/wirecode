@@ -18,16 +18,18 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 
+/**
+ * 
+ */
 class ActiveDHTNodeController extends AbstractDHTController {
     
     /**
      * The file to persist this Mojito DHT
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "routetable.mojito");
+    
+    public ActiveDHTNodeController(int vendor, int version) {
 
-    @Override
-    public void init() {
-        
         DHTStatsManager.clear();
         
         MojitoDHT mojitoDHT = null;
@@ -52,12 +54,10 @@ class ActiveDHTNodeController extends AbstractDHTController {
         }
         
         if (mojitoDHT == null) {
-            super.dht = MojitoFactory.createDHT("ActiveMojitoDHT");
-        } else {
-            super.dht = mojitoDHT;
+            mojitoDHT = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         }
         
-        setLimeMessageDispatcher();
+        setMojitoDHT(mojitoDHT);
     }
 
     @Override
@@ -85,7 +85,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
             FileOutputStream out = null;
             try {
                 out = new FileOutputStream(FILE);
-                dht.store(out);
+                getMojitoDHT().store(out);
             } catch (IOException err) {
                 LOG.error("IOException", err);
             } finally {
@@ -96,12 +96,10 @@ class ActiveDHTNodeController extends AbstractDHTController {
         }
     }
     
-    @Override
     public boolean isActiveNode() {
         return true;
     }
 
-    @Override
     public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();
@@ -133,9 +131,8 @@ class ActiveDHTNodeController extends AbstractDHTController {
         
     }
 
-    @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || !dht.isBootstrapped()) {
+        if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
             return Collections.emptyList();
         }
         //return our MRS nodes. We should be first in the list

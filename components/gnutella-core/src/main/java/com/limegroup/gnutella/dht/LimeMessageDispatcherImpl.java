@@ -126,9 +126,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     /* 
      * Overwritten:
      * 
-     * Takes the payload of Tag, wraps it in a LimeDHTMessage, 
-     * sends it over UDPService and registers it in the input
-     * map if it's a RequestMessage.
+     * Takes the payload of Tag and sends it via LimeWire's 
+     * UDPService
      */
     @Override
     protected boolean enqueueOutput(Tag tag) {
@@ -142,15 +141,15 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     /*
      * Implements:
      * 
-     * Takes the payload of LimeDHTMessage, deserializes it into
-     * a DHTMessage and handles the message.
+     * Takes the Message, fixes the source address and delegates
+     * it to MessageDispatcher's back-end
      */
     public void handleMessage(Message msg, InetSocketAddress addr, 
             ReplyHandler handler) {
         
         if (!isRunning()) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(" Dropping message from " + addr + " because DHT is not running");
+                LOG.info("Dropping message from " + addr + " because DHT is not running");
             }
             return;
         }

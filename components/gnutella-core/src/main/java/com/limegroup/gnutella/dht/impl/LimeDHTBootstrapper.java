@@ -23,6 +23,9 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.BootstrapEvent.Type;
 
+/**
+ * 
+ */
 class LimeDHTBootstrapper implements DHTBootstrapper{
     
     private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);

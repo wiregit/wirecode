@@ -19,6 +19,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.util.BucketUtils;
@@ -46,17 +47,15 @@ class PassiveDHTNodeController extends AbstractDHTController{
      * The file to persist the list of host
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "nodes.mojito");
+    
+    public PassiveDHTNodeController(int vendor, int version) {
 
-    @Override
-    public void init() {
-        
         DHTStatsManager.clear();
-        dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
+        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
         
         limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
-        
-        setLimeMessageDispatcher();
+        setMojitoDHT(dht);
         
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {
@@ -139,7 +138,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 // Save only some Nodes
                 contacts = contacts.subList(0, 
                         Math.min(DHTSettings.NUM_PERSISTED_NODES.getValue(), contacts.size()));
-                KUID localNodeID = dht.getLocalNodeID();
+                KUID localNodeID = getMojitoDHT().getLocalNodeID();
                 for(Contact node : contacts) {
                     if(!node.getNodeID().equals(localNodeID)) {
                         oos.writeObject(node);
@@ -163,9 +162,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
         return false;
     }
 
-    @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || !dht.isBootstrapped()) {
+        if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
             return Collections.emptyList();
         }
         

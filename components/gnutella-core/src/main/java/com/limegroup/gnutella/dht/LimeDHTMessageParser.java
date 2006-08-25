@@ -28,10 +28,14 @@ import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.mojito.messages.MessageFactory;
 
 /**
- * 
+ * The LimeDHTMessageParser class delegates parse
+ * requests to Mojito's MessageFactory
  */
 class LimeDHTMessageParser implements MessageParser {
     
+    /**
+     * A handle to Mojito's MessageFactory
+     */
     private MessageFactory factory;
     
     LimeDHTMessageParser(MessageFactory factory) {

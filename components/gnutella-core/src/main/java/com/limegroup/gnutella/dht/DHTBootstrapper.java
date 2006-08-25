@@ -4,6 +4,9 @@ import java.net.SocketAddress;
 
 import com.limegroup.mojito.MojitoDHT;
 
+/**
+ * 
+ */
 public interface DHTBootstrapper {
     
     /**

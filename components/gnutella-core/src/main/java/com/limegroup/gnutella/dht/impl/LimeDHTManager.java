@@ -12,12 +12,26 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.settings.ContextSettings;
 
+/**
+ * 
+ */
 public class LimeDHTManager implements DHTManager {
     
-    //TODO: this will change
+    /**
+     * The Vendor code of this DHT Node
+     */
+    private int vendor = ContextSettings.VENDOR.getValue();
+    
+    /**
+     * The Version of this DHT Node
+     */
     private int version = ContextSettings.VERSION.getValue();
     
+    /**
+     * The DHTController instance
+     */
     private DHTController dhtController = null;
+    
     
     public synchronized void start(boolean activeMode) {
         
@@ -27,21 +41,21 @@ public class LimeDHTManager implements DHTManager {
             }
             
             if (activeMode) {
-                dhtController = new ActiveDHTNodeController();
+                dhtController = new ActiveDHTNodeController(vendor, version);
             } else {
-                dhtController = new PassiveDHTNodeController();
+                dhtController = new PassiveDHTNodeController(vendor, version);
             }
         }
         dhtController.start();
     }
     
-    public void addActiveDHTNode(SocketAddress hostAddress) {
+    public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
         if (dhtController != null) {
             dhtController.addActiveDHTNode(hostAddress);
         }
     }
     
-    public void addPassiveDHTNode(SocketAddress hostAddress) {
+    public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
         if (dhtController != null) {
             dhtController.addPassiveDHTNode(hostAddress);
         }
@@ -56,7 +70,7 @@ public class LimeDHTManager implements DHTManager {
         dhtController.start();
     }
     
-    public List<IpPort> getActiveDHTNodes(int maxNodes){
+    public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
         if(dhtController == null) {
             return Collections.emptyList();
         }
@@ -64,7 +78,7 @@ public class LimeDHTManager implements DHTManager {
         return dhtController.getActiveDHTNodes(maxNodes);
     }
     
-    public boolean isActiveNode() {
+    public synchronized boolean isActiveNode() {
         if(dhtController != null) {
             return (dhtController.isActiveNode() 
                     && dhtController.isRunning());
@@ -80,28 +94,28 @@ public class LimeDHTManager implements DHTManager {
         }
     }
     
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         if(dhtController != null) {
             return dhtController.isRunning();
         }
         return false;
     }
     
-    public boolean isBootstrapped() {
+    public synchronized boolean isBootstrapped() {
         if(dhtController != null) {
             return dhtController.getMojitoDHT().isBootstrapped();
         }
         return false;
     }
     
-    public boolean isWaitingForNodes() {
+    public synchronized boolean isWaitingForNodes() {
         if(dhtController != null) {
             return dhtController.isWaitingForNodes();
         }
         return false;
     }
 
-    public MojitoDHT getMojitoDHT() {
+    public synchronized MojitoDHT getMojitoDHT() {
         if(dhtController != null) {
             return dhtController.getMojitoDHT();
         }
@@ -114,23 +128,28 @@ public class LimeDHTManager implements DHTManager {
      * it still qualifies.
      * 
      */
-    public void handleLifecycleEvent(LifecycleEvent evt) {
+    public synchronized void handleLifecycleEvent(LifecycleEvent evt) {
         if(dhtController == null) {
             return;
         }
         
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(dhtController.isRunning() && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            if(dhtController.isRunning() 
+                    && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                 dhtController.stop();
             }
             return;
         } 
 
-        if( evt.isConnectionLifecycleEvent() ) {
+        if(evt.isConnectionLifecycleEvent()) {
             dhtController.handleConnectionLifecycleEvent(evt);
         }
     }
-
+    
+    public int getVendor() {
+        return vendor;
+    }
+    
     public int getVersion() {
         return version;
     }

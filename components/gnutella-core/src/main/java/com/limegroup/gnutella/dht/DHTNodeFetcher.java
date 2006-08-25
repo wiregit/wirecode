@@ -35,8 +35,9 @@ import com.limegroup.gnutella.util.IpPortImpl;
  * when the <tt>AbstractDHTController</tt> is able to bootstrap. 
  * 
  * This class can also start a timer task to periodically requests hosts until 
- * the manager is able to bootstrap. TODO: ability to cancel timer task
- *
+ * the manager is able to bootstrap. 
+ * 
+ * TODO: ability to cancel timer task
  */
 public class DHTNodeFetcher {
     
@@ -218,7 +219,6 @@ public class DHTNodeFetcher {
         public void unregistered(byte[] guid) {}
     }
 
-    
     /**
      * In the case of a single ping, we have to handle the deregistration
      */

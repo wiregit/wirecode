@@ -12,7 +12,6 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
@@ -53,20 +52,16 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * The instance of the DHT
      */
-    protected MojitoDHT dht;
+    private MojitoDHT dht;
 
-    private boolean running = false;
-    
     protected final DHTBootstrapper dhtBootstrapper;
     
     private RandomNodeAdder dhtNodeAdder;
     
     public AbstractDHTController() {
         dhtBootstrapper = new LimeDHTBootstrapper(this);
-        //delegate
-        init();
     }
-    
+
     /**
      * Start the Mojito DHT and connects it to the network in either passive mode
      * or active mode if we are not firewalled.
@@ -79,7 +74,7 @@ abstract class AbstractDHTController implements DHTController {
      * @param activeMode true to connect to the DHT in active mode
      */
     public synchronized void start() {
-        if (running || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
+        if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
                 && !RouterService.isConnected())) {
             return;
         }
@@ -93,8 +88,6 @@ abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
-            running = true;
-            
             dhtBootstrapper.bootstrap(dht);
         } catch (IOException err) {
             LOG.error(err);
@@ -108,7 +101,7 @@ abstract class AbstractDHTController implements DHTController {
      * 
      */
     public synchronized void stop(){
-        if (!running) {
+        if (!isRunning()) {
             return;
         }
         
@@ -124,11 +117,10 @@ abstract class AbstractDHTController implements DHTController {
             dhtNodeAdder.stop();
         }
         
-        if(dht != null) {
+        if (dht != null) {
             dht.stop();
+            dht = null;
         }
-        
-        running = false;
     }
     
     /**
@@ -139,26 +131,32 @@ abstract class AbstractDHTController implements DHTController {
      * 
      * @param hostAddress The SocketAddress of the DHT host.
      */
-    public void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
+    protected synchronized void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
+        if (!isRunning()) {
+            return;
+        }
+        
         if(!dht.isBootstrapped()){
             dhtBootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
             if(dhtNodeAdder == null) {
                 dhtNodeAdder = new RandomNodeAdder();
             }
+            
             dhtNodeAdder.start();
             dhtNodeAdder.addDHTNode(hostAddress);
         }
     }
     
-    public void addActiveDHTNode(SocketAddress hostAddress) {
+    public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
         addActiveDHTNode(hostAddress, true);
     }
     
-    public void addPassiveDHTNode(SocketAddress hostAddress) {
-        if(dht.isBootstrapped()) {
+    public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
+        if (!isRunning() || dht.isBootstrapped()) {
             return;
         }
+        
         dhtBootstrapper.addPassiveNode(hostAddress);
     }
     
@@ -186,53 +184,47 @@ abstract class AbstractDHTController implements DHTController {
         return ipps;
     }
     
-    public boolean isRunning() {
-        return running;
+    public synchronized boolean isRunning() {
+        if (dht == null) {
+            return false;
+        }
+        
+        return dht.isRunning();
     }
     
     public boolean isWaitingForNodes() {
         return dhtBootstrapper.isWaitingForNodes();
     }
     
-    public MojitoDHT getMojitoDHT() {
-        return dht;
-    }
-    
-    public int getDHTVersion() {
-        return dht.getVersion();
-    }
-
-    public void setLimeMessageDispatcher() {
+    /**
+     * Sets the MojitoDHT instance. Meant to be called once!
+     */
+    protected void setMojitoDHT(MojitoDHT dht) {
+        assert (dht != null);
+        
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
         dht.setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
                 return new ManagedThread(runnable);
             }
         });
+        
+        this.dht = dht;
     }
     
-    /**
-     * Sends the updated capabilities to our connections
-     */
+    public MojitoDHT getMojitoDHT() {
+        return dht;
+    }
+    
     public void sendUpdatedCapabilities() {
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
     }
     
-    
-    /*** Abstract methods: ***/
-    
-    public abstract List<IpPort> getActiveDHTNodes(int maxNodes);
-    
-    public abstract void init();
-    
-    public abstract boolean isActiveNode();
-    
-    public abstract void handleConnectionLifecycleEvent(LifecycleEvent evt);
-    
-    /*** End abstract methods ***/
-    
-    public static class IpPortContactNode implements IpPort {
+    /**
+     * 
+     */
+    private static class IpPortContactNode implements IpPort {
         
         private final InetAddress nodeAddress;
         
@@ -263,7 +255,7 @@ abstract class AbstractDHTController implements DHTController {
      * network. It is effectively randomly adding them to the DHT routing table.
      * 
      */
-    private class RandomNodeAdder implements Runnable{
+    private class RandomNodeAdder implements Runnable {
         
         private Set<SocketAddress> dhtNodes;
         
@@ -289,6 +281,7 @@ abstract class AbstractDHTController implements DHTController {
             if(!running) {
                 return;
             }
+            
             synchronized(dhtNodes) {
                 for(SocketAddress addr : dhtNodes) {
                     dht.ping(addr);
