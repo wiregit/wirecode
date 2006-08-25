@@ -77,7 +77,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         PassiveControllerTest controller = new PassiveControllerTest();
         controller.start();
         Context context = (Context) controller.getMojitoDHT();
-        LimeDHTRouteTable rt = (LimeDHTRouteTable) context.getRouteTable();
+        PassiveDHTNodeRouteTable rt = (PassiveDHTNodeRouteTable) context.getRouteTable();
         MojitoDHT dht;
         InetSocketAddress addr;
         for(int i = 0; i < 20; i++) {

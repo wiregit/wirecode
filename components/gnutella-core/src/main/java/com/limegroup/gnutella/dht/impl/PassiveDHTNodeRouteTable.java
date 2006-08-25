@@ -2,9 +2,9 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,17 +17,23 @@ import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
-class LimeDHTRouteTable extends RouteTableImpl {
+/**
+ * Passive Nodes (Ultrapeers) use this slightly extended version 
+ * of the RouteTable. It maintains an internal mapping of DHT enabled 
+ * leaves that are currently connected to the Ultrapeer (Gnutella 
+ * connections). 
+ */
+class PassiveDHTNodeRouteTable extends RouteTableImpl {
     
     private static final long serialVersionUID = 707016966528414433L;
 
-    private static final Log LOG = LogFactory.getLog(LimeDHTRouteTable.class);
+    private static final Log LOG = LogFactory.getLog(PassiveDHTNodeRouteTable.class);
     
-    private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
+    private Map<SocketAddress, KUID> leafDHTNodes = new ConcurrentHashMap<SocketAddress, KUID>();
 
     private MojitoDHT dht;
     
-    public LimeDHTRouteTable(MojitoDHT dht) {
+    public PassiveDHTNodeRouteTable(MojitoDHT dht) {
         this.dht = dht;
     }
     
@@ -54,7 +60,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
                     KUID previous = leafDHTNodes.put(addr, node.getNodeID());
                     
                     if (previous == null || !previous.equals(node.getNodeID())) {
-                        //add it as a priority node
+                        // Add it as a priority Node
                         node.setTimeStamp(Contact.PRIORITY_CONTACT);
                         add(node);
                     }
@@ -66,13 +72,11 @@ class LimeDHTRouteTable extends RouteTableImpl {
                     LOG.debug("Ping failed to: " + addr, ex);
                 }
             }
-            
         });
     }
     
     /**
      * Removes this DHT leaf from our routing table and returns it.
-     * 
      */
     public synchronized SocketAddress removeLeafDHTNode(String host, int port) {
         
@@ -90,7 +94,7 @@ class LimeDHTRouteTable extends RouteTableImpl {
         return null;
     }
     
-    private void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
+    private synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);
         assert (removed == true);
@@ -104,11 +108,18 @@ class LimeDHTRouteTable extends RouteTableImpl {
         }
     }
     
-    public boolean hasDHTLeaves() {
+    /**
+     * Returns whether or not this Ultrapeer has any
+     * DHT enabled leaves
+     */
+    public synchronized boolean hasDHTLeaves() {
         return !leafDHTNodes.isEmpty();
     }
     
-    public synchronized Collection<SocketAddress> getDHTLeaves(){
+    /**
+     * Returns the IP:Ports of this Untrapeer's DHT enabled leaves
+     */
+    public synchronized Set<SocketAddress> getDHTLeaves() {
         return leafDHTNodes.keySet();
     }
 }

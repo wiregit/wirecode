@@ -36,18 +36,16 @@ import com.limegroup.mojito.util.BucketUtils;
  * by saving a few (DHTSettings.NUM_PERSISTED_NODES) MRS nodes. It is not necessary
  * to persist the entire DHT, because we don't want to keep the same nodeID at the next 
  * session, and accuracy of the contacts in the RT is not guaranteed when a node 
- * is passive (as it does not get contacted by the DHT). 
- * 
- *   
+ * is passive (as it does not get contacted by the DHT).   
  */
 class PassiveDHTNodeController extends AbstractDHTController{
     
-    private LimeDHTRouteTable limeDHTRouteTable;
+    private PassiveDHTNodeRouteTable limeDHTRouteTable;
     
     /**
      * The file to persist the list of host
      */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "dhtnodes.dat");
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "nodes.mojito");
 
     @Override
     public void init() {
@@ -55,26 +53,32 @@ class PassiveDHTNodeController extends AbstractDHTController{
         DHTStatsManager.clear();
         dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT");
         
-        limeDHTRouteTable = new LimeDHTRouteTable(dht);
+        limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
         
         setLimeMessageDispatcher();
-        //load the small list of MRS nodes for bootstrap
-        try {
-            if (FILE.exists() && FILE.isFile()) {
-                FileInputStream in = new FileInputStream(FILE);
+        
+        // Load the small list of MRS Nodes for bootstrap
+        if (FILE.exists() && FILE.isFile()) {
+            FileInputStream in = null;
+            try {
+                in = new FileInputStream(FILE);
                 ObjectInputStream ois = new ObjectInputStream(in);
                 Contact node = null;
                 while((node = (Contact)ois.readObject()) != null){
                     limeDHTRouteTable.add(node);
                 }
+            } catch (ClassNotFoundException e) {
+                LOG.error("ClassNotFoundException", e);
+            } catch (FileNotFoundException e) {
+                LOG.error("FileNotFoundException", e);
+            } catch (IOException e) {
+                LOG.error("IOException", e);
+            } finally {
+                if (in != null) {
+                    try { in.close(); } catch (IOException ignore) {}
+                }
             }
-        } catch (ClassNotFoundException e) {
-            LOG.error("ClassNotFoundException", e);
-        } catch (FileNotFoundException e) {
-            LOG.error("FileNotFoundException", e);
-        } catch (IOException e) {
-            LOG.error("IOException", e);
         }
     }
     
@@ -115,38 +119,45 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public synchronized void stop() {
-        //TODO: here, save a small list of MRS nodes for next bootstrap
         super.stop();
         
-        try {
-            FileOutputStream out = new FileOutputStream(FILE);
-            ObjectOutputStream oos = new ObjectOutputStream(out);
-            List<Contact> contacts = limeDHTRouteTable.getLiveContacts(); 
-            if(contacts.size() < 2) {
-                //delete the existing RT so we start next session from scratch
-                out.close();
-                FILE.delete();
-                return;
-            }
-            
-            //sort by MRS
-            BucketUtils.sort(contacts);
-            //only save some nodes
-            contacts = contacts.subList(0, 
-                    Math.min(DHTSettings.NUM_PERSISTED_NODES.getValue(), contacts.size()));
-            KUID localNodeID = dht.getLocalNodeID();
-            for(Contact node : contacts) {
-                if(!node.getNodeID().equals(localNodeID)) {
-                    oos.writeObject(node);
+        // Delete the previous file
+        if (FILE.exists()) {
+            FILE.delete();
+        }
+        
+        List<Contact> contacts = limeDHTRouteTable.getLiveContacts(); 
+        if (contacts.size() >= 2) {
+            FileOutputStream out = null;
+            try {
+                out = new FileOutputStream(FILE);
+                ObjectOutputStream oos = new ObjectOutputStream(out);
+                
+                // Sort by MRS
+                contacts = BucketUtils.sort(contacts);
+                
+                // Save only some Nodes
+                contacts = contacts.subList(0, 
+                        Math.min(DHTSettings.NUM_PERSISTED_NODES.getValue(), contacts.size()));
+                KUID localNodeID = dht.getLocalNodeID();
+                for(Contact node : contacts) {
+                    if(!node.getNodeID().equals(localNodeID)) {
+                        oos.writeObject(node);
+                    }
+                }
+                
+                // EOF Terminator
+                oos.writeObject(null);
+                
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+            } finally {
+                if (out != null) {
+                    try { out.close(); } catch (IOException ignore) {}
                 }
             }
-            //Terminator
-            oos.writeObject(null); 
-            out.close();
-        } catch (IOException err) {
-            LOG.error("IOException", err);
         }
-    };
+    }
     
     public boolean isActiveNode() {
         return false;

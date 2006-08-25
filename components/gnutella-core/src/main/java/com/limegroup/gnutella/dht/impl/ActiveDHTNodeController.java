@@ -11,8 +11,6 @@ import java.util.List;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
@@ -25,7 +23,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     /**
      * The file to persist this Mojito DHT
      */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "routetable.mojito");
 
     @Override
     public void init() {
@@ -35,16 +33,21 @@ class ActiveDHTNodeController extends AbstractDHTController {
         MojitoDHT mojitoDHT = null;
         if (DHTSettings.PERSIST_DHT.getValue() && 
                 FILE.exists() && FILE.isFile()) {
+            
+            FileInputStream in = null;
             try {
-                FileInputStream in = new FileInputStream(FILE);
+                in = new FileInputStream(FILE);
                 mojitoDHT = MojitoFactory.load(in);
-                in.close();
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
             } catch (ClassNotFoundException e) {
                 LOG.error("ClassNotFoundException", e);
             } catch (IOException e) {
                 LOG.error("IOException", e);
+            } finally {
+                if (in != null) {
+                    try { in.close(); } catch (IOException ignore) {}
+                }
             }
         }
         
@@ -78,14 +81,18 @@ class ActiveDHTNodeController extends AbstractDHTController {
         //Notify our ultrapeers that we disconnected
         sendUpdatedCapabilities();
         
-        try {
-            if(DHTSettings.PERSIST_DHT.getValue()) {
-                FileOutputStream out = new FileOutputStream(FILE);
+        if (DHTSettings.PERSIST_DHT.getValue()) {
+            FileOutputStream out = null;
+            try {
+                out = new FileOutputStream(FILE);
                 dht.store(out);
-                out.close();
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+            } finally {
+                if (out != null) {
+                    try { out.close(); } catch (IOException ignore) {}
+                }
             }
-        } catch (IOException err) {
-            LOG.error("IOException", err);
         }
     }
     
