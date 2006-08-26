@@ -26,14 +26,14 @@ class CRegistry {
 public:
 
 	// The handle to the registry key
-	HKEY key;
+	HKEY Key;
 
 	// Open a registry key and store its handle in this object
 	bool Open(LPCTSTR root, LPCTSTR path, DWORD access);
 
 	// Make a new local CRegistry object, and delete it when it goes out of scope
-	CRegistry() { key = NULL; }
-	~CRegistry() { if (key) RegCloseKey(key); key = NULL; }
+	CRegistry() { Key = NULL; }
+	~CRegistry() { if (Key) RegCloseKey(Key); Key = NULL; }
 };
 
 // Functions in Registry.cpp

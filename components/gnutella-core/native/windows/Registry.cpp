@@ -23,7 +23,7 @@ int RegistryReadNumber(LPCTSTR root, LPCTSTR path, LPCTSTR name) {
 	DWORD d;
 	DWORD size = sizeof(DWORD);
 	int result = RegQueryValueEx(
-		registry.key, // Handle to an open key
+		registry.Key, // Handle to an open key
 		name,         // Name of the value to read
 		0,
 		NULL,
@@ -50,7 +50,7 @@ CString RegistryReadText(LPCTSTR root, LPCTSTR path, LPCTSTR name) {
 	// Get the size required
 	DWORD size;
 	int result = RegQueryValueEx(
-		registry.key, // Handle to an open key
+		registry.Key, // Handle to an open key
 		name,         // Name of the value to read
 		0,
 		NULL,
@@ -64,7 +64,7 @@ CString RegistryReadText(LPCTSTR root, LPCTSTR path, LPCTSTR name) {
 
 	// Read the binary data
 	result = RegQueryValueEx(
-		registry.key,   // Handle to an open key
+		registry.Key,   // Handle to an open key
 		name,           // Name of the value to read
 		0,
 		NULL,
@@ -91,7 +91,7 @@ bool RegistryWriteNumber(LPCTSTR root, LPCTSTR path, LPCTSTR name, int value) {
 
 	// Set or make and set the number value
 	int result = RegSetValueEx(
-		registry.key,         // Handle to an open key
+		registry.Key,         // Handle to an open key
 		name,                 // Name of the value to set or make and set
 		0,
 		REG_DWORD,            // Variable type is a 32-bit number
@@ -101,7 +101,7 @@ bool RegistryWriteNumber(LPCTSTR root, LPCTSTR path, LPCTSTR name, int value) {
 	return true;
 }
 
-// Takes a root key handle, a key path, a registry variable name, and value text
+// Takes a root key handle name, a key path, a registry variable name, and value text
 // Stores the information in the registry
 // Returns false on error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value) {
@@ -115,7 +115,7 @@ bool RegistryWriteText(LPCTSTR root, LPCTSTR path, LPCTSTR name, LPCTSTR value) 
 
 	// Set or make and set the text value
 	int result = RegSetValueEx(
-		registry.key,        // Handle to an open key
+		registry.Key,        // Handle to an open key
 		name,                // Name of the valeu to set or make and set
 		0,
 		REG_SZ,              // Variable type is a null-terminated string
@@ -125,7 +125,7 @@ bool RegistryWriteText(LPCTSTR root, LPCTSTR path, LPCTSTR name, LPCTSTR value) 
 	return true;
 }
 
-// Takes a root key handle, the path to a key that has no subkeys, and a registry variable name, or blank to delete the key
+// Takes a root key handle name, the path to a key that has no subkeys, and a registry variable name, or blank to delete the key
 // Deletes the registry variable or key from the registry
 // Returns false on error
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
@@ -142,7 +142,7 @@ bool RegistryDelete(LPCTSTR root, LPCTSTR path, LPCTSTR name) {
 		if (!registry.Open(root, path, KEY_ALL_ACCESS)) return false;
 
 		// Delete the variable
-		result = RegDeleteValue(registry.key, name);
+		result = RegDeleteValue(registry.Key, name);
 		if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND) return false;
 		return true;
 
@@ -160,7 +160,7 @@ bool RegistryDelete(LPCTSTR root, LPCTSTR path, LPCTSTR name) {
 	}
 }
 
-// Takes a root key handle and a key path, and the desired level of access
+// Takes a root key handle name, a key path, and the desired level of access
 // Opens or creates and opens the key with full access
 // Returns false on error
 bool CRegistry::Open(LPCTSTR root, LPCTSTR path, DWORD access) {
