@@ -22,6 +22,7 @@ package com.limegroup.mojito.io;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
@@ -53,6 +54,8 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     private Selector selector;
     
+    private DatagramChannel channel;
+    
     private SecureMessageVerifier verifier;
     
     private ExecutorService executor;
@@ -71,7 +74,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             throw new IOException("Already open");
         }
         
-        DatagramChannel channel = DatagramChannel.open();
+        channel = DatagramChannel.open();
         channel.configureBlocking(false);
         
         selector = Selector.open();
@@ -83,8 +86,30 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
         
         socket.bind(address);
-        
-        setDatagramChannel(channel);
+    }
+    
+    @Override
+    public boolean isOpen() {
+        DatagramChannel c = channel;
+        return c != null && c.isOpen();
+    }
+
+    /**
+     * Returns the DatagramChannel
+     */
+    public DatagramChannel getDatagramChannel() {
+        return channel;
+    }
+    
+    /**
+     * Returns the DatagramChannel Socket's local SocketAddress
+     */
+    public SocketAddress getLocalSocketAddress() {
+        DatagramChannel c = channel;
+        if (c != null) {
+            return c.socket().getLocalSocketAddress();
+        }
+        return null;
     }
     
     @Override
@@ -115,8 +140,9 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         try {
             if (selector != null) {
                 selector.close();
-                getDatagramChannel().close();
+                channel.close();
                 selector = null;
+                channel = null;
             }
         } catch (IOException err) {
             LOG.error("An error occured during stopping", err);
@@ -184,6 +210,16 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         interest(SelectionKey.OP_WRITE, on);
     }
     
+    @Override
+    protected SocketAddress receive(ByteBuffer dst) throws IOException {
+        return channel.receive(dst);
+    }
+
+    @Override
+    protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
+        return channel.send(data, dst) > 0;
+    }
+
     public void run() {
         
         while(isRunning()) {

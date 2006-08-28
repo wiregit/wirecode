@@ -22,7 +22,6 @@ package com.limegroup.mojito.io;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -111,9 +110,7 @@ public abstract class MessageDispatcher {
     private StoreRequestHandler storeHandler;
     private StatsRequestHandler statsHandler;
     
-    private DatagramChannel channel;
-    
-    private ByteBuffer buffer;
+    private ByteBuffer inputBuffer;
     
     private ScheduledExecutorService executor;
     private ScheduledFuture future;
@@ -130,7 +127,7 @@ public abstract class MessageDispatcher {
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
-        buffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
+        inputBuffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
     }
     
     /**
@@ -190,37 +187,9 @@ public abstract class MessageDispatcher {
     public abstract boolean isRunning();
     
     /**
-     * Sets the DatagramChannel
-     */
-    public void setDatagramChannel(DatagramChannel channel) {
-        this.channel = channel;
-    }
-    
-    /**
-     * Returns the DatagramChannel
-     */
-    public DatagramChannel getDatagramChannel() {
-        return channel;
-    }
-    
-    /**
      * Returns whether or not the DatagramChannel is open
      */
-    public boolean isOpen() {
-        DatagramChannel c = channel;
-        return c != null && c.isOpen();
-    }
-    
-    /**
-     * Returns the DatagramChannel Socket's local SocketAddress
-     */
-    public SocketAddress getLocalSocketAddress() {
-        DatagramChannel c = channel;
-        if (c != null) {
-            return c.socket().getLocalSocketAddress();
-        }
-        return null;
-    }
+    public abstract boolean isOpen();
     
     /**
      * Sends a ResponseMessage to the given Contact
@@ -362,22 +331,20 @@ public abstract class MessageDispatcher {
     /**
      * The raw read-method.
      */
-    protected SocketAddress read(ByteBuffer b) throws IOException {
-        return channel.receive(b);
-    }
+    protected abstract SocketAddress receive(ByteBuffer dst) throws IOException;
     
     /**
      * Reads and returns a single DHTMessage from Network or null
      * if no Messages were in the input queue.
      */
     private DHTMessage readMessage() throws MessageFormatException, IOException {
-        SocketAddress src = read((ByteBuffer)buffer.clear());
+        SocketAddress src = receive((ByteBuffer)inputBuffer.clear());
         if (src != null) {
-            buffer.flip();
-            int length = buffer.remaining();
+            inputBuffer.flip();
+            int length = inputBuffer.remaining();
 
             ByteBuffer data = ByteBuffer.allocate(length);
-            data.put(buffer);
+            data.put(inputBuffer);
             data.rewind();
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
@@ -549,7 +516,7 @@ public abstract class MessageDispatcher {
                 ByteBuffer data = tag.getData();
                 assert data != null : "Somebody set Data to null";
 
-                if (send(channel, dst, data)) {
+                if (send(dst, data)) {
                     // Wohoo! Message was sent!
                     outputQueue.remove();
                     registerInput(tag);
@@ -577,10 +544,7 @@ public abstract class MessageDispatcher {
      * output buffer (that means you'll have to re-try it later
      * again).
      */
-    protected boolean send(DatagramChannel channel, 
-            SocketAddress dst, ByteBuffer data) throws IOException {
-        return channel.send(data, dst) > 0;
-    }
+    protected abstract boolean send(SocketAddress dst, ByteBuffer data) throws IOException;
     
     /**
      * Called right after a Message has been sent to register

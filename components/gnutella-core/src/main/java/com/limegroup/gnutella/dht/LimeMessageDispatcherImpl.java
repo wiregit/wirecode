@@ -191,4 +191,14 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
         verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
+
+    @Override
+    protected SocketAddress receive(ByteBuffer dst) throws IOException {
+        throw new IOException("receive() is not implemented");
+    }
+
+    @Override
+    protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
+        throw new IOException("receive() is not implemented");
+    }
 }
