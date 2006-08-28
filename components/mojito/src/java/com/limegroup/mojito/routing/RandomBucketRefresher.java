@@ -105,7 +105,7 @@ public class RandomBucketRefresher implements Runnable {
                 KUID nodeId = ids.get(i);
                 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting bucket refresh lookup ("+i+"/"+ids.size()+"): " + nodeId);
+                    LOG.debug("Starting bucket refresh lookup ("+i+"/"+(ids.size()-1)+"): " + nodeId);
                 }
                 
                 FindNodeResponseHandler handler 
@@ -114,7 +114,7 @@ public class RandomBucketRefresher implements Runnable {
                 FindNodeEvent event = handler.call();
                 
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Finished refresh ("+i+"/"+ids.size()+") with " + event.getNodes().size() + " nodes");
+                    LOG.debug("Finished refresh ("+i+"/"+(ids.size()-1)+") with " + event.getNodes().size() + " nodes");
                 }
             }
         } catch (Exception err) {
