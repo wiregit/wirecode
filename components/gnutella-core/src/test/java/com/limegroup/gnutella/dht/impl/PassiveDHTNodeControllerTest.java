@@ -55,7 +55,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = new PassiveDHTNodeController();
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(0, 0);
         Context context = (Context) controller.getMojitoDHT();
         Contact localContact = context.getLocalNode();
         KUID nodeID = context.getLocalNodeID();
@@ -64,7 +64,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         fillRoutingTable(rt, 2*numPersistedNodes);
         controller.stop();
         //now nodeID should have changed and we should have persisted SOME nodes
-        controller = new PassiveDHTNodeController();
+        controller = new PassiveDHTNodeController(0, 0);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         assertNotEquals(nodeID, context.getLocalNodeID());
@@ -74,7 +74,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testAddRemoveLeafDHTNode() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        PassiveControllerTest controller = new PassiveControllerTest();
+        PassiveControllerTest controller = new PassiveControllerTest(0, 0);
         controller.start();
         Context context = (Context) controller.getMojitoDHT();
         PassiveDHTNodeRouteTable rt = (PassiveDHTNodeRouteTable) context.getRouteTable();
@@ -115,6 +115,10 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     private class PassiveControllerTest extends PassiveDHTNodeController {
+        
+        public PassiveControllerTest(int vendor, int version) {
+            super(vendor, version);
+        }
 
         @Override
         protected synchronized void addLeafDHTNode(String host, int port) {

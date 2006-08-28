@@ -13,6 +13,7 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -78,7 +79,7 @@ public class DHTNodeFetcher {
         //node we can exit the loop.
         boolean haveActive = false;
         for(ExtendedEndpoint ep : dhtHosts) {
-            if(ep.getDHTMode().isActive()) {
+            if (DHTMode.ACTIVE == ep.getDHTMode()) {
                 
                 if(LOG.isDebugEnabled()){
                     LOG.debug("Adding active host from HostCatcher: "+ ep.getAddress());

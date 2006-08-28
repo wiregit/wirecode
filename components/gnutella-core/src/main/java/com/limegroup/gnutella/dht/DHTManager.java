@@ -16,37 +16,54 @@ public interface DHTManager extends LifecycleListener {
      * Various modes a DHT Node may have
      */
     public static enum DHTMode {
-        NONE((byte)0x00),
-        ACTIVE((byte)0x01),
-        PASSIVE((byte)0x02);
+        INACTIVE(0x00),
+        ACTIVE(0x01),
+        PASSIVE(0x02);
         
-        /**
-         * 
-         */
         public static final byte DHT_MODE_MASK = 0x0F;
         
         private byte mode;
         
-        private DHTMode(byte mode){
-            this.mode = mode;
+        private DHTMode(int state) {
+            this.mode = (byte)(state & 0xFF);
         }
         
-        public byte getByte() {
+        public byte toByte() {
             return mode;
         }
         
+        public boolean isInactive() {
+            return (this == INACTIVE);
+        }
+        
         public boolean isActive() {
-            return ((mode & DHT_MODE_MASK) == ACTIVE.getByte());
+            return (this == ACTIVE);
         }
         
         public boolean isPassive() {
-            return ((mode & DHT_MODE_MASK) == PASSIVE.getByte());
+            return (this == PASSIVE);
         }
         
-        public boolean isNone() {
-            return ((mode & DHT_MODE_MASK) == NONE.getByte());
+        private static final DHTMode[] MODES;
+        
+        static {
+            DHTMode[] modes = values();
+            MODES = new DHTMode[modes.length];
+            for (DHTMode m : modes) {
+                int index = (m.mode & 0xFF) % MODES.length;
+                assert (MODES[index] == null);
+                MODES[index] = m;
+            }
         }
         
+        public static DHTMode valueOf(byte mode) {
+            int index = (mode & 0xFF) % MODES.length;
+            DHTMode s = MODES[index];
+            if (s.mode == mode) {
+                return s;
+            }
+            return null;
+        }
     }
     
     /**

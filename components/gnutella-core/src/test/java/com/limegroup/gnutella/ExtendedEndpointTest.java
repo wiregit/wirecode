@@ -104,7 +104,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         TestExtendedEndpoint.now+=ExtendedEndpoint.WINDOW_TIME; //1x
         e.recordConnectionFailure();
         e.setDHTVersion(0);
-        e.setDHTMode(DHTMode.NONE);
+        e.setDHTMode(DHTMode.INACTIVE);
         StringWriter out=new StringWriter();
         e.write(out);
         //Window time is hard-coded below.

@@ -413,7 +413,7 @@ public class HostCatcherTest extends BaseTestCase {
         // dht capable node
         ExtendedEndpoint ep = new ExtendedEndpoint("18.239.0.100", 6323, 3);
         ep.setDHTVersion(2);
-        ep.setDHTMode(DHTMode.NONE);
+        ep.setDHTMode(DHTMode.INACTIVE);
         hc.add(ep, false);
         // dht active node
         ep = new ExtendedEndpoint("18.239.0.101", 6322, 2);
@@ -707,7 +707,7 @@ public class HostCatcherTest extends BaseTestCase {
             ep = new ExtendedEndpoint("18.239.0.100", i);
             ep.setDHTVersion(2);
             if((i % 2) == 0) {
-                ep.setDHTMode(DHTMode.NONE);
+                ep.setDHTMode(DHTMode.INACTIVE);
             } else {
                 ep.setDHTMode(DHTMode.PASSIVE);
             }
@@ -731,7 +731,7 @@ public class HostCatcherTest extends BaseTestCase {
         assertTrue(ep.getDHTMode().isPassive());
         ep = hostList.get(hostList.size()-1);
         assertFalse(ep.getDHTMode().isPassive());
-        assertTrue(ep.getDHTMode().isNone());
+        assertTrue(ep.getDHTMode().isInactive());
         
         //try excluding version
         hostList = hc.getDHTSupportEndpoint(2);

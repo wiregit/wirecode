@@ -48,7 +48,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = new ActiveDHTNodeController();
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0);
         Context context = (Context) controller.getMojitoDHT();
         KUID nodeID = context.getLocalNodeID();
         RouteTable rt = context.getRouteTable();
@@ -67,7 +67,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                 State.UNKNOWN);
         rt.add(node);
         controller.stop();
-        controller = new ActiveDHTNodeController();
+        controller = new ActiveDHTNodeController(0, 0);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         //should have the same nodeID as before
@@ -80,7 +80,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = new ActiveDHTNodeController();
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0);
         controller.start();
         //bootstrap active node
         controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));

@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
 public class DHTManagerStub implements DHTManager {
+    
     public void addActiveDHTNode(SocketAddress hostAddress) {}
     
     public void addPassiveDHTNode(SocketAddress hostAddress) {}
@@ -34,6 +35,10 @@ public class DHTManagerStub implements DHTManager {
 
     public void handleLifecycleEvent(LifecycleEvent evt) {}
 
+    public int getVendor() {
+        return 1;
+    }
+    
     public int getVersion() {
         return 1;
     }

@@ -130,11 +130,11 @@ public class HostCatcher {
             public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
                 DHTMode mode1 = e1.getDHTMode();
                 DHTMode mode2 = e2.getDHTMode();
-                if(mode1.isActive() && !mode2.isActive()
-                        || mode1.isPassive() && mode2.isNone()) {
+                if ((mode1.isActive() && !mode2.isActive())
+                        || (mode1.isPassive() && mode2.isInactive())) {
                     return -1;
-                } else if(mode2.isActive() && !mode1.isActive()
-                        || mode2.isPassive() && mode1.isNone()) {
+                } else if ((mode2.isActive() && !mode1.isActive())
+                        || (mode2.isPassive() && mode1.isInactive())) {
                     return 1;
                 } else {
                     return 0;

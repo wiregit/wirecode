@@ -779,13 +779,11 @@ public class PingReply extends Message implements Serializable, IpPort {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
                     if(bytes.length >= 3) {
                         dhtVersion = ByteOrder.beb2short(bytes, 0);
+                        
                         byte mode = (byte) (bytes[2] & DHTMode.DHT_MODE_MASK);
-                        if( mode == DHTMode.NONE.getByte()) {
-                            dhtMode = DHTMode.NONE;
-                        } else if(mode == DHTMode.ACTIVE.getByte()) {
-                            dhtMode = DHTMode.ACTIVE;
-                        } else if(mode == DHTMode.PASSIVE.getByte()) {
-                            dhtMode = DHTMode.PASSIVE;
+                        dhtMode = DHTMode.valueOf(mode);
+                        if (dhtMode == null) {
+                            dhtMode = DHTMode.INACTIVE;
                         }
                     }
                 } catch (BadGGEPPropertyException e) {}
@@ -1009,17 +1007,19 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     private static void addDHTExtension(GGEP ggep) {
         byte[] payload = new byte[3];
+        
         // put version
-        ByteOrder.short2beb((short)RouterService.getDHTManager().getVersion(), 
-                             payload, 0);
+        int version = RouterService.getDHTManager().getVersion();
+        ByteOrder.short2beb((short)version, payload, 0);
+        
         if(RouterService.isDHTNode() && RouterService.isMemberOfDHT()) {
             if(RouterService.isActiveDHTNode()) {
-                payload[2] = DHTMode.ACTIVE.getByte();
+                payload[2] = DHTMode.ACTIVE.toByte();
             } else { //passive node
-                payload[2] = DHTMode.PASSIVE.getByte();
+                payload[2] = DHTMode.PASSIVE.toByte();
             }
         } else {
-            payload[2] = DHTMode.NONE.getByte();
+            payload[2] = DHTMode.INACTIVE.toByte();
         }
 
         // add it
