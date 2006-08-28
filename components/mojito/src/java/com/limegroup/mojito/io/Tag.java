@@ -216,19 +216,24 @@ public class Tag {
             return received - sent;
         }
         
+        public long elapsedTime() {
+            return System.currentTimeMillis() - sent;
+        }
+        
         public boolean timeout() {
-            long time = System.currentTimeMillis() - sent;
+            long elapsed = elapsedTime();
+            
             if(timeout < 0L) {
                 long t = responseHandler.timeout();
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Default timeout: " + t + "ms for " + ContactUtils.toString(nodeId, dst));
                 }
-                return time >= t;
+                return elapsed >= t;
             } else {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Timeout: " + timeout + "ms for " + ContactUtils.toString(nodeId, dst));
                 }
-                return time >= timeout;
+                return elapsed >= timeout;
             }
         }
         

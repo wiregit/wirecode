@@ -51,9 +51,7 @@ public class DHTValuePublisher implements Runnable {
     private int published = 0;
     private int evicted = 0;
     
-    private long period = 0L;
-    
-    private long end = 0L;
+    private long delay = 0L;
     
     public DHTValuePublisher(Context context) {
         this.context = context;
@@ -67,11 +65,10 @@ public class DHTValuePublisher implements Runnable {
     public void start() {
         synchronized (lock) {
             if (future == null) {
-                period = DatabaseSettings.REPUBLISH_PERIOD.getValue();
-                long delay = period;
+                delay = DatabaseSettings.REPUBLISH_PERIOD.getValue();
+                long initialDelay = delay;
                 
-                end = 0;
-                future = context.scheduleAtFixedRate(this, delay, period, TimeUnit.MILLISECONDS);
+                future = context.scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -159,19 +156,6 @@ public class DHTValuePublisher implements Runnable {
                 LOG.trace("Skipping this republishing interval 'cause we're " 
                         + "either not bootstrapped or we're bootstrapping: " 
                         + context.isBootstrapped() + "/" + context.isBootstrapping());
-            }
-            return;
-        }
-        
-        // Scheduled Tasks have the side effect that if the last
-        // iteration took longer than the schedule period it will
-        // re-shedule the task immediately causing the Task being
-        // executed continuously without a delay. 
-        long timeSinceLastRepublish = System.currentTimeMillis() - end;
-        if (timeSinceLastRepublish < period) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Skipping this republishing interval: " 
-                        + timeSinceLastRepublish + " < " + period);
             }
             return;
         }

@@ -44,9 +44,7 @@ public class RandomBucketRefresher implements Runnable {
     
     private volatile ScheduledFuture future;
     
-    private long period = 0L;
-    
-    private long end = 0L;
+    private long delay = 0L;
     
     public RandomBucketRefresher(Context context) {
         this.context = context;
@@ -54,15 +52,14 @@ public class RandomBucketRefresher implements Runnable {
     
     public synchronized void start() {
         if (future == null) {
-            period = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
-            long delay = period;
+            delay = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
+            long initialDelay = delay;
             
             if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
-                delay = period + (long)(period * Math.random());
+                initialDelay = delay + (long)(delay * Math.random());
             }
             
-            end = 0L;
-            future = context.scheduleAtFixedRate(this, delay, period, TimeUnit.MILLISECONDS);
+            future = context.scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
         }
     }
     
@@ -97,19 +94,6 @@ public class RandomBucketRefresher implements Runnable {
                 // this will take some MRS nodes and bootstraps
                 // from them.
                 context.bootstrap(); 
-            }
-            return;
-        }
-        
-        // Scheduled Tasks have the side effect that if the last
-        // iteration took longer than the schedule period it will
-        // re-shedule the task immediately causing the Task being
-        // executed continuously without a delay. 
-        long timeSinceLastRefresh = System.currentTimeMillis() - end;
-        if (timeSinceLastRefresh < period) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Skipping this refresh interval: " 
-                        + timeSinceLastRefresh + " < " + period);
             }
             return;
         }

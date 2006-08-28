@@ -96,8 +96,20 @@ public abstract class MessageDispatcher {
     /** Queue of things we have to send */
     private Queue<Tag> outputQueue = new ConcurrentLinkedQueue<Tag>();
     
+    /** A lock for the outputQueue */
+    private Object outputQueueLock = new Object();
+    
     /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
+    
+    /** 
+     * The CleanupTask goes periodically through the ReceiptMap 
+     * and prunes out ResponseHandlers that have timed-out.
+     */
+    private Runnable cleanupTask = new CleanupTask();
+    
+    /** A lock for the ReceiptMap */
+    private Object receiptMapLock = new Object();
     
     private NetworkStatisticContainer networkStats;
     
@@ -139,8 +151,7 @@ public abstract class MessageDispatcher {
      * Starts the MessageDispatcher
      */
     public void start() {
-        synchronized (receiptMap) {
-            
+        synchronized (receiptMapLock) {
             if (executor == null) {
                 ThreadFactory factory = new ThreadFactory() {
                     public Thread newThread(Runnable r) {
@@ -156,7 +167,7 @@ public abstract class MessageDispatcher {
             
             if (future == null) {
                 future = executor.scheduleAtFixedRate(
-                        receiptMap, 
+                        cleanupTask, 
                         CLEANUP_RECEIPTS_INTERVAL, 
                         CLEANUP_RECEIPTS_INTERVAL, 
                         TimeUnit.MILLISECONDS);
@@ -168,7 +179,7 @@ public abstract class MessageDispatcher {
      * Stops the MessageDispatcher
      */
     public void stop() {
-        synchronized (receiptMap) {
+        synchronized (receiptMapLock) {
             if (future != null) {
                 future.cancel(true);
                 future = null;
@@ -282,7 +293,9 @@ public abstract class MessageDispatcher {
      * Enqueues Tag to the Output queue
      */
     protected boolean enqueueOutput(Tag tag) {
-        synchronized(outputQueue) {
+        // The purpose of this locking is to set
+        // interest write properly.
+        synchronized(outputQueueLock) {
             outputQueue.add(tag);
             interestWrite(true);
             return true;
@@ -413,7 +426,7 @@ public abstract class MessageDispatcher {
              
             Receipt receipt = null;
             
-            synchronized(receiptMap) {
+            synchronized(receiptMapLock) {
                 receipt = receiptMap.get(message.getMessageID());
                 
                 if (receipt != null) {
@@ -531,7 +544,9 @@ public abstract class MessageDispatcher {
             }
         }
         
-        synchronized (outputQueue) {
+        // The purpose of this locking is to set
+        // interest write properly.
+        synchronized (outputQueueLock) {
             boolean isEmpty = outputQueue.isEmpty();
             interestWrite(!isEmpty);
             return !isEmpty;
@@ -553,8 +568,9 @@ public abstract class MessageDispatcher {
     protected void registerInput(Tag tag) {
         Receipt receipt = tag.sent();
         if (receipt != null) {
-            synchronized (receiptMap) {
+            synchronized (receiptMapLock) {
                 receiptMap.add(receipt);
+                receiptMapLock.notifyAll();
             }
         }
         
@@ -597,11 +613,11 @@ public abstract class MessageDispatcher {
      * Clears the output queue and receipt map
      */
     protected void clear() {
-        synchronized(outputQueue) {
+        synchronized(outputQueueLock) {
             outputQueue.clear();
         }
         
-        synchronized (receiptMap) {
+        synchronized (receiptMapLock) {
             receiptMap.clear();
         }
     }
@@ -611,14 +627,16 @@ public abstract class MessageDispatcher {
      * internal use only! DO NOT CALL!
      */
     protected void cleanup() {
-        receiptMap.run();
+        synchronized (receiptMapLock) {
+            receiptMap.cleanup();
+        }
     }
     
     /**
      * A map of MessageID -> Receipts
      */
     @SuppressWarnings("serial")
-    private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> implements Runnable {
+    private class ReceiptMap extends FixedSizeHashMap<MessageID, Receipt> {
         
         public ReceiptMap(int maxSize) {
             super(maxSize);
@@ -632,10 +650,9 @@ public abstract class MessageDispatcher {
          * Cleans up the Map and kicks off Ticks. Meant to be
          * called by a scheduled task.
          */
-        public synchronized void run() {
+        public void cleanup() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
                 Receipt receipt = it.next();
-                
                 if (receipt.timeout()) {
                     receipt.received();
                     it.remove();
@@ -665,6 +682,25 @@ public abstract class MessageDispatcher {
                 return true;
             }
             return false;
+        }
+    }
+    
+    /**
+     * 
+     */
+    private class CleanupTask implements Runnable {
+        public void run() {
+            synchronized(receiptMapLock) {
+                try {
+                    if (receiptMap.isEmpty()) {
+                        receiptMapLock.wait();
+                    }
+                    
+                    receiptMap.cleanup();
+                } catch (InterruptedException err) {
+                    LOG.info("InterruptedException", err);
+                }
+            }
         }
     }
     

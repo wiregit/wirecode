@@ -232,8 +232,15 @@ public interface MojitoDHT {
      * period. The action is executed on Mojito DHTs internal scheduled 
      * Executor (an unbound ThreadPoolExecutor).
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit);
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
+            long delay, long period, TimeUnit unit);
     
+    /**
+     * 
+     */
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
+            long initialDelay, long delay, TimeUnit unit);
+            
     /**
      * Creates and executes a ScheduledFuture that becomes enabled after the
      * given delay. The task is executed on Mojito DHTs internal scheduled 

@@ -719,8 +719,14 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
     }
     
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
+            long delay, long period, TimeUnit unit) {
         return scheduledExecutor.scheduleAtFixedRate(command, delay, period, unit);
+    }
+    
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
+            long initialDelay, long delay, TimeUnit unit) {
+        return scheduledExecutor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
     }
     
     public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
