@@ -76,7 +76,7 @@ import com.limegroup.mojito.util.FixedSizeHashMap;
  * MessageDispatcher is an abstract class that takes care of
  * all Mojito's communication needs.
  */
-public abstract class MessageDispatcher implements Runnable {
+public abstract class MessageDispatcher {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     

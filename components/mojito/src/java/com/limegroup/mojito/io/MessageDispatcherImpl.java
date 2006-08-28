@@ -45,7 +45,7 @@ import com.limegroup.mojito.security.CryptoHelper;
 /**
  * This is a stand alone/reference implementation of MessageDispatcher
  */
-public class MessageDispatcherImpl extends MessageDispatcher {
+public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
     

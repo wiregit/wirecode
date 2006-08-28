@@ -191,8 +191,4 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
         verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
-
-    // This is not running as a Thread!
-    public void run() {
-    }
 }
