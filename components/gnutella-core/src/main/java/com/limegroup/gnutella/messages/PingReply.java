@@ -778,12 +778,13 @@ public class PingReply extends Message implements Serializable, IpPort {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
                     if(bytes.length >= 3) {
-                        dhtVersion = ByteOrder.beb2short(bytes, 0);
-                        
-                        byte mode = (byte) (bytes[2] & DHTMode.DHT_MODE_MASK);
+                        dhtVersion = ByteOrder.ushort2int(ByteOrder.beb2short(bytes, 0));
+                        byte mode = (byte)(bytes[2] & DHTMode.DHT_MODE_MASK);
                         dhtMode = DHTMode.valueOf(mode);
                         if (dhtMode == null) {
-                            dhtMode = DHTMode.INACTIVE;
+                            // Reset the Version number if the mode
+                            // is unknown
+                            dhtVersion = -1;
                         }
                     }
                 } catch (BadGGEPPropertyException e) {}
