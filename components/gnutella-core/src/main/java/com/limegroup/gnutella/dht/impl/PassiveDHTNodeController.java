@@ -88,7 +88,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
      * as a leaf involves sending it a DHT ping (in order to get its KUID).
      * 
      */
-    protected synchronized void addLeafDHTNode(String host, int port) {
+    protected void addLeafDHTNode(String host, int port) {
         if(!isRunning()) {
             return;
         }
@@ -103,7 +103,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         limeDHTRouteTable.addLeafDHTNode(host, port);
     }
     
-    protected synchronized SocketAddress removeLeafDHTNode(String host, int port) {
+    protected SocketAddress removeLeafDHTNode(String host, int port) {
         if(!isRunning()) {
             return null;
         }
@@ -117,7 +117,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
 
     @Override
-    public synchronized void stop() {
+    public void stop() {
         super.stop();
         
         // Delete the previous file

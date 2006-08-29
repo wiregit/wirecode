@@ -61,7 +61,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     }
 
     @Override
-    public synchronized void start() {
+    public void start() {
         //if we want to connect actively, we should be active DHT capable
         if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
                 && !DHTSettings.ACTIVE_DHT_CAPABLE.getValue()) {
@@ -75,7 +75,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     }
 
     @Override
-    public synchronized void stop() {
+    public void stop() {
         super.stop();
         
         //Notify our ultrapeers that we disconnected

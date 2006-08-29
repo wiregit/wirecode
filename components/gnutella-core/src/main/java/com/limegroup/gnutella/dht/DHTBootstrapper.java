@@ -2,8 +2,6 @@ package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.MojitoDHT;
-
 /**
  * 
  */
@@ -11,10 +9,8 @@ public interface DHTBootstrapper {
     
     /**
      * Bootstraps the given dht to the network.
-     * 
-     * @param dht The MojitoDHT to bootstrap
      */
-    public void bootstrap(MojitoDHT dht);
+    public void bootstrap();
     
     /**
      * Adds a host to the list of bootstrap hosts 

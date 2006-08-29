@@ -30,94 +30,102 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The DHTController instance
      */
-    private DHTController dhtController = null;
-    
+    private DHTController controller = null;
     
     public synchronized void start(boolean activeMode) {
         
-        if (dhtController == null || (dhtController.isActiveNode() != activeMode)) {
-            if (dhtController != null) {
-                dhtController.stop();
+        if (controller == null || (controller.isActiveNode() != activeMode)) {
+            if (controller != null) {
+                controller.stop();
             }
             
             if (activeMode) {
-                dhtController = new ActiveDHTNodeController(vendor, version);
+                controller = new ActiveDHTNodeController(vendor, version);
             } else {
-                dhtController = new PassiveDHTNodeController(vendor, version);
+                controller = new PassiveDHTNodeController(vendor, version);
             }
         }
-        dhtController.start();
+        controller.start();
     }
     
     public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
-        if (dhtController != null) {
-            dhtController.addActiveDHTNode(hostAddress);
+        if (controller != null) {
+            controller.addActiveDHTNode(hostAddress);
         }
     }
     
     public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (dhtController != null) {
-            dhtController.addPassiveDHTNode(hostAddress);
+        if (controller != null) {
+            controller.addPassiveDHTNode(hostAddress);
         }
     }
 
     public synchronized void addressChanged() {
-        if(dhtController == null || !dhtController.isRunning()) {
+        if(controller == null || !controller.isRunning()) {
             return;
         }
-        //restart dht (will get the new adress from RouterService)
-        dhtController.stop();
-        dhtController.start();
+        
+        // Restart the DHT (will get the new adress from RouterService)
+        controller.stop();
+        controller.start();
+    }
+    
+    public synchronized void sendUpdatedCapabilities() {
+        if(controller == null || !controller.isRunning()) {
+            return;
+        }
+        
+        controller.sendUpdatedCapabilities();
     }
     
     public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
-        if(dhtController == null) {
+        if(controller == null) {
             return Collections.emptyList();
         }
         
-        return dhtController.getActiveDHTNodes(maxNodes);
+        return controller.getActiveDHTNodes(maxNodes);
     }
     
     public synchronized boolean isActiveNode() {
-        if(dhtController != null) {
-            return (dhtController.isActiveNode() 
-                    && dhtController.isRunning());
+        if(controller != null) {
+            return (controller.isActiveNode() 
+                    && controller.isRunning());
         }
      
         return false;
     }
     
     public synchronized void stop(){
-        if (dhtController != null) {
-            dhtController.stop();
-            dhtController = null;
+        if (controller != null) {
+            controller.stop();
+            controller = null;
         }
     }
     
     public synchronized boolean isRunning() {
-        if(dhtController != null) {
-            return dhtController.isRunning();
+        if(controller != null) {
+            return controller.isRunning();
         }
         return false;
     }
     
     public synchronized boolean isBootstrapped() {
-        if(dhtController != null) {
-            return dhtController.getMojitoDHT().isBootstrapped();
+        if(controller != null) {
+            return controller.getMojitoDHT().isBootstrapped();
         }
         return false;
     }
     
     public synchronized boolean isWaitingForNodes() {
-        if(dhtController != null) {
-            return dhtController.isWaitingForNodes();
+        if(controller != null) {
+            return controller.isWaitingForNodes();
         }
         return false;
     }
 
     public synchronized MojitoDHT getMojitoDHT() {
-        if(dhtController != null) {
-            return dhtController.getMojitoDHT();
+        if(controller != null) {
+            return controller.getMojitoDHT();
         }
         return null;
     }
@@ -129,20 +137,20 @@ public class LimeDHTManager implements DHTManager {
      * 
      */
     public synchronized void handleLifecycleEvent(LifecycleEvent evt) {
-        if(dhtController == null) {
+        if(controller == null) {
             return;
         }
         
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(dhtController.isRunning() 
+            if(controller.isRunning() 
                     && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                dhtController.stop();
+                controller.stop();
             }
             return;
         } 
 
         if(evt.isConnectionLifecycleEvent()) {
-            dhtController.handleConnectionLifecycleEvent(evt);
+            controller.handleConnectionLifecycleEvent(evt);
         }
     }
     

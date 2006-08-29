@@ -54,12 +54,12 @@ abstract class AbstractDHTController implements DHTController {
      */
     private MojitoDHT dht;
 
-    protected final DHTBootstrapper dhtBootstrapper;
+    protected final DHTBootstrapper bootstrapper;
     
     private RandomNodeAdder dhtNodeAdder;
     
     public AbstractDHTController() {
-        dhtBootstrapper = new LimeDHTBootstrapper(this);
+        bootstrapper = new LimeDHTBootstrapper(this);
     }
 
     /**
@@ -73,7 +73,7 @@ abstract class AbstractDHTController implements DHTController {
      * 
      * @param activeMode true to connect to the DHT in active mode
      */
-    public synchronized void start() {
+    public void start() {
         if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
                 && !RouterService.isConnected())) {
             return;
@@ -88,7 +88,7 @@ abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
-            dhtBootstrapper.bootstrap(dht);
+            bootstrapper.bootstrap();
         } catch (IOException err) {
             LOG.error(err);
         }
@@ -100,7 +100,7 @@ abstract class AbstractDHTController implements DHTController {
      * to bootstrap from for the next session.
      * 
      */
-    public synchronized void stop(){
+    public void stop(){
         if (!isRunning()) {
             return;
         }
@@ -111,9 +111,9 @@ abstract class AbstractDHTController implements DHTController {
             LOG.trace("Shut down trace: ", new Exception());
         }
         
-        dhtBootstrapper.stop();
+        bootstrapper.stop();
         
-        if(dhtNodeAdder != null) {
+        if (dhtNodeAdder != null) {
             dhtNodeAdder.stop();
         }
         
@@ -131,13 +131,13 @@ abstract class AbstractDHTController implements DHTController {
      * 
      * @param hostAddress The SocketAddress of the DHT host.
      */
-    protected synchronized void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
+    protected void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
         if (!isRunning()) {
             return;
         }
         
         if(!dht.isBootstrapped()){
-            dhtBootstrapper.addBootstrapHost(hostAddress);
+            bootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
             if(dhtNodeAdder == null) {
                 dhtNodeAdder = new RandomNodeAdder();
@@ -148,16 +148,16 @@ abstract class AbstractDHTController implements DHTController {
         }
     }
     
-    public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
+    public void addActiveDHTNode(SocketAddress hostAddress) {
         addActiveDHTNode(hostAddress, true);
     }
     
-    public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
+    public void addPassiveDHTNode(SocketAddress hostAddress) {
         if (!isRunning() || dht.isBootstrapped()) {
             return;
         }
         
-        dhtBootstrapper.addPassiveNode(hostAddress);
+        bootstrapper.addPassiveNode(hostAddress);
     }
     
     /**
@@ -184,7 +184,7 @@ abstract class AbstractDHTController implements DHTController {
         return ipps;
     }
     
-    public synchronized boolean isRunning() {
+    public boolean isRunning() {
         if (dht == null) {
             return false;
         }
@@ -193,7 +193,7 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public boolean isWaitingForNodes() {
-        return dhtBootstrapper.isWaitingForNodes();
+        return bootstrapper.isWaitingForNodes();
     }
     
     /**
@@ -267,7 +267,7 @@ abstract class AbstractDHTController implements DHTController {
             RouterService.schedule(this, delay, delay);
         }
         
-        public synchronized void start() {
+        public void start() {
             running = true;
         }
         
@@ -294,7 +294,7 @@ abstract class AbstractDHTController implements DHTController {
         }
         
         //TODO: Use zlati's cancellable timer task when merging back
-        public synchronized void stop() {
+        public void stop() {
             running = false;
         }
     }

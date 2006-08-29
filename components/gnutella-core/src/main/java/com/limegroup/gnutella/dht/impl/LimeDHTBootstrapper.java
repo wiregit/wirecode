@@ -21,7 +21,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.event.BootstrapEvent.EventType;
 
 /**
  * 
@@ -29,11 +29,6 @@ import com.limegroup.mojito.event.BootstrapEvent.Type;
 class LimeDHTBootstrapper implements DHTBootstrapper{
     
     private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
-    
-    /**
-     * The instance of the DHT
-     */
-    private MojitoDHT dht;
     
     /**
      * The DHT controller
@@ -80,9 +75,9 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
      * the future.
      * 
      */
-    public synchronized void bootstrap(MojitoDHT dht) {
+    public void bootstrap() {
         
-        this.dht = dht;
+        MojitoDHT dht = controller.getMojitoDHT();
         
         if(dht.isBootstrapped()) {
             return;
@@ -116,6 +111,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         }
         
         if(waiting.getAndSet(false) || bootstrappingFromRT.getAndSet(false)) {
+            MojitoDHT dht = controller.getMojitoDHT();
+            
             //we may have bootstrapped (Mojito internal -- see RandomBucketRefresher.run()) 
             //in the meanwhile
             if(dht.isBootstrapped()) {
@@ -137,7 +134,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         dhtNodeFetcher.requestDHTHosts(hostAddress);
     }
 
-    public synchronized void stop() {
+    public void stop() {
         
         LOG.debug("Stoping");
         
@@ -182,7 +179,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             try {
                 String host = hostString.substring(0, index);
                 int port = Integer.parseInt(hostString.substring(index+1).trim());
-                InetSocketAddress addr = new InetSocketAddress(host, port);
+                SocketAddress addr = new InetSocketAddress(host, port);
                 hostList.add(addr);
             } catch(NumberFormatException nfe) {
                 LOG.error(new UnknownHostException("invalid host: " + hostString));
@@ -193,6 +190,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             return null;
         }
         
+        MojitoDHT dht = controller.getMojitoDHT();
+        
         //each host in the list is responsible for a subspace of the keyspace
         //first 4 bits responsible for dividing the keyspace
         int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
@@ -202,28 +201,29 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     }
     
     private void handleSuccess() {
-        //Notify our connections that we are now a bootstrapped DHT node 
+        // Notify our connections that we are now a bootstrapped DHT node 
         controller.sendUpdatedCapabilities();
     }
     
     private class InitialBootstrapListener implements BootstrapListener{
         public void handleResult(BootstrapEvent result) {
             
-            if(result.getType() == Type.PING_SUCCEEDED) {
-                
+            if(EventType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap ping succeded");
                 
                 waiting.set(false);
                 bootstrappingFromRT.set(false);
                 return;
-            } else if(result.getType() == Type.SUCCEEDED) {
                 
+            } else if(EventType.BOOTSTRAPPING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap completed");
 
                 handleSuccess();
                 return;
             } 
 
+            MojitoDHT dht = controller.getMojitoDHT();
+            
             //failure!
             if(bootstrappingFromRT.getAndSet(false)) {
                 //we were bootstrapping from the RT AND failed: try SIMPP hosts
@@ -265,12 +265,13 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
                     LOG.debug("Retrying bootstrap with host list: "+bootstrapHosts);
                 }
                 
-                bootstrapHosts.removeAll(result.getFailedHostList());
+                bootstrapHosts.removeAll(result.getFailedHosts());
                 bootstrappingFromRT.set(bootstrapHosts.isEmpty());
                 bootstrapFuture = dht.bootstrap(bootstrapHosts);
                 bootstrapFuture.addDHTEventListener(this);
             }
         }
+        
         public void handleThrowable(Throwable ex) {
             LOG.error("Throwable", ex);
             stop();
@@ -283,33 +284,35 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             //this listener should never be called when bootstrapping from RT
             Assert.that(!bootstrappingFromRT.get());
             
-            if(result.getType() == Type.PING_SUCCEEDED) {
-                
+            if(EventType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Ping succeded in waitingBootstrapListener");
                 
                 waiting.set(false); //this will also stop the node fetcher
                 return;
-            } else if(result.getType() == Type.SUCCEEDED) {
                 
+            } else if(EventType.BOOTSTRAPPING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Bootstrap succeded in waitingBootstrapListener");
                 
                 handleSuccess();
                 return;
-            } else {
                 
-                LOG.debug("hostlist: "+result.getFailedHostList()+" failed in waitingBootstrapListener");
-                
-                synchronized(bootstrapHosts) {
-                    bootstrapHosts.removeAll(result.getFailedHostList());
-                    if(bootstrapHosts.isEmpty()) {
-                        waiting.set(true);
-                        return;
-                    } 
-                }
-                bootstrapFuture = dht.bootstrap(bootstrapHosts);
-                bootstrapFuture.addDHTEventListener(this);
             }
+                
+            LOG.debug("hostlist: "+result.getFailedHosts()+" failed in waitingBootstrapListener");
+            
+            synchronized(bootstrapHosts) {
+                bootstrapHosts.removeAll(result.getFailedHosts());
+                if(bootstrapHosts.isEmpty()) {
+                    waiting.set(true);
+                    return;
+                } 
+            }
+            
+            MojitoDHT dht = controller.getMojitoDHT();
+            bootstrapFuture = dht.bootstrap(bootstrapHosts);
+            bootstrapFuture.addDHTEventListener(this);
         }
+        
         public void handleThrowable(Throwable ex) {
             LOG.debug(ex);
             stop();

@@ -16,8 +16,28 @@ public interface DHTManager extends LifecycleListener {
      * Various modes a DHT Node may have
      */
     public static enum DHTMode {
+        
+        /**
+         * A DHT Node is in INACTIVE mode if it's in theory DHT 
+         * capable but doesn't connect to the DHT for reasons
+         * like an unreliable Internet connection.
+         */
         INACTIVE(0x00),
+        
+        /**
+         * A DHT Node is ACTIVE mode if it's a full participant
+         * of the DHT.
+         * 
+         * Non-Firewalled Gnutella leave Nodes
+         */
         ACTIVE(0x01),
+        
+        /**
+         * A DHT Node is in PASSIVE mode if it's connected to
+         * the DHT but participates passively in the DHT.
+         * 
+         * Ultrapeers
+         */
         PASSIVE(0x02);
         
         public static final byte DHT_MODE_MASK = 0x0F;
@@ -28,20 +48,11 @@ public interface DHTManager extends LifecycleListener {
             this.mode = (byte)(state & 0xFF);
         }
         
+        /**
+         * Returns the mode as byte
+         */
         public byte toByte() {
             return mode;
-        }
-        
-        public boolean isInactive() {
-            return (this == INACTIVE);
-        }
-        
-        public boolean isActive() {
-            return (this == ACTIVE);
-        }
-        
-        public boolean isPassive() {
-            return (this == PASSIVE);
         }
         
         private static final DHTMode[] MODES;
@@ -56,6 +67,10 @@ public interface DHTManager extends LifecycleListener {
             }
         }
         
+        /**
+         * Returns a DHTMode enum for the given mode and null
+         * if no such DHTMode exists.
+         */
         public static DHTMode valueOf(byte mode) {
             int index = (mode & 0xFF) % MODES.length;
             DHTMode s = MODES[index];
@@ -90,7 +105,7 @@ public interface DHTManager extends LifecycleListener {
      * Called whenever our external Address has changed
      */
     public void addressChanged();
-
+    
     /**
      * Returns maxNodes number of active Node's IP:Ports
      */

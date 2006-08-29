@@ -79,17 +79,16 @@ public class DHTNodeFetcher {
         //node we can exit the loop.
         boolean haveActive = false;
         for(ExtendedEndpoint ep : dhtHosts) {
-            if (DHTMode.ACTIVE == ep.getDHTMode()) {
-                
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Adding active host from HostCatcher: "+ ep.getAddress());
-                }
-                
-                haveActive = true;
-                bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
-            } else {
+            if (!DHTMode.ACTIVE.equals(ep.getDHTMode())) {
                 break;
             }
+            
+            if(LOG.isDebugEnabled()){
+                LOG.debug("Adding active host from HostCatcher: "+ ep.getAddress());
+            }
+            
+            haveActive = true;
+            bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
         }
         
         if(haveActive) { //we have added active hosts already - no need to request
@@ -133,7 +132,6 @@ public class DHTNodeFetcher {
         if(!RouterService.isConnected()) {
             return;
         }   
-        
         
         if(!(hostAddress instanceof InetSocketAddress)) {
             return;

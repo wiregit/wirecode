@@ -130,11 +130,11 @@ public class HostCatcher {
             public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
                 DHTMode mode1 = e1.getDHTMode();
                 DHTMode mode2 = e2.getDHTMode();
-                if ((mode1.isActive() && !mode2.isActive())
-                        || (mode1.isPassive() && mode2.isInactive())) {
+                if ((mode1.equals(DHTMode.ACTIVE) && !mode2.equals(DHTMode.ACTIVE))
+                        || (mode1.equals(DHTMode.PASSIVE) && mode2.equals(DHTMode.INACTIVE))) {
                     return -1;
-                } else if ((mode2.isActive() && !mode1.isActive())
-                        || (mode2.isPassive() && mode1.isInactive())) {
+                } else if ((mode2.equals(DHTMode.ACTIVE) && !mode1.equals(DHTMode.ACTIVE))
+                        || (mode2.equals(DHTMode.PASSIVE) && mode1.equals(DHTMode.INACTIVE))) {
                     return 1;
                 } else {
                     return 0;
@@ -567,14 +567,15 @@ public class HostCatcher {
         
         int dhtVersion = pr.getDHTVersion();
         if(dhtVersion > -1) {
+            DHTMode mode = pr.getDHTMode();
             endpoint.setDHTVersion(dhtVersion);
-            endpoint.setDHTMode(pr.getDHTMode());
+            endpoint.setDHTMode(mode);
             //if active DHT endpoint, immediately send to dht manager
-            if(endpoint.getDHTMode().isActive()) {
+            if(mode.equals(DHTMode.ACTIVE)) {
                 SocketAddress address = new InetSocketAddress(
                         endpoint.getAddress(), endpoint.getPort());
                 RouterService.getDHTManager().addActiveDHTNode(address);
-            } else if(endpoint.getDHTMode().isPassive()) {
+            } else if(mode.equals(DHTMode.PASSIVE)) {
                 SocketAddress address = new InetSocketAddress(
                         endpoint.getAddress(), endpoint.getPort());
                 RouterService.getDHTManager().addPassiveDHTNode(address);
