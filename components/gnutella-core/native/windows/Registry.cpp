@@ -116,7 +116,7 @@ bool RegistryWriteText(LPCTSTR root, LPCTSTR path, LPCTSTR name, LPCTSTR value) 
 	// Set or make and set the text value
 	int result = RegSetValueEx(
 		registry.Key,        // Handle to an open key
-		name,                // Name of the valeu to set or make and set
+		name,                // Name of the value to set or make and set
 		0,
 		REG_SZ,              // Variable type is a null-terminated string
 		(const BYTE *)value, // Address of the value data to load
@@ -185,7 +185,7 @@ bool CRegistry::Open(LPCTSTR root, LPCTSTR path, DWORD access) {
 	if (result != ERROR_SUCCESS) return false;
 
 	// Save the open key in this CRegistry object
-	key = k;
+	Key = k;
 	return true;
 }
 
