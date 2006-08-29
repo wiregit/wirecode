@@ -33,7 +33,7 @@ import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.FindValueListener;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.StoreListener;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.event.BootstrapEvent.EventType;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.PlanetLabTestsStatContainer;
 import com.limegroup.mojito.statistics.StatsManager;
@@ -146,7 +146,7 @@ public class PlanetLab {
                     DHTFuture future = dht.bootstrap(dst);
                     BootstrapEvent event = (BootstrapEvent) future.get();
                     
-                    if(event.getType() == Type.SUCCEEDED) {
+                    if(event.getEventType() == EventType.BOOTSTRAPPING_SUCCEEDED) {
                         StringBuffer buffer = new StringBuffer();
                         buffer.append(index).append(": finished bootstrapping phase TWO in ");
                         buffer.append(event.getTotalTime()).append(" ms ");
@@ -390,7 +390,7 @@ public class PlanetLab {
                         
                         DHTFuture future = dht.bootstrap(bootstrapServer);
                         BootstrapEvent event = (BootstrapEvent) future.get();
-                        if(event.getType() == Type.SUCCEEDED) {
+                        if(event.getEventType() == EventType.BOOTSTRAPPING_SUCCEEDED) {
                             running = true;
                         } 
                         planetlabStats.CHURN_RECONNECTS.incrementStat();

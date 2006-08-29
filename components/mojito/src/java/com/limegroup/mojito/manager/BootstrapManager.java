@@ -21,6 +21,7 @@ package com.limegroup.mojito.manager;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,7 +37,6 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
@@ -47,7 +47,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
- * 
+ * The BootstrapManager manages the entire bootstrap process.
  */
 public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
@@ -55,7 +55,6 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
 	/**
 	 * The maximum number of nodes that can fail per lookup (until the timeout)
-	 * 
 	 */
 	private static final int MAX_NODE_FAILED_PER_LOOKUP = 
 		(int)((KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue()
@@ -72,58 +71,69 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         super(context);
     }
     
+    /**
+     * Returns true if this Node is currently bootstrapping
+     */
     public boolean isBootstrapping() {
         synchronized(lock) {
             return future != null;
         }
     }
     
-    public synchronized boolean isBootstrapped() {
+    /**
+     * Returns true if this Node has bootstrapped successfully
+     */
+    public boolean isBootstrapped() {
         return bootstrapped;
     }
     
-    public synchronized void setBootstrapped(boolean bootstrapped) {
+    /**
+     * An internal method to set the bootsrapped flag.
+     * Meant for internal use only.
+     */
+    public void setBootstrapped(boolean bootstrapped) {
         this.bootstrapped = bootstrapped;
     }
     
+    /**
+     * Re-Bootstrap from the internal RouteTable
+     */
+    @SuppressWarnings("unchecked")
     public DHTFuture<BootstrapEvent> bootstrap() {
-        synchronized(lock) {
-        	if(future != null) {
-            	future.cancel(true);
-                future = null;
-            }
-            Bootstrapper bootstrapper = new Bootstrapper();
-            future = new BootstrapFuture(bootstrapper);
-            
-            context.execute(future);
-            
-            return future;
-        }
+        return bootstrap(Collections.EMPTY_SET);
     }
     
+    /**
+     * Bootstrap from the given Set of Hosts
+     */
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
         synchronized (lock) {
+            // Cancel an active process
             if(future != null) {
             	future.cancel(true);
                 future = null;
             }
+            
             // Preserve the order of the Set
             Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
-            Bootstrapper bootstrapper = new Bootstrapper(copy);
-            future = new BootstrapFuture(bootstrapper);
-            
+            BootstrapProcess process = new BootstrapProcess(copy);
+            future = new BootstrapFuture(process);
             context.execute(future);
-            
             return future;
         }
     }
     
     /**
-     * Ping
-     * Lookup own Node ID
-     * Lookup radnom IDs
+     * The bootstrap process looks like:
+     * 
+     * +--->
+     * |   1) Find a Node that responds to our Ping
+     * |   2) Lookup own Node ID
+     * |   3) Lookup radnom IDs
+     * +---4) Prune RouteTable and restart if too many errors in #3
+     *     5) Done
      */
-    private class Bootstrapper implements Callable<BootstrapEvent> {
+    private class BootstrapProcess implements Callable<BootstrapEvent> {
     	
         private Set<SocketAddress> hostSet = null;
         
@@ -132,15 +142,12 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         private long phaseTwoStart = 0L;
         private long stop = 0L;
         
-        private boolean retriedBootstrap;
+        private boolean retriedBootstrap = false;
         
-        private List<SocketAddress> failed = new ArrayList<SocketAddress>();
-        
-        private Bootstrapper() {
-        }
-        
+        private List<SocketAddress> failedHosts = new ArrayList<SocketAddress>();
+
         @SuppressWarnings("unchecked")
-        private Bootstrapper(Set<? extends SocketAddress> hostSet) {
+        private BootstrapProcess(Set<? extends SocketAddress> hostSet) {
             this.hostSet = (Set<SocketAddress>)hostSet;
         }
         
@@ -155,14 +162,15 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             if (node == null) {
                 LOG.debug("Bootstrap failed: no bootstrap host");
-                return new BootstrapEvent(failed, System.currentTimeMillis()-start);
+                return BootstrapEvent.createBootstrappingFailedEvent(
+                        failedHosts, System.currentTimeMillis()-start);
             }
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
-            future.fireResult(new BootstrapEvent(Type.PING_SUCCEEDED));
+            future.fireResult(BootstrapEvent.createBootstrapPingSucceededEvent());
             phaseOneStart = System.currentTimeMillis();
 
             boolean foundNewContacts = startBootstrapLookups(node);
@@ -177,7 +185,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             	if(LOG.isDebugEnabled()) {
                     LOG.debug("Bootstrap failed at phase 1 or phase 2");
                 }
-                return new BootstrapEvent(failed, phaseOneTime+phaseTwoTime+phaseZeroTime);
+                return BootstrapEvent.createBootstrappingFailedEvent(
+                        failedHosts, phaseOneTime+phaseTwoTime+phaseZeroTime);
             }
             
             /*long totalTime = stop - start;
@@ -190,7 +199,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             System.out.println(buffer.toString());*/
             
             bootstrapped = true;
-            return new BootstrapEvent(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
+            return BootstrapEvent.createBootstrappingSucceededEvent(
+                    failedHosts, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         
         /**
@@ -207,7 +217,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 try {
                     FindNodeEvent findNode = phaseOne(node);
                     if(findNode.getNodes().size() == 0) {
-                        failed.add(node.getContactAddress());
+                        failedHosts.add(node.getContactAddress());
                         return false;
                     }
                     break;
@@ -244,7 +254,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             try {
                 return handler.call();
             } catch (BootstrapTimeoutException exception) {
-                failed.addAll(exception.getFailedHosts());
+                failedHosts.addAll(exception.getFailedHosts());
             }
             
             return null;
@@ -269,7 +279,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 try {
                     return handler.call();
                 } catch (BootstrapTimeoutException exception) {
-                    failed.addAll(exception.getFailedHosts());
+                    failedHosts.addAll(exception.getFailedHosts());
                 }
             }
             

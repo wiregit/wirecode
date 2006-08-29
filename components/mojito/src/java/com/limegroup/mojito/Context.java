@@ -783,6 +783,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException("get");
         }
+        
         return findValueManager.lookup(key);
     }
     

@@ -724,14 +724,14 @@ public class HostCatcherTest extends BaseTestCase {
         assertEquals(10, hostList.size());
         ep = hostList.get(0);
         assertEquals("18.239.0.101", ep.getAddress());
-        assertTrue(ep.getDHTMode().isActive());
+        assertTrue(ep.getDHTMode().equals(DHTMode.ACTIVE));
         
         hostList.remove(0);
         ep = hostList.iterator().next();
-        assertTrue(ep.getDHTMode().isPassive());
+        assertTrue(ep.getDHTMode().equals(DHTMode.PASSIVE));
         ep = hostList.get(hostList.size()-1);
-        assertFalse(ep.getDHTMode().isPassive());
-        assertTrue(ep.getDHTMode().isInactive());
+        assertFalse(ep.getDHTMode().equals(DHTMode.PASSIVE));
+        assertTrue(ep.getDHTMode().equals(DHTMode.INACTIVE));
         
         //try excluding version
         hostList = hc.getDHTSupportEndpoint(2);

@@ -37,7 +37,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.BootstrapEvent.Type;
+import com.limegroup.mojito.event.BootstrapEvent.EventType;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -195,7 +195,7 @@ public class CommandHandler {
         
         BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
-                if (result.getType() == Type.SUCCEEDED) {
+                if (result.getEventType() == EventType.BOOTSTRAPPING_SUCCEEDED) {
                     out.println("Bootstraping finished:\n" + result);
                     out.flush();
                 }

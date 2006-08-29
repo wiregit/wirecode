@@ -46,8 +46,8 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub());
         MojitoDHT dht = MojitoFactory.createDHT();
+        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht));
         dhtContext = (Context)dht;
         dhtContext.bind(new InetSocketAddress("localhost", 2000));
         dhtContext.start();
@@ -63,7 +63,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     public void testAddBootstrapHost() throws Exception{
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
-        bootstrapper.bootstrap(dhtContext);
+        bootstrapper.bootstrap();
         DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         Thread.sleep(300);
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
@@ -86,7 +86,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     
     public void testNotCancelBootstrap() throws Exception {
         //now try bootstrapping of hostlist and see if it cancels (it should not)
-        bootstrapper.bootstrap(dhtContext);
+        bootstrapper.bootstrap();
         Thread.sleep(1000);
         assertTrue("Should be waiting", bootstrapper.isWaitingForNodes());
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",5000));
@@ -112,7 +112,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         Contact localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext, "localNode", localNode);
         
-        bootstrapper.bootstrap(dhtContext);
+        bootstrapper.bootstrap();
         InetSocketAddress addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
         String address = addr.getHostName();
         int port = addr.getPort();

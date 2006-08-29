@@ -30,55 +30,82 @@ import com.limegroup.mojito.util.CollectionUtils;
  */
 public class BootstrapEvent {
     
-    public static enum Type {
-        PING_SUCCEEDED,
-        SUCCEEDED,
-        FAILED;
+    /**
+     * Various types of Bootstrap Events
+     */
+    public static enum EventType {
+        
+        /**
+         * Fired when the initial bootstrap ping succeded.
+         * The bootstrap process continues and finishes
+         * with either BOOTSTRAPPING_SUCCEEDED or 
+         * BOOTSTRAPPING_FAILED
+         */
+        BOOTSTRAP_PING_SUCCEEDED,
+        
+        /**
+         * Fired when the bootstrap process finished
+         * successfully
+         */
+        BOOTSTRAPPING_SUCCEEDED,
+        
+        /**
+         * Fired when the bootstrap process finished
+         * unsuccessfully
+         */
+        BOOTSTRAPPING_FAILED;
     }
     
-    private List<SocketAddress> failed;
+    private List<SocketAddress> failedHosts;
     
-    private long phaseZeroTime = 0L;
-    private long phaseOneTime = 0L;
-    private long phaseTwoTime = 0L;
+    private long phaseZeroTime = -1L;
+    private long phaseOneTime = -1L;
+    private long phaseTwoTime = -1L;
     private boolean foundNewContacts = false;
     
-    private Type type;
-    
-    public BootstrapEvent(List<? extends SocketAddress> failed, long phaseZeroTime) {
-        this(failed, phaseZeroTime, 0L, 0L, false, Type.FAILED);
-    }
-    
-    public BootstrapEvent(List<? extends SocketAddress> failed, 
-            long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
-            boolean foundNewContacts) {
-        this(failed, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts, Type.SUCCEEDED);
-    }
+    private EventType eventType;
     
     @SuppressWarnings("unchecked")
-    public BootstrapEvent(Type type) {
-        this(Collections.EMPTY_LIST, 0L, 0L, 0L, false, type);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public BootstrapEvent(List<? extends SocketAddress> failed, 
-            long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
-            boolean foundNewContacts, Type type) {
+    public static BootstrapEvent createBootstrapPingSucceededEvent() {
         
-        this.failed = (List<SocketAddress>)failed;
+        return new BootstrapEvent(Collections.EMPTY_LIST, -1L, 
+                -1L, -1L, false, EventType.BOOTSTRAP_PING_SUCCEEDED);
+    }
+    
+    public static BootstrapEvent createBootstrappingFailedEvent(
+            List<? extends SocketAddress> failedHosts, long phaseZero) {
+        
+        return new BootstrapEvent(failedHosts, phaseZero, 
+                -1L, -1L, false, EventType.BOOTSTRAPPING_FAILED);
+    }
+    
+    public static BootstrapEvent createBootstrappingSucceededEvent(
+            List<? extends SocketAddress> failedHosts, long phaseZero, 
+            long phaseOne, long phaseTwo, boolean foundsNewContacts) {
+        
+        return new BootstrapEvent(failedHosts, phaseZero, phaseOne, 
+                phaseTwo, foundsNewContacts, EventType.BOOTSTRAP_PING_SUCCEEDED);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private BootstrapEvent(List<? extends SocketAddress> failedHosts, 
+            long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
+            boolean foundNewContacts, EventType eventType) {
+        
+        this.failedHosts = (List<SocketAddress>)failedHosts;
         this.phaseZeroTime = phaseZeroTime;
         this.phaseOneTime = phaseOneTime;
         this.phaseTwoTime = phaseTwoTime;
         this.foundNewContacts = foundNewContacts;
-        this.type = type;
+        this.eventType = eventType;
     }
     
-    public Type getType() {
-        return type;
+    public EventType getEventType() {
+        return eventType;
     }
     
-    public List<SocketAddress> getFailedHostList() {
-        return failed;
+    public List<SocketAddress> getFailedHosts() {
+        return failedHosts;
     }
     
     public long getPhaseZeroTime() {
@@ -94,7 +121,16 @@ public class BootstrapEvent {
     }
 
     public long getTotalTime() {
-        return phaseZeroTime + phaseOneTime + phaseTwoTime;
+        if (phaseZeroTime != -1) {
+            if (phaseOneTime != -1) {
+                if (phaseTwoTime != -1) {
+                    return phaseZeroTime + phaseOneTime + phaseTwoTime;
+                }
+                return phaseZeroTime + phaseOneTime;
+            }
+            return phaseZeroTime;
+        }
+        return -1L;
     }
     
     public boolean hasFoundNewContacts() {
@@ -103,16 +139,14 @@ public class BootstrapEvent {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("State: ").append(type).append("\n");
+        buffer.append("State: ").append(eventType).append("\n");
         buffer.append("Phase #0: ").append(getPhaseZeroTime()).append("ms\n");
         buffer.append("Phase #1: ").append(getPhaseOneTime()).append("ms\n");
         buffer.append("Phase #2: ").append(getPhaseTwoTime()).append("ms\n");
         buffer.append("Total: ").append(getTotalTime()).append("ms\n");
         
-        if (failed.isEmpty()) {
-            buffer.append("Failed: NONE");
-        } else {
-            buffer.append("Failed: ").append(CollectionUtils.toString(failed));
+        if (!failedHosts.isEmpty()) {
+            buffer.append("Failed: ").append(CollectionUtils.toString(failedHosts));
         }
         
         return buffer.toString();

@@ -9,12 +9,10 @@ import com.limegroup.mojito.MojitoDHT;
 
 public class DHTControllerStub implements DHTController {
     
-    private byte[] localNodeId;
-    
-    public DHTControllerStub() {};
-    
-    public DHTControllerStub(byte[] localNodeId) {
-        this.localNodeId = localNodeId;
+    private MojitoDHT dht;
+
+    public DHTControllerStub(MojitoDHT dht) {
+        this.dht = dht;
     }
 
     public void addActiveDHTNode(SocketAddress hostAddress) {
@@ -32,7 +30,7 @@ public class DHTControllerStub implements DHTController {
     }
 
     public MojitoDHT getMojitoDHT() {
-        return null;
+        return dht;
     }
 
     public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
