@@ -109,10 +109,18 @@ public class MojitoFactory {
         }
     }
     
+    public static MojitoDHT load(InputStream in) 
+            throws ClassNotFoundException, IOException {
+        
+        return load(in, 
+                ContextSettings.VENDOR.getValue(), 
+                ContextSettings.VERSION.getValue());
+    }
+    
     /**
      * Loads a Mojito DHT instance from the InputStream.
      */
-    public static MojitoDHT load(InputStream in) 
+    public static MojitoDHT load(InputStream in, int vendor, int version) 
             throws ClassNotFoundException, IOException {
         
         ObjectInputStream ois = new ObjectInputStream(in);
@@ -151,7 +159,7 @@ public class MojitoFactory {
             timeout = true;
         }
         
-        Context context = new Context(name, routeTable, database);
+        Context context = new Context(name, vendor, version, routeTable, database);
         
         if (timeout) {
             if (LOG.isInfoEnabled()) {

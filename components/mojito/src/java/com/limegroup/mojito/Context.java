@@ -146,13 +146,16 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Constructor to create a Context from a pre-existing
      * RouteTable and Database.
      */
-    Context(String name, RouteTable routeTable, Database database) {
+    Context(String name, int vendor, int version, RouteTable routeTable, Database database) {
         this.name = name;
         
         assert (routeTable != null);
         assert (database != null);
         
         this.localNode = (LocalContact)routeTable.getLocalNode();
+        this.localNode.setVendor(vendor);
+        this.localNode.setVersion(version);
+        
         this.routeTable = routeTable;
         this.database = database;
         

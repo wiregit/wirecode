@@ -26,7 +26,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     /**
      * The file to persist this Mojito DHT
      */
-    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "routetable.mojito");
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
     public ActiveDHTNodeController(int vendor, int version) {
 
@@ -39,7 +39,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
             FileInputStream in = null;
             try {
                 in = new FileInputStream(FILE);
-                mojitoDHT = MojitoFactory.load(in);
+                mojitoDHT = MojitoFactory.load(in, vendor, version);
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
             } catch (ClassNotFoundException e) {

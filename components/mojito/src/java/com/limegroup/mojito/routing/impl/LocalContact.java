@@ -72,14 +72,33 @@ public class LocalContact implements Contact {
         contactAddress = new InetSocketAddress("localhost", 0);
     }
     
+    /**
+     * Sets the local Node's vendor code
+     */
+    public void setVendor(int vendor) {
+        this.vendor = vendor;
+    }
+    
     public int getVendor() {
         return vendor;
     }
-
+    
+    /**
+     * Sets the local Node's version number
+     */
+    public void setVersion(int version) {
+        this.version = version;
+    }
+    
     public int getVersion() {
         return version;
     }
     
+    /**
+     * Sets the local Node's KUID
+     * 
+     * NOTE: This requires a rebuild of the RouteTable!
+     */
     public void setNodeID(KUID nodeId) {
         this.nodeId = nodeId;
     }
