@@ -160,17 +160,16 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         
         clear();
     }
-    
+
     @Override
     public synchronized boolean isRunning() {
-        return isOpen() && getDatagramChannel().isRegistered();
+        return isOpen() && channel.isRegistered();
     }
 
     @Override
     protected boolean allow(DHTMessage message) {
         return true;
     }
-    
     
     @Override
     protected void process(Runnable runnable) {
@@ -185,11 +184,15 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
 
     private void interest(int ops, boolean on) {
+        DatagramChannel c = channel;
+        if (c == null) {
+            return;
+        }
+        
         try {
-            DatagramChannel channel = getDatagramChannel();
-            SelectionKey sk = channel.keyFor(selector);
+            SelectionKey sk = c.keyFor(selector);
             if (sk != null && sk.isValid()) {
-                synchronized(channel.blockingLock()) {
+                synchronized(c.blockingLock()) {
                     if (on) {
                         sk.interestOps(sk.interestOps() | ops);
                     } else {
@@ -235,12 +238,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
             } catch (ClosedSelectorException err) {
                 // thrown as close() is called asynchronously
-                //LOG.error(err);
+                //LOG.error("ClosedSelectorException", err);
             } catch (ClosedChannelException err) {
                 // thrown as close() is called asynchronously
-                //LOG.error(err);
+                //LOG.error("ClosedChannelException", err);
             } catch (IOException err) {
-                LOG.fatal("MessageHandler IO exception: ",err);
+                LOG.fatal("IOException", err);
             }
         }
     }
