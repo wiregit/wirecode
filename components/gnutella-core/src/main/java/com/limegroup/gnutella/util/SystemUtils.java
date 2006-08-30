@@ -184,7 +184,7 @@ public class SystemUtils {
     }
 
     /**
-     * Deletes a variable or key in the Windows Registry.
+     * Deletes a key in the Windows Registry.
      * 
      * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
      * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
