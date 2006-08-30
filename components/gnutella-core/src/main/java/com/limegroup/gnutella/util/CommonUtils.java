@@ -806,7 +806,7 @@ public final class CommonUtils {
             // In some Java 1.4 implementations, System.getenv() is 
             // depricated with prejudice (throws java.lang.Error).
             if (isJava15OrLater()) {
-                appdata = System.getProperty("LIMEWIRE_PREFS_DIR", System.getenv("APPDATA"));
+                appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
             } else {
                 // null string will fall back on default
                 appdata = System.getProperty("LIMEWIRE_PREFS_DIR",null);

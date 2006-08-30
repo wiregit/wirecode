@@ -19,6 +19,31 @@ CString GetRunningPath() {
 	return bay;
 }
 
+// Takes a special folder name, like "ApplicationData"
+// Looks up the full path to that folder for the current user as the user has customized it
+// Returns the path like "C:\Documents and Settings\UserName\Application Data", or blank on error
+JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name) {
+	return MakeJavaString(e, GetSpecialPath(GetJavaString(e, name)));
+}
+CString GetSpecialPath(LPCTSTR name) {
+
+	// Look up the special folder ID from the given special folder name
+	int id;
+	if      (name == CString("Documents"))         id = CSIDL_PERSONAL;
+	else if (name == CString("ApplicationData"))   id = CSIDL_APPDATA;
+	else if (name == CString("Desktop"))           id = CSIDL_DESKTOPDIRECTORY;
+	else if (name == CString("StartMenu"))         id = CSIDL_STARTMENU;
+	else if (name == CString("StartMenuPrograms")) id = CSIDL_PROGRAMS;
+	else if (name == CString("StartMenuStartup"))  id = CSIDL_STARTUP;
+	else return ""; // The given name is not in our list
+
+	// Get the path of the special folder
+	TCHAR bay[MAX_PATH];
+	CString path;
+	if (SHGetSpecialFolderPath(NULL, bay, id, false)) path = bay;
+	return path; // If SHGetSpecialFolderPath failed, path will still be blank
+}
+
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
 // Opens it with the default program or the default Web browser
 JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url) {

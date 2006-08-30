@@ -89,7 +89,7 @@ public class SystemUtils {
     private static final native int setOpenFileLimit0(int max);
 
 	/**
-	 * Get the path to the Windows launcher .exe file that is us running right now.
+	 * Gets the path to the Windows launcher .exe file that is us running right now.
 	 * 
 	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
 	 *         Blank on error.
@@ -99,6 +99,30 @@ public class SystemUtils {
     		return getRunningPathNative();
     	return "";
     }
+
+    /**
+	 * Gets the complete path to a special folder in the platform operating system shell.
+	 * 
+	 * The returned path is specific to the current user, and current to how the user has customized it.
+	 * Here are the given special folder names and example return paths this method currently supports on Windows:
+	 * 
+	 * <pre>
+	 * Documents         C:\Documents and Settings\UserName\My Documents
+	 * ApplicationData   C:\Documents and Settings\UserName\Application Data
+	 * Desktop           C:\Documents and Settings\UserName\Desktop
+	 * StartMenu         C:\Documents and Settings\UserName\Start Menu
+	 * StartMenuPrograms C:\Documents and Settings\UserName\Start Menu\Programs
+	 * StartMenuStartup  C:\Documents and Settings\UserName\Start Menu\Programs\Startup
+	 * </pre>
+	 * 
+	 * @param name The name of a special folder
+	 * @return     The path to that folder, or blank on error
+	 */
+    public static final String getSpecialPath(String name) {
+    	if (CommonUtils.isWindows() && isLoaded)
+    		return getSpecialPathNative(name);
+    	return "";
+    }    
 
     /**
      * Changes the icon of a window.
@@ -361,6 +385,7 @@ public class SystemUtils {
      */
 
     private static final native String getRunningPathNative();
+    private static final native String getSpecialPathNative(String name);    
     private static final native void openURLNative(String url);
     private static final native void openFileNative(String path);
     private static final native boolean recycleNative(String path);
