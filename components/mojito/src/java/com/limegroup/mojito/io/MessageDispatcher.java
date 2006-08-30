@@ -246,17 +246,18 @@ public abstract class MessageDispatcher {
         }
         
         KUID nodeId = tag.getNodeID();
-        SocketAddress dst = tag.getSocketAddres();
+        SocketAddress dst = tag.getSocketAddress();
         DHTMessage message = tag.getMessage();
         
-        // Make sure we're not sending messages to ourself
-        if (context.isLocalNode(nodeId, dst)
-                && !(message instanceof PingRequest)) {
-            
-            if (LOG.isErrorEnabled()) {
+        if (context.isLocalContactAddress(dst)
+        		|| (context.isLocalNodeID(nodeId) 
+        				&& !(message instanceof PingRequest))) {
+        	
+        	if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
                         + " to ourself " + ContactUtils.toString(nodeId, dst));
             }
+        	
             tag.handleError(new IOException("Cannot send message to yourself"));
             return false;
         }
@@ -387,10 +388,11 @@ public abstract class MessageDispatcher {
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getContactAddress();
         
-        if (context.isLocalNode(nodeId, src)
-                && !(message instanceof PingResponse)) {
-            
-            if (LOG.isErrorEnabled()) {
+        if (context.isLocalContactAddress(src)
+        		|| (context.isLocalNodeID(nodeId) 
+        				&& !(message instanceof PingResponse))) {
+        	
+        	if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
                         + " from ourself " + ContactUtils.toString(nodeId, src));
             }
@@ -525,7 +527,7 @@ public abstract class MessageDispatcher {
             }
             
             try {
-                SocketAddress dst = tag.getSocketAddres();
+                SocketAddress dst = tag.getSocketAddress();
                 ByteBuffer data = tag.getData();
                 assert data != null : "Somebody set Data to null";
 

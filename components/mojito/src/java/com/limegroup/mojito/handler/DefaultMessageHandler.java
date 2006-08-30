@@ -37,6 +37,7 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
@@ -120,11 +121,30 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             return;
         }
         
+        KUID nodeId = node.getNodeID();
+        if (context.isLocalNodeID(nodeId)) {
+        	if (message instanceof PingResponse) {
+        		// This is expected if there's a Node ID collision
+        		if (LOG.isInfoEnabled()) {
+        			LOG.info("Looks like our NodeID collides with " + node);
+        		}
+        	} else {
+        		// This is unexpected. The MessageDispatcher should have
+        		// caught it!
+        		if (LOG.isErrorEnabled()) {
+        			LOG.error("Received a " + message + " message from " + node 
+        					+ ". This message should have never gotten so far!");
+        		}
+        	}
+        	
+        	return;
+        }
+        
         RouteTable routeTable = context.getRouteTable();
         
         // Only do store forward if it is a new node in our routing table 
         // (we are (re)connecting to the network) or a node that is reconnecting
-        Contact existing = routeTable.get(node.getNodeID());
+        Contact existing = routeTable.get(nodeId);
         
         if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
             
@@ -132,11 +152,11 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             //we select the 2*k closest nodes in order to also check those values
             //where the local node is part of the k closest to the value but not part
             //of the k closest to the new joining node.
-            List<Contact> nodes = routeTable.select(node.getNodeID(), 2*k, false);
+            List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
             
             // Are we one of the K nearest Nodes to the contact?
             if (containsNodeID(nodes, context.getLocalNodeID())) {
-            //if (routeTable.isLocalBucket(node.getNodeID())) {
+            //if (routeTable.isLocalBucket(nodeId)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
                 }
