@@ -188,12 +188,11 @@ public class SystemUtils {
      * 
      * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
      * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
-     * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     False on error
      */
-    public static final boolean registryDelete(String root, String path, String name) {
+    public static final boolean registryDelete(String root, String path) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return registryDeleteNative(root, path, name);
+    		return registryDeleteNative(root, path);
     	else
     		return false;
     }
@@ -373,7 +372,7 @@ public class SystemUtils {
     private static final native String registryReadTextNative(String root, String path, String name);
     private static final native boolean registryWriteNumberNative(String root, String path, String name, int value);
     private static final native boolean registryWriteTextNative(String root, String path, String name, String value);
-    private static final native boolean registryDeleteNative(String root, String path, String name);
+    private static final native boolean registryDeleteNative(String root, String path);
 
     private static final native boolean firewallPresentNative();
     private static final native boolean firewallEnabledNative();

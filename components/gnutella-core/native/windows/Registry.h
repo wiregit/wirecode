@@ -14,7 +14,7 @@ extern "C" {
 	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
 	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value);
 	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value);
-	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
+	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path);
 
 #ifdef __cplusplus
 }
@@ -29,17 +29,18 @@ public:
 	HKEY Key;
 
 	// Open a registry key and store its handle in this object
-	bool Open(LPCTSTR root, LPCTSTR path, DWORD access);
+	bool Open(HKEY root, LPCTSTR path, DWORD access);
+	void Close() { if (Key) RegCloseKey(Key); Key = NULL; }
 
 	// Make a new local CRegistry object, and delete it when it goes out of scope
 	CRegistry() { Key = NULL; }
-	~CRegistry() { if (Key) RegCloseKey(Key); Key = NULL; }
+	~CRegistry() { Close(); }
 };
 
 // Functions in Registry.cpp
-int RegistryReadNumber(LPCTSTR root, LPCTSTR path, LPCTSTR name);
-CString RegistryReadText(LPCTSTR root, LPCTSTR path, LPCTSTR name);
-bool RegistryWriteNumber(LPCTSTR root, LPCTSTR path, LPCTSTR name, int value);
-bool RegistryWriteText(LPCTSTR root, LPCTSTR path, LPCTSTR name, LPCTSTR value);
-bool RegistryDelete(LPCTSTR root, LPCTSTR path, LPCTSTR name);
+int RegistryReadNumber(HKEY root, LPCTSTR path, LPCTSTR name);
+CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name);
+bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value);
+bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value);
+bool RegistryDelete(HKEY base, LPCTSTR path);
 HKEY RegistryName(LPCTSTR name);
