@@ -8,7 +8,7 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.routing.ContactFactory;
 
-public class LocalContactTest  extends BaseTestCase {
+public class LocalContactTest extends BaseTestCase {
     
     public LocalContactTest(String name) {
         super(name);

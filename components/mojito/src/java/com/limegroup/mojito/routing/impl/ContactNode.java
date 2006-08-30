@@ -122,7 +122,7 @@ public class ContactNode implements Contact {
      * as firewalled.
      */
     public void fixSourceAndContactAddress(SocketAddress sourceAddress) {
-        if (sourceAddress != null) {
+        if (sourceAddress != null && this.sourceAddress == null) {
             this.sourceAddress = sourceAddress;
             
             int port = ((InetSocketAddress)contactAddress).getPort();
@@ -133,7 +133,7 @@ public class ContactNode implements Contact {
                 }
                 
                 contactAddress = sourceAddress;
-                firewalled = true;
+                firewalled = true; // Force Firewalled!
             } else {
                 contactAddress = new InetSocketAddress(
                         ((InetSocketAddress)sourceAddress).getAddress(), port);
