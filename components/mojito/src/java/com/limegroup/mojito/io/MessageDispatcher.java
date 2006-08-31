@@ -26,11 +26,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,7 +101,10 @@ public abstract class MessageDispatcher {
      * The CleanupTask goes periodically through the ReceiptMap 
      * and prunes out ResponseHandlers that have timed-out.
      */
-    private Runnable cleanupTask = new CleanupTask();
+    private CleanupTask cleanupTask;
+    
+    /** CleanupTask's Thread */
+    private Thread cleanupTaskThread;
     
     /** A lock for the ReceiptMap */
     private Object receiptMapLock = new Object();
@@ -123,9 +121,6 @@ public abstract class MessageDispatcher {
     private StatsRequestHandler statsHandler;
     
     private ByteBuffer inputBuffer;
-    
-    private ScheduledExecutorService executor;
-    private ScheduledFuture future;
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -151,27 +146,15 @@ public abstract class MessageDispatcher {
      * Starts the MessageDispatcher
      */
     public void start() {
+    	// Start the CleanupTask
         synchronized (receiptMapLock) {
-            if (executor == null) {
-                ThreadFactory factory = new ThreadFactory() {
-                    public Thread newThread(Runnable r) {
-                        Thread thread = context.getThreadFactory().newThread(r);
-                        thread.setName(context.getName() + "-CleanupExecutor");
-                        thread.setDaemon(true);
-                        return thread;
-                    }
-                };
-                
-                executor = Executors.newSingleThreadScheduledExecutor(factory);
-            }
-            
-            if (future == null) {
-                future = executor.scheduleAtFixedRate(
-                        cleanupTask, 
-                        CLEANUP_RECEIPTS_INTERVAL, 
-                        CLEANUP_RECEIPTS_INTERVAL, 
-                        TimeUnit.MILLISECONDS);
-            }
+        	if (cleanupTaskThread == null) {
+        		cleanupTask = new CleanupTask();
+	        	cleanupTaskThread = context.getThreadFactory().newThread(cleanupTask);
+	        	cleanupTaskThread.setName(context.getName() + "-CleanupTask");
+	        	cleanupTaskThread.setDaemon(true);
+	        	cleanupTaskThread.start();
+        	}
         }
     }
     
@@ -179,16 +162,15 @@ public abstract class MessageDispatcher {
      * Stops the MessageDispatcher
      */
     public void stop() {
+    	// Stop the CleanupTask
         synchronized (receiptMapLock) {
-            if (future != null) {
-                future.cancel(true);
-                future = null;
-            }
-            
-            if (executor != null) {
-                executor.shutdownNow();
-                executor = null;
-            }
+        	if (cleanupTaskThread != null) {
+        		cleanupTask.stop();
+        		cleanupTaskThread.interrupt();
+        		
+        		cleanupTask = null;
+        		cleanupTaskThread = null;
+        	}
         }
     }
     
@@ -688,21 +670,33 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * 
+     * The CleanupTask calls is periodical intervals 
+     * ReceiptMap's cleanup() methods
      */
     private class CleanupTask implements Runnable {
+    	
+    	private boolean running = true;
+    	
         public void run() {
-            synchronized(receiptMapLock) {
-                try {
-                    if (receiptMap.isEmpty()) {
-                        receiptMapLock.wait();
-                    }
-                    
-                    receiptMap.cleanup();
-                } catch (InterruptedException err) {
-                    LOG.info("InterruptedException", err);
-                }
+        	try {
+	        	while(running) {
+		            synchronized(receiptMapLock) {
+	                    if (receiptMap.isEmpty()) {
+	                        receiptMapLock.wait();
+	                    }
+	                    
+	                    receiptMap.cleanup();
+		            }
+		            
+		            Thread.sleep(CLEANUP_RECEIPTS_INTERVAL);
+	        	}
+        	} catch (InterruptedException err) {
+                LOG.info("InterruptedException", err);
             }
+        }
+        
+        public void stop() {
+        	running = false;
         }
     }
     
