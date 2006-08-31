@@ -27,7 +27,8 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
 /**
- * 
+ * The FindNodeEvent is fired when a FIND_NODE lookup
+ * finishes
  */
 public class FindNodeEvent {
     
@@ -40,25 +41,41 @@ public class FindNodeEvent {
     private int hop;
     
     @SuppressWarnings("unchecked")
-    public FindNodeEvent(KUID lookupId, List<? extends Entry<Contact, QueryKey>> nodes, long time, int hop) {
+    public FindNodeEvent(KUID lookupId, 
+    		List<? extends Entry<Contact, QueryKey>> nodes, 
+			long time, int hop) {
+    	
         this.lookupId = lookupId;
         this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
         this.time = time;
         this.hop = hop;
     }
     
+    /**
+     * Returns the KUID we were looking for
+     */
     public KUID getLookupID() {
         return lookupId;
     }
     
+    /**
+     * Returns a List of Contacts and their QueryKeys
+     */
     public List<Entry<Contact, QueryKey>> getNodes() {
         return nodes;
     }
     
+    /**
+     * Returns the amount of time it took to find the
+     * k-closest Nodes
+     */
     public long getTime() {
         return time;
     }
     
+    /**
+     * Returns the hop at which the lookup terminated
+     */
     public int getHop() {
         return hop;
     }

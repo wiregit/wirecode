@@ -27,6 +27,9 @@ import java.util.Set;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.db.DHTValue;
 
+/**
+ * The StoreEvent is fired when a STORE request finished
+ */
 public class StoreEvent {
     
     private Collection<Contact> nodes;
@@ -45,18 +48,33 @@ public class StoreEvent {
         this.failed = (Collection<DHTValue>)failed;
     }
     
+    /**
+     * Returns a Collection Nodes where the DHTValue(s) were
+     * stored
+     */
     public Collection<Contact> getNodes() {
         return nodes;
     }
     
+    /**
+     * Returns a Collection of DHTValue(s) that were stored
+     */
     public Collection<DHTValue> getValues() {
         return values;
     }
     
+    /**
+     * Returns a Collection of DHTValue(s) that couldn't
+     * be stored on the DHT
+     */
     public Collection<DHTValue> getFailed() {
         return failed;
     }
     
+    /**
+     * Returns a Collection of DHTValue(s) that were successfully 
+     * stored on the DHT
+     */
     public Collection<DHTValue> getSucceeded() {
         Set<DHTValue> succeeded = new HashSet<DHTValue>(getValues());
         succeeded.removeAll(getFailed());
@@ -78,11 +96,11 @@ public class StoreEvent {
             buffer.append("  ").append(i++).append(": ").append(value).append("\n");
         }
         
-        buffer.append("NODES:").append("\n");
+        /*buffer.append("NODES:").append("\n");
         i = 0;
         for (Contact node : nodes) {
             buffer.append("  ").append(i++).append(": ").append(node).append("\n");
-        }
+        }*/
         return buffer.toString();
     }
 }

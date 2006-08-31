@@ -42,7 +42,8 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
- * 
+ * The FindNodeEvent is fired when a FIND_VALUE lookup
+ * finishes
  */
 public class FindValueEvent implements Iterable<DHTValue> {
     
@@ -59,8 +60,10 @@ public class FindValueEvent implements Iterable<DHTValue> {
     private int hop;
     
     @SuppressWarnings("unchecked")
-    public FindValueEvent(Context context, KUID lookupId, 
-            List<? extends FindValueResponse> values, long time, int hop) {
+    public FindValueEvent(Context context, 
+    		KUID lookupId, 
+            List<? extends FindValueResponse> values, 
+            long time, int hop) {
         
         this.context = context;
         this.lookupId = lookupId;
@@ -69,18 +72,30 @@ public class FindValueEvent implements Iterable<DHTValue> {
         this.hop = hop;
     }
     
+    /**
+     * Returns the KUID we were looking for
+     */
     public KUID getLookupID() {
         return lookupId;
     }
     
+    /**
+     * Returns an interator 
+     */
     public Iterator<DHTValue> iterator() {
         return new ResponseIterator();
     }
     
+    /**
+     * Returns the amount of time it took to find the DHTValue(s)
+     */
     public long getTime() {
         return time;
     }
     
+    /**
+     * Returns the number of hops it took to find the DHTValue(s)
+     */
     public int getHop() {
         return hop;
     }
@@ -95,6 +110,9 @@ public class FindValueEvent implements Iterable<DHTValue> {
         return buffer.toString();
     }
     
+    /**
+     * 
+     */
     private class ResponseIterator implements Iterator<DHTValue> {
         
         private Iterator<FindValueResponse> it = responses.iterator();
@@ -124,6 +142,9 @@ public class FindValueEvent implements Iterable<DHTValue> {
         }
     }
     
+    /**
+     * 
+     */
     private class GetValueIterator implements Iterator<DHTValue> {
         
         private Contact node;

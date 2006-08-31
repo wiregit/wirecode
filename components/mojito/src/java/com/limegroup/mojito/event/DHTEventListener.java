@@ -20,17 +20,23 @@
 package com.limegroup.mojito.event;
 
 /**
- * 
+ * The listener interface for receiving DHT notifications.
  */
 public interface DHTEventListener<T> {
     
     /**
+     * Invoked when a process finished without throwing
+     * an Exception.
      * 
+     * @param result The result of the asynchronous computation
      */
     public void handleResult(T result);
     
     /**
+     * Invoked when a process finisheded with throwing
+     * an Exception
      * 
+     * @param ex The Exception that occured
      */
     public void handleThrowable(Throwable ex);
 }

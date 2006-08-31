@@ -19,8 +19,8 @@
 
 package com.limegroup.mojito.manager;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -44,7 +44,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
      * Stores a single DHTValue on the DHT
      */
     public DHTFuture<StoreEvent> store(DHTValue value) {
-        return store(Arrays.asList(new DHTValue[]{value}));
+        return store(Collections.singletonList(value));
     }
     
     /**
@@ -63,7 +63,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
      * Stores a single DHTValue at the given Contact. 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
-        return store(node, queryKey, Arrays.asList(new DHTValue[]{value}));
+        return store(node, queryKey, Collections.singletonList(value));
     }
     
     /**
