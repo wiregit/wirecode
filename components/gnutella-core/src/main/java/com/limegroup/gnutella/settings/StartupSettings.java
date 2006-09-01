@@ -22,7 +22,7 @@ public final class StartupSettings extends LimeProps {
     /**
      * Whether or not the program should check associations with the system.
      * If true, the program will take unregistered assocations on startup,
-     * and prompt the user to take registered associations.
+     * and prompt the user to take associations held by some other program.
      * This is used for all associations, including magnet: links and .torrent files.
      */
     public static BooleanSetting CHECK_ASSOCIATION =

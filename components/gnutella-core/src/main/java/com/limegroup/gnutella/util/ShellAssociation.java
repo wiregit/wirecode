@@ -16,6 +16,7 @@ public class ShellAssociation {
 	 * If another program has either, asks the user permission with a dialog box.
 	 * 
 	 * TODO: Put this in the right place, not here
+	 * TODO: Call this when the program starts
 	 */
 	public static void takeAssociations() {
 
