@@ -1,15 +1,87 @@
 package com.limegroup.gnutella.util;
 
+import javax.swing.JOptionPane;
+import com.limegroup.gnutella.gui.GUIMediator;
+import com.limegroup.gnutella.settings.StartupSettings;
+
 /**
  * Sets this program as the default viewer for magnet: links and .torrent files, and determines what program is currently set.
  */
 public class ShellAssociation {
 
 	/**
+	 * Registers this program to open magnet: and .torrent, asking the user permission if necessary.
+	 * Only acts if the Windows launcher is running us and settings allow the associations check.
+	 * If magnet: or .torrent aren't taken, silently takes them for us.
+	 * If another program has either, asks the user permission with a dialog box.
+	 * 
+	 * TODO: Put this in the right place, not here
+	 */
+	public static void takeAssociations() {
+
+		// Only do something if we're on Windows, settings allow this check, and our custom launcher is running us
+		if (!CommonUtils.isWindows() || !StartupSettings.CHECK_ASSOCIATION.getValue() || !isLauncher()) return;
+
+		// If no program has registered magnet: or .torrent, grab them for us
+		if (isMagnetAvailable()) setMagnet(true);
+		if (isTorrentAvailable()) setTorrent(true);
+
+		// If we have both associations, we're done
+		if (isMagnetUs() && isTorrentUs()) return;
+
+		// TODO: Replace text with messages from the message bundles
+
+		// Ask the user permission to get the associations we don't have
+		Object[] options = {"Yes", "No", "Options..."};
+		int choice = JOptionPane.showOptionDialog(
+				GUIMediator.getAppFrame(),
+				"LimeWire is not currently set as your default program for magnet: links and .torrent files. Would you like LimeWire to open these links and files?",
+				"LimeWire",
+				JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options,
+				options[0]);
+
+		// The user clicked "Yes"
+		if (choice == 0) {
+
+			// Take both associations
+			setMagnet(true);
+			setTorrent(true);
+
+		// The user clicked "Options..."
+		} else if (choice == 2) {
+
+			// TODO: Open LimeWire Options with the Player pane showing
+		}
+
+		// Otherwise, choice is 1 No or -1 the X in the corner, do nothing
+	}
+
+	/**
+	 * Determines if nothing is registered to open magnet: links.
+	 * Only acts if our custom launcher is running us.
+	 */
+	public static boolean isMagnetAvailable() {
+		if (!isLauncher()) return false; // Only do something if our custom launcher is running us
+		return getProtocol(magnetExtension).equals(""); // See if there is no information in the Registry
+	}
+
+	/**
+	 * Determines if nothing is registered to open .torrent files.
+	 * Only acts if our custom launcher is running us.
+	 */
+	public static boolean isTorrentAvailable() {
+		if (!isLauncher()) return false; // Only do something if our custom launcher is running us
+		return getFileType(torrentExtension).equals(""); // See if there is no information in the Registry
+	}
+
+	/**
 	 * Determines if we are registered to open magnet: links.
 	 * Only acts if our custom launcher is running us.
 	 */
-	public static boolean getMagnet() {
+	public static boolean isMagnetUs() {
 		if (!isLauncher()) return false; // Only do something if our custom launcher is running us
 		return getProtocol(magnetExtension).equals(running); // See if the path in the Registry matches us running now
 	}
@@ -18,7 +90,7 @@ public class ShellAssociation {
 	 * Determines if we are registered to open .torrent files.
 	 * Only acts if our custom launcher is running us.
 	 */
-	public static boolean getTorrent() {
+	public static boolean isTorrentUs() {
 		if (!isLauncher()) return false; // Only do something if our custom launcher is running us
 		return getFileType(torrentExtension).equals(running); // See if the path in the Registry matches us running now
 	}
@@ -32,9 +104,9 @@ public class ShellAssociation {
 	 */
 	public static void setMagnet(boolean add) {
 		if (!isLauncher()) return; // Only do something if our custom launcher is running us
-		if (add && !getMagnet()) { // The caller requested we take magnet: links, and we don't already have them
+		if (add && !isMagnetUs()) { // The caller requested we take magnet: links, and we don't already have them
 			addProtocol(magnetExtension, magnetName, magnetType);
-		} else if (!add && getMagnet()) { // The caller requested we remove our registration of magnet: links, and we currently have it
+		} else if (!add && isMagnetUs()) { // The caller requested we remove our registration of magnet: links, and we currently have it
 			removeProtocol(magnetExtension);
 		}
 	}
@@ -48,9 +120,9 @@ public class ShellAssociation {
 	 */
 	public static void setTorrent(boolean add) {
 		if (!isLauncher()) return; // Only do something if our custom launcher is running us
-		if (add && !getTorrent()) { // The caller requested we take .torrent files, and we don't already have them
+		if (add && !isTorrentUs()) { // The caller requested we take .torrent files, and we don't already have them
 			addFileType(torrentExtension, torrentName, torrentType);
-		} else if (!add && getTorrent()) { // The caller requested we remove our registration of .torrent files, and we currently have it
+		} else if (!add && isTorrentUs()) { // The caller requested we remove our registration of .torrent files, and we currently have it
 			removeFileType(torrentExtension, torrentName);
 		}
 	}
@@ -179,7 +251,7 @@ public class ShellAssociation {
 	private static void removeProtocol(String extension) {
 		SystemUtils.registryDelete("HKEY_CLASSES_ROOT", extension);
 		// For magnet links, also remove our registration as a software handler
-		if (extension.equals("magnet"))
+		if (extension.equals(magnetExtension))
 			SystemUtils.registryDelete("HKEY_LOCAL_MACHINE", "SOFTWARE\\Magnet\\Handlers\\" + program);
 	}
 
@@ -212,7 +284,8 @@ public class ShellAssociation {
 	 * @return          The complete path to the program, or blank if no program is registered
 	 */
 	private static String getFileType(String extension) {
-		String name    = SystemUtils.registryReadText("HKEY_CLASSES_ROOT", "." + extension, "");
+		String name = SystemUtils.registryReadText("HKEY_CLASSES_ROOT", "." + extension, "");
+		if (name.equals("")) return "";
 		String command = SystemUtils.registryReadText("HKEY_CLASSES_ROOT", name + "\\shell\\open\\command", "");
 		return parsePath(command);
 	}
