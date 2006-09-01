@@ -78,7 +78,7 @@ bool Recycle(LPCTSTR path) {
 	info.wFunc = FO_DELETE;              // Delete operation
 	info.pFrom = buffer;                 // The path and file name, terminated by 2 zero bytes
 	info.fFlags = FOF_ALLOWUNDO      |   // Move the file into the Recycle Bin instead of deleting it
-		          FOF_NOCONFIRMATION |   // Don't ask the user if they're sure
+				  FOF_NOCONFIRMATION |   // Don't ask the user if they're sure
 				  FOF_NOERRORUI      |   // Don't show the user an error if one happens
 				  FOF_SILENT;            // Hide the progress bar dialog box
 	int result = SHFileOperation(&info); // Have the Windows shell perform the operation, and get the result code
