@@ -126,8 +126,12 @@ public class QueryRouteTable {
      */
     private QueryRouteTable resizedQRT = null;
 
-    /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
-     *  methods don't seem to offer what is needed.
+    /**
+     * The size of this QRP table in bytes.
+     * bitTableLength is usually 65536 bytes, which is 64 KB.
+     * 
+     * The 'logical' length of the BitSet.  Needed because the BitSet accessor
+     * methods don't seem to offer what is needed.
      */
     private int bitTableLength;
 
@@ -234,7 +238,9 @@ public class QueryRouteTable {
     //do
 
     /**
-     * Returns the size of this QueryRouteTable.
+     * Get the size of this QRP table.
+     * 
+     * @return 65536 bytes, which is 64 KB
      */
     public int getSize() {
 

@@ -219,6 +219,16 @@ public class ExternalControl {
 	 *   @returns  true if a local LimeWire responded with a true.
 	 */
 	private static boolean testForLimeWire(String arg) {
+
+		/*
+		 * Tour Point
+		 * 
+		 * Here's how LimeWire checks to see if it's already running.
+		 * It gets the random port number it chose for itself on this computer from settings.
+		 * It tries to connect to that port, and see if there is a running LimeWire it can talk to on it.
+		 * If there is, LimeWire is already running.
+		 */
+
 		Socket socket = null;
 		int port = ConnectionSettings.PORT.getValue();
 		// Check to see if the port is valid.
@@ -230,7 +240,7 @@ public class ExternalControl {
 		if( !NetworkUtils.isValidPort(port) ) {
 		    ConnectionSettings.PORT.revertToDefault();
 		    port = ConnectionSettings.PORT.getValue();
-        }   
+        }
 		try {
 			socket = Sockets.connect(LOCALHOST, port, 500);
 			InputStream istream = socket.getInputStream(); 

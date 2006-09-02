@@ -178,7 +178,7 @@ public class PatchTableMessage extends RouteTableMessage {
 
         this.sequenceNumber = (short)ByteOrder.ubyte2int(payload[1]);
         this.sequenceSize = (short)ByteOrder.ubyte2int(payload[2]);
-        if (sequenceNumber < 1 || sequenceSize < 1 || sequenceNumber>sequenceSize) throw new BadPacketException("Bad sequence/size: " + sequenceNumber + "/" + sequenceSize);
+        if (sequenceNumber < 1 || sequenceSize < 1 || sequenceNumber > sequenceSize) throw new BadPacketException("Bad sequence/size: " + sequenceNumber + "/" + sequenceSize);
 
         this.compressor = payload[3];
         if (!(compressor == COMPRESSOR_NONE || compressor == COMPRESSOR_DEFLATE)) throw new BadPacketException("Bad compressor: " + compressor);
