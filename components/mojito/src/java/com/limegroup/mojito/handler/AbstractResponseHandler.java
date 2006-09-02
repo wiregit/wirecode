@@ -49,7 +49,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     private int errors = 0;
     
     /** The total time that has elapsed since the request was sent */
-    private long time;
+    private long elapsedTime;
     
     /** The timeout of this handler */
     private long timeout;
@@ -80,6 +80,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     /** A handle to Context */
     protected final Context context;
+    
+    protected long lastResponseTime = 0L;
     
     public AbstractResponseHandler(Context context) {
         this(context, -1L, -1);
@@ -134,14 +136,18 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * Increments the gobal time by time
+     * Returns the total time that has elapsed since this
+     * ResponseHandler is active.
      */
-    protected void addTime(long time) {
-        this.time += time;
+    protected long getElapsedTime() {
+        return elapsedTime;
     }
     
-    public long time() {
-        return time;
+    /**
+     * Returns the time when the last response was received
+     */
+    protected long getLastResponseTime() {
+        return lastResponseTime;
     }
     
     /**
@@ -194,13 +200,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
             return;
         }
         
-        addTime(time);
-        
         if (LOG.isTraceEnabled()) {
             LOG.trace("Received " + response + " from " + response.getContact() 
-                    + " after " + getErrors() + " errors and a total time of " + time() + "ms");
+                    + " after " + getErrors() + " errors and a total time of " + getElapsedTime() + "ms");
         }
         
+        elapsedTime += time;
+        lastResponseTime = System.currentTimeMillis();
         response(response, time);
     }
 
@@ -216,18 +222,18 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
             return;
         }
         
-        addTime(time);
-        
         if (LOG.isTraceEnabled()) {
             LOG.trace(request + " to " + ContactUtils.toString(nodeId, dst) 
                     + " failed after " + time + "ms");
         }
         
+        elapsedTime += time;
+        
         // maxErrors is actually the total number of
         // retries. Since the first try failed there
         // are maxErrors-1 retries left.
         if (errors++ >= (maxErrors-1)) {
-            timeout(nodeId, dst, request, time());
+            timeout(nodeId, dst, request, getElapsedTime());
         } else {
             resend(nodeId, dst, request);
         }

@@ -43,7 +43,6 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 
 
@@ -67,15 +66,8 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         databaseStats = context.getDatabaseStats();
     }
     
-    public void addTime(long time) {
-    }
-    
-    public long time() {
-        return 0L;
-    }
-    
     public long timeout() {
-        return NetworkSettings.TIMEOUT.getValue();
+        return Long.MAX_VALUE;
     }
 
     public boolean isCancelled() {
@@ -123,21 +115,21 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         
         KUID nodeId = node.getNodeID();
         if (context.isLocalNodeID(nodeId)) {
-        	if (message instanceof PingResponse) {
-        		// This is expected if there's a Node ID collision
-        		if (LOG.isInfoEnabled()) {
-        			LOG.info("Looks like our NodeID collides with " + node);
-        		}
-        	} else {
-        		// This is unexpected. The MessageDispatcher should have
-        		// caught it!
-        		if (LOG.isErrorEnabled()) {
-        			LOG.error("Received a " + message + " message from " + node 
-        					+ ". This message should have never gotten so far!");
-        		}
-        	}
-        	
-        	return;
+            if (message instanceof PingResponse) {
+            	// This is expected if there's a Node ID collision
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Looks like our NodeID collides with " + node);
+            	}
+            } else {
+            	// This is unexpected. The MessageDispatcher should have
+                // caught it!
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Received a " + message + " message from " + node 
+                        + ". This message should have never gotten so far!");
+            	}
+            }
+            
+            return;
         }
         
         RouteTable routeTable = context.getRouteTable();

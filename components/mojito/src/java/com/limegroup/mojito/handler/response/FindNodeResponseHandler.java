@@ -110,7 +110,7 @@ public class FindNodeResponseHandler
     
     @Override
     protected void finishLookup() {
-        long time = time();
+        long time = getElapsedTime();
         int hop = getCurrentHop();
         
         lookupStat.setHops(hop, false);

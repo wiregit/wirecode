@@ -175,7 +175,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     @Override
-    public long time() {
+    public long getElapsedTime() {
         if (startTime > 0L) {
             return System.currentTimeMillis() - startTime;
         }
@@ -352,7 +352,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      */
     private void nextLookupStep() throws IOException {
         
-        long totalTime = time();
+        long totalTime = getElapsedTime();
         
         if (isGlobalTimeout(totalTime)) {
             if (LOG.isTraceEnabled()) {
@@ -591,7 +591,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     protected String getState() {
-        long time = time();
+        long time = getElapsedTime();
         boolean timeout = isGlobalTimeout(time);
         int activeSearches = getActiveSearches();
         

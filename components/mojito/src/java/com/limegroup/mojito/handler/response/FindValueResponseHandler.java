@@ -136,7 +136,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
 
     @Override
     protected void finishLookup() {
-        long time = time();
+        long time = getElapsedTime();
         int hop = getCurrentHop();
         
         if (responses.isEmpty()) {

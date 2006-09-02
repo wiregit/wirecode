@@ -32,12 +32,6 @@ import com.limegroup.mojito.messages.ResponseMessage;
 public interface ResponseHandler {
     
     /**
-     * Returns the total time that has elapsed since a
-     * request has been sent to Node
-     */
-    public long time();
-    
-    /**
      * Returns the timeout (in milliseconds) of this handler.
      */
     public long timeout();
