@@ -29,6 +29,9 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferInputStream extends InputStream {
 
+    /** An empty ByteBuffer */
+    private static final ByteBuffer[] EMPTY = new ByteBuffer[0];
+
     /** The index of the current ByteBuffer */
     protected int index = 0;
     
@@ -50,6 +53,10 @@ public class ByteBufferInputStream extends InputStream {
      * Returns the underlying array of ByteBuffer(s).
      */
     public ByteBuffer[] buffers() {
+        if (buffers == EMPTY) {
+            throw new IllegalStateException("InputStream is closed");
+        }
+        
         return buffers;
     }
     
@@ -61,8 +68,10 @@ public class ByteBufferInputStream extends InputStream {
         return available;
     }
     
-    /** Does nothing */
     public void close() throws IOException {
+        index = 0;
+        mark = -1;
+        buffers = EMPTY;
     }
 
     public void mark(int readlimit) {
