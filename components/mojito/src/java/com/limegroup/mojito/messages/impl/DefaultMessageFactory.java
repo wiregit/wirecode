@@ -115,7 +115,9 @@ public class DefaultMessageFactory implements MessageFactory {
             String msg = (src != null) ? src.toString() : null;
             throw new MessageFormatException(msg, err);
         } finally {
-            in.close();
+            if (in != null) { 
+                try { in.close(); } catch (IOException ignore) {}
+            }
         }
     }
     
