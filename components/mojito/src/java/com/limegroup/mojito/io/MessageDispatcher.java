@@ -146,15 +146,15 @@ public abstract class MessageDispatcher {
      * Starts the MessageDispatcher
      */
     public void start() {
-    	// Start the CleanupTask
+        // Start the CleanupTask
         synchronized (receiptMapLock) {
-        	if (cleanupTaskThread == null) {
-        		cleanupTask = new CleanupTask();
-	        	cleanupTaskThread = context.getThreadFactory().newThread(cleanupTask);
-	        	cleanupTaskThread.setName(context.getName() + "-CleanupTask");
-	        	cleanupTaskThread.setDaemon(true);
-	        	cleanupTaskThread.start();
-        	}
+            if (cleanupTaskThread == null) {
+                cleanupTask = new CleanupTask();
+                cleanupTaskThread = context.getThreadFactory().newThread(cleanupTask);
+                cleanupTaskThread.setName(context.getName() + "-CleanupTask");
+                cleanupTaskThread.setDaemon(true);
+                cleanupTaskThread.start();
+            }
         }
     }
     
@@ -162,15 +162,15 @@ public abstract class MessageDispatcher {
      * Stops the MessageDispatcher
      */
     public void stop() {
-    	// Stop the CleanupTask
+        // Stop the CleanupTask
         synchronized (receiptMapLock) {
-        	if (cleanupTaskThread != null) {
-        		cleanupTask.stop();
-        		cleanupTaskThread.interrupt();
-        		
-        		cleanupTask = null;
-        		cleanupTaskThread = null;
-        	}
+            if (cleanupTaskThread != null) {
+                cleanupTask.stop();
+                cleanupTaskThread.interrupt();
+                
+                cleanupTask = null;
+                cleanupTaskThread = null;
+            }
         }
     }
     
@@ -232,8 +232,8 @@ public abstract class MessageDispatcher {
         DHTMessage message = tag.getMessage();
         
         if (context.isLocalContactAddress(dst)
-        		|| (context.isLocalNodeID(nodeId) 
-        				&& !(message instanceof PingRequest))) {
+                || (context.isLocalNodeID(nodeId) 
+                        && !(message instanceof PingRequest))) {
         	
         	if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
@@ -371,8 +371,8 @@ public abstract class MessageDispatcher {
         SocketAddress src = node.getContactAddress();
         
         if (context.isLocalContactAddress(src)
-        		|| (context.isLocalNodeID(nodeId) 
-        				&& !(message instanceof PingResponse))) {
+                || (context.isLocalNodeID(nodeId) 
+                    && !(message instanceof PingResponse))) {
         	
         	if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
@@ -678,25 +678,25 @@ public abstract class MessageDispatcher {
     	private boolean running = true;
     	
         public void run() {
-        	try {
-	        	while(running) {
-		            synchronized(receiptMapLock) {
-	                    if (receiptMap.isEmpty()) {
-	                        receiptMapLock.wait();
-	                    }
-	                    
-	                    receiptMap.cleanup();
-		            }
-		            
-		            Thread.sleep(CLEANUP_RECEIPTS_INTERVAL);
-	        	}
-        	} catch (InterruptedException err) {
+            try {
+                while(running) {
+                    synchronized(receiptMapLock) {
+                        if (receiptMap.isEmpty()) {
+                            receiptMapLock.wait();
+                        }
+                        
+                        receiptMap.cleanup();
+                    }
+                    
+                    Thread.sleep(CLEANUP_RECEIPTS_INTERVAL);
+                }
+            } catch (InterruptedException err) {
                 LOG.info("InterruptedException", err);
             }
         }
         
         public void stop() {
-        	running = false;
+            running = false;
         }
     }
     
