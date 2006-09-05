@@ -18,9 +18,10 @@ public interface DHTManager extends LifecycleListener {
     public static enum DHTMode {
         
         /**
-         * A DHT Node is in INACTIVE mode if it's in theory DHT 
-         * capable but doesn't connect to the DHT for reasons
-         * like an unreliable Internet connection.
+         * A DHT Node is in INACTIVE mode if it supports the DHT
+         * but is currently not capable of joining it.
+         * 
+         * @see NodeAssigner.java
          */
         INACTIVE(0x00),
         

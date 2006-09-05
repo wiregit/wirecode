@@ -53,6 +53,8 @@ abstract class AbstractDHTController implements DHTController {
      * The instance of the DHT
      */
     private MojitoDHT dht;
+    
+    private boolean running = false;
 
     protected final DHTBootstrapper bootstrapper;
     
@@ -88,6 +90,7 @@ abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
+            running = true;
             bootstrapper.bootstrap();
         } catch (IOException err) {
             LOG.error(err);
@@ -120,6 +123,8 @@ abstract class AbstractDHTController implements DHTController {
         if (dht != null) {
             dht.stop();
         }
+        
+        running = false;
     }
     
     /**
@@ -131,10 +136,6 @@ abstract class AbstractDHTController implements DHTController {
      * @param hostAddress The SocketAddress of the DHT host.
      */
     protected void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
-        if (!isRunning()) {
-            return;
-        }
-        
         if(!dht.isBootstrapped()){
             bootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
@@ -152,7 +153,7 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (!isRunning() || dht.isBootstrapped()) {
+        if (dht.isBootstrapped()) {
             return;
         }
         
@@ -184,11 +185,7 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public boolean isRunning() {
-        if (dht == null) {
-            return false;
-        }
-        
-        return dht.isRunning();
+        return running;
     }
     
     public boolean isWaitingForNodes() {
