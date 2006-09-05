@@ -389,5 +389,9 @@ public class Tag {
                 responseHandler.handleTick();
             }
         }
+        
+        public boolean isCancelled() {
+        	return Tag.this.isCancelled();
+        }
     }
 }

@@ -637,7 +637,12 @@ public abstract class MessageDispatcher {
         public void cleanup() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
                 Receipt receipt = it.next();
-                if (receipt.timeout()) {
+                
+                if (receipt.isCancelled()) {
+                	// The user cancelled the Future
+                	it.remove();
+                	
+                } else if (receipt.timeout()) {
                     receipt.received();
                     it.remove();
                     networkStats.RECEIPTS_TIMEOUT.incrementStat();
