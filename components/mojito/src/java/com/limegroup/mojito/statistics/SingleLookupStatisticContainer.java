@@ -31,8 +31,6 @@ abstract class SingleLookupStatisticContainer extends StatisticContainer {
     private final GlobalLookupStatisticContainer globalLookupStats;
     
     protected SingleLookupStatisticContainer(Context context, KUID lookupKey) {
-        super(context.getLocalNodeID());
-        
         this.lookupKey = lookupKey;
         this.globalLookupStats = context.getGlobalLookupStats();
         globalLookupStats.addSingleLookupStatistic(this);

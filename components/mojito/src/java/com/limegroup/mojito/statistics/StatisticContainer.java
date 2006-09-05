@@ -31,6 +31,8 @@ import com.limegroup.mojito.KUID;
 
 class StatisticContainer {
     
+    public StatisticContainer() {};
+    
     public StatisticContainer(KUID nodeId) {
         DHTStatsManager.getInstance(nodeId).addStatisticContainer(this);
     }
