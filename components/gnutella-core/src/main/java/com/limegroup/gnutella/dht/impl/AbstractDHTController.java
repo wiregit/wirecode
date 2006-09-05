@@ -119,7 +119,6 @@ abstract class AbstractDHTController implements DHTController {
         
         if (dht != null) {
             dht.stop();
-            dht = null;
         }
     }
     
