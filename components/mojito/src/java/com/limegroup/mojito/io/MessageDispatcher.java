@@ -103,9 +103,6 @@ public abstract class MessageDispatcher {
      */
     private CleanupTask cleanupTask;
     
-    /** CleanupTask's Thread */
-    private Thread cleanupTaskThread;
-    
     /** A lock for the ReceiptMap */
     private Object receiptMapLock = new Object();
     
@@ -147,15 +144,12 @@ public abstract class MessageDispatcher {
      */
     public void start() {
         // Start the CleanupTask
-        synchronized (receiptMapLock) {
-            if (cleanupTaskThread == null) {
-                cleanupTask = new CleanupTask();
-                cleanupTaskThread = context.getThreadFactory().newThread(cleanupTask);
-                cleanupTaskThread.setName(context.getName() + "-CleanupTask");
-                cleanupTaskThread.setDaemon(true);
-                cleanupTaskThread.start();
-            }
-        }
+    	synchronized (receiptMapLock) {
+    		if (cleanupTask == null) {
+        		cleanupTask = new CleanupTask();
+        		cleanupTask.start();
+        	}
+		}
     }
     
     /**
@@ -163,15 +157,12 @@ public abstract class MessageDispatcher {
      */
     public void stop() {
         // Stop the CleanupTask
-        synchronized (receiptMapLock) {
-            if (cleanupTaskThread != null) {
-                cleanupTask.stop();
-                cleanupTaskThread.interrupt();
-                
-                cleanupTask = null;
-                cleanupTaskThread = null;
-            }
-        }
+    	synchronized (receiptMapLock) {
+	    	if (cleanupTask != null) {
+	    		cleanupTask.stop();
+	    		cleanupTask = null;
+	    	}
+    	}
     }
     
     /**
@@ -680,6 +671,7 @@ public abstract class MessageDispatcher {
      */
     private class CleanupTask implements Runnable {
     	
+    	private Thread thread = null;
     	private boolean running = true;
     	
         public void run() {
@@ -700,8 +692,24 @@ public abstract class MessageDispatcher {
             }
         }
         
+        public void start() {
+        	running = true;
+        	
+        	if (thread == null) {
+        		thread = context.getThreadFactory().newThread(this);
+        		thread.setName(context.getName() + "-CleanupTask");
+        		thread.setDaemon(true);
+        		thread.start();
+        	}
+        }
+        
         public void stop() {
             running = false;
+            
+            if (thread != null) {
+            	thread.interrupt();
+            	thread = null;
+            }
         }
     }
     
