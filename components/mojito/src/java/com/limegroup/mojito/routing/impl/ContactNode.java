@@ -95,6 +95,8 @@ public class ContactNode implements Contact {
         }
         
         this.sourceAddress = sourceAddress;
+        this.vendor = vendor;
+        this.version = version;
         this.nodeId = nodeId;
         this.contactAddress = contactAddress;
         this.instanceId = instanceId;
