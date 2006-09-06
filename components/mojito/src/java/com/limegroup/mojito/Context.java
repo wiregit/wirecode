@@ -903,12 +903,12 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     /**
      * Computes and returns the approximate DHT size
      */
-    private int getEstimatedSize() {
-        KUID localNodeId = getLocalNodeID();
+    public int getEstimatedSize() {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         // TODO only live nodes?
+        KUID localNodeId = routeTable.getLocalNode().getNodeID();
         List<Contact> nodes = routeTable.select(localNodeId, k, false);
         
         // TODO accoriding to Az code it works only with more than
