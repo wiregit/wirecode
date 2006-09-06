@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
 
@@ -200,6 +202,20 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         // Get the first round of alpha nodes and send them requests
         List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, getParallelLookups());
+        
+        //optimimize the first lookup step if we have enough parallel lookup slots
+        if(alphaList.size() >= 3) {
+            //get the MRS node of the k closest nodes
+            BucketUtils.sort(nodes);
+            Contact mrs = BucketUtils.getMostRecentlySeen(nodes);
+            if(!alphaList.contains(mrs) && !mrs.equals(context.getLocalNode())) {
+                //if list is full, remove last element and add the MRS node
+                if (alphaList.size() == getParallelLookups()) {
+                    alphaList.remove(alphaList.size()-1);
+                }
+                alphaList.add(mrs);
+            }
+        }
         
         // Make sure the forcedContact is in the alpha list
         if (forcedContact != null 
