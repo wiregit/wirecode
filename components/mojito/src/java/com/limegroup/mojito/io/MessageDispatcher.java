@@ -671,7 +671,7 @@ public abstract class MessageDispatcher {
     	private boolean running = true;
     	
         public void run() {
-        	long sleep = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
+            long sleep = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
         	
             try {
                 while(running) {
@@ -686,7 +686,9 @@ public abstract class MessageDispatcher {
                     Thread.sleep(sleep);
                 }
             } catch (InterruptedException err) {
-                LOG.info("InterruptedException", err);
+                if (running) {
+                    LOG.error("InterruptedException", err);
+                }
             }
         }
         
