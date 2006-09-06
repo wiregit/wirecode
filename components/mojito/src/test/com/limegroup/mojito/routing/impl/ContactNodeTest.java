@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.ContactFactory;
 
@@ -105,5 +106,28 @@ public class ContactNodeTest extends BaseTestCase {
             node4.updateWithExistingContact(node2);
             fail(node4 + " should have rejected the exsting Node " + node2);
         } catch (IllegalArgumentException ignore) {}
+    }
+    
+    public void testVendorAndVersion() {
+        Contact node1 = ContactFactory.createLocalContact(1, 2, false);
+        
+        assertEquals(1, node1.getVendor());
+        assertEquals(2, node1.getVersion());
+        
+        Contact node2 = ContactFactory.createLiveContact(
+                new InetSocketAddress("localhost", 1024), 
+                3, 4, KUID.createRandomNodeID(), 
+                new InetSocketAddress("localhost", 2048), 
+                0, false);
+        
+        assertEquals(3, node2.getVendor());
+        assertEquals(4, node2.getVersion());
+        
+        Contact node3 = ContactFactory.createUnknownContact(
+                5, 6, KUID.createRandomNodeID(), 
+                new InetSocketAddress("localhost", 2048));
+        
+        assertEquals(5, node3.getVendor());
+        assertEquals(6, node3.getVersion());
     }
 }
