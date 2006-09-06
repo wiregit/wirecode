@@ -84,10 +84,6 @@ public abstract class MessageDispatcher {
     private static final int MAX_MESSAGE_SIZE
         = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
     
-    /** The recommended interval to call handleCleanup() */
-    private static final long CLEANUP_RECEIPTS_INTERVAL 
-        = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
-    
     /** Queue of things we have to send */
     private Queue<Tag> outputQueue = new ConcurrentLinkedQueue<Tag>();
     
@@ -97,14 +93,14 @@ public abstract class MessageDispatcher {
     /** Map of Messages (responses) we're awaiting */
     private ReceiptMap receiptMap = new ReceiptMap(512);
     
+    /** A lock for the ReceiptMap */
+    private Object receiptMapLock = new Object();
+    
     /** 
      * The CleanupTask goes periodically through the ReceiptMap 
      * and prunes out ResponseHandlers that have timed-out.
      */
     private CleanupTask cleanupTask;
-    
-    /** A lock for the ReceiptMap */
-    private Object receiptMapLock = new Object();
     
     private NetworkStatisticContainer networkStats;
     
@@ -675,6 +671,8 @@ public abstract class MessageDispatcher {
     	private boolean running = true;
     	
         public void run() {
+        	long sleep = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
+        	
             try {
                 while(running) {
                     synchronized(receiptMapLock) {
@@ -685,7 +683,7 @@ public abstract class MessageDispatcher {
                         receiptMap.cleanup();
                     }
                     
-                    Thread.sleep(CLEANUP_RECEIPTS_INTERVAL);
+                    Thread.sleep(sleep);
                 }
             } catch (InterruptedException err) {
                 LOG.info("InterruptedException", err);
