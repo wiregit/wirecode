@@ -355,10 +355,6 @@ class BucketNode implements Bucket {
             return true;
         }
         
-        if (getLiveSize() < KademliaSettings.REPLICATION_PARAMETER.getValue()) {
-            return true;
-        }
-        
         //we may have dead nodes in a bucket that has an empty replacement cache
         if (getLiveSize() != getLiveNotDeadCount()) {
             return true;

@@ -72,7 +72,7 @@ public final class RouteTableSettings extends MojitoProps {
      * The period of the RandomBucketRefresher
      */
     public static final LongSetting BUCKET_REFRESH_PERIOD
-        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 5L*60L*1000L, 
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 1L*60L*1000L, 
                 "bucket_refresh_period", 1L*60L*1000L, 120L*60L*1000L);
     
     /**
