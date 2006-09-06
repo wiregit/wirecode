@@ -69,11 +69,18 @@ public final class RouteTableSettings extends MojitoProps {
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
     /**
-     * The period of the RandomBucketRefresher
+     * The period of the Bucket freshness
      */
     public static final LongSetting BUCKET_REFRESH_PERIOD
-        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 1L*60L*1000L, 
-                "bucket_refresh_period", 1L*60L*1000L, 120L*60L*1000L);
+        = FACTORY.createSettableLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, 
+                "bucket_refresh_period", 10L*60L*1000L, 120L*60L*1000L);
+    
+    /**
+     * The delay of the RandomBucketRefresher
+     */
+    public static final LongSetting RANDOM_REFRESHER_DELAY
+        = FACTORY.createSettableLongSetting("RANDOM_REFRESHER_DELAY", 1L*60L*1000L, 
+                "random_refresher_delay", 1L*60L*1000L, 120L*60L*1000L);
     
     /**
      * This setting is primarily for testing. It makes sure that

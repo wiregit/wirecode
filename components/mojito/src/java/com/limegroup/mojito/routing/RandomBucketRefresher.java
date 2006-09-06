@@ -52,7 +52,7 @@ public class RandomBucketRefresher implements Runnable {
     
     public synchronized void start() {
         if (future == null) {
-            delay = RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue();
+            delay = RouteTableSettings.RANDOM_REFRESHER_DELAY.getValue();
             long initialDelay = delay;
             
             if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
