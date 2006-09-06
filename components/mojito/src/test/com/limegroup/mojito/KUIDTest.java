@@ -27,7 +27,6 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.util.ArrayUtils;
 
 public class KUIDTest extends BaseTestCase {
     

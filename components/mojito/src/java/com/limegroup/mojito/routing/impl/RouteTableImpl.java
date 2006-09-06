@@ -220,14 +220,20 @@ public class RouteTableImpl implements RouteTable {
             }
             
             public void handleThrowable(Throwable ex) {
-                if (!(ex instanceof DHTException)) {
+                
+                Throwable t = ex;
+                while(!(t instanceof DHTException) && t != null) {
+                    t = t.getCause();
+                }
+                
+                if (t == null) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("No DHTException in cause chain", ex);
+                    }
                     return;
                 }
                 
-                DHTException dhtEx = (DHTException)ex;
-                /*if (!(dhtEx.getCause() instanceof TimeoutException)) {
-                    return;
-                }*/
+                DHTException dhtEx = (DHTException)t;
                 
                 KUID nodeId = dhtEx.getNodeID();
                 SocketAddress address = dhtEx.getSocketAddress();
