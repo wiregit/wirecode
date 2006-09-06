@@ -127,6 +127,8 @@ public class ContactNode implements Contact {
         if (sourceAddress != null && this.sourceAddress == null) {
             this.sourceAddress = sourceAddress;
             
+            SocketAddress ca = contactAddress;
+            
             int port = ((InetSocketAddress)contactAddress).getPort();
             if (port == 0) {
                 if (!firewalled && LOG.isErrorEnabled()) {
@@ -139,6 +141,11 @@ public class ContactNode implements Contact {
             } else {
                 contactAddress = new InetSocketAddress(
                         ((InetSocketAddress)sourceAddress).getAddress(), port);
+            }
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Merged " + sourceAddress + " and " 
+                    + ca + " to " + contactAddress + ", firewalled=" + firewalled);
             }
         }
     }
