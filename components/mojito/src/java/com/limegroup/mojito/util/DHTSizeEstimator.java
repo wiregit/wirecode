@@ -36,50 +36,50 @@ import com.limegroup.mojito.settings.KademliaSettings;
  * http://azureus.cvs.sourceforge.net/azureus/azureus2/com/aelitis/azureus/core/dht/control/impl/DHTControlImpl.java
  */
 public class DHTSizeEstimator {
-	
-	/** */
-	private List<Number> localSizeHistory = new LinkedList<Number>();
-	
-	/** */
+
+    /** */
+    private List<Number> localSizeHistory = new LinkedList<Number>();
+
+    /** */
     private List<Number> remoteSizeHistory = new LinkedList<Number>();
-    
+
     /** */
     private volatile int estimatedSize = 0;
-    
+
     /** */
     private volatile long lastEstimateTime = 0L;
-    
+
     public DHTSizeEstimator() {
-	}
-	
-	public void clear() {
-		estimatedSize = 0;
-		lastEstimateTime = 0L;
-		
-		synchronized (localSizeHistory) {
-			localSizeHistory.clear();			
-		}
-		
-		synchronized (remoteSizeHistory) {
-			remoteSizeHistory.clear();			
-		}
-	}
-	
-	/**
+    }
+
+    public void clear() {
+        estimatedSize = 0;
+        lastEstimateTime = 0L;
+
+        synchronized (localSizeHistory) {
+            localSizeHistory.clear();
+        }
+
+        synchronized (remoteSizeHistory) {
+            remoteSizeHistory.clear();
+        }
+    }
+
+    /**
      * Returns the approximate DHT size
      */
     public int getEstimatedSize(RouteTable routeTable) {
-    	
-        if ((System.currentTimeMillis() - lastEstimateTime) 
-                >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
-            
+
+        if ((System.currentTimeMillis() - lastEstimateTime) >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY
+                .getValue()) {
+
             estimatedSize = computeSize(routeTable);
             lastEstimateTime = System.currentTimeMillis();
         }
-        
+
         return estimatedSize;
     }
-    
+
     /**
      * Adds the approximate DHT size as returned by a remote Node.
      * The average of the remote DHT sizes is incorporated into into
@@ -89,93 +89,95 @@ public class DHTSizeEstimator {
         if (remoteSize <= 0 || !ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             return;
         }
-        
+
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.add(new Integer(remoteSize));
-            if (remoteSizeHistory.size() 
-                    >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
+            if (remoteSizeHistory.size() >= ContextSettings.MAX_REMOTE_HISTORY_SIZE
+                    .getValue()) {
                 remoteSizeHistory.remove(0);
             }
         }
     }
-    
-	/**
+
+    /**
      * Computes and returns the approximate DHT size
      */
     public int computeSize(RouteTable routeTable) {
-        
+
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
+
         // TODO only live nodes?
         KUID localNodeId = routeTable.getLocalNode().getNodeID();
         List<Contact> nodes = routeTable.select(localNodeId, k, false);
-        
+
         // TODO accoriding to Az code it works only with more than
         // two Nodes
         if (nodes.size() <= 2) {
             // There's always we!
             return Math.max(1, nodes.size());
         }
-        
+
         // See Azureus DHTControlImpl.estimateDHTSize()
         // Di = localNodeID xor NodeIDi
         // Dc = sum(i * Di) / sum(i * i)
         // Size = 2**160 / Dc
-        
+
         BigInteger sum1 = BigInteger.ZERO;
         BigInteger sum2 = BigInteger.ZERO;
-        
-        for(int i = 1; i < nodes.size(); i++) {
+
+        for (int i = 1; i < nodes.size(); i++) {
             Contact node = nodes.get(i);
-            
-            BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
+
+            BigInteger distance = localNodeId.xor(node.getNodeID())
+                    .toBigInteger();
             BigInteger j = BigInteger.valueOf(i);
-            
+
             sum1 = sum1.add(j.multiply(distance));
             sum2 = sum2.add(j.pow(2));
         }
-        
+
         int estimatedSize = 0;
         if (!sum1.equals(BigInteger.ZERO)) {
-            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(sum1).intValue();
+            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(
+                    sum1).intValue();
         }
         estimatedSize = Math.max(1, estimatedSize);
-        
+
         int localSize = 0;
         synchronized (localSizeHistory) {
             localSizeHistory.add(new Integer(estimatedSize));
-            if (localSizeHistory.size() 
-            		>= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
+            if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE
+                    .getValue()) {
                 localSizeHistory.remove(0);
             }
-        
+
             int localSizeSum = 0;
             if (!localSizeHistory.isEmpty()) {
-	            for (Number size : localSizeHistory) {
-	                localSizeSum += size.intValue();
-	            }
-	            
-	            localSize = localSizeSum/localSizeHistory.size();
+                for (Number size : localSizeHistory) {
+                    localSizeSum += size.intValue();
+                }
+
+                localSize = localSizeSum / localSizeHistory.size();
             }
         }
-        
+
         int combinedSize = localSize;
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             synchronized (remoteSizeHistory) {
                 if (remoteSizeHistory.size() >= 3) {
-                	Number[] remote = remoteSizeHistory.toArray(new Number[0]);
+                    Number[] remote = remoteSizeHistory.toArray(new Number[0]);
                     Arrays.sort(remote);
-                    
+
                     // Skip the smallest and largest value
                     int count = 1;
-                    while(count < remote.length-1) {
+                    while (count < remote.length - 1) {
                         combinedSize += remote[count++].intValue();
                     }
                     combinedSize /= count;
                 }
             }
         }
-        
+
         // There's always us!
         return Math.max(1, combinedSize);
     }
