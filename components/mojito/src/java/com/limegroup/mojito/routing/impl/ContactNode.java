@@ -124,7 +124,7 @@ public class ContactNode implements Contact {
      * as firewalled.
      */
     public void fixSourceAndContactAddress(SocketAddress sourceAddress) {
-        if (sourceAddress != null && this.sourceAddress == null) {
+        if (sourceAddress != null) {
             this.sourceAddress = sourceAddress;
             
             SocketAddress ca = contactAddress;
