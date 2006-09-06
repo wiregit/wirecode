@@ -37,21 +37,25 @@ import com.limegroup.mojito.settings.KademliaSettings;
  */
 public class DHTSizeEstimator {
 
-    /** */
+    /** History of local estimations */
     private List<Number> localSizeHistory = new LinkedList<Number>();
 
-    /** */
+    /** History of remote estimations (sizes we received with pongs) */
     private List<Number> remoteSizeHistory = new LinkedList<Number>();
 
-    /** */
+    /** Current estimated size */
     private volatile int estimatedSize = 0;
 
-    /** */
+    /** The time when we made the last estimation */
     private volatile long lastEstimateTime = 0L;
 
     public DHTSizeEstimator() {
     }
 
+    /**
+     * Clears the history and sets everyting to
+     * its initial state
+     */
     public void clear() {
         estimatedSize = 0;
         lastEstimateTime = 0L;
