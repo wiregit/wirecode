@@ -41,7 +41,7 @@ public class ContactNode implements Contact {
     
     private static final long serialVersionUID = 833079992601013124L;
 
-    private static final Log LOG = LogFactory.getLog(Contact.class);
+    private static final Log LOG = LogFactory.getLog(ContactNode.class);
     
     private KUID nodeId;
     
