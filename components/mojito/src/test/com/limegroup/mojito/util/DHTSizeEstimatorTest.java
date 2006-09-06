@@ -7,12 +7,11 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 public class DHTSizeEstimatorTest extends BaseTestCase {
 	
@@ -201,8 +200,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     }
     
     public void testEstimateSize() {
-    	Context dht = (Context)MojitoFactory.createDHT();
-    	RouteTable routeTable = dht.getRouteTable();
+    	RouteTable routeTable = new RouteTableImpl();
     	routeTable.setRouteTableCallback(new RouteTable.Callback() {
             public DHTFuture<Contact> ping(Contact node) {
                 return null;
@@ -220,11 +218,13 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	
     	assertEquals(490, routeTable.size());
     	
+    	DHTSizeEstimator estimator = new DHTSizeEstimator();
+    	
     	int[] remote = {525, 601, 310, 750, 455, 654, 512, 210, 497, 101 };
     	for (int size : remote) {
-    		dht.addEstimatedRemoteSize(size);
+    		estimator.addEstimatedRemoteSize(size);
     	}
     	
-    	assertEquals(486, dht.getEstimatedSize());
+    	assertEquals(486, estimator.getEstimatedSize(routeTable));
     }
 }

@@ -23,18 +23,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -85,6 +82,7 @@ import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
+import com.limegroup.mojito.util.DHTSizeEstimator;
 
 /**
  * The Context is the heart of Mojito where everything comes 
@@ -120,16 +118,14 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private GlobalLookupStatisticContainer globalLookupStats;
     private DatabaseStatisticContainer databaseStats;
     
-    private long lastEstimateTime = 0L;
-    private int estimatedSize = 0;
-    
-    private List<Integer> localSizeHistory = new LinkedList<Integer>();
-    private List<Integer> remoteSizeHistory = new LinkedList<Integer>();
-    
     private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
     
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
+    
+    private DHTSizeEstimator estimator = new DHTSizeEstimator();
+    
+    private int estimatedSize = 0;
     
     /**
      * Constructor to create a new Context
@@ -710,16 +706,8 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         contextExecutor.shutdownNow();
         messageDispatcher.stop();
         
-        lastEstimateTime = 0L;
+        estimator.clear();
         estimatedSize = 0;
-        
-        synchronized (localSizeHistory) {
-            localSizeHistory.clear();
-        }
-        
-        synchronized (remoteSizeHistory) {
-            remoteSizeHistory.clear();
-        }
     }
     
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
@@ -870,12 +858,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             return 0;
         }
         
-        if ((System.currentTimeMillis() - lastEstimateTime) 
-                >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
-            
-            estimatedSize = getEstimatedSize();
-            lastEstimateTime = System.currentTimeMillis();
-            networkStats.ESTIMATE_SIZE.addData(estimatedSize);
+        int size = estimator.getEstimatedSize(getRouteTable());
+        if (estimatedSize != size) {
+        	networkStats.ESTIMATE_SIZE.addData(size);
+        	estimatedSize = size;
         }
         
         return estimatedSize;
@@ -887,98 +873,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * our local computation.
      */
     public void addEstimatedRemoteSize(int remoteSize) {
-        if (remoteSize <= 0 || !ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
-            return;
-        }
-        
-        synchronized (remoteSizeHistory) {
-            remoteSizeHistory.add(new Integer(remoteSize));
-            if (remoteSizeHistory.size() 
-                    >= ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
-                remoteSizeHistory.remove(0);
-            }
-        }
-    }
-    
-    /**
-     * Computes and returns the approximate DHT size
-     */
-    public int getEstimatedSize() {
-        
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
-        // TODO only live nodes?
-        KUID localNodeId = routeTable.getLocalNode().getNodeID();
-        List<Contact> nodes = routeTable.select(localNodeId, k, false);
-        
-        // TODO accoriding to Az code it works only with more than
-        // two Nodes
-        if (nodes.size() <= 2) {
-            // There's always we!
-            return Math.max(1, nodes.size());
-        }
-        
-        // See Azureus DHTControlImpl.estimateDHTSize()
-        // Di = localNodeID xor NodeIDi
-        // Dc = sum(i * Di) / sum(i * i)
-        // Size = 2**160 / Dc
-        
-        BigInteger sum1 = BigInteger.ZERO;
-        BigInteger sum2 = BigInteger.ZERO;
-        
-        for(int i = 1; i < nodes.size(); i++) {
-            Contact node = nodes.get(i);
-            
-            BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
-            BigInteger j = BigInteger.valueOf(i);
-            
-            sum1 = sum1.add(j.multiply(distance));
-            sum2 = sum2.add(j.pow(2));
-        }
-        
-        int estimatedSize = 0;
-        if (!sum1.equals(BigInteger.ZERO)) {
-            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(sum1).intValue();
-        }
-        estimatedSize = Math.max(1, estimatedSize);
-        
-        int localSize = 0;
-        synchronized (localSizeHistory) {
-            localSizeHistory.add(new Integer(estimatedSize));
-            if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
-                localSizeHistory.remove(0);
-            }
-        
-            int localSizeSum = 0;
-            for (Integer size : localSizeHistory) {
-                localSizeSum += size.intValue();
-            }
-            
-            // If somebody is playing around with MAX_HISTORY_SIZE
-            // then localSizeHistory.size() might be zero which
-            // would cause a div by zero error
-            localSize = (!localSizeHistory.isEmpty() ? localSizeSum/localSizeHistory.size() : 0);
-        }
-        
-        int combinedSize = localSize;
-        if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
-            synchronized (remoteSizeHistory) {
-                if (remoteSizeHistory.size() >= 3) {
-                    Integer[] remote = remoteSizeHistory.toArray(new Integer[0]);
-                    Arrays.sort(remote);
-                    
-                    // Skip the smallest and largest value
-                    int count = 1;
-                    while(count < remote.length-1) {
-                        combinedSize += remote[count++].intValue();
-                    }
-                    combinedSize /= count;
-                }
-            }
-        }
-        
-        // There's always us!
-        return Math.max(1, combinedSize);
+    	estimator.addEstimatedRemoteSize(remoteSize);
     }
     
     public NetworkStatisticContainer getNetworkStats() {
