@@ -801,12 +801,20 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("get");
+        }
+        
         DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
         database.store(dhtValue);
         return store(dhtValue);
     }
     
     public DHTFuture<StoreEvent> remove(KUID key) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("remove");
+        }
+        
         // To remove a KeyValue you just store an empty value!
         return put(key, DHTValue.EMPTY_DATA);
     }
@@ -815,6 +823,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Stores the given KeyValue 
      */
     public DHTFuture<StoreEvent> store(DHTValue value) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
+        
         return storeManager.store(value);
     }
    
@@ -822,6 +834,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * 
      */
     public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
+        
         return storeManager.store(values);
     }
     
@@ -829,6 +845,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * Stores the given KeyValue 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
+        
         return storeManager.store(node, queryKey, value);
     }
     
@@ -836,6 +856,10 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
+        if(!isBootstrapped()) {
+            throw new NotBootstrappedException("store");
+        }
+        
         return storeManager.store(node, queryKey, values);
     }
     
