@@ -495,6 +495,12 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                                 context.getLocalNode() + " collides with " +  result);
                         setException(collision);
                     }
+                    
+                    // TODO The Ping response may arrive after the
+                    // lookup has already finished...! I think I
+                    // have to move the collision check to
+                    // BootstrapManager where it would make more
+                    // sense anyways...
                 }
             }
 
