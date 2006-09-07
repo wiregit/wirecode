@@ -1210,7 +1210,7 @@ public final class CommonUtils {
                 }
             });
             
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for(Map.Entry<Thread, StackTraceElement[]> entry : sorted) {
                 Thread key = entry.getKey();
                 StackTraceElement[] value = entry.getValue();
