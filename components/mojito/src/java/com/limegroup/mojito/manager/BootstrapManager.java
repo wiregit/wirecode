@@ -216,7 +216,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             while(true) {
                 try {
                     FindNodeEvent findNode = phaseOne(node);
-                    if(findNode.getNodes().size() == 0) {
+                    if(findNode.getNodes().isEmpty()) {
                         failedHosts.add(node.getContactAddress());
                         return false;
                     }
@@ -249,8 +249,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstrapping from host Set: "+hostSet);
             }
             
-            BootstrapPingResponseHandler<SocketAddress> handler = 
-                new BootstrapPingResponseHandler<SocketAddress>(context, hostSet);
+            BootstrapPingResponseHandler<SocketAddress> handler 
+                = new BootstrapPingResponseHandler<SocketAddress>(context, hostSet);
             try {
                 return handler.call();
             } catch (BootstrapTimeoutException exception) {
@@ -313,7 +313,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             int failures = 0;
             
             List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
-            if(randomId.size() == 0) {
+            if(randomId.isEmpty()) {
                 return true;
             }
             
@@ -330,29 +330,29 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     	failures++;
                     	
                     	if(LOG.isDebugEnabled()) {
-                    		LOG.debug("Bootstrap poor lookup ratio. Failures: " +failures);
+                    	    LOG.debug("Bootstrap poor lookup ratio. Failures: " +failures);
                     	}
                     	
                     	if((failures * MAX_NODE_FAILED_PER_LOOKUP) 
-                    			>= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                    		//routing table is stale! remove unknown and dead contacts
-                    		//and start over
-                    		context.getRouteTable().purge();
-                    		
-                    		if(!retriedBootstrap) {
-                        		LOG.debug("Retrying bootstrap from phase 2");
-                    			retriedBootstrap = true;
-                        		return startBootstrapLookups(node);
-                    		} else {
-                    			return false;
-                    		}
+                                >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                            //routing table is stale! remove unknown and dead contacts
+                            //and start over
+                            context.getRouteTable().purge();
+                            
+                            if(!retriedBootstrap) {
+                                LOG.debug("Retrying bootstrap from phase 2");
+                                retriedBootstrap = true;
+                                return startBootstrapLookups(node);
+                            } else {
+                                return false;
+                            }
                     	}
                     	
                     } else if (!foundNewContacts && !evt.getNodes().isEmpty()) {
                         foundNewContacts = true;
                     }
                 } catch (DHTException ignore) {
-                	failures++;
+                    failures++;
                 }
             }
             return foundNewContacts;
