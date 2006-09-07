@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -206,7 +205,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         //optimimize the first lookup step if we have enough parallel lookup slots
         if(alphaList.size() >= 3) {
             //get the MRS node of the k closest nodes
-            BucketUtils.sort(nodes);
+            nodes = BucketUtils.sort(nodes);
             Contact mrs = BucketUtils.getMostRecentlySeen(nodes);
             if(!alphaList.contains(mrs) && !mrs.equals(context.getLocalNode())) {
                 //if list is full, remove last element and add the MRS node
