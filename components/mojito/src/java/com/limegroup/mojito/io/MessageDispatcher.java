@@ -222,9 +222,10 @@ public abstract class MessageDispatcher {
                 || (context.isLocalNodeID(nodeId) 
                         && !(message instanceof PingRequest))) {
         	
-        	if (LOG.isErrorEnabled()) {
+            if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot send message of type " + message.getClass().getName() 
-                        + " to ourself " + ContactUtils.toString(nodeId, dst));
+                    + " to " + ContactUtils.toString(nodeId, dst) 
+                    + " which is equal to our local Node " + context.getLocalNode());
             }
         	
             tag.handleError(new IOException("Cannot send message to yourself"));
@@ -361,23 +362,24 @@ public abstract class MessageDispatcher {
                 || (context.isLocalNodeID(nodeId) 
                     && !(message instanceof PingResponse))) {
         	
-        	if (LOG.isErrorEnabled()) {
+            if (LOG.isErrorEnabled()) {
                 LOG.error("Received a message of type " + message.getClass().getName() 
-                        + " from ourself " + ContactUtils.toString(nodeId, src));
+                        + " from " + node + " which is equal to our local Node " 
+                        + context.getLocalNode());
             }
             return;
         }
         
         if (!NetworkUtils.isValidSocketAddress(src)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(ContactUtils.toString(nodeId, src) + " has an invalid IP/Port");
+                LOG.error(node + " has an invalid IP/Port");
             }
             return;
         }
         
         if (!accept(message)) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping message from " + ContactUtils.toString(nodeId, src));
+                LOG.info("Dropping message from " + node);
             }
             return;
         }
