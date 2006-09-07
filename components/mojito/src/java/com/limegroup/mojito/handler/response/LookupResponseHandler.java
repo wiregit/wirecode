@@ -209,10 +209,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             Contact mrs = BucketUtils.getMostRecentlySeen(nodes);
             if(!alphaList.contains(mrs) && !context.isLocalNode(mrs)) {
                 // If list is full, remove last element and add the MRS node
-                alphaList.add(0, mrs);
-                if (alphaList.size() > getParallelLookups()) {
+                if (alphaList.size() >= getParallelLookups()) {
                     alphaList.remove(alphaList.size()-1);
                 }
+                alphaList.add(mrs);
             }
         }
         
