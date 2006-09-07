@@ -53,13 +53,13 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
     
-	/**
-	 * The maximum number of nodes that can fail per lookup (until the timeout)
-	 */
-	private static final int MAX_NODE_FAILED_PER_LOOKUP = 
-		(int)((KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue()
-				 / NetworkSettings.TIMEOUT.getValue())
-				 * KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue()); 
+    /**
+     * The maximum number of nodes that can fail per lookup (until the timeout)
+     */
+    private static final int MAX_NODE_FAILED_PER_LOOKUP 
+        = (int)((KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue()
+                / NetworkSettings.TIMEOUT.getValue())
+                    * KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue()); 
     
     private Object lock = new Object();
     
