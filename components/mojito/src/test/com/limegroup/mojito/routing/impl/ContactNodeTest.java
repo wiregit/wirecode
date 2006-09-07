@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.ContactFactory;
+import com.limegroup.mojito.settings.NetworkSettings;
 
 public class ContactNodeTest extends BaseTestCase {
     
@@ -129,5 +130,39 @@ public class ContactNodeTest extends BaseTestCase {
         
         assertEquals(5, node3.getVendor());
         assertEquals(6, node3.getVersion());
+    }
+    
+    public void testAdaptiveTimeout() {
+        Contact node1 = ContactFactory.createLiveContact(
+                new InetSocketAddress("localhost", 1024), 
+                0, 0, KUID.createRandomNodeID(), 
+                new InetSocketAddress("localhost", 2048), 
+                0, false);
+        
+        assertEquals(-1L, node1.getRoundTripTime());
+        assertEquals(NetworkSettings.TIMEOUT.getValue(), node1.getAdaptativeTimeout());
+        
+        node1.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
+        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
+        
+        node1.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() + 500L);
+        assertGreaterThan(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
+        
+        Contact node2 = ContactFactory.createUnknownContact(
+                0, 0, KUID.createRandomNodeID(), 
+                new InetSocketAddress("localhost", 2048));
+        
+        assertEquals(-1L, node2.getRoundTripTime());
+        assertEquals(NetworkSettings.TIMEOUT.getValue(), node2.getAdaptativeTimeout());
+        
+        node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
+        assertFalse(node2.isAlive());
+        assertEquals(NetworkSettings.TIMEOUT.getValue(), node2.getAdaptativeTimeout());
+        
+        ((ContactNode)node2).alive();
+        assertTrue(node2.isAlive());
+        
+        node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
+        assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node2.getAdaptativeTimeout());
     }
 }
