@@ -90,17 +90,20 @@ public class StoreEvent {
             buffer.append("  ").append(i++).append(": ").append(value).append("\n");
         }
         
-        buffer.append("FAILED:").append("\n");
-        i = 0;
-        for (DHTValue value : getFailed()) {
-            buffer.append("  ").append(i++).append(": ").append(value).append("\n");
+        Collection<DHTValue> failed = getFailed();
+        if (!failed.isEmpty()) {
+            buffer.append("FAILED:").append("\n");
+            i = 0;
+            for (DHTValue value : failed) {
+                buffer.append("  ").append(i++).append(": ").append(value).append("\n");
+            }
         }
         
-        /*buffer.append("NODES:").append("\n");
+        buffer.append("NODES:").append("\n");
         i = 0;
         for (Contact node : nodes) {
             buffer.append("  ").append(i++).append(": ").append(node).append("\n");
-        }*/
+        }
         return buffer.toString();
     }
 }
