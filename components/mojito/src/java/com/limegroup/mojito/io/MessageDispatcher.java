@@ -141,11 +141,11 @@ public abstract class MessageDispatcher {
     public void start() {
         // Start the CleanupTask
     	synchronized (receiptMapLock) {
-    		if (cleanupTask == null) {
-        		cleanupTask = new CleanupTask();
-        		cleanupTask.start();
-        	}
-		}
+            if (cleanupTask == null) {
+                cleanupTask = new CleanupTask();
+                cleanupTask.start();
+            }
+        }
     }
     
     /**
@@ -154,11 +154,11 @@ public abstract class MessageDispatcher {
     public void stop() {
         // Stop the CleanupTask
     	synchronized (receiptMapLock) {
-	    	if (cleanupTask != null) {
-	    		cleanupTask.stop();
-	    		cleanupTask = null;
-	    	}
-    	}
+            if (cleanupTask != null) {
+                cleanupTask.stop();
+                cleanupTask = null;
+            }
+        }
     }
     
     /**
@@ -221,14 +221,39 @@ public abstract class MessageDispatcher {
         if (context.isLocalContactAddress(dst)
                 || (context.isLocalNodeID(nodeId) 
                         && !(message instanceof PingRequest))) {
-        	
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot send message of type " + message.getClass().getName() 
+            
+            if (context.isLocalNodeID(nodeId)) {
+                String msg = "Cannot send Message of type " 
+                    + message.getClass().getName() 
                     + " to " + ContactUtils.toString(nodeId, dst) 
-                    + " which is equal to our local Node " + context.getLocalNode());
+                    + " which is equal to our local Node " 
+                    + context.getLocalNode();
+                
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(msg);
+                }
+                
+                tag.handleError(new IOException(msg));
+                
+            } else {
+                // This can happen when the RouteTable was
+                // initialized with Nodes from an external
+                // source like a file. It's not really an
+                // error because the Node's ID is different
+                // but there's no point in sending the Msg.
+                String msg = "Cannot send Message of type "
+                    + message.getClass().getName()
+                    + " to " + ContactUtils.toString(nodeId, dst)
+                    + " because it has the same contact address as the local Node"
+                    + context.getLocalNode() + " has";
+                
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(msg);
+                }
+                
+                tag.handleError(new IOException(msg));
             }
-        	
-            tag.handleError(new IOException("Cannot send message to yourself"));
+            
             return false;
         }
         
@@ -360,13 +385,18 @@ public abstract class MessageDispatcher {
         
         if (context.isLocalContactAddress(src)
                 || (context.isLocalNodeID(nodeId) 
-                    && !(message instanceof PingResponse))) {
-        	
+                        && !(message instanceof PingResponse))) {
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("Received a message of type " + message.getClass().getName() 
-                        + " from " + node + " which is equal to our local Node " 
-                        + context.getLocalNode());
+                String msg = "Received a message of type " 
+                    + message.getClass().getName() 
+                    + " from " + node 
+                    + " which is equal to our local Node " 
+                    + context.getLocalNode();
+                
+                LOG.error(msg);
             }
+            
             return;
         }
         

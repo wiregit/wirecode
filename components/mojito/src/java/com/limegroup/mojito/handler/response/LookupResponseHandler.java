@@ -582,12 +582,24 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** Adds the Node to the to-query Trie */
     private boolean addYetToBeQueried(Contact node, int hop) {
-        if (!isQueried(node) && !context.isLocalNode(node)) {
-            toQuery.put(node.getNodeID(), node);
-            hopMap.put(node.getNodeID(), hop);
-            return true;
+            
+        if (isQueried(node)) {
+            return false;
         }
-        return false;
+        
+        KUID nodeId = node.getNodeID();
+        if (context.isLocalNodeID(nodeId)
+                || context.isLocalContactAddress(node.getContactAddress())) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(node + " has either the same NodeID or contact"
+                        + " address as the local Node " + context.getLocalNode());
+            }
+            return false;
+        }
+        
+        toQuery.put(nodeId, node);
+        hopMap.put(nodeId, hop);
+        return true;
     }
     
     /** Adds the ContactNodeEntry to the response Trie */
