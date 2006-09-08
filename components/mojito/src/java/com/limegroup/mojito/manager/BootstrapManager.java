@@ -22,10 +22,10 @@ package com.limegroup.mojito.manager;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -269,11 +269,14 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstrapping from Route Table : "+context.getRouteTable());
             }
             
-            Set<Contact> nodes = new TreeSet<Contact>(BucketUtils.MRS_COMPARATOR);
-            nodes.addAll(context.getRouteTable().getLiveContacts());
+            Set<Contact> nodes = new HashSet<Contact>();
+            List<Contact> contactList = context.getRouteTable().getLiveContacts();
+            Collections.sort(contactList, BucketUtils.MRS_COMPARATOR);
+            nodes.addAll(contactList);
             nodes.remove(context.getLocalNode());
             
             if(!nodes.isEmpty()) {
+                System.out.println("nodes: "+nodes);
                 BootstrapPingResponseHandler<Contact> handler = 
                     new BootstrapPingResponseHandler<Contact>(context, nodes);
                 try {
