@@ -276,7 +276,6 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             nodes.remove(context.getLocalNode());
             
             if(!nodes.isEmpty()) {
-                System.out.println("nodes: "+nodes);
                 BootstrapPingResponseHandler<Contact> handler = 
                     new BootstrapPingResponseHandler<Contact>(context, nodes);
                 try {

@@ -1,0 +1,120 @@
+package com.limegroup.mojito.manager;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+
+import junit.framework.TestSuite;
+
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.routing.ContactFactory;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.settings.NetworkSettings;
+
+public class BootstrapManagerTest extends BaseTestCase {
+    
+    protected static MojitoDHT BOOTSTRAP_DHT;
+    protected static final int BOOTSTRAP_DHT_PORT = 3000;
+
+    protected static MojitoDHT TEST_DHT;
+    
+    public BootstrapManagerTest(String name){
+        super(name);
+    }
+    
+    public static TestSuite suite() {
+        return buildTestSuite(BootstrapManagerTest.class);
+    }
+    
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    private static void setSettings() {
+        NetworkSettings.TIMEOUT.setValue(200);
+        NetworkSettings.MIN_TIMEOUT_RTT.setValue(200);
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        setSettings();
+        //setup bootstrap node
+        BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
+        BOOTSTRAP_DHT.bind(BOOTSTRAP_DHT_PORT);
+        BOOTSTRAP_DHT.start();
+        //setup test node
+        TEST_DHT = MojitoFactory.createDHT("dht-test");
+        TEST_DHT.bind(2000);
+        TEST_DHT.start();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        BOOTSTRAP_DHT.stop();
+        TEST_DHT.stop();
+    }
+    
+    public void testBootstrapFailure() throws Exception{
+        //try failure first
+        BOOTSTRAP_DHT.stop();
+        HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
+        bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
+        BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAPPING_FAILED);
+        assertEquals(BOOTSTRAP_DHT.getContactAddress(), evt.getFailedHosts().get(0));
+    }
+
+    public void testBootstrapPingList() throws Exception{
+        //try pings to a bootstrap list
+        //add some bad hosts
+        HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
+        bootstrapSet.clear();
+        for(int i= 1; i < 5; i++) {
+            bootstrapSet.add(new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT+i));
+        }
+        //add good host
+        bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
+        BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_PING_SUCCEEDED);
+        assertNotContains(evt.getFailedHosts(), BOOTSTRAP_DHT.getContactAddress());
+    }
+    
+    public void testBootstrapPingRouteTable() throws Exception{
+        //try ping from RT
+        RouteTable rt = ((Context)TEST_DHT).getRouteTable();
+        Contact node;
+        for(int i= 1; i < 5; i++) {
+            node = ContactFactory.createLiveContact(null,
+                    0,0,KUID.createRandomNodeID(),
+                    new InetSocketAddress("localhost", 3000+i), 0, false);
+            rt.add(node);
+        }
+        //add good node
+        node = ContactFactory.createLiveContact(null,
+                0,0,BOOTSTRAP_DHT.getLocalNodeID(),
+                BOOTSTRAP_DHT.getContactAddress(), 0, false);
+        rt.add(node);
+        //now try bootstrapping from RT
+        BootstrapEvent evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_PING_SUCCEEDED);
+    }
+    
+    public void testBootstrapPhase1() throws Exception{
+        
+    }
+    
+    public void testBootstrapPhase2() throws Exception{
+        
+    }
+
+    
+    
+}
