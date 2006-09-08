@@ -81,6 +81,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /** The number of responses we have received */
     private int responseCount = 0;
     
+    /** The number of failed queries */
+    private int failures = 0;
+    
     /** The time when this lookup was started */
     private long startTime = -1L;
     
@@ -153,6 +156,14 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      */
     protected int getCurrentHop() {
         return currentHop;
+    }
+    
+    /**
+     * Return the number of failures
+     * 
+     */
+    protected int getFailures() {
+        return failures;
     }
     
     @Override
@@ -311,6 +322,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             hop = new Integer(0);
         }
         
+        failures++;
         currentHop = hop.intValue();
         nextLookupStep();
         finishIfDone();
@@ -374,6 +386,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 return;
                 
             // ...or if we found the target node
+            // It is important to have finished all the active searches before
+            // probing for this condition, because in the case of a bootstrap lookup
+            // we are actually updating the routing tables of the nodes we contact.
             } else if (!context.isLocalNodeID(lookupId) 
                     && responses.containsKey(lookupId)) {
                 

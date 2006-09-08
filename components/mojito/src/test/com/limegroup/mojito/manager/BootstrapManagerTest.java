@@ -68,11 +68,11 @@ public class BootstrapManagerTest extends BaseTestCase {
         HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
         bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
         BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAPPING_FAILED);
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_FAILED);
         assertEquals(BOOTSTRAP_DHT.getContactAddress(), evt.getFailedHosts().get(0));
     }
 
-    public void testBootstrapPingList() throws Exception{
+    public void testBootstrapFromList() throws Exception{
         //try pings to a bootstrap list
         //add some bad hosts
         HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
@@ -83,11 +83,11 @@ public class BootstrapManagerTest extends BaseTestCase {
         //add good host
         bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
         BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_PING_SUCCEEDED);
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
         assertNotContains(evt.getFailedHosts(), BOOTSTRAP_DHT.getContactAddress());
     }
     
-    public void testBootstrapPingRouteTable() throws Exception{
+    public void testBootstrapFromRouteTable() throws Exception{
         //try ping from RT
         RouteTable rt = ((Context)TEST_DHT).getRouteTable();
         Contact node;
@@ -104,15 +104,26 @@ public class BootstrapManagerTest extends BaseTestCase {
         rt.add(node);
         //now try bootstrapping from RT
         BootstrapEvent evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_PING_SUCCEEDED);
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
     }
     
-    public void testBootstrapPhase1() throws Exception{
-        
-    }
-    
-    public void testBootstrapPhase2() throws Exception{
-        
+    public void testBootstrapPoorRatio() throws Exception{
+        //fill RT with bad nodes
+        RouteTable rt = ((Context)TEST_DHT).getRouteTable();
+        Contact node;
+        for(int i= 1; i < 100; i++) {
+            node = ContactFactory.createUnknownContact(0,0,KUID.createRandomNodeID(),
+                    new InetSocketAddress("localhost", 3000+i));
+            rt.add(node);
+        }
+        node = ContactFactory.createUnknownContact(0,0,KUID.createRandomNodeID(),
+                new InetSocketAddress("localhost", 7777));
+        rt.add(node);
+
+        BootstrapEvent evt = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getContactAddress()).get();
+        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
+        //see if RT was purged
+        assertNotContains(rt.getLiveContacts(), node);
     }
 
     

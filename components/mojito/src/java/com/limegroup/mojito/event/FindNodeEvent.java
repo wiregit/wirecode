@@ -43,17 +43,20 @@ public class FindNodeEvent {
     
     private int hop;
     
+    private int failures;
+    
     @SuppressWarnings("unchecked")
     public FindNodeEvent(KUID lookupId, 
             List<? extends Entry<Contact, QueryKey>> nodes, 
             Collection<? extends Contact> collisions,
-            long time, int hop) {
+            long time, int hop, int failures) {
     	
         this.lookupId = lookupId;
         this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
         this.collisions = (Collection<Contact>)collisions;
         this.time = time;
         this.hop = hop;
+        this.failures = failures;
     }
     
     /**
@@ -61,6 +64,13 @@ public class FindNodeEvent {
      */
     public KUID getLookupID() {
         return lookupId;
+    }
+    
+    /**
+     * Returns the number of failed hosts during this lookup
+     */
+    public int getFailures() {
+        return failures;
     }
     
     /**

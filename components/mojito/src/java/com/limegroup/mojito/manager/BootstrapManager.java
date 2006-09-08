@@ -39,11 +39,9 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
-import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.KademliaSettings;
-import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -52,14 +50,6 @@ import com.limegroup.mojito.util.BucketUtils;
 public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
-    
-    /**
-     * The maximum number of nodes that can fail per lookup (until the timeout)
-     */
-    private static final int MAX_NODE_FAILED_PER_LOOKUP 
-        = (int)((KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue()
-                / NetworkSettings.TIMEOUT.getValue())
-                    * KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue()); 
     
     private Object lock = new Object();
     
@@ -342,40 +332,27 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             for (KUID nodeId : randomId) {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
-                try {
-                    FindNodeEvent evt = handler.call();
+                FindNodeEvent evt = handler.call();
+            	failures += evt.getFailures();
+                	
+            	if(failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
+                    //routing table is stale! remove unknown and dead contacts
+                    //and start over
+                    context.getRouteTable().purge();
                     
-                    float responseRatio = 
-                    	evt.getNodes().size()/(float)KademliaSettings.REPLICATION_PARAMETER.getValue();
-                    
-                    if(responseRatio < KademliaSettings.BOOTSTRAP_RATIO.getValue()) {
-                    	failures++;
-                    	
-                    	if(LOG.isDebugEnabled()) {
-                    	    LOG.debug("Bootstrap poor lookup ratio. Failures: " +failures);
-                    	}
-                    	
-                    	if((failures * MAX_NODE_FAILED_PER_LOOKUP) 
-                                >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
-                            //routing table is stale! remove unknown and dead contacts
-                            //and start over
-                            context.getRouteTable().purge();
-                            
-                            if(!retriedBootstrap) {
-                                LOG.debug("Retrying bootstrap from phase 2");
-                                retriedBootstrap = true;
-                                return startBootstrapLookups(node);
-                            } else {
-                                return false;
-                            }
-                    	}
-                    	
-                    } else if (!foundNewContacts && !evt.getNodes().isEmpty()) {
-                        foundNewContacts = true;
+                    if(!retriedBootstrap) {
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("Too many failures: "+ failures
+                                    + ".Retrying bootstrap from phase 2");
+                        }
+                        retriedBootstrap = true;
+                        return startBootstrapLookups(node);
+                    } else {
+                        return false;
                     }
-                } catch (DHTException ignore) {
-                    failures++;
-                }
+            	} else if (!foundNewContacts && !evt.getNodes().isEmpty()) {
+            	    foundNewContacts = true;
+            	}
             }
             return foundNewContacts;
         }

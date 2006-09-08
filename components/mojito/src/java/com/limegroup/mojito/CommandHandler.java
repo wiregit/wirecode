@@ -195,7 +195,7 @@ public class CommandHandler {
         
         BootstrapListener listener = new BootstrapListener() {
             public void handleResult(BootstrapEvent result) {
-                if (result.getEventType() == EventType.BOOTSTRAPPING_SUCCEEDED) {
+                if (result.getEventType() == EventType.BOOTSTRAP_SUCCEEDED) {
                     out.println("Bootstraping finished:\n" + result);
                     out.flush();
                 }

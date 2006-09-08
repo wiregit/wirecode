@@ -112,6 +112,7 @@ public class FindNodeResponseHandler
     protected void finishLookup() {
         long time = getElapsedTime();
         int hop = getCurrentHop();
+        int failures = getFailures();
         
         lookupStat.setHops(hop, false);
         lookupStat.setTime((int)time, false);
@@ -119,6 +120,6 @@ public class FindNodeResponseHandler
         List<Entry<Contact,QueryKey>> nodes 
                 = TrieUtils.select(responses, lookupId, responses.size());
         
-        setReturnValue(new FindNodeEvent(getLookupID(), nodes, collisions, time, hop));
+        setReturnValue(new FindNodeEvent(getLookupID(), nodes, collisions, time, hop, failures));
     }
 }

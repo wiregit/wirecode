@@ -215,7 +215,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
                 bootstrappingFromRT.set(false);
                 return;
                 
-            } else if(EventType.BOOTSTRAPPING_SUCCEEDED.equals(result.getEventType())) {
+            } else if(EventType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap completed");
 
                 handleSuccess();
@@ -290,7 +290,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
                 waiting.set(false); //this will also stop the node fetcher
                 return;
                 
-            } else if(EventType.BOOTSTRAPPING_SUCCEEDED.equals(result.getEventType())) {
+            } else if(EventType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Bootstrap succeded in waitingBootstrapListener");
                 
                 handleSuccess();

@@ -47,13 +47,13 @@ public class BootstrapEvent {
          * Fired when the bootstrap process finished
          * successfully
          */
-        BOOTSTRAPPING_SUCCEEDED,
+        BOOTSTRAP_SUCCEEDED,
         
         /**
          * Fired when the bootstrap process finished
          * unsuccessfully
          */
-        BOOTSTRAPPING_FAILED;
+        BOOTSTRAP_FAILED;
     }
     
     private List<SocketAddress> failedHosts;
@@ -76,7 +76,7 @@ public class BootstrapEvent {
             List<? extends SocketAddress> failedHosts, long phaseZero) {
         
         return new BootstrapEvent(failedHosts, phaseZero, 
-                -1L, -1L, false, EventType.BOOTSTRAPPING_FAILED);
+                -1L, -1L, false, EventType.BOOTSTRAP_FAILED);
     }
     
     public static BootstrapEvent createBootstrappingSucceededEvent(
@@ -84,7 +84,7 @@ public class BootstrapEvent {
             long phaseOne, long phaseTwo, boolean foundsNewContacts) {
         
         return new BootstrapEvent(failedHosts, phaseZero, phaseOne, 
-                phaseTwo, foundsNewContacts, EventType.BOOTSTRAP_PING_SUCCEEDED);
+                phaseTwo, foundsNewContacts, EventType.BOOTSTRAP_SUCCEEDED);
     }
     
     @SuppressWarnings("unchecked")
