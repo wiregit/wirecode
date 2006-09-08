@@ -35,7 +35,8 @@ public class DHTException extends Exception {
     
     private long time;
     
-    public DHTException(KUID nodeId, SocketAddress address, RequestMessage request, long time, Throwable cause) {
+    public DHTException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time, Throwable cause) {
         super(cause);
         
         this.nodeId = nodeId;
@@ -44,7 +45,8 @@ public class DHTException extends Exception {
         this.time = time;
     }
     
-    public DHTException(KUID nodeId, SocketAddress address, RequestMessage request, long time, String msg, Throwable cause) {
+    public DHTException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time, String msg, Throwable cause) {
         super(msg, cause);
         
         this.nodeId = nodeId;

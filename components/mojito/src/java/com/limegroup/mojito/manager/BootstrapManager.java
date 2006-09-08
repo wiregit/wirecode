@@ -235,10 +235,6 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             return phaseTwo(node);
         }
         
-        private void handleCollision(Contact collide) {
-            context.changeNodeID();
-        }
-        
         /**
          * Tries to ping the IPPs from the hostList and returns the first
          * Contact that responds or null if none of them did respond
@@ -266,7 +262,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          */
         private Contact bootstrapFromRouteTable() throws Exception {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstrapping from Route Table : "+context.getRouteTable());
+                LOG.debug("Bootstrapping from RouteTable : " + context.getRouteTable());
             }
             
             Set<Contact> nodes = new HashSet<Contact>();
@@ -276,8 +272,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             nodes.remove(context.getLocalNode());
             
             if(!nodes.isEmpty()) {
-                BootstrapPingResponseHandler<Contact> handler = 
-                    new BootstrapPingResponseHandler<Contact>(context, nodes);
+                BootstrapPingResponseHandler<Contact> handler 
+                    = new BootstrapPingResponseHandler<Contact>(context, nodes);
+                
                 try {
                     return handler.call();
                 } catch (BootstrapTimeoutException exception) {
@@ -292,12 +289,35 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * Do a lookup for myself (Phase one)
          */
         private FindNodeEvent phaseOne(Contact node) throws Exception {
+            
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
-            handler.setCollisionCheckEnabled(true);
-            return handler.call();
+            FindNodeEvent evt = handler.call();
+            
+            // Ping all Contacts that have our Node ID. If any
+            // of them responds then change our Node ID and
+            // try again!
+            for (Contact c : evt.getCollisions()) {
+                try {
+                    Contact collidesWith = context.collisionPing(c).get();
+                    throw new CollisionException(collidesWith, 
+                        context.getLocalNode() + " collides with " + collidesWith); 
+                } catch (Exception err) {
+                    if (err instanceof CollisionException) {
+                        throw err;
+                    }
+                    
+                    LOG.error("Exception", err);
+                }
+            }
+            
+            return evt;
         }
         
+        private void handleCollision(Contact collide) {
+            context.changeNodeID();
+        }
+
         /**
          * Refresh all Buckets (Phase two)
          * 

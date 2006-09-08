@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.event;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -36,17 +37,21 @@ public class FindNodeEvent {
     
     private List<Entry<Contact, QueryKey>> nodes;
     
+    private Collection<Contact> collisions;
+    
     private long time;
     
     private int hop;
     
     @SuppressWarnings("unchecked")
     public FindNodeEvent(KUID lookupId, 
-    		List<? extends Entry<Contact, QueryKey>> nodes, 
-			long time, int hop) {
+            List<? extends Entry<Contact, QueryKey>> nodes, 
+            Collection<? extends Contact> collisions,
+            long time, int hop) {
     	
         this.lookupId = lookupId;
         this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
+        this.collisions = (Collection<Contact>)collisions;
         this.time = time;
         this.hop = hop;
     }
@@ -63,6 +68,13 @@ public class FindNodeEvent {
      */
     public List<Entry<Contact, QueryKey>> getNodes() {
         return nodes;
+    }
+    
+    /**
+     * 
+     */
+    public Collection<Contact> getCollisions() {
+        return collisions;
     }
     
     /**
@@ -88,6 +100,15 @@ public class FindNodeEvent {
             buffer.append(i++).append(": ").append(entry.getKey())
                 .append(", qk=").append(entry.getValue()).append("\n");
         }
+        
+        if (!collisions.isEmpty()) {
+            buffer.append("Collisions:\n");
+            i = 0;
+            for (Contact node : collisions) {
+                buffer.append(i++).append(": ").append(node).append("\n");
+            }
+        }
+        
         return buffer.toString();
     }
 }

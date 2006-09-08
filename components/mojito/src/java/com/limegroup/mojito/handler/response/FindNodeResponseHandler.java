@@ -119,6 +119,6 @@ public class FindNodeResponseHandler
         List<Entry<Contact,QueryKey>> nodes 
                 = TrieUtils.select(responses, lookupId, responses.size());
         
-        setReturnValue(new FindNodeEvent(getLookupID(), nodes, time, hop));
+        setReturnValue(new FindNodeEvent(getLookupID(), nodes, collisions, time, hop));
     }
 }

@@ -40,9 +40,6 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.CollisionVerifyer;
-import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
@@ -53,8 +50,7 @@ import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
 
-public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> 
-        implements CollisionVerifyer {
+public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
 
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
@@ -72,6 +68,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** Trie of Contacts that did respond */
     protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_ANALYZER);
+    
+    /** */
+    protected Collection<Contact> collisions = new HashSet<Contact>();
     
     /** A Map we're using to count the number of hops */
     private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
@@ -96,9 +95,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     /** The current hop */
     private int currentHop = 0;
-    
-    /** Whether or not the collision check is enabled */
-    private boolean collisionCheckEnabled = false;
     
     LookupResponseHandler(Context context, KUID lookupId) {
         this(context, null, lookupId, -1);
@@ -133,22 +129,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      */
     public KUID getLookupID() {
         return lookupId;
-    }
-    
-    /**
-     * Sets whether or not the collsion check is enabled. Default
-     * is false and it's meant to be enabled only during bootstrapping!
-     */
-    public void setCollisionCheckEnabled(boolean collisionCheckEnabled) {
-        this.collisionCheckEnabled = collisionCheckEnabled;
-    }
-    
-    /**
-     * Returns whether or not the collision check is enabled.
-     * Default is false
-     */
-    public boolean isCollisionCheckEnabled() {
-        return collisionCheckEnabled;
     }
     
     /**
@@ -274,10 +254,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                     continue;
                 }
                 
-                if (ContactUtils.isLocalContact(context, node, this)) {
+                if (ContactUtils.isLocalContact(context, node, collisions)) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Dropping " + node);
                     }
+                    
                     continue;
                 }
                 
@@ -470,46 +451,6 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * requests
      */
     protected abstract LookupRequest createLookupRequest(SocketAddress address);
-    
-    /**
-     * Called for every Contact we receive that has the same
-     * NodeID as we do but a different Address. It doesn't
-     * necessarily mean there's really a collision (our address
-     * may just changed) but in worst case we have to create
-     * a new NodeID for us.
-     * 
-     * Called only if the collisionCheck is enabled!
-     */
-    public void doCollisionCheck(Contact node) throws IOException {
-        
-        if (!isCollisionCheckEnabled()) {
-            return;
-        }
-        
-        PingListener listener = new PingListener() {
-            public void handleResult(Contact result) {
-                synchronized (LookupResponseHandler.this) {
-                    if (!isDone()) {
-                        // Interrupt the lookup!
-                        Exception collision = new CollisionException(result, 
-                                context.getLocalNode() + " collides with " +  result);
-                        setException(collision);
-                    }
-                    
-                    // TODO The Ping response may arrive after the
-                    // lookup has already finished...! I think I
-                    // have to move the collision check to
-                    // BootstrapManager where it would make more
-                    // sense anyways...
-                }
-            }
-
-            public void handleThrowable(Throwable ex) {
-            }
-        };
-        
-        context.collisionPing(node).addDHTEventListener(listener);
-    }
     
     /**
      * Calls finishLookup() if the lookup isn't already

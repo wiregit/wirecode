@@ -21,7 +21,10 @@ package com.limegroup.mojito;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestSuite;
 
@@ -79,14 +82,27 @@ public class CollisionTest extends BaseTestCase {
             Thread.sleep(500);
             
             assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
+            assertNotEquals(original.getContactAddress(), spoofer.getContactAddress());
             
             Context context = (Context)bootstrap;
             List<Contact> nodes = context.getRouteTable().getContacts();
-            for(Contact node : nodes) {
-                assertNotEquals(spoofer.getContactAddress(), 
-                        node.getContactAddress());
+            
+            // Precondition: LocalContact.equals(LiveContact) == false
+            // Copy the fields we're interested in into a Map and perform
+            // all tests on the Map rather than the actual List of Contacts!
+            Map<KUID, SocketAddress> map = new HashMap<KUID, SocketAddress>();
+            for (Contact node : nodes) {
+                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
             }
             
+            assertContains(map.keySet(), bootstrap.getLocalNodeID());
+            assertEquals(map.get(bootstrap.getLocalNodeID()), bootstrap.getContactAddress());
+            
+            assertContains(map.keySet(), original.getLocalNodeID());
+            assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
+            
+            assertContains(map.keySet(), spoofer.getLocalNodeID());
+            assertEquals(map.get(spoofer.getLocalNodeID()), spoofer.getContactAddress());
             
         } finally {
             if (bootstrap != null) {
@@ -124,17 +140,18 @@ public class CollisionTest extends BaseTestCase {
             
             original.stop();
             
-            boolean contains = false;
             List<Contact> nodes = ((Context)bootstrap).getRouteTable().getContacts();
-            for(Contact node : nodes) {
-                if (node.getContactAddress()
-                        .equals(original.getContactAddress())) {
-                    contains = true;
-                    break;
-                }
+            
+            // Precondition: LocalContact.equals(LiveContact) == false
+            // Copy the fields we're interested in into a Map and perform
+            // all tests on the Map rather than the actual List of Contacts!
+            Map<KUID, SocketAddress> map = new HashMap<KUID, SocketAddress>();
+            for (Contact node : nodes) {
+                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
             }
             
-            assertTrue("Bootstrap Node does not have the new Node in its RT!", contains);
+            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), original.getLocalNodeID());
+            assertEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
             
             // The replacement Node
             replacement = MojitoFactory.createDHT("ReplacementDHT");
@@ -150,17 +167,17 @@ public class CollisionTest extends BaseTestCase {
             
             Thread.sleep(5L * NetworkSettings.TIMEOUT.getValue());
             
-            contains = false;
             nodes = ((Context)bootstrap).getRouteTable().getContacts();
-            for(Contact node : nodes) {
-                if (node.getContactAddress()
-                        .equals(replacement.getContactAddress())) {
-                    contains = true;
-                    break;
-                }
+            map = new HashMap<KUID, SocketAddress>();
+            for (Contact node : nodes) {
+                assertNull(map.put(node.getNodeID(), node.getContactAddress()));
             }
             
-            assertTrue("Bootstrap Node does not have the new Node in its RT!", contains);
+            assertContains("Bootstrap Node does not have the new Node in its RT!", map.keySet(), replacement.getLocalNodeID());
+            assertEquals(map.get(replacement.getLocalNodeID()), replacement.getContactAddress());
+            
+            // The original Contact shouldn't be no longer there
+            assertNotEquals(map.get(original.getLocalNodeID()), original.getContactAddress());
             
         } finally {
             

@@ -22,6 +22,7 @@ package com.limegroup.mojito.util;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.CollisionVerifyer;
 
 /**
  * 
@@ -135,8 +135,9 @@ public final class ContactUtils {
      * Checks whether or not 'node' is the local Node and
      * triggers Node ID collision verification respectively.
      */
+    @SuppressWarnings("unchecked")
     public static boolean isLocalContact(Context context, Contact node, 
-            CollisionVerifyer verifyer) throws IOException {
+            Collection collisions) {
         
         if (context.isLocalNodeID(node.getNodeID())) {
             // If same address then just skip it
@@ -149,10 +150,8 @@ public final class ContactUtils {
                     LOG.warn(node + " seems to collide with " + context.getLocalNode());
                 }
                 
-                // Continue with the lookup but run in parallel a
-                // collision check.
-                if (verifyer != null) {
-                    verifyer.doCollisionCheck(node);
+                if (collisions != null) {
+                    collisions.add(node);
                 }
             }
             
