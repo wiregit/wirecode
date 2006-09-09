@@ -15,9 +15,9 @@ import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 public class DHTSizeEstimatorTest extends BaseTestCase {
 	
-	public static final String LOCAL_NODE_ID = "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEA4";
+    public static final String LOCAL_NODE_ID = "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEA4";
     
-	public static final String[] NODE_IDS = {
+    public static final String[] NODE_IDS = {
         "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEAF", "ED1E8511CAA7DDA36395FF402EE05BC62BA0429F", "FB3617BA541D522F6A5E7A2E188CB0A99FBA7DFB", 
         "6DD888A15B61F4B9F9A1117641A3E30F05F43475", "8CD86D31AA23C4060D9C523C62C5661C9087BC7C", "D813FE7931C4E6D6AF38EFA3D8558A798A31A8F1", 
         "F64B5A1EB2CD0F02CA1D743599FF2ADA64996F0F", "E6AA2F4531F9FF2D4CB058F9A5CA3CAB3A589941", "6AB9D487B9B27C08763A3939E4CC672B44039B78", 
@@ -187,7 +187,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
         "D6A0E5F04BF7D041A410CAC145B84A35E0688FB7", "62F64D1ABC0A688911738380881B3CFC851BD711"
     };
     
-	public DHTSizeEstimatorTest(String name) {
+    public DHTSizeEstimatorTest(String name) {
         super(name);
     }
 
@@ -211,9 +211,9 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	routeTable.add(ContactFactory.createLocalContact(0, 0, KUID.create(LOCAL_NODE_ID), 0, false));
     	
     	for (String id : NODE_IDS) {
-    		KUID nodeId = KUID.create(id);
-    		SocketAddress addr = new InetSocketAddress("localhost", 5000);
-    		routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            KUID nodeId = KUID.create(id);
+            SocketAddress addr = new InetSocketAddress("localhost", 5000);
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
     	}
     	
     	assertEquals(490, routeTable.size());
@@ -222,9 +222,9 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	
     	int[] remote = {525, 601, 310, 750, 455, 654, 512, 210, 497, 101 };
     	for (int size : remote) {
-    		estimator.addEstimatedRemoteSize(size);
+            estimator.addEstimatedRemoteSize(size);
     	}
     	
-    	assertEquals(486, estimator.getEstimatedSize(routeTable));
+    	assertEquals(490, estimator.getEstimatedSize(routeTable));
     }
 }

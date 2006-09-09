@@ -74,8 +74,8 @@ public class DHTSizeEstimator {
      */
     public int getEstimatedSize(RouteTable routeTable) {
 
-        if ((System.currentTimeMillis() - lastEstimateTime) >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY
-                .getValue()) {
+        if ((System.currentTimeMillis() - lastEstimateTime) 
+                >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
 
             estimatedSize = computeSize(routeTable);
             lastEstimateTime = System.currentTimeMillis();
@@ -96,8 +96,8 @@ public class DHTSizeEstimator {
 
         synchronized (remoteSizeHistory) {
             remoteSizeHistory.add(new Integer(remoteSize));
-            if (remoteSizeHistory.size() >= ContextSettings.MAX_REMOTE_HISTORY_SIZE
-                    .getValue()) {
+            if (remoteSizeHistory.size() 
+                    > ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
                 remoteSizeHistory.remove(0);
             }
         }
@@ -132,8 +132,7 @@ public class DHTSizeEstimator {
         for (int i = 1; i < nodes.size(); i++) {
             Contact node = nodes.get(i);
 
-            BigInteger distance = localNodeId.xor(node.getNodeID())
-                    .toBigInteger();
+            BigInteger distance = localNodeId.xor(node.getNodeID()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);
 
             sum1 = sum1.add(j.multiply(distance));
@@ -142,16 +141,15 @@ public class DHTSizeEstimator {
 
         int estimatedSize = 0;
         if (!sum1.equals(BigInteger.ZERO)) {
-            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(
-                    sum1).intValue();
+            estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(sum1).intValue();
         }
         estimatedSize = Math.max(1, estimatedSize);
 
         int localSize = 0;
         synchronized (localSizeHistory) {
             localSizeHistory.add(new Integer(estimatedSize));
-            if (localSizeHistory.size() >= ContextSettings.MAX_LOCAL_HISTORY_SIZE
-                    .getValue()) {
+            if (localSizeHistory.size() 
+                    > ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
                 localSizeHistory.remove(0);
             }
 
