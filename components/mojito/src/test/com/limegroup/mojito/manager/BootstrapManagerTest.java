@@ -87,6 +87,7 @@ public class BootstrapManagerTest extends BaseTestCase {
         assertNotContains(evt.getFailedHosts(), BOOTSTRAP_DHT.getContactAddress());
     }
     
+    @SuppressWarnings("unchecked")
     public void testBootstrapFromRouteTable() throws Exception{
         //try ping from RT
         RouteTable rt = ((Context)TEST_DHT).getRouteTable();
