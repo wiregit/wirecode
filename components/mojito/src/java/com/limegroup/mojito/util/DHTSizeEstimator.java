@@ -40,10 +40,10 @@ public class DHTSizeEstimator {
     private static final BigInteger MAXIMUM = BigInteger.valueOf(Integer.MAX_VALUE);
     
     /** History of local estimations */
-    private List<Number> localSizeHistory = new LinkedList<Number>();
+    private List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
 
     /** History of remote estimations (sizes we received with pongs) */
-    private List<Number> remoteSizeHistory = new LinkedList<Number>();
+    private List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
 
     /** Current estimated size */
     private volatile int estimatedSize = 0;
@@ -97,7 +97,7 @@ public class DHTSizeEstimator {
         }
 
         synchronized (remoteSizeHistory) {
-            remoteSizeHistory.add(new Integer(remoteSize));
+            remoteSizeHistory.add(BigInteger.valueOf(remoteSize));
             if (remoteSizeHistory.size() 
                     > ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
                 remoteSizeHistory.remove(0);
@@ -154,7 +154,7 @@ public class DHTSizeEstimator {
         
         BigInteger localSize = BigInteger.ZERO;
         synchronized (localSizeHistory) {
-            localSizeHistory.add(estimatedSize.intValue());
+            localSizeHistory.add(estimatedSize);
             if (localSizeHistory.size() 
                     > ContextSettings.MAX_LOCAL_HISTORY_SIZE.getValue()) {
                 localSizeHistory.remove(0);
@@ -162,8 +162,8 @@ public class DHTSizeEstimator {
 
             if (!localSizeHistory.isEmpty()) {
                 BigInteger localSizeSum = BigInteger.ZERO;
-                for (Number size : localSizeHistory) {
-                    localSizeSum = localSizeSum.add(BigInteger.valueOf(size.intValue()));
+                for (BigInteger size : localSizeHistory) {
+                    localSizeSum = localSizeSum.add(size);
                 }
 
                 localSize = localSizeSum.divide(BigInteger.valueOf(localSizeHistory.size()));
@@ -174,13 +174,13 @@ public class DHTSizeEstimator {
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             synchronized (remoteSizeHistory) {
                 if (remoteSizeHistory.size() >= 3) {
-                    Number[] remote = remoteSizeHistory.toArray(new Number[0]);
+                    BigInteger[] remote = remoteSizeHistory.toArray(new BigInteger[0]);
                     Arrays.sort(remote);
                     
                     // Skip the smallest and largest value
                     int count = 1;
                     while (count < (remote.length - 1)) {
-                        combinedSize = combinedSize.add(BigInteger.valueOf(remote[count++].intValue()));
+                        combinedSize = combinedSize.add(remote[count++]);
                     }
                     combinedSize = combinedSize.divide(BigInteger.valueOf(count));
                     combinedSize = limit(combinedSize);
@@ -189,7 +189,7 @@ public class DHTSizeEstimator {
         }
 
         // There is always us!
-        return Math.max(1, combinedSize.intValue());
+        return BigInteger.ONE.max(combinedSize).intValue();
     }
     
     private static BigInteger limit(BigInteger value) {
