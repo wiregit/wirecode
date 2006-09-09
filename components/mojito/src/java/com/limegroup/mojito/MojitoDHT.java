@@ -21,6 +21,7 @@ package com.limegroup.mojito;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -130,7 +131,7 @@ public interface MojitoDHT {
     /**
      * Returns the approximate size of the DHT
      */
-    public int size();
+    public BigInteger size();
     
     /**
      * Sets the external (forced) Port number

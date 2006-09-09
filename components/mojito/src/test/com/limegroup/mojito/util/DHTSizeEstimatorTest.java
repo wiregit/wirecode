@@ -1,5 +1,6 @@
 package com.limegroup.mojito.util;
 
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
@@ -218,13 +219,13 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	
     	assertEquals(490, routeTable.size());
     	
-    	DHTSizeEstimator estimator = new DHTSizeEstimator();
+    	DHTSizeEstimator estimator = new DHTSizeEstimator(routeTable);
     	
     	int[] remote = {525, 601, 310, 750, 455, 654, 512, 210, 497, 101 };
     	for (int size : remote) {
-            estimator.addEstimatedRemoteSize(size);
+            estimator.addEstimatedRemoteSize(BigInteger.valueOf(size));
     	}
     	
-    	assertEquals(490, estimator.getEstimatedSize(routeTable));
+    	assertEquals(BigInteger.valueOf(490), estimator.getEstimatedSize());
     }
 }

@@ -19,11 +19,12 @@
  
 package com.limegroup.mojito.messages;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
 
 public interface PingResponse extends ResponseMessage {
 
     public SocketAddress getExternalAddress();
 
-    public int getEstimatedSize();
+    public BigInteger getEstimatedSize();
 }

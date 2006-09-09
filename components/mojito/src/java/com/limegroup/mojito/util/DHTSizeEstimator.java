@@ -24,6 +24,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.RouteTable;
@@ -37,7 +40,9 @@ import com.limegroup.mojito.settings.KademliaSettings;
  */
 public class DHTSizeEstimator {
 
-    private static final BigInteger MAXIMUM = BigInteger.valueOf(Integer.MAX_VALUE);
+    private static final Log LOG = LogFactory.getLog(DHTSizeEstimator.class);
+    
+    private static final BigInteger MAXIMUM = KUID.MAXIMUM.toBigInteger();
     
     /** History of local estimations */
     private List<BigInteger> localSizeHistory = new LinkedList<BigInteger>();
@@ -46,12 +51,15 @@ public class DHTSizeEstimator {
     private List<BigInteger> remoteSizeHistory = new LinkedList<BigInteger>();
 
     /** Current estimated size */
-    private volatile int estimatedSize = 0;
+    private volatile BigInteger estimatedSize = BigInteger.ZERO;
 
     /** The time when we made the last estimation */
     private volatile long lastEstimateTime = 0L;
 
-    public DHTSizeEstimator() {
+    private RouteTable routeTable;
+    
+    public DHTSizeEstimator(RouteTable routeTable) {
+        this.routeTable = routeTable;
     }
 
     /**
@@ -59,7 +67,7 @@ public class DHTSizeEstimator {
      * its initial state
      */
     public void clear() {
-        estimatedSize = 0;
+        estimatedSize = BigInteger.ZERO;
         lastEstimateTime = 0L;
 
         synchronized (localSizeHistory) {
@@ -74,12 +82,12 @@ public class DHTSizeEstimator {
     /**
      * Returns the approximate DHT size
      */
-    public int getEstimatedSize(RouteTable routeTable) {
+    public BigInteger getEstimatedSize() {
 
         if ((System.currentTimeMillis() - lastEstimateTime) 
                 >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
 
-            estimatedSize = computeSize(routeTable);
+            estimatedSize = computeSize();
             lastEstimateTime = System.currentTimeMillis();
         }
 
@@ -91,13 +99,25 @@ public class DHTSizeEstimator {
      * The average of the remote DHT sizes is incorporated into into
      * our local computation.
      */
-    public void addEstimatedRemoteSize(int remoteSize) {
-        if (remoteSize <= 0 || !ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
+    public void addEstimatedRemoteSize(BigInteger remoteSize) {
+        if (!ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             return;
         }
-
+        
+        if (remoteSize.compareTo(BigInteger.ZERO) == 0) {
+            return;
+        }
+        
+        if (remoteSize.compareTo(BigInteger.ZERO) < 0
+                || remoteSize.compareTo(MAXIMUM) > 0) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(remoteSize + " is an illegal argument");
+            }
+            return;
+        }
+        
         synchronized (remoteSizeHistory) {
-            remoteSizeHistory.add(BigInteger.valueOf(remoteSize));
+            remoteSizeHistory.add(remoteSize);
             if (remoteSizeHistory.size() 
                     > ContextSettings.MAX_REMOTE_HISTORY_SIZE.getValue()) {
                 remoteSizeHistory.remove(0);
@@ -108,9 +128,7 @@ public class DHTSizeEstimator {
     /**
      * Computes and returns the approximate DHT size
      */
-    public int computeSize(RouteTable routeTable) {
-        
-        assert (Integer.MAX_VALUE == MAXIMUM.intValue());
+    public BigInteger computeSize() {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
 
@@ -122,7 +140,7 @@ public class DHTSizeEstimator {
         // two Nodes
         if (nodes.size() <= 2) {
             // There's always we!
-            return Math.max(1, nodes.size());
+            return BigInteger.ONE.max(BigInteger.valueOf(nodes.size()));
         }
 
         // See Azureus DHTControlImpl.estimateDHTSize()
@@ -132,7 +150,8 @@ public class DHTSizeEstimator {
 
         BigInteger sum1 = BigInteger.ZERO;
         BigInteger sum2 = BigInteger.ZERO;
-
+        
+        // We start 1 because the local Node is the 0th item!
         for (int i = 1; i < nodes.size(); i++) {
             Contact node = nodes.get(i);
 
@@ -146,12 +165,12 @@ public class DHTSizeEstimator {
         BigInteger estimatedSize = BigInteger.ZERO;
         if (!sum1.equals(BigInteger.ZERO)) {
             estimatedSize = KUID.MAXIMUM.toBigInteger().multiply(sum2).divide(sum1);
-            estimatedSize = limit(estimatedSize);
         }
 
         // And there is always us!
         estimatedSize = BigInteger.ONE.max(estimatedSize);
         
+        // Get the average of the local estimations
         BigInteger localSize = BigInteger.ZERO;
         synchronized (localSizeHistory) {
             localSizeHistory.add(estimatedSize);
@@ -169,7 +188,9 @@ public class DHTSizeEstimator {
                 localSize = localSizeSum.divide(BigInteger.valueOf(localSizeHistory.size()));
             }
         }
-
+        
+        // Get the combined average
+        // S = (localEstimation + sum(remoteEstimation[i]))/count
         BigInteger combinedSize = localSize;
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             synchronized (remoteSizeHistory) {
@@ -183,21 +204,16 @@ public class DHTSizeEstimator {
                         combinedSize = combinedSize.add(remote[count++]);
                     }
                     combinedSize = combinedSize.divide(BigInteger.valueOf(count));
-                    combinedSize = limit(combinedSize);
+                    
+                    // Make sure we didn't exceed the MAXIMUM number as
+                    // we made an addition with the local estimation which
+                    // might be already 2**160 bit!
+                    combinedSize = combinedSize.min(MAXIMUM);
                 }
             }
         }
 
         // There is always us!
-        return BigInteger.ONE.max(combinedSize).intValue();
-    }
-    
-    private static BigInteger limit(BigInteger value) {
-        // Wow! We estimate there are more than MAXIMUM number
-        // of Nodes in the DHT which is a lot. The technical max
-        // is 2**160 but as we're not using 160bit values for
-        // the estimated size we have to cap the estimated size
-        // at the MAXIMUM number.
-        return value.min(MAXIMUM);
+        return BigInteger.ONE.max(combinedSize);
     }
 }

@@ -20,6 +20,7 @@
 package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.Contact;
@@ -36,11 +37,11 @@ public class PingResponseImpl extends AbstractResponseMessage
         implements PingResponse {
 
     private SocketAddress externalAddress;
-    private int estimatedSize;
+    private BigInteger estimatedSize;
 
     public PingResponseImpl(Context context, 
 	    Contact contact, MessageID messageId, 
-	    SocketAddress externalAddress, int estimatedSize) {
+	    SocketAddress externalAddress, BigInteger estimatedSize) {
         super(context, OpCode.PING_RESPONSE, contact, messageId);
 
         this.externalAddress = externalAddress;
@@ -52,7 +53,7 @@ public class PingResponseImpl extends AbstractResponseMessage
         super(context, OpCode.PING_RESPONSE, src, messageId, version, in);
         
         this.externalAddress = in.readSocketAddress();
-        this.estimatedSize = in.readInt();
+        this.estimatedSize = in.readDHTSize();
     }
     
     /** My external address */
@@ -60,13 +61,13 @@ public class PingResponseImpl extends AbstractResponseMessage
         return externalAddress;
     }
 
-    public int getEstimatedSize() {
+    public BigInteger getEstimatedSize() {
         return estimatedSize;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeSocketAddress(externalAddress);
-        out.writeInt(estimatedSize);
+        out.writeDHTSize(estimatedSize);
     }
 
     public String toString() {

@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.messages;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -69,7 +70,7 @@ public class MessageHelper {
         return MessageID.create(dst);
     }
 
-    protected int getEstimatedSize() {
+    protected BigInteger getEstimatedSize() {
         return context.size();
     }
 

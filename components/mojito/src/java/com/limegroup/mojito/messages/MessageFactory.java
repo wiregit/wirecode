@@ -20,6 +20,7 @@
 package com.limegroup.mojito.messages;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -45,7 +46,7 @@ public interface MessageFactory {
     public PingRequest createPingRequest(Contact contact, MessageID messageId);
 
     public PingResponse createPingResponse(Contact contact, MessageID messageId, 
-            SocketAddress externalAddress, int estimatedSize);
+            SocketAddress externalAddress, BigInteger estimatedSize);
 
     public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
             KUID lookupId);

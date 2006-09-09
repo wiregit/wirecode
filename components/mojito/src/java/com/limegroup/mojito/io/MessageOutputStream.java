@@ -22,6 +22,7 @@ package com.limegroup.mojito.io;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -61,6 +62,15 @@ public class MessageOutputStream extends DataOutputStream {
         }
         
         messageId.write(this);
+    }
+    
+    public void writeDHTSize(BigInteger estimatedSize) throws IOException {
+        byte[] data = estimatedSize.toByteArray();
+        if (data.length > KUID.LENGTH) { // Can't be more than 2**160 bit
+            throw new IOException("Illegal length: " + data.length + "/" + estimatedSize);
+        }
+        writeByte(data.length);
+        write(data, 0, data.length);
     }
     
     public void writeDHTValue(DHTValue value) throws IOException {

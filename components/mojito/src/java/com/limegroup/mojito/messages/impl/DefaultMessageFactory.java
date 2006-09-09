@@ -20,6 +20,7 @@
 package com.limegroup.mojito.messages.impl;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -154,7 +155,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public PingResponse createPingResponse(Contact contact, MessageID messageId, 
-            SocketAddress externalAddress, int estimatedSize) {
+            SocketAddress externalAddress, BigInteger estimatedSize) {
         return new PingResponseImpl(context, contact, messageId, externalAddress, estimatedSize);
     }
 

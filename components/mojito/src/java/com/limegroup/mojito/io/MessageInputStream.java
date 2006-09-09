@@ -22,6 +22,7 @@ package com.limegroup.mojito.io;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -65,6 +66,16 @@ public class MessageInputStream extends DataInputStream {
     
     public MessageID readMessageID() throws IOException {
         return MessageID.create(readBytes(MessageID.LENGTH));
+    }
+    
+    public BigInteger readDHTSize() throws IOException {
+        int length = readUnsignedByte();
+        if (length > KUID.LENGTH) { // can't be more than 2**160 bit
+            throw new IOException("Illegal length: " + length);
+        }
+        
+        byte[] num = readBytes(length);
+        return new BigInteger(1 /* unsigned */, num);
     }
     
     public DHTValue readDHTValue(Contact sender) throws IOException {

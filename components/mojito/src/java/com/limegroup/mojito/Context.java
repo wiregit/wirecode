@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -123,9 +124,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private ScheduledExecutorService scheduledExecutor;
     private ExecutorService contextExecutor;
     
-    private DHTSizeEstimator estimator = new DHTSizeEstimator();
-    
-    private int estimatedSize = 0;
+    private DHTSizeEstimator estimator;
     
     /**
      * Constructor to create a new Context
@@ -678,6 +677,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         
         running = true;
         
+        estimator = new DHTSizeEstimator(getRouteTable());
         messageDispatcher.start();
         bucketRefresher.start();
         publisher.start();
@@ -707,7 +707,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         messageDispatcher.stop();
         
         estimator.clear();
-        estimatedSize = 0;
     }
     
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
@@ -877,18 +876,12 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     /**
      * Returns the approximate DHT size
      */
-    public synchronized int size() {
+    public synchronized BigInteger size() {
         if (!isRunning()) {
-            return 0;
+            return BigInteger.ZERO;
         }
         
-        int size = estimator.getEstimatedSize(getRouteTable());
-        if (estimatedSize != size) {
-        	networkStats.ESTIMATE_SIZE.addData(size);
-        	estimatedSize = size;
-        }
-        
-        return estimatedSize;
+        return estimator.getEstimatedSize();
     }
     
     /**
@@ -896,7 +889,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * The average of the remote DHT sizes is incorporated into into
      * our local computation.
      */
-    public void addEstimatedRemoteSize(int remoteSize) {
+    public void addEstimatedRemoteSize(BigInteger remoteSize) {
     	estimator.addEstimatedRemoteSize(remoteSize);
     }
     
