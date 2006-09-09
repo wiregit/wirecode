@@ -27,7 +27,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +40,6 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.ContactFactory;
-import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.util.EntryImpl;
 
 /**
@@ -130,17 +128,6 @@ public class MessageInputStream extends DataInputStream {
         }
         
         return Arrays.asList(keys);
-    }
-    
-    public PublicKey readPublicKey() throws IOException {
-        int length = readUnsignedShort();
-        if (length == 0) {
-            return null;
-        }
-        
-        byte[] encodedKey = new byte[length];
-        readFully(encodedKey);
-        return CryptoHelper.createPublicKey(encodedKey);
     }
     
     public byte[] readSignature() throws IOException {

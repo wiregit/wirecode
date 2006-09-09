@@ -139,7 +139,7 @@ public class DHTSizeEstimator {
         // TODO accoriding to Az code it works only with more than
         // two Nodes
         if (nodes.size() <= 2) {
-            // There's always we!
+            // There's always us!
             return BigInteger.ONE.max(BigInteger.valueOf(nodes.size()));
         }
 

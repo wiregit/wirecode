@@ -27,8 +27,8 @@ import com.limegroup.mojito.KUID;
 public interface StoreResponse extends ResponseMessage {
 
     public static enum Status {
-        FAILED(0x00),
-        SUCCEEDED(0x01);
+        FAILED(0x01),
+        SUCCEEDED(0x02);
         
         private int status;
         

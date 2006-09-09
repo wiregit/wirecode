@@ -26,7 +26,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Map.Entry;
 
@@ -93,16 +92,6 @@ public class MessageOutputStream extends DataOutputStream {
         writeCollectionSize(values);
         for(DHTValue value : values) {
             writeDHTValue(value);
-        }
-    }
-    
-    public void writePublicKey(PublicKey pubKey) throws IOException {
-        if (pubKey != null) {
-            byte[] encoded = pubKey.getEncoded();
-            writeShort(encoded.length);
-            write(encoded, 0, encoded.length);
-        } else {
-            writeShort(0);
         }
     }
     
