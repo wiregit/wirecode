@@ -1,13 +1,17 @@
 package com.limegroup.gnutella.guess;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Random;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.settings.SecuritySettings;
 
 public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryKeyTest(String name) {
@@ -135,4 +139,41 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         qk.toString();
     }
     
+    public void testChangeQueryKey() throws Exception {
+        SocketAddress address1 = new InetSocketAddress("www.microsoft.com", 1024);
+        QueryKey qk1 = QueryKey.getQueryKey(address1);
+        
+        // Both QKs should be created by the same KeyCreator
+        SocketAddress address2 = new InetSocketAddress("www.limewire.org", 8080);
+        QueryKey qk2 = QueryKey.getQueryKey(address2);
+        QueryKey qk3 = QueryKey.getQueryKey(address2);
+        assertEquals(qk2, qk3);
+        
+        // Set the time stamp so that a new KeyGenerator
+        // will be created
+        QueryKey qk4 = QueryKey.getQueryKey(address2);
+        
+        Field lastQueryKeyChange = QueryKey.class.getDeclaredField("lastQueryKeyChange");
+        lastQueryKeyChange.setAccessible(true);
+        lastQueryKeyChange.set(null, System.currentTimeMillis() 
+                - SecuritySettings.CHANGE_QK_EVERY.getValue() 
+                - 100L);
+        
+        QueryKey qk5 = QueryKey.getQueryKey(address2);
+        assertNotEquals(qk4, qk5);
+        
+        // Make sure the previous QK is still valid
+        assertTrue(qk1.isFor(address1));
+        
+        // Create a yet another new KeyCreator
+        lastQueryKeyChange.set(null, System.currentTimeMillis() 
+                - SecuritySettings.CHANGE_QK_EVERY.getValue() 
+                - 100L);
+        
+        QueryKey qk6 = QueryKey.getQueryKey(address2);
+        assertNotEquals(qk5, qk6);
+        
+        // It's no longer valid
+        assertFalse(qk1.isFor(address1));
+    }
 }
