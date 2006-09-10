@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -85,7 +85,7 @@ public abstract class MessageDispatcher {
         = NetworkSettings.MAX_MESSAGE_SIZE.getValue();
     
     /** Queue of things we have to send */
-    private Queue<Tag> outputQueue = new ConcurrentLinkedQueue<Tag>();
+    private List<Tag> outputQueue = new LinkedList<Tag>();
     
     /** A lock for the outputQueue */
     private Object outputQueueLock = new Object();
@@ -512,48 +512,40 @@ public abstract class MessageDispatcher {
      */
     public boolean handleWrite() throws IOException {
         
-        // We're using Queue.peek() + Queue.remove() instead of
-        // Queue.poll() because DatagramChannel.send() may not
-        // be able to send a Message and we'd have to re-enqeue
-        // the Message at the head of the Queue which is not
-        // possible because Queue supports insertions only at 
-        // the tail.
-        
-        Tag tag = null;
-        while((tag = outputQueue.peek()) != null && isRunning()) {
-            
-            if (tag.isCancelled()) {
-                outputQueue.remove(tag);
-                continue;
-            }
-            
-            try {
-                SocketAddress dst = tag.getSocketAddress();
-                ByteBuffer data = tag.getData();
-                assert data != null : "Somebody set Data to null";
-
-                if (send(dst, data)) {
-                    // Wohoo! Message was sent!
-                    outputQueue.remove();
-                    registerInput(tag);
-                } else {
-                    // Dang! Re-Try next time!
-                    break;
-                }
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-                outputQueue.remove(tag);
-                tag.handleError(err);
-            }
-        }
-        
-        // The purpose of this locking is to set
-        // interest write properly.
         synchronized (outputQueueLock) {
-            boolean isEmpty = outputQueue.isEmpty();
+			Tag tag = null;
+			while(!outputQueue.isEmpty() && isRunning()) {
+				tag = outputQueue.get(0);
+				
+				if (tag.isCancelled()) {
+	                outputQueue.remove(0);
+	                continue;
+	            }
+				
+				try {
+	                SocketAddress dst = tag.getSocketAddress();
+	                ByteBuffer data = tag.getData();
+	                assert data != null : "Somebody set Data to null";
+
+	                if (send(dst, data)) {
+	                    // Wohoo! Message was sent!
+	                    outputQueue.remove(0);
+	                    registerInput(tag);
+	                } else {
+	                    // Dang! Re-Try next time!
+	                    break;
+	                }
+	            } catch (IOException err) {
+	                LOG.error("IOException", err);
+	                outputQueue.remove(0);
+	                tag.handleError(err);
+	            }
+			}
+			
+			boolean isEmpty = outputQueue.isEmpty();
             interestWrite(!isEmpty);
             return !isEmpty;
-        }
+		}
     }
     
     /**
