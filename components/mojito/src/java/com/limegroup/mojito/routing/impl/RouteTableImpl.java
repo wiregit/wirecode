@@ -517,13 +517,18 @@ public class RouteTableImpl implements RouteTable {
                 
                 for(Contact contact : list) {
                     if (contact.isDead()) {
-                        float fact = (maxNodeFailures - contact.getFailures())
-                                            /((float)Math.max(1, maxNodeFailures));
+                        if (liveContacts) {
+                            continue;
+                        }
                         
-                        if(liveContacts || Math.random() >= fact) {
+                        float fact = (maxNodeFailures - contact.getFailures()) 
+                                        / (float)Math.max(1, maxNodeFailures);
+                        
+                        if (Math.random() >= fact) {
                             continue;
                         }
                     }
+                    
                     nodes.add(contact);
                 }
                 
