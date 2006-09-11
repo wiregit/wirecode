@@ -453,7 +453,8 @@ public class RouteTableImpl implements RouteTable {
                     
                     bucket.addLiveContact(mrs);
                     
-                } else if(node.getFailures() >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
+                } else if(node.getFailures() 
+                            >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
                     
                     bucket.removeLiveContact(nodeId);
                     assert (bucket.isLiveFull() == false);
@@ -507,6 +508,7 @@ public class RouteTableImpl implements RouteTable {
     public synchronized List<Contact> select(final KUID nodeId, final int count, 
             final boolean liveContacts) {
         
+        final int maxNodeFailures = RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue();
         final List<Contact> nodes = new ArrayList<Contact>(count);
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
@@ -515,10 +517,8 @@ public class RouteTableImpl implements RouteTable {
                 
                 for(Contact contact : list) {
                     if (contact.isDead()) {
-                        int maxNodeFailure = RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue();
-                        
-                        float fact = (maxNodeFailure - contact.getFailures())
-                                            /((float)Math.max(1, maxNodeFailure));
+                        float fact = (maxNodeFailures - contact.getFailures())
+                                            /((float)Math.max(1, maxNodeFailures));
                         
                         if(liveContacts || Math.random() >= fact) {
                             continue;
