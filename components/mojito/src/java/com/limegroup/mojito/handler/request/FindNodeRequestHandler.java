@@ -83,7 +83,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
                 
             } else {
                 nodes = context.getRouteTable().select(lookup, 
-                        KademliaSettings.REPLICATION_PARAMETER.getValue(), false);
+                        KademliaSettings.REPLICATION_PARAMETER.getValue(), true);
             }
         }
         

@@ -39,6 +39,11 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
     }
     
     /**
+     * <tt>Statistic</tt> for the number of lookups
+     */
+    public Statistic GLOBAL_LOOKUPS = new SimpleStatistic();
+    
+    /**
     * <tt>Statistic</tt> for all outgoing lookup messages
     */
    public Statistic GLOBAL_LOOKUP_REQUESTS = new SimpleStatistic();
@@ -75,6 +80,7 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
    
    public void addSingleLookupStatistic(SingleLookupStatisticContainer lookupStat) {
        synchronized (singleLookups) {
+           GLOBAL_LOOKUPS.incrementStat();
            singleLookups.add(lookupStat);
            if (singleLookups.size() > MAX_LOOKUPS) {
                singleLookups.remove(0);

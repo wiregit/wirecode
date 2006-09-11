@@ -20,6 +20,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.EntryImpl;
 
 public class RouteTableTest extends BaseTestCase {
@@ -680,6 +681,56 @@ public class RouteTableTest extends BaseTestCase {
                 assertEquals(nodes1.get(i).getNodeID(), nodes2.get(i).getNodeID());
             }
         }
+    }
+    
+    public void testSelectLiveNodes() throws Exception { 
+        RouteTable rt = new RouteTableImpl();
+        rt.setRouteTableCallback(new RouteTable.Callback() {
+            public DHTFuture<Contact> ping(Contact node) {
+                return null;
+            }
+        });
+        rt.add(localNode);
+        Contact node;
+        //add 10 live nodes and 10 dead nodes
+        List<Contact> liveContacts = new ArrayList<Contact>();
+        for(int i = 0; i < 10; i++) {
+            node = ContactFactory.createLiveContact(null,
+                    0,0,KUID.createRandomNodeID(),
+                    new InetSocketAddress("localhost", 3000+i), 0, false);
+            rt.add(node);
+            liveContacts.add(node);
+        }
+        List<Contact> deadContacts = new ArrayList<Contact>();;
+        for(int i = 0; i < 400; i++) {
+            node = ContactFactory.createLiveContact(null,
+                    0,0,KUID.createRandomNodeID(),
+                    new InetSocketAddress("localhost", 4000+i), 0, false);
+            node.handleFailure();
+            node.handleFailure();
+            node.handleFailure();
+            node.handleFailure();
+            node.handleFailure();
+            rt.add(node);
+            deadContacts.add(node);
+        }
+        //test select only alive nodes
+        List<Contact> contacts = rt.select(KUID.createRandomNodeID(), 500, true);
+        assertEquals(11, contacts.size());
+        assertContains(contacts, liveContacts.get(0));
+        assertNotContains(contacts, deadContacts.get(0));
+        //now test probabilistic select:
+        //should not get anything:
+        RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(5);
+        contacts = rt.select(KUID.createRandomNodeID(), 500, false);
+        assertEquals(11, contacts.size());
+        assertContains(contacts, liveContacts.get(0));
+        //should get about half of the nodes
+        RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(10);
+        contacts = rt.select(KUID.createRandomNodeID(), 500, false);
+        assertGreaterThan(150, contacts.size());
+        assertLessThan(250, contacts.size());
+        
     }
     
     /*public static void main(String[] args) {

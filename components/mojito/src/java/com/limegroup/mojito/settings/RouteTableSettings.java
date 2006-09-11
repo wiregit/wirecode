@@ -39,6 +39,15 @@ public final class RouteTableSettings extends MojitoProps {
                 "max_cache_size", 1, 256);
     
     /**
+     * The maximum number of failures a node may have before beeing completely
+     * evicted from the routing table. This also serves as a basis for the 
+     * probability of a node to be included in the list of k closest nodes.
+     */
+    public static final IntSetting MAX_ACCEPT_NODE_FAILURES 
+        = FACTORY.createSettableIntSetting("MAX_ACCEPT_NODE_FAILURES", 50, 
+                "max_accept_node_failures", 4, 200);
+    
+    /**
      * The maximum number of errors that may occur before an
      * alive Contact is considered as dead.
      */

@@ -440,7 +440,7 @@ public class RouteTableImpl implements RouteTable {
                 }
                 
                 // Remove a live-dead Contact only if there's something 
-                // in the replacement cache.
+                // in the replacement cache or if the node is over the limit.
                 
                 Contact mrs = bucket.getMostRecentlySeenCachedContact();
                 if (mrs != null) {
@@ -453,6 +453,10 @@ public class RouteTableImpl implements RouteTable {
                     
                     bucket.addLiveContact(mrs);
                     
+                } else if(node.getFailures() >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
+                    
+                    bucket.removeLiveContact(nodeId);
+                    assert (bucket.isLiveFull() == false);
                 }
             } else {
                 
@@ -509,14 +513,18 @@ public class RouteTableImpl implements RouteTable {
                 Bucket bucket = entry.getValue();
                 List<Contact> list = bucket.select(nodeId, count - nodes.size());
                 
-                if (liveContacts) {
-                    for(Contact contact : list) {
-                        if (!contact.hasFailed()) {
-                            nodes.add(contact);
+                for(Contact contact : list) {
+                    if (contact.isDead()) {
+                        int maxNodeFailure = RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue();
+                        
+                        float fact = (maxNodeFailure - contact.getFailures())
+                                            /((float)Math.max(1, maxNodeFailure));
+                        
+                        if(liveContacts || Math.random() >= fact) {
+                            continue;
                         }
                     }
-                } else {
-                    nodes.addAll(list);
+                    nodes.add(contact);
                 }
                 
                 if (nodes.size() < count) {

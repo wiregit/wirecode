@@ -357,8 +357,6 @@ public abstract class MessageDispatcher {
             data.rewind();
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
-            networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-            networkStats.RECEIVED_MESSAGES_SIZE.addData(length);
             return message;
         }
         return null;
@@ -413,6 +411,9 @@ public abstract class MessageDispatcher {
             }
             return;
         }
+        
+        networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+        //networkStats.RECEIVED_MESSAGES_SIZE.addData(message.getSize());
         
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
