@@ -295,7 +295,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     throw new CollisionException(collidesWith, 
                         context.getLocalNode() + " collides with " + collidesWith); 
                 } catch (Exception err) {
-                    if (!ExceptionUtils.isCauseBy(err, DHTException.class)) {
+                    if (ExceptionUtils.isCauseBy(err, DHTException.class)) {
+                        LOG.info("DHTException", err);
+                    } else {
                         throw err;
                     }
                 }
