@@ -41,3 +41,4 @@ bool Recycle(LPCTSTR path);
 int SetFileWritable(LPCTSTR path);
 DWORD GetIdleTime();
 CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR icon);
+void GetIcons(LPCTSTR icon);
