@@ -29,6 +29,12 @@ public final class StartupSettings extends LimeProps {
     	FACTORY.createBooleanSetting("CHECK_ASSOCIATION", true);
     
     /**
+     * Whether we should always grab associations 
+     */
+    public static IntSetting GRAB_ASSOCIATIONS =
+    	FACTORY.createIntSetting("GRAB_ASSOCIATIONS",100);
+    
+    /**
      * Whether or not tips should be displayed on startup.
      */
     public static final BooleanSetting SHOW_TOTD =
