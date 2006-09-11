@@ -10,6 +10,7 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.NodeAssignerStat;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -232,6 +233,7 @@ public class NodeAssigner {
                     && !DHTSettings.DISABLE_DHT_USER.getValue()
                     && (!RouterService.isDHTNode() || RouterService.isActiveDHTNode())) {
 
+                NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
                 RouterService.startDHT(false);
                 
             }
@@ -284,6 +286,7 @@ public class NodeAssigner {
             Runnable ultrapeerRunner = 
                 new Runnable() {
                     public void run() {
+                        NodeAssignerStat.ULTRAPEER_ASSIGNMENTS.incrementStat();
                         RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
                     }
                 };
@@ -297,6 +300,7 @@ public class NodeAssigner {
         //here: we are not an ultrapeer and will not try to connect as one
         //maybe a demotion from ultrapeer to leaf --> disconnect the DHT if it is the case
         if(RouterService.isDHTNode() && !RouterService.isActiveDHTNode()) {
+            NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
             RouterService.shutdownDHT();
         }
     }
@@ -328,6 +332,7 @@ public class NodeAssigner {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");
                 }
+                NodeAssignerStat.UP_TO_DHT_SWITCHES.incrementStat();
                 return true;
             } else {
                 return false;
@@ -397,6 +402,7 @@ public class NodeAssigner {
             
             Runnable dhtInitializer = new Runnable() {
                 public void run() {
+                    NodeAssignerStat.ACTIVE_DHT_ASSIGNMENTS.incrementStat();
                     RouterService.startDHT(true);
                 }
             };
@@ -407,6 +413,7 @@ public class NodeAssigner {
 
         // for now, disconnect node as soon as not anymore DHT capable
         if(!isActiveDHTCapable && RouterService.isActiveDHTNode()) { 
+            NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
             RouterService.shutdownDHT();
         }
     }
