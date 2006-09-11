@@ -37,7 +37,7 @@ public class BucketNodeTest extends BaseTestCase {
         vendor = ContextSettings.VENDOR.getValue();
         version = ContextSettings.VERSION.getValue();
         
-        KUID nodeId = KUID.createRandomNodeID();
+        KUID nodeId = KUID.createRandomID();
         int instanceId = 0;
         
         localNode = ContactFactory.createLocalContact(vendor, version, nodeId, instanceId, false);
@@ -68,11 +68,11 @@ public class BucketNodeTest extends BaseTestCase {
         
         //now add dead and unknown nodes
         Contact node = ContactFactory.createUnknownContact(
-                vendor, version, KUID.createRandomNodeID(), address);
+                vendor, version, KUID.createRandomID(), address);
         
         bucket.addLiveContact(node);
         Contact node2 = new ContactNode(address, vendor, version, 
-                KUID.createRandomNodeID(), address, 0, false, State.DEAD);
+                KUID.createRandomID(), address, 0, false, State.DEAD);
         
         bucket.addLiveContact(node2);
         assertEquals(bucket.getLiveContacts().size(), 3);
@@ -81,15 +81,15 @@ public class BucketNodeTest extends BaseTestCase {
         assertEquals(bucket.getLiveContacts().size(), 1);
         //now add cached node
         node = ContactFactory.createUnknownContact(
-                vendor, version, KUID.createRandomNodeID(), address);
+                vendor, version, KUID.createRandomID(), address);
         
         bucket.addLiveContact(node);
         node2 = new ContactNode(address, vendor, version, 
-                KUID.createRandomNodeID(), address, 0, false, State.DEAD);
+                KUID.createRandomID(), address, 0, false, State.DEAD);
         bucket.addLiveContact(node2);
         
         Contact node3 = new ContactNode(address, vendor, version, 
-                KUID.createRandomNodeID(), address, 0, false, State.ALIVE);
+                KUID.createRandomID(), address, 0, false, State.ALIVE);
         bucket.addCachedContact(node3);
         
         assertEquals(bucket.getLiveContacts().size(), 3);

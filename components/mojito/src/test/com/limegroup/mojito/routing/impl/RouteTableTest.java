@@ -508,19 +508,19 @@ public class RouteTableTest extends BaseTestCase {
         
         try {
             routeTable.add(ContactFactory.createLiveContact(
-                    null, 0, 0, KUID.createRandomNodeID(), 
+                    null, 0, 0, KUID.createRandomID(), 
                     new InetSocketAddress(0), 0, false));
             fail("Contact should have been rejected");
         } catch (Exception err) {}
         
         try {
             routeTable.add(ContactFactory.createUnknownContact(
-                    0, 0, KUID.createRandomNodeID(), new InetSocketAddress(0)));
+                    0, 0, KUID.createRandomID(), new InetSocketAddress(0)));
             fail("Contact should have been rejected");
         } catch (Exception err) {}
         
         Contact localNode1 = ContactFactory.createLocalContact(
-                0, 0, KUID.createRandomNodeID(), 0, false);
+                0, 0, KUID.createRandomID(), 0, false);
         routeTable.add(localNode1);
         
         Contact localNode2 = ContactFactory.createLocalContact(
@@ -696,7 +696,7 @@ public class RouteTableTest extends BaseTestCase {
         List<Contact> liveContacts = new ArrayList<Contact>();
         for(int i = 0; i < 10; i++) {
             node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomNodeID(),
+                    0,0,KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 0, false);
             rt.add(node);
             liveContacts.add(node);
@@ -704,7 +704,7 @@ public class RouteTableTest extends BaseTestCase {
         List<Contact> deadContacts = new ArrayList<Contact>();;
         for(int i = 0; i < 400; i++) {
             node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomNodeID(),
+                    0,0,KUID.createRandomID(),
                     new InetSocketAddress("localhost", 4000+i), 0, false);
             node.handleFailure();
             node.handleFailure();
@@ -715,19 +715,19 @@ public class RouteTableTest extends BaseTestCase {
             deadContacts.add(node);
         }
         //test select only alive nodes
-        List<Contact> contacts = rt.select(KUID.createRandomNodeID(), 500, true);
+        List<Contact> contacts = rt.select(KUID.createRandomID(), 500, true);
         assertEquals(11, contacts.size());
         assertContains(contacts, liveContacts.get(0));
         assertNotContains(contacts, deadContacts.get(0));
         //now test probabilistic select:
         //should not get anything:
         RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(5);
-        contacts = rt.select(KUID.createRandomNodeID(), 500, false);
+        contacts = rt.select(KUID.createRandomID(), 500, false);
         assertEquals(11, contacts.size());
         assertContains(contacts, liveContacts.get(0));
         //should get about half of the nodes
         RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.setValue(10);
-        contacts = rt.select(KUID.createRandomNodeID(), 500, false);
+        contacts = rt.select(KUID.createRandomID(), 500, false);
         assertGreaterThan(150, contacts.size());
         assertLessThan(250, contacts.size());
         

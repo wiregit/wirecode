@@ -27,7 +27,7 @@ public class ContactNodeTest extends BaseTestCase {
     public void testFixSourceAndContactAddress() {
         // External Port == 0 -> force firewalled if it isn't!
         ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomNodeID(), 
+                null, 0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 0), 0, false);
         
         assertNull(node1.getSourceAddress());
@@ -43,7 +43,7 @@ public class ContactNodeTest extends BaseTestCase {
         
         // External Port != 0 -> Contact Address = Source Address + external Port
         ContactNode node2 = (ContactNode)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomNodeID(), 
+                null, 0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("dell.com", 2048), 0, false);
         
         assertNull(node2.getSourceAddress());
@@ -64,7 +64,7 @@ public class ContactNodeTest extends BaseTestCase {
     }
     
     public void testUpdateWithExistingContact() {
-        KUID nodeId = KUID.createRandomNodeID();
+        KUID nodeId = KUID.createRandomID();
         
         ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
@@ -100,7 +100,7 @@ public class ContactNodeTest extends BaseTestCase {
         try {
             ContactNode node4 = (ContactNode)ContactFactory.createLiveContact(
                     new InetSocketAddress("localhost", 1024), 
-                    0, 0, KUID.createRandomNodeID(), 
+                    0, 0, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2048), 
                     0, false);
             
@@ -117,7 +117,7 @@ public class ContactNodeTest extends BaseTestCase {
         
         Contact node2 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                3, 4, KUID.createRandomNodeID(), 
+                3, 4, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
                 0, false);
         
@@ -125,7 +125,7 @@ public class ContactNodeTest extends BaseTestCase {
         assertEquals(4, node2.getVersion());
         
         Contact node3 = ContactFactory.createUnknownContact(
-                5, 6, KUID.createRandomNodeID(), 
+                5, 6, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
         assertEquals(5, node3.getVendor());
@@ -135,7 +135,7 @@ public class ContactNodeTest extends BaseTestCase {
     public void testAdaptiveTimeout() {
         Contact node1 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                0, 0, KUID.createRandomNodeID(), 
+                0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
                 0, false);
         
@@ -149,7 +149,7 @@ public class ContactNodeTest extends BaseTestCase {
         assertGreaterThan(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
         
         Contact node2 = ContactFactory.createUnknownContact(
-                0, 0, KUID.createRandomNodeID(), 
+                0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
         assertEquals(-1L, node2.getRoundTripTime());

@@ -344,10 +344,10 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Creates and returns a random Node ID that is hopefully
+     * Creates and returns a random ID that is hopefully
      * globally unique.
      */
-    public static KUID createRandomNodeID() {
+    public static KUID createRandomID() {
         
         /*
          * Random Numbers.

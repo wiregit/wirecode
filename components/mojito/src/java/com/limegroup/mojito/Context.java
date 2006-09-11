@@ -270,7 +270,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      *          or MojitoFactory!
      */
     public void changeNodeID() {
-        setLocalNodeID(KUID.createRandomNodeID());
+        setLocalNodeID(KUID.createRandomID());
     }
     
     /**

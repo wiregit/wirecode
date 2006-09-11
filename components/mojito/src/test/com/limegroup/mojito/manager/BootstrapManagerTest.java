@@ -94,7 +94,7 @@ public class BootstrapManagerTest extends BaseTestCase {
         Contact node;
         for(int i= 1; i < 5; i++) {
             node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomNodeID(),
+                    0,0,KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 0, false);
             rt.add(node);
         }
@@ -113,11 +113,11 @@ public class BootstrapManagerTest extends BaseTestCase {
         RouteTable rt = ((Context)TEST_DHT).getRouteTable();
         Contact node;
         for(int i= 1; i < 100; i++) {
-            node = ContactFactory.createUnknownContact(0,0,KUID.createRandomNodeID(),
+            node = ContactFactory.createUnknownContact(0,0,KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i));
             rt.add(node);
         }
-        node = ContactFactory.createUnknownContact(0,0,KUID.createRandomNodeID(),
+        node = ContactFactory.createUnknownContact(0,0,KUID.createRandomID(),
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);
 

@@ -55,7 +55,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         //fill the routing table a bit
         fillRoutingTable(rt, 10);
         //add one more
-        KUID kuid = KUID.createRandomNodeID();
+        KUID kuid = KUID.createRandomID();
         ContactNode node = new ContactNode(
                 new InetSocketAddress("localhost",4010),
                 ContextSettings.VENDOR.getValue(),

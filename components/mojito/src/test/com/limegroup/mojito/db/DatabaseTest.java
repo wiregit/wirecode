@@ -53,8 +53,8 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     private static DHTValue createLocalDHTValue(byte[] value) {
-        return createLocalDHTValue(KUID.createRandomNodeID(), 
-                KUID.createRandomNodeID(), value);
+        return createLocalDHTValue(KUID.createRandomID(), 
+                KUID.createRandomID(), value);
     }
     
     private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
@@ -63,8 +63,8 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     private static DHTValue createDirectDHTValue(byte[] value) {
-        return createDirectDHTValue(KUID.createRandomNodeID(), 
-                KUID.createRandomNodeID(), value);
+        return createDirectDHTValue(KUID.createRandomID(), 
+                KUID.createRandomID(), value);
     }
     
     private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
@@ -74,8 +74,8 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     private static DHTValue createIndirectDHTValue(byte[] value) {
-        return createIndirectDHTValue(KUID.createRandomNodeID(), 
-                KUID.createRandomNodeID(), KUID.createRandomNodeID(), value);
+        return createIndirectDHTValue(KUID.createRandomID(), 
+                KUID.createRandomID(), KUID.createRandomID(), value);
     }
     
     private static DHTValue createIndirectDHTValue(KUID origId, KUID senderId, KUID valueId, byte[] value) {
@@ -109,7 +109,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // ...nor indirect values can replace a local value
         DHTValue value3 = createIndirectDHTValue(value1.getOriginatorID(), 
-                KUID.createRandomNodeID(), value1.getValueID(), "Mary".getBytes());
+                KUID.createRandomID(), value1.getValueID(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -197,7 +197,7 @@ public class DatabaseTest extends BaseTestCase {
         // A directly stored value cannot be replaced by
         // an indirect value
         DHTValue value3 = createIndirectDHTValue(value2.getOriginatorID(), 
-                    KUID.createRandomNodeID(), value2.getValueID(), "Tough".getBytes());
+                    KUID.createRandomID(), value2.getValueID(), "Tough".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -220,7 +220,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // Indirect replaces indirect
         DHTValue value2 = createIndirectDHTValue(value1.getOriginatorID(), 
-                KUID.createRandomNodeID(), value1.getValueID(), "Mojito".getBytes());
+                KUID.createRandomID(), value1.getValueID(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -240,7 +240,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // Indirect shouldn't replace direct
         DHTValue value4 = createIndirectDHTValue(value3.getOriginatorID(), 
-                KUID.createRandomNodeID(), value3.getValueID(), "Mary".getBytes());
+                KUID.createRandomID(), value3.getValueID(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -262,8 +262,8 @@ public class DatabaseTest extends BaseTestCase {
                     .get(value1.getOriginatorID()).getData()));
         
         // Same Key but different originator/sender
-        DHTValue value2 = createIndirectDHTValue(KUID.createRandomNodeID(), 
-                KUID.createRandomNodeID(), value1.getValueID(), "Tonic".getBytes());
+        DHTValue value2 = createIndirectDHTValue(KUID.createRandomID(), 
+                KUID.createRandomID(), value1.getValueID(), "Tonic".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(2, database.getValueCount());
@@ -272,7 +272,7 @@ public class DatabaseTest extends BaseTestCase {
                     .get(value2.getOriginatorID()).getData()));
         
         // Same Key but a different originator
-        DHTValue value3 = createDirectDHTValue(KUID.createRandomNodeID(),
+        DHTValue value3 = createDirectDHTValue(KUID.createRandomID(),
                 value1.getValueID(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
@@ -305,7 +305,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // It's not possible to remove a value indirectly
         DHTValue value2 = createIndirectDHTValue(value1.getOriginatorID(), 
-                KUID.createRandomNodeID(), value1.getValueID(), new byte[0]);
+                KUID.createRandomID(), value1.getValueID(), new byte[0]);
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
@@ -359,7 +359,7 @@ public class DatabaseTest extends BaseTestCase {
         DHTValue value3 = createDirectDHTValue("Mojito".getBytes());
         database.store(value3);
         
-        DHTValue value4 = createDirectDHTValue(KUID.createRandomNodeID(), 
+        DHTValue value4 = createDirectDHTValue(KUID.createRandomID(), 
                 value3.getValueID(), "Hello World".getBytes());
         database.store(value4);
         
@@ -401,7 +401,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, view.size());
         
         // Store a new value under value5's key
-        DHTValue value6 = createDirectDHTValue(KUID.createRandomNodeID(), 
+        DHTValue value6 = createDirectDHTValue(KUID.createRandomID(), 
                 value5.getValueID(), "Juice".getBytes());
         view.add(value6);
         assertTrue(database.contains(value6));
@@ -428,10 +428,10 @@ public class DatabaseTest extends BaseTestCase {
     public void testMapViewRemove() {
         Database database = new DatabaseImpl();
         
-        KUID valueId = KUID.createRandomNodeID();
+        KUID valueId = KUID.createRandomID();
         List<KUID> nodeIds = new ArrayList<KUID>();
         for (int i = 0; i < 10; i++) {
-            KUID nodeId = KUID.createRandomNodeID();
+            KUID nodeId = KUID.createRandomID();
             DHTValue value = createDirectDHTValue(nodeId, 
                     valueId, ("Lime-" + i).getBytes());
             
@@ -472,7 +472,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // Remove from KeySet
         for (int i = 0; i < 10; i++) {
-            KUID nodeId = KUID.createRandomNodeID();
+            KUID nodeId = KUID.createRandomID();
             DHTValue value = createDirectDHTValue(nodeId, 
                     valueId, ("Lime-" + i).getBytes());
             
@@ -496,7 +496,7 @@ public class DatabaseTest extends BaseTestCase {
         
         // Remove from ValueCollection
         for (int i = 0; i < 10; i++) {
-            KUID nodeId = KUID.createRandomNodeID();
+            KUID nodeId = KUID.createRandomID();
             DHTValue value = createDirectDHTValue(nodeId, 
                     valueId, ("Lime-" + i).getBytes());
             
@@ -576,7 +576,7 @@ public class DatabaseTest extends BaseTestCase {
         DHTValue value = null;
         for (int i = 0; i < 10; i++) {
             if (value != null && i % 3 == 0) {
-                value = createDirectDHTValue(KUID.createRandomNodeID(), 
+                value = createDirectDHTValue(KUID.createRandomID(), 
                         value.getValueID(), ("Lime-" + i).getBytes());
             } else {
                 value = createDirectDHTValue(("Lime-" + i).getBytes());
@@ -613,7 +613,7 @@ public class DatabaseTest extends BaseTestCase {
         DHTValue value = null;
         for (int i = 0; i < 10; i++) {
             if (value != null && i % 3 == 0) {
-                value = createDirectDHTValue(KUID.createRandomNodeID(), 
+                value = createDirectDHTValue(KUID.createRandomID(), 
                         value.getValueID(), ("Lime-" + i).getBytes());
             } else {
                 value = createDirectDHTValue(("Lime-" + i).getBytes());

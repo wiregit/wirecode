@@ -74,7 +74,7 @@ public abstract class DHTTestCase extends BaseTestCase {
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {
         for(int i = 0; i < numNodes; i++) {
-            KUID kuid = KUID.createRandomNodeID();
+            KUID kuid = KUID.createRandomID();
             ContactNode node = new ContactNode(
                     new InetSocketAddress("localhost",4000+i),
                     ContextSettings.VENDOR.getValue(),

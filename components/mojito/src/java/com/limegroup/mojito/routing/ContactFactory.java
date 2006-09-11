@@ -42,7 +42,7 @@ public class ContactFactory {
      * @param firewalled whether or not we're firewalled
      */
     public static Contact createLocalContact(int vendor, int version, boolean firewalled) {
-        return createLocalContact(vendor, version, KUID.createRandomNodeID(), 0, firewalled);
+        return createLocalContact(vendor, version, KUID.createRandomID(), 0, firewalled);
     }
     
     /**
