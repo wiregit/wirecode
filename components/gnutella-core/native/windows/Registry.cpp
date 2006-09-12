@@ -17,7 +17,7 @@ int RegistryReadNumber(HKEY root, LPCTSTR path, LPCTSTR name) {
 
 	// Open the key
 	CRegistry registry;
-	if (!registry.Open(root, path, KEY_READ)) return 0;
+	if (!registry.Open(root, path, false)) return 0;
 
 	// Read the number value
 	DWORD d;
@@ -45,7 +45,7 @@ CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name) {
 
 	// Open the key
 	CRegistry registry;
-	if (!registry.Open(root, path, KEY_READ)) return "";
+	if (!registry.Open(root, path, false)) return "";
 
 	// Get the size required
 	DWORD size;
@@ -87,7 +87,7 @@ bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value) {
 
 	// Open the key
 	CRegistry registry;
-	if (!registry.Open(root, path, KEY_ALL_ACCESS)) return false;
+	if (!registry.Open(root, path, true)) return false;
 
 	// Set or make and set the number value
 	int result = RegSetValueEx(
@@ -111,7 +111,7 @@ bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value) {
 
 	// Open the key
 	CRegistry registry;
-	if (!registry.Open(root, path, KEY_ALL_ACCESS)) return false;
+	if (!registry.Open(root, path, true)) return false;
 
 	// Set or make and set the text value
 	int result = RegSetValueEx(
@@ -135,7 +135,7 @@ bool RegistryDelete(HKEY base, LPCTSTR path) {
 
 	// Open the key
 	CRegistry key;
-	if (!key.Open(base, path, KEY_ALL_ACCESS)) return false;
+	if (!key.Open(base, path, true)) return false;
 
 	// Loop for each subkey, deleting them all
 	DWORD size;
@@ -160,27 +160,47 @@ bool RegistryDelete(HKEY base, LPCTSTR path) {
 	return true;
 }
 
-// Takes a root key handle name, a key path, and the desired level of access
+// Takes a root key handle name, a key path, and true to make keys and get write access
 // Opens or creates and opens the key with full access
 // Returns false on error
-bool CRegistry::Open(HKEY root, LPCTSTR path, DWORD access) {
+bool CRegistry::Open(HKEY root, LPCTSTR path, bool write) {
 
 	// Make sure we were given a key and path
 	if (!root || path == CString("")) return false;
 
-	// Open or create and open the key
+	// Variables for opening the key
 	HKEY key;
 	DWORD info;
-	int result = RegCreateKeyEx(
-		root,                    // Handle to open root key
-		path,                    // Subkey name
-		0,
-		"",
-		REG_OPTION_NON_VOLATILE, // Save information in the registry file
-		access,                  // Given access flags
-		NULL,
-		&key,                    // The opened or created key handle is put here
-		&info);                  // Tells if the key was opened or created and opened
+	int result;
+
+	// If the caller wants write access, create the key if it isn't there
+	if (write) {
+
+		// Open or create and open the key
+		result = RegCreateKeyEx(
+			root,                    // Handle to open root key
+			path,                    // Subkey name
+			0,
+			"",
+			REG_OPTION_NON_VOLATILE, // Save information in the registry file
+			KEY_ALL_ACCESS,          // Get access to read and write values in the key we're making and opening
+			NULL,
+			&key,                    // The opened or created key handle is put here
+			&info);                  // Tells if the key was opened or created and opened
+
+	// If the caller only wants read access, don't create the key when trying to open it
+	} else {
+
+		// Open the key
+		result = RegOpenKeyEx(
+			root,     // Handle to open root key
+			path,     // Subkey name
+			0,
+			KEY_READ, // We only need to read the key we're opening
+			&key);    // The opened key handle is put here
+	}
+
+	// Check for an error from opening or making and opening the key
 	if (result != ERROR_SUCCESS) return false;
 
 	// Save the open key in this CRegistry object

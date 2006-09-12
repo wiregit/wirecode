@@ -29,7 +29,7 @@ public:
 	HKEY Key;
 
 	// Open a registry key and store its handle in this object
-	bool Open(HKEY root, LPCTSTR path, DWORD access);
+	bool Open(HKEY root, LPCTSTR path, bool write);
 	void Close() { if (Key) RegCloseKey(Key); Key = NULL; }
 
 	// Make a new local CRegistry object, and delete it when it goes out of scope
