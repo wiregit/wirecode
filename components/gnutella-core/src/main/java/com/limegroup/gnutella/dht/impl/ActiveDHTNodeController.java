@@ -118,15 +118,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
             } else if(c.remostHostIsActiveDHTNode() > -1) {
                 
                 if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
-                    //this should never happen if ultrapeers are excluded 
-                    //(i.e. they are never active) because as a leaf, we only receive
-                    //capabilities VMs from our ultrapeer.
-                    LOG.error("Got an ACTIVE CAPABLE VM from "+ c);
-                    throw new IllegalStateException("Active DHT node got an impossible capabilities VM " +
-                            "from connection " + c);
-                } else {
-                    addActiveDHTNode(new InetSocketAddress(host, port));
-                }
+                    return;
+                } 
+                addActiveDHTNode(new InetSocketAddress(host, port));
             } 
         }
         
