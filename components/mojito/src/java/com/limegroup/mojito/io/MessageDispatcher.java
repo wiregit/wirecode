@@ -480,9 +480,11 @@ public abstract class MessageDispatcher {
         if (response instanceof DHTSecureMessage) {
             if (context.getMasterKey() != null) {
                 verify((DHTSecureMessage)response, processor);
-            } else if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping secure response " 
-                        + response + " because PublicKey is not set");
+            } else {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Dropping secure response " 
+                            + response + " because MasterKey is not set");
+                }
             }
         } else {
             process(processor);
@@ -497,9 +499,11 @@ public abstract class MessageDispatcher {
         if (request instanceof DHTSecureMessage) {
             if (context.getMasterKey() != null) {
                 verify((DHTSecureMessage)request, processor);
-            } else if (LOG.isInfoEnabled()) {
-                LOG.info("Dropping secure request " 
-                        + request + " because PublicKey is not set");
+            } else {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Dropping secure request " 
+                            + request + " because MasterKey is not set");
+                }
             }
         } else {
             process(processor);
