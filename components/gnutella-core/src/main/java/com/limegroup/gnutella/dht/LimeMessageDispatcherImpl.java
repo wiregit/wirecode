@@ -37,6 +37,8 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
+import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -135,6 +137,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         ByteBuffer data = tag.getData();
         UDPService.instance().send(data, dst.getAddress(), dst.getPort(), true);
         registerInput(tag);
+        SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message)tag.getMessage());
         return true;
     }
 
@@ -154,6 +157,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
             return;
         }
         
+        ReceivedMessageStatHandler.UDP_DHT_MESSAGE.addMessage(msg);
         DHTMessage dhtMessage = (DHTMessage)msg;
         ((ContactNode)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
         

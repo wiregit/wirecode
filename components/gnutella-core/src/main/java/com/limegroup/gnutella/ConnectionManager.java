@@ -1377,8 +1377,10 @@ public class ConnectionManager {
     /**
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
+     * 
+     * @param willTryToReconnect Whether or not this is only a temporary disconnection
      */
-    public synchronized void disconnect() {
+    public synchronized void disconnect(boolean willTryToReconnect) {
         if(_disconnectTime == 0) {
             long averageUptime = getCurrentAverageUptime();
             int totalConnections = Math.max(1, ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1);
@@ -1404,8 +1406,10 @@ public class ConnectionManager {
             }
         }
         
-        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifecycleEvent.LifeEvent.DISCONNECTED, null));
+        if(!willTryToReconnect) {
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.LifeEvent.DISCONNECTED, null));
+        }
     }
     
     /**
@@ -1889,7 +1893,7 @@ public class ConnectionManager {
 		if(isSupernode()) return;
 		_demotionLimit = demotionLimit;
 		_leafTries = 0;
-		disconnect();
+		disconnect(true);
 		connect();
 	}
 
@@ -2318,7 +2322,7 @@ public class ConnectionManager {
         }
 
         // Kill all of the ConnectionFetchers.
-        disconnect();
+        disconnect(false);
         
         // Try to reconnect in 10 seconds, and then every minute after
         // that.

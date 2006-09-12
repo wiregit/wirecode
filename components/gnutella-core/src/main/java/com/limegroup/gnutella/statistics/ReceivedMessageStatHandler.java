@@ -339,7 +339,12 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
                                        "RECEIVED_UDP_REPLY_NUMBER");
 
 
-	
+	public static final ReceivedMessageStatHandler UDP_DHT_MESSAGE = 
+        new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_DHT_MSG,
+                                       ReceivedMessageStatBytes.UDP_DHT_MSG,
+                                       LimeReceivedMessageStat.UDP_DHT_MSG,
+                                       LimeReceivedMessageStatBytes.UDP_DHT_MSG,
+                                       "RECEIVED_UDP_DHT_MSG");
 
 
 }

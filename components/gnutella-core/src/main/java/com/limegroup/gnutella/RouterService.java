@@ -782,7 +782,7 @@ public class RouterService {
      */
     public static void disconnect() {
 		// Delegate to connection manager
-		manager.disconnect();
+		manager.disconnect(false);
     }
 
     /**
@@ -921,7 +921,7 @@ public class RouterService {
             getAcceptor().shutdown();
             
             //clean-up connections and record connection uptime for this session
-            manager.disconnect();
+            manager.disconnect(false);
             
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
