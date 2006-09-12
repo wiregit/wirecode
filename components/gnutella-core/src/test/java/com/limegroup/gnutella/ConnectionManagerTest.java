@@ -464,14 +464,14 @@ public class ConnectionManagerTest extends BaseTestCase {
         //try simple connect-disconnect
         mgr.connect();
         sleep(2000);
-        mgr.disconnect();
+        mgr.disconnect(false);
         long totalConnect = ApplicationSettings.TOTAL_CONNECTION_TIME.getValue();
         long averageTime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
         assertEquals(totalConnect,
                 averageTime);
         mgr.connect();
         sleep(6000);
-        mgr.disconnect();
+        mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
         assertLessThan(totalConnect+6500,
@@ -482,7 +482,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         assertLessThan((totalConnect+6500)/2,
                 ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
         //try disconnecting twice in a row
-        mgr.disconnect();
+        mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
         assertLessThan(totalConnect+6500,
@@ -492,7 +492,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         long now = System.currentTimeMillis();
         PrivilegedAccessor.setValue(RouterService.getConnectionManager(), 
                 "_connectTime", new Long(now+(60L*60L*1000L)));
-        mgr.disconnect();
+        mgr.disconnect(false);
         assertGreaterThan(totalConnect+5800,
                 ApplicationSettings.TOTAL_CONNECTION_TIME.getValue());
         assertLessThan(totalConnect+6500,
@@ -517,7 +517,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         assertLessThan((30L*60L*1000L), mgr.getCurrentAverageUptime());
         assertGreaterThan(((60L*60L*1000L)+2L*1000L)/3L, mgr.getCurrentAverageUptime());
         assertEquals(2,ApplicationSettings.TOTAL_CONNECTIONS.getValue());
-        mgr.disconnect();
+        mgr.disconnect(false);
         long avgtime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();
         assertLessThan((30L*60L*1000L), avgtime);
         assertGreaterThan((60L*60L*1000L)+(2L*1000L), 
