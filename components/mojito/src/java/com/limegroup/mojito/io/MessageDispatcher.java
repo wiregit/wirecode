@@ -518,39 +518,39 @@ public abstract class MessageDispatcher {
     public boolean handleWrite() throws IOException {
         
         synchronized (outputQueueLock) {
-			Tag tag = null;
-			while(!outputQueue.isEmpty() && isRunning()) {
-				tag = outputQueue.get(0);
-				
-				if (tag.isCancelled()) {
-	                outputQueue.remove(0);
-	                continue;
-	            }
-				
-				try {
-	                SocketAddress dst = tag.getSocketAddress();
-	                ByteBuffer data = tag.getData();
-	                assert data != null : "Somebody set Data to null";
+            Tag tag = null;
+            while (!outputQueue.isEmpty() && isRunning()) {
+                tag = outputQueue.get(0);
 
-	                if (send(dst, data)) {
-	                    // Wohoo! Message was sent!
-	                    outputQueue.remove(0);
-	                    registerInput(tag);
-	                } else {
-	                    // Dang! Re-Try next time!
-	                    break;
-	                }
-	            } catch (IOException err) {
-	                LOG.error("IOException", err);
-	                outputQueue.remove(0);
-	                tag.handleError(err);
-	            }
-			}
-			
-			boolean isEmpty = outputQueue.isEmpty();
+                if (tag.isCancelled()) {
+                    outputQueue.remove(0);
+                    continue;
+                }
+
+                try {
+                    SocketAddress dst = tag.getSocketAddress();
+                    ByteBuffer data = tag.getData();
+                    assert data != null : "Somebody set Data to null";
+
+                    if (send(dst, data)) {
+                        // Wohoo! Message was sent!
+                        outputQueue.remove(0);
+                        registerInput(tag);
+                    } else {
+                        // Dang! Re-Try next time!
+                        break;
+                    }
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
+                    outputQueue.remove(0);
+                    tag.handleError(err);
+                }
+            }
+
+            boolean isEmpty = outputQueue.isEmpty();
             interestWrite(!isEmpty);
             return !isEmpty;
-		}
+        }
     }
     
     /**
@@ -655,8 +655,8 @@ public abstract class MessageDispatcher {
                 Receipt receipt = it.next();
                 
                 if (receipt.isCancelled()) {
-                	// The user cancelled the Future
-                	it.remove();
+                    // The user cancelled the Future
+                    it.remove();
                 	
                 } else if (receipt.timeout()) {
                     receipt.received();
@@ -722,14 +722,14 @@ public abstract class MessageDispatcher {
         }
         
         public void start() {
-        	running = true;
-        	
-        	if (thread == null) {
-        		thread = context.getThreadFactory().newThread(this);
-        		thread.setName(context.getName() + "-CleanupTask");
-        		thread.setDaemon(true);
-        		thread.start();
-        	}
+            running = true;
+            
+            if (thread == null) {
+                thread = context.getThreadFactory().newThread(this);
+                thread.setName(context.getName() + "-CleanupTask");
+                thread.setDaemon(true);
+                thread.start();
+            }
         }
         
         public void stop() {
