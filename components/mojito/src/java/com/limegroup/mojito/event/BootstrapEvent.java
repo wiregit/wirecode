@@ -121,9 +121,9 @@ public class BootstrapEvent {
     }
 
     public long getTotalTime() {
-        if (phaseZeroTime > 0L) {
-            if (phaseOneTime > 0L) {
-                if (phaseTwoTime > 0L) {
+        if (phaseZeroTime >= 0L) {
+            if (phaseOneTime >= 0L) {
+                if (phaseTwoTime >= 0L) {
                     return phaseZeroTime + phaseOneTime + phaseTwoTime;
                 }
                 return phaseZeroTime + phaseOneTime;
