@@ -34,7 +34,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.TrieUtils;
@@ -268,9 +267,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 
                 // Make sure we're not mixing IPv4 and IPv6 addresses.
                 // See RouteTableImpl.add() for more Info!
-                if (!NetworkUtils.isSameAddressSpace(
-                        context.getContactAddress(), 
-                        node.getContactAddress())) {
+                if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
                     
                     // Log as ERROR so that we're not missing this
                     if (LOG.isErrorEnabled()) {

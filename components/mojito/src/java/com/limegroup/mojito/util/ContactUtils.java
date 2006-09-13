@@ -33,7 +33,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 
 /**
- * 
+ * Miscellaneous untilities for Contacts
  */
 public final class ContactUtils {
 
@@ -42,7 +42,7 @@ public final class ContactUtils {
     private ContactUtils() {}
     
     /**
-     * 
+     * Returns the nodeId and address as a formatted String
      */
     public static String toString(KUID nodeId, SocketAddress address) {
         if (nodeId != null) {
@@ -177,5 +177,14 @@ public final class ContactUtils {
         }
         
         return false;
+    }
+    
+    /**
+     * Returns true if both Contacts have an IPv4 or IPv6 address
+     */
+    public static boolean isSameAddressSpace(Contact a, Contact b) {
+        return NetworkUtils.isSameAddressSpace(
+                    a.getContactAddress(), 
+                    b.getContactAddress());
     }
 }

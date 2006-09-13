@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.settings;
 
+import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -80,4 +81,10 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final IntSetting OUTPUT_BUFFER_SIZE
         = FACTORY.createIntSetting("OUTPUT_BUFFER_SIZE", 64*1024);
+    
+    /**
+     * Whether or not we're accepting forced addresses
+     */
+    public static final BooleanSetting ACCEPT_FORCED_ADDRESS
+        = FACTORY.createBooleanSetting("ACCEPT_FORCED_ADDRESS", false);
 }

@@ -407,9 +407,7 @@ public abstract class MessageDispatcher {
         
         // Make sure we're not mixing IPv4 and IPv6 addresses.
         // See RouteTableImpl.add() for more info!
-        if (!NetworkUtils.isSameAddressSpace(
-                context.getContactAddress(), 
-                node.getContactAddress())) {
+        if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
             
             // Log as ERROR so that we're not missing this
             if (LOG.isErrorEnabled()) {
@@ -543,8 +541,7 @@ public abstract class MessageDispatcher {
                 try {
                     SocketAddress dst = tag.getSocketAddress();
                     ByteBuffer data = tag.getData();
-                    assert data != null : "Somebody set Data to null";
-
+                    
                     if (send(dst, data)) {
                         // Wohoo! Message was sent!
                         outputQueue.remove(0);

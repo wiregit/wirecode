@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
@@ -126,9 +125,7 @@ public class RouteTableImpl implements RouteTable {
         // idea is to mark IPv6 Nodes as firewalled if they're contacting
         // IPv4 Nodes but this would lead to problems in the IPv6 network
         // if some IPv6 Nodes don't have access to a 6to4 gateway...
-        if (!NetworkUtils.isSameAddressSpace(
-                localNode.getContactAddress(), 
-                node.getContactAddress())) {
+        if (!ContactUtils.isSameAddressSpace(localNode, node)) {
             
             // Log as ERROR so that we're not missing this
             if (LOG.isErrorEnabled()) {

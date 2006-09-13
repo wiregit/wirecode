@@ -127,25 +127,30 @@ public class ContactNode implements Contact {
         if (sourceAddress != null) {
             this.sourceAddress = sourceAddress;
             
-            SocketAddress ca = contactAddress;
+            SocketAddress backup = contactAddress;
             
             int port = ((InetSocketAddress)contactAddress).getPort();
             if (port == 0) {
-                if (!firewalled && LOG.isErrorEnabled()) {
-                    LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
-                            + " contact address is set to Port 0 but it is not marked as firewalled");
+                if (!firewalled) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
+                                + " contact address is set to Port 0 but it is not marked as firewalled");
+                    }
                 }
                 
                 contactAddress = sourceAddress;
                 firewalled = true; // Force Firewalled!
-            } else {
+                
+            } else if (!NetworkSettings.ACCEPT_FORCED_ADDRESS.getValue()) {
+                // Combine source address as read from the IP packet with
+                // the forced Port number.
                 contactAddress = new InetSocketAddress(
                         ((InetSocketAddress)sourceAddress).getAddress(), port);
             }
             
             if (LOG.isInfoEnabled()) {
                 LOG.info("Merged " + sourceAddress + " and " 
-                    + ca + " to " + contactAddress + ", firewalled=" + firewalled);
+                    + backup + " to " + contactAddress + ", firewalled=" + firewalled);
             }
         }
     }
