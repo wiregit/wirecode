@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -501,7 +502,30 @@ public final class NetworkUtils {
         dst[dst.length-1] = (byte)((port     ) & 0xFF);
         return dst;
     }
+    
+    /**
+     * Returns true if both SocketAddresses are either IPv4 or IPv6 addresses
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isSameAddressSpace(SocketAddress a, SocketAddress b) {
+        return isSameAddressSpace(
+                    ((InetSocketAddress)a).getAddress(), 
+                    ((InetSocketAddress)b).getAddress());
+    }
+    
+    /**
+     * Returns true if both InetAddresses are either IPv4 or IPv6 addresses
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isSameAddressSpace(InetAddress a, InetAddress b) {
+        if (a instanceof Inet4Address) {
+            return (b instanceof Inet4Address);
+        } else /*if (a instanceof Inet6Address)*/ {
+            return (b instanceof Inet6Address);
+        }/* else {
+            return false;
+        }*/
+    }
 }
-
-
-

@@ -26,6 +26,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.util.ContactUtils;
@@ -39,6 +43,8 @@ import com.limegroup.mojito.util.ContactUtils;
  */
 public class LocalContact implements Contact {
 
+    private static final Log LOG = LogFactory.getLog(LocalContact.class);
+    
     private static final long serialVersionUID = -1372388406248015059L;
 
     private volatile int vendor;
@@ -169,6 +175,9 @@ public class LocalContact implements Contact {
      */
     public synchronized void setExternalAddress(SocketAddress externalSocketAddress) {
         if (externalSocketAddress == null) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Argument is null");
+            }
             return;
         }
         
@@ -181,6 +190,20 @@ public class LocalContact implements Contact {
         int currentPort = ((InetSocketAddress)getContactAddress()).getPort();
         
         if (externalAddress.equals(currentAddress)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Reported external address is equal to current external address: " + externalAddress);
+            }
+            return;
+        }
+        
+        if (tmpExternalAddress != null 
+                && !NetworkUtils.isSameAddressSpace(
+                        externalAddress, currentAddress)) {
+            
+            if (LOG.isErrorEnabled()) {
+                LOG.error("The current external address " + currentAddress 
+                        + " is from a different IP address space than " + externalAddress);
+            }
             return;
         }
         
@@ -188,6 +211,12 @@ public class LocalContact implements Contact {
         
         if (tmpExternalAddress == null 
                 || tmpExternalAddress.equals(addr)) {
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Setting the current external address from " 
+                        + contactAddress + " to " + addr);
+            }
+            
             contactAddress = addr;
             
             //if (externalPort == currentPort) {}

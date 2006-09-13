@@ -59,9 +59,10 @@ public final class ContactUtils {
     }
     
     /**
-     * 
+     * Returns true if the given Contact's address is any of
+     * localhost's addresses
      */
-    public static boolean isLocalContact(Contact node) {
+    public static boolean isLocalHostAddress(Contact node) {
         try {
             return NetworkUtils.isLocalHostAddress(node.getContactAddress());
         } catch (IOException e) {
@@ -71,7 +72,7 @@ public final class ContactUtils {
     }
     
     /**
-     * 
+     * Returns true if the given Contacts have both a localhost address
      */
     public static boolean areLocalContacts(Contact existing, Contact node) {
         try {

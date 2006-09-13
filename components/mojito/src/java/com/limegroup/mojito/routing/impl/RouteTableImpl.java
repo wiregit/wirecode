@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
@@ -115,6 +116,23 @@ public class RouteTableImpl implements RouteTable {
         if (node.isFirewalled() && !isLocalNode(node)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace(node + " is firewalled");
+            }
+            return;
+        }
+        
+        // Make sure we're not mixing IPv4 and IPv6 addresses in the
+        // RouteTable! IPv6 to IPv4 might work if there's a 6to4 gateway
+        // or whatsoever but the opposite direction doesn't. An immediate
+        // idea is to mark IPv6 Nodes as firewalled if they're contacting
+        // IPv4 Nodes but this would lead to problems in the IPv6 network
+        // if some IPv6 Nodes don't have access to a 6to4 gateway...
+        if (!NetworkUtils.isSameAddressSpace(
+                localNode.getContactAddress(), 
+                node.getContactAddress())) {
+            
+            // Log as ERROR so that we're not missing this
+            if (LOG.isErrorEnabled()) {
+                LOG.error(node + " is from a different IP address space than " + localNode);
             }
             return;
         }

@@ -405,6 +405,19 @@ public abstract class MessageDispatcher {
             return;
         }
         
+        // Make sure we're not mixing IPv4 and IPv6 addresses.
+        // See RouteTableImpl.add() for more info!
+        if (!NetworkUtils.isSameAddressSpace(
+                context.getContactAddress(), 
+                node.getContactAddress())) {
+            
+            // Log as ERROR so that we're not missing this
+            if (LOG.isErrorEnabled()) {
+                LOG.error(node + " is from a different IP address space than local Node");
+            }
+            return;
+        }
+        
         if (!accept(message)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping message from " + node);
