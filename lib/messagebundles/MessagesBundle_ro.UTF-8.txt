@@ -3073,10 +3073,11 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Parola
 ################################################################################
 # Key/value pairs for the network interface pane item.
 ################################################################################
-#### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interfac
+#### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 OPTIONS_NETWORK_INTERFACE_TITLE=Interfata Retelei
 #### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 OPTIONS_NETWORK_INTERFACE_LABEL=Puteti seta LimeWire sa lege conexiuni exterioare catre o adresa IP de la o interfata specifica de retea. Ascultand socketuri va asculta totusi si toate interfetele existente. Aceasta este utila pentru gazdele cu mai multe puncte de acces. Daca mai tarziu dezactivezi interfata, LimeWire se va intoarce catre o adresa arbitrara.                                                                          
+
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Foloseste o interfata specifica unei retele.
 #### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
@@ -3384,7 +3385,7 @@ STATS_LIME_RECEIVED_MULTICAST_PUSH_REQUESTS_LABEL=Impinsaturi Multicast primite 
 #### STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=Total
 STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=Total
 #### STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
-#? STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobiti primiti de la ceilalti utilizatori LimeWire.
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobiti primiti de la ceilalti utilizatori LimeWire.
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 #? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=
 #### STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.

@@ -12,37 +12,33 @@ LOCALE_VARIANT_NAME=International
 LOCALE_SCRIPT_CODE=Guru
 LOCALE_SCRIPT_NAME=Brahmic (Indian)
 LOCALE_ENGLISH_LANGUAGE_NAME=Punjabi (Gurmukhi)
-# Before adding a value below, verify the existence of the translation on the NSIS repository:
-# http://cvs.sourceforge.net/viewcvs.py/nsis/NSIS/Contrib/Language%20files/
-#? LOCALE_NSIS_NAME=
-# See also other translatable items for the LimeWire installer:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/installbundles/
-
-################################################################################
-# Key/value pair for whether or not bold characters should be used for this
-# locale. Must be "true" or "false" (true only for complex scripts).
-################################################################################
+LOCALE_NSIS_NAME=
 DISABLE_BOLD_CHARACTERS=false
-
-################################################################################
-# Key/value pair for whether or not the layout should be adapted for right-to-
-# left scripts. Must be "true" or "false" (true only for semitic scripts).
-################################################################################
 LAYOUT_RIGHT_TO_LEFT=false
-
-################################################################################
-# Key/value pair for whether or not the tips of the day should be displayed.
-# The default is false (set to true if TOTDs exist).
-################################################################################
-# See: http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/totd/
 HAS_TIPS_OF_THE_DAY=false
 
-# See also other translatable resources for the application:
-# * translations of meta-data search items:
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/xml/display/
-# * translations of "about.html"
-# http://www.limewire.org/fisheye/viewrep/limecvs/lib/messagebundles/resources/
-
+################################################################################
+# TO TRANSLATORS: DO NOT EDIT ANY OF THE ABOVE LINES.
+# Everything above this point is used internally by the LimeWire program and
+# should not be edited. See below for translating.
+################################################################################
+################################################################################
+# How to translate:
+# 1) Find a line that begins with #?
+# 2) Remove the #?
+# 3) Translate the line
+#
+# You can use the English line directly above it as a reference.
+# All English lines begin with '#### '.
+# You should not change those lines.
+#
+# If the language is a variant of another language
+# (like Brazilian/Standard Portuguese or Traditional/Simplified Chinese), there
+# will also be a line that begins with '###$ ' showing the translation in the
+# other language, if there was a translation in the other language.
+# You should not change those lines.
+#
+# You can also correct mispelled translations, if you see one that is wrong.
 ################################################################################
 ################################################################################
 # TRANSLATIONS START BELOW.
@@ -81,7 +77,7 @@ GENERAL_BROWSE_BUTTON_LABEL=ਬਰਾਓਜ਼...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
 GENERAL_BROWSE_HOST_LABEL=ਹੋਸਟ ਨੂੰ ਬਰਾਓਜ਼ ਕਰੋ
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
-#? GENERAL_BROWSE_HOST_TIP=ਸਾਰੀ  ਫ਼ਾਈਲਾਂ ਨੂੰ ਚੁਣੇ ਕੰਪਿਊਟਰ ਤੇ ਵੇਖੋ
+GENERAL_BROWSE_HOST_TIP=ਸਾਰੀ  ਫ਼ਾਈਲਾਂ ਨੂੰ ਚੁਣੇ ਕੰਪਿਊਟਰ ਤੇ ਵੇਖੋ
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
 GENERAL_ADVANCED_SUB_MENU=ਹੋਰ ਜਾਨਕਾਰੀ
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
@@ -180,7 +176,7 @@ ABOUT_BUTTON_TIP=ਵਿੰਡੋ ਬੰਦ ਕਰੋ
 #? ABOUT_WEBDEV_BLURB=
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 #? ABOUT_SUPPORT_BLURB=
-#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following developers have worked on the LimeWire team in the past but have since moved on to other projects:
+#### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 #? ABOUT_PREVIOUS_DEV_BLURB=
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 #? ABOUT_CONTRIBUTORS_BLURB=
@@ -215,7 +211,7 @@ TOTD_LOADING_TIPS=ਸੁਝਾਵ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=ਸ਼ੁਰੁਆਤੀ ਗੱਲਾਂ
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
-#? GETTING_STARTED_CONTENTS=ਲਾਇਸਵਾਇਰ ਸ਼ੁਰੂ ਕਰਣ ਲਈ, ਬਾਂਈ ਤਰਫ਼ ਖਾੰਨੇਆਂ ਵਿੱਚ ਓਹ ਲਿਖੋ ਜੋ ਤੁਸੀ ਲਭ ਰਹੇ ਹੋ ਅਤੇ ‘ਲਭੋ’ਬਟਨ ਦਬਾਓ , ਜੇ ਤੁਸੀਂ ਇੱਕ ਹੀ ਪਰਕਾਰ ਦੀ ਚੀਜ਼ ਲਭ ਰਹੇ ਹੋ (ਗਾਣੇਂ, ਵਿਡਿਓ,...) ਤੇ ਉੱਤੇ ਦਿੱਤੇ ਬਟਨ ਦਬਾਓ.
+GETTING_STARTED_CONTENTS=ਲਾਇਸਵਾਇਰ ਸ਼ੁਰੂ ਕਰਣ ਲਈ, ਬਾਂਈ ਤਰਫ਼ ਖਾੰਨੇਆਂ ਵਿੱਚ ਓਹ ਲਿਖੋ ਜੋ ਤੁਸੀ ਲਭ ਰਹੇ ਹੋ ਅਤੇ ‘ਲਭੋ’ਬਟਨ ਦਬਾਓ , ਜੇ ਤੁਸੀਂ ਇੱਕ ਹੀ ਪਰਕਾਰ ਦੀ ਚੀਜ਼ ਲਭ ਰਹੇ ਹੋ (ਗਾਣੇਂ, ਵਿਡਿਓ,...) ਤੇ ਉੱਤੇ ਦਿੱਤੇ ਬਟਨ ਦਬਾਓ.
 
 ###################################################################
 # Key/value pairs for the Going Pro image.
@@ -257,7 +253,7 @@ STATS_TITLE=ਆੰਕੜੇ
 #### DOWNLOAD_TITLE=Downloads
 DOWNLOAD_TITLE=ਹੁਣ ਦੇ ਡਾਉੰਲੋਡ
 #### UPLOAD_TITLE=Uploads
-#? UPLOAD_TITLE=ਹੁਣ ਦੇ ਅੱਪਲੋਡ
+UPLOAD_TITLE=ਹੁਣ ਦੇ ਅੱਪਲੋਡ
 #### CONSOLE_TITLE=Console
 CONSOLE_TITLE=ਕੰਸੋਲ
 
@@ -335,7 +331,6 @@ MENU_NAV_CONSOLE=ਕੰਸੋਲ(O)
 MENU_NAV_CONSOLE_MNEMONIC=O
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 MENU_NAV_CONSOLE_ACCESSIBLE=ਕੰਸੋਲ ਦੀ ਸਕਰੀਨ ਵੇਖੋ
-
 
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=ਵਿਊ(V)
@@ -607,7 +602,7 @@ SEARCH_PUBLIC_BLOCK_STRING=ਹੋਸਟ ਨੂੰ ਬਲੌਕ ਕਿਤਾ ਜ�
 SEARCH_RESULT_TABLE_LABEL=ਨਤੀੱਜੇ
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=ਹੋਰ ਲਭੋ
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered. 
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
 SEARCH_RESULT_SECURE_TIP=ਇਹ ਇੱਕ ਸੁਰਕਸ਼ਿਤ ਨਤੀੱਜਾ ਹੈ.ਜਾਨਕਾਰੀ ਨਾਲ ਕੋਈ ਛੇੜਛਾੜ ਨਈ ਕਿੱਤੀ ਗਈ. 
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=ਇੰਨਾਂ ਵਿੱਚੋਂ ਇਕ ਫ਼ਾਇਲ executable ਹੈ
@@ -650,7 +645,7 @@ SEARCH_WHATS_NEW_SMALL=ਨਵਾ
 #### SEARCH_SELECT_TYPE=Select Search Type:
 SEARCH_SELECT_TYPE=ਖੋਜ ਦਾ ਢੰਗ
 #### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
-SEARCH_MEDIA_DOCUMENTS_TOOLTIP= ਫ਼ਾਇਲਾਂ ਲਭੋ, ਜਿੱਦਾਂ ਏੱਚ ਟੀ ੲਮ ੲਲ, ਟੀ ਏਕਸ ਟੀ, ਪੀ ਡੀ ਏਫ਼ ਵਰਗੀਆਂ.
+SEARCH_MEDIA_DOCUMENTS_TOOLTIP=ਫ਼ਾਇਲਾਂ ਲਭੋ, ਜਿੱਦਾਂ ਏੱਚ ਟੀ ੲਮ ੲਲ, ਟੀ ਏਕਸ ਟੀ, ਪੀ ਡੀ ਏਫ਼ ਵਰਗੀਆਂ.
 #### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
 SEARCH_MEDIA_PROGRAMS_TOOLTIP=ਪ੍ਰੋਗ੍ਰੈਮ ਫ਼ਾਇਲਾਂ ਲਭੋ, ਜਿੱਦਾਂ ਜ਼ਿੱਪ, ਈ ਏਕਸ ਈ, ਜੀਜ਼ੈੱਡ ਵਰਗੀਆਂ.
 #### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
@@ -681,17 +676,17 @@ MAGNET_COPY_MAGNET_LINKS_WARNING=ਹੋਸਟ ਦੀ ਫ਼ਾਇਰਵਾਲ ਕ�
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
-SEARCH_FOR_KEYWORDS_ACTION_NAME= {0} ਮੁੱਖ ਸ਼ਬਦ ਲੱਭੋ
+SEARCH_FOR_KEYWORDS_ACTION_NAME={0} ਮੁੱਖ ਸ਼ਬਦ ਲੱਭੋ
 # {0} the title of the search
 #### SEARCH_ACTION_NAME=Search for: {0}
-SEARCH_ACTION_NAME= {0} ਬਾਰੇ ਲੱਭੋ
+SEARCH_ACTION_NAME={0} ਬਾਰੇ ਲੱਭੋ
 # {0} the already translated mediatype
 #### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
-SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME= {0} ਨਵਾ ਕੀ’ਚ ਲੱਭੋ
+SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME={0} ਨਵਾ ਕੀ’ਚ ਲੱਭੋ
 # {0} the type of the search, e.g. Title, Album, Genre
 # {1} the keywords fo the search, e.g. name of the album
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
-SEARCH_XML_FIELD_ACTION_NAME= {0}: {1} ਬਾਰੇ ਲੱਭੋ
+SEARCH_XML_FIELD_ACTION_NAME={0}: {1} ਬਾਰੇ ਲੱਭੋ
 
 ################################################################################
 # CheckBoxList actions
@@ -703,8 +698,7 @@ CHECK_BOX_LIST_SELECT_ALL_ACTION_TOOLTIP=ਸਾਰੀ ਚੀਜ਼ਾਂ ਚੁਣ�
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=Deselect All
 CHECK_BOX_LIST_DESELECT_ALL_ACTION_NAME=ਸਾਰਾ ਅੰਚੁਣੋ
 #### CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=Deselects all Items in the List
-#? CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=ਲਿਸਟ ਦੀ ਸਾਰੀ ਚੀਜ਼ਾਂ ਅੰਚੁਣਿਆਂ  ਹੋਣ
-
+CHECK_BOX_LIST_DESELECT_ALL_ACTION_TOOLTIP=ਲਿਸਟ ਦੀ ਸਾਰੀ ਚੀਜ਼ਾਂ ਅੰਚੁਣਿਆਂ  ਹੋਣ
 
 #Media Types
 #### MEDIA_ANY_TYPE=All Types
@@ -849,7 +843,7 @@ PLAYLIST_LOAD_BUTTON_LABEL=ਖੋਲੋ...
 #### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
 PLAYLIST_LOAD_BUTTON_TIP=ਉਪਲਬਧ ਪਲੇਲਿਸਟ ਖੋਲੋ
 #### PLAYLIST_SAVE_BUTTON_LABEL=Save As...
-PLAYLIST_SAVE_BUTTON_LABEL= ...ਵੰਗ ਸੇਵ
+PLAYLIST_SAVE_BUTTON_LABEL=...ਵੰਗ ਸੇਵ
 #### PLAYLIST_SAVE_BUTTON_TIP=Save the Current Playlist to a File
 PLAYLIST_SAVE_BUTTON_TIP=ਇਸ ਪਲੇਲਿਸਟ ਨੂੰ ਸੇਵ ਕਰੋ
 #### PLAYLIST_DELETE_BUTTON_LABEL=Remove
@@ -887,7 +881,7 @@ DOWNLOADER_DIALOG_DEFAULT_ACTION_ASK_LABEL=ਹਮੇਸ਼ਾਂ ਪੁੱਛੂਂ
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=Choose a Default Action:
 DOWNLOADER_DIALOG_DEFAULT_ACTION_LABEL=ਇੱਕ ਡਿਫ਼ੌਲਟ ਏਕਸ਼ਨ ਚੁਣੋ
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=Save As...
-DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME= ...ਵੰਗ ਸੇਵ
+DOWNLOADER_DIALOG_SAVE_AS_ACTION_NAME=...ਵੰਗ ਸੇਵ
 #### DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=Choose a different location for the Download
 DOWNLOADER_DIALOG_SAVE_AS_ACTION_SHORT_DESCRIPTION=ਡਾਉੰਲੋਡ ਲਈ ਕੋਈ ਹੋਰ ਜਗਹ ਦਓ
 #### DOWNLOADER_DIALOG_APPEND_ACTION_NAME=Append (#)
@@ -1010,9 +1004,9 @@ SHARE_NEW_FOLDER_ACTION_DESCRIPTION=ਵਿੰਡੋ ਖੋਲ ਕੇ ਵੰਡ�
 #### SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
 SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
 #### SHARE_FILE_FAILED=LimeWire was unable to share the file "{0}".
-SHARE_FILE_FAILED= "{0}" : ਇਸ ਫ਼ਾਇਲ ਨੂੰ ਲਾਇੰਵਾਇਰ ਵੰਡ ਨਈ ਪਾਯਾ
+SHARE_FILE_FAILED="{0}" : ਇਸ ਫ਼ਾਇਲ ਨੂੰ ਲਾਇੰਵਾਇਰ ਵੰਡ ਨਈ ਪਾਯਾ
 #### SHARE_FILE_ALREADY_SHARED=The file "{0}" is already shared.
-SHARE_FILE_ALREADY_SHARED= "{0}" :ਇਹਫ਼ਾਇਲਪਹਲਾਂ
+SHARE_FILE_ALREADY_SHARED="{0}" :ਇਹਫ਼ਾਇਲਪਹਲਾਂ
 
 ################################################################################
 # Key/value pairs for Statistics String...
@@ -1030,7 +1024,7 @@ STATISTICS_CONNECTION_DISCONNECTED=ਡਿਸਕਨੈੱਕਟਿੱਡ
 #### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
 STATISTICS_CONNECTION_DISCONNECTED_TIP=ਤੁਸੀਂ ਡਿਸਕਨੈੱਕਟਿੱਡ ਹੋ.ਫ਼ਾਇਲ ਮੈਨ੍ਯੂ ਤੋਂ ਕਨੈੱਕਟ ਕਰੋ.
 #### STATISTICS_CONNECTION_CONNECTING=Starting
-STATISTICS_CONNECTION_CONNECTING=
+#? STATISTICS_CONNECTION_CONNECTING=
 #### STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network
 STATISTICS_CONNECTION_CONNECTING_TIP=ਕਨੈੱਕਟ ਹੋ ਰਹੇ ਹੋ
 #### STATISTICS_CONNECTION_POOR=Poor
@@ -1147,7 +1141,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? DOWNLOAD_STATUS_PAUSED=
 #### DOWNLOAD_STATUS_INVALID=Content Removed
 #? DOWNLOAD_STATUS_INVALID=
-#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network.  To learn more, double-click on the download (or click preview).
+#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network. To learn more, double-click on the download (or click preview).
 #? DOWNLOAD_INVALID_EXPLAIN=
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 #? DOWNLOAD_AWAITING_SOURCES=
@@ -1467,7 +1461,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? SETUP_DIALOG_TITLE=
 #### SETUP_LANGUAGE_TITLE=Language Options
 #? SETUP_LANGUAGE_TITLE=
-#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language: 
+#### SETUP_CHOOSE_LANGUAGE_LABEL=Choose Language:
 #? SETUP_CHOOSE_LANGUAGE_LABEL=
 #### SETUP_LANGUAGE_LABEL=Please choose the language you would like LimeWire to use.
 #? SETUP_LANGUAGE_LABEL=
@@ -1525,7 +1519,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=
 #### SETUP_FILTER_TITLE=Content Filtering
 #? SETUP_FILTER_TITLE=
-#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared.  By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content.  You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
+#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared. By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content. You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
 #? SETUP_FILTER_LABEL=
 #### SETUP_FILTER_CHECKBOX=Enable Content Filtering
 #? SETUP_FILTER_CHECKBOX=
@@ -1888,7 +1882,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
-#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded 
+#### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded
 #? INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
 #### INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes of
 #? INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
@@ -2468,6 +2462,8 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? OPTIONS_PROXY_MAIN_TITLE=
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
 #? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
+#### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
+#? OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
 
 ################################################################################
 # Key/value pairs for the save directory options window item
@@ -2812,9 +2808,8 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=
-#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media.  If iTunes or other media players experience frequent rebuffering, increase this value.  A higher setting may use more memory.
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media. If iTunes or other media players experience frequent rebuffering, increase this value. A higher setting may use more memory.
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
-
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -3075,8 +3070,18 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #### OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password:
 #? OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=
 
+################################################################################
+# Key/value pairs for the network interface pane item.
+################################################################################
+#### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
+#? OPTIONS_NETWORK_INTERFACE_TITLE=
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#? OPTIONS_NETWORK_INTERFACE_LABEL=
 
-
+#### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
+#? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
@@ -3084,7 +3089,7 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
-#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared.  By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
 #? OPTIONS_CONTENT_FILTER_LABEL=
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
 #? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
@@ -3753,26 +3758,6 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=
-
-# ultrapeer-specific sent stats
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=Sent
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_TITLE=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_SEND_LABEL=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_TITLE=
-#### STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-#? STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
-
-# leaf-specific sent stats
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=Sent
-#? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=All queries that were routed to leaves, using query routing tables.
-#? STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=Not Sent
-#? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=
-#### STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
-#? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
@@ -4456,5 +4441,3 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
-

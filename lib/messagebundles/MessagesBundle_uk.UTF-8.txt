@@ -44,11 +44,7 @@ HAS_TIPS_OF_THE_DAY=false
 # TRANSLATIONS START BELOW.
 ################################################################################
 ################################################################################
-#
-#                                Translated by Undsoft
-#                                   www.undsoft.net
-#                                   undsoft@mail.ru
-#
+
 ################################################################################
 # Key/value pairs for general strings that can be used in any components
 ################################################################################
@@ -146,26 +142,26 @@ GENERAL_TIME_SPENT=Пройшло сплинуло
 GENERAL_UNIT_TERABYTES=Tб
 #### GENERAL_UNIT_GIGABYTES=GB
 GENERAL_UNIT_GIGABYTES=Gб
-#### GENERAL_UNIT_MEGABYTES=Mб
+#### GENERAL_UNIT_MEGABYTES=MB
 GENERAL_UNIT_MEGABYTES=Mб
 #### GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KILOBYTES=Kб
-#### GENERAL_UNIT_KBPSEC= KB/s
+#### GENERAL_UNIT_KBPSEC=KB/s
 GENERAL_UNIT_KBPSEC=Kб/с
 
 ################################################################################
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-APP_TITLE= LimeWire: Дозволяючи вільно ділитись інформацією
+APP_TITLE=LimeWire: Дозволяючи вільно ділитись інформацією
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=Про LimeWire
-#### ABOUT_LABEL_START= LimeWire
-ABOUT_LABEL_START= LimeWire
+#### ABOUT_LABEL_START=LimeWire
+ABOUT_LABEL_START=LimeWire
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
 ABOUT_SCROLL_CHECK_BOX_LABEL=Автоматично прогортати
 #### ABOUT_BUTTON_TIP=Close This Window
@@ -179,7 +175,7 @@ ABOUT_DEV_BLURB=Також LimeWire  - це, звичайно, результа�
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 #? ABOUT_WEBDEV_BLURB=
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
-#? ABOUT_SUPPORT_BLURB=Питання 
+ABOUT_SUPPORT_BLURB=Питання
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 #? ABOUT_PREVIOUS_DEV_BLURB=
 #### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
@@ -383,7 +379,7 @@ MENU_VIEW_CONSOLE=Консоль
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
 MENU_VIEW_CONSOLE_ACCESSIBLE=Показати вікно Консолі
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
-MENU_VIEW_THEMES_TITLE=
+#? MENU_VIEW_THEMES_TITLE=
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
 #? MENU_VIEW_THEMES_TITLE_MNEMONIC=
 #### MENU_VIEW_THEMES_GET_MORE=Get More Skins
@@ -861,7 +857,7 @@ PLAYLIST_FILE_DESCRIPTION=Плейлісти (*.m3u)
 # Key/value pairs for the integrated media player
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
-MEDIA_PLAYER_DEFAULT_STRING= LimeWire Media Player
+MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 #### MEDIA_PLAY_BUTTON_TIP=Play
 MEDIA_PLAY_BUTTON_TIP=Грати
 #### MEDIA_PAUSE_BUTTON_TIP=Pause
@@ -900,7 +896,7 @@ DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_NAME=Переписати
 DOWNLOADER_DIALOG_OVERWRITE_ACTION_SHORT_DESCRIPTION=Переписати Існуючий Файл
 # {0} a short error message which is localized independently
 #### DOWNLOADER_DIALOG_ERROR_LABEL=Error: {0}
-DOWNLOADER_DIALOG_ERROR_LABEL= Помилка: {0}
+DOWNLOADER_DIALOG_ERROR_LABEL=Помилка: {0}
 # {0} a short warning message which is localized independently
 #### DOWNLOADER_DIALOG_WARNING_LABEL=Warning: {0}
 DOWNLOADER_DIALOG_WARNING_LABEL=Попередження: {0}
@@ -1008,7 +1004,7 @@ SHARE_NEW_FOLDER_ACTION_DESCRIPTION=Дозволяти обрати Нову Т�
 #### SHARE_NEW_FOLDER_ACTION_MNEMONIC=R
 #? SHARE_NEW_FOLDER_ACTION_MNEMONIC=
 #### SHARE_FILE_FAILED=LimeWire was unable to share the file "{0}".
-SHARE_FILE_FAILED= LimeWire не зміг поділитись файлом "{0}".
+SHARE_FILE_FAILED=LimeWire не зміг поділитись файлом "{0}".
 #### SHARE_FILE_ALREADY_SHARED=The file "{0}" is already shared.
 SHARE_FILE_ALREADY_SHARED=Ви вже ділитесь файлом "{0}" 
 
@@ -1158,7 +1154,7 @@ DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=Ви завантажили скін, як�
 #### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
 DOWNLOAD_APPLY_NEW_THEME_START=Ви завантажили новий скін, що називається "
 #### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
-#? DOWNLOAD_APPLY_NEW_THEME_END=." Бажаєте використовувати цей скін?
+DOWNLOAD_APPLY_NEW_THEME_END=." Бажаєте використовувати цей скін?
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
 DOWNLOAD_POSSIBLE_HOSTS=Можливі Хости
 #### DOWNLOAD_BUSY_HOSTS=Busy Hosts
@@ -1281,13 +1277,13 @@ MONITOR_VIEW_LEAF_MESSAGE=Ваш клієнт – вузол «лист», як�
 #### MODEM_SPEED=Modem
 MODEM_SPEED=Модем
 #### CABLE_SPEED=Cable/DSL
-CABLE_SPEED= Cable/DSL
+CABLE_SPEED=Cable/DSL
 #### T1_SPEED=T1
-T1_SPEED= T1
+T1_SPEED=T1
 #### T3_SPEED=T3 or Higher
-T3_SPEED= T3 or Higher
+T3_SPEED=T3 or Higher
 #### MULTICAST_SPEED=Ethernet
-MULTICAST_SPEED= Ethernet
+MULTICAST_SPEED=Ethernet
 
 ################################################################################
 # HTML Page stuff
@@ -1321,7 +1317,7 @@ CV_COLUMN_TIME=Час
 #### CV_COLUMN_COMPRESSION=Compressed (I/O)
 CV_COLUMN_COMPRESSION=Стиснуто (I/O)
 #### CV_COLUMN_QRP_FULL=QRP (%)
-CV_COLUMN_QRP_FULL= QRP (%)
+CV_COLUMN_QRP_FULL=QRP (%)
 #### CV_COLUMN_QRP_USED=QRP Empty
 CV_COLUMN_QRP_USED=Порожні QRP
 #### CV_BUTTON_REMOVE=Remove
@@ -1361,7 +1357,7 @@ CV_TABLE_STRING_CONNECTED_ON=Підключено
 #### CV_STRING_CLIENT=Leaf
 CV_STRING_CLIENT=Лист
 #### CV_STRING_ULTRAPEER=Ultrapeer
-CV_STRING_ULTRAPEER= Ultrapeer
+CV_STRING_ULTRAPEER=Ultrapeer
 #### CV_STRING_STATUS=Connection Status:
 CV_STRING_STATUS=Статус Підключення
 #### CV_ADD_HOST_LABEL=Host:
@@ -2138,7 +2134,7 @@ NO_INTERNET=Ваш комп’ютер схоже не має підключен
 # keep trying.
 ################################################################################
 #### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
-NO_INTERNET_RETRYING= Ваш комп’ютер схоже не має підключення до Інтернету або firewall не дає LimeWire доступу до нього. LimeWire буде намагатись підключитись до мережі доти, доки ви не натисните «Відключитись» у меню «Файл».
+NO_INTERNET_RETRYING=Ваш комп’ютер схоже не має підключення до Інтернету або firewall не дає LimeWire доступу до нього. LimeWire буде намагатись підключитись до мережі доти, доки ви не натисните «Відключитись» у меню «Файл».
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
@@ -2147,7 +2143,7 @@ NO_INTERNET_RETRYING= Ваш комп’ютер схоже не має підк
 #### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_FETCHED_TOO_MANY=LimeWire не зміг підключитись до хостів в мережі Gnutella. Скоріш за все, це через firewall або іншу програму, яка блокує доступ до Gnutella(порт 6346). Будь ласка, превірте ваші налаштування firewall’у або поговоріть з системним адміністратором або інтернет провайдером, щоб дізнатись чи не фільтрують вони трафік Gnutella.
 #### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
-GWEBCACHE_NO_CACHES_LEFT= LimeWire не зміг підключитись до хостів в мережі Gnutella. Скоріш за все, це через firewall або іншу програму, яка блокує доступ до Gnutella(порт 6346). Будь ласка, превірте ваші налаштування firewall’у або поговоріть з системним адміністратором або інтернет провайдером, щоб дізнатись чи не фільтрують вони трафік Gnutella.
+GWEBCACHE_NO_CACHES_LEFT=LimeWire не зміг підключитись до хостів в мережі Gnutella. Скоріш за все, це через firewall або іншу програму, яка блокує доступ до Gnutella(порт 6346). Будь ласка, превірте ваші налаштування firewall’у або поговоріть з системним адміністратором або інтернет провайдером, щоб дізнатись чи не фільтрують вони трафік Gnutella.
 
 ################################################################################
 # Key/Value pairs for friendly error messages.
@@ -2157,7 +2153,7 @@ GWEBCACHE_NO_CACHES_LEFT= LimeWire не зміг підключитись до �
 #### ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
 ERROR_DISK_FULL_DOWNLOAD=LimeWire не зміг завантажити обрані файли, тому що на жорсткому диску немає місця. Звільніть місце на диску, щоб завантажувати більше файлів.
 #### ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
-ERROR_DISK_FULL_GENERIC= LimeWire не зміг записати необхідний файл, тому що на жорсткому диску немає місця. Звільніть місце на диску, щоб продовжувати роботу з LimeWire.
+ERROR_DISK_FULL_GENERIC=LimeWire не зміг записати необхідний файл, тому що на жорсткому диску немає місця. Звільніть місце на диску, щоб продовжувати роботу з LimeWire.
 #### ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
 ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire не зміг завантажити обраний файл, тому що інша програма використовує його. Будь ласка, закрийте іншу програму та спробуйте знову.
 #### ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
@@ -2170,7 +2166,6 @@ ERROR_ACCESS_DENIED_GENERIC=LimeWire не зміг записати необхі
 ERROR_INVALID_NAME_DOWNLOAD=LimeWire не зміг відкрити неповний файл для обраного завантаження тому, що ім’я файлу має в собі символи, які не підтримуються Вашою файловою системою.
 #### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 ERROR_INVALID_NAME_GENERIC=LimeWire не зміг відкрити неповний файл тому, що ім’я файлу має в собі символи, які не підтримуються Вашою файловою системою. LimeWire може поводитись непередбачувано.
-
 
 ################################################################################
 # Key/Value pairs for internal error messages
@@ -2207,7 +2202,7 @@ ERROR_INTERNAL_SERVLET_FAILED=LimeWire не зміг підключитися д
 ERROR_INTERNET_IS_BLOCKED=LimeWire не зміг запуститися та ініціалізуватися. Зазвичай, це через firewall, який блокує LimeWire доступ до Інтернету або не дозволяє закольцовані підключення на Вашому комп’ютері. Будь ласка, надайте LimeWire доступ до Інтернету та перезапустіть LimeWire.
 #### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 ERROR_DAAP_LOOPBACK_FAILED=LimeWire не зміг запустити Протокол Доступу до Цифрового Аудіо(DAAP)(використовується для обміну файлами в iTunes) тому, що потрібен патч від Microsoft або firewall блокує доступ. LimeWire може направити Вас на необхідний сайт Microsoft, якщо Ви бажаєте користуватись цією функцією. Натисніть «Так», щоб піти за патчем, «Ні» - щоб вимкнути цю функцію та «Скасувати» - щоб вирішити потім.
-#### ERROR_DAAP_LOOPBACK_FAILED_NONXP= LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
+#### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
 ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire не зміг запустити Протокол Доступу до Цифрового Аудіо (DAAP)(використовується для обміну файлами в iTunes), тому що firewall блокує доступ. Щоб продовжити використовувати DAAP, натисніть «Так» та налаштуйте Ваш firewall так, щоб він надав повний доступ 'LimeWire.exe' до вхідних та вихідних підключень. Щоб відключити DAAP, натисніть «Ні».
 #### ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
 ERROR_DAAP_START_FAILED=LimeWire не зміг запустити службу Протокол Доступу до Цифрового Аудіо (DAAP). DAAP буде вимкнено. Ви зможете увімкнути DAAP в налаштуваннях, iTunes -> Спільний доступ.
@@ -2668,7 +2663,7 @@ OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Максимум слотів на вивант�
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
-#? OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Стартувати вивантажень:
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Стартувати вивантажень:
 
 ################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
@@ -2937,10 +2932,8 @@ OPTIONS_SEARCH_SPEED_LABEL=Ви можете обрати, яку мінімал
 OPTIONS_SEARCH_SPEED_T3_LABEL=Показувати тільки результати зі швидкістю T3 або вище
 #### OPTIONS_SEARCH_SPEED_T1_LABEL=Show Only Results of T1 Speed or Higher
 OPTIONS_SEARCH_SPEED_T1_LABEL=Показувати тільки результати зі швидкістю T1 або вище
-
 #### OPTIONS_SEARCH_SPEED_CABLE_LABEL=Show Only Results of Cable/DSL Speed or Higher
 OPTIONS_SEARCH_SPEED_CABLE_LABEL=Показувати тільки результати зі швидкістю Cable/DSL або вище
-
 #### OPTIONS_SEARCH_SPEED_ALL_LABEL=Show All Speeds
 OPTIONS_SEARCH_SPEED_ALL_LABEL=Показувати усі швидкості
 
@@ -3070,7 +3063,7 @@ OPTIONS_PROXY_PORT_LABEL=Порт:
 OPTIONS_PROXY_LOGIN_TITLE=Деталі авторизації
 #### OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy.
 OPTIONS_PROXY_LOGIN_LABEL=Вкажіть ім’я користувача та пароль для роботи з Proxy
-#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication (Does Not Work for Proxies):
+#### OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable Authentication (Does Not Work for HTTP Proxies):
 OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Увімкнути авторизацію (Не підходить для HTTP Proxy):
 #### OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username:
 OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Ім’я користувача:
@@ -3218,7 +3211,7 @@ STATS_TOTAL_RECEIVED_MESSAGES_TITLE=Всього
 STATS_TOTAL_RECEIVED_MESSAGES_LABEL=Усі повідомлення Gnutella отримані цим клієнтом
 #### STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP
 STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP
-#### STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over , by message type.
+#### STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over TCP, by message type.
 STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=Усі повідомлення Gnutella отримані за допомогою TCP, за типом повідомлення.
 #### STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
@@ -3323,7 +3316,7 @@ STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Пінги
 STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=Пінги TCP отримані від усіх клієнтів Gnutella, порівняно з отриманими від клієнтів LimeWire.
 #### STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Понг
-#### STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP received from all Gnutella clients versus other LimeWires.
+#### STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
 STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=Понги TCP отримані від усіх клієнтів Gnutella, порівняно з отриманими від клієнтів LimeWire.
 #### STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Queries
 STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=Запити
@@ -3753,22 +3746,18 @@ STATS_LIME_SENT_BYTES_MULTICAST_PING_REQUESTS_LABEL=Кілобайти пінг�
 STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_TITLE=Понги
 #### STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=Kilobytes for Multicast pongs sent from all Gnutella clients versus other LimeWires.
 STATS_LIME_SENT_BYTES_MULTICAST_PING_REPLIES_LABEL=Кілобайти понгів широкомовлення надісланих від усіх клієнтів Gnutella, порівняно з клієнтами LimeWire.
-
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=Queries
 STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_TITLE=Запити
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=Kilobytes for Multicast queries sent from all Gnutella clients versus other LimeWires.
 STATS_LIME_SENT_BYTES_MULTICAST_QUERIES_LABEL=Кілобайти запитів широкомовлення надісланих від усіх клієнтів Gnutella, порівняно з клієнтами LimeWire.
-
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Query Hits
 STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_TITLE=Відгуки
 #### STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Kilobytes for Multicast query hits sent from all Gnutella clients versus other LimeWires.
 STATS_LIME_SENT_BYTES_MULTICAST_QUERY_REPLIES_LABEL=Кілобайти відгуків широкомовлення надісланих від усіх клієнтів Gnutella, порівняно з клієнтами LimeWire.
-
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 #### STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes sent from all Gnutella clients versus other LimeWires.
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Кілобайти pushes широкомовлення надісланих від усіх клієнтів Gnutella, порівняно з клієнтами LimeWire.
-
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
@@ -4183,7 +4172,6 @@ TTL8=TTL 8
 #### TTL9=TTL 9
 TTL9=TTL 9
 
-
 # Advanced Gnutella Routing errors
 #### ALL_ROUTE_ERRORS=Routing Errors
 ALL_ROUTE_ERRORS=Помилки паршрутизації
@@ -4355,7 +4343,7 @@ UPLOAD_STAT_HEAD=Head
 UPLOAD_STAT_UNKNOWN=Невідомі
 #### UPLOAD_STAT_PUSHED_GET=Pushed Get
 UPLOAD_STAT_PUSHED_GET=Push Get
-#### UPLOAD_STAT_PUSHED_HEAD=Push Head
+#### UPLOAD_STAT_PUSHED_HEAD=Pushed Head
 UPLOAD_STAT_PUSHED_HEAD=Push Head
 #### UPLOAD_STAT_PUSHED_UNKNOWN=Pushed Unknown
 UPLOAD_STAT_PUSHED_UNKNOWN=Невідомий Push
@@ -4453,4 +4441,3 @@ ALL_OOB_BYPASSED=Обходи відповідей
 STATS_OOB_THROUGHPUT_TITLE=Ступінь успішності OOB 
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 STATS_OOB_THROUGHPUT_LABEL=Кількість відповідей запитано та отримано за допомогою протоколу OOB.
-
