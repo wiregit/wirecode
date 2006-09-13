@@ -244,7 +244,7 @@ public abstract class MessageDispatcher {
                 String msg = "Cannot send Message of type "
                     + message.getClass().getName()
                     + " to " + ContactUtils.toString(nodeId, dst)
-                    + " because it has the same contact address as the local Node"
+                    + " because it has the same contact address as the local Node "
                     + context.getLocalNode() + " has";
                 
                 if (LOG.isInfoEnabled()) {
