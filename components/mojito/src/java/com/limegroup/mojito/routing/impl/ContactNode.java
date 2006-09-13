@@ -28,6 +28,7 @@ import java.net.SocketAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.settings.NetworkSettings;
@@ -142,10 +143,19 @@ public class ContactNode implements Contact {
                 firewalled = true; // Force Firewalled!
                 
             } else if (!NetworkSettings.ACCEPT_FORCED_ADDRESS.getValue()) {
-                // Combine source address as read from the IP packet with
-                // the forced Port number.
-                contactAddress = new InetSocketAddress(
-                        ((InetSocketAddress)sourceAddress).getAddress(), port);
+                // If the source address is a PRIVATE address then 
+                // don't use it because the other Node is on the 
+                // same LAN as we are (damn NAT routers!).
+                if (!NetworkUtils.isPrivateAddress(sourceAddress)) {
+                    contactAddress = new InetSocketAddress(
+                            ((InetSocketAddress)sourceAddress).getAddress(), port);
+                    
+                // The other guy doesn't know its external address
+                // TODO: There's a missing condition...
+                } else if (!NetworkUtils.isValidSocketAddress(contactAddress)) {
+                    contactAddress = sourceAddress;
+                    firewalled = true;
+                }
             }
             
             if (LOG.isInfoEnabled()) {

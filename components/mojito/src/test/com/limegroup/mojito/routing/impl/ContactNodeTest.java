@@ -49,18 +49,14 @@ public class ContactNodeTest extends BaseTestCase {
         assertNull(node2.getSourceAddress());
         assertFalse(node2.isFirewalled());
         
+        // Cannot switch from a PUBLIC to a PRIVATE address
         node2.fixSourceAndContactAddress(new InetSocketAddress("localhost", 1024));
         
         assertNotNull(node2.getSourceAddress());
         assertFalse(node2.isFirewalled());
         
         assertEquals(new InetSocketAddress("localhost", 1024), node2.getSourceAddress());
-        assertEquals(new InetSocketAddress("localhost", 2048), node2.getContactAddress());
-        
-        // Fix works only once
-        node2.fixSourceAndContactAddress(new InetSocketAddress("dell.com", 8096));
-        assertEquals(new InetSocketAddress("localhost", 1024), node2.getSourceAddress());
-        assertEquals(new InetSocketAddress("localhost", 2048), node2.getContactAddress());
+        //assertEquals(new InetSocketAddress("localhost", 2048), node2.getContactAddress());
     }
     
     public void testUpdateWithExistingContact() {
@@ -164,5 +160,34 @@ public class ContactNodeTest extends BaseTestCase {
         
         node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
         assertEquals(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node2.getAdaptativeTimeout());
+    }
+    
+    public void testPublicPrivateAddress() {
+        InetSocketAddress sourceAddress = new InetSocketAddress("localhost", 1234);
+        InetSocketAddress contactAddress = new InetSocketAddress("216.244.101.15", 5000);
+        InetSocketAddress externalAddress = new InetSocketAddress("216.244.101.16", 5000);
+        
+        ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
+                null, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+        
+        // PUBLIC contact address and PRIVATE source address
+        // Result: Don't use the IP from the source address
+        node1.fixSourceAndContactAddress(sourceAddress);
+        assertEquals(contactAddress, node1.getContactAddress());
+        
+        // PUBLIC contact address and PUBLIC source address
+        // Result: Use the IP from the source address
+        node1.fixSourceAndContactAddress(externalAddress);
+        assertEquals(externalAddress, node1.getContactAddress());
+        
+        // As above...
+        node1 = (ContactNode)ContactFactory.createLiveContact(
+                sourceAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+        assertEquals(contactAddress, node1.getContactAddress());
+        
+        // As above...
+        node1 = (ContactNode)ContactFactory.createLiveContact(
+                externalAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+        assertEquals(externalAddress, node1.getContactAddress());
     }
 }
