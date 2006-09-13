@@ -1,12 +1,3 @@
-Subject:
-[trans] translation to Irish Gaelic (Gaeilge)
-From:
-"Jack" <jack1991@eircom.net>
-Date:
-Sun, 10 Sep 2006 18:00:12 +0100
-To:
-translate@limewire.org
-
 ################################################################################
 # Messages Bundle for LimeWire 4.8.2
 # Specialization for: Irish Gaelic - Ireland
@@ -4450,25 +4441,4 @@ HAS_TIPS_OF_THE_DAY=false
 #? STATS_OOB_THROUGHPUT_TITLE=
 #### STATS_OOB_THROUGHPUT_LABEL=Number of Responses Requested and Received via the OOB Protocol
 #? STATS_OOB_THROUGHPUT_LABEL=
-
-
-
------------------------------------------------------------------
-Find the home of your dreams with eircom net property
-Sign up for email alerts now http://www.eircom.net/propertyalerts
-
-
-
-
-_______________________________________________
-translate mailing list
-translate@lists.limewire.org
-http://lists.limewire.org/mailman/listinfo/translate
-
-Part 1.2
-	
-Content-Type:
-	text/plain
-Content-Encoding:
-	7bit
 
