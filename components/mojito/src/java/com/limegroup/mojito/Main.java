@@ -78,13 +78,13 @@ public class Main {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         List<MojitoDHT> dhts = standalone(null, port, count);
-        /*for (MojitoDHT dht: dhts) {
-            InetSocketAddress addr = (InetSocketAddress)dht.getContactAddress();
-            addr = new InetSocketAddress(bootstrapHost.getAddress(), addr.getPort());
-            ((Context)dht).setContactAddress(addr);
-        }*/
-        
         //List<MojitoDHT> dhts = limewire(null, port);
+        
+        if (dhts.isEmpty()) {
+            System.out.println("No Nodes to run");
+            System.exit(0);
+        }
+        
         run(port, dhts, bootstrapHost);
     }
     
@@ -106,7 +106,7 @@ public class Main {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
-                dht.start();
+                //dht.start();
 
                 dhts.add(dht);
                 System.out.println(i + ": " + ((Context)dhts.get(dhts.size()-1)).getLocalNode());
@@ -136,7 +136,7 @@ public class Main {
         } else {
             dht.bind(new InetSocketAddress(port));
         }
-        dht.start();
+        //dht.start();
         
         return Arrays.asList(dht);
     }
@@ -176,11 +176,19 @@ public class Main {
             bootstrapHostSet.add(new InetSocketAddress("localhost", port));
         }
         
-        int start = (bootstrapHost != null ? 0 : 1);
-        for(int i = start; i < dhts.size(); i++) {
+        int start = 0;
+        if (bootstrapHost == null) {
+            dhts.get(0).start();
+            start = 1;
             
+            // 1...n bootstraps from 0
+        }
+        
+        for(int i = start; i < dhts.size(); i++) {
             try {
                 MojitoDHT dht = dhts.get(i);
+                dht.start();
+                
                 future = dht.bootstrap(bootstrapHostSet);
                 
                 BootstrapEvent evt = future.get();
