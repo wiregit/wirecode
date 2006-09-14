@@ -110,6 +110,10 @@ public class ApplicationSettings extends LimeProps {
     public static final IntSetting WINDOW_Y =
         (IntSetting)FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
     
+    /** Setting for whether or not LW should start maximized. */
+    public static final BooleanSetting MAXIMIZE_WINDOW =
+        FACTORY.createBooleanSetting("MAXIMIZE_WINDOW", false);
+    
     /**
 	 * A flag for whether or not the application should be minimized
 	 * to the system tray on windows.
