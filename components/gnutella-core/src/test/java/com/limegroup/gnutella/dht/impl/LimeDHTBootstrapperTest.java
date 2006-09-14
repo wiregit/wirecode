@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
 import com.limegroup.gnutella.dht.DHTTestCase;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.Contact;
@@ -39,13 +40,13 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     
     public static void globalSetUp() throws Exception {
         NetworkSettings.TIMEOUT.setValue(500);
-        
         MojitoDHT dht = MojitoFactory.createDHT();
         dhtContext = (Context)dht;
     }
 
     @Override
     protected void setUp() throws Exception {
+        setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
         bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht));
         dhtContext = (Context)dht;
@@ -61,6 +62,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     }
     
     public void testAddBootstrapHost() throws Exception{
+        System.out.println("Setting: "+ ConnectionSettings.LOCAL_IS_PRIVATE.getValue());
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap();

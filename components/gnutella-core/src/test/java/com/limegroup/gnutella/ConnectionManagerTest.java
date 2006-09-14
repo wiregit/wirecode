@@ -515,7 +515,7 @@ public class ConnectionManagerTest extends BaseTestCase {
         sleep(2000);
         //this should have lowered average time
         assertLessThan((30L*60L*1000L), mgr.getCurrentAverageUptime());
-        assertGreaterThan(((60L*60L*1000L)+2L*1000L)/3L, mgr.getCurrentAverageUptime());
+        assertGreaterThan((((60L*60L*1000L)+2L*1000L)/3L)-1, mgr.getCurrentAverageUptime());
         assertEquals(2,ApplicationSettings.TOTAL_CONNECTIONS.getValue());
         mgr.disconnect(false);
         long avgtime = ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue();

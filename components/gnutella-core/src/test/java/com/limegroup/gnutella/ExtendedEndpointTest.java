@@ -110,7 +110,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,3492,1,100,86400113;113,"
                      + ApplicationSettings.DEFAULT_LOCALE.getValue() 
-                     + ",,0,NONE,\n",
+                     + ",,0,INACTIVE,\n",
                      out.toString());
     }
 

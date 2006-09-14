@@ -87,6 +87,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             dht.start();
             DHT_LIST.add(dht);
             controller.addLeafDHTNode("localhost", addr.getPort());
+            Thread.sleep(300);
         }
         assertTrue(rt.hasDHTLeaves());
         assertEquals(rt.getDHTLeaves().size(), rt.getLiveContacts().size() - 1); //minus local node
