@@ -40,7 +40,8 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
     
     /**
      * Adds a DHT leaf node to the dht routing table, setting a very high timestamp
-     * to make sure it always gets contacted first for the first hop of lookups
+     * to make sure it always gets contacted first for the first hop of lookups, and 
+     * make sure it always gets returned first when selecting the MRS nodes from the RT.
      * 
      * @param node The DHT leaf node to be added
      */
@@ -118,7 +119,7 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
     }
     
     /**
-     * Returns the IP:Ports of this Untrapeer's DHT enabled leaves
+     * Returns the IP:Ports of this Ultrapeer's DHT enabled leaves
      * 
      * Hold a lock on 'this' when using the Iterator! 
      */

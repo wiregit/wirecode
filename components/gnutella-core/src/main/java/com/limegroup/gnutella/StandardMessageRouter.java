@@ -12,6 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.messages.PingReply;
@@ -33,6 +36,9 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This class is the message routing implementation for TCP messages.
  */
 public class StandardMessageRouter extends MessageRouter {
+    
+    private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
+    
     /**
      * Responds to a Gnutella ping with cached pongs.  This does special 
      * handling for both "heartbeat" pings that were sent to ensure that
@@ -158,6 +164,11 @@ public class StandardMessageRouter extends MessageRouter {
     	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
     	else
     	    reply = PingReply.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Responding to UDPPingRequest with Gnutella hosts: \n"+ gnuthosts 
+                    + "\n and DHT hosts: \n" + dhthosts);
+        }
         
         sendPingReply(reply, handler);
         
