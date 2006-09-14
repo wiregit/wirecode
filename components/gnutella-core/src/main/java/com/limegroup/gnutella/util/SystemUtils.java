@@ -92,12 +92,15 @@ public class SystemUtils {
 	 * Gets the path to the Windows launcher .exe file that is us running right now.
 	 * 
 	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
-	 *         Blank on error.
+	 *         null on error.
 	 */
     public static final String getRunningPath() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return getRunningPathNative();
-    	return "";
+    	if (CommonUtils.isWindows() && isLoaded) {
+    		String path = getRunningPathNative();
+    		if (path.equals("")) return null;
+    		else return path;
+    	}
+    	return null;
     }
 
     /**
@@ -116,12 +119,15 @@ public class SystemUtils {
 	 * </pre>
 	 * 
 	 * @param name The name of a special folder
-	 * @return     The path to that folder, or blank on error
+	 * @return     The path to that folder, or null on error
 	 */
     public static final String getSpecialPath(String name) {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return getSpecialPathNative(name);
-    	return "";
+    	if (CommonUtils.isWindows() && isLoaded) {
+    		String path = getSpecialPathNative(name);
+    		if (path.equals("")) return null;
+    		else return path;
+    	}
+    	return null;
     }    
 
     /**
