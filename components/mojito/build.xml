@@ -26,7 +26,7 @@
         </javac>
     </target>
 
-    <target name="build2">
+    <target name="buildall">
         <javac destdir="${src}" 
 	            target="1.5" 
 	            source="1.5" 
@@ -55,21 +55,5 @@
 				compress="false">
         </jar>
     </target>
-
-    <!--
-	<target name="planetLab" depends="clean, build">
-		<delete file="planetlab.jar"/>
-		<jar destfile="planetlab.jar" 
-				basedir="${basedir}"
-				includes="com/**, de/**"
-				excludes="**/bin/**"
-				compress="false">
-			<manifest>
-			 	<attribute name="Main-Class" value="com.limegroup.mojito.tests.PlanetLab"/>
-			 	<attribute name="Class-Path" value=". commons-logging.jar log4j.jar core.jar"/>
-			</manifest>
-		</jar>
-	</target>
-	-->
 </project>
 
