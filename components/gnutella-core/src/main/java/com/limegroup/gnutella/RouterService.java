@@ -1616,12 +1616,8 @@ public class RouterService {
     }
     
     /**
-     * Tells whether this node is *actively* connected to the DHT or 
-     * is *passively* connected to the DHT, i.e. can perform queries
-     * and store requests but is not part of the DHT routing table 
-     * (does not store data or respond to queries). Note: This 
-     * also returns false if the node is not running.
-     * 
+     * Tells whether this node is *actively* connected to the DHT,
+     * i.e. is part of the global DHT routing table 
      */
     public static boolean isActiveDHTNode() {
         return dhtManager.isActiveNode();

@@ -16,82 +16,22 @@ import com.limegroup.gnutella.version.UpdateInformation;
  * The command-line UI for the Gnutella servent.
  */
 public class Main implements ActivityCallback, ErrorCallback {
-    
-    private static volatile boolean isShuttingDown = false;
-    
-    private static final String statsFileName = "OUTBOUND/";
-    
-    private static final String fileName = "stats.csv";
-    
-    private static int arg = 0;
-    
     public static void main(String args[]) {
-        Thread shutdownThread = new Thread() {
-            public synchronized void run() {
-                if(!isShuttingDown) {
-                    isShuttingDown = true;
-                }
-                else {
-                    return;
-                }
-                try{
-                    System.out.println("exiting...");
-                    RouterService.shutdown();
-//                    SearchStatManager.instance().writeStatsToFile(statsFileName+fileName);
-//                    SearchStatManager.instance().shutDown();
-                    System.exit(0);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        Runtime.getRuntime().addShutdownHook(shutdownThread);
-        //start main
         ActivityCallback callback = new Main();
         //RouterService.setCallback(callback);
         RouterService service = new RouterService(callback);
         RouterService.preGuiInit();
         service.start();    
-        try {
-            if(args.length==0) {
-                System.out.println("args usage: 1 for headless, 2 for console");
-                System.exit(0);
-            }
-            arg = (new Integer(args[0])).intValue();
-            if(arg==1) {
-                startHeadless();
-            }
-            else {
-                startConsole();
-            }
-        } catch(NumberFormatException ex) {
-            System.out.println("Wrong args. Usage: 1 for headless, 2 for console");
-            System.exit(1);
-        }
-    }
-    
-    private static void startHeadless() {
-        //loop infinite
-        while(true) {
-            try {
-                Thread.sleep(5000);
-                continue;
-            } catch (InterruptedException doNothing) {
-                break;
-            }
-        }
-    }
-    
-    private static void startConsole() {
+
+
         System.out.println("For a command list type help.");
         BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
         for ( ; ;) {
             System.out.print("LimeRouter> ");
             try {
                 String command=in.readLine();
-                if (command==null) {
-                  break;
-                }
+                if (command==null)
+                    break;
                 else if (command.equals("help")) {
                     System.out.println("catcher                  "+
                                        "Print host catcher.");
@@ -116,33 +56,9 @@ public class Main implements ActivityCallback, ErrorCallback {
                 }
                 else if (command.equals("quit"))
                     break;
-                else if (command.equals("issupernode")) {
-                    System.out.println(RouterService.isSupernode());
-                    continue;
-                }
-//                else if (command.equals("searchstats"))
-//                    SearchStatManager.instance().writeStatsToFile(fileName);
-                else if (command.equals("numconnect")) {
-                    System.out.println(RouterService.getConnectionManager().getNumConnections());
-                    continue;
-                }else if (command.equals("numupconnect")) {
-                    //the number of up to up connections
-                    System.out.println(RouterService.getConnectionManager().getNumUltrapeerConnections());
-                    continue;
-                }
-                else if (command.equals("dhtInfo")) {
-                    if(RouterService.isDHTNode()) {
-                        System.out.println("DHT Status: "+(RouterService.isActiveDHTNode()?"Active":"Passive"));
-                    } else {
-                        System.out.println("Not a DHT node");
-                    }
-                    continue;
-                }
-                //Print routing tables
-                else if (command.equals("connections")) {
-                    RouterService.dumpConnections();
-                    continue;
-                }
+                //          //Print routing tables
+                //          else if (command.equals("route"))
+                //              RouterService.dumpRouteTable();
                 //          //Print connections
                 //          else if (command.equals("push"))
                 //              RouterService.dumpPushRouteTable();
@@ -179,23 +95,33 @@ public class Main implements ActivityCallback, ErrorCallback {
                 }
             } catch (IOException e) {
                 System.exit(1);
-            } 
+            }
         }
-        isShuttingDown = true;
         System.out.println("Good bye.");
-        RouterService.shutdown();
-//        SearchStatManager.instance().writeStatsToFile(fileName);
-//        SearchStatManager.instance().shutDown();
-        System.exit(0);
+        RouterService.shutdown(); //write gnutella.net
     }
-    
+
     /////////////////////////// ActivityCallback methods //////////////////////
-    
-    public void handleAddressStateChanged() {}
 
-    public void handleLifecycleEvent(LifecycleEvent evt) {}
+    public void connectionInitializing(ManagedConnection c) {
+    }
 
-    
+    public void connectionInitialized(ManagedConnection c) {
+//      String host = c.getOrigHost();
+//      int    port = c.getOrigPort();
+        ;//System.out.println("Connected to "+host+":"+port+".");
+    }
+
+    public void connectionClosed(ManagedConnection c) {
+//      String host = c.getOrigHost();
+//      int    port = c.getOrigPort();
+        //System.out.println("Connection to "+host+":"+port+" closed.");
+    }
+
+    public void knownHost(Endpoint e) {
+        //Do nothing.
+    }
+
 //     public void handleQueryReply( QueryReply qr ) {
 //      synchronized(System.out) {
 //          System.out.println("Query reply from "+qr.getIP()+":"+qr.getPort()+":");
@@ -206,7 +132,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 //      }
 //     }
 
-    public void handleQueryResult(RemoteFileDesc rfd ,HostData data, Set loc) {
+    public void handleQueryResult(RemoteFileDesc rfd ,HostData data, Set<Endpoint> loc) {
         synchronized(System.out) {
             System.out.println("Query hit from "+rfd.getHost()+":"+rfd.getPort()+":");
             System.out.println("   "+rfd.getFileName());
@@ -252,7 +178,7 @@ public class Main implements ActivityCallback, ErrorCallback {
         int n=s.length();
         if (n==0)
             return new String[0];
-        Vector buf=new Vector();
+        Vector<String> buf=new Vector<String>();
 
         //s[i] is the start of the word to add to buf
         //s[j] is just past the end of the word
@@ -271,12 +197,10 @@ public class Main implements ActivityCallback, ErrorCallback {
         }
         String[] ret=new String[buf.size()];
         for (int i=0; i<ret.length; i++)
-            ret[i]=(String)buf.get(i);
+            ret[i]= buf.get(i);
         return ret;
     }
 
-
-    public boolean overwriteFile(String file) {return false;};
 
     public void addDownload(Downloader mgr) {}
 
@@ -286,10 +210,6 @@ public class Main implements ActivityCallback, ErrorCallback {
 
     public void removeUpload(Uploader mgr) {}
 
-    public void setPort(int port){}
-
-    public int getNumUploads(){ return 0; }
-    
     public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
     
     public void handleFileEvent(FileManagerEvent evt) {}
@@ -344,13 +264,15 @@ public class Main implements ActivityCallback, ErrorCallback {
         System.out.println("Loading component: " + component);
     }
     
-    public void addressStateChanged() {}
-
     public boolean handleMagnets(final MagnetOptions[] magnets) {
         return false;
     }
 
     public void acceptedIncomingChanged(boolean status) { }
 
-}
+    public void handleAddressStateChanged() {
+    }
 
+    public void handleLifecycleEvent(LifecycleEvent evt) {
+    }
+}
