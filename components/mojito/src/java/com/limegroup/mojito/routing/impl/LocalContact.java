@@ -196,8 +196,18 @@ public class LocalContact implements Contact {
             return;
         }
         
-        if (tmpExternalAddress != null 
-                && !NetworkUtils.isSameAddressSpace(
+        // There's no reason to set the external address to a
+        // PRIVATE IP address. This can happen with a Node that
+        // is pinging an another Node that is behind the same
+        // NAT router
+        if (NetworkUtils.isPrivateAddress(externalAddress)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(externalAddress + " is a PRIVATE address");
+            }
+            return;
+        }
+        
+        if (!NetworkUtils.isSameAddressSpace(
                         externalAddress, currentAddress)) {
             
             if (LOG.isErrorEnabled()) {

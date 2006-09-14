@@ -149,12 +149,6 @@ public class ContactNode implements Contact {
                 if (!NetworkUtils.isPrivateAddress(sourceAddress)) {
                     contactAddress = new InetSocketAddress(
                             ((InetSocketAddress)sourceAddress).getAddress(), port);
-                    
-                // The other guy doesn't know its external address
-                // TODO: There's a missing condition...
-                } else if (!NetworkUtils.isValidSocketAddress(contactAddress)) {
-                    contactAddress = sourceAddress;
-                    firewalled = true;
                 }
             }
             

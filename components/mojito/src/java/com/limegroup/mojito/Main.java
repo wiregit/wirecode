@@ -76,6 +76,9 @@ public class Main {
         }
         
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+        ConnectionSettings.PORT.setValue(port);
+        ConnectionSettings.FORCED_PORT.setValue(port);
         
         List<MojitoDHT> dhts = standalone(null, port, count);
         //List<MojitoDHT> dhts = limewire(null, port);
@@ -121,11 +124,6 @@ public class Main {
     
     @SuppressWarnings("unused")
     private static List<MojitoDHT> limewire(InetAddress addr, int port) throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.PORT.setValue(port);
-        ConnectionSettings.FORCED_PORT.setValue(port);
-        
         RouterService service = new RouterService(new DoNothing());
         RouterService.preGuiInit();
         service.start();
