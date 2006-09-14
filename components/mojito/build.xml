@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<project name="MojitoDHT" default="build" basedir=".">
+<project name="MojitoDHT" default="buildall" basedir=".">
     <description>MojitoDHT</description>
 
     <property name="basedir" value="."/>
     <property name="src" value="${basedir}/src/java"/>
 
     <property name="coredir" value="../core"/>
+	<property name="guidir" value="../gui"/>
     <property name="lib" value="../lib"/>
     <property name="jars" value="${lib}/jars"/>
 
@@ -37,13 +38,18 @@
             <src path="${coredir}" />
             <classpath refid="default.classpath"/>
         </javac>
+    	
+    	<move todir="${coredir}">
+			<fileset dir="${src}">
+				<exclude name="**/mojito/**"/>
+			</fileset>
+		</move>
     </target>
-
+	
     <target name="clean">
         <delete>
-            <fileset dir="${src}" 
-				includes="**/*.class"
-			/>
+            <fileset dir="${src}" includes="**/*.class"/>
+        	<fileset dir="${coredir}" includes="**/*.class"/>
         </delete>
     </target>
 
