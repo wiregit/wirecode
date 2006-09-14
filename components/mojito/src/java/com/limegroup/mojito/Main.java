@@ -61,7 +61,7 @@ public class Main {
         InetSocketAddress bootstrapHost = null;
         
         if (args.length != 2 && args.length != 4) {
-            System.out.println("java1 Main count port");
+            System.out.println("java Main count port");
             System.out.println("java Main count port host port");
             System.exit(-1);
         } else {
