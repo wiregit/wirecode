@@ -247,7 +247,7 @@ abstract class AbstractDHTController implements DHTController {
     
     /**
      * This class is used to fight against possible DHT clusters 
-     * by sending a Mojito ping to the last 20 DHT nodes seen in the Gnutella
+     * by sending a Mojito ping to the last 30 DHT nodes seen in the Gnutella
      * network. It is effectively randomly adding them to the DHT routing table.
      * 
      */
@@ -282,6 +282,7 @@ abstract class AbstractDHTController implements DHTController {
                 for(SocketAddress addr : dhtNodes) {
                     dht.ping(addr);
                 }
+                dhtNodes.clear();
             }
         }
         
