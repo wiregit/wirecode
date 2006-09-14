@@ -311,10 +311,15 @@ public abstract class MessageDispatcher {
             return false;
         }
         
-        // See PingManager.collisionPing()
-        KUID expectedSenderId = context.getLocalNodeID().invert();
         Contact fakeSender = message.getContact();
         
+        // The fake sender must be firewalled!
+        if (!fakeSender.isFirewalled()) {
+            return false;
+        }
+        
+        // See PingManager.collisionPing()
+        KUID expectedSenderId = context.getLocalNodeID().invert();
         return expectedSenderId.equals(fakeSender.getNodeID());
     }
     
