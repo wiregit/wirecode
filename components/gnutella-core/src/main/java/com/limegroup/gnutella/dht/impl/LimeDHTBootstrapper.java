@@ -136,7 +136,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
 
     public void stop() {
         
-        LOG.debug("Stoping");
+        LOG.debug("Stopping");
         
         if(bootstrapFuture != null) {
             bootstrapFuture.cancel(true);

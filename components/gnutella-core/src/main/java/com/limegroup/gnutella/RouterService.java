@@ -1633,8 +1633,10 @@ public class RouterService {
      * 
      */
     public static boolean isMemberOfDHT() {
-        return (dhtManager.isRunning()
-                && dhtManager.isBootstrapped());
+        if(dhtManager != null) {
+            return (dhtManager.isRunning()
+                    && dhtManager.isBootstrapped());
+        } else return false;
     }
     
 	/**

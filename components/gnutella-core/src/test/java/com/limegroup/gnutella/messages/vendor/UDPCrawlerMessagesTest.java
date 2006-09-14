@@ -33,7 +33,6 @@ import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -531,9 +530,8 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
     
     public void testMsgDHTStatus() throws Exception {
         PrivilegedAccessor.setValue(ROUTER_SERVICE, "dhtManager", new DHTManagerStub());
-        UDPCrawlerPing msgDHTCapable = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x20);
-        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(true);
-        UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTCapable);
+        UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x20);
+        UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTStatus);
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
         assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
@@ -542,16 +540,10 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
                 == (int)UDPCrawlerPing.DHT_STATUS);
         
         byte status = payload[3];
-        assertTrue( (status & UDPCrawlerPong.DHT_CAPABLE_MASK) == UDPCrawlerPong.DHT_CAPABLE_MASK);
-        assertTrue( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
-        assertFalse( (status & UDPCrawlerPong.DHT_ACTIVE_MASK) == UDPCrawlerPong.DHT_ACTIVE_MASK);
+        assertFalse( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
+        assertFalse( (status & UDPCrawlerPong.DHT_PASSIVE_MASK) == UDPCrawlerPong.DHT_PASSIVE_MASK);
+        assertTrue( (status & UDPCrawlerPong.DHT_ACTIVE_MASK) == UDPCrawlerPong.DHT_ACTIVE_MASK);
         
-        //now see if offset is correctly set
-        msgDHTCapable = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x30);
-        pong = new UDPCrawlerPong(msgDHTCapable);
-        payload = pong.getPayload();
-        status = payload[7];
-        assertTrue( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
     }
     
  	private void tryMessage() throws Exception {

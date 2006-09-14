@@ -22,10 +22,8 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.mojito.statistics.DHTStats;
 
 public class UDPCrawlerPong extends VendorMessage {
 	
@@ -34,7 +32,7 @@ public class UDPCrawlerPong extends VendorMessage {
 	public static final String AGENT_SEP = ";";
     
 	//The masks for the DHT status information
-    public static final byte DHT_CAPABLE_MASK = 0x1;
+    public static final byte DHT_PASSIVE_MASK = 0x1;
     public static final byte DHT_ACTIVE_MASK = 0x2;
     public static final byte DHT_WAITING_MASK = 0x4;
     
@@ -129,11 +127,9 @@ public class UDPCrawlerPong extends VendorMessage {
 		if (request.hasLocaleInfo())
 			bytesPerResult+=2;
 
-        int index;
+        int index = 3;
 		if(request.hasNodeUptime()) {
-		    index = 7;
-		} else {
-		    index = 3;
+		    index += 4;
 		}
         
         if(request.hasDHTStatus()) {
@@ -155,19 +151,20 @@ public class UDPCrawlerPong extends VendorMessage {
             ByteOrder.int2leb((int)currentAverage, result, 3);
 		}
         
-        //TODO!!
-//        if(request.hasDHTStatus()) {
-//            byte dhtStatus = 0x0;
-//            if(DHTSettings.DHT_CAPABLE.getValue()) {
-//                dhtStatus |= DHT_CAPABLE_MASK;
-//            }
-//            dhtStatus |= (DHTSettings.DHT_CAPABLE.getValue()? DHT_CAPABLE_MASK : 0x0);
-//            dhtStatus |= (RouterService.isActiveDHTNode()? DHT_ACTIVE_MASK : 0x0);
-//            dhtStatus |= ((RouterService.isDHTNode()
-//                    && !RouterService.isActiveDHTNode())? DHT_PASSIVE_MASK : 0x0);
-//            dhtStatus |= (RouterService.isDHTWaiting()? DHT_WAITING_MASK : 0x0);
-//            result[index-1] = dhtStatus;
-//        }
+        if(request.hasDHTStatus()) {
+            byte dhtStatus = 0x0;
+            if(RouterService.isDHTNode()) {
+                if(RouterService.isActiveDHTNode()) {
+                    dhtStatus |= DHT_ACTIVE_MASK;
+                } else {
+                    dhtStatus |= DHT_PASSIVE_MASK;
+                }
+                if(!RouterService.isMemberOfDHT()) {
+                    dhtStatus |= DHT_WAITING_MASK;
+                }
+            }
+            result[index-1] = dhtStatus;
+        }
         
 		//cat the two lists
 		endpointsUP.addAll(endpointsLeaf);

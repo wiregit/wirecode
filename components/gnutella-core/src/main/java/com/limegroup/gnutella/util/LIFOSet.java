@@ -111,7 +111,6 @@ public class LIFOSet<E> implements Set<E>{
 
     public Object[] toArray() {
         List<E> reverse = new ArrayList<E>(list);
-        Object[] l = list.toArray();
         Collections.reverse(reverse);
         return reverse.toArray();
     }
