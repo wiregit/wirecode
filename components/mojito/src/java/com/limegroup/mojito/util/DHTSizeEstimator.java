@@ -20,9 +20,10 @@
 package com.limegroup.mojito.util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -136,8 +137,7 @@ public class DHTSizeEstimator {
         KUID localNodeId = routeTable.getLocalNode().getNodeID();
         List<Contact> nodes = routeTable.select(localNodeId, k, false);
 
-        // TODO accoriding to Az code it works only with more than
-        // two Nodes
+        // Works only with more than two Nodes
         if (nodes.size() <= 2) {
             // There's always us!
             return BigInteger.ONE.max(BigInteger.valueOf(nodes.size()));
@@ -194,14 +194,18 @@ public class DHTSizeEstimator {
         BigInteger combinedSize = localSize;
         if (ContextSettings.COUNT_REMOTE_SIZE.getValue()) {
             synchronized (remoteSizeHistory) {
-                if (remoteSizeHistory.size() >= 3) {
-                    BigInteger[] remote = remoteSizeHistory.toArray(new BigInteger[0]);
-                    Arrays.sort(remote);
+                // Prune all duplicates and sort the values
+                Set<BigInteger> remoteSizeSet = new TreeSet<BigInteger>(remoteSizeHistory);
+                
+                if (remoteSizeSet.size() >= 3) {
+                    BigInteger[] remote = remoteSizeSet.toArray(new BigInteger[0]);
                     
-                    // Skip the smallest and largest value
+                    // Skip the smallest and largest values
+                    // TODO: skip the 3 smallest and biggest values (breaks the unit test)
                     int count = 1;
-                    while (count < (remote.length - 1)) {
-                        combinedSize = combinedSize.add(remote[count++]);
+                    for (int i = 1; i < (remote.length-1); i++) {
+                        combinedSize = combinedSize.add(remote[i]);
+                        count++;
                     }
                     combinedSize = combinedSize.divide(BigInteger.valueOf(count));
                     
