@@ -218,51 +218,69 @@ public abstract class MessageDispatcher {
         SocketAddress dst = tag.getSocketAddress();
         DHTMessage message = tag.getMessage();
         
-        if (context.isLocalContactAddress(dst)
-                || (context.isLocalNodeID(nodeId) 
-                        && !(message instanceof PingRequest))) {
+        // Make sure we're not sending messages to ourself
+        if (context.isLocalContactAddress(dst)) {
+            // This can happen when the RouteTable was
+            // initialized with Nodes from an external
+            // source like a file. It's not really an
+            // error because the Node's ID is different
+            // but there's no point in sending the Msg.
+            String msg = "Cannot send Message of type "
+                + message.getClass().getName()
+                + " to " + ContactUtils.toString(nodeId, dst)
+                + " because it has the same contact address as the local Node "
+                + context.getLocalNode() + " has";
             
-            if (context.isLocalNodeID(nodeId)) {
-                String msg = "Cannot send Message of type " 
-                    + message.getClass().getName() 
-                    + " to " + ContactUtils.toString(nodeId, dst) 
-                    + " which is equal to our local Node " 
-                    + context.getLocalNode();
-                
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(msg);
-                }
-                
-                tag.handleError(new IOException(msg));
-                
-            } else {
-                // This can happen when the RouteTable was
-                // initialized with Nodes from an external
-                // source like a file. It's not really an
-                // error because the Node's ID is different
-                // but there's no point in sending the Msg.
-                String msg = "Cannot send Message of type "
-                    + message.getClass().getName()
-                    + " to " + ContactUtils.toString(nodeId, dst)
-                    + " because it has the same contact address as the local Node "
-                    + context.getLocalNode() + " has";
-                
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(msg);
-                }
-                
-                tag.handleError(new IOException(msg));
+            if (LOG.isInfoEnabled()) {
+                LOG.info(msg);
             }
             
+            tag.handleError(new IOException(msg));
             return false;
         }
         
-        if (!NetworkUtils.isValidSocketAddress(dst)) {
+        // Like above. It makes no sense to send messages to a
+        // Node that has our local Node ID but we have to permit
+        // this case for ID collision test pings
+        if (context.isLocalNodeID(nodeId) 
+                && !isCollisionPingRequest(message)) {
+            
+            String msg = "Cannot send Message of type " 
+                + message.getClass().getName() 
+                + " to " + ContactUtils.toString(nodeId, dst) 
+                + " which is equal to our local Node " 
+                + context.getLocalNode();
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("The IP/Port of " + ContactUtils.toString(nodeId, dst) + " is not valid");
+                LOG.error(msg);
             }
             
-            tag.handleError(new IllegalSocketAddressException("Invalid IP/Port: " + ContactUtils.toString(nodeId, dst)));
+            tag.handleError(new IOException(msg));
+            return false;
+        }
+        
+        // Check if it's a valid destination address
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            String msg = "Invalid IP:Port " + ContactUtils.toString(nodeId, dst);
+            if (LOG.isErrorEnabled()) {
+                LOG.error(msg);
+            }
+            
+            tag.handleError(new IllegalSocketAddressException(msg));
+            return false;
+        }
+        
+        // And make sure we're not sending messages to private
+        // IPs if it's not permitted. Two Nodes behind the same 
+        // NAT using private IPs to communicate with each other
+        // would screw up a few things.
+        if (NetworkUtils.isPrivateAddress(dst)) {
+            String msg = "Private IP:Port " + ContactUtils.toString(nodeId, dst);
+            if (LOG.isErrorEnabled()) {
+                LOG.error(msg);
+            }
+            
+            tag.handleError(new IllegalSocketAddressException(msg));
             return false;
         }
         
@@ -283,6 +301,21 @@ public abstract class MessageDispatcher {
         
         tag.setData(data);
         return enqueueOutput(tag);
+    }
+    
+    /**
+     * Returns true if the given DHTMessage is a Node ID collision test ping
+     */
+    private boolean isCollisionPingRequest(DHTMessage message) {
+        if (!(message instanceof PingRequest)) {
+            return false;
+        }
+        
+        // See PingManager.collisionPing()
+        KUID expectedSenderId = context.getLocalNodeID().invert();
+        Contact fakeSender = message.getContact();
+        
+        return expectedSenderId.equals(fakeSender.getNodeID());
     }
     
     /**
