@@ -113,6 +113,23 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     }
 
     /**
+     * Returns the raw bytes of the MessageID. The
+     * returned byte[] array is a copy and modifications
+     * are not reflected to the MessageID
+     */
+    public byte[] getBytes() {
+        return getBytes(0, new byte[messageId.length], 0, messageId.length);
+    }
+    
+    /**
+     * Returns the raw bytes of the current MessageID from the specified interval
+     */
+    public byte[] getBytes(int srcPos, byte[] dest, int destPos, int length) {
+        System.arraycopy(messageId, srcPos, dest, destPos, length);
+        return dest;
+    }
+    
+    /**
      * Extracts and returns the QueryKey from the GUID
      */
     private QueryKey getQueryKey() {
