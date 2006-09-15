@@ -22,7 +22,6 @@ package com.limegroup.mojito.handler;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -138,22 +137,24 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         // (we are (re)connecting to the network) or a node that is reconnecting
         Contact existing = routeTable.get(nodeId);
         
-        if (existing == null || existing.getInstanceID() != node.getInstanceID()) {
+        if (existing == null 
+                || existing.getInstanceID() != node.getInstanceID()) {
             
-            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            //we select the 2*k closest nodes in order to also check those values
-            //where the local node is part of the k closest to the value but not part
-            //of the k closest to the new joining node.
-            List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
-            
-            // Are we one of the K nearest Nodes to the contact?
-            if (containsNodeID(nodes, context.getLocalNodeID())) {
-            //if (routeTable.isLocalBucket(nodeId)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
-                }
+            if (context.isBootstrapped()) {
+                int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+                //we select the 2*k closest nodes in order to also check those values
+                //where the local node is part of the k closest to the value but not part
+                //of the k closest to the new joining node.
+                List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
                 
-                forwardOrRemoveValues(node, message);
+                // Are we one of the K nearest Nodes to the contact?
+                if (containsNodeID(nodes, context.getLocalNodeID())) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
+                    }
+                    
+                    forwardOrRemoveValues(node, (existing==null), message);
+                }
             }
         }
         
@@ -162,7 +163,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         routeTable.add(node);
     }
     
-    private void forwardOrRemoveValues(Contact node, DHTMessage message) throws IOException {
+    private void forwardOrRemoveValues(Contact node, boolean isNewContact, DHTMessage message) throws IOException {
         
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
@@ -183,52 +184,73 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 Contact closest = nodes.get(0);
                 Contact furthest = nodes.get(nodes.size()-1);
                 
+                //System.out.println(CollectionUtils.toString(nodes));
+                //System.out.println("RT furthest: " + furthest);
                 //System.out.println(context.getLocalNode());
                 //System.out.println(node);
                 //System.out.println(CollectionUtils.toString(nodes));
                 //System.out.println();
                 
-                if (context.isLocalNode(closest)    // Re: Or-Condition; disabled 'cause 
-                        /*|| (node.equals(closest)  // we're adding the Node AFTER this
-                                && nodes.size() > 1 // method is called!
-                                && context.isLocalNode(nodes.get(1)))*/) {
+                // The first condition applies if the Node is new
+                // and we're the closest Node. The second condition
+                // applies if the Node has changed it's instanceId.
+                // That means we're the second closest and since
+                // the other Node has changed its instanceId we must
+                // re-send the values
+                if (context.isLocalNode(closest)
+                        || (node.equals(closest)
+                                && nodes.size() > 1
+                                && context.isLocalNode(nodes.get(1)))) {
                     
-                    //System.out.println("CONDITION B");
-                    //System.out.println(context.getLocalNode());
-                    //System.out.println(node);
-                    //System.out.println(CollectionUtils.toString(nodes));
-                    //System.out.println();
+                    KUID nodeId = node.getNodeID();
+                    KUID furthestId = furthest.getNodeID();
                     
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
-                    }
-                    
-                    databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                    valuesToForward.addAll(database.get(valueId).values());
-                    
-                } else if (nodes.size() >= k && context.isLocalNode(furthest)) {
-                    
-                    //System.out.println("CONDITION C");
-                    //System.out.println(context.getLocalNode());
-                    //System.out.println(node);
-                    //System.out.println(CollectionUtils.toString(nodes));
-                    //System.out.println();
-                    
-                    boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
-                    
-                    if (delete) {
-                        int count = 0;
-                        for(Iterator<DHTValue> it = database.get(valueId).values().iterator(); it.hasNext(); ) {
-                            DHTValue value = it.next();
-                            if (!value.isLocalValue()) {
-                                //System.out.println("REMOVING: " + value + "\n");
-                                
-                                it.remove();
-                                count++;
-                            }
+                    if (nodeId.equals(furthestId) 
+                            || nodeId.isNearerTo(valueId, furthestId)) {
+                        
+                        //System.out.println("CONDITION B");
+                        //System.out.println(context.getLocalNode());
+                        //System.out.println(node);
+                        //System.out.println(CollectionUtils.toString(nodes));
+                        //System.out.println();
+                        
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
                         }
                         
-                        databaseStats.STORE_FORWARD_REMOVALS.addData(count);
+                        databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                        valuesToForward.addAll(database.get(valueId).values());
+                    }
+                    
+                } else if (nodes.size() >= k 
+                        && isNewContact
+                        && context.isLocalNode(furthest)) {
+                    
+                    KUID nodeId = node.getNodeID();
+                    KUID furthestId = furthest.getNodeID();
+                        
+                    if (nodeId.isNearerTo(valueId, furthestId)) {
+                        //System.out.println("CONDITION C");
+                        //System.out.println(context.getLocalNode());
+                        //System.out.println(node);
+                        //System.out.println(CollectionUtils.toString(nodes));
+                        //System.out.println();
+                        
+                        boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
+                        
+                        if (delete) {
+                            int count = 0;
+                            for (DHTValue value : database.get(valueId).values()) {
+                                if (!value.isLocalValue()) {
+                                    //System.out.println("REMOVING: " + value + "\n");
+                                    
+                                    database.remove(value);
+                                    count++;
+                                }
+                            }
+                            
+                            databaseStats.STORE_FORWARD_REMOVALS.addData(count);
+                        }
                     }
                 }
             }

@@ -61,7 +61,14 @@ public interface Database extends Serializable {
     public boolean remove(DHTValue value);
     
     /**
-     * Returns a Map of NodeID -> DHTValue for the given ValueID
+     * Removes the given DHTValue(s) from the Database.
+     * Returns true if all values were removed.
+     */
+    //public boolean removeAll(Collection<? extends DHTValue> values);
+    
+    /**
+     * Returns a Map of NodeID -> DHTValue for the given ValueID.
+     * The returned Map is unmodifyable!
      */
     public Map<KUID, DHTValue> get(KUID valueId);
     

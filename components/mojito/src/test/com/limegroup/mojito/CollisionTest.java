@@ -36,7 +36,7 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 
 public class CollisionTest extends BaseTestCase {
     
-    private static final int PORT = 3000;
+    private static final int PORT = 4000;
     
     public CollisionTest(String name) {
         super(name);
@@ -193,6 +193,5 @@ public class CollisionTest extends BaseTestCase {
                 replacement.stop();
             }
         }
-        Thread.sleep(3000);
     }
 }

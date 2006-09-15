@@ -19,8 +19,7 @@
 
 package com.limegroup.mojito.db;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -163,11 +162,8 @@ public class DHTValuePublisher implements Runnable {
         published = 0;
         evicted = 0;
         
-        List<DHTValue> values = null;
         Database database = context.getDatabase();
-        synchronized (database) {
-            values = new ArrayList<DHTValue>(database.values());
-        }
+        Collection<DHTValue> values = database.values();
         
         for(DHTValue value : values) {
             if (context.isBootstrapping()) {

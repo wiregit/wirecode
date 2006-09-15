@@ -32,7 +32,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -425,8 +424,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         synchronized (database) {
             int oldValueCount = database.getValueCount();
             int removedCount = 0;
-            for (Iterator<DHTValue> it = database.values().iterator(); it.hasNext(); ) {
-                DHTValue value = it.next();
+            for (DHTValue value : database.values()) {
                 if (value.isLocalValue()) {
                     // Make sure all local DHTValues have the
                     // local Node as the originator
@@ -442,7 +440,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                     // store. So, any work would be redundant!
                     
                     if (remove || isExpired(value)) {
-                        it.remove();
+                        database.remove(value);
                         removedCount++;
                     }
                 }
@@ -801,7 +799,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("get");
+            throw new NotBootstrappedException(getName() + " get()");
         }
         
         DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
@@ -811,7 +809,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     public DHTFuture<StoreEvent> remove(KUID key) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("remove");
+            throw new NotBootstrappedException(getName() + " remove()");
         }
         
         // To remove a KeyValue you just store an empty value!
@@ -823,7 +821,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      */
     public DHTFuture<StoreEvent> store(DHTValue value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
+            throw new NotBootstrappedException(getName() + " store()");
         }
         
         return storeManager.store(value);
@@ -834,7 +832,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      */
     public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
+            throw new NotBootstrappedException(getName() + " store()");
         }
         
         return storeManager.store(values);
@@ -845,7 +843,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
+            throw new NotBootstrappedException(getName() + " store()");
         }
         
         return storeManager.store(node, queryKey, value);
@@ -856,7 +854,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("store");
+            throw new NotBootstrappedException(getName() + " store()");
         }
         
         return storeManager.store(node, queryKey, values);
