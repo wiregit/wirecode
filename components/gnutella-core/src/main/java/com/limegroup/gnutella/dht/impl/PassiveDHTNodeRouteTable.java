@@ -99,14 +99,15 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
     private synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);
-        assert (removed == true);
-        
-        Contact mrs = bucket.getMostRecentlySeenCachedContact();
-        if (mrs != null) {
-            removed = bucket.removeCachedContact(mrs.getNodeID());
-            assert (removed == true);
-            
-            bucket.addLiveContact(mrs);
+
+        if(removed) {
+            Contact mrs = bucket.getMostRecentlySeenCachedContact();
+            if (mrs != null) {
+                removed = bucket.removeCachedContact(mrs.getNodeID());
+                assert (removed == true);
+                
+                bucket.addLiveContact(mrs);
+            }
         }
     }
     
