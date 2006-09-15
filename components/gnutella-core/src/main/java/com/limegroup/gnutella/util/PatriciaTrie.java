@@ -2099,7 +2099,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return new EntrySetView();
         }
 
-        private class EntrySetView extends AbstractSet<Map.Entry<K,V>> {
+        protected class EntrySetView extends AbstractSet<Map.Entry<K,V>> {
             private transient int size = -1, sizeModCount;
 
             public int size() {
