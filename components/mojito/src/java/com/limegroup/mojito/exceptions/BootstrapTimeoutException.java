@@ -22,6 +22,10 @@ package com.limegroup.mojito.exceptions;
 import java.net.SocketAddress;
 import java.util.Set;
 
+/**
+ * The BootstrapTimeoutException is thrown when the bootstrap
+ * process isn't able to find an initial bootstrap Node.
+ */
 @SuppressWarnings("serial")
 public class BootstrapTimeoutException extends Exception {
     
@@ -31,6 +35,9 @@ public class BootstrapTimeoutException extends Exception {
         this.failedHosts = failedHosts;
     }
 
+    /**
+     * Returns a Set of addresses that did not respond to our pings
+     */
     public Set<SocketAddress> getFailedHosts() {
         return failedHosts;
     }

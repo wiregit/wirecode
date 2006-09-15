@@ -131,6 +131,14 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
+     * Flips the specified bit from 0 to 1 or vice versa
+     * and returns a new KUID instance
+     */
+    public KUID flip(int bit) {
+        return set(bit, !isBitSet(bit));
+    }
+    
+    /**
      * Sets or unsets the 'bitIndex' th bit
      */
     private KUID set(int bitIndex, boolean set) {

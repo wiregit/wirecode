@@ -30,6 +30,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
+import com.limegroup.mojito.util.DatabaseUtils;
 
 /**
  * The DHTValuePublisher publishes in periodical intervals
@@ -101,7 +102,7 @@ public class DHTValuePublisher implements Runnable {
                 return;
             }
             
-            if (context.isExpired(value)) {
+            if (DatabaseUtils.isExpired(context.getRouteTable(), value)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(value + " is expired!");
                 }

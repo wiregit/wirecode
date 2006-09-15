@@ -28,6 +28,7 @@ import com.limegroup.mojito.Contact;
 @SuppressWarnings("serial")
 public class CollisionException extends Exception {
     
+    /** The Contact that collides with the local Node */
     private Contact collides;
     
     public CollisionException(Contact collides) {
@@ -50,6 +51,9 @@ public class CollisionException extends Exception {
         this.collides = collides;
     }
     
+    /**
+     * Returns the Contact that collides with the local Node
+     */
     public Contact getCollideContact() {
         return collides;
     }

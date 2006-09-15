@@ -19,11 +19,14 @@
 
 package com.limegroup.mojito.exceptions;
 
+/**
+ * 
+ */
 @SuppressWarnings("serial")
 public class NotBootstrappedException extends RuntimeException{
     
-    public NotBootstrappedException(String failedOperation) {
-        super("Attempting to execute a " + failedOperation 
+    public NotBootstrappedException(String operation) {
+        super("Attempting to execute a " + operation 
                 + " while not bootstrapped to the network");
     }
 }

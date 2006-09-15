@@ -67,7 +67,7 @@ public class DHTValue implements Serializable {
     private boolean isLocalValue = true;
     
     /** The hashCode, lazy initialization */
-    private int hashCode = -1;
+    private volatile int hashCode = -1;
     
     /** Creates and returns a local DHTValue */
     public static DHTValue createLocalValue(Contact originator, 

@@ -74,8 +74,6 @@ import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
-import com.limegroup.mojito.settings.DatabaseSettings;
-import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
@@ -83,6 +81,7 @@ import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
+import com.limegroup.mojito.util.DatabaseUtils;
 
 /**
  * The Context is the heart of Mojito where everything comes 
@@ -439,7 +438,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                     // the other guys will send us anyways DHTValues to
                     // store. So, any work would be redundant!
                     
-                    if (remove || isExpired(value)) {
+                    if (remove || DatabaseUtils.isExpired(getRouteTable(), value)) {
                         database.remove(value);
                         removedCount++;
                     }
@@ -460,46 +459,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return database;
     }
     
-    /**
-     * Returns the expiration time of the given DHTValue
-     */
-    public long getExpirationTime(DHTValue value) {
-        if (value.isLocalValue()) {
-            return Long.MAX_VALUE;
-        }
-        
-        KUID valueId = value.getValueID();
-        
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List<Contact> nodes = getRouteTable().select(valueId, k, false);
-        
-        long creationTime = value.getCreationTime();
-        long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
-        
-        long expiresAt = 0L;
-        
-        if (nodes.size() <= k || nodes.contains(getLocalNode())) {
-            expiresAt = creationTime + expirationTime;
-            
-        } else {
-            KUID nearestId = nodes.get(0).getNodeID();
-            KUID localId = getLocalNodeID();
-            KUID xor = localId.xor(nearestId);
-            int log2 = xor.log2();
-            
-            expiresAt = creationTime + (expirationTime / KUID.LENGTH_IN_BITS * log2);
-        }
-        
-        return expiresAt;
-    }
-    
-    /**
-     * Returns whether or not the given DHTValue has expired
-     */
-    public boolean isExpired(DHTValue value) {
-        return System.currentTimeMillis() >= getExpirationTime(value);
-    }
-
     public void setThreadFactory(ThreadFactory threadFactory) {
         if (threadFactory == null) {
             threadFactory = new DefaultThreadFactory();

@@ -24,6 +24,12 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.RequestMessage;
 
+/**
+ * A DHTException is thrown as a result of an another exception.
+ * Besides the reason why a DHTException was thrown (getCause())
+ * it's also providing addition info like the Node ID, address 
+ * and the Message which can be useful to reconstruct the reason.
+ */
 @SuppressWarnings("serial")
 public class DHTException extends Exception {
 
@@ -55,18 +61,32 @@ public class DHTException extends Exception {
         this.time = time;
     }
     
+    /**
+     * Returns the ID of the Node (can be null)
+     */
     public KUID getNodeID() {
         return nodeId;
     }
     
+    /**
+     * Returns the SocketAddress of the Node
+     */
     public SocketAddress getSocketAddress() {
         return address;
     }
     
+    /**
+     * Returns the RequestMessage
+     */
     public RequestMessage getRequestMessage() {
         return request;
     }
     
+    /**
+     * Returns the time how long it took between sending
+     * and throwing the exception (the cause could be a
+     * timeout for example)
+     */
     public long getTime() {
         return time;
     }
