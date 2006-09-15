@@ -21,6 +21,8 @@ package com.limegroup.mojito;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,8 @@ import com.limegroup.mojito.settings.KademliaSettings;
 
 public class CacheForwardTest extends BaseTestCase {
     
+    private static final int PORT = 3000;
+    
     static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
     }
@@ -51,6 +55,11 @@ public class CacheForwardTest extends BaseTestCase {
 
     public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
+        /*int index = 0;
+        while(true) {
+            new CacheForwardTest("test").testCaseForward();
+            System.out.println("Finished: " + (index++));
+        }*/
     }
 
     public void testCaseForward() throws Exception {
@@ -59,26 +68,27 @@ public class CacheForwardTest extends BaseTestCase {
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        int port = 3000;
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         MojitoDHT originator = null;
         try {
             for (int i = 0; i < 3*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", port + i));
+                dht.bind(new InetSocketAddress("localhost", PORT + i));
                 dht.start();
                 
                 if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", port)).get();
+                    dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
                 } else {
                     originator = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            originator.bootstrap(new InetSocketAddress("localhost", port+1)).get();
+            originator.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
+            Thread.sleep(250);
             
             // Store the value
-            KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
+            //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
+            KUID valueId = KUID.createRandomID();
             byte[] value = "Hello World".getBytes();
             StoreEvent evt = originator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
@@ -111,9 +121,10 @@ public class CacheForwardTest extends BaseTestCase {
             m.setAccessible(true);
             m.invoke(nearest, new Object[]{valueId});
             
-            nearest.bind(new InetSocketAddress("localhost", port+1000));
+            nearest.bind(new InetSocketAddress("localhost", PORT+1000));
             nearest.start();
-            nearest.bootstrap(new InetSocketAddress("localhost", port + k)).get();
+            bootstrap(nearest, dhts.values());
+            Thread.sleep(250);
             
             // The 'furthest' Node should no longer have the value
             assertEquals(1, nearest.getValues().size());
@@ -152,14 +163,18 @@ public class CacheForwardTest extends BaseTestCase {
             nearest.getDatabase().clear();
             assertEquals(0, nearest.getDatabase().getKeyCount());
             assertEquals(0, nearest.getDatabase().getValueCount());
-            nearest.bootstrap(new InetSocketAddress("localhost", port + k + 5)).get();
+            bootstrap(nearest, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(0, nearest.getDatabase().getKeyCount());
             assertEquals(0, nearest.getDatabase().getValueCount());
             
             // Change the instanceId and we'll asked to store the
             // value again!
             ((LocalContact)nearest.getLocalNode()).nextInstanceID();
-            nearest.bootstrap(new InetSocketAddress("localhost", port + k + 10)).get();
+            bootstrap(nearest, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
             for (DHTValue dhtValue : nearest.getValues()) {
@@ -189,12 +204,16 @@ public class CacheForwardTest extends BaseTestCase {
             middle.getDatabase().clear();
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
-            middle.bootstrap(new InetSocketAddress("localhost", port + k + 5)).get();
+            bootstrap(middle, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
             
             ((LocalContact)middle.getLocalNode()).nextInstanceID();
-            middle.bootstrap(new InetSocketAddress("localhost", port + k + 10)).get();
+            bootstrap(middle, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
             for (DHTValue dhtValue : middle.getValues()) {
@@ -209,7 +228,9 @@ public class CacheForwardTest extends BaseTestCase {
             // Change the instanceId the previous furthest Node
             // and it shouldn't get the value
             ((LocalContact)furthest.getLocalNode()).nextInstanceID();
-            furthest.bootstrap(new InetSocketAddress("localhost", port + k + 2)).get();
+            bootstrap(furthest, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
             
@@ -236,13 +257,16 @@ public class CacheForwardTest extends BaseTestCase {
             furthest.getDatabase().clear();
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
-            furthest.bootstrap(new InetSocketAddress("localhost", port + k + 5)).get();
+            bootstrap(furthest, dhts.values());
+            Thread.sleep(250);
+            
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
             
             // Change the instanceId 
             ((LocalContact)furthest.getLocalNode()).nextInstanceID();
-            furthest.bootstrap(new InetSocketAddress("localhost", port + k + 2)).get();
+            bootstrap(furthest, dhts.values());
+            Thread.sleep(250);
             
             // And we should have the value now
             assertEquals(1, furthest.getDatabase().getKeyCount());
@@ -257,7 +281,8 @@ public class CacheForwardTest extends BaseTestCase {
             }
             
             ((LocalContact)nearest.getLocalNode()).nextInstanceID();
-            furthest.bootstrap(new InetSocketAddress("localhost", port + k + 2)).get();
+            bootstrap(furthest, dhts.values());
+            Thread.sleep(250);
             
             // Check the final state. k Nodes should have the value!
             int count = 0;
@@ -287,5 +312,28 @@ public class CacheForwardTest extends BaseTestCase {
                 dht.stop();
             }
         }
+    }
+    
+    /**
+     * Bootstraps the given Node from one of the other Nodes
+     */
+    private static void bootstrap(MojitoDHT dht, Collection<? extends MojitoDHT> dhts) throws Exception {
+        dht.bootstrap(getRandomAddress(dht, dhts)).get();
+    }
+    
+    /**
+     * Returns an address that is different from the given Nodes contact address
+     */
+    private static SocketAddress getRandomAddress(MojitoDHT dht, Collection<? extends MojitoDHT> dhts) {
+        InetSocketAddress addr1 = (InetSocketAddress)dht.getContactAddress();
+        
+        for (MojitoDHT other : dhts) {
+            InetSocketAddress addr2 = (InetSocketAddress)other.getContactAddress();
+            if (!addr1.equals(addr2)) {
+                return addr2;
+            }
+        }
+        
+        throw new IllegalStateException();
     }
 }

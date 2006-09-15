@@ -153,7 +153,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
                     }
                     
-                    forwardOrRemoveValues(node, (existing==null), message);
+                    forwardOrRemoveValues(node, existing, message);
                 }
             }
         }
@@ -163,7 +163,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         routeTable.add(node);
     }
     
-    private void forwardOrRemoveValues(Contact node, boolean isNewContact, DHTMessage message) throws IOException {
+    private void forwardOrRemoveValues(Contact node, Contact existing, DHTMessage message) throws IOException {
         
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
@@ -221,16 +221,33 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
                         valuesToForward.addAll(database.get(valueId).values());
                     }
-                    
+                
+                // We remove a value if:
+                // #1 The value is stored at k Nodes 
+                //    (i.e. the total number of Nodes in the DHT
+                //     is equal or greater than k. If the DHT has
+                //     less than k Nodes then there's no reason to
+                //     remove a value)
+                //
+                // #2 This Node is the furthest of the k-closest Nodes
+                //
+                // #3 The new Node isn't in our RouteTable yet. That means
+                //    adding it will push this Node out of the club of the
+                //    k-closest Nodes and makes it the (k+1)-closest Node.
+                //    
+                // #4 The new Node is nearer to the given valueId then
+                //    the furthest away Node (we).
                 } else if (nodes.size() >= k 
-                        && isNewContact
-                        && context.isLocalNode(furthest)) {
+                        && context.isLocalNode(furthest)
+                        && (existing==null)
+                        /*&& !containsNodeID(nodes, node.getNodeID())*/) {
                     
                     KUID nodeId = node.getNodeID();
                     KUID furthestId = furthest.getNodeID();
                         
                     if (nodeId.isNearerTo(valueId, furthestId)) {
                         //System.out.println("CONDITION C");
+                        //System.out.println(valueId);
                         //System.out.println(context.getLocalNode());
                         //System.out.println(node);
                         //System.out.println(CollectionUtils.toString(nodes));
