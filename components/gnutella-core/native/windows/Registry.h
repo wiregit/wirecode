@@ -38,8 +38,8 @@ public:
 };
 
 // Functions in Registry.cpp
-int RegistryReadNumber(HKEY root, LPCTSTR path, LPCTSTR name);
-CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name);
+int RegistryReadNumber(JNIEnv *env, HKEY root, LPCTSTR path, LPCTSTR name);
+CString RegistryReadText(JNIEnv *env, HKEY root, LPCTSTR path, LPCTSTR name);
 bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value);
 bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value);
 bool RegistryDelete(HKEY base, LPCTSTR path);

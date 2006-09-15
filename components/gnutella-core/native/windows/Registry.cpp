@@ -6,14 +6,24 @@
 #include "stdafx.h"
 #include "SystemUtilities.h"
 #include "Registry.h"
+#include <jni.h>
 
 // Takes a root key handle name, a key path, and a registry variable name
 // Gets the information from the registry
 // Returns the number, or 0 if not found or any error
 JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
-	return RegistryReadNumber(RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name));
+	return RegistryReadNumber(e, RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name));
 }
-int RegistryReadNumber(HKEY root, LPCTSTR path, LPCTSTR name) {
+
+void throw_IOException(JNIEnv *env, const char *msg)
+{
+    jclass exc_class = env->FindClass("java/io/IOException");
+    if (exc_class == 0)
+      return;
+    env->ThrowNew(exc_class, msg);
+}
+
+int RegistryReadNumber(JNIEnv *env, HKEY root, LPCTSTR path, LPCTSTR name) {
 
 	// Open the key
 	CRegistry registry;
@@ -29,19 +39,21 @@ int RegistryReadNumber(HKEY root, LPCTSTR path, LPCTSTR name) {
 		NULL,
 		(LPBYTE)&d,   // Data buffer
 		&size);       // Size of data buffer
-	if (result != ERROR_SUCCESS) return 0;
-
-	// Return the number
-	return d;
+	if (result != ERROR_SUCCESS)
+	{
+		throw_IOException(env, "couldn't read integer");
+		return 0;
+	}
+	return d; // Return the number
 }
 
 // Takes a root key handle name, a key path, and a registry variable name
 // Gets the information from the registry
 // Returns the text, blank if not found or any error
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
-	return MakeJavaString(e, RegistryReadText(RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name)));
+	return MakeJavaString(e, RegistryReadText(e, RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name)));
 }
-CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name) {
+CString RegistryReadText(JNIEnv *env, HKEY root, LPCTSTR path, LPCTSTR name) {
 
 	// Open the key
 	CRegistry registry;
@@ -71,9 +83,9 @@ CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name) {
 		(LPBYTE)buffer, // Data buffer
 		&size);         // Size of data buffer
 	s.ReleaseBuffer();
-	if (result != ERROR_SUCCESS) return "";
+	if (result != ERROR_SUCCESS) 
+		throw_IOException(env, "couldn't read text");
 
-	// Return the string
 	return s;
 }
 
@@ -83,6 +95,7 @@ CString RegistryReadText(HKEY root, LPCTSTR path, LPCTSTR name) {
 JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value) {
 	return RegistryWriteNumber(RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name), value);
 }
+
 bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value) {
 
 	// Open the key
