@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -78,10 +77,6 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             } else { //it has to be a SocketAddress
                 
                 SocketAddress address = (SocketAddress) host;
-                if (!NetworkUtils.isValidSocketAddress(address)) {
-                    continue;
-                }
-                
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Sending bootstrap ping to address: " + address);
                 }

@@ -5,9 +5,11 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import junit.framework.TestSuite;
 
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -41,6 +43,7 @@ public class BootstrapManagerTest extends BaseTestCase {
     private static void setSettings() {
         NetworkSettings.TIMEOUT.setValue(200);
         NetworkSettings.MIN_TIMEOUT_RTT.setValue(200);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
     
     @Override
@@ -127,6 +130,27 @@ public class BootstrapManagerTest extends BaseTestCase {
         assertNotContains(rt.getLiveContacts(), node);
     }
 
-    
-    
+    public void testBootstrapFromInvalidHostList() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+        Set<SocketAddress> hostList = new HashSet<SocketAddress>();
+        hostList.add(new InetSocketAddress(1));
+        hostList.add(new InetSocketAddress("localhost", 2));
+        hostList.add(new InetSocketAddress("localhost", 0));
+        hostList.add(new InetSocketAddress("localhost", 5000));
+        hostList.add(new InetSocketAddress("www.google.com", 0));
+        
+        MojitoDHT dht = MojitoFactory.createDHT();
+        
+        try {
+            dht.bind(5000);
+            dht.start();
+            
+            dht.bootstrap(hostList);
+            fail(dht + " should have rejected the invalid hostList " + hostList);
+        } catch (IllegalArgumentException ignore) {
+            //ignore.printStackTrace();
+        } finally {
+            dht.stop();
+        }
+    }
 }

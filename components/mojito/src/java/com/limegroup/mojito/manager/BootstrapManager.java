@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
@@ -100,14 +101,43 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      */
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
         synchronized (lock) {
+            // Copy the hostSet but preserve the order of the Set
+            Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>();
+            for (SocketAddress addr : hostSet) {
+                if (!NetworkUtils.isValidSocketAddress(addr)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Dropping invalid address " + addr);
+                    }
+                    continue;
+                }
+                
+                if (NetworkUtils.isPrivateAddress(addr)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Dropping private address " + addr);
+                    }
+                    continue;
+                }
+                
+                if (context.isLocalContactAddress(addr)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Dropping local address " + addr);
+                    }
+                    continue;
+                }
+                
+                copy.add(addr);
+            }
+            
+            if (copy.isEmpty() && !hostSet.isEmpty()) {
+                throw new IllegalArgumentException("Cannot bootstrap from " + hostSet);
+            }
+            
             // Cancel an active process
-            if(future != null) {
-            	future.cancel(true);
+            if (future != null) {
+                future.cancel(true);
                 future = null;
             }
             
-            // Preserve the order of the Set
-            Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>(hostSet);
             BootstrapProcess process = new BootstrapProcess(copy);
             future = new BootstrapFuture(process);
             context.execute(future);

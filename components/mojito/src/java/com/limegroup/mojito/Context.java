@@ -31,7 +31,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -775,26 +775,24 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return findValueManager.lookup(key);
     }
     
-    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
-        Set<SocketAddress> set = new HashSet<SocketAddress>();
-        set.add(address);
-        return bootstrap(set);
-    }
-
     /** Starts a lookup for the given KUID */
     public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
         return findNodeManager.lookup(lookupId);
     }
     
-    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
-        return bootstrapManager.bootstrap(hostList);
-    }
-
     /**
      * Tries to bootstrap from the local Route Table.
      */
     public DHTFuture<BootstrapEvent> bootstrap() {
         return bootstrapManager.bootstrap();
+    }
+    
+    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
+        return bootstrap(Collections.singleton(address));
+    }
+    
+    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
+        return bootstrapManager.bootstrap(hostList);
     }
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
