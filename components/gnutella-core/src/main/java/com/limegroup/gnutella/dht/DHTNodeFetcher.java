@@ -61,7 +61,7 @@ public class DHTNodeFetcher {
      * synchronized because it can be called either directly by the manager
      * or by the timer task.
      */
-    public synchronized void requestDHTHosts() {
+    private synchronized void requestDHTHosts() {
         
         LOG.debug("Requesting DHT hosts");
         
@@ -161,6 +161,7 @@ public class DHTNodeFetcher {
     }
     
     private void processPingReply(Message m) {
+        
         if(!(m instanceof PingReply)) {
             return;
         }
@@ -222,6 +223,13 @@ public class DHTNodeFetcher {
      * In the case of a single ping, we have to handle the deregistration
      */
     private class SinglePingRequestListener extends UDPPingerRequestListener{
+        
+        @Override
+        public void processMessage(Message m, ReplyHandler handler) {
+            super.processMessage(m, handler);
+            pingingSingleHost.set(false);
+        }
+
         @Override
         public void unregistered(byte[] guid) {
             if(LOG.isDebugEnabled()) {

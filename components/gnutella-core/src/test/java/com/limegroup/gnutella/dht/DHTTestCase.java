@@ -44,6 +44,7 @@ public abstract class DHTTestCase extends BaseTestCase {
         DHT_LIST.add(BOOTSTRAP_DHT);
         
         ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ROUTER_SERVICE.start();
     }
     
