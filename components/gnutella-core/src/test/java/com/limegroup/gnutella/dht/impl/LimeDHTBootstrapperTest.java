@@ -62,7 +62,6 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     }
     
     public void testAddBootstrapHost() throws Exception{
-        System.out.println("Setting: "+ ConnectionSettings.LOCAL_IS_PRIVATE.getValue());
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap();

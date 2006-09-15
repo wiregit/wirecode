@@ -68,8 +68,8 @@ public final class RouteTableSettings extends MojitoProps {
      * before we're contacting a Node for RouteTable maintenance reasons.
      */
     public static final LongSetting MIN_RECONNECTION_TIME
-        = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 1L*60L, 
-                "min_reconnect_time", 0, 1L*60L);
+        = FACTORY.createSettableLongSetting("MIN_RECONNECTION_TIME", 30L*1000L, 
+                "min_reconnect_time", 0, 5L*60L*1000L);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step

@@ -135,7 +135,7 @@ public class StandardMessageRouter extends MessageRouter {
         int maxHosts = ConnectionSettings.NUM_HOSTS_PONG.getValue();
         
         if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
-                dhthosts = RouterService.getDHTManager().getActiveDHTNodes(maxHosts);
+            dhthosts = RouterService.getDHTManager().getActiveDHTNodes(maxHosts);
         }
         
         int numDHTHosts = dhthosts.size();
@@ -166,7 +166,8 @@ public class StandardMessageRouter extends MessageRouter {
     	    reply = PingReply.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
         
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Responding to UDPPingRequest with Gnutella hosts: \n"+ gnuthosts 
+            LOG.debug("Responding to UDPPingRequest "+(request.requestsDHTIPP()?"with DHTIPP ":"") +
+                    "from : "+ addr + " with Gnutella hosts: \n"+ gnuthosts 
                     + "\n and DHT hosts: \n" + dhthosts);
         }
         

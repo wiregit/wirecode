@@ -283,8 +283,8 @@ public class RouteTableImpl implements RouteTable {
                 }
             }
         };
-        
         ping(existing).addDHTEventListener(listener);
+        touchBucket(bucket);
     }
     
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
@@ -617,6 +617,7 @@ public class RouteTableImpl implements RouteTable {
                 }
                 
                 randomIds.add(randomId);
+                touchBucket(bucket);
             }
         }
         

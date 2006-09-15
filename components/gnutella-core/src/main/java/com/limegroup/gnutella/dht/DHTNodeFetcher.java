@@ -225,7 +225,7 @@ public class DHTNodeFetcher {
         @Override
         public void unregistered(byte[] guid) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Unregistering guid " + guid);
+                LOG.debug("Unregistering Ping");
             }
             pingingSingleHost.set(false);
         }
