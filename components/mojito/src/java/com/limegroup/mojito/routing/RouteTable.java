@@ -97,12 +97,9 @@ public interface RouteTable extends Serializable {
     public List<KUID> getRefreshIDs(boolean bootstrapping);
     
     /**
-     * Returns whether or not the local Contact (i.e. we)
-     * are close to the provided KUID. In other words if
-     * the provided KUID is (hypothetically) in the same 
-     * Bucket in the RouteTable as the local Contact is.
+     * Returns the Bucket ID for the given Node ID
      */
-    public boolean isLocalBucket(KUID nodeId);
+    public KUID getBucketID(KUID nodeId);
     
     /**
      * Clears all elements from the RoutingTable

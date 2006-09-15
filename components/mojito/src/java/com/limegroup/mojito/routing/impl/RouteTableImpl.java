@@ -500,8 +500,8 @@ public class RouteTableImpl implements RouteTable {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
-    public synchronized boolean isLocalBucket(KUID nodeId) {
-        return bucketTrie.select(nodeId).contains(getLocalNode().getNodeID());
+    public synchronized KUID getBucketID(KUID nodeId) {
+        return bucketTrie.select(nodeId).getBucketID();
     }
     
     public synchronized Bucket getBucket(KUID nodeId) {
