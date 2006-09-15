@@ -61,19 +61,17 @@ public class DatabaseUtils {
         // The value expires inversly proportional otherwise by using
         // the xor distance
         } else {
-            KUID nearestId = nodes.get(0).getNodeID();
-            KUID localId = routeTable.getLocalNode().getNodeID();
-            KUID xor = localId.xor(nearestId);
-            int log2 = xor.log2();
+            KUID valueBucketId = routeTable.getBucketID(valueId);
+            KUID localBucketId = routeTable.getBucketID(routeTable.getLocalNode().getNodeID());
+            KUID xor = localBucketId.xor(valueBucketId);
             
-            // TODO I think we must take the estimated DHT size into account.
-            // Say we have 1M Nodes in our DHT which is roughly 2**20bit.
-            // Under the assumption that all IDs are equally distributed the
-            // average xor distance between Nodes will be 2**140bit (log2==140).
-            // Lets say 'expirationTime' is 60 minutes and using the follwoing
-            // function values will expire in average 4.5 seconds after creation
-            // time. That means the values expire instantly!
-            return creationTime + (long)(expirationTime - (expirationTime / (float)KUID.LENGTH_IN_BITS * log2));
+            int lowestSetBit = xor.toBigInteger().getLowestSetBit();
+            float ratio = 0.0f;
+            if (lowestSetBit >= 0) {
+                ratio = (float)(KUID.LENGTH_IN_BITS - lowestSetBit) / (float)KUID.LENGTH_IN_BITS;
+            }
+            
+            return creationTime + (long)(expirationTime - (expirationTime * ratio));
         }
     }
     
