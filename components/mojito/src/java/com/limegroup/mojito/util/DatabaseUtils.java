@@ -48,7 +48,6 @@ public class DatabaseUtils {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         List<Contact> nodes = routeTable.select(valueId, k, false);
-        //System.out.println(CollectionUtils.toString(nodes));
         
         long creationTime = value.getCreationTime();
         long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
