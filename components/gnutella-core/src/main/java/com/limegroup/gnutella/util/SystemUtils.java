@@ -159,11 +159,10 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The number value stored there, or 0 on error
      */
-    public static final int registryReadNumber(String root, String path, String name) {
+    public static final int registryReadNumber(String root, String path, String name) throws IOException {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadNumberNative(root, path, name);
-    	else
-    		return 0;
+    	throw new IOException(" not supported ");
     }
 
     /**
@@ -174,11 +173,10 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The text value stored there, or blank on error
      */
-    public static final String registryReadText(String root, String path, String name) {
+    public static final String registryReadText(String root, String path, String name) throws IOException {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadTextNative(root, path, name);
-    	else
-    		return "";
+    	throw new IOException(" not supported ");
     }
 
     /**
@@ -399,8 +397,8 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
 
-    private static final native int registryReadNumberNative(String root, String path, String name);
-    private static final native String registryReadTextNative(String root, String path, String name);
+    private static final native int registryReadNumberNative(String root, String path, String name) throws IOException ;
+    private static final native String registryReadTextNative(String root, String path, String name) throws IOException;
     private static final native boolean registryWriteNumberNative(String root, String path, String name, int value);
     private static final native boolean registryWriteTextNative(String root, String path, String name, String value);
     private static final native boolean registryDeleteNative(String root, String path);
