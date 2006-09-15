@@ -71,8 +71,8 @@ public class DatabaseUtils {
             // Under the assumption that all IDs are equally distributed the
             // average xor distance between Nodes will be 2**140bit (log2==140).
             // Lets say 'expirationTime' is 60 minutes and using the follwoing
-            // function values will expire in average 4.5 seconds after we're
-            // no longer member of the k-closest Nodes.
+            // function values will expire in average 4.5 seconds after creation
+            // time. That means the values expire instantly!
             return creationTime + (long)(expirationTime - (expirationTime / (float)KUID.LENGTH_IN_BITS * log2));
         }
     }
