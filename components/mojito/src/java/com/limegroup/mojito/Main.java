@@ -49,6 +49,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.event.BootstrapEvent.EventType;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 public class Main {
@@ -193,9 +194,14 @@ public class Main {
                 //bootstrapHostSet.add(dht.getContactAddress());
                 
                 time += evt.getTotalTime();
-                System.out.println("Node #" + i + " finished bootstrapping from " 
-                        + bootstrapHostSet + " in " + evt.getTotalTime() + "ms");
                 
+                if (evt.getEventType().equals(EventType.BOOTSTRAP_SUCCEEDED)) {    
+                    System.out.println("Node #" + i + " finished bootstrapping from " 
+                            + bootstrapHostSet + " in " + evt.getTotalTime() + "ms");
+                } else {
+                    System.out.println("Node #" + i + " failed to bootstrap from " 
+                            + bootstrapHostSet + "\n" + evt);
+                }
             } catch (Exception err) {
                 System.out.println("Node #" + i + " failed to bootstrap from " + bootstrapHostSet);
                 err.printStackTrace();
