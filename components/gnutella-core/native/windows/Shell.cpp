@@ -138,7 +138,7 @@ DWORD GetIdleTime() {
 // Takes the JNI environment and class
 // The jobject frame is a AWT Component like a JFrame that is backed by a real Windows window
 // bin is the path to the folder that has the file "jawt.dll", like "C:\Program Files\Java\jre1.5.0_05\bin"
-// icon is the path to a Windows .ico file on the disk, or blank to load the icon from the .exe launcher
+// icon is the path to a Windows .exe or .ico file on the disk that contains the icons
 // Gets the window handle, and uses it to set the icon
 // Returns blank on success, or a text message about what didn't work
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
@@ -151,7 +151,7 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	HWND window = GetJavaWindowHandle(e, c, frame, bin, &message);
 	if (!window) return message; // Return the message that tells what happened
 
-	// If we don't already have the icons, load them from the given .ico file, or from our running .exe
+	// If we don't already have the icons, load them from the given .exe or .ico file, or from our running .exe
 	GetIcons(icon);
 
 	// Set both sizes of the window's icon
@@ -160,31 +160,28 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	return ""; // Return blank on success
 }
 
-// Takes a path to a .ico file on the disk, or blank to load the icons from our running .exe
+// Takes a path to a .exe or .ico file on the disk
 // Loads the icons, keeping their handles in Handle.Icon and Handle.SmallIcon
 void GetIcons(LPCTSTR icon) {
 
 	// Don't load the icons twice
 	if (Handle.Icon || Handle.SmallIcon) return;
 
-	// No path to .ico file, we should load the icon from the .exe launcher
-	if (icon == CString("")) {
+	// The path is to a .exe file
+	if (CString(icon).Right(4).CompareNoCase(".exe") == 0) {
 
-		// Get the path to the program that is us running
-		CString path = GetRunningPath();
-
-		// Load the large and small icons from the program
+		// Extract the large and small icons from the first icon set in the .exe file
 		ExtractIconEx(
-			path,                // Path to the .exe file with the icon
+			icon,                // Path to the .exe file with the icon
 			0,                   // Extract the first icon in the program
 			&(Handle.Icon),      // Handle for large icon
 			&(Handle.SmallIcon), // Handle for small icon
 			1);                  // Extract 1 set of icons
 
-	// Load the icons from the given .ico file on the disk
-	} else {
+	// The path is to a .ico file
+	} else if (CString(icon).Right(4).CompareNoCase(".ico") == 0) {
 
-		// Load the large and small icons
+		// Load the large and small icons from the .ico file
 		Handle.Icon      = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 		Handle.SmallIcon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
 	}

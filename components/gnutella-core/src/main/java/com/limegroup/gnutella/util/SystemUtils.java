@@ -136,7 +136,7 @@ public class SystemUtils {
      * Replaces the Swing icon with a real Windows .ico icon that supports multiple sizes, full color, and partially transparent pixels.
      * 
      * @param frame The AWT Component, like a JFrame, that is backed by a native window
-     * @param icon  The path to a .ico file on the disk
+     * @param icon  The path to a .exe or .ico file on the disk
      * @return      False on error
      */
     public static final boolean setWindowIcon(Component frame, File icon) {
