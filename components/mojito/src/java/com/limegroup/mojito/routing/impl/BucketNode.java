@@ -354,14 +354,6 @@ class BucketNode implements Bucket {
                 >= RouteTableSettings.BUCKET_REFRESH_PERIOD.getValue()) {
             return true;
         }
-        
-        // We may have dead nodes in a bucket that has an empty replacement cache
-        for (Contact node : nodeTrie.values()) {
-            if (node.isDead()) {
-                return true;
-            }
-        }
-        
         return false;
     }
     

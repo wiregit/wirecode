@@ -18,6 +18,8 @@ public class BucketNodeTest extends BaseTestCase {
     
     private Contact localNode;
     
+    private RouteTableImpl routeTable;
+    
     private int vendor,version;
     
     public BucketNodeTest(String name) {
@@ -40,7 +42,17 @@ public class BucketNodeTest extends BaseTestCase {
         KUID nodeId = KUID.createRandomID();
         int instanceId = 0;
         
-        localNode = ContactFactory.createLocalContact(vendor, version, nodeId, instanceId, false);
+        localNode = ContactFactory.createLocalContact(vendor, version, nodeId, 
+        		instanceId, false);
+        
+        routeTable = new RouteTableImpl();
+        routeTable.setRouteTableCallback(new Callback() {
+            public DHTFuture<Contact> ping(Contact node) {
+                throw new UnsupportedOperationException();
+            }
+            
+        });
+        routeTable.add(localNode);
     }
 
     @Override
@@ -49,15 +61,6 @@ public class BucketNodeTest extends BaseTestCase {
     }
     
     public void testPurge() {
-        RouteTableImpl routeTable = new RouteTableImpl();
-        routeTable.setRouteTableCallback(new Callback() {
-            public DHTFuture<Contact> ping(Contact node) {
-                throw new UnsupportedOperationException();
-            }
-            
-        });
-        
-        routeTable.add(localNode);
         Bucket bucket = routeTable.getBucket(localNode.getNodeID());
         
         //try purging bucket with only local node
@@ -97,5 +100,19 @@ public class BucketNodeTest extends BaseTestCase {
         assertTrue(bucket.getLiveContacts().contains(node3));
         assertFalse(bucket.getCachedContacts().contains(node3));
         
+    }
+    
+    public void testTouchBucket() throws Exception{
+    	Bucket bucket = routeTable.getBucket(localNode.getNodeID());
+    	
+    	long now = System.currentTimeMillis();
+    	assertEquals(0, bucket.getTimeStamp());
+    	assertLessThan(now, bucket.getTimeStamp());
+    	Thread.sleep(200);
+    	bucket.touch();
+    	Thread.sleep(200);
+    	assertGreaterThan(now, bucket.getTimeStamp());
+    	now = System.currentTimeMillis();
+    	assertLessThan(now, bucket.getTimeStamp());
     }
 }

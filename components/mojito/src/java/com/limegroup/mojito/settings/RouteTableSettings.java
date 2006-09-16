@@ -44,7 +44,7 @@ public final class RouteTableSettings extends MojitoProps {
      * probability of a node to be included in the list of k closest nodes.
      */
     public static final IntSetting MAX_ACCEPT_NODE_FAILURES 
-        = FACTORY.createSettableIntSetting("MAX_ACCEPT_NODE_FAILURES", 50, 
+        = FACTORY.createSettableIntSetting("MAX_ACCEPT_NODE_FAILURES", 20, 
                 "max_accept_node_failures", 4, 200);
     
     /**
