@@ -756,7 +756,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " get()");
+            throw new NotBootstrappedException(getName() + " put()");
         }
         
         DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
