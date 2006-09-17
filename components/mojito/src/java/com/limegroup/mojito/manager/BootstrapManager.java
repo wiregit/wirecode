@@ -288,7 +288,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             }
             
             Set<Contact> nodes = new HashSet<Contact>();
-            List<Contact> contactList = context.getRouteTable().getLiveContacts();
+            List<Contact> contactList = context.getRouteTable().getActiveContacts();
             Collections.sort(contactList, BucketUtils.MRS_COMPARATOR);
             nodes.addAll(contactList);
             nodes.remove(context.getLocalNode());

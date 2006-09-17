@@ -53,10 +53,9 @@ public interface Bucket extends Serializable {
     public long getTimeStamp();
 
     /**
-     * Adds the Contact as a live contact (i.e. it will 
-     * be actively used for routing).
+     * Adds the Contact as an active contact.
      */
-    public void addLiveContact(Contact node);
+    public void addActiveContact(Contact node);
 
     /**
      * Add the Contact to the replacement cache.
@@ -76,7 +75,7 @@ public interface Bucket extends Serializable {
     /**
      * Returns the Contact that has the provided KUID.
      */
-    public Contact getLiveContact(KUID nodeId);
+    public Contact getActiveContact(KUID nodeId);
 
     /**
      * Returns the Contact that has the provided KUID.
@@ -101,7 +100,7 @@ public interface Bucket extends Serializable {
     /**
      * Removes the Contact that has the provided KUID
      */
-    public boolean removeLiveContact(KUID nodeId);
+    public boolean removeActiveContact(KUID nodeId);
 
     /**
      * Removes the Contact that has the provided KUID
@@ -116,7 +115,7 @@ public interface Bucket extends Serializable {
     /**
      * Returns whether or not this Bucket contains a Contact with this KUID
      */
-    public boolean containsLiveContact(KUID nodeId);
+    public boolean containsActiveContact(KUID nodeId);
 
     /**
      * Returns whether or not this Bucket contains a Contact with this KUID
@@ -126,7 +125,7 @@ public interface Bucket extends Serializable {
     /**
      * Returns whether or not this Bucket is full
      */
-    public boolean isLiveFull();
+    public boolean isActiveFull();
 
     /**
      * Returns whether or not this Bucket is full
@@ -139,9 +138,9 @@ public interface Bucket extends Serializable {
     public boolean isTooDeep();
 
     /**
-     * Returns all live Contacts as List
+     * Returns all active Contacts as List
      */
-    public Collection<Contact> getLiveContacts();
+    public Collection<Contact> getActiveContacts();
 
     /**
      * Returns all cached Contacts as List
@@ -149,14 +148,14 @@ public interface Bucket extends Serializable {
     public Collection<Contact> getCachedContacts();
 
     /**
-     * Returns the least recently seen live Contact
+     * Returns the least recently seen active Contact
      */
-    public Contact getLeastRecentlySeenLiveContact();
+    public Contact getLeastRecentlySeenActiveContact();
 
     /**
-     * Returns the most recently seen live Contact
+     * Returns the most recently seen active Contact
      */
-    public Contact getMostRecentlySeenLiveContact();
+    public Contact getMostRecentlySeenActiveContact();
 
     /**
      * Returns the least recently seen cached Contact
@@ -184,9 +183,9 @@ public interface Bucket extends Serializable {
     public int size();
 
     /**
-     * Returns the number of live Contacts in the Bucket
+     * Returns the number of active Contacts in the Bucket
      */
-    public int getLiveSize();
+    public int getActiveSize();
     
     /**
      * Returns the number of cached Contacts in the Bucket

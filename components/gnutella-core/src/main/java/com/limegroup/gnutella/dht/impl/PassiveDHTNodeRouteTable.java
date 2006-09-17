@@ -106,7 +106,7 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
                 removed = bucket.removeCachedContact(mrs.getNodeID());
                 assert (removed == true);
                 
-                bucket.addLiveContact(mrs);
+                bucket.addActiveContact(mrs);
             }
         }
     }

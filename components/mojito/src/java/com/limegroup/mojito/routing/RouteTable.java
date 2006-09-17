@@ -62,10 +62,10 @@ public interface RouteTable extends Serializable {
      * 
      * @param nodeId the lookup KUID
      * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)
-     * @param liveContacts whether or not only live Contacts should be in the result set
+     * @param aliveContacts whether or not only alive Contacts should be in the result set
      * @return list of Contacts sorted by closeness
      */
-    public List<Contact> select(KUID nodeId, int count, boolean liveContacts);
+    public List<Contact> select(KUID nodeId, int count, boolean aliveContacts);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided
@@ -81,7 +81,7 @@ public interface RouteTable extends Serializable {
     /**
      * Returns Contacts that are actively used for routing
      */
-    public List<Contact> getLiveContacts();
+    public List<Contact> getActiveContacts();
     
     /**
      * Returns cached Contacts that are in the replacement cache

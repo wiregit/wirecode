@@ -127,7 +127,7 @@ public class BootstrapManagerTest extends BaseTestCase {
         BootstrapEvent evt = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getContactAddress()).get();
         assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
         //see if RT was purged
-        assertNotContains(rt.getLiveContacts(), node);
+        assertNotContains(rt.getActiveContacts(), node);
     }
 
     public void testBootstrapFromInvalidHostList() throws Exception {

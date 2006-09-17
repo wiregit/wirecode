@@ -171,7 +171,7 @@ abstract class AbstractDHTController implements DHTController {
     protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
         Context dhtContext = (Context)dht; 
         List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
-                dhtContext.getRouteTable().getLiveContacts(), numNodes + 1); //it will add the local node!
+                dhtContext.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
         
         KUID localNode = dhtContext.getLocalNodeID();
         List<IpPort> ipps = new ArrayList<IpPort>();

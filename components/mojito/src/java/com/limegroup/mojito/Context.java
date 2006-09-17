@@ -284,7 +284,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             
             synchronized (routeTable) {
                 // Backup the current Node ID and all live Contacts
-                List<Contact> backup = new ArrayList<Contact>(routeTable.getLiveContacts());
+                List<Contact> backup = new ArrayList<Contact>(routeTable.getActiveContacts());
                 backup.remove(localNode);
                 
                 // Change the Node ID

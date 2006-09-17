@@ -498,7 +498,7 @@ public class RouteTableTest extends BaseTestCase {
         }
         
         assertEquals(18, routeTable.getBuckets().size());
-        assertEquals(332, routeTable.getLiveContacts().size());
+        assertEquals(332, routeTable.getActiveContacts().size());
         assertEquals(158, routeTable.getCachedContacts().size());
         assertEquals(PING_NODE_IDS.length, toPing.size());
     }
@@ -557,7 +557,7 @@ public class RouteTableTest extends BaseTestCase {
             assertEquals(nodeId, node1.getNodeID());
             
             Bucket b = routeTable.getBucket(nodeId);
-            Contact node2 = b.getLiveContact(nodeId);
+            Contact node2 = b.getActiveContact(nodeId);
             assertEquals(node1, node2);
         }
         
@@ -654,7 +654,7 @@ public class RouteTableTest extends BaseTestCase {
      * designs!
      */
     public void testRouteTableVsPatricia() throws Exception {
-        List<Contact> nodes = routeTable.getLiveContacts();
+        List<Contact> nodes = routeTable.getActiveContacts();
         PatriciaTrie<KUID, Contact> trie = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
         
         for (Contact node : nodes) {

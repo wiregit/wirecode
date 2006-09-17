@@ -125,7 +125,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             FILE.delete();
         }
         
-        List<Contact> contacts = limeDHTRouteTable.getLiveContacts(); 
+        List<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
             FileOutputStream out = null;
             try {

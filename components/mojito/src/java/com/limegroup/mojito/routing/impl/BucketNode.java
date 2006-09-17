@@ -88,9 +88,9 @@ class BucketNode implements Bucket {
         return timeStamp;
     }
     
-    public void addLiveContact(Contact node) {
+    public void addActiveContact(Contact node) {
         checkNodeID(node);
-        assert (isLiveFull() == false);
+        assert (isActiveFull() == false);
         
         Contact existing = nodeTrie.put(node.getNodeID(), node);
         assert (existing == null);
@@ -124,7 +124,7 @@ class BucketNode implements Bucket {
         checkNodeID(node);
         
         KUID nodeId = node.getNodeID();
-        if (containsLiveContact(nodeId)) {
+        if (containsActiveContact(nodeId)) {
             return nodeTrie.put(nodeId, node);
         } else if (containsCachedContact(nodeId)) {
             return cache.put(nodeId, node);
@@ -149,14 +149,14 @@ class BucketNode implements Bucket {
     }
     
     public Contact get(KUID nodeId) {
-        Contact node = getLiveContact(nodeId);
+        Contact node = getActiveContact(nodeId);
         if (node == null) {
             node = getCachedContact(nodeId);
         }
         return node;
     }
     
-    public Contact getLiveContact(KUID nodeId) {
+    public Contact getActiveContact(KUID nodeId) {
         return nodeTrie.get(nodeId);
     }
     
@@ -173,14 +173,14 @@ class BucketNode implements Bucket {
     }
     
     public boolean remove(KUID nodeId) {
-        if (removeLiveContact(nodeId)) {
+        if (removeActiveContact(nodeId)) {
             return true;
         } else {
             return removeCachedContact(nodeId);
         }
     }
     
-    public boolean removeLiveContact(KUID nodeId) {
+    public boolean removeActiveContact(KUID nodeId) {
         return nodeTrie.remove(nodeId) != null;
     }
     
@@ -196,14 +196,14 @@ class BucketNode implements Bucket {
     }
     
     public boolean contains(KUID nodeId) {
-        if (containsLiveContact(nodeId)) {
+        if (containsActiveContact(nodeId)) {
             return true;
         } else {
             return containsCachedContact(nodeId);
         }
     }
     
-    public boolean containsLiveContact(KUID nodeId) {
+    public boolean containsActiveContact(KUID nodeId) {
         return nodeTrie.containsKey(nodeId);
     }
     
@@ -211,7 +211,7 @@ class BucketNode implements Bucket {
         return cache.containsKey(nodeId);
     }
     
-    public boolean isLiveFull() {
+    public boolean isActiveFull() {
         return nodeTrie.size() >= KademliaSettings.REPLICATION_PARAMETER.getValue();
     }
     
@@ -223,7 +223,7 @@ class BucketNode implements Bucket {
         return depth % RouteTableSettings.DEPTH_LIMIT.getValue() == 0;
     }
     
-    public Collection<Contact> getLiveContacts() {
+    public Collection<Contact> getActiveContacts() {
         return nodeTrie.values();
     }
     
@@ -231,7 +231,7 @@ class BucketNode implements Bucket {
         return cache.values();
     }
     
-    public Contact getLeastRecentlySeenLiveContact() {
+    public Contact getLeastRecentlySeenActiveContact() {
         final Contact[] leastRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
@@ -246,7 +246,7 @@ class BucketNode implements Bucket {
         return leastRecentlySeen[0];
     }
     
-    public Contact getMostRecentlySeenLiveContact() {
+    public Contact getMostRecentlySeenActiveContact() {
         final Contact[] mostRecentlySeen = new Contact[]{ null };
         nodeTrie.traverse(new Cursor<KUID, Contact>() {
             public SelectStatus select(Map.Entry<? extends KUID, ? extends Contact> entry) {
@@ -269,11 +269,11 @@ class BucketNode implements Bucket {
             }
         }
         
-        if(!isLiveFull() && !cache.isEmpty()) {
+        if(!isActiveFull() && !cache.isEmpty()) {
             // The cache Map is in LRS order. Add the Contacts to a List and 
             // iterate it backwards so that we get the elements in MRS order.
             List<Contact> contacts = new ArrayList<Contact>(getCachedContacts());
-            for(int i = contacts.size()-1; i>=0 && !isLiveFull(); i--) {
+            for(int i = contacts.size()-1; i>=0 && !isActiveFull(); i--) {
                 Contact node = contacts.get(i);
                 if(node.isAlive()) {
                     nodeTrie.put(node.getNodeID(), node);
@@ -310,12 +310,12 @@ class BucketNode implements Bucket {
         Bucket left = new BucketNode(routeTable, bucketId, depth+1);
         Bucket right = new BucketNode(routeTable, bucketId.set(depth), depth+1);
         
-        for (Contact node : getLiveContacts()) {
+        for (Contact node : getActiveContacts()) {
             KUID nodeId = node.getNodeID();
             if (!nodeId.isBitSet(depth)) {
-                left.addLiveContact(node);
+                left.addActiveContact(node);
             } else {
-                right.addLiveContact(node);
+                right.addActiveContact(node);
             }
         }
         
@@ -324,10 +324,10 @@ class BucketNode implements Bucket {
     }
     
     public int size() {
-        return getLiveSize() + getCacheSize();
+        return getActiveSize() + getCacheSize();
     }
     
-    public int getLiveSize() {
+    public int getActiveSize() {
         return nodeTrie.size();
     }
     
@@ -379,10 +379,10 @@ class BucketNode implements Bucket {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(bucketId).append(" (depth=").append(getDepth())
-            .append(", live=").append(getLiveSize())
+            .append(", live=").append(getActiveSize())
             .append(", cache=").append(getCacheSize()).append(")\n");
         
-        Iterator<Contact> it = getLiveContacts().iterator();
+        Iterator<Contact> it = getActiveContacts().iterator();
         for(int i = 0; it.hasNext(); i++) {
             buffer.append(" ").append(i).append(": ").append(it.next()).append("\n");
         }

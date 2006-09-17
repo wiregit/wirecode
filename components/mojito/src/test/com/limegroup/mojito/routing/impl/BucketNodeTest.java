@@ -65,7 +65,7 @@ public class BucketNodeTest extends BaseTestCase {
         
         //try purging bucket with only local node
         bucket.purge();
-        assertTrue("should contain local node", bucket.getLiveContacts().contains(localNode));
+        assertTrue("should contain local node", bucket.getActiveContacts().contains(localNode));
         
         SocketAddress address = new InetSocketAddress("localhost", 2000);
         
@@ -73,31 +73,31 @@ public class BucketNodeTest extends BaseTestCase {
         Contact node = ContactFactory.createUnknownContact(
                 vendor, version, KUID.createRandomID(), address);
         
-        bucket.addLiveContact(node);
+        bucket.addActiveContact(node);
         Contact node2 = new ContactNode(address, vendor, version, 
                 KUID.createRandomID(), address, 0, false, State.DEAD);
         
-        bucket.addLiveContact(node2);
-        assertEquals(bucket.getLiveContacts().size(), 3);
+        bucket.addActiveContact(node2);
+        assertEquals(bucket.getActiveContacts().size(), 3);
         bucket.purge();
-        assertTrue("should contain local node", bucket.getLiveContacts().contains(localNode));
-        assertEquals(bucket.getLiveContacts().size(), 1);
+        assertTrue("should contain local node", bucket.getActiveContacts().contains(localNode));
+        assertEquals(bucket.getActiveContacts().size(), 1);
         //now add cached node
         node = ContactFactory.createUnknownContact(
                 vendor, version, KUID.createRandomID(), address);
         
-        bucket.addLiveContact(node);
+        bucket.addActiveContact(node);
         node2 = new ContactNode(address, vendor, version, 
                 KUID.createRandomID(), address, 0, false, State.DEAD);
-        bucket.addLiveContact(node2);
+        bucket.addActiveContact(node2);
         
         Contact node3 = new ContactNode(address, vendor, version, 
                 KUID.createRandomID(), address, 0, false, State.ALIVE);
         bucket.addCachedContact(node3);
         
-        assertEquals(bucket.getLiveContacts().size(), 3);
+        assertEquals(bucket.getActiveContacts().size(), 3);
         bucket.purge();
-        assertTrue(bucket.getLiveContacts().contains(node3));
+        assertTrue(bucket.getActiveContacts().contains(node3));
         assertFalse(bucket.getCachedContacts().contains(node3));
         
     }

@@ -69,7 +69,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         rt = context.getRouteTable();
         assertNotEquals(nodeID, context.getLocalNodeID());
         assertFalse(context.getRouteTable().select(nodeID).equals(localContact));
-        assertEquals(numPersistedNodes, context.getRouteTable().getLiveContacts().size());
+        assertEquals(numPersistedNodes, context.getRouteTable().getActiveContacts().size());
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
@@ -90,7 +90,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             Thread.sleep(300);
         }
         assertTrue(rt.hasDHTLeaves());
-        assertEquals(rt.getDHTLeaves().size(), rt.getLiveContacts().size() - 1); //minus local node
+        assertEquals(rt.getDHTLeaves().size(), rt.getActiveContacts().size() - 1); //minus local node
         //try removing nodes
         assertNotNull(controller.removeLeafDHTNode("localhost",2000));
         assertNotNull(controller.removeLeafDHTNode("localhost",2015));
@@ -99,7 +99,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2015)));
         assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
         //see if removed from the DHT RT
-        assertEquals(19, rt.getLiveContacts().size());
+        assertEquals(19, rt.getActiveContacts().size());
         //getActive nodes should return leaf nodes
         List<IpPort> l = controller.getActiveDHTNodes(30);
         //and not local node
