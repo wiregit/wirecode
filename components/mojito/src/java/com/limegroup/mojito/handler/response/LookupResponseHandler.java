@@ -81,8 +81,14 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /** The number of responses we have received */
     private int responseCount = 0;
     
-    /** The number of failed queries */
-    private int failures = 0;
+    /** The number of Nodes from our RouteTable that failed  */
+    private int routeTableFailures = 0;
+    
+    /** The k-closest IDs we selected to start the lookup */
+    private Set<KUID> routeTableNodes = new HashSet<KUID>();
+    
+    /** The total number of failed lookups */
+    private int totalFailures = 0;
     
     /** The time when this lookup was started */
     private long startTime = -1L;
@@ -159,11 +165,17 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     /**
-     * Return the number of failures
-     * 
+     * Returns the number of Nodes from our RouteTable that failed
      */
-    protected int getFailures() {
-        return failures;
+    protected int getRouteTableFailures() {
+        return routeTableFailures;
+    }
+    
+    /**
+     * Return the total number of failures
+     */
+    protected int getTotalFailures() {
+        return totalFailures;
     }
     
     @Override
@@ -183,6 +195,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         List<Contact> nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         for(Contact node : nodes) {
             addYetToBeQueried(node, currentHop+1);
+            routeTableNodes.add(node.getNodeID());
         }
         
         // Mark the local node as queried 
@@ -333,7 +346,12 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             hop = new Integer(0);
         }
         
-        failures++;
+        if (routeTableNodes.contains(nodeId)) {
+            routeTableFailures++;
+        }
+        
+        totalFailures++;
+        
         currentHop = hop.intValue();
         nextLookupStep();
         finishIfDone();
