@@ -306,7 +306,7 @@ public class UDPHostCacheTest extends BaseTestCase {
     
     public void testRecordingFailuresAndSuccesses() throws Exception {
         assertEquals(0, cache.getSize());
-        UDPPinger.LISTEN_EXPIRE_TIME = 3 * 1000;
+        UDPPinger.DEFAULT_LISTEN_EXPIRE_TIME = 3 * 1000;
         cache.doRealFetch = true;
         
         ExtendedEndpoint e1 = create("1.2.3.4");
