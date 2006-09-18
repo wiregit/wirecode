@@ -379,7 +379,7 @@ class BucketNode implements Bucket {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(bucketId).append(" (depth=").append(getDepth())
-            .append(", live=").append(getActiveSize())
+            .append(", active=").append(getActiveSize())
             .append(", cache=").append(getCacheSize()).append(")\n");
         
         Iterator<Contact> it = getActiveContacts().iterator();

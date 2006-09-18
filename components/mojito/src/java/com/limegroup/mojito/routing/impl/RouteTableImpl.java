@@ -692,7 +692,7 @@ public class RouteTableImpl implements RouteTable {
         }
         
         buffer.append("Total Buckets: ").append(bucketTrie.size()).append("\n");
-        buffer.append("Total Live Contacts: ").append(getActiveContacts().size()).append("\n");
+        buffer.append("Total Active Contacts: ").append(getActiveContacts().size()).append("\n");
         buffer.append("Total Cached Contacts: ").append(getCachedContacts().size()).append("\n");
         return buffer.toString();
     }
