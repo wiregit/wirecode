@@ -36,7 +36,10 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * An implementation of Contact
+ * The ContactNode class implements the Contact interface 
+ * and encapsulates all requires info of a remote Node.
+ * 
+ * TODO: Rename this class to RemoteContact?
  */
 public class ContactNode implements Contact {
     
@@ -44,41 +47,42 @@ public class ContactNode implements Contact {
 
     private static final Log LOG = LogFactory.getLog(ContactNode.class);
     
+    /** This Contact's Node ID */
     private KUID nodeId;
     
+    /** The Vendor code of this Contact */
     private int vendor;
     
+    /** The Version of this Contact */
     private int version;
     
+    /** The instance ID of this Contact */
     private int instanceId;
     
+    /** The IP:Port of the Contact as reported in the IP Packet */
     private transient SocketAddress sourceAddress;
     
+    /** The IP:Port of the Contact as reported in the DHTMessage */
     private SocketAddress contactAddress;
     
+    /** The Rount Trip Time (RTT) */
     private transient long rtt = -1L;
     
+    /** The time of the last successful contact */
     private long timeStamp = 0L;
     
+    /** The time of the last unseccessful contact  */
     private long lastFailedTime = 0L;
     
+    /** The number of errors that have occured */
     private int failures = 0;
     
+    /** The current state of the Node */
     private transient State state = State.UNKNOWN;
     
+    /** Whether or not this Node is firewalled */
     private boolean firewalled = false;
     
-    /**
-     * 
-     * @param sourceAddress
-     * @param vendor
-     * @param version
-     * @param nodeId
-     * @param contactAddress
-     * @param instanceId
-     * @param firewalled
-     * @param state
-     */
     public ContactNode(SocketAddress sourceAddress, int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress, 
             int instanceId, boolean firewalled, State state) {
