@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,6 +37,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -227,8 +229,21 @@ public class FindValueEvent implements Iterable<DHTValue> {
 
         @Override
         protected void response(ResponseMessage message, long time) throws IOException {
-            Collection<DHTValue> values = ((FindValueResponse)message).getValues();
-            setReturnValue(values);
+            if (message instanceof FindValueResponse) {
+                Collection<DHTValue> values = ((FindValueResponse)message).getValues();
+                setReturnValue(values);
+                
+            // Imagine the following case: We do a lookup for a value 
+            // on the 59th minute and start retrieving the values on 
+            // the 60th minute. As values expire on the 60th minute 
+            // it may no longer exists and the remote Node returns us
+            // a Set of the k-closest Nodes instead.
+            } else if (message instanceof FindNodeResponse) {
+                Collection<DHTValue> values = Collections.emptyList();
+                setReturnValue(values);
+            } else {
+                setException(new IllegalArgumentException(message.toString()));
+            }
         }
         
         @Override
