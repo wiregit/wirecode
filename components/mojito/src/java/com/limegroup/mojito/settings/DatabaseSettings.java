@@ -20,7 +20,6 @@
 package com.limegroup.mojito.settings;
 
 import com.limegroup.gnutella.settings.BooleanSetting;
-import com.limegroup.gnutella.settings.FloatSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -54,13 +53,6 @@ public final class DatabaseSettings extends MojitoProps {
     public static final LongSetting VALUE_EXPIRATION_TIME
         = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L* 1000L, 
                 "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L); //1 hour
-    
-    /**
-     * A multiplication factor in which
-     */
-    public static final FloatSetting NOT_NEARBY_EXPIRATION_TIME_RATIO
-        = FACTORY.createSettableFloatSetting("NOT_NEARBY_EXPIRATION_TIME_RATIO", 0.5F, 
-                "not_nearby_expiration_time_ratio", 0.01F, 1.0F); // expires 50% faster 
     
     /**
      * The lower bound republishing interval for a DHTValue. That

@@ -51,9 +51,9 @@ public final class RouteTableSettings extends MojitoProps {
      * The maximum number of errors that may occur before an
      * alive Contact is considered as dead.
      */
-    public static final IntSetting MAX_LIVE_NODE_FAILURES
-        = FACTORY.createSettableIntSetting("MAX_LIVE_NODE_FAILURES", 4, 
-                "max_live_node_failures", 4, 10);
+    public static final IntSetting MAX_ALIVE_NODE_FAILURES
+        = FACTORY.createSettableIntSetting("MAX_ALIVE_NODE_FAILURES", 4, 
+                "max_alive_node_failures", 4, 10);
    
     /**
      * The maximum number of errors that may occur before an
@@ -72,9 +72,10 @@ public final class RouteTableSettings extends MojitoProps {
                 "min_reconnect_time", 0, 5L*60L*1000L);
     
     /**
-     * The symbol size, i.e. the number of bits improved at each step
+     * The symbol size, i.e. the number of bits improved at each step.
+     * Also known as parameter B
      */
-    public static final IntSetting DEPTH_LIMIT //a.k.a B
+    public static final IntSetting DEPTH_LIMIT
         = FACTORY.createSettableIntSetting("DEPTH_LIMIT", 4, "depth_limit", 1, 16);
     
     /**

@@ -280,7 +280,7 @@ public class ContactNode implements Contact {
         
         // Node has ever been alive?
         if (getTimeStamp() > 0L) {
-            if (failures >= RouteTableSettings.MAX_LIVE_NODE_FAILURES.getValue()) {
+            if (failures >= RouteTableSettings.MAX_ALIVE_NODE_FAILURES.getValue()) {
                 state = State.DEAD;
             }
         } else {

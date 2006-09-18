@@ -20,7 +20,6 @@
 package com.limegroup.mojito.settings;
 
 import com.limegroup.gnutella.settings.BooleanSetting;
-import com.limegroup.gnutella.settings.FloatSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -84,13 +83,6 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final IntSetting MAX_BOOTSTRAP_FAILURES
         = FACTORY.createIntSetting("MAX_BOOTSTRAP_FAILURES", 40);
-    
-    /**
-     * The ratio of nodes that have to respond to a bootstrap lookup
-     * Used to discover stale routing tables
-     */
-    public static final FloatSetting BOOTSTRAP_RATIO
-    	= FACTORY.createFloatSetting("BOOTSTRAP_RATIO", 0.5F);
     
     /**
      * The maximum number of parallel store requests

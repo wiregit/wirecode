@@ -74,6 +74,7 @@ import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
@@ -405,7 +406,9 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
         
         if (database == null) {
-            database = new DatabaseImpl();
+            database = new DatabaseImpl(
+                    DatabaseSettings.MAX_DATABASE_SIZE.getValue(), 
+                    DatabaseSettings.MAX_VALUES_PER_KEY.getValue());
             
         } else {
             purgeDatabase(remove);
