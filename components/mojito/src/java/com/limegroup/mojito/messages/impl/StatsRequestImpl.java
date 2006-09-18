@@ -37,14 +37,14 @@ import com.limegroup.mojito.messages.StatsRequest;
 public class StatsRequestImpl extends AbstractRequestMessage
         implements StatsRequest {
 
-    private int request;
+    private Type request;
     
     private int secureStatus = INSECURE;
     
     private byte[] signature;
     
     public StatsRequestImpl(Context context, 
-            Contact contact, MessageID messageId, int request) {
+            Contact contact, MessageID messageId, Type request) {
         super(context, OpCode.STATS_REQUEST, contact, messageId);
 
         this.request = request;
@@ -55,11 +55,11 @@ public class StatsRequestImpl extends AbstractRequestMessage
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.STATS_REQUEST, src, messageId, version, in);
         
-        this.request = in.readUnsignedByte();
+        this.request = in.readStatsType();
         this.signature = in.readSignature();
     }
     
-    public int getRequest() {
+    public Type getType() {
         return request;
     }
 
@@ -85,7 +85,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeByte(request);
+        out.writeStatsType(request);
         out.writeSignature(signature);
     }
     

@@ -21,7 +21,13 @@ package com.limegroup.mojito.messages;
 
 import com.limegroup.mojito.KUID;
 
+/**
+ * An interface for LookupRequest implementations
+ */
 public interface LookupRequest extends RequestMessage {
     
+    /**
+     * The ID we're looking for
+     */
     public KUID getLookupID();
 }

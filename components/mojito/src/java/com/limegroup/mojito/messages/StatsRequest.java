@@ -19,11 +19,57 @@
  
 package com.limegroup.mojito.messages;
 
+/**
+ * An interface for StatsRequest implementations
+ */
 public interface StatsRequest extends RequestMessage, DHTSecureMessage {
 
-    public static final int STATS = 0x00;
-    public static final int DB = 0x01;
-    public static final int RT = 0x02;
-
-    public int getRequest();
+    /**
+     * Various types of statistic requests
+     */
+    public static enum Type {
+        STATISTICS(0x01),
+        DATABASE(0x02),
+        ROUTETABLE(0x03);
+        
+        private int type;
+        
+        private Type(int type) {
+            this.type = type;
+        }
+        
+        public int toByte() {
+            return type;
+        }
+        
+        private static final Type[] TYPES;
+        
+        static {
+            Type[] types = values();
+            TYPES = new Type[types.length];
+            for (Type t : types) {
+                int index = t.type % TYPES.length;
+                if (TYPES[index] != null) {
+                    throw new IllegalStateException("Type collision: index=" + index 
+                            + ", TYPE=" + TYPES[index] + ", t=" + t);
+                }
+                TYPES[index] = t;
+            }
+        }
+        
+        public static Type valueOf(int type) throws MessageFormatException {
+            int index = type % TYPES.length;
+            Type t = TYPES[index];
+            if (t.type == type) {
+                return t;
+            }
+            
+            throw new MessageFormatException("Unknown type: " + type);
+        }
+    }
+    
+    /**
+     * Returns the Type of the request
+     */
+    public Type getType();
 }

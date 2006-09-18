@@ -24,8 +24,15 @@ import java.util.Map.Entry;
 
 import com.limegroup.mojito.KUID;
 
+/**
+ * An interface for StoreResponse implementations
+ */
 public interface StoreResponse extends ResponseMessage {
 
+    /**
+     * The Status tells whether or not the remote 
+     * Node was able to store a DHTValue
+     */
     public static enum Status {
         FAILED(0x01),
         SUCCEEDED(0x02);
@@ -36,7 +43,7 @@ public interface StoreResponse extends ResponseMessage {
             this.status = status;
         }
         
-        public int getStatus() {
+        public int toByte() {
             return status;
         }
         
@@ -49,8 +56,8 @@ public interface StoreResponse extends ResponseMessage {
                 int index = s.status % STATUS.length;
                 if (STATUS[index] != null) {
                     // Check the enums for duplicate states
-                    throw new IllegalStateException("StoreStatus collision: index=" + index 
-                            + ", STORESTATUS=" + STATUS[index] + ", o=" + s);
+                    throw new IllegalStateException("Status collision: index=" + index 
+                            + ", STATUS=" + STATUS[index] + ", s=" + s);
                 }
                 STATUS[index] = s;
             }
@@ -65,5 +72,8 @@ public interface StoreResponse extends ResponseMessage {
         }
     }
     
+    /**
+     * Returns a Collection of KUID-Status Tuples.
+     */
     public Collection<Entry<KUID, Status>> getStatus();
 }

@@ -223,7 +223,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Make sure the forcedContact is in the alpha list
         if (forcedContact != null 
                 && !alphaList.contains(forcedContact)
-                && !forcedContact.equals(context.getLocalNode())) {
+                && !context.isLocalNode(forcedContact)) {
             
             alphaList.add(0, forcedContact);
             hopMap.put(forcedContact.getNodeID(), currentHop+1);

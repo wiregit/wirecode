@@ -61,19 +61,19 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         networkStats.STATS_REQUEST.incrementStat();
         StringWriter writer = new StringWriter();
         
-        switch(request.getRequest()) {
-            case StatsRequest.STATS:
+        switch(request.getType()) {
+            case STATISTICS:
                 context.getDHTStats().dump(writer, false);
                 break;
-            case StatsRequest.DB:
+            case DATABASE:
                 writer.write(context.getDatabase().toString());
                 break;
-            case StatsRequest.RT:
+            case ROUTETABLE:
                 writer.write(context.getRouteTable().toString());
                 break;
             default:
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Unknown stats request: " + request.getRequest());
+                    LOG.error("Unknown stats request: " + request.getType());
                 }
                 return;
                 

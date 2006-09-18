@@ -24,9 +24,20 @@ import java.util.Collection;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.db.DHTValue;
 
+/**
+ * An interface for StoreRequest implementations
+ */
 public interface StoreRequest extends RequestMessage {
 
+    /**
+     * The QueryKey the remote Node is using to store
+     * the DHTValue(s) at our Node.
+     */
     public QueryKey getQueryKey();
 
+    /**
+     * A Collection of DHTValue(s) we're supposed to
+     * store at our Node
+     */
     public Collection<DHTValue> getDHTValues();
 }

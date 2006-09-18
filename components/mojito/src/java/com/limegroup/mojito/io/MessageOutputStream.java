@@ -35,6 +35,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
+import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 
 /**
@@ -163,11 +164,15 @@ public class MessageOutputStream extends DataOutputStream {
         writeByte(opcode.getOpCode());
     }
     
+    public void writeStatsType(Type type) throws IOException {
+        writeByte(type.toByte());
+    }
+    
     public void writeStoreStatus(Collection<? extends Entry<KUID, Status>> status) throws IOException {
         writeCollectionSize(status);
         for (Entry<KUID, Status> e : status) {
             writeKUID(e.getKey());
-            writeByte(e.getValue().getStatus());
+            writeByte(e.getValue().toByte());
         }
     }
     

@@ -30,11 +30,14 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 
 /**
- * 
+ * The MessageHelper class simplifies the construction of DHTMessages.
+ * Except for some rare cases you want to use the MessageHelper instead of
+ * the MessageFactory
  */
 public class MessageHelper {
 
@@ -120,9 +123,8 @@ public class MessageHelper {
         return factory.createStoreResponse(getLocalNode(), request.getMessageID(), status);
     }
 
-    public StatsRequest createStatsRequest(SocketAddress dst, int request) {
-        return factory.createStatsRequest(getLocalNode(), createMessageID(dst), 
-                request);
+    public StatsRequest createStatsRequest(SocketAddress dst, Type request) {
+        return factory.createStatsRequest(getLocalNode(), createMessageID(dst), request);
     }
 
     public StatsResponse createStatsResponse(RequestMessage request, String statistics) {

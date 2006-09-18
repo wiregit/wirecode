@@ -21,7 +21,13 @@ package com.limegroup.mojito.messages;
 
 import com.limegroup.gnutella.messages.SecureMessage;
 
+/**
+ * The DHTSecureMessage interface allows a DHTMessage to be secured
+ */
 public interface DHTSecureMessage extends SecureMessage {
     
+    /**
+     * Returns true if this message is secure
+     */
     public boolean isSecure();
 }

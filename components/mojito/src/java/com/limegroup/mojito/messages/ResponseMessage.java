@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+/**
+ * An interface for ResponseMessage implementations
+ */
 public interface ResponseMessage extends DHTMessage {
     
 }

@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+/**
+ * An interface for LookupResponse implementations
+ */
 public interface LookupResponse extends ResponseMessage {
     
 }

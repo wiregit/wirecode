@@ -24,9 +24,21 @@ import java.util.Collection;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 
+/**
+ * An interface for FindNodeResponse implementations
+ */
 public interface FindNodeResponse extends LookupResponse {
 
+    /**
+     * Returns the remote Node's QueryKey we're supposted to
+     * use if we're planning to store values at the remote
+     * Node for example
+     */
     public QueryKey getQueryKey();
 
+    /**
+     * Returns the k-closest (or less) Node's to the
+     * KUID we were looking for
+     */
     public Collection<Contact> getNodes();
 }

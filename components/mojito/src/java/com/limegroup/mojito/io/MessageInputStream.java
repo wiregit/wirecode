@@ -38,6 +38,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.util.EntryImpl;
@@ -213,6 +214,10 @@ public class MessageInputStream extends DataInputStream {
         byte[] statistics = new byte[length];
         readFully(statistics);
         return statistics;
+    }
+    
+    public Type readStatsType() throws IOException {
+        return Type.valueOf(readUnsignedByte());
     }
     
     @SuppressWarnings("unchecked")

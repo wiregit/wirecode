@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+/**
+ * An interface for PingRequest implementations
+ */
 public interface PingRequest extends RequestMessage {
 
 }

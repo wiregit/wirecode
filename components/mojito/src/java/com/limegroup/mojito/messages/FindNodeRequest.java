@@ -19,6 +19,9 @@
  
 package com.limegroup.mojito.messages;
 
+/**
+ * An interface for FindNodeRequest implementations
+ */
 public interface FindNodeRequest extends LookupRequest {
     
 }

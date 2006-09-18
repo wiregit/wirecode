@@ -24,10 +24,18 @@ import java.util.Collection;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 
-
+/**
+ * An interface for FindValueResponse implementations
+ */
 public interface FindValueResponse extends LookupResponse {
     
+    /**
+     * Returns a Collection of KUIDs that a Node has to offer
+     */
     public Collection<KUID> getKeys();
     
+    /**
+     * Returns a Collection of DHTValue(s)
+     */
     public Collection<DHTValue> getValues();
 }
