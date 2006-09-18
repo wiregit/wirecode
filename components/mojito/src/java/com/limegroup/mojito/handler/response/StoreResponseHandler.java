@@ -156,6 +156,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         } else {
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, valueId);
+            handler.setFullLiveNodesLookup(true);
             List<Entry<Contact,QueryKey>> nodes = handler.call().getNodes();
             
             for (Entry<Contact,QueryKey> entry : nodes) {
