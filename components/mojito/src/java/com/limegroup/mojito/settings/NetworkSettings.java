@@ -62,7 +62,7 @@ public final class NetworkSettings extends MojitoProps {
      * The maximum size of a serialized message
      */
     public static final IntSetting MAX_MESSAGE_SIZE
-        = FACTORY.createSettableIntSetting("MAX_MESSAGE_SIZE", 1492, "max_message_size", 512, 64*1024);
+        = FACTORY.createIntSetting("MAX_MESSAGE_SIZE", 1492);
     
     /**
      * The cleanup rate for Receipts

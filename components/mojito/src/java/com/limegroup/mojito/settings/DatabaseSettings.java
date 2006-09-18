@@ -32,16 +32,13 @@ public final class DatabaseSettings extends MojitoProps {
     
     /**
      * The maximum number of Keys a single Node can store
-     * 
-     * TODO reasonable min and max values
      */
     public static final IntSetting MAX_DATABASE_SIZE
-        = FACTORY.createSettableIntSetting("MAX_DATABASE_SIZE", 16384, "max_database_size", 16384, 65536);
+        = FACTORY.createSettableIntSetting("MAX_DATABASE_SIZE", 16384, 
+                "max_database_size", 8192, 65536);
     
     /**
      * The maximum number of Values per Key a single Node can store
-     * 
-     * TODO reasonable min and max values
      */
     public static final IntSetting MAX_VALUES_PER_KEY
         = FACTORY.createSettableIntSetting("MAX_VALUES_PER_KEY", 5, 
@@ -51,8 +48,8 @@ public final class DatabaseSettings extends MojitoProps {
      * The time after a non-local value expires
      */
     public static final LongSetting VALUE_EXPIRATION_TIME
-        = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L* 1000L, 
-                "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L); //1 hour
+        = FACTORY.createSettableLongSetting("VALUE_EXPIRATION_TIME", 60L*60L*1000L, 
+                "value_expiration_time", 30L*60L*1000L, 24L*60L*60L*1000L);
     
     /**
      * The lower bound republishing interval for a DHTValue. That
@@ -64,12 +61,10 @@ public final class DatabaseSettings extends MojitoProps {
     
     /**
      * The republishing interval in milliseconds.
-     * 
-     * TODO reasonable min and max values
      */
     public static final LongSetting VALUE_REPUBLISH_INTERVAL
-        = FACTORY.createSettableLongSetting("VALUE_REPUBLISH_INTERVAL", VALUE_EXPIRATION_TIME.getValue()/2 , 
-                "value_republish_interval", 3L*60L*1000L, 3L*60L*1000L);
+        = FACTORY.createSettableLongSetting("VALUE_REPUBLISH_INTERVAL", 30L*60L*1000L, 
+                "value_republish_interval", 3L*60L*1000L, 24L*60L*60L*1000L);
     
     /**
      * The period of the DHTValuePublisher

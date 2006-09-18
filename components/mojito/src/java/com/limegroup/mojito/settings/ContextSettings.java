@@ -37,7 +37,7 @@ public class ContextSettings extends MojitoProps {
      * The time interval to compute the estimated Network size
      */
     public static final LongSetting ESTIMATE_NETWORK_SIZE_EVERY
-        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L * 1000L);
+        = FACTORY.createLongSetting("ESTIMATE_NETWORK_SIZE_EVERY", 60L*1000L);
     
     /**
      * The maximum number of locally estimated Network sizes to
