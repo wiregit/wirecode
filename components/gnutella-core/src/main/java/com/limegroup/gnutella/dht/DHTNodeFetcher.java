@@ -13,6 +13,7 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -52,6 +53,10 @@ public class DHTNodeFetcher {
     
     private AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
+    private UDPPinger pinger;
+    
+    private int pingExpireTime = -1;
+    
     public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
         this.bootstrapper = bootstrapper;
     }
@@ -60,6 +65,9 @@ public class DHTNodeFetcher {
      * Requests active DHT hosts from the Gnutella network. This method has to be 
      * synchronized because it can be called either directly by the manager
      * or by the timer task.
+     * 
+     * This method gets hosts from the HostCatcher and therefore uses the
+     * UniqueHostPinger of the HostCatcher in order to avoid pinging hosts twice.
      */
     private synchronized void requestDHTHosts() {
         
@@ -115,14 +123,14 @@ public class DHTNodeFetcher {
             LOG.debug("Sending ping to dht capable hosts");
             
             //we don't have active hosts but have hosts that support dht
-            RouterService.getHostCatcher().sendMessage(m, dhtHosts, 
-                    listener, canceller);
+            RouterService.getHostCatcher().getPinger().rank(dhtHosts, 
+                                                            listener, canceller, m);
         } else {
             
             LOG.debug("Sending ping to all hosts");
             
             //send to all hosts
-            RouterService.getHostCatcher().sendMessage(m, 
+            RouterService.getHostCatcher().sendMessageToAllHosts(m, 
                     listener, canceller);
         }
     }
@@ -148,8 +156,11 @@ public class DHTNodeFetcher {
             }
             
             Message m = PingRequest.createUDPingWithDHTIPPRequest();
-            RouterService.getHostCatcher().sendMessage(m, Arrays.asList(ipp), 
-                    new SinglePingRequestListener(), null);
+            
+            if(pinger == null) {
+                pinger = new UDPPinger();
+            }
+            pinger.rank(Arrays.asList(ipp), new SinglePingRequestListener(), null, m, pingExpireTime);
         }
     }
     
@@ -186,6 +197,10 @@ public class DHTNodeFetcher {
             }
             requestDHTHosts();
         }
+    }
+    
+    public void setPingExpireTime(int expireTime) {
+        pingExpireTime = expireTime;
     }
     
     private class UDPPingRankerCanceller implements Cancellable{

@@ -98,7 +98,7 @@ public class DHTSettings extends LimeProps{
     /**
      * Setting for the delay between DHT random node adder runs
      */
-    public static final LongSetting DHT_NODE_ADDER =
+    public static final LongSetting DHT_NODE_ADDER_DELAY =
         //30 minutes for now
         FACTORY.createSettableLongSetting("DHT_NODE_ADDER_TIME", 
                 30L * 60L * 1000L, "DHTSettings.DHTNodeAdderTime", 0L, 24L * 60L * 60L * 1000L); 

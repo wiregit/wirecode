@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -125,6 +124,31 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         assertInstanceof(PingRequest.class, m);
         ping = (PingRequest)m;
         assertTrue(ping.requestsDHTIPP());
+    }
+    
+    public void testRequestMultipleTimesFromSingleHost() throws Exception {
+        DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
+//      try to send a ping, unregister it and send another ping
+        nodeFetcher.setPingExpireTime(100);
+        //wait: LISTEN_EXPIRE_TIME is not volatile and a wrong value may be read otherwise
+        Thread.sleep(1000);  
+        byte[] datagramBytes = new byte[1000];
+        DatagramPacket pack = new DatagramPacket(datagramBytes, 1000);
+        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
+        nodeFetcher.requestDHTHosts(addr);
+        Thread.sleep(500);
+        datagramBytes = new byte[1000];
+        pack = new DatagramPacket(datagramBytes, 1000);
+        addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[2].getLocalPort());
+        nodeFetcher.requestDHTHosts(addr);
+        UDP_ACCESS[2].receive(pack);
+        InputStream in = new ByteArrayInputStream(pack.getData());
+        Message m = MessageFactory.read(in);
+        m.hop();
+        assertInstanceof(PingRequest.class, m);
+        PingRequest ping = (PingRequest)m;
+        assertTrue(ping.requestsDHTIPP());
+        
     }
     
     public void testAddHostCatcherActiveNodes() throws Exception {

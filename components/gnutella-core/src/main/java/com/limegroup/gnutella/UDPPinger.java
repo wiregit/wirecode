@@ -26,7 +26,7 @@ public class UDPPinger {
      *
      * Non-final for testing.
      */
-    public static int LISTEN_EXPIRE_TIME = 20 * 1000;
+    public static int DEFAULT_LISTEN_EXPIRE_TIME = 20 * 1000;
     
     /** Send pings every this often */
     private static final long SEND_INTERVAL = 500;
@@ -84,13 +84,30 @@ public class UDPPinger {
     }
 
     /**
+     * Ranks the specified <tt>Collection</tt> of hosts with the given
+     * MessageListener, Cancellable and Message.
+     * 
+     */
+    public void rank(final Collection<? extends IpPort> hosts,
+                            final MessageListener listener,
+                            Cancellable canceller,
+                            final Message message) {
+        rank(hosts, listener, canceller, message, -1);
+    }
+    
+    /**
      * Ranks the specified <tt>Collection</tt> of hosts.
+     * 
+     * If expireTime is < 0, the default expiry time for the message 
+     * is DEFAULT_LISTEN_EXPIRE_TIME
      * 
      * @param hosts the <tt>Collection</tt> of hosts to rank
      * @param listener a MessageListener if you want to spy on the message.  can
      * be null.
      * @param canceller a Cancellable that can short-circuit the sending
      * @param message the message to send, can be null. 
+     * @param expireTime The expiry time of the message. If this is < 0, takes the 
+     * DEFAULT_LISTEN_EXPIRE_TIME value.
      * @return a new <tt>UDPHostRanker</tt> instance
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt>
@@ -98,7 +115,8 @@ public class UDPPinger {
     public void rank(final Collection<? extends IpPort> hosts,
                             final MessageListener listener,
                             Cancellable canceller,
-                            final Message message) {
+                            final Message message,
+                            int expireTime) {
         if(hosts == null)
             throw new NullPointerException("null hosts not allowed");
         if(canceller == null) {
@@ -107,7 +125,18 @@ public class UDPPinger {
             };
         }
         
-        QUEUE.add(new SenderBundle(hosts, listener, canceller, message));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Adding hosts "+hosts+" with message: "+message+" to processing queue");
+        }
+        
+        SenderBundle bundle;
+        if(expireTime > 0) {
+            bundle = new SenderBundle(hosts, listener, canceller, message, expireTime);
+        } else {
+            bundle = new SenderBundle(hosts, listener, canceller, message, DEFAULT_LISTEN_EXPIRE_TIME);
+        }
+        
+        QUEUE.add(bundle);
     }
     
     /**
@@ -135,7 +164,7 @@ public class UDPPinger {
     protected void send(Collection<? extends IpPort> hosts, 
             final MessageListener listener,
             Cancellable canceller,
-            Message message) {
+            Message message, int expireTime) {
         
         // something went wrong with UDPService - don't try to send
         if (!waitForListening(canceller))
@@ -168,7 +197,7 @@ public class UDPPinger {
                 };
          
             // Purge after 20 seconds.
-            RouterService.schedule(udpMessagePurger, LISTEN_EXPIRE_TIME, 0);
+            RouterService.schedule(udpMessagePurger, expireTime, 0);
         }
     }
     
@@ -200,17 +229,19 @@ public class UDPPinger {
         private final MessageListener listener;
         private final Cancellable canceller;
         private final Message message;
-        
+        private final int expireTime;
+
         public SenderBundle(Collection<? extends IpPort> hosts, MessageListener listener,
-                      Cancellable canceller, Message message) {
+                Cancellable canceller, Message message, int expireTime) {
             this.hosts = hosts;
             this.listener = listener;
             this.canceller = canceller;
             this.message = message;
+            this.expireTime = expireTime;
         }
-        
+
         public void run() {
-            send(hosts,listener,canceller,message);
+            send(hosts,listener,canceller,message,expireTime);
         }
     }
 }

@@ -213,6 +213,9 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public void sendUpdatedCapabilities() {
+        
+        LOG.debug("Sending updated capabilities to our connections");
+        
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
     }
@@ -247,7 +250,7 @@ abstract class AbstractDHTController implements DHTController {
     
     /**
      * This class is used to fight against possible DHT clusters 
-     * by sending a Mojito ping to the last 30 DHT nodes seen in the Gnutella
+     * by periodicaly sending a Mojito ping to the last 30 DHT nodes seen in the Gnutella
      * network. It is effectively randomly adding them to the DHT routing table.
      * 
      */
@@ -259,7 +262,7 @@ abstract class AbstractDHTController implements DHTController {
         
         public RandomNodeAdder() {
             dhtNodes = new FixedSizeLIFOSet<SocketAddress>(30);
-            long delay = DHTSettings.DHT_NODE_ADDER.getValue();
+            long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
             RouterService.schedule(this, delay, delay);
         }
         
@@ -280,6 +283,11 @@ abstract class AbstractDHTController implements DHTController {
             
             synchronized(dhtNodes) {
                 for(SocketAddress addr : dhtNodes) {
+                    
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("RandomNodeAdder pinging: "+ addr);
+                    }
+                    
                     dht.ping(addr);
                 }
                 dhtNodes.clear();

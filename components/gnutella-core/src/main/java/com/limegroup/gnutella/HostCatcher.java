@@ -383,13 +383,8 @@ public class HostCatcher {
     }
     
     
-    public void sendMessage(Message m, MessageListener listener, Cancellable c) {
+    public void sendMessageToAllHosts(Message m, MessageListener listener, Cancellable c) {
         pinger.rank(getAllHosts(), listener, c, m);
-    }
-    
-    public void sendMessage(Message m, Collection<? extends IpPort> hosts , 
-            MessageListener listener, Cancellable c) {
-        pinger.rank(hosts, listener, c, m);
     }
     
     private synchronized Collection<ExtendedEndpoint> getAllHosts() {
