@@ -203,6 +203,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     @Override
     protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
-        throw new IOException("receive() is not implemented");
+        throw new IOException("send() is not implemented");
     }
 }

@@ -57,7 +57,9 @@ public interface DHTController {
      */
     public boolean isWaitingForNodes();
     
-    //TODO: remove! for testing only 
+    /**
+     * Returns the Mojito DHT instance
+     */
     MojitoDHT getMojitoDHT();
     
     /**
