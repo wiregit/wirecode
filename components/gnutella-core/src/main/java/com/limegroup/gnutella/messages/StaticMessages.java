@@ -18,6 +18,8 @@ import org.apache.commons.logging.Log;
  * MessageRouter.updateMessage() would call this if it got a query packet from LimeWire version 3.3 or earlier.
  * Reads a file named "data.ser", which is no longer used.
  * 
+ * "data.ser" contains the payload of a query hit message to send a very old LimeWire program, advertising the new version as a download.
+ * 
  * TODO:kfaaborg Remove this class.
  */
 public final class StaticMessages {
