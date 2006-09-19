@@ -16,7 +16,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
 public class ActiveDHTNodeControllerTest extends DHTTestCase {
@@ -56,7 +56,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         fillRoutingTable(rt, 10);
         //add one more
         KUID kuid = KUID.createRandomID();
-        ContactNode node = new ContactNode(
+        RemoteContact node = new RemoteContact(
                 new InetSocketAddress("localhost",4010),
                 ContextSettings.VENDOR.getValue(),
                 ContextSettings.VERSION.getValue(),

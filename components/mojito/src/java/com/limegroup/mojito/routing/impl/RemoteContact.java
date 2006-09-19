@@ -38,14 +38,12 @@ import com.limegroup.mojito.util.ContactUtils;
 /**
  * The ContactNode class implements the Contact interface 
  * and encapsulates all requires info of a remote Node.
- * 
- * TODO: Rename this class to RemoteContact?
  */
-public class ContactNode implements Contact {
+public class RemoteContact implements Contact {
     
     private static final long serialVersionUID = 833079992601013124L;
 
-    private static final Log LOG = LogFactory.getLog(ContactNode.class);
+    private static final Log LOG = LogFactory.getLog(RemoteContact.class);
     
     /** This Contact's Node ID */
     private KUID nodeId;
@@ -83,7 +81,7 @@ public class ContactNode implements Contact {
     /** Whether or not this Node is firewalled */
     private boolean firewalled = false;
     
-    public ContactNode(SocketAddress sourceAddress, int vendor, int version, 
+    public RemoteContact(SocketAddress sourceAddress, int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress, 
             int instanceId, boolean firewalled, State state) {
         

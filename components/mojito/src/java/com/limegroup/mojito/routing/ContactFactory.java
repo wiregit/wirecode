@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 
 /**
@@ -72,7 +72,7 @@ public class ContactFactory {
      */
     public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
             int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
-        return new ContactNode(sourceAddress, vendor, version, 
+        return new RemoteContact(sourceAddress, vendor, version, 
                 nodeId, contactAddress, instanceId, firewalled, State.ALIVE);
     }
     
@@ -86,7 +86,7 @@ public class ContactFactory {
      */
     public static Contact createUnknownContact(int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress) {
-        return new ContactNode(null, vendor, version, 
+        return new RemoteContact(null, vendor, version, 
                 nodeId, contactAddress, 0, false, State.UNKNOWN);
     }
 }

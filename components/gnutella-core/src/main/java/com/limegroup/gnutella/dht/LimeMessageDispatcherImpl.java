@@ -54,7 +54,7 @@ import com.limegroup.mojito.messages.impl.StatsRequestImpl;
 import com.limegroup.mojito.messages.impl.StatsResponseImpl;
 import com.limegroup.mojito.messages.impl.StoreRequestImpl;
 import com.limegroup.mojito.messages.impl.StoreResponseImpl;
-import com.limegroup.mojito.routing.impl.ContactNode;
+import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.security.CryptoHelper;
 
 /**
@@ -159,7 +159,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         ReceivedMessageStatHandler.UDP_DHT_MESSAGE.addMessage(msg);
         DHTMessage dhtMessage = (DHTMessage)msg;
-        ((ContactNode)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
+        ((RemoteContact)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
         
         try {
             handleMessage(dhtMessage);

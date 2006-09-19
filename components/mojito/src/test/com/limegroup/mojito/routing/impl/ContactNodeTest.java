@@ -26,7 +26,7 @@ public class ContactNodeTest extends BaseTestCase {
     
     public void testFixSourceAndContactAddress() {
         // External Port == 0 -> force firewalled if it isn't!
-        ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
+        RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 0), 0, false);
         
@@ -42,7 +42,7 @@ public class ContactNodeTest extends BaseTestCase {
         assertEquals(new InetSocketAddress("localhost", 1024), node1.getContactAddress());
         
         // External Port != 0 -> Contact Address = Source Address + external Port
-        ContactNode node2 = (ContactNode)ContactFactory.createLiveContact(
+        RemoteContact node2 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("dell.com", 2048), 0, false);
         
@@ -62,7 +62,7 @@ public class ContactNodeTest extends BaseTestCase {
     public void testUpdateWithExistingContact() {
         KUID nodeId = KUID.createRandomID();
         
-        ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
+        RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
@@ -72,7 +72,7 @@ public class ContactNodeTest extends BaseTestCase {
         node1.setRoundTripTime(100);
         node1.handleFailure();
         
-        ContactNode node2 = (ContactNode)ContactFactory.createLiveContact(
+        RemoteContact node2 = (RemoteContact)ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
@@ -94,7 +94,7 @@ public class ContactNodeTest extends BaseTestCase {
         
         // Make sure update works only with Contacts that have the same Node ID
         try {
-            ContactNode node4 = (ContactNode)ContactFactory.createLiveContact(
+            RemoteContact node4 = (RemoteContact)ContactFactory.createLiveContact(
                     new InetSocketAddress("localhost", 1024), 
                     0, 0, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2048), 
@@ -155,7 +155,7 @@ public class ContactNodeTest extends BaseTestCase {
         assertFalse(node2.isAlive());
         assertEquals(NetworkSettings.TIMEOUT.getValue(), node2.getAdaptativeTimeout());
         
-        ((ContactNode)node2).alive();
+        ((RemoteContact)node2).alive();
         assertTrue(node2.isAlive());
         
         node2.setRoundTripTime(NetworkSettings.MIN_TIMEOUT_RTT.getValue() - 500L);
@@ -167,7 +167,7 @@ public class ContactNodeTest extends BaseTestCase {
         InetSocketAddress contactAddress = new InetSocketAddress("216.244.101.15", 5000);
         InetSocketAddress externalAddress = new InetSocketAddress("216.244.101.16", 5000);
         
-        ContactNode node1 = (ContactNode)ContactFactory.createLiveContact(
+        RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
         
         // PUBLIC contact address and PRIVATE source address
@@ -181,12 +181,12 @@ public class ContactNodeTest extends BaseTestCase {
         assertEquals(externalAddress, node1.getContactAddress());
         
         // As above...
-        node1 = (ContactNode)ContactFactory.createLiveContact(
+        node1 = (RemoteContact)ContactFactory.createLiveContact(
                 sourceAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
         assertEquals(contactAddress, node1.getContactAddress());
         
         // As above...
-        node1 = (ContactNode)ContactFactory.createLiveContact(
+        node1 = (RemoteContact)ContactFactory.createLiveContact(
                 externalAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
         assertEquals(externalAddress, node1.getContactAddress());
     }
