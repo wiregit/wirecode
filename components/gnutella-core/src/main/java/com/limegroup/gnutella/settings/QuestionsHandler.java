@@ -141,4 +141,10 @@ public class QuestionsHandler extends AbstractSettings {
 	 */
     public static final IntSetting DEFAULT_ACTION_FILE_EXISTS =
         FACTORY.createIntSetting("DEFAULT_ACTION_FILE_EXISTS", 0);
+    
+    /**
+     * Whether we should always grab associations 
+     */
+    public static IntSetting GRAB_ASSOCIATIONS =
+    	FACTORY.createIntSetting("GRAB_ASSOCIATIONS",0);
 }

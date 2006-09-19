@@ -20,21 +20,6 @@ public final class StartupSettings extends LimeProps {
         FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
     
     /**
-     * Whether or not the program should check associations with the system.
-     * If true, the program will take unregistered assocations on startup,
-     * and prompt the user to take associations held by some other program.
-     * This is used for all associations, including magnet: links and .torrent files.
-     */
-    public static BooleanSetting CHECK_ASSOCIATION =
-    	FACTORY.createBooleanSetting("CHECK_ASSOCIATION", true);
-    
-    /**
-     * Whether we should always grab associations 
-     */
-    public static IntSetting GRAB_ASSOCIATIONS =
-    	FACTORY.createIntSetting("GRAB_ASSOCIATIONS",100);
-    
-    /**
      * Whether or not tips should be displayed on startup.
      */
     public static final BooleanSetting SHOW_TOTD =
