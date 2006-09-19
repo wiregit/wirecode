@@ -10,14 +10,14 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
 
-public class ContactNodeTest extends BaseTestCase {
+public class RemoteContactTest extends BaseTestCase {
     
-    public ContactNodeTest(String name) {
+    public RemoteContactTest(String name) {
         super(name);
     }
 
     public static TestSuite suite() {
-        return buildTestSuite(ContactNodeTest.class);
+        return buildTestSuite(RemoteContactTest.class);
     }
 
     public static void main(String[] args) {
