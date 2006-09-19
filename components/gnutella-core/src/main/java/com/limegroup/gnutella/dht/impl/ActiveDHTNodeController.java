@@ -19,6 +19,11 @@ import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 
 /**
+ * Controlls an active DHT node.
+ * 
+ * Active nodes load and persist DHT data, as they keep the same node ID 
+ * over multiple sessions and can therefore re-use their local routing table
+ * and local database. 
  * 
  */
 class ActiveDHTNodeController extends AbstractDHTController {
@@ -60,6 +65,13 @@ class ActiveDHTNodeController extends AbstractDHTController {
         setMojitoDHT(mojitoDHT);
     }
 
+    /**
+     * @see AbstractDHTController.start
+     * 
+     * Adds the following precondition to start an active DHT node: 
+     * We are not an ultrapeer while excluding ultrapeers from the active network
+     * 
+     */
     @Override
     public void start() {
         //if we want to connect actively, we should be active DHT capable

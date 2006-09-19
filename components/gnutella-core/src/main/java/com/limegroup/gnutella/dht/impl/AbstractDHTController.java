@@ -54,10 +54,19 @@ abstract class AbstractDHTController implements DHTController {
      */
     private MojitoDHT dht;
     
+    /**
+     * Whether or not the DHT controlled by this controller is running.
+     */
     private boolean running = false;
 
+    /**
+     * The DHT bootstrapper instance.
+     */
     protected final DHTBootstrapper bootstrapper;
     
+    /**
+     * The random node adder.
+     */
     private RandomNodeAdder dhtNodeAdder;
     
     public AbstractDHTController() {
@@ -69,9 +78,7 @@ abstract class AbstractDHTController implements DHTController {
      * or active mode if we are not firewalled.
      * The start preconditions are the following:
      * 1) We are not already connected AND we have at least one initialized Gnutella connection
-     * 1) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
-     * 2) We are not an ultrapeer while excluding ultrapeers from the active network
-     * 3) We are not already connected or trying to bootstrap
+     * 2) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
      * 
      * @param activeMode true to connect to the DHT in active mode
      */
@@ -212,6 +219,12 @@ abstract class AbstractDHTController implements DHTController {
         return dht;
     }
     
+    /**
+     * Sends the updated CapabilitiesVM to our connections. This is used
+     * when a node has successfully bootstrapped to the network and wants to notify
+     * its Gnutella peers that they can now bootstrap off of him.
+     * 
+     */
     public void sendUpdatedCapabilities() {
         
         LOG.debug("Sending updated capabilities to our connections");
@@ -221,7 +234,8 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * 
+     * A helper class to easily go back and forth 
+     * from the DHT's ContactNode to Gnutella's IpPort
      */
     private static class IpPortContactNode implements IpPort {
         

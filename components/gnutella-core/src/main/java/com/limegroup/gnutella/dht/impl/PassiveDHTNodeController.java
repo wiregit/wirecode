@@ -82,8 +82,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
     }
     
     /**
-     * Adds a leaf DHT node to the list and then tries to bootstrap off it 
-     * if we are not bootstrapped yet.
+     * This method first adds the given host to the list of bootstrap nodes and 
+     * then adds it to this passive node's routing table.
+     * 
      * Note: This method makes sure the DHT is running already, as adding a node
      * as a leaf involves sending it a DHT ping (in order to get its KUID).
      * 
@@ -162,17 +163,23 @@ class PassiveDHTNodeController extends AbstractDHTController{
         return false;
     }
 
+    /**
+     * This method return this passive node's leafs first (they have the highest timestamp)
+     * 
+     * Note: Although a passive node does not have accurate info in its RT 
+     * (except for direct leafs), we still return nodes. 
+     */
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
         if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
             return Collections.emptyList();
         }
         
-        //This should return the leafs first (they have the highest timestamp)
-        //TODO: Although a passive node does not have accurate info in its RT 
-        //(except for direct leafs), we still return nodes. Maybe be stricter here?
         return getMRSNodes(maxNodes, true);
     }
     
+    /**
+     * Handle connection-specific lifecycle events only. 
+     */
     public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();

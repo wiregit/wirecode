@@ -13,7 +13,10 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
+ * This DHT manager starts either an active or a passive DHT controller.
+ * It also handles switching from one mode to the other
  * 
+ *
  */
 public class LimeDHTManager implements DHTManager {
     

@@ -28,12 +28,17 @@ public interface DHTController {
     public List<IpPort> getActiveDHTNodes(int maxNodes);
     
     /**
+     * If this node is not bootstrapped, passes the given hostAddress
+     * on to the DHT bootstrapper. If the node is already bootstrapped, 
+     * the controller randomly tries to add the node to the DHT routing table.
      * 
+     * @param hostAddress The SocketAddress of the DHT host.
      */
     public void addActiveDHTNode(SocketAddress hostAddress);
     
     /**
-     * 
+     * If this node is not bootstrapped, the controller requests
+     * active DHT nodes from the given <tt>SocketAddress</tt>.
      */
     public void addPassiveDHTNode(SocketAddress hostAddress);
     
@@ -58,13 +63,13 @@ public interface DHTController {
     public boolean isWaitingForNodes();
     
     /**
-     * Returns the Mojito DHT instance
-     */
-    MojitoDHT getMojitoDHT();
-    
-    /**
      * A callback method to notify the DHTController about 
      * ConnectionLifecycleEvents
      */
     public void handleConnectionLifecycleEvent(LifecycleEvent evt);
+    
+    /**
+     * Returns this controller's Mojito DHT instance.
+     */
+    MojitoDHT getMojitoDHT();
 }

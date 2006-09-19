@@ -4,11 +4,15 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import com.limegroup.gnutella.LifecycleListener;
+import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.mojito.MojitoDHT;
 
 /**
+ * The DHT Manager interface currently defines method to start, stop and perform
+ * operations related to the maintenance of the DHT (bootstrapping, etc.).
  * 
+ * TODO: The manager will later expose the methods to use the DHT, i.e. store 
+ * and retrieve values.
  */
 public interface DHTManager extends LifecycleListener {
     
@@ -27,17 +31,19 @@ public interface DHTManager extends LifecycleListener {
         
         /**
          * A DHT Node is ACTIVE mode if it's a full participant
-         * of the DHT.
+         * of the DHT, e.g. a non-firewalled Gnutella leave node
+         * with a sufficiently stable connection.
          * 
-         * Non-Firewalled Gnutella leave Nodes
          */
         ACTIVE(0x01),
         
         /**
          * A DHT Node is in PASSIVE mode if it's connected to
-         * the DHT but participates passively in the DHT.
+         * the DHT but is not part of the global DHT routing table. 
+         * Thus, a passive node never receives requests from the DHT 
+         * and does necessarily have an accurate knowledge of the DHT
+         * structure. However, it can perform queries and requests stores.
          * 
-         * Ultrapeers
          */
         PASSIVE(0x02);
         
@@ -93,17 +99,19 @@ public interface DHTManager extends LifecycleListener {
     public void stop();
     
     /**
-     * 
+     * Passes the given active DHT node to the DHT controller 
+     * in order to bootstrap or perform other maintenance operations. 
      */
     public void addActiveDHTNode(SocketAddress hostAddress);
     
     /**
-     * 
+     * Passes the given passive DHT node to the DHT controller 
+     * in order to bootstrap or perform other maintenance operations. 
      */
     public void addPassiveDHTNode(SocketAddress hostAddress);
     
     /**
-     * Called whenever our external Address has changed
+     * Notifies the DHT controller that our external Address has changed
      */
     public void addressChanged();
     
@@ -131,11 +139,6 @@ public interface DHTManager extends LifecycleListener {
      * Returns whether this Node is waiting for Nodes or not
      */
     public boolean isWaitingForNodes();
-    
-    /**
-     * Returns the MojitoDHT instance
-     */
-    public MojitoDHT getMojitoDHT();
     
     /**
      * Returns the Vendor code of this Node

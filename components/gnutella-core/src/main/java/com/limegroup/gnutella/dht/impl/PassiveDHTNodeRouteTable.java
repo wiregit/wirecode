@@ -30,6 +30,10 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
 
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeRouteTable.class);
     
+    /**
+     * The Map storing the leaf nodes connected to this ultrapeer. The mapping is
+     * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>ContactNode</tt>. 
+     */
     private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
 
     private MojitoDHT dht;
@@ -96,6 +100,12 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
         return null;
     }
     
+    /**
+     * Removes the given node from the routing table and tries to replace
+     * it with the Most Recently Seen cached contact.
+     * 
+     * @param nodeId The nodeId of the node to remove
+     */
     private synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);
         boolean removed = bucket.remove(nodeId);

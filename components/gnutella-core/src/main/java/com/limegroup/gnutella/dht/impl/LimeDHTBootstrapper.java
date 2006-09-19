@@ -24,7 +24,15 @@ import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.BootstrapEvent.EventType;
 
 /**
+ * This class bootstrapps a DHT off of the Gnutella network.
  * 
+ * It uses the following 4 methods to find bootstrap hosts: 
+ * 1) DHT nodes already received from the Gnutella network.
+ * 2) Bootstrap hosts stored in the corresponding SIMPP setting.
+ * 3) A persisted DHT routing table.
+ * 4) The DHT node fetcher, which sends pings requesting DHT IP:Ports
+ * in the Gnutella network.
+ *  
  */
 class LimeDHTBootstrapper implements DHTBootstrapper{
     
@@ -41,10 +49,13 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     private DHTNodeFetcher dhtNodeFetcher;
     
     /**
-     * A flag set to true when we are bootstraping from our persisted Routing Table
+     * A flag set to true when we are bootstrapping from our persisted Routing Table
      */
     private AtomicBoolean bootstrappingFromRT = new AtomicBoolean(false);
     
+    /**
+     * Flag set to true if the bootstrapper is waiting for a bootstrap node.
+     */
     private AtomicBoolean waiting = new AtomicBoolean(false);
     
     /**

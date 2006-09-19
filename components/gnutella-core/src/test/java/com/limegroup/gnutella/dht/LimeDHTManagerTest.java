@@ -38,7 +38,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
     
     public void testLimeDHTManager() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        DHTManager manager = new LimeDHTManager();
+        LimeDHTManager manager = new LimeDHTManager();
         assertFalse(manager.isRunning());
         assertFalse(manager.isBootstrapped());
         assertFalse(manager.isWaitingForNodes());
