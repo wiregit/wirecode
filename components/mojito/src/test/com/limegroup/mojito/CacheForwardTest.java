@@ -41,9 +41,9 @@ public class CacheForwardTest extends BaseTestCase {
     
     private static final int PORT = 3000;
     
-    static {
+    /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }
+    }*/
     
     public CacheForwardTest(String name) {
         super(name);
@@ -55,11 +55,6 @@ public class CacheForwardTest extends BaseTestCase {
 
     public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
-        /*int index = 0;
-        while(true) {
-            new CacheForwardTest("test").testCaseForward();
-            System.out.println("Finished: " + (index++));
-        }*/
     }
 
     public void testCaseForward() throws Exception {

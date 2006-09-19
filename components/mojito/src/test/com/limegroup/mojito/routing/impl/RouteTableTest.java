@@ -25,9 +25,9 @@ import com.limegroup.mojito.util.EntryImpl;
 
 public class RouteTableTest extends BaseTestCase {
     
-    static {
+    /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }
+    }*/
     
     public static final String LOCAL_NODE_ID = "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEA4";
     public static final String LOCAL_NODE_BUCKET_ID = "8800000000000000000000000000000000000000";
