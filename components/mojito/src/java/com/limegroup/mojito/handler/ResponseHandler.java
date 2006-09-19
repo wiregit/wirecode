@@ -72,7 +72,7 @@ public interface ResponseHandler {
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
     
     /**
-     * 
+     * Called in periodic intervals while we're waiting for a response.
      */
     public void handleTick();
 }

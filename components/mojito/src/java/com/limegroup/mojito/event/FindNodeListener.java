@@ -20,7 +20,7 @@
 package com.limegroup.mojito.event;
 
 /**
- * 
+ * The interface for reciving FindNode events.
  */
 public interface FindNodeListener extends DHTEventListener<FindNodeEvent> {
 

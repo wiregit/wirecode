@@ -26,7 +26,8 @@ import java.util.List;
 import com.limegroup.mojito.util.CollectionUtils;
 
 /**
- * 
+ * BootstrapEvents are fired during bootstrapping and after
+ * bootstrapping has finished
  */
 public class BootstrapEvent {
     
@@ -65,6 +66,9 @@ public class BootstrapEvent {
     
     private EventType eventType;
     
+    /**
+     * Factory method to create BOOTSTRAP_PING_SUCCEEDED BootstrapEvents
+     */
     @SuppressWarnings("unchecked")
     public static BootstrapEvent createBootstrapPingSucceededEvent() {
         
@@ -72,6 +76,9 @@ public class BootstrapEvent {
                 -1L, -1L, false, EventType.BOOTSTRAP_PING_SUCCEEDED);
     }
     
+    /**
+     * Factory method to create BOOTSTRAP_FAILED BootstrapEvents
+     */
     public static BootstrapEvent createBootstrappingFailedEvent(
             List<? extends SocketAddress> failedHosts, long phaseZero) {
         
@@ -79,6 +86,9 @@ public class BootstrapEvent {
                 -1L, -1L, false, EventType.BOOTSTRAP_FAILED);
     }
     
+    /**
+     * Factory method to create BOOTSTRAP_SUCCEEDED BootstrapEvents
+     */
     public static BootstrapEvent createBootstrappingSucceededEvent(
             List<? extends SocketAddress> failedHosts, long phaseZero, 
             long phaseOne, long phaseTwo, boolean foundsNewContacts) {
@@ -100,26 +110,45 @@ public class BootstrapEvent {
         this.eventType = eventType;
     }
     
+    /**
+     * Returns the EventType
+     */
     public EventType getEventType() {
         return eventType;
     }
     
+    /**
+     * Returns a List of SocketAddresses that failed during
+     * bootstrapping
+     */
     public List<SocketAddress> getFailedHosts() {
         return failedHosts;
     }
     
+    /**
+     * Returns the time how long phase zero (ping bootstrap host) took
+     */
     public long getPhaseZeroTime() {
         return phaseZeroTime;
     }
     
+    /**
+     * Returns the time how long phase one (find nearest Nodes) took
+     */
     public long getPhaseOneTime() {
         return phaseOneTime;
     }
 
+    /**
+     * Returns the time how long phase two (find random Nodes) took
+     */
     public long getPhaseTwoTime() {
         return phaseTwoTime;
     }
 
+    /**
+     * Returns the total bootstrapping time
+     */
     public long getTotalTime() {
         if (phaseZeroTime >= 0L) {
             if (phaseOneTime >= 0L) {
@@ -133,6 +162,9 @@ public class BootstrapEvent {
         return -1L;
     }
     
+    /**
+     * Returns whether or not phase two found any new Nodes
+     */
     public boolean hasFoundNewContacts() {
         return foundNewContacts;
     }

@@ -19,9 +19,9 @@
  
 package com.limegroup.mojito.event;
 
-
 /**
  * The interface for reciving Bootstrap events.
  */
 public interface BootstrapListener extends DHTEventListener<BootstrapEvent> {
+    
 }

@@ -19,10 +19,9 @@
  
 package com.limegroup.mojito.event;
 
-
 /**
- * 
+ * The interface for reciving Store events.
  */
-public interface StoreListener extends DHTEventListener<StoreEvent>{
+public interface StoreListener extends DHTEventListener<StoreEvent> {
     
 }

@@ -21,9 +21,8 @@ package com.limegroup.mojito.event;
 
 import com.limegroup.mojito.messages.StatsResponse;
 
-
 /**
- * 
+ * The interface for reciving Stats events.
  */
 public interface StatsListener extends DHTEventListener<StatsResponse> {
 

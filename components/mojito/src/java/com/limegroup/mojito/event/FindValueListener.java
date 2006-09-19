@@ -20,7 +20,7 @@
 package com.limegroup.mojito.event;
 
 /**
- * 
+ * The interface for reciving FindValue events.
  */
 public interface FindValueListener extends DHTEventListener<FindValueEvent> {
 

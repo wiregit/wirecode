@@ -270,7 +270,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * 
+     * See handleTick()
      */
     protected void tick() {
     }
@@ -401,7 +401,9 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * 
+     * Returns the current processing State (it's called on a lock timeout). 
+     * The default implementation returns null. Subclasses may override this 
+     * method for debugging purposes. 
      */
     protected String getState() {
         return null;

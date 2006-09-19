@@ -51,6 +51,14 @@ import com.limegroup.mojito.db.Database;
  *   nodeId
  *     value
  */
+
+/**
+ * This is a simple implementation of the Database interface.
+ * 
+ * TODO: For more advanced features we need some definition for
+ * DHTValues (non-signed values cannot replace signed values and
+ * what not).
+ */
 public class DatabaseImpl implements Database {
     
     private static final long serialVersionUID = -4857315774747734947L;
