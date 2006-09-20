@@ -31,6 +31,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import com.limegroup.gnutella.security.SecurityUtils;
 import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
 import com.limegroup.mojito.util.ArrayUtils;
 
@@ -45,7 +46,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     private static final long serialVersionUID = 633717248208386374L;
     
-    private static final Random GENERATOR = new Random();
+    private static final Random GENERATOR = SecurityUtils.createSecureRandomNoBlock();
     
     public static final int LENGTH = 20;
     
@@ -362,7 +363,7 @@ public class KUID implements Comparable<KUID>, Serializable {
          */
         MessageDigestInput randomNumbers = new MessageDigestInput() {
             public void update(MessageDigest md) {
-                byte[] random = new byte[1024];
+                byte[] random = new byte[LENGTH * 2];
                 GENERATOR.nextBytes(random);
                 md.update(random);
             }
