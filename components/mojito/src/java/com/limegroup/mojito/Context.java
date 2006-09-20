@@ -844,11 +844,18 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     
     /**
      * Adds the approximate DHT size as returned by a remote Node.
-     * The average of the remote DHT sizes is incorporated into into
+     * The average of the remote DHT sizes is incorporated into
      * our local computation.
      */
     public void addEstimatedRemoteSize(BigInteger remoteSize) {
     	estimator.addEstimatedRemoteSize(remoteSize);
+    }
+    
+    /**
+     * Updates the approxmiate DHT size based on the given Contacts
+     */
+    public void updateEstimatedSize(List<? extends Contact> nodes) {
+        estimator.updateSize(nodes);
     }
     
     public NetworkStatisticContainer getNetworkStats() {

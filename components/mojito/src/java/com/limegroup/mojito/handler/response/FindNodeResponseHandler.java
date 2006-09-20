@@ -117,11 +117,19 @@ public class FindNodeResponseHandler
         lookupStat.setHops(hop, false);
         lookupStat.setTime((int)time, false);
         
-        List<Entry<Contact,QueryKey>> nodes 
+        List<Entry<Contact,QueryKey>> entries 
                 = TrieUtils.select(responses, lookupId, responses.size());
         
-        FindNodeEvent evt = new FindNodeEvent(getLookupID(), nodes, 
+        FindNodeEvent evt = new FindNodeEvent(getLookupID(), entries, 
                 collisions, time, hop, routeTableFailures);
+        
+        // TODO We can use the result from a Node lookup to estimate the DHT size
+        /*List<Contact> nodes = new ArrayList<Contact>(entries.size());
+        for (Entry<Contact,QueryKey> e : entries) {
+            nodes.add(e.getKey());
+        }
+        context.updateEstimatedSize(nodes);*/
+        
         setReturnValue(evt);
     }
 }
