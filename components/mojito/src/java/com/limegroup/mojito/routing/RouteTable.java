@@ -55,10 +55,10 @@ public interface RouteTable extends Serializable {
     public Contact select(KUID nodeId);
     
     /**
-     * Selects the best matching k ContactNodes for the provided KUID. The returned
+     * Selects the best matching k Contacts for the provided KUID. The returned
      * Contacts are sorted by their closeness to the lookup Key from closest to
      * least closest Contact. Use {@link com.limegroup.mojito.util.BucketUtils#sort(List)}
-     * to sort the list from least-recently-seen to most-recently-seen ContactNode.
+     * to sort the list from least-recently-seen to most-recently-seen Contact.
      * 
      * @param nodeId the lookup KUID
      * @param count the number of Contact (maybe less if RoutingTable has less than 'count' entries!)

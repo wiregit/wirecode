@@ -32,7 +32,7 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
     
     /**
      * The Map storing the leaf nodes connected to this ultrapeer. The mapping is
-     * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>ContactNode</tt>. 
+     * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>RemoteContact</tt>. 
      */
     private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
 

@@ -889,7 +889,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         
-        buffer.append("Local ContactNode: ").append(getLocalNode()).append("\n");
+        buffer.append("Local Node: ").append(getLocalNode()).append("\n");
         buffer.append("Is running: ").append(isRunning()).append("\n");
         buffer.append("Database Size (Keys): ").append(getDatabase().getKeyCount()).append("\n");
         buffer.append("Database Size (Values): ").append(getDatabase().getValueCount()).append("\n");

@@ -100,7 +100,7 @@ public class CommandHandler {
     }
     
     public static void info(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
-        out.println("Local ContactNode: " + ((Context)dht).getLocalNode());
+        out.println("Local Node: " + ((Context)dht).getLocalNode());
         out.println("Is running: " + dht.isRunning());
         out.println("Database Size (Keys): " + ((Context)dht).getDatabase().getKeyCount());
         out.println("Database Size (Values): " + ((Context)dht).getDatabase().getValueCount());

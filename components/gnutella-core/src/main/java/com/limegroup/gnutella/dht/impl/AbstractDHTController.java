@@ -186,7 +186,7 @@ abstract class AbstractDHTController implements DHTController {
             if(excludeLocal && cn.getNodeID().equals(localNode)) {
                 continue;
             }
-            ipps.add(new IpPortContactNode(cn));
+            ipps.add(new IpPortRemoteContact(cn));
         }
         return ipps;
     }
@@ -235,15 +235,15 @@ abstract class AbstractDHTController implements DHTController {
     
     /**
      * A helper class to easily go back and forth 
-     * from the DHT's ContactNode to Gnutella's IpPort
+     * from the DHT's RemoteContact to Gnutella's IpPort
      */
-    private static class IpPortContactNode implements IpPort {
+    private static class IpPortRemoteContact implements IpPort {
         
         private final InetAddress nodeAddress;
         
         private final int port;
         
-        public IpPortContactNode(Contact node) {
+        public IpPortRemoteContact(Contact node) {
             InetSocketAddress addr = (InetSocketAddress) node.getContactAddress();
             this.nodeAddress = addr.getAddress();
             this.port = addr.getPort();

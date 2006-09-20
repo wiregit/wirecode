@@ -36,7 +36,7 @@ import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * The ContactNode class implements the Contact interface 
+ * The RemoteContact class implements the Contact interface 
  * and encapsulates all requires info of a remote Node.
  */
 public class RemoteContact implements Contact {

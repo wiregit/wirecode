@@ -608,7 +608,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return true;
     }
     
-    /** Adds the ContactNodeEntry to the response Trie */
+    /** Adds the Contact-QueryKey Tuple to the response Trie */
     private void addResponse(Contact node, QueryKey queryKey) {
         
         Entry<Contact,QueryKey> entry 
