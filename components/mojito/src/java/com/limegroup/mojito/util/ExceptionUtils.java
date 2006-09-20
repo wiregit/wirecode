@@ -19,6 +19,9 @@
 
 package com.limegroup.mojito.util;
 
+/**
+ * Miscellaneous utilities for Exceptions
+ */
 public class ExceptionUtils {
     
     private ExceptionUtils() {}
@@ -28,12 +31,22 @@ public class ExceptionUtils {
      * Exception that is of type <tt>clazz</tt>
      */
     public static boolean isCauseBy(Throwable t, Class<? extends Throwable> clazz) {
+        return getCause(t, clazz) != null;
+    }
+    
+    /**
+     * Returns the first Exception from the exception cause 
+     * chain that is of type <tt>clazz</tt> or null if the
+     * given Throwable was not caused a such Exception.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T getCause(Throwable t, Class<T> clazz) {
         while(t != null) {
             if (clazz.isInstance(t)) {
-                return true;
+                return (T)t;
             }
             t = t.getCause();
         }
-        return false;
+        return null;
     }
 }
