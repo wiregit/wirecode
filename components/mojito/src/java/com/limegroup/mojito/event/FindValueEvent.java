@@ -21,12 +21,12 @@ package com.limegroup.mojito.event;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +47,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
  * The FindNodeEvent is fired when a FIND_VALUE lookup
  * finishes
  */
-public class FindValueEvent implements Iterable<DHTValue> {
+public class FindValueEvent {
     
     private static final Log LOG = LogFactory.getLog(FindValueEvent.class);
     
@@ -82,10 +82,12 @@ public class FindValueEvent implements Iterable<DHTValue> {
     }
     
     /**
-     * Returns an interator 
+     * Returns a Callable that works like an Iterator. The call()
+     * Method returns null if all DHTValues were retireved from
+     * the remote Node(s).
      */
-    public Iterator<DHTValue> iterator() {
-        return new ResponseIterator();
+    public Callable<DHTValue> getCallable() {
+        return new GetValueCallable();
     }
     
     /**
@@ -104,48 +106,59 @@ public class FindValueEvent implements Iterable<DHTValue> {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
-        int i = 0;
-        for (DHTValue value : this) {
-            buffer.append(i++).append(": ").append(value).append("\n");
+        buffer.append(lookupId).append(" (time=").append(time)
+            .append("ms, hop=").append(hop).append(")\n");
+        try {
+            int i = 0;
+            DHTValue value = null;
+            Callable<DHTValue> c = getCallable();
+            while((value = c.call()) != null) {
+                buffer.append(i++).append(": ").append(value).append("\n");
+            }
+        } catch (Exception err) {
+            buffer.append(err.toString());
         }
         return buffer.toString();
     }
     
     /**
-     * 
+     * The GetValueCallable class iterates through all FindValueResponses
+     * and tries to get the DHTValues from each Node
      */
-    private class ResponseIterator implements Iterator<DHTValue> {
+    private class GetValueCallable implements Callable<DHTValue> {
         
-        private Iterator<FindValueResponse> it = responses.iterator();
+        private Iterator<FindValueResponse> resps = responses.iterator();
         
-        private Iterator<DHTValue> values = null;
+        @SuppressWarnings("unchecked")
+        private Iterator<DHTValue> values = Collections.EMPTY_LIST.iterator();
         
-        public boolean hasNext() {
-            return it.hasNext() || (values != null && values.hasNext());
-        }
-
-        public DHTValue next() {
-            if (values == null || !values.hasNext()) {
-                if (it.hasNext()) {
-                    values = new GetValueIterator(it.next());
+        public DHTValue call() throws Exception {
+            while(resps.hasNext() || values.hasNext()) {
+                
+                if (!values.hasNext()) {
+                    if (!resps.hasNext()) {
+                        // EOF
+                        break;
+                    }
+                    
+                    values = new GetValueIterator(resps.next());
+                }
+                
+                try {
+                    return values.next();
+                } catch (NoSuchElementException err) {
+                    LOG.info("NoSuchElementException", err);
+                    // Continue with next DHTValue or FindValueResponse!
                 }
             }
             
-            if (values != null && values.hasNext()) {
-                return values.next();
-            }
-            
-            throw new NoSuchElementException();
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
+            return null;
         }
     }
-    
+
     /**
-     * 
+     * The GetValueIterator iterates through all DHTValues on
+     * a remote Node and tries to get them
      */
     private class GetValueIterator implements Iterator<DHTValue> {
         
@@ -173,10 +186,13 @@ public class FindValueEvent implements Iterable<DHTValue> {
             if (keys.hasNext()) {
                 try {
                     KUID key = keys.next();
-                    DHTValue v = next(key);
-                    return v;
+                    initNext(key);
+                    return next();
                 } catch (Exception err) {
                     LOG.error("Exception", err);
+                    
+                    // If there are keys left then continue 
+                    // with the next key
                     if (keys.hasNext()) {
                         return next();
                     }
@@ -188,11 +204,9 @@ public class FindValueEvent implements Iterable<DHTValue> {
             throw new NoSuchElementException();
         }
 
-        private DHTValue next(KUID nodeId) throws Exception {
+        private void initNext(KUID nodeId) throws Exception {
             GetValueResponseHandler getValues = new GetValueResponseHandler(node, lookupId, nodeId);
-            Collection<DHTValue> v = getValues.call();
-            values = v.iterator();
-            return values.next();
+            values = getValues.call().iterator();
         }
         
         public void remove() {
@@ -200,6 +214,10 @@ public class FindValueEvent implements Iterable<DHTValue> {
         }
     }
     
+    /**
+     * The GetValueResponseHandler retrieves DHTValues from 
+     * a remote Node
+     */
     private class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValue>> {
         
         private Contact node;
@@ -220,7 +238,7 @@ public class FindValueEvent implements Iterable<DHTValue> {
         protected void start() throws Exception {
             super.start();
             
-            List<KUID> nodeIds = Arrays.asList(nodeId);
+            List<KUID> nodeIds = Collections.singletonList(nodeId);
             FindValueRequest request = context.getMessageHelper()
                 .createFindValueRequest(node.getContactAddress(), valueId, nodeIds);
             

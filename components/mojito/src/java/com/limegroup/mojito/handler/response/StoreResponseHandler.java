@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,7 +54,8 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * 
+ * The StoreResponseHandler class handles/manages storing of
+ * DHTValues on remote Node
  */
 public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
 
@@ -84,7 +86,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, DHTValue value) {
-        this(context, null, null, Arrays.asList(value));
+        this(context, null, null, Collections.singletonList(value));
     }
     
     @SuppressWarnings("unchecked")
@@ -95,7 +97,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
 
     public StoreResponseHandler(Context context, 
             Contact node, QueryKey queryKey, DHTValue value) {
-        this(context, node, queryKey, Arrays.asList(value));
+        this(context, node, queryKey, Collections.singletonList(value));
     }
     
     @SuppressWarnings("unchecked")
