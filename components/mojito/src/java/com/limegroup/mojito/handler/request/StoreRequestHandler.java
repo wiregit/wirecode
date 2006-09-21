@@ -73,14 +73,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        QueryKey expected = QueryKey.getQueryKey(
-                request.getContact().getContactAddress());
-        
-        if (!expected.equals(queryKey)) {
+        if (!queryKey.isFor(request.getContact().getContactAddress())) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Expected " + expected + " from " 
-                        + request.getContact() 
-                        + " but got " + queryKey);
+                LOG.error(request.getContact() 
+                        + " send us an invalid QueryKey " + queryKey);
             }
             networkStats.STORE_REQUESTS_BAD_QK.incrementStat();
             return;
