@@ -150,7 +150,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             }
             
             if (queryKey == null) {
-                throw new Exception("QueryKey is null");
+                throw new IllegalStateException("QueryKey is null");
             }
             
             storeStates.add(new StoreState(node, queryKey, values));

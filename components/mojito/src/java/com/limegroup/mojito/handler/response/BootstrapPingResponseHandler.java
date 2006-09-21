@@ -90,7 +90,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         }
         
         if (activePings == 0) {
-            setException(new Exception("All SocketAddresses were invalid and there are no Hosts left to Ping"));
+            setException(new IllegalArgumentException("All SocketAddresses were invalid and there are no Hosts left to Ping"));
         }
     }
     

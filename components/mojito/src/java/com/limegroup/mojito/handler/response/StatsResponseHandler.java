@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -60,6 +61,6 @@ public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse>
     
     @Override
     public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        setException(new Exception(message.toString(), e));
+        setException(new DHTException(nodeId, dst, message, -1L, e));
     }
 }

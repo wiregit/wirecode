@@ -95,7 +95,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
         
         Contact node = response.getContact();
         if (node.getContactAddress().equals(externalAddress)) {
-            setException(new Exception(node + " is trying to set our external address to its address!"));
+            setException(new IllegalArgumentException(node + " is trying to set our external address to its address!"));
             return;
         }
         
@@ -108,7 +108,7 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
             // actual Node ID
             
             if (sender == null) {
-                setException(new Exception(node + " is trying to spoof our Node ID"));
+                setException(new IllegalArgumentException(node + " is trying to spoof our Node ID"));
             } else {
                 setReturnValue(message.getContact());
             }
