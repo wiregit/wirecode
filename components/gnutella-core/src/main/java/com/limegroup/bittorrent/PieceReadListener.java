@@ -11,4 +11,9 @@ public interface PieceReadListener {
 	 * @param data the data of that interval.
 	 */
 	public void pieceRead(BTInterval interval, byte [] data);
+	
+	/**
+	 * Notification that reading of the piece failed.
+	 */
+	public void pieceReadFailed(BTInterval interval);
 }

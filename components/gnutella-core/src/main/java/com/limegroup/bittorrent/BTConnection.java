@@ -558,6 +558,13 @@ PieceSendListener, PieceReadListener {
 		invoker.invokeLater(pieceSender);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.PieceReadListener#pieceReadFailed(com.limegroup.bittorrent.BTInterval)
+	 */
+	public void pieceReadFailed(BTInterval interval) {
+		cancelSlotRequest();
+	}
+	
 	
 	private void clearRequests() {
 		for (BTInterval clear : _requesting)

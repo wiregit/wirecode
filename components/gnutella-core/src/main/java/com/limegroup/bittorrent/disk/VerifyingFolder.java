@@ -487,19 +487,24 @@ class VerifyingFolder implements TorrentDiskManager {
 			long position = (long)in.getId() * _info.getPieceLength() + in.low;
 			int offset = 0;
 			byte[] buf = new byte[length];
+			boolean success = false;
 			try {
 				do {
 					offset += diskController.read(position + offset, buf, offset, length
 							- offset, false);
 				} while (offset < length);
+				success = true;
 			} catch (IOException bad) {
 				if (isOpen()) {
 					storedException = bad;
 					notifyDiskProblem();
 				}
+			} finally {
+				if (success)
+					listener.pieceRead(in, buf);
+				else
+					listener.pieceReadFailed(in);
 			}
-			
-			listener.pieceRead(in, buf);
 		}
 	}
 	
