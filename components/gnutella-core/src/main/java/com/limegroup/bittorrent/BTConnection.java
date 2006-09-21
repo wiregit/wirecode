@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +25,7 @@ import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
@@ -720,7 +720,7 @@ PieceSendListener, PieceReadListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.BTMessageHandler#handlePiece(com.limegroup.bittorrent.BTPieceFactory)
 	 */
-	public void handlePiece(Callable<BTPiece> factory) {
+	public void handlePiece(NECallable<BTPiece> factory) {
 		_info.getDiskManager().writeBlock(factory);
 	}
 

@@ -1,8 +1,8 @@
 package com.limegroup.bittorrent;
 
-import java.util.concurrent.Callable;
 
 import com.limegroup.bittorrent.messages.BTMessage;
+import com.limegroup.gnutella.util.NECallable;
 
 /**
  * A handler for received BTMessages.  Since Piece messages
@@ -26,7 +26,7 @@ public interface BTMessageHandler {
 	 * @param factory the<tt>BTPieceFactory</tt> that will
 	 * create the piece.
 	 */
-	public void handlePiece(Callable<BTPiece> factory);
+	public void handlePiece(NECallable<BTPiece> factory);
 	
 	/**
 	 * notification that some bytes belonging to a Piece message 

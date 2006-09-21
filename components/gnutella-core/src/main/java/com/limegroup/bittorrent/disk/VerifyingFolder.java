@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +33,7 @@ import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.NotView;
 import com.limegroup.gnutella.util.RRProcessingQueue;
 import com.limegroup.gnutella.util.SystemUtils;
@@ -186,7 +186,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	
-	public void writeBlock(Callable<BTPiece> factory) {
+	public void writeBlock(NECallable<BTPiece> factory) {
 		if (storedException != null)
 			return;
 		QUEUE.invokeLater(new WriteJob(factory),_info.getURN());
@@ -197,9 +197,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * the two should eventually be abstracted somehow.
 	 */
 	private class WriteJob implements Runnable {
-		private final Callable<BTPiece> factory;
+		private final NECallable<BTPiece> factory;
 		
-		WriteJob(Callable<BTPiece> factory) {
+		WriteJob(NECallable<BTPiece> factory) {
 			this.factory = factory;
 		}
 		
@@ -207,12 +207,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (storedException != null)
 				return;
 			
-			BTPiece piece = null;
-			try {
-				piece = factory.call();
-			} catch (Exception ignore) {
-				return; // failed to get task? nothing to do
-			}
+			BTPiece piece = factory.call();
 			
 			BTInterval in = piece.getInterval();
 			byte [] data = piece.getData();
