@@ -1,5 +1,7 @@
 package com.limegroup.bittorrent;
 
+import java.util.concurrent.Callable;
+
 import com.limegroup.bittorrent.messages.BTMessage;
 
 /**
@@ -24,7 +26,7 @@ public interface BTMessageHandler {
 	 * @param factory the<tt>BTPieceFactory</tt> that will
 	 * create the piece.
 	 */
-	public void handlePiece(BTPieceFactory factory);
+	public void handlePiece(Callable<BTPiece> factory);
 	
 	/**
 	 * notification that some bytes belonging to a Piece message 

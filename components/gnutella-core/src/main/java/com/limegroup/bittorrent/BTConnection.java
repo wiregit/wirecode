@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -712,7 +713,7 @@ PieceSendListener, PieceReadListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.BTMessageHandler#handlePiece(com.limegroup.bittorrent.BTPieceFactory)
 	 */
-	public void handlePiece(BTPieceFactory factory) {
+	public void handlePiece(Callable<BTPiece> factory) {
 		_info.getDiskManager().writeBlock(factory);
 	}
 

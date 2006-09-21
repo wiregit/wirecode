@@ -1,8 +1,9 @@
 package com.limegroup.bittorrent.reader;
 
+import java.util.concurrent.Callable;
+
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
-import com.limegroup.bittorrent.BTPieceFactory;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
@@ -11,7 +12,7 @@ import com.limegroup.gnutella.Assert;
 /**
  * State that parses the Piece message. 
  */
-class PieceState extends BTReadMessageState implements BTPieceFactory {
+class PieceState extends BTReadMessageState implements Callable<BTPiece> {
 
 	private final int length;
 	private final BTDataSource buf;
@@ -99,7 +100,7 @@ class PieceState extends BTReadMessageState implements BTPieceFactory {
 		return Math.min(buf.size(), complete.high - currentOffset + 1);
 	}
 	
-	public BTPiece getPiece() {
+	public BTPiece call() {
 		synchronized(readerState) {
 			Assert.that(writeExpected);
 			writeExpected = false;

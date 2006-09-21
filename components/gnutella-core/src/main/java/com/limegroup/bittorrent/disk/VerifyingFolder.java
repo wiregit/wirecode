@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTPiece;
-import com.limegroup.bittorrent.BTPieceFactory;
 import com.limegroup.bittorrent.PieceReadListener;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
@@ -186,7 +186,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	
-	public void writeBlock(BTPieceFactory factory) {
+	public void writeBlock(Callable<BTPiece> factory) {
 		if (storedException != null)
 			return;
 		QUEUE.invokeLater(new WriteJob(factory),_info.getURN());
@@ -197,9 +197,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * the two should eventually be abstracted somehow.
 	 */
 	private class WriteJob implements Runnable {
-		private final BTPieceFactory factory;
+		private final Callable<BTPiece> factory;
 		
-		WriteJob(BTPieceFactory factory) {
+		WriteJob(Callable<BTPiece> factory) {
 			this.factory = factory;
 		}
 		
@@ -207,7 +207,13 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (storedException != null)
 				return;
 			
-			BTPiece piece = factory.getPiece();
+			BTPiece piece = null;
+			try {
+				piece = factory.call();
+			} catch (Exception ignore) {
+				return; // failed to get task? nothing to do
+			}
+			
 			BTInterval in = piece.getInterval();
 			byte [] data = piece.getData();
 			
