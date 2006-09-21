@@ -24,7 +24,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 ################################################################################
 # How to translate:
-# 1) Find a line that begins with #?
+# 1) Find a line that begins with #
 # 2) Remove the #?
 # 3) Translate the line
 #
@@ -79,9 +79,9 @@ GENERAL_BROWSE_HOST_LABEL=استعراض المضيف
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
 GENERAL_BROWSE_HOST_TIP=عرض جميع الملفات على الكمبيوتر الحالي.
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
-#? GENERAL_ADVANCED_SUB_MENU=
+GENERAL_ADVANCED_SUB_MENU=䋞У
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
-#? GENERAL_CLEAR_BUTTON_LABEL=
+GENERAL_CLEAR_BUTTON_LABEL=䎦
 
 ################################################################################
 # Key/value pairs for right-click context menus.
@@ -91,7 +91,7 @@ GENERAL_BROWSE_HOST_TIP=عرض جميع الملفات على الكمبيوتر
 #### CONTEXT_MENU_CUT=Cut
 #? CONTEXT_MENU_CUT=
 #### CONTEXT_MENU_COPY=Copy
-#? CONTEXT_MENU_COPY=
+CONTEXT_MENU_COPY=唎
 #### CONTEXT_MENU_PASTE=Paste
 #? CONTEXT_MENU_PASTE=
 #### CONTEXT_MENU_DELETE=Delete
@@ -107,7 +107,7 @@ OPTIONS_RESTART_REQUIRED=واحدة أو أكثر من الخيارات سيظه
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 #? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=
+#? OPTIONS_LEARN_MORE_LABEL=ƚҝ ȡ䓭ۤ͠ 摇 ȡϭȑ...
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -169,7 +169,7 @@ ABOUT_BUTTON_TIP=إغلاق النافذة.
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
-#? ABOUT_DEV_BLURB=
+ABOUT_DEV_BLURB= LimeWier 椠ĭׇ, وۇ, 椠刊ʠԇۇȠȡۣ�♦ ȡ˭ ۣ�⮥Š䙦ҭ LimeWier: 
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 #? ABOUT_BIZDEV_BLURB=
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
@@ -203,13 +203,13 @@ TOTD_PREVIOUS=<< التلميح السابق
 #### TOTD_CLOSE=Close
 TOTD_CLOSE=إغلاق
 #### TOTD_LOADING_TIPS=Loading tips...
-#? TOTD_LOADING_TIPS=
+TOTD_LOADING_TIPS=ˍ䮡 ȡ喇Ǎ...
 
 ###################################################################
 # Key/value pairs for the Getting Started image
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
-#? GETTING_STARTED_TITLE=
+GETTING_STARTED_TITLE=ȡɏ�
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
 #? GETTING_STARTED_CONTENTS=
 
@@ -217,7 +217,7 @@ TOTD_CLOSE=إغلاق
 # Key/value pairs for the Going Pro image.
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
-#? GOING_PRO_TITLE=
+GOING_PRO_TITLE=ğ̑ ȡɑ刣ʠ˞УŠۡꡦͥ ȡđԡ
 #### GOING_PRO_DESCRIPTION=Better search results\nTurbo-Charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 #? GOING_PRO_DESCRIPTION=
 
@@ -250,7 +250,7 @@ LIBRARY_TITLE=المكتبة
 OPTIONS_TITLE=خيارات
 #### STATS_TITLE=Statistics
 STATS_TITLE=إحصائيات
-#### DOWNLOAD_TITLE=Downloads
+#### TITLE=Downloads
 DOWNLOAD_TITLE=الملفات الجاري تنزيلها
 #### UPLOAD_TITLE=Uploads
 UPLOAD_TITLE=الملفات الجاري تحميلها
@@ -328,7 +328,7 @@ MENU_NAV_LIB_ACCESSIBLE=عرض شاشة المكتبة.
 #### MENU_NAV_CONSOLE=Console
 #? MENU_NAV_CONSOLE=
 #### MENU_NAV_CONSOLE_MNEMONIC=O
-#? MENU_NAV_CONSOLE_MNEMONIC=
+MENU_NAV_CONSOLE_MNEMONIC=O
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 #? MENU_NAV_CONSOLE_ACCESSIBLE=
 
@@ -337,17 +337,17 @@ MENU_VIEW_TITLE=(V) عرض
 #### MENU_VIEW_TITLE_MNEMONIC=V
 MENU_VIEW_TITLE_MNEMONIC=V
 #### MENU_VIEW_SMALL_ICONS=Use Small Icons
-#? MENU_VIEW_SMALL_ICONS=
+MENU_VIEW_SMALL_ICONS=Ɠ˚䈡 ȡĭߦ刊 ȡ֛
 #### MENU_VIEW_SMALL_ICONS_MNEMONIC=S
-#? MENU_VIEW_SMALL_ICONS_MNEMONIC=
+MENU_VIEW_SMALL_ICONS_MNEMONIC=S
 #### MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Use Small Icons
-#? MENU_VIEW_SMALL_ICONS_ACCESSIBLE=
+MENU_VIEW_SMALL_ICONS_ACCESSIBLE=Ɠ˚䈡 ȡĭߦ刊 ȡ֛
 #### MENU_VIEW_TEXT_WITH_ICONS=Show Icon Text
-#? MENU_VIEW_TEXT_WITH_ICONS=
+MENU_VIEW_TEXT_WITH_ICONS=ƙ我 ࠊȈǠȡĭߦ刊
 #### MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
-#? MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=
+MENU_VIEW_TEXT_WITH_ICONS_MNEMONIC=T
 #### MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=Show Text Below Icons
-#? MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=
+MENU_VIEW_TEXT_WITH_ICONS_ACCESSIBLE=ƙ我 ȡࠊȈǠˍȠȡĭߦ刊
 #### MENU_VIEW_SHOW_HIDE_TITLE=Show/Hide
 MENU_VIEW_SHOW_HIDE_TITLE=(W) عرض/إخفاء
 #### MENU_VIEW_SHOW_HIDE_TITLE_MNEMONIC=W
@@ -381,7 +381,7 @@ MENU_VIEW_LIBRARY_ACCESSIBLE=إظهار نافذة المكتبة.
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=(T) إضافة السمات
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
-MENU_VIEW_THEMES_TITLE_MNEMONIC=T
+MENU_VIEW_THEMES_TITLE_MNEMONIC=A
 #### MENU_VIEW_THEMES_GET_MORE=Get More Skins
 MENU_VIEW_THEMES_GET_MORE=(G) المزيد من السمات
 #### MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
@@ -405,19 +405,19 @@ MENU_VIEW_LANGS_TITLE=(H) تغيير اللغة
 #### MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 #### MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Select your Language Prefereces
-#? MENU_VIEW_LANGS_TITLE_ACCESSIBLE=
+MENU_VIEW_LANGS_TITLE_ACCESSIBLE=Ǝˑ ȡ✉
 #### MENU_VIEW_LANGS_RESTART_REQUIRED=LimeWire must be restarted for the new language to take effect.
 MENU_VIEW_LANGS_RESTART_REQUIRED=يجب إعادة تشغيل LimeWire لكي يظهر تأثير اللغة الجديدة.
 #### MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=Help Translate LimeWire
-#? MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=
+MENU_VIEW_LANGS_TRANSLATE_LIMEWIRE=ԇۏ ޭ ˑͣǠLimeWier
 #### MENU_VIEW_SEARCH_TITLE=Search
 MENU_VIEW_SEARCH_TITLE=(S) بحث
 #### MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
 #### MENU_VIEW_SEARCH_FILTERS=Result Filters
-#? MENU_VIEW_SEARCH_FILTERS=
+MENU_VIEW_SEARCH_FILTERS=˕ޭǠȡ勇ǌ
 #### MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
-#? MENU_VIEW_SEARCH_FILTERS_MNEMONIC=
+MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
 #### MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
 #? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=
 #### MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
@@ -425,7 +425,7 @@ MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
 #### MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
 #### MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
-#? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=
+MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Ƙ我 ӑ Magnetmix
 
 #### MENU_RESOURCES_TITLE=Resources
 MENU_RESOURCES_TITLE=(R) الموارد
@@ -458,19 +458,19 @@ MENU_TOOLS_OPTIONS_ACCESSIBLE=عرض شاشة الخيارات.
 #### MENU_FILTERS_TITLE=Filters
 #? MENU_FILTERS_TITLE=
 #### MENU_FILTERS_TITLE_MNEMONIC=S
-#? MENU_FILTERS_TITLE_MNEMONIC=
+MENU_FILTERS_TITLE_MNEMONIC=S
 #### MENU_FILTERS_CONFIGURE=Configure Content Filters
 #? MENU_FILTERS_CONFIGURE=
 #### MENU_FILTERS_CONFIGURE_MNEMONIC=C
-#? MENU_FILTERS_CONFIGURE_MNEMONIC=
+MENU_FILTERS_CONFIGURE_MNEMONIC=C
 #### MENU_FILTERS_CONFIGURE_ACCESSIBLE=Configure LimeWire's Content Filtering Options
 #? MENU_FILTERS_CONFIGURE_ACCESSIBLE=
 #### MENU_FILTERS_LEARN_MORE=Learn More...
-#? MENU_FILTERS_LEARN_MORE=
+MENU_FILTERS_LEARN_MORE=ȡ䓭ͮ..
 #### MENU_FILTERS_LEARN_MORE_ACCESSIBLE=Learn More about LimeWire's Content Filtering System
 #? MENU_FILTERS_LEARN_MORE_ACCESSIBLE=
 #### MENU_FILTERS_LEARN_MORE_MNEMONIC=L
-#? MENU_FILTERS_LEARN_MORE_MNEMONIC=
+MENU_FILTERS_LEARN_MORE_MNEMONIC=L
 
 #### MENU_HELP_TITLE=Help
 MENU_HELP_TITLE=(H) مساعدة
@@ -517,21 +517,20 @@ MENU_HELP_ERROR_ACCESSIBLE=تخليق خطأ منبثق للاختبار.
 # Key/value pairs for status bar components and right-click menu
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
-#? STATUS_BAR_SHOW_CONNECTION_QUALITY=
-#### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
-#? STATUS_BAR_SHOW_SHARED_FILES_COUNT=
+STATUS_BAR_SHOW_CONNECTION_QUALITY=ƙ我 姚ȡƊև�#### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
+STATUS_BAR_SHOW_SHARED_FILES_COUNT=ƙ我 ۏ͠ȡ䢝Ȋ 
 #### STATUS_BAR_SHOW_LANGUAGE_STATUS=Show Language Status
-#? STATUS_BAR_SHOW_LANGUAGE_STATUS=
+STATUS_BAR_SHOW_LANGUAGE_STATUS=ƙ我 ·⇠ȡ✉
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
-#? STATUS_BAR_SHOW_FIREWALL_STATUS=
+STATUS_BAR_SHOW_FIREWALL_STATUS=ƙ我 ·⇠ȡFierwall
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
-#? STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=
+STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=↙我 ࠣƓ˥∟ ȡƤˑ刉		
 #### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
-#? STATUS_BAR_SHOW_MEDIA_PLAYER=
+STATUS_BAR_SHOW_MEDIA_PLAYER=ƙ我 ȡMedia Player
 #### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
-#? STATUS_BAR_FIREWALL_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_FOUND_TOOLTIP=Ɵ˔۠LimeWire 獦͠Firewall
 #### STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire has not detected a firewall
-#? STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=
+STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=⡠՝ LimeWire 獦͠Firewall
 
 ################################################################################
 # Key/value pairs for general tables info
@@ -549,13 +548,13 @@ TABLES_DISPLAY_TOOLTIPS=عرض تلميح الأدوات.
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=أنت غير متصل باشبكة. للاتصال اختر "اتصال" من قائمة "ملف".
 #### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
-#? SEARCH_STILL_CONNECTING=
+SEARCH_STILL_CONNECTING=LimeWire .·⮇ �ȡՈࠉ. 䤟⡇Ⅰ͠ɍ̟ Ƀ勇ǌ Ίꡭˣ ȡƊև�⠇䟠ɇ╈ࠉ
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=تنزيل
 #### SEARCH_DOWNLOAD_BUTTON_TIP=Download All Selected Files
 SEARCH_DOWNLOAD_BUTTON_TIP=. تنزيل جميع الملفات المختارة.
 #### SEARCH_DOWNLOAD_AS_LABEL=Download As...
-#? SEARCH_DOWNLOAD_AS_LABEL=
+SEARCH_DOWNLOAD_AS_LABEL=ˤӭ�⪠՟�.
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
 SEARCH_BROWSE_HOST_BUTTON_LABEL=استعراض المضيف
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
@@ -569,15 +568,15 @@ SEARCH_STOP_BUTTON_LABEL=إيقاف
 #### SEARCH_STOP_BUTTON_TIP=Stop Collecting Search Results for Selected Tab
 SEARCH_STOP_BUTTON_TIP=إيقاف تجميع نتائج البحث لعلامة التبويب المختارة.
 #### SEARCH_SPAM_MARK_AS_LABEL=Mark As
-#? SEARCH_SPAM_MARK_AS_LABEL=
+SEARCH_SPAM_MARK_AS_LABEL=˚⮣ ۡꡃ妇
 #### SEARCH_SPAM_BUTTON_LABEL=Junk
-#? SEARCH_SPAM_BUTTON_LABEL=
+SEARCH_SPAM_BUTTON_LABEL=䢝Ȋ ۏ ȡއǏǍ
 #### SEARCH_NOT_SPAM_BUTTON_LABEL=Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_LABEL=
+SEARCH_NOT_SPAM_BUTTON_LABEL=䧇͠⦇ އǏǍ
 #### SEARCH_SPAM_BUTTON_TIP=Mark selected search results as Junk
-#? SEARCH_SPAM_BUTTON_TIP=
+SEARCH_SPAM_BUTTON_TIP=˚⮣ ȡ勇ǌ ȡ䏊ȑǠۡꡃ妇 ۏ ȡއǏǍ
 #### SEARCH_NOT_SPAM_BUTTON_TIP=Mark selected search results as Not Junk
-#? SEARCH_NOT_SPAM_BUTTON_TIP=
+SEARCH_NOT_SPAM_BUTTON_TIP=˚⮣ ȡ勇ǌ ȡ䏊ȑǠۡꡃ慠⦇ އǏǍ
 #### SEARCH_PUBLIC_KILL_STRING=Close Search
 SEARCH_PUBLIC_KILL_STRING=إغلاق البحث
 #### SEARCH_PUBLIC_LAUNCH_STRING=Launch Action
@@ -595,15 +594,15 @@ SEARCH_PUBLIC_CHAT_STRING=دردشة مع المضيف
 #### SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Repeat Search
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=إعادة البحث
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
-#? SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=
+SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=ȡΕ矠ۡꡤˇǌ ğ̑
 #### SEARCH_PUBLIC_BLOCK_STRING=Block Host
 SEARCH_PUBLIC_BLOCK_STRING=حظر المضيف
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=النتائج
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
-#? SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=
+SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=ȡɍɠğ̑
 #### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
-#? SEARCH_RESULT_SECURE_TIP=
+SEARCH_RESULT_SECURE_TIP=摥 ȡ勭͉ ģ凮 ⡠ ȡˡȚƠɃ롌Ӂ 䥥Ů
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=واحد من الملفات المختارة برنامج
 #### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
@@ -619,45 +618,45 @@ SEARCH_TYPE_KEYWORD=كلمة مفتاحية
 #### SEARCH_TYPE_WHATSNEW=What's New
 SEARCH_TYPE_WHATSNEW=مجتمع
 #### SEARCH_TYPE_BROWSEHOST=Direct Connect
-#? SEARCH_TYPE_BROWSEHOST=
+SEARCH_TYPE_BROWSEHOST=ȡƊև�ɇՑ
 #### SEARCH_BROWSEHOST_TITLE=Got Friends?
-#? SEARCH_BROWSEHOST_TITLE=
+SEARCH_BROWSEHOST_TITLE=柠␭ݠĕОȁ
 #### SEARCH_BROWSEHOST_DESC=Enter the IP address of a friend you'd like to connect to, click 'Direct Connect', and LimeWire will try to browse the files of that user.
-#? SEARCH_BROWSEHOST_DESC=
+SEARCH_BROWSEHOST_DESC=ďϡ ۤ爤 ȡIP ␬ ֏ ȡѭ ˑĤ ˊ֡ ɥ, Ɩ܊ ۡ꣇↊և�⤈ȔϢ, 䟌imeWire Ԧ۠矠Ĥ  䢝Ȋ ȡ˭ ␬ ч❠ȡ䔊Ϗᬍ
 #### SEARCH_BROWSEHOST_MYIP=When your friends want to connect to you, they should enter
-#? SEARCH_BROWSEHOST_MYIP=
+SEARCH_BROWSEHOST_MYIP=ۤУŠ矠ĕОȆݠȡƊև�ݬ  Ĥ ⤍
 #### SEARCH_BROWSEHOST_FIREWALLED=Your computer is behind a firewall or router and cannot receive direct connections.
-#? SEARCH_BROWSEHOST_FIREWALLED=
+SEARCH_BROWSEHOST_FIREWALLED=ͥȒ ȡ·ԦƠȡѭ ␭ݠϡ۠Firewall Ħ Router 䡡Š٭ؠĤ ߈�롅˕ȡ 䉇Ց.
 #### SEARCH_BROWSEHOST_BUTTON=Direct Connect
-#? SEARCH_BROWSEHOST_BUTTON=
+SEARCH_BROWSEHOST_BUTTON=ȡƊև�ɇՑ
 #### SEARCH_WHATSNEW_HIDE_ADULT=Hide Adult Content
-#? SEARCH_WHATSNEW_HIDE_ADULT=
+SEARCH_WHATSNEW_HIDE_ADULT=Ǝއ�ȡ䧇͠ȡއΔǠ䡇≐
 #### SEARCH_WHATSNEW_TITLE_ONE=Don't Know
-#? SEARCH_WHATSNEW_TITLE_ONE=
+SEARCH_WHATSNEW_TITLE_ONE=ⅠĚ⡍
 #### SEARCH_WHATSNEW_TITLE_TWO=What To Look For?
 #? SEARCH_WHATSNEW_TITLE_TWO=
 #### SEARCH_WHATSNEW_DESC=A "What's New" search will search for files that have been recently added to the network.
 SEARCH_WHATSNEW_DESC=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
 #### SEARCH_CURRENT_SEARCH=Current Search:
-#? SEARCH_CURRENT_SEARCH=
+SEARCH_CURRENT_SEARCH=ȡɍɠȡ·⫺
 #### SEARCH_WHATS_NEW_SMALL=New
 SEARCH_WHATS_NEW_SMALL=جديد
 #### SEARCH_SELECT_TYPE=Select Search Type:
-#? SEARCH_SELECT_TYPE=
+SEARCH_SELECT_TYPE=Ǝˑ 姚 ȡɍɺ
 #### SEARCH_MEDIA_DOCUMENTS_TOOLTIP=Search for Document Files, Including html, txt, pdf, and More
 #? SEARCH_MEDIA_DOCUMENTS_TOOLTIP=
 #### SEARCH_MEDIA_PROGRAMS_TOOLTIP=Search for Program Files, Including exe, zip, gz, and More
-#? SEARCH_MEDIA_PROGRAMS_TOOLTIP=
+SEARCH_MEDIA_PROGRAMS_TOOLTIP=ƈ΋ ۤ ɑȣʬ 䢠ף妇 exe, zip, gz, 䡇⤒
 #### SEARCH_MEDIA_AUDIO_TOOLTIP=Search For Audio Files, Including mp3, wav, ogg, and More
-#? SEARCH_MEDIA_AUDIO_TOOLTIP=
+SEARCH_MEDIA_AUDIO_TOOLTIP=ƈ΋ ۤ 䢝Ȋ ֦Ȭ 䢠ף妇, mp3, wav, ogg, 䡇⤒
 #### SEARCH_MEDIA_VIDEO_TOOLTIP=Search For Video Files, Including avi, mpg, wmv, and More
-#? SEARCH_MEDIA_VIDEO_TOOLTIP=
+SEARCH_MEDIA_VIDEO_TOOLTIP=ƈ΋ ۤ 䢝Ȋ ޭЭ䪠䢠ף妇 avi, mpg, mwv, 䡇⤒
 #### SEARCH_MEDIA_IMAGES_TOOLTIP=Search For Image Files, Including jpg, gif, png and More
-#? SEARCH_MEDIA_IMAGES_TOOLTIP=
+SEARCH_MEDIA_IMAGES_TOOLTIP=ƈ΋ ۤ ֦Ϭ 䢠ף妇, jpg, gif, png, 䡇⤒
 #### SEARCH_FILTER_RESULTS=Filter Results:
-#? SEARCH_FILTER_RESULTS=
+SEARCH_FILTER_RESULTS=˕ޭǠȡ勇ǌ
 #### SEARCH_BACK_TO_SEARCH=Back To Search
-#? SEARCH_BACK_TO_SEARCH=
+SEARCH_BACK_TO_SEARCH=ȡҌ瘠ơꡇ≍ɍ
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
 #? SEARCH_BLOCK_HOST=
 
@@ -738,7 +737,7 @@ RESULT_PANEL_VENDOR=البائع
 #### RESULT_PANEL_ADDED=Created
 #? RESULT_PANEL_ADDED=
 #### RESULT_PANEL_LICENSE=License
-#? RESULT_PANEL_LICENSE=
+RESULT_PANEL_LICENSE=Ҏ։
 #### RESULT_PANEL_SPAM=Junk Rating
 #? RESULT_PANEL_SPAM=
 
@@ -755,23 +754,23 @@ SEARCH_FILTER_MEDIA=الوسائط
 #### DOWNLOAD_LAUNCH_BUTTON_LABEL=Preview
 DOWNLOAD_LAUNCH_BUTTON_LABEL=مشاهدة
 #### DOWNLOAD_LAUNCH_BUTTON_TIP=Preview Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_TIP=
+DOWNLOAD_LAUNCH_BUTTON_TIP=҄ȡˍ䮡Ȋ ȡ䏊ȑǍ
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Launch
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_LABEL=Ƙ∞
 #### DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Launch Selected Downloads
-#? DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=
+DOWNLOAD_LAUNCH_BUTTON_COMPLETED_TIP=Ƙ∞ ȡˍ䮡Ȋ ȡ䏊ȑǍ
 #### DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Launch Download
-#? DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_LAUNCH_COMPLETED_LABEL=Ƙ∞ ȡˍ䮡Ȋ
 #### DOWNLOAD_KILL_BUTTON_LABEL=Cancel
 DOWNLOAD_KILL_BUTTON_LABEL=إنهاء التنزيل
 #### DOWNLOAD_KILL_BUTTON_TIP=Cancel Selected Downloads
 DOWNLOAD_KILL_BUTTON_TIP=أوقف تنزيل الملفات المختارة.
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=Clear
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=
+DOWNLOAD_KILL_BUTTON_COMPLETED_LABEL=ơ܇�
 #### DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=Clear Selected Downloads
-#? DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=
+DOWNLOAD_KILL_BUTTON_COMPLETED_TIP=ơ܇�ȡˍ䮡Ȋ ȡ䏊ȑǍ
 #### DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Clear Download
-#? DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=
+DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=ơ܇�ȡˍ䮡
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=إيقاف مؤقت
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
@@ -785,17 +784,16 @@ DOWNLOAD_CLEAR_BUTTON_LABEL=مسح الغير نشط
 #### DOWNLOAD_CLEAR_BUTTON_TIP=Remove Inactive Downloads
 DOWNLOAD_CLEAR_BUTTON_TIP=إزالة الملفات الغير نشطة الجاري تنزيلها.
 #### DOWNLOAD_PAUSE_BUTTON_LABEL=Pause
-#? DOWNLOAD_PAUSE_BUTTON_LABEL=
+DOWNLOAD_PAUSE_BUTTON_LABEL=˦߭۠䅞ȍ
 #### DOWNLOAD_PAUSE_BUTTON_TIP=Pause Selected Downloads
-#? DOWNLOAD_PAUSE_BUTTON_TIP=
+DOWNLOAD_PAUSE_BUTTON_TIP=ƭ߇۠ȡˍ䮡Ȋ ȡ䏊ȑǠ䅞ˇ
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=Change File Location...
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=˛䧞ؠȡ䢝...
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Edit the Final Filename of the Download
-#? DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=
-#### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
-#? DOWNLOAD_POPUP_MENU_CLEAR=
+DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=˛Ɠᡇ⤡۠ȡ䎣�#### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
+DOWNLOAD_POPUP_MENU_CLEAR=ơ܇�ࠡ ȡˍ䮡Ȋ ȡܭϠ刔ى
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
-#? DOWNLOAD_EXPLORE_BUTTON_TIP=
+DOWNLOAD_EXPLORE_BUTTON_TIP=Ɲˍ ȡ䍡͠ȡѭ 章ۡꡇ⤡ۍ
 
 #### LIBRARY_LAUNCH_BUTTON_LABEL=Launch
 LIBRARY_LAUNCH_BUTTON_LABEL=فتح
@@ -822,15 +820,15 @@ LIBRARY_ANNOTATE_BUTTON_LABEL=توثيق...
 #### LIBRARY_ANNOTATE_BUTTON_TIP=Add Description to Selected File
 LIBRARY_ANNOTATE_BUTTON_TIP=توثيق الملف المختار.
 #### LIBRARY_PUBLISH_BUTTON_LABEL=Publish...
-#? LIBRARY_PUBLISH_BUTTON_LABEL=
+LIBRARY_PUBLISH_BUTTON_LABEL=啑...
 #### LIBRARY_PUBLISH_BUTTON_TIP=Publish under Creative Commons License
-#? LIBRARY_PUBLISH_BUTTON_TIP=
+LIBRARY_PUBLISH_BUTTON_TIP=啑 ˍȠҎ։ ⍤ǠȡƈЇ؍
 #### LIBRARY_RESUME_BUTTON_LABEL=Resume
 LIBRARY_RESUME_BUTTON_LABEL=إيقاف مؤقت
 #### LIBRARY_RESUME_BUTTON_TIP=Continue Downloading Selected Incomplete File
 LIBRARY_RESUME_BUTTON_TIP=استأنف تنزيل الملفات المختارة الغير كاملة.
 #### LIBRARY_RENAME_BUTTON_LABEL=Rename
-#? LIBRARY_RENAME_BUTTON_LABEL=
+LIBRARY_RENAME_BUTTON_LABEL=ƚȏǠȡ˓䮉
 #### LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=You can configure the folders you share in LimeWire's Options.
 #? LIBRARY_SHARED_FILES_CONFIGURE_EXPLAIN=
 #### LIBRARY_SHARED_FILES_CONFIGURE=Configure...
@@ -910,19 +908,18 @@ MEDIA_REWIND_BUTTON_TIP=إرجاع.
 # Key/value pair for download location dialog
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
-#? DOWNLOAD_LOCATION_DIALOG_TITLE=
+DOWNLOAD_LOCATION_DIALOG_TITLE=Ǝˑ 䧞ؠȡˍ䮡
 #### DIRECTORY_CHOOSER_FILE_DESCRIPTION=All Folders
-#? DIRECTORY_CHOOSER_FILE_DESCRIPTION=
+DIRECTORY_CHOOSER_FILE_DESCRIPTION=ࠡ ȡ䍡Їȍ
 
 ################################################################################
 # Key/value pair for save location error states
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
-#? SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=
+SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=摇 ȡ䢝 䧌獠߈⅍
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Filename Taken
-#? SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=
-#### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
-#? SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=
+SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Ɠᡇ⤡۠䔊ۣ�#### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
+SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=ȡˍ䮡 Ƥ˥ꡞɡō
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=No Write Permission
 #? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=
 #### SAVE_LOCATION_DIRECTORY_DOES_NOT_EXIST_SHORT_ERROR=Folder Does Not Exist
