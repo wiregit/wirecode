@@ -114,7 +114,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         Contact node = response.getContact();
         if (node.getContactAddress().equals(externalAddress)) {
             if (hostsToPing.isEmpty()) {
-                setException(new Exception(node + " is trying to set our external address to its address!"));
+                setException(new IllegalArgumentException(node + " is trying to set our external address to its address!"));
             } else {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to set our external address to its address!");
