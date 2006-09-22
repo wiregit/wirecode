@@ -32,7 +32,7 @@ import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 
 /**
- * 
+ * The StoreManager class manages 
  */
 public class StoreManager extends AbstractManager<StoreEvent> {
     

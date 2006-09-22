@@ -43,6 +43,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -55,34 +56,37 @@ import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The StoreResponseHandler class handles/manages storing of
- * DHTValues on remote Node
+ * DHTValues on remote Nodes
  */
 public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
 
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
     
-    /** */
+    /** The ID of the Value */
     private KUID valueId;
     
-    /** */
+    /** 
+     * The remote Node wehere to store the Value(s). 
+     * Can be null.
+     */
     private Contact node;
     
-    /** */
+    /** The QueryKey we have to use. Can be null. */
     private QueryKey queryKey;
     
-    /** */
+    /** The Value(s) we're going to store */
     private Collection<DHTValue> values;
     
-    /** */
-    private List<StoreState> storeStates = new ArrayList<StoreState>();
+    /** A list of StoreProcesses. One StoreProcess per Contact */
+    private List<StoreProcess> processList = new ArrayList<StoreProcess>();
     
-    /** */
-    private Iterator<StoreState> states = null;
+    /** An Iterator of StoreProcesses (see processList) */
+    private Iterator<StoreProcess> processes = null;
     
-    /** */
-    private Map<KUID, StoreState> activeStates = new HashMap<KUID, StoreState>();
+    /** Map of currently active StoreProcesses (see parallelism) */
+    private Map<KUID, StoreProcess> activeProcesses = new HashMap<KUID, StoreProcess>();
     
-    /** */
+    /** The number of parallel stores */
     private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, DHTValue value) {
@@ -118,7 +122,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 }
                 
                 if (!valueId.equals(value.getValueID())) {
-                    throw new AssertionError("All DHTValues must have the same ID");
+                    throw new IllegalArgumentException("All DHTValues must have the same ID");
                 }
             }
         }
@@ -153,7 +157,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 throw new IllegalStateException("QueryKey is null");
             }
             
-            storeStates.add(new StoreState(node, queryKey, values));
+            processList.add(new StoreProcess(node, queryKey, values));
             
         } else {
             FindNodeResponseHandler handler 
@@ -164,11 +168,11 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             for (Entry<Contact,QueryKey> entry : nodes) {
                 Contact node = entry.getKey();
                 QueryKey queryKey = entry.getValue();
-                storeStates.add(new StoreState(node, queryKey, values));
+                processList.add(new StoreProcess(node, queryKey, values));
             }
         }
         
-        states = storeStates.iterator();
+        processes = processList.iterator();
         sendNextAndExitIfDone();
     }
     
@@ -180,8 +184,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
         
-        if (activeStates.get(nodeId).response(status)) {
-            activeStates.remove(nodeId);
+        if (activeProcesses.get(nodeId).response(status)) {
+            activeProcesses.remove(nodeId);
         }
         
         sendNextAndExitIfDone();
@@ -191,8 +195,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         
-        if (activeStates.get(nodeId).timeout(nodeId, dst, message, time)) {
-            activeStates.remove(nodeId);
+        if (activeProcesses.get(nodeId).timeout(nodeId, dst, message, time)) {
+            activeProcesses.remove(nodeId);
         }
         
         sendNextAndExitIfDone();
@@ -202,9 +206,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     protected synchronized void error(KUID nodeId, SocketAddress dst, 
             RequestMessage message, Exception e) {
         
-        StoreState state = activeStates.get(nodeId);
+        StoreProcess state = activeProcesses.get(nodeId);
         if (state != null && state.error(e)) {
-            activeStates.remove(nodeId);
+            activeProcesses.remove(nodeId);
         }
         
         sendNextAndExitIfDone();
@@ -215,12 +219,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
      * an event if storing is done
      */
     private synchronized void sendNextAndExitIfDone() {
-        while(activeStates.size() < parallelism && states.hasNext()) {
-            StoreState state = states.next();
+        while(activeProcesses.size() < parallelism && processes.hasNext()) {
+            StoreProcess state = processes.next();
             
             try {
                 if (state.start()) {
-                    activeStates.put(state.node.getNodeID(), state);
+                    activeProcesses.put(state.node.getNodeID(), state);
                 }
             } catch (IOException err) {
                 state.exception = err;
@@ -229,25 +233,25 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         }
         
         // No active states left? We're done!
-        if (activeStates.isEmpty()) {
+        if (activeProcesses.isEmpty()) {
             done();
         }
     }
     
     /**
-     * 
+     * Called if all values were stored
      */
     private synchronized void done() {
         List<Contact> nodes = new ArrayList<Contact>();
         Set<DHTValue> failed = new HashSet<DHTValue>();
         
-        for (StoreState s : storeStates) {
+        for (StoreProcess s : processList) {
             nodes.add(s.node);
             failed.addAll(s.getFailedValues());
         }
         
-        if (storeStates.size() == 1) {
-            StoreState s = storeStates.get(0);
+        if (processList.size() == 1) {
+            StoreProcess s = processList.get(0);
             if (s.exception != null) {
                 setException(s.exception);
             } else if (s.timeout >= 0L) {
@@ -259,34 +263,36 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     }
     
     /**
-     * 
+     * The StoreState class manages storing of values on a single Node
      */
-    private class StoreState {
+    private class StoreProcess {
         
-        /* */
+        /** The Node to where to store the values */
         private Contact node;
+        
+        /** The QueryKey for the Node */
         private QueryKey queryKey;
         
-        /* */
+        /** The Values to store */
         private Iterator<DHTValue> it;
         
-        /* */
+        /** The value that is currently beeing stored */
         private DHTValue lastValue = null;
         
-        /* */
+        /** A List of values that couldn't be stored */
         private List<DHTValue> failed = new ArrayList<DHTValue>();
         
-        /* */
+        /*  */
         private KUID nodeId;
         private SocketAddress dst;
         private RequestMessage message;
         private long timeout = -1L;
         
-        /* */
+        /** A reference to an Exception that iterrupted this store process */
         private Exception exception;
         
         @SuppressWarnings("unchecked")
-        private StoreState(Contact node, QueryKey queryKey, 
+        private StoreProcess(Contact node, QueryKey queryKey, 
                 Collection<? extends DHTValue> values) {
             this.node = node;
             this.queryKey = queryKey;
@@ -450,7 +456,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
             
-            setException(e);
+            setException(new DHTException(nodeId, dst, message, -1L, e));
         }
     }
 }

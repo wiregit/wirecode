@@ -63,6 +63,7 @@ import com.limegroup.mojito.io.MessageDispatcherImpl;
 import com.limegroup.mojito.manager.BootstrapManager;
 import com.limegroup.mojito.manager.FindNodeManager;
 import com.limegroup.mojito.manager.FindValueManager;
+import com.limegroup.mojito.manager.GetValueManager;
 import com.limegroup.mojito.manager.PingManager;
 import com.limegroup.mojito.manager.StoreManager;
 import com.limegroup.mojito.messages.MessageFactory;
@@ -110,6 +111,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     private FindValueManager findValueManager;
     private StoreManager storeManager;
     private BootstrapManager bootstrapManager;
+    private GetValueManager getValueManager;
     
     private volatile boolean running = false;
     
@@ -191,6 +193,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         findValueManager = new FindValueManager(this);
         storeManager = new StoreManager(this);
         bootstrapManager = new BootstrapManager(this);
+        getValueManager = new GetValueManager(this);
     }
     
     private void initStats() {
@@ -728,7 +731,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return pingManager.collisionPing(node);
     }
     
-    /** Starts a value for the given KUID */
+    /** Starts a value lookup for the given KUID */
     public DHTFuture<FindValueEvent> get(KUID key) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException("get");
@@ -737,7 +740,24 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         return findValueManager.lookup(key);
     }
     
-    /** Starts a lookup for the given KUID */
+    /** 
+     * Retrieve all DHTValues from the remote Node that are 
+     * stored under the given valueId and nodeIds
+     */
+    public DHTFuture<Collection<DHTValue>> get(Contact node, KUID valueId, KUID nodeId) {
+        return get(node, valueId, Collections.singleton(nodeId));
+    }
+    
+    /** 
+     * Retrieve all DHTValues from the remote Node that are 
+     * stored under the given valueId and nodeIds
+     */
+    public DHTFuture<Collection<DHTValue>> get(Contact node, 
+            KUID valueId, Collection<KUID> nodeIds) {
+        return getValueManager.get(node, valueId, nodeIds);
+    }
+    
+    /** Starts a Node lookup for the given KUID */
     public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
         return findNodeManager.lookup(lookupId);
     }

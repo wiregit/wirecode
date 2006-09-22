@@ -28,7 +28,9 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 
 /**
- * 
+ * The AbstractLookupManager class manages lookups for Nodes or Values
+ * and makes sure there are never two or more parallel lookups for
+ * the same key.
  */
 abstract class AbstractLookupManager<V> extends AbstractManager<V> {
     

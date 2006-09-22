@@ -27,6 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +46,6 @@ import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
-import com.limegroup.mojito.util.ExceptionUtils;
 
 /**
  * The BootstrapManager manages the entire bootstrap process.
@@ -324,9 +324,10 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     Contact collidesWith = context.collisionPing(c).get();
                     throw new CollisionException(collidesWith, 
                         context.getLocalNode() + " collides with " + collidesWith); 
-                } catch (Exception err) {
-                    if (ExceptionUtils.isCauseBy(err, DHTException.class)) {
-                        LOG.info("DHTException", err);
+                } catch (ExecutionException err) {
+                    Throwable cause = err.getCause();
+                    if (cause instanceof DHTException) {
+                        LOG.info("DHTException", cause);
                     } else {
                         throw err;
                     }

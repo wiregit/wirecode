@@ -42,7 +42,6 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
-import com.limegroup.mojito.util.ExceptionUtils;
 
 public class RouteTableImpl implements RouteTable {
     
@@ -76,7 +75,7 @@ public class RouteTableImpl implements RouteTable {
     private transient Callback callback;
     
     /**
-     * 
+     * The local Node
      */
     private Contact localNode;
     
@@ -237,14 +236,11 @@ public class RouteTableImpl implements RouteTable {
             
             public void handleThrowable(Throwable ex) {
                 
-                DHTException dhtEx = ExceptionUtils.getCause(ex, DHTException.class);
-                if (dhtEx == null) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("No DHTException in cause chain", ex);
-                    }
+                if (!(ex instanceof DHTException)) {
                     return;
                 }
                 
+                DHTException dhtEx = (DHTException)ex;
                 KUID nodeId = dhtEx.getNodeID();
                 SocketAddress address = dhtEx.getSocketAddress();
                 

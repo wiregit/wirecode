@@ -19,14 +19,15 @@
 
 package com.limegroup.mojito.event;
 
-import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,19 +36,12 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.handler.AbstractResponseHandler;
-import com.limegroup.mojito.messages.FindNodeResponse;
-import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
-import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
- * The FindNodeEvent is fired when a FIND_VALUE lookup
- * finishes
+ * The FindNodeEvent is fired when a FIND_VALUE lookup finishes
  */
-public class FindValueEvent {
+public class FindValueEvent implements Iterable<Future<DHTValue>> {
     
     private static final Log LOG = LogFactory.getLog(FindValueEvent.class);
     
@@ -82,14 +76,12 @@ public class FindValueEvent {
     }
     
     /**
-     * Returns a Callable that works like an Iterator. The call()
-     * Method returns null if all DHTValues were retireved from
-     * the remote Node(s).
+     * Returns an Iterator of Futures that return the DHTValue(s)
      */
-    public Callable<DHTValue> getCallable() {
-        return new GetValueCallable();
+    public Iterator<Future<DHTValue>> iterator() {
+        return new ValuesIterator();
     }
-    
+
     /**
      * Returns the amount of time it took to find the DHTValue(s)
      */
@@ -108,59 +100,63 @@ public class FindValueEvent {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append(" (time=").append(time)
             .append("ms, hop=").append(hop).append(")\n");
-        try {
-            int i = 0;
-            DHTValue value = null;
-            Callable<DHTValue> c = getCallable();
-            while((value = c.call()) != null) {
+        
+        int i = 0;
+        for (Future<DHTValue> future : this) {
+            try {
+                DHTValue value = future.get();
                 buffer.append(i++).append(": ").append(value).append("\n");
+            } catch (InterruptedException err) {
+                LOG.error("InterruptedException", err);
+                buffer.append(err);
+            } catch (ExecutionException err) {
+                LOG.error("ExecutionException", err);
+                buffer.append(err);
             }
-        } catch (Exception err) {
-            buffer.append(err.toString());
         }
         return buffer.toString();
     }
     
     /**
-     * The GetValueCallable class iterates through all FindValueResponses
-     * and tries to get the DHTValues from each Node
+     * The ValuesIterator class iterates through all FindValueResponses
+     * we received (one response per Node and if the lookup wasn't 
+     * exhaustive there's only one FindValueResponse) and delegates 
+     * all method calls to ContactValuesIterator.
      */
-    private class GetValueCallable implements Callable<DHTValue> {
+    private class ValuesIterator implements Iterator<Future<DHTValue>> {
         
         private Iterator<FindValueResponse> resps = responses.iterator();
         
         @SuppressWarnings("unchecked")
-        private Iterator<DHTValue> values = Collections.EMPTY_LIST.iterator();
+        private Iterator<Future<DHTValue>> values = Collections.EMPTY_LIST.iterator();
         
-        public DHTValue call() throws Exception {
-            while(resps.hasNext() || values.hasNext()) {
-                
-                if (!values.hasNext()) {
-                    if (!resps.hasNext()) {
-                        // EOF
-                        break;
-                    }
-                    
-                    values = new GetValueIterator(resps.next());
+        public boolean hasNext() {
+            return resps.hasNext() || values.hasNext();
+        }
+        
+        public Future<DHTValue> next() {
+            if (!values.hasNext()) {
+                if (!resps.hasNext()) {
+                    throw new NoSuchElementException();
                 }
                 
-                try {
-                    return values.next();
-                } catch (NoSuchElementException err) {
-                    LOG.info("NoSuchElementException", err);
-                    // Continue with next DHTValue or FindValueResponse!
-                }
+                values = new ContactValuesIterator(resps.next());
             }
             
-            return null;
+            return values.next();
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
 
     /**
-     * The GetValueIterator iterates through all DHTValues on
-     * a remote Node and tries to get them
+     * The ContactValuesIterator class iterates through all values
+     * the remote Node send us first and continues with retreiving
+     * values from the remote Node.
      */
-    private class GetValueIterator implements Iterator<DHTValue> {
+    private class ContactValuesIterator implements Iterator<Future<DHTValue>> {
         
         private Contact node;
         
@@ -168,7 +164,7 @@ public class FindValueEvent {
         
         private Iterator<DHTValue> values;
         
-        private GetValueIterator(FindValueResponse response) {
+        private ContactValuesIterator(FindValueResponse response) {
             this.node = response.getContact();
             this.keys = response.getKeys().iterator();
             this.values = response.getValues().iterator();
@@ -178,35 +174,21 @@ public class FindValueEvent {
             return keys.hasNext() || values.hasNext();
         }
 
-        public DHTValue next() {
+        public Future<DHTValue> next() {
+            // Return the values we aleady have first...
             if (values.hasNext()) {
-                return values.next();
+                return new ReturnDHTValueFuture(values.next());
             }
             
+            // ...and continue with retreiving the values
+            // from the remote Node
             if (keys.hasNext()) {
-                try {
-                    KUID key = keys.next();
-                    initNext(key);
-                    return next();
-                } catch (Exception err) {
-                    LOG.error("Exception", err);
-                    
-                    // If there are keys left then continue 
-                    // with the next key
-                    if (keys.hasNext()) {
-                        return next();
-                    }
-
-                    throw new NoSuchElementException(err.getMessage());
-                }
+                KUID nodeId = keys.next();
+                Future<Collection<DHTValue>> future = context.get(node, lookupId, nodeId);
+                return new GetDHTValueFuture(future);
             }
             
             throw new NoSuchElementException();
-        }
-
-        private void initNext(KUID nodeId) throws Exception {
-            GetValueResponseHandler getValues = new GetValueResponseHandler(node, lookupId, nodeId);
-            values = getValues.call().iterator();
         }
         
         public void remove() {
@@ -215,63 +197,85 @@ public class FindValueEvent {
     }
     
     /**
-     * The GetValueResponseHandler retrieves DHTValues from 
-     * a remote Node
+     * Wraps a single DHTValue into a Future
      */
-    private class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValue>> {
+    private static class ReturnDHTValueFuture implements Future<DHTValue> {
         
-        private Contact node;
+        private DHTValue value;
         
-        private KUID valueId;
-        
-        private KUID nodeId;
-        
-        private GetValueResponseHandler(Contact node, KUID valueId, KUID nodeId) {
-            super(FindValueEvent.this.context);
-            
-            this.node = node;
-            this.valueId = valueId;
-            this.nodeId = nodeId;
-        }
-        
-        @Override
-        protected void start() throws Exception {
-            super.start();
-            
-            List<KUID> nodeIds = Collections.singletonList(nodeId);
-            FindValueRequest request = context.getMessageHelper()
-                .createFindValueRequest(node.getContactAddress(), valueId, nodeIds);
-            
-            context.getMessageDispatcher().send(node, request, this);
+        private ReturnDHTValueFuture(DHTValue value) {
+            this.value = value;
         }
 
-        @Override
-        protected void response(ResponseMessage message, long time) throws IOException {
-            if (message instanceof FindValueResponse) {
-                Collection<DHTValue> values = ((FindValueResponse)message).getValues();
-                setReturnValue(values);
-                
-            // Imagine the following case: We do a lookup for a value 
-            // on the 59th minute and start retrieving the values on 
-            // the 60th minute. As values expire on the 60th minute 
-            // it may no longer exists and the remote Node returns us
-            // a Set of the k-closest Nodes instead.
-            } else if (message instanceof FindNodeResponse) {
-                Collection<DHTValue> values = Collections.emptyList();
-                setReturnValue(values);
-            } else {
-                setException(new IllegalArgumentException(message.toString()));
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public DHTValue get() throws InterruptedException, ExecutionException {
+            return value;
+        }
+
+        public DHTValue get(long timeout, TimeUnit unit) 
+                throws InterruptedException, ExecutionException, TimeoutException {
+            return value;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
+    }
+    
+    /**
+     * Wraps a Future as returned by GetValueManager and the
+     * get methods return a single value instead of a Collection
+     * of values.
+     * 
+     * We count on the fact that we're requesting a single value
+     * and receive either none or one value.
+     */
+    private static class GetDHTValueFuture implements Future<DHTValue> {
+        
+        private Future<Collection<DHTValue>> future;
+        
+        private GetDHTValueFuture(Future<Collection<DHTValue>> future) {
+            this.future = future;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return future.cancel(mayInterruptIfRunning);
+        }
+
+        public DHTValue get() throws InterruptedException, ExecutionException {
+            Collection<DHTValue> values = future.get();
+            if (values.size() > 1) {
+                throw new IllegalStateException("Expected none or one DHTValue: " + values);
             }
+            
+            // Can fail with NoSuchElementException which is OK
+            return values.iterator().next();
         }
-        
-        @Override
-        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-            fireTimeoutException(nodeId, dst, message, time);
+
+        public DHTValue get(long timeout, TimeUnit unit) 
+                throws InterruptedException, ExecutionException, TimeoutException {
+            Collection<DHTValue> values = future.get(timeout, unit);
+            if (values.size() > 1) {
+                throw new IllegalStateException("Expected none or one DHTValue: " + values);
+            }
+            
+            // Can fail with NoSuchElementException which is OK
+            return values.iterator().next();
         }
-        
-        @Override
-        protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-            setException(new DHTException(nodeId, dst, message, -1L, e));
+
+        public boolean isCancelled() {
+            return future.isCancelled();
+        }
+
+        public boolean isDone() {
+            return future.isDone();
         }
     }
 }

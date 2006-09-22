@@ -23,9 +23,10 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.handler.response.LookupResponseHandler;
 
 /**
- * 
+ * FindNodeManager manages lookups for Nodes
  */
 public class FindNodeManager extends AbstractLookupManager<FindNodeEvent> {
 
@@ -34,9 +35,8 @@ public class FindNodeManager extends AbstractLookupManager<FindNodeEvent> {
     }
 
     @Override
-    protected FindNodeResponseHandler createLookupHandler(KUID lookupId, int count) {
+    protected LookupResponseHandler<FindNodeEvent> createLookupHandler(
+            KUID lookupId, int count) {
         return new FindNodeResponseHandler(context, lookupId, count);
     }
-    
-    
 }

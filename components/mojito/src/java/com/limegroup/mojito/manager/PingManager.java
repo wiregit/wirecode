@@ -34,7 +34,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
  * The PingManager takes care of concurrent Pings and makes sure
- * a single Node cannot be pinged multiple times.
+ * a single Node cannot be pinged multiple times in parallel.
  */
 public class PingManager extends AbstractManager<Contact> {
     

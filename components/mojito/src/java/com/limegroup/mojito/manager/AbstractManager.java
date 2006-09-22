@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import com.limegroup.mojito.Context;
@@ -31,7 +32,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.event.DHTEventListener;
 
 /**
- * 
+ * An abstract class for various types of Managers.
  */
 abstract class AbstractManager<V> {
     
@@ -79,10 +80,12 @@ abstract class AbstractManager<V> {
                     try {
                         V result = get();
                         listener.handleResult(result);
-                    } catch (CancellationException ignore) {
                     } catch (InterruptedException ignore) {
-                    } catch (Throwable ex) {
-                        listener.handleThrowable(ex);
+                    } catch (ExecutionException ex) {
+                        Throwable cause = ex.getCause();
+                        if (!(cause instanceof CancellationException)) {
+                            listener.handleThrowable(cause);
+                        }
                     }
                 } else {
                     listeners.add(listener);
@@ -101,10 +104,12 @@ abstract class AbstractManager<V> {
             try {
                 V result = get();
                 fireResult(result);
-            } catch (CancellationException ignore) {
             } catch (InterruptedException ignore) {
-            } catch (Throwable ex) {
-                fireThrowable(ex);
+            } catch (ExecutionException ex) {
+                Throwable cause = ex.getCause();
+                if (!(cause instanceof CancellationException)) {
+                    fireThrowable(cause);
+                }
             }
         }
         
