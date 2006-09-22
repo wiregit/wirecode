@@ -777,7 +777,7 @@ DOWNLOAD_POPUP_MENU_KILL_COMPLETED_LABEL=Zmazať sťahovanie
 #### DOWNLOAD_RESUME_BUTTON_LABEL=Resume
 DOWNLOAD_RESUME_BUTTON_LABEL=Obnoviť
 #### DOWNLOAD_RESUME_BUTTON_TIP=Reattempt Selected Downloads
-#? DOWNLOAD_RESUME_BUTTON_TIP=Zopakovať sťahovanie vybraných súborov
+DOWNLOAD_RESUME_BUTTON_TIP=Zopakovať sťahovanie vybraných súborov
 #### DOWNLOAD_SOURCES_BUTTON_LABEL=Find Sources
 DOWNLOAD_SOURCES_BUTTON_LABEL=Nájť zdroje
 #### DOWNLOAD_SOURCES_BUTTON_TIP=Try to Find Additional Sources for Downloads
@@ -2017,7 +2017,7 @@ SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Načítavam už stiahn
 #### SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for Updates...
 SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Kontrolujem aktualizácie...
 #### SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading Directed Querier...
-#? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Načítavam priame požiadavky...
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Načítavam priame požiadavky...
 #### SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading Magnet Listener...
 SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Načítavam Magnet naslúchač...
 #### SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading Peer Listener...
@@ -2136,7 +2136,7 @@ NO_INTERNET=Zdá sa, že váš počítač nemá aktívne pripojenie k internet a
 # keep trying.
 ################################################################################
 #### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
-#? NO_INTERNET_RETRYING=Zdá sa, že váš počítač nemá aktívne pripojenie k internet alebo váš firewall blokuje LimeWire prístup k internetu. LimeWire sa bude automaticky snažiť pripojiť sa k internetu pokiaľ nezvolíte "Odpojiť" z menu Súbor.
+NO_INTERNET_RETRYING=Zdá sa, že váš počítač nemá aktívne pripojenie k internet alebo váš firewall blokuje LimeWire prístup k internetu. LimeWire sa bude automaticky snažiť pripojiť sa k internetu pokiaľ nezvolíte "Odpojiť" z menu Súbor.
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
@@ -2145,7 +2145,7 @@ NO_INTERNET=Zdá sa, že váš počítač nemá aktívne pripojenie k internet a
 #### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_FETCHED_TOO_MANY=LimeWire sa nepodrilo spojiť na server siete Gnutella. Najčastejšie to spôsobujefirewall alebo softvér na filtrovanie obsahu blokuje prístup do Gnutella (port 6346). Skontrolujte prosím nastavenie firewallu a povolte LimeWire prístup do siete Gnutella alebo kontaktujte vášho systémového administrátora alebo poskytovateľa internetového pripojenia, aby zistili, či nie je odfiltrovávaný prenos siete Gnutella.
 #### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
-#? GWEBCACHE_NO_CACHES_LEFT=LimeWire sa nepodrilo spojiť na server siete Gnutella. Najčastejšie to spôsobujefirewall alebo softvér na filtrovanie obsahu blokuje prístup do Gnutella (port 6346). Skontrolujte prosím nastavenie firewallu a povolte LimeWire prístup do siete Gnutella alebo kontaktujte vášho systémového administrátora alebo poskytovateľa internetového pripojenia, aby zistili, či nie je odfiltrovávaný prenos siete Gnutella.
+GWEBCACHE_NO_CACHES_LEFT=LimeWire sa nepodrilo spojiť na server siete Gnutella. Najčastejšie to spôsobujefirewall alebo softvér na filtrovanie obsahu blokuje prístup do Gnutella (port 6346). Skontrolujte prosím nastavenie firewallu a povolte LimeWire prístup do siete Gnutella alebo kontaktujte vášho systémového administrátora alebo poskytovateľa internetového pripojenia, aby zistili, či nie je odfiltrovávaný prenos siete Gnutella.
 
 ################################################################################
 # Key/Value pairs for friendly error messages.
@@ -2347,7 +2347,7 @@ LICENSE_CC_DETAILS=Detaily licencie:
 #### LICENSE_CC_CLAIMED_DEED=View Claimed License Deed
 LICENSE_CC_CLAIMED_DEED=Zobraziť požiadavky licenčnej listiny
 #### LICENSE_CC_DEED=View License Deed
-#? LICENSE_CC_DEED=Zobraziť licenčnú listinu
+LICENSE_CC_DEED=Zobraziť licenčnú listinu
 #### LICENSE_CC_VERIFICATION=View Verification Page
 LICENSE_CC_VERIFICATION=Zobraziť overovaciu stránku
 #### LICENSE_CC=Creative Commons
@@ -2357,7 +2357,7 @@ LICENSE_CC=Creative Commons
 # Messages for Weed Licensing
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
-LICENSE_WEED_TITLE=
+#? LICENSE_WEED_TITLE=
 #### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
 #? LICENSE_WEED_LOCATING=
 #### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.

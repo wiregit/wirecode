@@ -24,7 +24,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 ################################################################################
 # How to translate:
-# 1) Find a line that begins with #
+# 1) Find a line that begins with #?
 # 2) Remove the #?
 # 3) Translate the line
 #
@@ -107,7 +107,7 @@ OPTIONS_RESTART_REQUIRED=واحدة أو أكثر من الخيارات سيظه
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
 #? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=ƚҝ ȡ䓭ۤ͠ 摇 ȡϭȑ...
+OPTIONS_LEARN_MORE_LABEL=ƚҝ ȡ䓭ۤ͠ 摇 ȡϭȑ...
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -169,7 +169,7 @@ ABOUT_BUTTON_TIP=إغلاق النافذة.
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
-ABOUT_DEV_BLURB= LimeWier 椠ĭׇ, وۇ, 椠刊ʠԇۇȠȡۣ�♦ ȡ˭ ۣ�⮥Š䙦ҭ LimeWier: 
+ABOUT_DEV_BLURB=LimeWier 椠ĭׇ, وۇ, 椠刊ʠԇۇȠȡۣ�♦ ȡ˭ ۣ�⮥Š䙦ҭ LimeWier: 
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 #? ABOUT_BIZDEV_BLURB=
 #### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
@@ -250,7 +250,7 @@ LIBRARY_TITLE=المكتبة
 OPTIONS_TITLE=خيارات
 #### STATS_TITLE=Statistics
 STATS_TITLE=إحصائيات
-#### TITLE=Downloads
+#### DOWNLOAD_TITLE=Downloads
 DOWNLOAD_TITLE=الملفات الجاري تنزيلها
 #### UPLOAD_TITLE=Uploads
 UPLOAD_TITLE=الملفات الجاري تحميلها
@@ -518,13 +518,14 @@ MENU_HELP_ERROR_ACCESSIBLE=تخليق خطأ منبثق للاختبار.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=ƙ我 姚ȡƊև�#### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
+#### STATUS_BAR_SHOW_SHARED_FILES_COUNT=Show Shared Files Count
 STATUS_BAR_SHOW_SHARED_FILES_COUNT=ƙ我 ۏ͠ȡ䢝Ȋ 
 #### STATUS_BAR_SHOW_LANGUAGE_STATUS=Show Language Status
 STATUS_BAR_SHOW_LANGUAGE_STATUS=ƙ我 ·⇠ȡ✉
 #### STATUS_BAR_SHOW_FIREWALL_STATUS=Show Firewall Status
 STATUS_BAR_SHOW_FIREWALL_STATUS=ƙ我 ·⇠ȡFierwall
 #### STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=Show Bandwidth Consumption
-STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=↙我 ࠣƓ˥∟ ȡƤˑ刉		
+STATUS_BAR_SHOW_BANDWIDTH_CONSUMPTION=↙我 ࠣƓ˥∟ ȡƤˑ刉\t\t
 #### STATUS_BAR_SHOW_MEDIA_PLAYER=Show Media Player
 STATUS_BAR_SHOW_MEDIA_PLAYER=ƙ我 ȡMedia Player
 #### STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire has detected a firewall
@@ -791,6 +792,7 @@ DOWNLOAD_PAUSE_BUTTON_TIP=ƭ߇۠ȡˍ䮡Ȋ ȡ䏊ȑǠ䅞ˇ
 DOWNLOAD_POPUP_MENU_EDIT_LOCATION_LABEL=˛䧞ؠȡ䢝...
 #### DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=Edit the Final Filename of the Download
 DOWNLOAD_POPUP_MENU_EDIT_LOCATION_TIP=˛Ɠᡇ⤡۠ȡ䎣�#### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
+#### DOWNLOAD_POPUP_MENU_CLEAR=Clear All Inactive Downloads
 DOWNLOAD_POPUP_MENU_CLEAR=ơ܇�ࠡ ȡˍ䮡Ȋ ȡܭϠ刔ى
 #### DOWNLOAD_EXPLORE_BUTTON_TIP=Open Folder Containing the File
 DOWNLOAD_EXPLORE_BUTTON_TIP=Ɲˍ ȡ䍡͠ȡѭ 章ۡꡇ⤡ۍ
@@ -919,6 +921,7 @@ DIRECTORY_CHOOSER_FILE_DESCRIPTION=ࠡ ȡ䍡Їȍ
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=摇 ȡ䢝 䧌獠߈⅍
 #### SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Filename Taken
 SAVE_LOCATION_IS_ALREADY_DOWNLOADED_TO_SHORT_ERROR=Ɠᡇ⤡۠䔊ۣ�#### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
+#### SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=Download Already Finished
 SAVE_LOCATION_ALREADY_SAVED_SHORT_ERROR=ȡˍ䮡 Ƥ˥ꡞɡō
 #### SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=No Write Permission
 #? SAVE_LOCATION_DIRECTORY_NOT_WRITEABLE_SHORT_ERROR=
