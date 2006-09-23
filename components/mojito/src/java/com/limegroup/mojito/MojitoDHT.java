@@ -237,7 +237,10 @@ public interface MojitoDHT {
             long delay, long period, TimeUnit unit);
     
     /**
-     * 
+     * Creates and executes a periodic action that becomes enabled first
+     * after the given initial delay, and subsequently with the given
+     * delay. The action is executed on Mojito DHTs internal scheduled 
+     * Executor (an unbound ThreadPoolExecutor).
      */
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
             long initialDelay, long delay, TimeUnit unit);
