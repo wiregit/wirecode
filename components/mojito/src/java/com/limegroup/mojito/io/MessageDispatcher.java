@@ -235,7 +235,7 @@ public abstract class MessageDispatcher {
                 LOG.info(msg);
             }
             
-            tag.handleError(new IOException(msg));
+            process(new ErrorProcessor(tag, new IOException(msg)));
             return false;
         }
         
@@ -255,7 +255,7 @@ public abstract class MessageDispatcher {
                 LOG.error(msg);
             }
             
-            tag.handleError(new IOException(msg));
+            process(new ErrorProcessor(tag, new IOException(msg)));
             return false;
         }
         
@@ -266,7 +266,7 @@ public abstract class MessageDispatcher {
                 LOG.error(msg);
             }
             
-            tag.handleError(new IllegalSocketAddressException(msg));
+            process(new ErrorProcessor(tag, new IllegalSocketAddressException(msg)));
             return false;
         }
         
@@ -280,7 +280,7 @@ public abstract class MessageDispatcher {
                 LOG.error(msg);
             }
             
-            tag.handleError(new IllegalSocketAddressException(msg));
+            process(new ErrorProcessor(tag, new IllegalSocketAddressException(msg)));
             return false;
         }
         
@@ -591,7 +591,7 @@ public abstract class MessageDispatcher {
                 } catch (IOException err) {
                     LOG.error("IOException", err);
                     outputQueue.remove(0);
-                    tag.handleError(err);
+                    process(new ErrorProcessor(tag, err));
                 }
             }
 
@@ -952,6 +952,25 @@ public abstract class MessageDispatcher {
         
         public void run() {
             receipt.handleTick();
+        }
+    }
+    
+    /**
+     * An implementation of Runnable to handle Errors.
+     */
+    private class ErrorProcessor implements Runnable {
+        
+        private Tag tag;
+        
+        private Exception exception;
+        
+        private ErrorProcessor(Tag tag, Exception exception) {
+            this.tag = tag;
+            this.exception = exception;
+        }
+        
+        public void run() {
+            tag.handleError(exception);
         }
     }
 }
