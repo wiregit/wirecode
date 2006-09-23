@@ -678,13 +678,40 @@ public class RouteTableImpl implements RouteTable {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Local: ").append(getLocalNode()).append("\n");
         
+        int alive = 0;
+        int dead = 0;
+        int unknown = 0;
+        
         for(Bucket bucket : getBuckets()) {
             buffer.append(bucket).append("\n");
+            
+            for (Contact node : bucket.getActiveContacts()) {
+                if (node.isAlive()) {
+                    alive++;
+                } else if (node.isDead()) {
+                    dead++;
+                } else {
+                    unknown++;
+                }
+            }
+            
+            for (Contact node : bucket.getCachedContacts()) {
+                if (node.isAlive()) {
+                    alive++;
+                } else if (node.isDead()) {
+                    dead++;
+                } else {
+                    unknown++;
+                }
+            }
         }
         
         buffer.append("Total Buckets: ").append(bucketTrie.size()).append("\n");
         buffer.append("Total Active Contacts: ").append(getActiveContacts().size()).append("\n");
         buffer.append("Total Cached Contacts: ").append(getCachedContacts().size()).append("\n");
+        buffer.append("Total Alive Contacts: ").append(alive).append("\n");
+        buffer.append("Total Dead Contacts: ").append(dead).append("\n");
+        buffer.append("Total Unknown Contacts: ").append(unknown).append("\n");
         return buffer.toString();
     }
     
