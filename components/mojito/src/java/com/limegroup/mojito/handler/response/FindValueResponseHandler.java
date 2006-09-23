@@ -43,7 +43,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 
 /**
- * 
+ * The FindNodeResponseHandler class implements FIND_VALUE specific features.
  */
 public class FindValueResponseHandler extends LookupResponseHandler<FindValueEvent> {
 
@@ -126,8 +126,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
     }
     
     @Override
-    protected boolean doLookup(Contact node) throws IOException {
-        if (super.doLookup(node)) {
+    protected boolean sendLookupRequest(Contact node) throws IOException {
+        if (super.sendLookupRequest(node)) {
             lookupStat.addRequest();
             return true;
         }

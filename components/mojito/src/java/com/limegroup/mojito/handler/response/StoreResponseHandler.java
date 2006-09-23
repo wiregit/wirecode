@@ -148,6 +148,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     protected synchronized void start() throws Exception {
 
         if (isSingleNodeStore()) {
+            // Get the QueryKey if we don't have it
             if (queryKey == null) {
                 GetQueryKeyHandler handler = new GetQueryKeyHandler(node);
                 queryKey = handler.call();
@@ -160,8 +161,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             processList.add(new StoreProcess(node, queryKey, values));
             
         } else {
+            // Do a lookup for the k-closest Nodes where we're
+            // going to store the value
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, valueId);
+            
+            // Use only alive Contacts from the RouteTable
             handler.setFullLiveNodesLookup(true);
             List<Entry<Contact,QueryKey>> nodes = handler.call().getNodes();
             

@@ -33,7 +33,7 @@ import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 
 /**
- * 
+ * The PingRequestHandler handles incoming Stats requests.
  */
 public class StatsRequestHandler extends AbstractRequestHandler {
 

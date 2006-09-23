@@ -37,7 +37,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 
 /**
- * 
+ * The FindNodeResponseHandler class implements FIND_NODE specific features.
  */
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeEvent> {
@@ -100,8 +100,8 @@ public class FindNodeResponseHandler
     }
 
     @Override
-    protected boolean doLookup(Contact node) throws IOException {
-        if (super.doLookup(node)) {
+    protected boolean sendLookupRequest(Contact node) throws IOException {
+        if (super.sendLookupRequest(node)) {
             lookupStat.addRequest();
             return true;
         }

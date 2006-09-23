@@ -40,7 +40,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.util.CollectionUtils;
 
 /**
- * The FindNodeRequestHandler handles unsolicited FIND_VALUE requests
+ * The FindNodeRequestHandler handles incoming FIND_VALUE requests
  */
 public class FindValueRequestHandler extends AbstractRequestHandler {
     

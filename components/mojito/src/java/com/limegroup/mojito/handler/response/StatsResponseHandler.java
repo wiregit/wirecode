@@ -34,7 +34,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StatsResponse;
 
 /**
- * 
+ * The StatsResponseHandler handles responses for Stats requests
  */
 public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse> {
 

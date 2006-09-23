@@ -50,6 +50,14 @@ import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.EntryImpl;
 
+/**
+ * The LookupResponseHandler class handles the entire Kademlia 
+ * lookup process. Subclasses implement lookup specific feautues
+ * like the type of the lookup (FIND_NODE and FIND_VALUE) or
+ * different lookup termintation conditions.
+ * 
+ * Think of the LookupResponseHandler as some kind of State-Machine.
+ */
 public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
 
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
@@ -69,7 +77,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /** Trie of Contacts that did respond */
     protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_ANALYZER);
     
-    /** */
+    /** Collection of Contacts that collide with our Node ID */
     protected Collection<Contact> collisions = new HashSet<Contact>();
     
     /** A Map we're using to count the number of hops */
@@ -192,6 +200,13 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         return -1L;
     }
     
+    /**
+     * Sets whether or not only alive Contacts from the local 
+     * RouteTable should be used as the lookup start Set. The
+     * default is false as lookups are an important tool to
+     * refresh the local RouteTable but in some cases it's
+     * useful to use 'guaranteed' alive Contacts.
+     */
     public void setFullLiveNodesLookup(boolean isFullLiveNodesLookup) {
         this.isFullLiveNodesLookup = isFullLiveNodesLookup;
     }
@@ -208,6 +223,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         } else {
             nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         }
+        
         for(Contact node : nodes) {
             addYetToBeQueried(node, currentHop+1);
             routeTableNodes.add(node.getNodeID());
@@ -251,10 +267,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Go Go Go!
         startTime = System.currentTimeMillis();
         for(Contact node : alphaList) {
-            doLookup(node);                
+            sendLookupRequest(node);                
         }
         
-        finishIfDone();
+        finishLookupIfDone();
     }
 
     @Override
@@ -334,7 +350,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         
         nextLookupStep();
-        finishIfDone();
+        finishLookupIfDone();
     }
     
     @Override
@@ -369,7 +385,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         currentHop = hop.intValue();
         nextLookupStep();
-        finishIfDone();
+        finishLookupIfDone();
     }
     
     @Override
@@ -478,7 +494,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 }
                 
                 try {
-                    doLookup(node);
+                    sendLookupRequest(node);
                 } catch (SocketException err) {
                     LOG.error("A SocketException occured", err);
                 }
@@ -489,7 +505,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /**
      * Sends a lookup request to the given Contact
      */
-    protected boolean doLookup(Contact node) throws IOException {
+    protected boolean sendLookupRequest(Contact node) throws IOException {
         LookupRequest request = createLookupRequest(node.getContactAddress());
         
         if (LOG.isTraceEnabled()) {
@@ -497,12 +513,12 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         }
         
         markAsQueried(node);
-        boolean wasSent = context.getMessageDispatcher().send(node, request, this);
+        boolean requestWasSent = context.getMessageDispatcher().send(node, request, this);
         
-        if (wasSent) {
+        if (requestWasSent) {
             incrementActiveSearches();
         }
-        return wasSent;
+        return requestWasSent;
     }
     
     /**
@@ -515,7 +531,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Calls finishLookup() if the lookup isn't already
      * finished and there are no parallel searches active
      */
-    private void finishIfDone() {
+    private void finishLookupIfDone() {
         if (!isDone() && !isCancelled() && hasActiveSearches() == false) {
             finishLookup();
         }
@@ -616,6 +632,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         responses.put(node.getNodeID(), entry);
         
+        // We're only interested in the k-closest
+        // Contacts so remove the worst ones
         if (responses.size() > getResultSetSize()) {
             Contact worst = responses.select(furthestId).getKey();
             responses.remove(worst.getNodeID());

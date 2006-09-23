@@ -39,7 +39,7 @@ import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CollectionUtils;
 
 /**
- * The FindNodeRequestHandler handles unsolicited FIND_NODE requests
+ * The FindNodeRequestHandler handles incoming FIND_NODE requests
  */
 public class FindNodeRequestHandler extends AbstractRequestHandler {
 
