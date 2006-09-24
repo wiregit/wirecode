@@ -90,6 +90,10 @@ public class Main {
             System.exit(0);
         }
         
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+            System.out.println("WARNING: LOCAL_IS_PRIVATE is set to false!");
+        }
+        
         run(port, dhts, bootstrapHost);
     }
     

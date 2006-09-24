@@ -57,7 +57,7 @@ public class CacheForwardTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    public void testCaseForward() throws Exception {
+    public void testCacheForward() throws Exception {
         
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);

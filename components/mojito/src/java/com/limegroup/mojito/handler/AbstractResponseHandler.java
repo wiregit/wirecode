@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +38,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.util.OnewayExchanger;
 
 /**
  * An abstract base class for ResponseHandlers
@@ -58,30 +60,31 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     private int maxErrors;
     
     /** LOCK */
-    private final Object lock = new Object();
+    private Object lock = new Object();
     
     /** Whether or not this handler has been started */
-    private volatile boolean started = false;
+    private boolean started = false;
     
     /** Whether or not this handler has finished */
-    private volatile boolean finished = false;
-    
-    /** Whether or not this handler was cancelled */
-    private volatile boolean cancelled = false;
-    
-    /** Whether or not this handler is done */
-    private volatile boolean done = false;
-    
-    /** The return value */
-    private volatile V value = null;
-    
-    /** The Exception we may throw */
-    private volatile Exception ex = null;
+    private boolean finished = false;
     
     /** A handle to Context */
     protected final Context context;
     
+    /** */
     protected long lastResponseTime = 0L;
+    
+    /**
+     * The OnewayExchanger is the synchronization point for the
+     * front-end and back-end. The fron-end is in most cases a
+     * Future that is calling the call() method of the Callable
+     * interface and the back-end is most likely a processing
+     * Thread that is initialized by the MessageDispatcher.
+     * 
+     * In other words, the front-end is waiting for the result
+     * from the back-end.
+     */
+    private OnewayExchanger<V, Exception> exchanger = new OnewayExchanger<V, Exception>(true);
     
     public AbstractResponseHandler(Context context) {
         this(context, -1L, -1);
@@ -285,7 +288,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
 
     public boolean isCancelled() {
-        return cancelled;            
+        return exchanger.isCancelled();            
     }
     
     /**
@@ -294,7 +297,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Exception
      */
     protected boolean isDone() {
-        return done;
+        return exchanger.isDone();
     }
     
     /**
@@ -302,19 +305,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * call() method
      */
     protected void setReturnValue(V value) {
-        synchronized (lock) {
-            if (cancelled) {
-                return;
-            }
-            
-            if (done) {
-                throw new IllegalStateException();
-            }
-            
-            done = true;
-            this.value = value;
-            lock.notifyAll();
-        }
+        exchanger.setValue(value);
     }
     
     /**
@@ -322,82 +313,49 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * call() method
      */
     protected void setException(Exception ex) {
-        synchronized (lock) {
-            if (cancelled) {
-                return;
-            }
-            
-            if (done) {
-                throw new IllegalStateException();
-            }
-            
-            done = true;
-            this.ex = ex;
-            lock.notifyAll();
-        }
+        exchanger.setException(ex);
     }
     
     public V call() throws Exception {
-        try {
-            synchronized (lock) {
+        synchronized (lock) { 
+            try {
                 if (!started) {
                     started = true;
                     start();
                 }
-                
-                if (!done && !cancelled) {
-                    long timeout = getLockTimeout();
-                    lock.wait(timeout);
-                    
-                    // Woke up but still not done nor cancelled?
-                    // Must be the timeout -> throw an Exception!
-                    if (!done && !cancelled) {
-                        String state = getState();
-                        
-                        if (state == null) {
-                            setException(new LockTimeoutException("Timeout: " + timeout));
-                        } else {
-                            setException(new LockTimeoutException("Timeout: " + timeout + ", State: " + state));
-                        }
-                    }
-                }
-    
-                if (!done) {
-                    cancelled = true;
-                }
-                
-                if (cancelled && ex == null) {
-                    ex = new CancellationException();
-                }
-                
-                if (ex != null) {
-                    throw ex;
-                }
-                
-                return value;
-            }
-        } catch (InterruptedException err) {
-            cancelled = true;
-            ex = err;
-            cancelled();
-            throw err;
-        } finally {
-            if (!finished) {
-                finished = true;
-                
+            
                 try {
-                    finish();
-                } catch (Throwable t) {
-                    LOG.error("Throwable", t);
+                    return exchanger.get(getLockTimeout(), TimeUnit.MILLISECONDS);
+                } catch (TimeoutException err) {
+                    String state = getState();
+                    if (state == null) {
+                        throw new LockTimeoutException("Timeout: " + timeout);
+                    } else {
+                        throw new LockTimeoutException("Timeout: " + timeout + ", State: " + state);
+                    }
+                } catch (CancellationException err) {
+                    cancelled();
+                    throw err;
+                }
+                
+            } finally {
+                if (!finished) {
+                    finished = true;
+                    
+                    try {
+                        finish();
+                    } catch (Throwable t) {
+                        LOG.error("Throwable", t);
+                    }
                 }
             }
         }
     }
-
+    
     /**
      * Called if this handler was cancelled externally (interrupted)
      */
-    protected void cancelled() throws Exception {
+    protected void cancelled() {
     }
     
     /**
