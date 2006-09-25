@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.impl.Bucket;
 
 /**
  * Miscellaneous utilities for Buckets
@@ -111,7 +112,7 @@ public final class BucketUtils {
                     t2 = b.getLastFailedTime();
                     if (t1 == t2) {
                         return 0;
-                    } else if (t1 < t2) {
+                    } else if (t1 > t2) {
                         return 1;
                     } else {
                         return -1;
@@ -120,5 +121,27 @@ public final class BucketUtils {
             }
         });
         return nodes;
+    }
+    
+    /**
+     * Sort this list of Buckets by depth. Used for things such as 
+     * building a binary tree out of this list of buckets.
+     * 
+     */
+    public static <T extends Bucket> List<T> sortByDepth(List<T> buckets){
+        Collections.sort(buckets, new Comparator<T>() {
+            public int compare(T o1, T o2) {
+                int depth1 = o1.getDepth();
+                int depth2 = o2.getDepth();
+                if(depth1 == depth2) {
+                    return 0;
+                } else if(depth1 > depth2) {
+                    return 1;
+                } else 
+                    return -1;
+            }
+            
+        });
+        return buckets;
     }
 }
