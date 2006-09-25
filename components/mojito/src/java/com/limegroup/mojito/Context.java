@@ -265,55 +265,68 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     }
     
     /**
-     * Clears the RouteTable, generates a new random Node ID
-     * for the local Node and adds the (new) Node to the RouteTable.
+     * Generates a new random Node ID for the local Node, 
+     * rebuild the routing table with this new ID and purge 
+     * the database (it doesn't make sense to keep the key-values
+     * from our old node ID).
      * 
      * WARNING: Meant to be called only by BootstrapManager 
      *          or MojitoFactory!
      */
     public void changeNodeID() {
-        setLocalNodeID(KUID.createRandomID());
+        
+        KUID newID = KUID.createRandomID();
+        
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + newID);
+        }
+        
+        rebuildRouteTable(newID);
+        purgeDatabase(true);
     }
     
     /**
-     * Sets the local Node ID to the given ID. See also 
-     * changeNodeID() !
+     * Rebuilds the routeTable with the given local node ID.
+     * This will effectively clear the route table and
+     * re-add any previous node in the MRS order.
+     * 
+     * @param localNodeID the local node's KUID
      */
-    private synchronized void setLocalNodeID(KUID nodeId) {
-        if (!nodeId.equals(getLocalNodeID())) {
+    public void rebuildRouteTable(KUID localNodeID) {
+        synchronized (routeTable) {
+            // Backup the current Node ID and all live Contacts
+            List<Contact> backup = new ArrayList<Contact>(routeTable.getActiveContacts());
+            backup.remove(localNode);
             
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + nodeId);
+            // Change the Node ID
+            localNode.setNodeID(localNodeID);
+            
+            // Clear the RouteTable and add the local Node with our
+            // new Node ID
+            routeTable.clear();
+            routeTable.add(localNode);
+            
+            // Sort the Nodes list (because rebuilding the table with 
+            // the new Node ID will probably evict some nodes)
+            backup = BucketUtils.sortAliveToFailed(backup);
+            
+            // Re-add the Contacts but set their state to Unknown
+            // so that they can be easily replaced by new live 
+            // Contacts
+            for (Contact node : backup) {
+                node.unknown();
+                routeTable.add(node);
             }
-            
-            synchronized (routeTable) {
-                // Backup the current Node ID and all live Contacts
-                List<Contact> backup = new ArrayList<Contact>(routeTable.getActiveContacts());
-                backup.remove(localNode);
-                
-                // Change the Node ID
-                localNode.setNodeID(nodeId);
-                
-                // Clear the RouteTable and add the local Node with our
-                // new Node ID
-                routeTable.clear();
-                routeTable.add(localNode);
-                
-                // Sort the Nodes list (because rebuilding the table with 
-                // the new Node ID will probably evict some nodes)
-                backup = BucketUtils.sortAliveToFailed(backup);
-                
-                // Re-add the Contacts but set their state to Unknown
-                // so that they can be easily replaced by new live 
-                // Contacts
-                for (Contact node : backup) {
-                    node.unknown();
-                    routeTable.add(node);
-                }
-            }
-            
-            purgeDatabase(true);
         }
+    }
+    
+    /**
+     * Rebuilds the routing table with our existing nodeID.
+     * Used to have a well-balanced bucket tree, i.e. prune empty
+     * buckets and merge non-full subtrees.
+     */
+    public void rebuildRouteTable() {
+        rebuildRouteTable(getLocalNodeID());
     }
     
     public boolean isLocalNode(Contact node) {
