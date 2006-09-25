@@ -171,7 +171,9 @@ public class HTTPAcceptor {
                 if (word.equals("GET")) {
                     handleHTTPRequest(_socket);
                 } else if (word.equals("MAGNET")) {
-                    ExternalControl.fireMagnet(_socket);
+                    ExternalControl.fireControlThread(_socket, true);
+                } else if (word.equals("TORRENT")) {
+                	ExternalControl.fireControlThread(_socket, false);
                 }
             } catch (IOException e) {
             } finally {

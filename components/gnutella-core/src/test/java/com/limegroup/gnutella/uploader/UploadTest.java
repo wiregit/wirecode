@@ -2661,6 +2661,10 @@ public class UploadTest extends BaseTestCase {
 
         private List activeUploads = new ArrayList();
         
+        public TestUploadManager() {
+        	super(new UploadSlotManager());
+        }
+        
         protected synchronized void addAcceptedUploader(HTTPUploader uploader) {
             activeUploads.add(uploader);
             super.addAcceptedUploader(uploader);

@@ -33,7 +33,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
     public static final int INVALID                 = 19;
-
+    
     
     /**
      * Stops this.  If the download is already stopped, does nothing.
@@ -52,8 +52,17 @@ public interface Downloader extends BandwidthTracker {
     public boolean isPaused();
     
     /**
-     * Determines if this downloader is in an inactive state that can be resumed
-     * from.
+     * @return if this downloader can be paused.
+     */
+    public boolean isPausable();
+    
+    /**
+     * @return if this downloader can be resumed.
+     */
+    public boolean isResumable();
+    
+    /**
+     * Determines if this downloader is in an inactive state 
      */
     public boolean isInactive();
 	
@@ -129,12 +138,12 @@ public interface Downloader extends BandwidthTracker {
      * Returns the size of this file in bytes, i.e., the total amount to
      * download. 
      */
-    public int getContentLength();
+    public long getContentLength();
 
     /**
      * Returns the amount read by this so far, in bytes.
      */
-    public int getAmountRead();
+    public long getAmountRead();
     
     /**
      * @return the amount of data pending to be written on disk (i.e. in cache, queue)
@@ -166,6 +175,11 @@ public interface Downloader extends BandwidthTracker {
 	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
 	 */
 	public boolean hasChatEnabledHost();
+	
+	/**
+	 * @return if this downloader can be launched.
+	 */
+	public boolean isLaunchable();
 
     /**
      * either treats a corrupt file as normal file and saves it, or 
@@ -228,7 +242,7 @@ public interface Downloader extends BandwidthTracker {
 	/**
 	 * @return the amount of data that has been verified
 	 */
-	public int getAmountVerified();
+	public long getAmountVerified();
 	
 	/**
 	 * @return the chunk size for the given download
@@ -238,7 +252,7 @@ public interface Downloader extends BandwidthTracker {
 	/**
 	 * @return the amount of data lost due to corruption
 	 */
-	public int getAmountLost();
+	public long getAmountLost();
 
 	/**
 	 * Returns the sha1 urn associated with the file being downloaded, or

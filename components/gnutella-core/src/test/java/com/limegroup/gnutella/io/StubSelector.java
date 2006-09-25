@@ -56,9 +56,7 @@ class StubSelector extends AbstractSelector {
             StubSelectionKey key = (StubSelectionKey)i.next();
             StubChannel channel = (StubChannel)key.channel();
             int ready = channel.readyOps() & key.interestOps();
-            System.out.println("checking key: " + key + ", channel: " + channel + ", channelR: " + channel.readyOps() + ", kI: " + key.interestOps());
             if(ready != 0) {
-                System.out.println("ready with: " + ready);
                 key.setReadyOps(ready);
                 selectedKeys.add(key);
             }

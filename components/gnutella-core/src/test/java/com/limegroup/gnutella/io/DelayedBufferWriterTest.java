@@ -2,12 +2,19 @@ package com.limegroup.gnutella.io;
 
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.WriteBufferChannel;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 
 public class DelayedBufferWriterTest extends BaseTestCase {
@@ -36,7 +43,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         assertNull(sink.observer);
         assertNull(source.channel);
         
-        DelayedBufferWriter delayer = new DelayedBufferWriter(1);
+        DelayedBufferWriter delayer = new DelayedBufferWriter(1,200, new StubScheduler());
         setupChain(delayer);
         // test that when we set the sink we register that we are interested in events
         assertEquals(delayer, sink.observer);
@@ -55,7 +62,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         ByteBuffer buf = ByteBuffer.wrap(data);
         
         
-        DelayedBufferWriter delayer = new DelayedBufferWriter(5);
+        DelayedBufferWriter delayer = new DelayedBufferWriter(5,200, new StubScheduler());
         setupChain(delayer);
         source.setBuffer(buf);
         sink.resize(5);
@@ -87,7 +94,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         ByteBuffer buf = ByteBuffer.wrap(data);
         
         
-        DelayedBufferWriter delayer = new DelayedBufferWriter(2);
+        DelayedBufferWriter delayer = new DelayedBufferWriter(2,200, new StubScheduler());
         setupChain(delayer);
         source.setBuffer(buf);
         sink.resize(3);
@@ -114,7 +121,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         byte [] data = new byte[]{(byte)1};
         ByteBuffer buf = ByteBuffer.wrap(data);
         
-        DelayedBufferWriter delayer = new DelayedBufferWriter(2);
+        DelayedBufferWriter delayer = new DelayedBufferWriter(2,200, new StubScheduler());
         setupChain(delayer);
         source.setBuffer(buf);
         sink.resize(3);        
@@ -141,29 +148,117 @@ public class DelayedBufferWriterTest extends BaseTestCase {
     }
     
     /**
-     * tests that if nobody is interested in the buffer and its empty,
-     * it turns itself off from the chain
+     * tests that if nobody is interested in the buffer but its not empty,
+     * it will turn its interest off but will schedule a flushing.
+     * @throws Exception
      */
-    public void testTurnsInterestOff() throws Exception {
-        byte [] data = new byte[]{(byte)1};
+    public void testFlushingScheduled() throws Exception {
+        byte [] data = new byte[]{(byte)2};
         ByteBuffer buf = ByteBuffer.wrap(data);
         
-        DelayedBufferWriter delayer = new DelayedBufferWriter(1);
+        StubScheduler scheduler = new StubScheduler();
+        DelayedBufferWriter delayer = new DelayedBufferWriter(2,200, scheduler);
         setupChain(delayer);
         source.setBuffer(buf);
         sink.resize(1);
         
         delayer.handleWrite(); // source->buf and source turns itself off
-        Thread.sleep(300);
-        delayer.handleWrite(); // buf-> sink
-        
         // delayer should have turned itself off
         assertFalse(sink.status);
+        
+        // but there should be a scheduled flusher
+        assertFalse(scheduler.tasks.isEmpty());
+        Runnable r = scheduler.tasks.get(0);
+        
+        // that should turn interest on
+        Thread.sleep(200);
+        r.run();
+        assertTrue(sink.status);
+    }
+    
+    public void testFlushingCancelled() throws Exception {
+    	byte [] data = new byte[]{(byte)2};
+        ByteBuffer buf = ByteBuffer.wrap(data);
+        
+        StubScheduler scheduler = new StubScheduler();
+        DelayedBufferWriter delayer = new DelayedBufferWriter(2,200, scheduler);
+        setupChain(delayer);
+        source.setBuffer(buf);
+        sink.resize(1);
+        
+        delayer.handleWrite(); // source->buf and source turns itself off
+        // delayer should have turned itself off
+        assertFalse(sink.status);
+        
+        // but there should be a scheduled cleaner
+        assertFalse(scheduler.tasks.isEmpty());
+        assertFalse(scheduler.futures.isEmpty());
+        assertFalse(scheduler.futures.get(0).isCancelled());
+        
+        // buf if in the meantime someone becomes interested in the
+        // delayer again the cleaner should be cancelled.
+        delayer.interest(source, true);
+        assertTrue(scheduler.futures.get(0).isCancelled());
+        
+        // even if the cancelling happens too late, the interester
+        // should still do nothing.
+        PrivilegedAccessor.setValue(sink,"status", Boolean.FALSE);
+        Thread.sleep(200);
+        scheduler.tasks.get(0).run();
+        assertFalse(sink.status);
+        
     }
     
     private void setupChain(DelayedBufferWriter delayer) {
         source.setWriteChannel(delayer);
         delayer.interest(source,true);
         delayer.setWriteChannel(sink);
+    }
+    
+    private class StubScheduler implements SchedulingThreadPool {
+
+    	List<Runnable> tasks = new ArrayList<Runnable>();
+    	List<StubFuture> futures = new ArrayList<StubFuture>();
+		public Future invokeLater(Runnable r, long delay) {
+			tasks.add(r);
+			StubFuture f = new StubFuture(delay, r); 
+			futures.add(f);
+			return f;
+		}
+
+		public void invokeLater(Runnable runner) {
+			throw new IllegalArgumentException();
+		}
+    }
+    
+    private class StubFuture implements Future {
+    	final long delay;
+    	final Runnable r;
+    	boolean cancelled;
+    	StubFuture(long delay, Runnable r) {
+    		this.delay = delay;
+    		this.r = r;
+    	}
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			cancelled = true;
+			return false;
+		}
+
+		public Object get() throws InterruptedException, ExecutionException {
+			return null;
+		}
+
+		public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+			return null;
+		}
+
+		public boolean isCancelled() {
+			return cancelled;
+		}
+
+		public boolean isDone() {
+			return false;
+		}
+    	
     }
 }

@@ -10,6 +10,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
 
@@ -315,9 +318,11 @@ public class NIODispatcherTest extends BaseTestCase {
             Socket socket = new Socket();
             channel.setSocket(socket);
             NIODispatcher.instance().registerConnect(channel, observer, 0);
+            NIODispatcher.instance().wakeup();
             Thread.sleep(300);
             assertEquals(SelectionKey.OP_CONNECT, interestOps(channel));
             channel.setReadyOps(SelectionKey.OP_CONNECT);
+            NIODispatcher.instance().wakeup();
             observer.waitForEvent(1000);
             assertSame(socket, channel.socket());
             assertEquals(0, interestOps(channel));
@@ -326,6 +331,7 @@ public class NIODispatcherTest extends BaseTestCase {
             NIODispatcher.instance().interestRead(channel, true);
             assertEquals(SelectionKey.OP_READ, interestOps(channel));
             channel.setReadyOps(SelectionKey.OP_READ);
+            NIODispatcher.instance().wakeup();
             observer.waitForEvent(2000);
             assertEquals(1, observer.getReadsHandled());
         } finally {
@@ -333,7 +339,37 @@ public class NIODispatcherTest extends BaseTestCase {
         }
     }
     
-    
+    /**
+     * tests that scheduling tasks works and that they are executed on
+     * the dispatcher thread.
+     */
+    public void testSchedulingTasks() throws Exception {
+    	// first get a ref to the dispatch thread
+    	final AtomicReference<Thread>t = new AtomicReference<Thread>();
+    	NIODispatcher.instance().invokeLater(new Runnable() {
+    		public void run() {
+    			t.set(Thread.currentThread());
+    		}
+    	});
+    	
+    	while(t.get() != null)
+    		Thread.sleep(10);
+    	
+    	final CountDownLatch executed = new CountDownLatch(1);
+    	java.util.concurrent.Future f = NIODispatcher.instance().invokeLater(new Runnable() {
+    		public void run() {
+    			// should be executed on the dispatch thread
+    			assertSame(t.get(), Thread.currentThread());
+    			executed.countDown();
+    		}
+    	}, 500);
+
+    	// and not get executed until the timeout elapses
+    	assertFalse(executed.await(495,TimeUnit.MILLISECONDS));
+    	assertFalse(f.isDone());
+    	assertTrue(executed.await(10,TimeUnit.MILLISECONDS));
+    	assertTrue(f.isDone());
+    }
     
     private int interestOps(SelectableChannel channel) throws Exception {
         // peeks into the NIODispatcher to get the Selector so we can assert the interetOps

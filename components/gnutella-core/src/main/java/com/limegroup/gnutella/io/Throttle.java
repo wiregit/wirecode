@@ -24,5 +24,10 @@ public interface Throttle {
      * Sets the rate of the throttle.
      */
     public void setRate(float rate);
+    
+    /**
+     * @return the time in milliseconds when the next tick will begin.
+     */
+    public long nextTickTime();
 }
     

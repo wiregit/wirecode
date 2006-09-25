@@ -26,4 +26,14 @@ public final class Constants {
      * how long a minute is.  Not final so that tests can change it.
      */
     public static long MINUTE = 60*1000;
+    
+    /**
+	 * Identifier for ISO-Latin-1 encoding
+	 */
+	public static final String ASCII_ENCODING = "ISO-8859-1";
+
+	/**
+	 * Identifier for UTF-8 encoding
+	 */
+	public static final String UTF_8_ENCODING = "UTF-8";
 }

@@ -363,7 +363,8 @@ public class UpdateHandler {
             if(dm.isGUIInitd() && fm.isLoadFinished()) {
                 
                 FileDesc shared = fm.getFileDescForUrn(next.getUpdateURN());
-                ManagedDownloader md = dm.getDownloaderForURN(next.getUpdateURN());
+                //TODO: remove the cast
+                ManagedDownloader md = (ManagedDownloader)dm.getDownloaderForURN(next.getUpdateURN());
                 if(LOG.isDebugEnabled())
                     LOG.debug("Looking for: " + next + ", got: " + shared);
                 

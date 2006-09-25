@@ -223,10 +223,9 @@ public final class ConnectionChecker implements Runnable {
         if (down != 0)
             return false;
         
-        RouterService.getUploadManager().measureBandwidth();
-        float up = RouterService.getUploadManager().getMeasuredBandwidth();
-        
-        return up == 0;
+        // query the upload slot manager, because multicast
+        // uploads do not use slots and we do not care about them.
+        return !RouterService.getUploadManager().hasActiveInternetTransfers();
     }
     
     /**

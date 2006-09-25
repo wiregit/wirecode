@@ -72,9 +72,13 @@ public class ProcessingQueue implements ThreadPool {
      */
     public synchronized void add(Runnable r) {
         QUEUE.add(r);
-        notify();
-        if(_runner == null)
-            startRunner();
+        notifyAndStart();
+    }
+    
+    protected synchronized void notifyAndStart() {
+    	notify();
+    	if(_runner == null)
+    		startRunner();
     }
     
     /**
@@ -112,11 +116,15 @@ public class ProcessingQueue implements ThreadPool {
     /**
      * Gets the next item to be processed.
      */
-    private synchronized Runnable next() {
+    protected synchronized Runnable next() {
         if(QUEUE.size() > 0)
             return QUEUE.remove(0);
         else
             return null;
+    }
+    
+    protected synchronized boolean moreTasks() {
+    	return !QUEUE.isEmpty();
     }
     
     /**
@@ -136,7 +144,7 @@ public class ProcessingQueue implements ThreadPool {
                     synchronized(ProcessingQueue.this) {
                         // If something was added before we grabbed the lock,
                         // process those items immediately instead of waiting
-                        if(!QUEUE.isEmpty())
+                        if(moreTasks())
                             continue;
                         
                         // Wait a little bit to see if something new is going
@@ -148,7 +156,7 @@ public class ProcessingQueue implements ThreadPool {
                         
                         // If something was added and notified us, process it
                         // instead of exiting.
-                        if(!QUEUE.isEmpty())
+                        if(moreTasks())
                             continue;
                         // Otherwise, exit
                         else
@@ -163,7 +171,7 @@ public class ProcessingQueue implements ThreadPool {
                 // We cannot loop here because we'd lose any exceptions
                 // that may have been thrown.
                 synchronized(ProcessingQueue.this) {
-                    if(!QUEUE.isEmpty())
+                    if(moreTasks())
                         startRunner();
                     else
                         _runner = null;

@@ -25,6 +25,7 @@ public class FakeThrottle implements Throttle {
     }
     
     void setAvailable(int av) { available = av; }
+    public void limit(int i){}
     int getAvailable() { return available; }
     int interests() { return interests; }
     public boolean didRequest() { return didRequest; }
@@ -32,6 +33,7 @@ public class FakeThrottle implements Throttle {
     void clear() { available = 0; interests = 0; didRequest = false; didRelease = false; }
     
     public void setRate(float rate) {}
+    public long nextTickTime() {return 0;}
 }
     
     

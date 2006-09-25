@@ -3,14 +3,18 @@ package com.limegroup.gnutella.chat;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.IOUtils;
 
@@ -21,7 +25,7 @@ import com.limegroup.gnutella.util.IOUtils;
  *
  * @author rsoule
  */
-public final class ChatManager {
+public final class ChatManager implements ConnectionAcceptor {
 
 	/**
 	 * Constant for the <tt>ChatManager</tt> instance, following
@@ -42,6 +46,14 @@ public final class ChatManager {
 		return CHAT_MANAGER;
 	}
 
+	private ChatManager() {
+		RouterService.getConnectionDispatcher().
+		addConnectionAcceptor(this,
+				new String[]{"CHAT"},
+				false,
+				false);
+	}
+	
 	/** 
 	 * Accepts the given socket for a one-to-one
 	 * chat connection, like an instant messanger.
@@ -125,5 +137,10 @@ public final class ChatManager {
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.
                     setValue((String[])bannedList.toArray());
 		}
+	}
+
+	public void acceptConnection(String word, Socket s) {
+		HTTPStat.CHAT_REQUESTS.incrementStat();
+		accept(s);
 	}
 }

@@ -95,7 +95,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return null;
     }
 
-    private ManagedDownloader getMyDownloader() {
+    private Downloader getMyDownloader() {
         return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
     }
     
@@ -104,7 +104,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 */
 	public boolean isActivelyDownloading() {
         
-        ManagedDownloader md = getMyDownloader();
+        Downloader md = getMyDownloader();
 	    
 	    if(md == null)
 	        return false;

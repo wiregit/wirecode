@@ -24,6 +24,8 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     private int available;    
     /** The object that the Throttle will recognize as the SelectionKey attachments */
     private Object attachment;
+    /** Whether we interested the channel last time */
+    private boolean channelInterested;
     
     /**
      * Constructs a ThrottleWriter with the given Throttle.
@@ -84,8 +86,11 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen()) {
-            channel.interest(this, true);
-            return true;
+        	if (!channelInterested) {
+        		channelInterested = true;
+        		channel.interest(this, true);
+        	}
+        	return true;
         } else {
             return false;
         }
@@ -154,21 +159,19 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
         InterestWriteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no source.");
-            
         WriteObserver interested = observer;
-        if(available != 0) {
-            chain.interest(this, false);
-            if(interested != null)
-                interested.handleWrite();
-            interested = observer; // re-get it, since observer may have changed interest.
-            if(interested != null) {
-                throttle.interest(this);
-                return true;
-            } else {
-                return false;
-            }
+        chain.interest(this, false);
+        channelInterested = false;
+        if (available > 0) {
+        	if(interested != null)
+        		interested.handleWrite();
+        	interested = observer; // re-get it, since observer may have changed interest.
+        }
+        if(interested != null) {
+        	throttle.interest(this);
+        	return true;
         } else {
-            return true;
+        	return false;
         }
     }
     

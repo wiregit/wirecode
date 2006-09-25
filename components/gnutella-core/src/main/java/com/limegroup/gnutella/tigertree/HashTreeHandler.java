@@ -11,9 +11,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -383,22 +386,25 @@ class HashTreeHandler {
             if (LOG.isDebugEnabled())
                 LOG.debug("XMLTreeDescription read: " + data);
 
-            DOMParser parser = new DOMParser();
-            InputSource is = new InputSource(new StringReader(data));
-            parser.setEntityResolver(new Resolver());
 
 
+            Document doc = null;
             try {
-                parser.parse(is);
+            	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            	InputSource is = new InputSource(new StringReader(data));
+            	parser.setEntityResolver(new Resolver());
+                doc = parser.parse(is);
             } catch (IOException ioe) {
                 LOG.debug(ioe);
                 return false;
             } catch (SAXException saxe) {
                 LOG.debug(saxe);
                 return false;
+            } catch (ParserConfigurationException bad) {
+            	LOG.debug(bad);
+            	return false;
             }
 
-            Document doc = parser.getDocument();
             Node treeDesc = doc.getElementsByTagName("hashtree").item(0);
             if (treeDesc == null) {
                 if(LOG.isDebugEnabled())

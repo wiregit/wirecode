@@ -15,6 +15,7 @@
   <property name="cloverdir"       value="clover"/>
   <property name="cloverjar"       value="lib/clover.jar"/>
   <property name="log.properties"  value="jdk14.logging.properties"/>
+  <property name="module"          value="gnutella"/>
 
   <!-- constants --> 
   <property name="DEBUG" value="yes" />
@@ -96,7 +97,7 @@
   <target name="init" >
     <available file="${jars}" type="dir" property="jars.present"/>
     <tstamp/>
-    <antcall target="checkjars"/>    
+    <antcall target="checkjars"/>   
   </target>
 
   <target name="checkjars" unless="jars.present">
@@ -164,7 +165,7 @@
   <!-- Formats the XML output to html. -->
  <target name="test package" if="package">
     <antcall target="batchunit" inheritRefs="true">
-        <param name="unit" value="com/limegroup/gnutella/${package}/*Test.class"/>
+        <param name="unit" value="com/limegroup/${module}/${package}/*Test.class"/>
         <param name="haltonfailure" value="no"/>
         <param name="haltonerror" value="no"/>
     </antcall>
@@ -180,7 +181,7 @@
  <!-- ant -D"class=downloader/DownloadTest" test -->
  <target name="test" if="class">
     <antcall target="batchunit" inheritRefs="true">
-        <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
+        <param name="unit" value="com/limegroup/${module}/${class}.class"/>
         <param name="haltonfailure" value="yes"/>
         <param name="haltonerror" value="yes"/>
     </antcall>
@@ -196,7 +197,7 @@
  <!-- ant -D"class=downloader/DownloadTest" test -->
  <target name="testnofail" if="class">
     <antcall target="batchunit" inheritRefs="true">
-        <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
+        <param name="unit" value="com/limegroup/${module}/${class}.class"/>
         <param name="haltonfailure" value="no"/>
         <param name="haltonerror" value="no"/>
     </antcall>

@@ -184,6 +184,13 @@ public class BufferByteArrayOutputStream extends ByteArrayOutputStream {
         buffer.put(b, off, len);
     }
     
+    public void write(ByteBuffer src) {
+    	if (grow && src.remaining() > buffer.remaining())
+    		grow(src.remaining());
+    	
+    	buffer.put(src);
+    }
+    
     /**
      * Writes the given byte to the buffer.
      * If the buffer is already full and cannot grow, a BufferOverflowException is thrown

@@ -42,13 +42,8 @@ public interface Uploader extends BandwidthTracker {
 	/**
 	 * returns the length of the file being uploaded.
 	 */ 
-	public int getFileSize();
+	public long getFileSize();
 	
-	/**
-	 * returns the length of the requested size for uploading
-	 */ 
-	public int getAmountRequested();	
-
 	/**
 	 * Returns the <tt>FileDesc</tt> for this uploader -- the file that
 	 * is being uploaded.
@@ -69,13 +64,13 @@ public interface Uploader extends BandwidthTracker {
 	 * this method was previously called "amountRead", but the
 	 * name was changed to make more sense.
 	 */ 
-	public int amountUploaded();
+	public long amountUploaded();
 	
 	/**
 	 * Returns the amount of data that this uploader and all previous
 	 * uploaders exchanging this file have uploaded.
 	 */
-	public int getTotalAmountUploaded();
+	public long getTotalAmountUploaded();
 
 	/**
 	 * returns the string representation of the IP Address
@@ -94,13 +89,6 @@ public interface Uploader extends BandwidthTracker {
      * and CONNECTING.
      */
     public int getLastTransferState();
-
-	/**
-	 * Sets the state of this uploader.
-	 */
-	public void setState(int state);
-
-	public void writeResponse() throws IOException;
 
 	/**
 	 * returns true if chat for the host is on, false if it is not.
@@ -122,18 +110,6 @@ public interface Uploader extends BandwidthTracker {
 	 */
 	public String getUserAgent();
 	
-	/** 
-	 * return whether or not the headers have been parsed
-	 */
-	public boolean isHeaderParsed();
-
-    public boolean supportsQueueing();
-    
-    /**
-     * returns the current request method.
-     */
-    public HTTPRequestMethod getMethod();
-    
     /**
      * Returns the current queue position if queued.
      */

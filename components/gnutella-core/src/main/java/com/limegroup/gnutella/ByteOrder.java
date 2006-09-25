@@ -319,6 +319,21 @@ public class ByteOrder {
     }
 
     /**
+     * Long to big-endian bytes: writes x to buf[offset ..].
+     */
+    public static void long2beb(final long x,
+                               final byte[] buf, final int offset) {
+        buf[offset    ] = (byte)(x >> 56);
+        buf[offset + 1] = (byte)(x >> 48);
+        buf[offset + 2] = (byte)(x >> 40);
+        buf[offset + 3] = (byte)(x >> 32);
+        buf[offset + 4] = (byte)(x >> 24);
+        buf[offset + 5] = (byte)(x >> 16);
+        buf[offset + 6] = (byte)(x >>  8);
+        buf[offset + 7] = (byte) x       ;
+    }
+    
+    /**
      * Int to big-endian bytes: writes x to buf[offset ..].
      */
     public static void int2beb(final int x,
@@ -517,4 +532,71 @@ public class ByteOrder {
             return (int)l;
         return m;
     }
+    
+    
+    /**
+     * Big-endian bytes to long.  Unlike beb2long(x, offset), this version can
+     * read fewer than 4 bytes.  If n &lt; 4, the returned value is never negative.
+     *
+     * @param x the source of the bytes
+     * @param offset the index to start reading bytes
+     * @param n the number of bytes to read, which must be between 1 and 4,
+     *   inclusive
+     * @return the value of x[offset .. offset + N] as an int, assuming x is
+     *   interpreted as an unsigned big-endian number (i.e., x[offset] is MSB).
+     * @exception IllegalArgumentException if n is less than 1 or greater than 4
+     * @exception IndexOutOfBoundsException if offset &lt; 0 or
+     *   offset + n &gt; x.length
+     */
+	public static long beb2long(final byte[] x, final int offset, final int n)
+			throws IndexOutOfBoundsException, IllegalArgumentException {
+		switch (n) {
+		case 1:
+			return (long) x[offset] & 0xFFL;
+		case 2:
+			return ((long) x[offset + 1] & 0xFFL)
+					| (((long) x[offset] & 0xFFL) << 8);
+		case 3:
+			return ((long) x[offset + 2] & 0xFFL)
+					| (((long) x[offset + 1] & 0xFFL) << 8)
+					| (((long) x[offset] & 0xFFL) << 16);
+		case 4:
+			return ((long) x[offset + 3] & 0xFFL)
+					| (((long) x[offset + 2] & 0xFFL) << 8)
+					| (((long) x[offset + 1] & 0xFFL) << 16)
+					| (((long) x[offset] & 0xFFL) << 24);
+		case 5:
+			return ((long) x[offset + 4] & 0xFFL)
+					| (((long) x[offset + 3] & 0xFFL) << 8)
+					| (((long) x[offset + 2] & 0xFFL) << 16)
+					| (((long) x[offset + 1] & 0xFFL) << 24)
+					| (((long) x[offset] & 0xFFL) << 32);
+		case 6:
+			return ((long) x[offset + 5] & 0xFFL)
+					| (((long) x[offset + 4] & 0xFFL) << 8)
+					| (((long) x[offset + 3] & 0xFFL) << 16)
+					| (((long) x[offset + 2] & 0xFFL) << 24)
+					| (((long) x[offset + 1] & 0xFFL) << 32)
+					| (((long) x[offset] & 0xFFL) << 40);
+		case 7:
+			return ((long) x[offset + 6] & 0xFFL)
+					| (((long) x[offset + 5] & 0xFFL) << 8)
+					| (((long) x[offset + 4] & 0xFFL) << 16)
+					| (((long) x[offset + 3] & 0xFFL) << 24)
+					| (((long) x[offset + 2] & 0xFFL) << 32)
+					| (((long) x[offset + 1] & 0xFFL) << 40)
+					| (((long) x[offset] & 0xFFL) << 48);
+		case 8:
+			return ((long) x[offset + 7] & 0xFFL)
+					| (((long) x[offset + 6] & 0xFFL) << 8)
+					| (((long) x[offset + 5] & 0xFFL) << 16)
+					| (((long) x[offset + 4] & 0xFFL) << 24)
+					| (((long) x[offset + 3] & 0xFFL) << 32)
+					| (((long) x[offset + 2] & 0xFFL) << 40)
+					| (((long) x[offset + 1] & 0xFFL) << 48)
+					| ((long) x[offset] << 56);
+		default:
+			throw new IllegalArgumentException("No bytes specified");
+		}
+	}
 }

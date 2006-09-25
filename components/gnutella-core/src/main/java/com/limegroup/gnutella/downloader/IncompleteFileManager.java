@@ -19,6 +19,7 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.bitzi.util.Base32;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -541,6 +542,19 @@ public class IncompleteFileManager implements Serializable {
         
         registerIncompleteFile(incompleteFile);
     }
+    
+    public synchronized void addTorrentEntry(URN urn) {
+    	String torrentDirPath = 
+    		SharingSettings.INCOMPLETE_DIRECTORY.getValue().getAbsolutePath() +
+    		File.separator +
+    		Base32.encode(urn.getBytes());
+    	File torrentDir = new File(torrentDirPath);
+    	hashes.put(urn, torrentDir);
+    }
+    
+    public synchronized void removeTorrentEntry(URN urn) {
+    	hashes.remove(urn);
+    }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {
         return blocks.get(incompleteFile);
@@ -593,6 +607,11 @@ public class IncompleteFileManager implements Serializable {
      */
     public static String getCompletedName(File incompleteFile) 
             throws IllegalArgumentException {
+    	
+    	String torrent = getCompletedTorrentName(incompleteFile);
+    	if (torrent != null)
+    		return torrent;
+    	
         //Given T-<size>-<name> return <name>.
         //       i      j
         //This is not as strict as it could be.  TODO: what about (x) suffix?
@@ -606,6 +625,37 @@ public class IncompleteFileManager implements Serializable {
         if (j==name.length()-1)
             throw new IllegalArgumentException("No name after last separator");
         return name.substring(j+1);
+    }
+    
+    private static String getCompletedTorrentName(File incompleteDir) {
+    	if (!isTorrentFolder(incompleteDir))
+    			return null;
+    		
+    	File [] list = incompleteDir.listFiles();
+    	if (list[0].getName().startsWith(".dat"))
+    		return list[1].getName();
+    	else
+    		return list[0].getName();
+    }
+    
+    public static boolean isTorrentFolder(File file) {
+		if (!file.isDirectory() || file.getName().length() != 32)
+			return false;
+		
+		File [] files = file.listFiles();
+		if (files.length != 2)
+			return false;
+		
+		File datFile = files[0];
+		File otherFile = files[1];
+		if (!datFile.getName().startsWith(".dat")) {
+			datFile = files[1];
+			otherFile = files[0];
+		}
+		if (!datFile.getName().startsWith(".dat"))
+			return false;
+		
+		return datFile.getName().equals(".dat"+otherFile.getName());
     }
 
     /**

@@ -63,24 +63,6 @@ public final class NBThrottleTest extends BaseTestCase {
 	        assertEquals(i%3==0 ? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
     }
     
-    // only those that were NEWLY interested should be given bandwidth
-    // on the second tick.
-    public void testBandwidthOnTickToNewInterestOnly() throws Exception {
-	    for(int i = 0; i < DATA.length; i+=3)
-	        THROTTLE.interest(DATA[i].STUB);
-	    THROTTLE.tick(1000);
-        
-        // When requesting interest again, people who already were interested
-        // should not be given bandwidth again, but new people should.
-	    for(int i = 0; i < DATA.length; i+=2)
-	        THROTTLE.interest(DATA[i].STUB);
-        THROTTLE.tick(2000);
-        
-        // if this wasn't working, i%3 && i%2 would give two availables.
-	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals((i%3==0 || i%2 == 0)? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
-    }
-    
     // make sure that if bandwidth is still available, ticks within the tick interval
     // will spread bandwidth also.
     public void testBandwidthWithinTickIntervalSpreadsAvailable() throws Exception {
@@ -93,8 +75,13 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.tick(1001);
      
         // if this wasn't working (i%5 && !i%3) would give 0 available.   
-	    for(int i = 0; i < DATA.length; i++)
-	        assertEquals((i%3==0 || i%5 == 0)? 1 : 0, DATA[i].STUB.bandwidthAvailableCalls());
+	    for(int i = 0; i < DATA.length; i++) {
+	    	int calls = DATA[i].STUB.bandwidthAvailableCalls();
+	    	if (i%3==0 || i%5 == 0)
+	    		assertGreaterThan(0, calls);
+	    	else 
+	    		assertEquals(0, calls);
+	    }
     }
     
     // make sure it gives no bandwidth if it isn't active (within a selectableKeys call)
@@ -204,6 +191,11 @@ public final class NBThrottleTest extends BaseTestCase {
         THROTTLE.interest(DATA[0].STUB);
         THROTTLE.tick(3000);
         DATA[1].ATTACHMENT.setAmountToUse(BYTES_PER_TICK - 50);
+        
+        // make sure the selector ticks so that the key can get processed
+        NIODispatcher.instance().wakeup();
+        Thread.sleep(10);
+        
         THROTTLE.selectableKeys(set( new Object[] { DATA[0].KEY, DATA[1].KEY } ) );
         assertEquals(BYTES_PER_TICK, DATA[1].STUB.given());
         assertEquals(50, DATA[0].STUB.given());
@@ -235,6 +227,34 @@ public final class NBThrottleTest extends BaseTestCase {
         assertEquals(0, DATA[1].STUB.bandwidthAvailableCalls());
         THROTTLE.tick(1077);
         assertEquals(1, DATA[1].STUB.bandwidthAvailableCalls());
+    }
+    
+    // tests whether retrieving the next tick time works properly
+    public void testNextTickTime() {
+    	// with nobody interested, the next tick is never
+    	assertEquals(Long.MAX_VALUE, THROTTLE.nextTickTime());
+    	THROTTLE.tick(0);
+    	assertEquals(Long.MAX_VALUE, THROTTLE.nextTickTime());
+    	
+    	// with somebody interested, the next tick is 100
+    	THROTTLE.interest(DATA[0].STUB);
+    	assertEquals(100, THROTTLE.nextTickTime());
+    	
+    	// and until that time elapses, it stays 100
+    	THROTTLE.tick(50);
+    	assertEquals(100, THROTTLE.nextTickTime());
+    	THROTTLE.tick(99);
+    	assertEquals(100, THROTTLE.nextTickTime());
+    	
+    	// after it elapses, it becomes 200
+    	THROTTLE.tick(100);
+    	assertEquals(200, THROTTLE.nextTickTime());
+    	
+    	// if nobody is interested anymore, its never again
+    	DATA[0].STUB.setClosed(true);
+    	THROTTLE.selectableKeys( set (new Object[] { DATA[0].KEY }) );
+    	assertEquals(Long.MAX_VALUE, THROTTLE.nextTickTime());
+    	
     }
     
     private Set set(Object o) {

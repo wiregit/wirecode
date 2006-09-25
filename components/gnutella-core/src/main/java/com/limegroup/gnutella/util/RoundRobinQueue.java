@@ -66,5 +66,9 @@ public class RoundRobinQueue<T>  {
 	public synchronized int size() {
 		return _current.size();
 	}
+	
+	public synchronized void clear() {
+		_current.clear();
+	}
 		
 }

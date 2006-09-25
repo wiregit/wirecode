@@ -29,7 +29,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -103,7 +105,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         fm = new FileManagerStub(urns,descs);
         rs = new RouterService(ac);
         RouterService.getContentManager().initialize();
-        upManager = new UploadManager();
+        upManager = new UploadManager(new UploadSlotManager());
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
@@ -135,7 +137,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - Bandwidth tracker works properly.
      */
     public void testLegacy() {
-        UploadManager.tBandwidthTracker(new UploadManager());
+        UploadManager.tBandwidthTracker(new UploadManager(null));
     }
     
     /** 
@@ -241,8 +243,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         //wait till min Poll time + 2 seconds to be safe, we have been
         //burned by this before - if d4 responds too fast it gets
         //disconnected
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);
+        Thread.sleep((HTTPSession.MIN_POLL_TIME+
+                      HTTPSession.MAX_POLL_TIME)/2);
         //test that uploaders cannot jump the line
         try { //still queued - cannot jump line.
             connectDloader(d4,false, rfd4,true);
@@ -271,8 +273,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.uploadsInProgress());            
         
         //Test that uploads in queue advance. d4 should have 0th position
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);
+        Thread.sleep((HTTPSession.MIN_POLL_TIME+
+                      HTTPSession.MAX_POLL_TIME)/2);
         try {
             connectDloader(d4,false,rfd4,true);
         } catch(QueuedException qx) {
@@ -314,8 +316,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             0, upManager.uploadsInProgress());
             
         // Sleep so we don't hammer with requests.
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);            
+        Thread.sleep((HTTPSession.MIN_POLL_TIME+
+                      HTTPSession.MAX_POLL_TIME)/2);            
 
         //test that second uploader is given a slot.
         try {
@@ -402,7 +404,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.getNumQueuedUploads());
         assertEquals("should have 2 active uploads",
             2, upManager.uploadsInProgress());
-        
+
         try {
             connectDloader(d5, false, rfd2, true);
             fail("should have been queued");
@@ -537,7 +539,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
         try {
             connectDloader(d4,true,rfd4,true);
-            fail("Host limit reached, should not have accepted d4");
+            fail("Queue size reached, should have queued d4");
         } catch (TryAgainLaterException tx) {
             fail("d4 should have been queued", tx);
         } catch (QueuedException expectedException) {
@@ -955,8 +957,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             fail("not queued", ioe);
         }
         kill(d1);
-        Thread.sleep((UploadManager.MIN_POLL_TIME+
-                      UploadManager.MAX_POLL_TIME)/2);            
+        Thread.sleep((HTTPSession.MIN_POLL_TIME+
+                      HTTPSession.MAX_POLL_TIME)/2);            
         try { //should get the slot
             connectDloader(d3,false,rfd3,true);
         } catch (QueuedException e) {

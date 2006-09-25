@@ -145,7 +145,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * devoting all processing time to hashing.
 	 * (Currently 5 minutes).
 	 */
-	private static final int MIN_IDLE_TIME = 5 * 60 * 1000;
+	public static final int MIN_IDLE_TIME = 5 * 60 * 1000;
 
 	/**
 	 * Cached constant to avoid making unnecessary string allocations

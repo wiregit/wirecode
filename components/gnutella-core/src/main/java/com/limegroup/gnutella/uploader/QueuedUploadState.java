@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
@@ -27,8 +26,8 @@ public class QueuedUploadState extends UploadState {
         HTTPUtils.writeHeader(HTTPHeaderName.SERVER,
 							  ConstantHTTPHeaderValue.SERVER_VALUE,ostream);
         str = "X-Queue: position="+(POSITION+1)+
-        ", pollMin="+(UploadManager.MIN_POLL_TIME/1000)+/*mS to S*/
-        ", pollMax="+(UploadManager.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
+        ", pollMin="+(HTTPSession.MIN_POLL_TIME/1000)+/*mS to S*/
+        ", pollMax="+(HTTPSession.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
         ostream.write(str.getBytes());
         
         writeAlts(ostream);

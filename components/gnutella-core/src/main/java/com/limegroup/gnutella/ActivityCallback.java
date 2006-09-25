@@ -22,8 +22,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener 
-{
+public interface ActivityCallback extends DownloadCallback, FileEventListener {
     
     /**
      * The address of the program has changed or we've
@@ -166,4 +165,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
 	 * Indicates that the firewalled state of this has changed. 
 	 */
 	public void acceptedIncomingChanged(boolean status);
+	
+	/** Try to download the torrent file */
+	public void handleTorrent(File torrentFile);
 }

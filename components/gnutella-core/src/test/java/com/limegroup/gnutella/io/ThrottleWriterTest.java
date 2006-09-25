@@ -145,6 +145,19 @@ public final class ThrottleWriterTest extends BaseTestCase {
         assertFalse(WRITER.bandwidthAvailable());
         assertFalse(SINK.interested());
     }   
+    
+    // tests that if a handleRead is received if there is no bandwidth
+    // interest is turned off.
+    public void testInterestOffNoBW() throws Exception {
+    	// pretend there is bandwidth available
+    	WRITER.bandwidthAvailable();
+    	assertTrue(SINK.interested());
+    	
+    	// handleWrite calls come directly from the selector
+    	// (no request/releaseBandwidth)
+    	WRITER.handleWrite();
+    	assertFalse(SINK.interested());
+    }
 	
 	private byte[] data(int size) {
 	    byte[] data = new byte[size];

@@ -72,7 +72,8 @@ public class BinaryHeap<T extends Comparable<T>> implements Iterable<T> {
      */
     public void clear()
     {
-        currentSize = 0;
+        while(currentSize > 0) 
+        	array[currentSize--] = null;
     }
 
     /**

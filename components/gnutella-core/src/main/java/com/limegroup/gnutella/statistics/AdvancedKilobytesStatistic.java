@@ -3,7 +3,7 @@ package com.limegroup.gnutella.statistics;
 /**
  * Specialized subclass for recording advanced kilobytes statistics.
  */
-class AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
+public class AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
 
 	/**
 	 * Adds the statistic to the list of advanced statistics.

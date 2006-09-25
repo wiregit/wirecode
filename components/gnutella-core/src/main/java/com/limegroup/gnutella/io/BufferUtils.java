@@ -101,6 +101,15 @@ public class BufferUtils {
         return read;
     }
     
+    public static long transfer(ByteBuffer from, ByteBuffer [] to,
+    		int offset, int length, boolean needsFlip) {
+    	long read = 0;
+    	for (int i = offset; i < offset + length ;i++)
+    		read += transfer(from, to[i], needsFlip);
+    	
+    	return read;
+    }
+    
     /**
      * Transfers data from 'src' to 'dst'.  This assumes that there
      * is data in src and that it is non-null.  This also assumes that

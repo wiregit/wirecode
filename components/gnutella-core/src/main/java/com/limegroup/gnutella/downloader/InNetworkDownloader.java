@@ -108,8 +108,8 @@ public class InNetworkDownloader extends ManagedDownloader implements Serializab
      * Overrides ManagedDownloader to display a reasonable file size even
      * when no locations have been found.
      */
-    public synchronized int getContentLength() {
-        return (int)size;
+    public synchronized long getContentLength() {
+        return size;
     }
     
     /**

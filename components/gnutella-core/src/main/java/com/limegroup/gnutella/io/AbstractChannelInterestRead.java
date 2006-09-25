@@ -3,7 +3,7 @@ package com.limegroup.gnutella.io;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public abstract class AbstractChannelInterestRead implements ChannelReadObserver, InterestReadChannel {
+public abstract class AbstractChannelInterestRead implements ChannelReadObserver, InterestScatteringByteChannel {
     protected ByteBuffer buffer;
     protected InterestReadChannel source;
     protected boolean shutdown;
@@ -16,6 +16,14 @@ public abstract class AbstractChannelInterestRead implements ChannelReadObserver
 
     public int read(ByteBuffer dst) {
         return BufferUtils.transfer(buffer, dst);
+    }
+    
+    public long read(ByteBuffer [] dst) {
+    	return read(dst, 0, dst.length);
+    }
+    
+    public long read(ByteBuffer [] dst, int offset, int length) {
+    	return BufferUtils.transfer(buffer, dst, offset, length, true);
     }
 
     public void shutdown() {

@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.Periodic;
 
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>
@@ -32,7 +34,7 @@ import com.limegroup.gnutella.statistics.UploadStat;
  *
  * All methods are synchronized and guaranteed to not lock the timer queue.
  */
-public final class StalledUploadWatchdog implements Runnable {
+public final class StalledUploadWatchdog extends Periodic {
     
     private static final Log LOG =
         LogFactory.getLog(StalledUploadWatchdog.class);
@@ -45,39 +47,49 @@ public final class StalledUploadWatchdog implements Runnable {
      */
     public static long DELAY_TIME = 1000 * 60 * 2; //2 minutes    
     
-    private OutputStream ostream;
-    private boolean isScheduled;
-    private long nextCheckTime;
-    private boolean closed;
+    private final Closer closer;
+    
+    private final long delayTime;
+    
+    private OStreamWrap osWrap;
+    
+    public StalledUploadWatchdog() {
+    	this(DELAY_TIME);
+    }
+    
+    public StalledUploadWatchdog(long delayTime) {
+    	super(new Closer(), RouterService.getSchedulingThreadPool());
+    	this.closer = (Closer)getRunnable();
+    	this.delayTime = delayTime;
+    }
     
     /**
      * Deactives the killing of the NormalUploadState
      */
-    public synchronized boolean deactivate() {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Deactived on: " + ostream);
-        nextCheckTime = -1; // don't reschedule.
-        ostream = null; //release the OutputStream
-        return closed;
+    public boolean deactivate() {
+    	if (LOG.isDebugEnabled())
+    		LOG.debug("Deactivated on "+closer.shutdownable);
+        unschedule();
+        closer.shutdownable = null;
+        return closer.closed;
     }
     
     /**
      * Activates the checking.
      */
-    public synchronized void activate(OutputStream os) {
+    public void activate(Shutdownable shutdownable) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Activated on: " + os);
-        // let run() know when we're expecting to run, so
-        // it can reschedule older schedulings if needed.
-        nextCheckTime = System.currentTimeMillis() + DELAY_TIME;
-
-        // if we're not already scheduled, schedule this task.
-        if ( !isScheduled ) {
-            RouterService.schedule(this, DELAY_TIME, 0);
-            isScheduled = true;
-        }
+            LOG.debug("Activated on: " + shutdownable);
+        rescheduleIfLater(delayTime);
         
-        this.ostream = os;
+        closer.shutdownable = shutdownable;
+    }
+    
+    public synchronized void activate(OutputStream os) {
+    	if (osWrap == null)
+    		osWrap = new OStreamWrap();
+    	osWrap.setOstream(os);
+    	activate(osWrap);
     }
     
     /**
@@ -85,36 +97,33 @@ public final class StalledUploadWatchdog implements Runnable {
      * to close the connection.
      * Reschedules if needed.
      */
-    public synchronized void run() {
-        isScheduled = false;
-        // we deactivated, don't do anything.
-        if(nextCheckTime == -1) {
-            return;
-        }
-        
-        long now = System.currentTimeMillis();
-        // if this was called before we should be checking,
-        // then reschedule it for the correct time.
-        if ( now < nextCheckTime ) {
-            RouterService.schedule(this, nextCheckTime - now, 0);
-        }
-        // otherwise, close the stream & remember we did it.
-        else {
-            closed = true;
-            try {
-                // If it was null, it was already closed
-                // by an outside source.
-                if( ostream != null ) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("STALLED!  Killing: " + ostream);                    
-                    UploadStat.STALLED.incrementStat();
-                    ostream.close();
-                }
-            } catch(IOException ignored) {
-                //this can be ignored because we're going to close
-                //the connection anyway.
-            }
-            ostream = null;
-        }
+    private static class Closer implements Runnable {
+        private volatile Shutdownable shutdownable;
+        private volatile boolean closed;
+    	public void run() {
+    		closed = true;
+    		// If it was null, it was already closed
+    		// by an outside source.
+    		Shutdownable toShut = shutdownable;
+    		if( toShut != null ) {
+    			if(LOG.isDebugEnabled())
+    				LOG.debug("STALLED!  Killing: " + toShut);                    
+    			UploadStat.STALLED.incrementStat();
+    			toShut.shutdown();
+    			shutdownable = null;
+    		}
+    	}
+    }
+    private static class OStreamWrap implements Shutdownable {
+    	private OutputStream ostream;
+    	void setOstream(OutputStream ostream) {
+    		this.ostream = ostream;
+    	}
+    	public void shutdown() {
+    		IOUtils.close(ostream);
+    		ostream = null; 
+            //exceptions can be ignored because we're going to close
+            //the connection anyway.
+    	}
     }
 }

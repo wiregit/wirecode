@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
+
 /**
  * Manages reading data from the network & piping it to a blocking input stream.
  *
@@ -16,7 +17,8 @@ import java.nio.ByteBuffer;
  * reading and use this NIOInputStream as a source channel to read any buffered
  * data.
  */
-class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTimeout {
+
+class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChannel, ReadTimeout {
     
     private final Shutdownable shutdownHandler;
     private final SoTimeout soTimeoutHandler;
@@ -65,6 +67,14 @@ class NIOInputStream implements ChannelReadObserver, InterestReadChannel, ReadTi
      */
     public int read(ByteBuffer toBuffer) {
         return BufferUtils.transfer(buffer, toBuffer);
+    }
+    
+    public long read(ByteBuffer[] dst, int offset, int length) {
+    	return BufferUtils.transfer(buffer,dst, offset, length, true);
+    }
+    
+    public long read(ByteBuffer [] dst) {
+    	return read(dst,0, dst.length);
     }
     
     /**
