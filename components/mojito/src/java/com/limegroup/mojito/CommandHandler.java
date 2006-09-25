@@ -376,7 +376,7 @@ public class CommandHandler {
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         KUID nodeId = KUID.create(ArrayUtils.parseHexString(args[1]));
         out.println("Setting NodeID to: " + nodeId);
-        Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
+        Method m = dht.getClass().getDeclaredMethod("rebuildRouteTable", new Class[]{KUID.class});
         m.setAccessible(true);
         m.invoke(dht, new Object[]{nodeId});
     }

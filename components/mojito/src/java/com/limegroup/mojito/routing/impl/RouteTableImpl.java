@@ -320,7 +320,7 @@ public class RouteTableImpl implements RouteTable {
                 } else if (right.contains(getLocalNode().getNodeID())) {
                     smallestSubtreeBucket = left;
                 } else {
-                    throw new AssertionError("Neither left nor right Bucket contains the local Node");
+                    throw new IllegalStateException("Neither left nor right Bucket contains the local Node");
                 }
             }
             
@@ -678,11 +678,45 @@ public class RouteTableImpl implements RouteTable {
             }
         });
         
+        // Rebuild the RouteTable (merge Buckets) but don't do a 
+        // true rebuild. That means forget the cached Contacts! 
+        // This is more about merging Buckets than actually rebuilding
+        // the RouteTable.
+        rebuild(false);
+    }
+    
+    public synchronized void rebuild() {
+        if (localNode == null) {
+            throw new IllegalStateException("RouteTable is not initialized");
+        }
+        
+        // Do a true RouteTable rebuild.
+        rebuild(true);
+    }
+    
+    /**
+     * Gets copies of the current RouteTable, clears the
+     * current RouteTable and re-adds the Contacts from
+     * the copies.
+     */
+    private void rebuild(boolean isTrueRebuild) {
+        
+        // Get the local Node (clear() will set it to null)
+        Contact localNode = this.localNode;
+        
         // Get the active Contacts
         List<Contact> activeNodes = getActiveContacts();
         activeNodes = BucketUtils.sortAliveToFailed(activeNodes);
         
-        // We count on the fact that getActiveContacts() returns a copy!
+        // Get the cached Contacts
+        List<Contact> cachedNodes = null;
+        if (isTrueRebuild) {
+            cachedNodes = getCachedContacts();
+            cachedNodes = BucketUtils.sort(cachedNodes);
+        }
+        
+        // We count on the fact that getActiveContacts() and 
+        // getCachedContacts() return copies!
         clear();
         
         // Remove the local Node from the List. Shouldn't fail as 
@@ -693,9 +727,21 @@ public class RouteTableImpl implements RouteTable {
         // Add the local Node first!
         add(localNode);
         
-        // Re-add the remaining Contacts
+        // Re-add the active Contacts
         for (Contact node : activeNodes) {
+            if (isTrueRebuild) {
+                node.unknown();
+            }
+            
             add(node);
+        }
+        
+        // And re-add the cached Contacts
+        if (isTrueRebuild) {
+            for (Contact node : cachedNodes) {
+                node.unknown();
+                add(node);
+            }
         }
     }
     

@@ -112,6 +112,12 @@ public interface RouteTable extends Serializable {
     public void purge();
     
     /**
+     * Rebuilds the RouteTable. Meant to be called after a local
+     * Node ID change.
+     */
+    public void rebuild();
+    
+    /**
      * Returns the number of live and cached Contacts in the Route Table
      */
     public int size();

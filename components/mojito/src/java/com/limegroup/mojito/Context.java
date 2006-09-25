@@ -81,7 +81,6 @@ import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
-import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
 import com.limegroup.mojito.util.DatabaseUtils;
 
@@ -292,31 +291,12 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * 
      * @param localNodeID the local node's KUID
      */
-    public void rebuildRouteTable(KUID localNodeID) {
+    private void rebuildRouteTable(KUID localNodeID) {
         synchronized (routeTable) {
-            // Backup the current Node ID and all live Contacts
-            List<Contact> backup = new ArrayList<Contact>(routeTable.getActiveContacts());
-            backup.remove(localNode);
-            
             // Change the Node ID
             localNode.setNodeID(localNodeID);
-            
-            // Clear the RouteTable and add the local Node with our
-            // new Node ID
-            routeTable.clear();
-            routeTable.add(localNode);
-            
-            // Sort the Nodes list (because rebuilding the table with 
-            // the new Node ID will probably evict some nodes)
-            backup = BucketUtils.sortAliveToFailed(backup);
-            
-            // Re-add the Contacts but set their state to Unknown
-            // so that they can be easily replaced by new live 
-            // Contacts
-            for (Contact node : backup) {
-                node.unknown();
-                routeTable.add(node);
-            }
+            routeTable.rebuild();
+            assert(localNode.equals(routeTable.getLocalNode()));
         }
     }
     
