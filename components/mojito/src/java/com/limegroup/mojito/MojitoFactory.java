@@ -45,30 +45,51 @@ public class MojitoFactory {
     
     private MojitoFactory() {}
     
+    /**
+     * Creates a MojitoDHT with default settings
+     */
     public static MojitoDHT createDHT() {
         return createDHT(DEFAULT_NAME);
     }
     
+    /**
+     * Creates a MojitoDHT with the given name
+     */
     public static MojitoDHT createDHT(String name) {
         return create(name, false);
     }
     
+    /**
+     * Creates a MojitoDHT with the given name, vendor code and version
+     */
     public static MojitoDHT createDHT(String name, int vendor, int version) {
         return create(name, vendor, version, false);
     }
     
+    /**
+     * Creates a firewalled MojitoDHT
+     */
     public static MojitoDHT createFirewalledDHT() {
         return createFirewalledDHT(DEFAULT_NAME);
     }
     
+    /**
+     * Creates a firewalled MojitoDHT with the given name
+     */
     public static MojitoDHT createFirewalledDHT(String name) {
         return create(name, true);
     }
     
+    /**
+     * Creates a firewalled MojitoDHT with the given name, vendor code and version
+     */
     public static MojitoDHT createFirewalledDHT(String name, int vendor, int version) {
         return create(name, vendor, version, true);
     }
     
+    /**
+     * Creates a MojitoDHT with the given arguments
+     */
     private static Context create(String name, boolean firewalled) {
         return create(name, 
                 ContextSettings.VENDOR.getValue(), 
@@ -76,6 +97,9 @@ public class MojitoFactory {
                 firewalled);
     }
     
+    /**
+     * Creates a MojitoDHT with the given arguments
+     */
     private static Context create(String name, int vendor, int version, boolean firewalled) {
         
         if (name == null) {
@@ -109,6 +133,9 @@ public class MojitoFactory {
         }
     }
     
+    /**
+     * Loads a serialized MojitoDHT instance from the given InputStream
+     */
     public static MojitoDHT load(InputStream in) 
             throws ClassNotFoundException, IOException {
         
