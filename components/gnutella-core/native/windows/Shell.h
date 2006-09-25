@@ -5,6 +5,7 @@
 // Include Windows shell headers
 #include <io.h>       // Unix-style file functions, like _chmod
 #include <sys/stat.h> // Options for Unix-style file functions, like _S_IWRITE
+#include <shlobj.h>   // Special folder names
 #include <shellapi.h> // Windows shell, including the Recycle Bin
 
 // Define types to match the signatures of functions we'll call in DLLs we load
@@ -19,6 +20,7 @@ extern "C" {
 
 	// Functions in Shell.cpp
 	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c);
+	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name);
 	JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url);
 	JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path);
 	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_recycleNative(JNIEnv *e, jclass c, jstring path);
@@ -33,8 +35,10 @@ extern "C" {
 
 // Functions in Shell.cpp
 CString GetRunningPath();
+CString GetSpecialPath(LPCTSTR name);
 void Run(LPCTSTR path);
 bool Recycle(LPCTSTR path);
 int SetFileWritable(LPCTSTR path);
 DWORD GetIdleTime();
 CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR icon);
+void GetIcons(LPCTSTR icon);

@@ -7,6 +7,9 @@
 #include "SystemUtilities.h"
 #include "Shell.h"
 
+// Access the icon handles
+extern CSystemUtilities Handle;
+
 // Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
 	return MakeJavaString(e, GetRunningPath());
@@ -15,8 +18,33 @@ CString GetRunningPath() {
 
 	// Ask Windows for our path
 	TCHAR bay[MAX_PATH];
-	if (!GetModuleFileName(NULL, bay, MAX_PATH)) return("");
+	if (!GetModuleFileName(NULL, bay, MAX_PATH)) return "";
 	return bay;
+}
+
+// Takes a special folder name, like "ApplicationData"
+// Looks up the full path to that folder for the current user as the user has customized it
+// Returns the path like "C:\Documents and Settings\UserName\Application Data", or blank on error
+JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name) {
+	return MakeJavaString(e, GetSpecialPath(GetJavaString(e, name)));
+}
+CString GetSpecialPath(LPCTSTR name) {
+
+	// Look up the special folder ID from the given special folder name
+	int id;
+	if      (name == CString("Documents"))         id = CSIDL_PERSONAL;
+	else if (name == CString("ApplicationData"))   id = CSIDL_APPDATA;
+	else if (name == CString("Desktop"))           id = CSIDL_DESKTOPDIRECTORY;
+	else if (name == CString("StartMenu"))         id = CSIDL_STARTMENU;
+	else if (name == CString("StartMenuPrograms")) id = CSIDL_PROGRAMS;
+	else if (name == CString("StartMenuStartup"))  id = CSIDL_STARTUP;
+	else return ""; // The given name is not in our list
+
+	// Get the path of the special folder
+	TCHAR bay[MAX_PATH];
+	CString path;
+	if (SHGetSpecialFolderPath(NULL, bay, id, false)) path = bay;
+	return path; // If SHGetSpecialFolderPath failed, path will still be blank
 }
 
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
@@ -53,7 +81,7 @@ bool Recycle(LPCTSTR path) {
 	info.wFunc = FO_DELETE;              // Delete operation
 	info.pFrom = buffer;                 // The path and file name, terminated by 2 zero bytes
 	info.fFlags = FOF_ALLOWUNDO      |   // Move the file into the Recycle Bin instead of deleting it
-		          FOF_NOCONFIRMATION |   // Don't ask the user if they're sure
+				  FOF_NOCONFIRMATION |   // Don't ask the user if they're sure
 				  FOF_NOERRORUI      |   // Don't show the user an error if one happens
 				  FOF_SILENT;            // Hide the progress bar dialog box
 	int result = SHFileOperation(&info); // Have the Windows shell perform the operation, and get the result code
@@ -110,10 +138,9 @@ DWORD GetIdleTime() {
 // Takes the JNI environment and class
 // The jobject frame is a AWT Component like a JFrame that is backed by a real Windows window
 // bin is the path to the folder that has the file "jawt.dll", like "C:\Program Files\Java\jre1.5.0_05\bin"
-// icon is the path to a Windows .ico file on the disk
-// Gets the window handle, and uses it to set the icon.
+// icon is the path to a Windows .exe or .ico file on the disk that contains the icons
+// Gets the window handle, and uses it to set the icon
 // Returns blank on success, or a text message about what didn't work
-// Do not call this function repeatedly, it creates two icon resources for each call
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
 	return MakeJavaString(e, SetWindowIcon(e, c, frame, GetJavaString(e, bin), GetJavaString(e, icon)));
 }
@@ -124,22 +151,38 @@ CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR i
 	HWND window = GetJavaWindowHandle(e, c, frame, bin, &message);
 	if (!window) return message; // Return the message that tells what happened
 
-	// Open the .ico file, getting handles to the large and small icons inside it
-	HICON bigicon   = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-	HICON smallicon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
-	if (!bigicon || !smallicon) return "Unable to open icon file";
-
-	/*
-	 * It is important that you do not call this function repeatedly.
-	 * Each LoadImage call above creates a HICON that leads to an icon resource.
-	 * Windows graphics resources like icons take up a lot of memory.
-	 * A Windows program should free icons with a call to DestroyIcon(HICON).
-	 * We can't free them now, because they are on display in our window.
-	 * When the Windows process exits, Windows will free the two icons.
-	 */
+	// If we don't already have the icons, load them from the given .exe or .ico file, or from our running .exe
+	GetIcons(icon);
 
 	// Set both sizes of the window's icon
-	SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)bigicon);
-	SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)smallicon);
+	if (Handle.Icon)      SendMessage(window, WM_SETICON, ICON_BIG,   (LPARAM)Handle.Icon);
+	if (Handle.SmallIcon) SendMessage(window, WM_SETICON, ICON_SMALL, (LPARAM)Handle.SmallIcon);
 	return ""; // Return blank on success
+}
+
+// Takes a path to a .exe or .ico file on the disk
+// Loads the icons, keeping their handles in Handle.Icon and Handle.SmallIcon
+void GetIcons(LPCTSTR icon) {
+
+	// Don't load the icons twice
+	if (Handle.Icon || Handle.SmallIcon) return;
+
+	// The path is to a .exe file
+	if (CString(icon).Right(4).CompareNoCase(".exe") == 0) {
+
+		// Extract the large and small icons from the first icon set in the .exe file
+		ExtractIconEx(
+			icon,                // Path to the .exe file with the icon
+			0,                   // Extract the first icon in the program
+			&(Handle.Icon),      // Handle for large icon
+			&(Handle.SmallIcon), // Handle for small icon
+			1);                  // Extract 1 set of icons
+
+	// The path is to a .ico file
+	} else if (CString(icon).Right(4).CompareNoCase(".ico") == 0) {
+
+		// Load the large and small icons from the .ico file
+		Handle.Icon      = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+		Handle.SmallIcon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
+	}
 }

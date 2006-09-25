@@ -18,10 +18,10 @@ public final class StartupSettings extends LimeProps {
      */
     public static final BooleanSetting RUN_ON_STARTUP = 
         FACTORY.createBooleanSetting("RUN_ON_STARTUP", true);
-        
+    
     /**
      * Whether or not tips should be displayed on startup.
      */
     public static final BooleanSetting SHOW_TOTD =
-        FACTORY.createBooleanSetting("SHOW_TOTD", true);        
+    	FACTORY.createBooleanSetting("SHOW_TOTD", true);
 }

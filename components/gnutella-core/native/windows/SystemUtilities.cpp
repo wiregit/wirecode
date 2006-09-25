@@ -6,6 +6,9 @@
 #include "stdafx.h"
 #include "SystemUtilities.h"
 
+// Make the global object that holds icon handles
+CSystemUtilities Handle;
+
 // A Windows DLL has a DllMain method that Windows calls when it loads the DLL
 BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 

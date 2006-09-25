@@ -19,6 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="You will have to add the paths to the jdk include and include\win32 folders here"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;SYSTEMUTILITIES_EXPORTS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -68,6 +69,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="1"
+				AdditionalIncludeDirectories="you will have to add the paths to the jdk include and include\win32 folders here"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SYSTEMUTILITIES_EXPORTS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="3"

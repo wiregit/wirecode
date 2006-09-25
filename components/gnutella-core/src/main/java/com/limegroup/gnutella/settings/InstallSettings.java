@@ -58,4 +58,8 @@ public final class InstallSettings extends AbstractSettings {
     /** Whether or not the filter question has been asked. */
     public static final BooleanSetting FILTER_OPTION =
         FACTORY.createBooleanSetting("FILTER_OPTION", false);
+    
+    /** Whether the association option has been asked */
+    public static final IntSetting ASSOCIATION_OPTION =
+    	FACTORY.createIntSetting("ASSOCIATION_OPTION", 0);
 }

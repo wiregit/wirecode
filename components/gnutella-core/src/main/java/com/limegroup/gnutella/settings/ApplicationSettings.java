@@ -224,6 +224,12 @@ public class ApplicationSettings extends LimeProps {
                 !CommonUtils.isWindows() && !CommonUtils.isAnyMac());
     
     /**
+     * Whether LimeWire should handle magnets.
+     */
+    public static final BooleanSetting HANDLE_MAGNETS = 
+    	FACTORY.createBooleanSetting("HANDLE_MAGNETS", true);
+    			
+    /**
      * Whether or not to use 'secure results' to screen search results.
      */
     public static final BooleanSetting USE_SECURE_RESULTS =
