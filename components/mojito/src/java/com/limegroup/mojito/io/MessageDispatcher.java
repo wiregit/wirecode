@@ -510,7 +510,11 @@ public abstract class MessageDispatcher {
         } else if (message instanceof RequestMessage) {
             if (context.getLocalNode().isFirewalled()) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.trace("Local Node is firewalled, dropping " + message);
+                    LOG.info("Local Node is firewalled, dropping " + message);
+                }
+            } else if(context.isBootstrapping()){
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Local Node is bootstrapping, dropping "+ message);
                 }
             } else {
                 processRequest((RequestMessage)message);
