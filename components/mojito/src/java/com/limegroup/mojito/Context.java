@@ -320,15 +320,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
     }
     
-    /**
-     * Rebuilds the routing table with our existing nodeID.
-     * Used to have a well-balanced bucket tree, i.e. prune empty
-     * buckets and merge non-full subtrees.
-     */
-    public void rebuildRouteTable() {
-        rebuildRouteTable(getLocalNodeID());
-    }
-    
     public boolean isLocalNode(Contact node) {
         return node.equals(getLocalNode());
     }

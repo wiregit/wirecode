@@ -41,6 +41,7 @@ import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
+import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 
 public class RouteTableImpl implements RouteTable {
@@ -665,6 +666,10 @@ public class RouteTableImpl implements RouteTable {
     }
     
     public synchronized void purge() {
+        if (localNode == null) {
+            throw new IllegalStateException("RouteTable is not initialized");
+        }
+        
     	bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
@@ -672,6 +677,26 @@ public class RouteTableImpl implements RouteTable {
                 return SelectStatus.CONTINUE;
             }
         });
+        
+        // Get the active Contacts
+        List<Contact> activeNodes = getActiveContacts();
+        activeNodes = BucketUtils.sortAliveToFailed(activeNodes);
+        
+        // We count on the fact that getActiveContacts() returns a copy!
+        clear();
+        
+        // Remove the local Node from the List. Shouldn't fail as 
+        // activeNodes is a copy!
+        boolean removed = activeNodes.remove(localNode);
+        assert (removed);
+        
+        // Add the local Node first!
+        add(localNode);
+        
+        // Re-add the remaining Contacts
+        for (Contact node : activeNodes) {
+            add(node);
+        }
     }
     
     public synchronized String toString() {
