@@ -375,7 +375,7 @@ public class CommandHandler {
     
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         KUID nodeId = KUID.create(ArrayUtils.parseHexString(args[1]));
-        System.out.println("Setting NodeID to: " + nodeId);
+        out.println("Setting NodeID to: " + nodeId);
         Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
         m.setAccessible(true);
         m.invoke(dht, new Object[]{nodeId});
@@ -383,13 +383,27 @@ public class CommandHandler {
     
     public static void select(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         KUID nodeId = KUID.create(ArrayUtils.parseHexString(args[1]));
-        System.out.println("Selecting: " + nodeId);
+        out.println("Selecting: " + nodeId);
         
         RouteTable routeTable = ((Context)dht).getRouteTable();
-        System.out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
+        out.println(CollectionUtils.toString(routeTable.select(nodeId, 20, false)));
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         ((LocalContact)((Context)dht).getLocalNode()).nextInstanceID();
+    }
+    
+    public static void kill(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        if (dht.isRunning()) {
+            out.println("Stopping " + dht.getName());
+            dht.stop();
+        }
+    }
+    
+    public static void restart(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        if (!dht.isRunning()) {
+            out.println("Starting " + dht.getName());
+            dht.start();
+        }
     }
 }
