@@ -350,6 +350,78 @@ public class FileUtils {
     }
 
     /**
+     * Parses the text of a special path into a complete platform-specific path in a File.
+     * Special paths can be complete or relative, step upwards, and start with platform-specific special folders.
+     * 
+     * <pre>
+     * Special Path               Return File
+     * -------------------------  --------------------------
+     * C:\Folder\Subfolder        C:\Folder\Subfolder
+     * Folder Here                C:\Program Files\LimeWire\Folder Here
+     * ..\One Up                  C:\Program Files\One Up
+     * Desktop>                   C:\Documents and Settings\User Name\Desktop
+     * Documents>In My Documents  C:\Documents and Settings\User Name\My Documents\In My Documents
+     * </pre>
+     * 
+     * The first example is just the entire path to the directory "C:\Folder\Subfolder".
+     * These examples assume LimeWire is running from C:\Program Files\LimeWire\LimeWire.jar.
+     * Given just "Folder Here", this method will return the path as though Folder Here is sitting next to LimeWire.jar.
+     * Use "..\" at the start to move up from where LimeWire.jar is running.
+     * Use the tags SystemUtils.getSpecialPath() understands, putting ">" after them as a separator.
+     * 
+     * @param path The text of a special path.
+     * @return     A File with that path made absolute and specific to this platform and running instance.
+     *             null given an unknown tag or a relative path this method can't resolve.
+     */
+    public static File parseSpecialPath(String path) {
+    	if (path == null) return null;
+
+    	// If the given path contains a ">", parse for the special folder tag before it
+    	int i = path.indexOf(">");
+    	if (i != -1) {
+    		String tag = path.substring(0, i);
+    		String special = SystemUtils.getSpecialPath(tag);
+    		if (special == null)
+    			return null; // Unknown tag
+    		path = path.substring(i + 1);
+    		return new File(special, path).getAbsoluteFile();
+    	}
+
+    	try {
+    		return new File(path).getCanonicalFile();
+    	} catch (IOException e) { return null; } // Unable to resolve the relative path
+    }
+
+    /**
+     * Copies all the files and folders in a directory to a new location.
+     * 
+     * @param sourceDirectory      The directory to copy, must exist on disk
+     * @param destinationDirectory The destination path where the copy will go, must be free on disk
+     */
+    public static void copyDirectory(File sourceDirectory, File destinationDirectory) {
+
+    	// Make sure the given source directory exists, and make the new empty destination directory
+    	if (!sourceDirectory.isDirectory() || destinationDirectory.exists()) throw new IllegalArgumentException();
+    	destinationDirectory.mkdirs();
+
+    	// Loop for each name in the source directory, like "file.ext" and "subfolder name"
+    	String[] contents = sourceDirectory.list();
+    	File source, destination;
+    	for (String name : contents) {
+
+    		// Make File objects with complete paths for this file or subfolder
+    		source = new File(sourceDirectory, name);
+    		destination = new File(destinationDirectory, name);
+
+    		// Copy it across
+    		if (source.isDirectory())
+    			copyDirectory(source, destination); // Call this same method to copy the subfolder and its contents
+    		else
+    			CommonUtils.copy(source, destination);
+    	}
+    }
+
+    /**
      * Deletes the given file or directory, moving it to the trash can or recycle bin if the platform has one.
      * 
      * @param file The file or directory to trash or delete

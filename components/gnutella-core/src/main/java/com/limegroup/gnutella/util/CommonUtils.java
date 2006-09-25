@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
+import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * This class handles common utility functions that many classes
@@ -797,25 +800,16 @@ public final class CommonUtils {
         // If neither a), b) nor c) exist, then the former is created in preference of
         // of a), then b).
         
-        if ( SETTINGS_DIRECTORY != null )
+        if (SETTINGS_DIRECTORY != null)
             return SETTINGS_DIRECTORY;
-        
+
         File settingsDir = new File(getUserHomeDir(), LIMEWIRE_PREFS_DIR_NAME);
-        if (isWindows()) {
-            String appdata = null;
-            // In some Java 1.4 implementations, System.getenv() is 
-            // depricated with prejudice (throws java.lang.Error).
-            if (isJava15OrLater()) {
-                appdata = System.getProperty("LIMEWIRE_PREFS_DIR", System.getenv("APPDATA"));
-            } else {
-                // null string will fall back on default
-                appdata = System.getProperty("LIMEWIRE_PREFS_DIR",null);
-            }
-            
-            if ("%APPDATA%".equals(appdata)) {
-                appdata = null; // fall back on default
-            }
-            
+
+        File portableDir = readRuntimeSettings();
+        if (portableDir != null) {
+        	settingsDir = portableDir;
+        } else if (isWindows()) {
+            String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
             if (appdata != null && appdata.length() > 0) {
                 File tempSettingsDir = new File(appdata, "LimeWire");
                 if (tempSettingsDir.isDirectory() || !settingsDir.exists()) {
@@ -840,10 +834,67 @@ public final class CommonUtils {
     }
 
     /**
+     * Reads runtime.props to determine where we should read and keep our settings.
+     * 
+     * If it's there at all, runtime.props will be next to this running LimeWire.jar.
+     * Path values in runtime.props can be relative, like "..\\Shared".
+     * They can also be based on platform-specific special folders, like "Desktop>My LimeWire Files".
+     * 
+     * SETTINGS is the settings folder, which must be writable.
+     * If SETTINGS isn't there yet, this method will copy SOURCE there.
+     * SOURCE doesn't have to be writable.
+     * SHARED sets the shared files folder.
+     * 
+     * @return A File with the path where runtime.props says we should store our settings.
+     *         null if there is no runtime.props, or it doesn't have a property named SETTINGS.
+     */
+    private static File readRuntimeSettings() {
+
+    	// Read and parse the settings in runtime.props
+    	File settings = null, source = null, shared = null;
+		try {
+			File file = new File("runtime.props").getAbsoluteFile();
+			FileInputStream stream = new FileInputStream(file);
+			Properties properties = new Properties();
+			properties.load(stream);
+			stream.close();
+			settings = FileUtils.parseSpecialPath(properties.getProperty("SETTINGS")); // Path to settings folder
+			source = FileUtils.parseSpecialPath(properties.getProperty("SOURCE"));     // Files to copy there
+			shared = FileUtils.parseSpecialPath(properties.getProperty("SHARED"));     // Path to Shared folder
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+		}
+
+		// If there's no directory at SETTINGS, copy SOURCE there
+		if (source != null && settings != null && source.isDirectory() && !settings.exists())
+			FileUtils.copyDirectory(source, settings);
+
+		/*
+		 * TODO: This part doesn't work yet. You can't call setSaveDirectory() this early.
+		 * Possible solutions:
+		 * (1) Have SharingSettings look in runtime.props separate from us reading it here.
+		 *     Make RuntimeSettings and integrate it into the class structure of the settings package.
+		 * (2) Change FileSetting to take "..\\This" and "Documents>This".
+		 *     Protect old LimeWires from being tripped up by special settings.
+		 *     Keep LimeWire from replacing a relative or special path with a specific one while it's running.
+		 * 
+		// If SHARED is specified, set it as the shared folder where the program will save files
+		if (shared != null) {
+			try {
+				SharingSettings.setSaveDirectory(shared);
+			} catch (IOException e) {}
+		}
+		 */
+
+		// Return the path where runtime.props says we should keep our settings
+		return settings;
+    }
+
+    /**
      * Boolean for whether or not the windows files have been copied.
      */
     private static boolean _windowsFilesMoved = false;
-    
+
     /**
      * Boolean for whether or not XML files have been copied.
      */

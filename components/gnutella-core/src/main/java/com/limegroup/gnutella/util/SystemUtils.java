@@ -89,16 +89,46 @@ public class SystemUtils {
     private static final native int setOpenFileLimit0(int max);
 
 	/**
-	 * Get the path to the Windows launcher .exe file that is us running right now.
+	 * Gets the path to the Windows launcher .exe file that is us running right now.
 	 * 
 	 * @return A String like "c:\Program Files\LimeWire\LimeWire.exe".
-	 *         Blank on error.
+	 *         null on error.
 	 */
     public static final String getRunningPath() {
-    	if (CommonUtils.isWindows() && isLoaded)
-    		return getRunningPathNative();
-    	return "";
+    	if (CommonUtils.isWindows() && isLoaded) {
+    		String path = getRunningPathNative();
+    		if (path.equals("")) return null;
+    		else return path;
+    	}
+    	return null;
     }
+
+    /**
+	 * Gets the complete path to a special folder in the platform operating system shell.
+	 * 
+	 * The returned path is specific to the current user, and current to how the user has customized it.
+	 * Here are the given special folder names and example return paths this method currently supports on Windows:
+	 * 
+	 * <pre>
+	 * Documents         C:\Documents and Settings\UserName\My Documents
+	 * ApplicationData   C:\Documents and Settings\UserName\Application Data
+	 * Desktop           C:\Documents and Settings\UserName\Desktop
+	 * StartMenu         C:\Documents and Settings\UserName\Start Menu
+	 * StartMenuPrograms C:\Documents and Settings\UserName\Start Menu\Programs
+	 * StartMenuStartup  C:\Documents and Settings\UserName\Start Menu\Programs\Startup
+	 * </pre>
+	 * 
+	 * @param name The name of a special folder
+	 * @return     The path to that folder, or null on error
+	 */
+    public static final String getSpecialPath(String name) {
+    	if (CommonUtils.isWindows() && isLoaded) {
+    		String path = getSpecialPathNative(name);
+    		if (path.equals("")) return null;
+    		else return path;
+    	}
+    	return null;
+    }    
 
     /**
      * Changes the icon of a window.
@@ -106,7 +136,7 @@ public class SystemUtils {
      * Replaces the Swing icon with a real Windows .ico icon that supports multiple sizes, full color, and partially transparent pixels.
      * 
      * @param frame The AWT Component, like a JFrame, that is backed by a native window
-     * @param icon  The path to a .ico file on the disk
+     * @param icon  The path to a .exe or .ico file on the disk
      * @return      False on error
      */
     public static final boolean setWindowIcon(Component frame, File icon) {
@@ -129,11 +159,10 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The number value stored there, or 0 on error
      */
-    public static final int registryReadNumber(String root, String path, String name) {
+    public static final int registryReadNumber(String root, String path, String name) throws IOException {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadNumberNative(root, path, name);
-    	else
-    		return 0;
+    	throw new IOException(" not supported ");
     }
 
     /**
@@ -144,11 +173,10 @@ public class SystemUtils {
      * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     The text value stored there, or blank on error
      */
-    public static final String registryReadText(String root, String path, String name) {
+    public static final String registryReadText(String root, String path, String name) throws IOException {
     	if (CommonUtils.isWindows() && isLoaded)
     		return registryReadTextNative(root, path, name);
-    	else
-    		return "";
+    	throw new IOException(" not supported ");
     }
 
     /**
@@ -184,16 +212,15 @@ public class SystemUtils {
     }
 
     /**
-     * Deletes a variable or key in the Windows Registry.
+     * Deletes a key in the Windows Registry.
      * 
      * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
      * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
-     * @param name The name of the variable within that key, or blank to access the key's default value
      * @return     False on error
      */
-    public static final boolean registryDelete(String root, String path, String name) {
+    public static final boolean registryDelete(String root, String path) {
     	if (CommonUtils.isWindows() && isLoaded)
-    		return registryDeleteNative(root, path, name);
+    		return registryDeleteNative(root, path);
     	else
     		return false;
     }
@@ -362,6 +389,7 @@ public class SystemUtils {
      */
 
     private static final native String getRunningPathNative();
+    private static final native String getSpecialPathNative(String name);    
     private static final native void openURLNative(String url);
     private static final native void openFileNative(String path);
     private static final native boolean recycleNative(String path);
@@ -369,11 +397,11 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
 
-    private static final native int registryReadNumberNative(String root, String path, String name);
-    private static final native String registryReadTextNative(String root, String path, String name);
+    private static final native int registryReadNumberNative(String root, String path, String name) throws IOException ;
+    private static final native String registryReadTextNative(String root, String path, String name) throws IOException;
     private static final native boolean registryWriteNumberNative(String root, String path, String name, int value);
     private static final native boolean registryWriteTextNative(String root, String path, String name, String value);
-    private static final native boolean registryDeleteNative(String root, String path, String name);
+    private static final native boolean registryDeleteNative(String root, String path);
 
     private static final native boolean firewallPresentNative();
     private static final native boolean firewallEnabledNative();
