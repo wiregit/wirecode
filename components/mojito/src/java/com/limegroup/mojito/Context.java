@@ -293,7 +293,6 @@ public class Context implements MojitoDHT, RouteTable.Callback {
                 
                 // Change the Node ID
                 localNode.setNodeID(nodeId);
-                localNode.nextInstanceID();
                 
                 // Clear the RouteTable and add the local Node with our
                 // new Node ID
