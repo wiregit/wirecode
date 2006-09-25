@@ -376,8 +376,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     
                     if(!retriedBootstrap) {
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("Too many failures: "+ failures
-                                    + ".Retrying bootstrap from phase 2");
+                            LOG.debug("Too many failures: " + failures
+                                    + ". Retrying bootstrap from phase 2");
                         }
                         retriedBootstrap = true;
                         return startBootstrapLookups(node);
