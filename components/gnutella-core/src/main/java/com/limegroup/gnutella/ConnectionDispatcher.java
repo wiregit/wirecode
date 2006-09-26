@@ -23,8 +23,8 @@ public class ConnectionDispatcher {
     /**
      * Mapping of first protocol word -> ConnectionAcceptor
      */
-    private static final Map protocols = 
-    	Collections.synchronizedMap(new HashMap());
+    private static final Map<String, Delegator> protocols = 
+    	Collections.synchronizedMap(new HashMap<String, Delegator>());
     
     /** 
      * The longest protocol word we understand.

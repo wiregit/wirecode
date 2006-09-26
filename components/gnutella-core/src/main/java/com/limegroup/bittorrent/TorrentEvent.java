@@ -4,6 +4,8 @@ import java.util.EventObject;
 
 public class TorrentEvent extends EventObject {
 
+	private static final long serialVersionUID = 5166816249517367147L;
+
 	public enum Type {STARTING,STARTED,STOPPED,COMPLETE,STOP_REQUESTED, STOP_APPROVED}
 	
 	private final Type type;

@@ -6,6 +6,8 @@ import com.limegroup.gnutella.downloader.Interval;
  * An interval within a block. 
  */
 public class BTInterval extends Interval {
+	private static final long serialVersionUID = 6565199693843714608L;
+
 	private final Integer blockId;
 	
 	private int hashCode;

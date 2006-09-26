@@ -3,11 +3,9 @@ package com.limegroup.gnutella.chat;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionAcceptor;

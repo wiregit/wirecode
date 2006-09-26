@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.Set;
 
 import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.tigertree.HashTree;

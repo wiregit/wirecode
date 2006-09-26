@@ -140,7 +140,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	VerifyingFolder(BTMetaInfo info, 
 			boolean complete, 
-			Map data,
+			Map<String, Serializable> data,
 			DiskController<TorrentFile> diskController) {
 		TorrentFileSystem system = info.getFileSystem();
 		_files = complete? system.getFiles() : system.getIncompleteFiles();

@@ -288,11 +288,11 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * adds a request to the appropriate queue if not already there
 	 * @return the position in the queue (>= 1)
 	 */
-	private <T extends UploadSlotRequest>int queueRequest(UploadSlotRequest request) {
-		List<T> queue = (List<T>)getQueue(request.user);
+	private <Request_t extends UploadSlotRequest>int queueRequest(Request_t request) {
+		List<Request_t> queue = (List<Request_t>)getQueue(request.user);
 		if (queue.size() == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
 			return -1;
-		queue.add((T)request);
+		queue.add(request);
 		
 		if (LOG.isDebugEnabled())
 			LOG.debug("queued "+request.getUser()+" at position "+queue.size());

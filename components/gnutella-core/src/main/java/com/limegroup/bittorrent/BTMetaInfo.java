@@ -30,6 +30,7 @@ import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.StringUtils;
 
 import com.limegroup.bittorrent.bencoding.BEncoder;
@@ -165,7 +166,7 @@ public class BTMetaInfo implements Serializable {
 	 */
 	public FileDesc getFileDesc() {
 		if (_desc == null) {
-			Set s = new HashSet();
+			Set<URN> s = new HashSet<URN>();
 			s.add(getURN());
 			_desc = new FakeFileDesc(fileSystem.getCompleteFile(),s);
 		}
@@ -263,7 +264,7 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * private utility method for initializing the DiskManager
 	 */
-	private void initializeDiskManager(Map data, boolean complete) {
+	private void initializeDiskManager(Map<String, Serializable> data, boolean complete) {
 		_folder = DiskManagerFactory.instance().getManager(this, data, complete);
 	}
 
@@ -353,9 +354,9 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private synchronized void writeObject(ObjectOutputStream out)
 			throws IOException {
-		Map toWrite = new HashMap();
+		Map<String,Serializable> toWrite = new HashMap<String, Serializable>();
 		
-		toWrite.put("_hashes",_hashes);
+		toWrite.put("_hashes",(Serializable)_hashes);
 		toWrite.put("_pieceLength",new Integer(_pieceLength));
 		toWrite.put("_fileSystem",fileSystem);
 		toWrite.put("_infoHash",_infoHash);
@@ -372,7 +373,11 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private synchronized void readObject(ObjectInputStream in)
 			throws IOException, ClassNotFoundException {
-		Map toRead = (Map) in.readObject();
+		Object read = in.readObject();
+		Map<String, Serializable> toRead = 
+			GenericsUtils.scanForMap(read, 
+					String.class, Serializable.class, 
+					GenericsUtils.ScanMode.EXCEPTION);
 		
 		_hashes = (List<byte[]>) toRead.get("_hashes");
 		Integer pieceLength = (Integer)toRead.get("_pieceLength");
@@ -382,7 +387,10 @@ public class BTMetaInfo implements Serializable {
 		_trackers = (URL []) toRead.get("_trackers");
 		Float ratio = (Float) toRead.get("ratio");
 		
-		Map folderData = (Map) toRead.get("folder data");
+		read = toRead.get("folder data");
+		Map<String, Serializable> folderData = GenericsUtils.scanForMap(read, 
+				String.class, Serializable.class, 
+				GenericsUtils.ScanMode.EXCEPTION); 
 		
 		if (_hashes == null || pieceLength == null || fileSystem == null ||
 				 _infoHash == null || _trackers == null ||
@@ -418,7 +426,7 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	public static class FakeFileDesc extends FileDesc {
-		public FakeFileDesc(File file, Set s) {
+		public FakeFileDesc(File file, Set<? extends URN> s) {
 			super(file, s, Integer.MAX_VALUE);
 		}
 	}
@@ -438,6 +446,7 @@ public class BTMetaInfo implements Serializable {
 	 * A bitset that has fixed size and every bit in it is set.
 	 */
 	private class FullBitSet extends BitSet {
+		private static final long serialVersionUID = -2621319856548383315L;
 		public void set(int i) {}
 		public void clear(int i){}
 		public boolean get(int i) {

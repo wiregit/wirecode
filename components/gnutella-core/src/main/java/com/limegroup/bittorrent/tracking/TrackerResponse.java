@@ -79,7 +79,7 @@ class TrackerResponse {
 				throw new ValueException("bad tracker response - bad peers "
 						+ t_peers);
 		} else
-			PEERS = Collections.EMPTY_LIST;
+			PEERS = Collections.emptyList();
 
 		Object t_interval = response.get("interval");
 		Object t_minInterval = response.get("min_interval");

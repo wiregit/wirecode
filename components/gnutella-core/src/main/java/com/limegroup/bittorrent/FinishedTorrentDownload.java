@@ -15,7 +15,7 @@ public class FinishedTorrentDownload implements Torrent {
 	}
 	
 	public List<BTLink> getConnections() {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	public long getNextTrackerRequestTime() {

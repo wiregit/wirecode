@@ -5,9 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.io.ByteBufferCache;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.IOErrorObserver;
@@ -20,8 +17,6 @@ import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 public class BTMessageReader implements ChannelReadObserver, PieceParseListener {
 	
-	private static final Log LOG = LogFactory.getLog(BTMessageReader.class);
-
 	// a small buffer for connections
 	private static final int BUFFER_SIZE = 2 * 1024;
 	

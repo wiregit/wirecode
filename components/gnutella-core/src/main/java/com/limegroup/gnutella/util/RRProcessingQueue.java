@@ -12,8 +12,8 @@ public class RRProcessingQueue extends ProcessingQueue {
 	
 	private static final Log LOG = LogFactory.getLog(RRProcessingQueue.class);
 
-	private final Map queues = new HashMap();
-	private final RoundRobinQueue lists = new RoundRobinQueue();
+	private final Map<Object, NamedQueue> queues = new HashMap<Object, NamedQueue>();
+	private final RoundRobinQueue<NamedQueue> lists = new RoundRobinQueue<NamedQueue>();
 	
 	private int size;
 	
@@ -30,9 +30,9 @@ public class RRProcessingQueue extends ProcessingQueue {
 	}
 
 	public synchronized void invokeLater(Runnable runner, Object queueId) {
-		NamedQueue queue = (NamedQueue)queues.get(queueId);
+		NamedQueue queue = queues.get(queueId);
 		if (queue == null) {
-			queue = new NamedQueue(new LinkedList(), queueId);
+			queue = new NamedQueue(new LinkedList<Runnable>(), queueId);
 			queues.put(queueId, queue);
 			lists.enqueue(queue);
 		}
@@ -95,9 +95,9 @@ public class RRProcessingQueue extends ProcessingQueue {
 	}
 	
 	private class NamedQueue {
-		final List list;
+		final List<Runnable> list;
 		final Object name;
-		NamedQueue (List list, Object name) {
+		NamedQueue (List<Runnable> list, Object name) {
 			this.list = list;
 			this.name = name;
 		}

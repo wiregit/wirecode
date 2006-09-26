@@ -12,13 +12,12 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	private static final long NANO_BASE = System.nanoTime();
 	
 	private Runnable delegate;
-	private final long time, nanoTime;
+	private final long nanoTime;
 	private final long sequenceNumber;
 	private volatile boolean executed;
 	private boolean executing;
 	DelayedRunnable(Runnable delegate, long time) {
 		this.delegate = delegate;
-		this.time = time + System.currentTimeMillis();
 		sequenceNumber = sequencer.getAndIncrement();
 		this.nanoTime = System.nanoTime() - NANO_BASE + time * 1000 * 1000;
 	}

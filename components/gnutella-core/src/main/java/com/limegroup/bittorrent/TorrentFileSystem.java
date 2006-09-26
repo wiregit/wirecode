@@ -25,6 +25,8 @@ import com.limegroup.gnutella.util.StringUtils;
  * Information about the file hierarchy contained in the torrent.
  */
 public class TorrentFileSystem implements Serializable {
+	
+	private static final long serialVersionUID = 6006838744525690869L;
 
 	/* the name of the torrent */
 	private String _name;

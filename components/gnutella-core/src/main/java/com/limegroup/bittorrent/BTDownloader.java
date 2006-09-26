@@ -23,6 +23,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.NumericBuffer;
 
 /**
@@ -378,8 +379,14 @@ implements TorrentEventListener {
 	
 	private void readObject(ObjectInputStream in)
 	throws IOException, ClassNotFoundException {
-		propertiesMap = (Map<String, Serializable>)in.readObject();
-		attributes = (Map)propertiesMap.get(ATTRIBUTES);
+		Object read = in.readObject();
+		propertiesMap = GenericsUtils.scanForMap(read, 
+				String.class, Serializable.class, 
+				GenericsUtils.ScanMode.EXCEPTION);
+		read = propertiesMap.get(ATTRIBUTES);
+		attributes = GenericsUtils.scanForMap(read, 
+				String.class, Serializable.class, 
+				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
 		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
@@ -400,7 +407,7 @@ implements TorrentEventListener {
 	}
 	
 	public void startDownload() {
-		BTUploader uploader = new BTUploader((ManagedTorrent)_torrent,
+		new BTUploader((ManagedTorrent)_torrent,
 				_info, 
 				RouterService.getTorrentManager());
 		_torrent.start();

@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent.settings;
 
-import java.io.File;
 
 import com.limegroup.gnutella.settings.BooleanSetting;
 import com.limegroup.gnutella.settings.IntSetting;
