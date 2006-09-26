@@ -299,6 +299,64 @@ MENU_FILE_DISCONNECT=切断 (I)
 MENU_FILE_DISCONNECT_MNEMONIC=I
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
 MENU_FILE_DISCONNECT_ACCESSIBLE=ネットワークを切断する
+#### MENU_FILE_OPEN_TORRENT=Open .torrent
+#? MENU_FILE_OPEN_TORRENT=
+#### MENU_FILE_OPEN_TORRENT_MNEMONIC=T
+#? MENU_FILE_OPEN_TORRENT_MNEMONIC=
+#### MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Opens a .torrent file from your hard drive
+#? MENU_FILE_OPEN_TORRENT_ACCESSIBLE=
+#### MENU_FILE_DOWNLOAD_TORRENT=Download .torrent
+#? MENU_FILE_DOWNLOAD_TORRENT=
+#### MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=D
+#? MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=
+#### MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Downloads a .torrent file from the WWW
+#? MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=
+#### MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Download .torrent file from the web
+#? MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=
+#### MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL
+#? MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=
+#### MENU_FILE_LIBRARY_NEW_FOLDER=New Folder
+#? MENU_FILE_LIBRARY_NEW_FOLDER=
+#### MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=N
+#? MENU_FILE_LIBRARY_NEW_FOLDER_MNEMONIC=
+#### MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=Add a Folder to the Selected Library Folder
+#? MENU_FILE_LIBRARY_NEW_FOLDER_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_UNSHARE_FOLDER=Stop Sharing Folder
+#? MENU_FILE_LIBRARY_UNSHARE_FOLDER=
+#### MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=P
+#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_MNEMONIC=
+#### MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=Stop Sharing the Selected Library Folder
+#? MENU_FILE_LIBRARY_UNSHARE_FOLDER_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_RENAME_FOLDER=Rename Folder
+#? MENU_FILE_LIBRARY_RENAME_FOLDER=
+#### MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=R
+#? MENU_FILE_LIBRARY_RENAME_FOLDER_MNEMONIC=
+#### MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=Rename the Selected Library Folder
+#? MENU_FILE_LIBRARY_RENAME_FOLDER_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_LAUNCH_FILES=Launch File(s)
+#? MENU_FILE_LIBRARY_LAUNCH_FILES=
+#### MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=L
+#? MENU_FILE_LIBRARY_LAUNCH_FILES_MNEMONIC=
+#### MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=Launch the Selected File(s)
+#? MENU_FILE_LIBRARY_LAUNCH_FILES_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_DELETE_FILES=Delete File(s)
+#? MENU_FILE_LIBRARY_DELETE_FILES=
+#### MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=E
+#? MENU_FILE_LIBRARY_DELETE_FILES_MNEMONIC=
+#### MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=Delete the Selected File(s)
+#? MENU_FILE_LIBRARY_DELETE_FILES_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_REFRESH=Refresh
+#? MENU_FILE_LIBRARY_REFRESH=
+#### MENU_FILE_LIBRARY_REFRESH_MNEMONIC=S
+#? MENU_FILE_LIBRARY_REFRESH_MNEMONIC=
+#### MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=Reload the Library
+#? MENU_FILE_LIBRARY_REFRESH_ACCESSIBLE=
+#### MENU_FILE_LIBRARY_EXPLORE=Explore
+#? MENU_FILE_LIBRARY_EXPLORE=
+#### MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=X
+#? MENU_FILE_LIBRARY_EXPLORE_MNEMONIC=
+#### MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=Open Library Folder
+#? MENU_FILE_LIBRARY_EXPLORE_ACCESSIBLE=
 
 #### MENU_NAV_TITLE=Navigation
 MENU_NAV_TITLE=操作 (N)
@@ -1098,6 +1156,10 @@ DOWNLOAD_TIME_REMAINING_COLUMN=時間
 DOWNLOAD_SERVER_COLUMN=開発元/バージョン
 #### DOWNLOAD_STATUS_QUEUED=Queued
 DOWNLOAD_STATUS_QUEUED=予約した
+#### DOWNLOAD_STATUS_SEEDING=Seeding
+#? DOWNLOAD_STATUS_SEEDING=
+#### DOWNLOAD_STATUS_WAITING_FOR_TRACKER=Waiting For Tracker
+#? DOWNLOAD_STATUS_WAITING_FOR_TRACKER=
 #### DOWNLOAD_STATUS_CONNECTING=Connecting...
 DOWNLOAD_STATUS_CONNECTING=接続中...
 #### DOWNLOAD_STATUS_WAITING=Waiting On Busy Hosts
@@ -1197,6 +1259,11 @@ DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWireはこのファイルのライセ�
 #### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
 #? DOWNLOAD_SERACH_ORGINAL_TIP=
 
+#### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
+#? TORRENTS_COULD_NOT_READ_SNAPSHOT=
+#### TORRENTS_TRACKER_FAILURE=LimeWire's tracker request failed:
+#? TORRENTS_TRACKER_FAILURE=
+
 ###################################################################
 # Key/value pairs for UploadView
 ###################################################################
@@ -1260,6 +1327,12 @@ UPLOAD_TABLE_STRING_QUEUED=次の順番に予約した
 UPLOAD_ACTIVE=有効
 #### UPLOAD_QUEUED=Queued
 UPLOAD_QUEUED=順番待ち
+#### UPLOAD_BT_SEEDING=Seeding
+#? UPLOAD_BT_SEEDING=
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#? UPLOAD_BT_STOP=
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#? UPLOAD_BT_SEED_MORE=
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -1530,6 +1603,21 @@ SETUP_CONFIRM_LABEL_NO_DIRECTORIES=共有可能なファイルが見つかりま
 SETUP_FINISH_TITLE=設定完了
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
 SETUP_FINISH_LABEL=設定は無事に完了。"完了"ボタンを押してLimeWire をお使い下さい。
+#### SETUP_ASSOCIATIONS_TITLE=File & Protocol Associations
+#? SETUP_ASSOCIATIONS_TITLE=
+#### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
+#? SETUP_ASSOCIATIONS_LABEL=
+
+
+################################################################################
+# Key/value pairs for miscellaneous associations 
+################################################################################
+#### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
+#? ASSOCIATIONS_MANGET_DESCRIPTION=
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#? ASSOCIATIONS_UNLINKED_WARNING=
+#### ASSOCIATIONS_OTHER_OPTION=Details
+#? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
 # Key/value pairs for the file chooser
@@ -2322,6 +2410,12 @@ ERROR_XML_SEARCH_TOO_LARGE=検索が特定化されすぎているので、検�
 #? ERROR_INTERNETARCHIVE_DIRECTORY=
 #### ERROR_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive. Please try again later.
 #? ERROR_INTERNETARCHIVE_COMMUNICATION=
+#### ERROR_COULD_NOT_OPEN_TORRENT=LimeWire was unable to load the specified torrent file, - it may be malformed or LimeWire does not have permission to access this file.
+#? ERROR_COULD_NOT_OPEN_TORRENT=
+#### ERROR_COULD_NOT_OPEN_TORRENT_URL=LimeWire was unable to download the torrent file from the specified URL:
+#? ERROR_COULD_NOT_OPEN_TORRENT_URL=
+#### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
+#? ERROR_BAD_TORRENT_URL=
 ################################################################################
 # Messages for Licensing
 ################################################################################
@@ -2411,6 +2505,8 @@ OPTIONS_UPLOAD_BASIC_MAIN_TITLE=基本
 OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=スロット
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=接続
+#### OPTIONS_BITTORRENT_MAIN_TITLE=BitTorrent
+#? OPTIONS_BITTORRENT_MAIN_TITLE=
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=終了
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
@@ -2467,6 +2563,8 @@ OPTIONS_PROXY_MAIN_TITLE=プロキシ
 #? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
 #### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
+#### OPTIONS_ASSOCIATIONS_MAIN_TITLE=File Associations
+#? OPTIONS_ASSOCIATIONS_MAIN_TITLE=
 
 ################################################################################
 # Key/value pairs for the save directory options window item
@@ -2688,6 +2786,24 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=アプリケーションの起動時に、自�
 #### OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Connect on Startup:
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=起動時に接続：
 
+###############################################################################
+# Key/Value pairs for BitTorrent options
+###############################################################################
+#### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
+#? OPTIONS_BITTORRENT_SETTINGS_TITLE=
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=Settings for the BitTorrent Protocol.
+#? OPTIONS_BITTORRENT_SETTINGS_LABEL=
+#### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
+#? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
+#### OPTIONS_BITTORRENT_MAX_TORRENTS=Maximum Active Torrents
+#? OPTIONS_BITTORRENT_MAX_TORRENTS=
+#### OPTIONS_BITTORRENT_MAX_CONNECTIONS=Maximum connections per torrent
+#? OPTIONS_BITTORRENT_MAX_CONNECTIONS=
+#### OPTIONS_BITTORRENT_MAX_UPLOADS=Maximum uploads per torrent
+#? OPTIONS_BITTORRENT_MAX_UPLOADS=
+#### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
+#? OPTIONS_BITTORRENT_MIN_UPLOADS=
+
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
@@ -2741,6 +2857,26 @@ OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 プレイヤーを使用：
 OPTIONS_PLAYER_PREFERENCE_TITLE=プレイヤー・オプション
 #### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player. The media player and playlist will appear only if this option is set. A restart will be required when enabling or disabling the media controls.
 OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire またはシステム初期設定のプレイヤーが使用できる。また、プレイヤーのコントロールを無効/有効にするには LimeWire を再起動させる必要がある。
+
+################################################################################
+# Key/Value pairs for the association options in the options window
+################################################################################
+#### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
+#? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
+#? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
+#### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
+#? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
+#### OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=What should LimeWire do with the selected associations on startup?
+#? OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=
+#### OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=Always take the selected associations.
+#? OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=
+#### OPTIONS_ASSOCIATIONS_GRAB_ASK=Ask me what to do when an association is missing.
+#? OPTIONS_ASSOCIATIONS_GRAB_ASK=
+#### OPTIONS_ASSOCIATIONS_GRAB_NEVER=Ignore all missing associations.
+#? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
 # Key/Value pairs for the status bar options in the options window
