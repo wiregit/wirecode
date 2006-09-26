@@ -90,10 +90,10 @@ public class NBThrottle implements Throttle {
     private final int _processOp;
     
     /** The amount that is available every tick. */
-    private int _bytesPerTick;
+    private volatile int _bytesPerTick;
     
     /** The amount currently available in this tick. */
-    private int _available;
+    private volatile int _available;
     
     /** The next time a tick should occur. */
     private long _nextTickTime = -1;
@@ -176,7 +176,7 @@ public class NBThrottle implements Throttle {
             MINIMUM_TO_GIVE = 30;
         } else {
             MAXIMUM_TO_GIVE = Integer.MAX_VALUE;
-            MINIMUM_TO_GIVE = 0;
+            MINIMUM_TO_GIVE = 1;
         }
     }
     
@@ -209,26 +209,25 @@ public class NBThrottle implements Throttle {
             
             _active = true;
             long now = System.currentTimeMillis();
-            Iterator<Map.Entry<Object, ThrottleListener>> i = _interested.entrySet().iterator();
-            for(; !_ready.isEmpty() && i.hasNext(); ) {
-                Map.Entry<Object, ThrottleListener> next = i.next();
-                ThrottleListener listener = next.getValue();
+            for(Iterator i = _interested.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry next = (Map.Entry)i.next();
+                ThrottleListener listener = (ThrottleListener)next.getValue();
                 Object attachment = next.getKey();
                 SelectionKey key = _ready.remove(attachment);
                 if(!listener.isOpen()) {
                     //LOG.trace("Removing closed but interested party: " + next.getKey());
                     i.remove();
                 } else if(key != null) {
+                	i.remove();
                     //LOG.debug("Processing: " + key.attachment());
-                    listener.requestBandwidth();
-                    try {
-                        NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
-                    } finally {
-                        listener.releaseBandwidth();
-                    }
-                    i.remove();
-                    if(_available < MINIMUM_TO_GIVE)
-                        break;
+                	listener.requestBandwidth();
+                	try {
+                		NIODispatcher.instance().process(now, key, key.attachment(), _processOp);
+                	} finally {
+                		listener.releaseBandwidth();
+                	}
+                	if (_available < MINIMUM_TO_GIVE)
+                		break;
                 }
             }
             _active = false;
@@ -243,6 +242,8 @@ public class NBThrottle implements Throttle {
             //LOG.debug("Adding: " + writer + " to requests");
             _requests.add(writer);
         }
+        if (_available >= MINIMUM_TO_GIVE)
+        	NIODispatcher.instance().wakeup();
     }
     
     /**
@@ -266,6 +267,15 @@ public class NBThrottle implements Throttle {
         //LOG.trace("RETR: " + amount + ", REMAINING: " + _available + ", ALL: " + wroteAll + ", FROM: " + attachment);
     }
     
+	/**
+	 * Set the number of bytes to write per second
+	 * 
+	 * @param bytesPerSecond
+	 */
+	public void limit(int bytesPerSecond) {
+		_bytesPerTick = (int)(bytesPerSecond * MILLIS_PER_TICK / 1000);
+	}
+    
     /**
      * Notification from NIODispatcher that some time has passed.
      *
@@ -277,9 +287,17 @@ public class NBThrottle implements Throttle {
             _available = _bytesPerTick;
             _nextTickTime = currentTime + MILLIS_PER_TICK;
             spreadBandwidth();
-        } else if(_available > MINIMUM_TO_GIVE) {
+        } else if(_available >= MINIMUM_TO_GIVE) {
             spreadBandwidth();
         }
+    }
+    
+    public long nextTickTime() {
+    	synchronized(_requests) {
+    		if (_requests.isEmpty() && _interested.isEmpty())
+    			return Long.MAX_VALUE;
+    	}
+    	return _nextTickTime;
     }
     
     /**
@@ -293,12 +311,10 @@ public class NBThrottle implements Throttle {
                     if(attachment == null)
                         throw new IllegalStateException("must have an attachment");
                     
-                    if(!_interested.containsKey(attachment)) {
-                        //LOG.debug("Moving: " + attachment + " from rquests to interested");
-                        if(req.bandwidthAvailable())
-                            _interested.put(attachment, req);
-                        // else it'll be cleared when we loop later on.
-                    }
+                    //LOG.debug("Moving: " + attachment + " from rquests to interested");
+                    if(req.bandwidthAvailable())
+                    	_interested.put(attachment, req);
+                    // else it'll be cleared when we loop later on.
                 }
                 _requests.clear();
             }

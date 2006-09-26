@@ -17,12 +17,18 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * Dispatcher for NIO.
@@ -59,6 +65,9 @@ public class NIODispatcher implements Runnable {
     
     private static final NIODispatcher INSTANCE = new NIODispatcher();
     public static final NIODispatcher instance() { return INSTANCE; }
+    
+    private final SchedulingThreadPool SCHEDULER =
+    	new MyThreadPool();
     
     /**
      * Constructs the sole NIODispatcher, starting its thread.
@@ -105,13 +114,15 @@ public class NIODispatcher implements Runnable {
         new HashMap<Class<? extends SelectableChannel>, Selector>();
     
     /** A list of other Selectors that should be polled. */
-    private final List<Selector> POLLERS = new ArrayList<Selector>();
+    private final List <Selector> POLLERS = new ArrayList<Selector>();
     
     /** The invokeLater queue. */
-    private Collection<Runnable> LATER = new LinkedList<Runnable>();
+    private Collection <Runnable> LATER = new LinkedList<Runnable>();
+    
+    private final BlockingQueue<DelayedRunnable> DELAYED = new DelayQueue<DelayedRunnable>();
     
     /** The throttle queue. */
-    private final List<NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
+    private final List <NBThrottle> THROTTLE = new ArrayList<NBThrottle>();
     
     /** The timeout manager. */
     private final TimeoutController TIMEOUTER = new TimeoutController();
@@ -326,12 +337,8 @@ public class NIODispatcher implements Runnable {
    public void invokeLater(Runnable runner) {
         if(Thread.currentThread() == dispatchThread) {
             runner.run();
-        } else {
-            synchronized(Q_LOCK) {
-                LATER.add(runner);
-            }
-            wakeup();
-        }
+        } else 
+            invokeReallyLater(runner);
     }
    
    /** Same as invokeLater, except forces the Runnable to be done later on. */
@@ -341,6 +348,14 @@ public class NIODispatcher implements Runnable {
         }
         wakeup();
     }
+   
+
+   public java.util.concurrent.Future invokeLater(Runnable later, long delay) {
+	   DelayedRunnable ret = new DelayedRunnable(later, delay);
+	   DELAYED.add(ret);
+	   wakeup();
+	   return ret;
+   }
    
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
    public void invokeAndWait(final Runnable future) throws InterruptedException {
@@ -469,14 +484,13 @@ public class NIODispatcher implements Runnable {
      */
     private void runPendingTasks() {
         long now = System.currentTimeMillis();
-        for(int i = 0; i < THROTTLE.size(); i++)
-            THROTTLE.get(i).tick(now);
-        
         Collection<Runnable> localLater;
         synchronized(Q_LOCK) {
             localLater = LATER;
             LATER = new LinkedList<Runnable>();
         }
+        
+        DELAYED.drainTo(localLater);
         
         if(now > lastCacheClearTime + CACHE_CLEAR_INTERVAL) {
             BUFFER_CACHE.clearCache();
@@ -493,13 +507,17 @@ public class NIODispatcher implements Runnable {
                 }
             }
         }
+        
+        now = System.currentTimeMillis();
+        for(NBThrottle t: THROTTLE)
+            t.tick(now);
     }
     
     /**
      * Runs through all secondary Selectors and returns a 
      * Collection of SelectionKeys that they selected.
      */
-    private Collection<SelectionKey> pollOtherSelectors() {
+    private Collection <SelectionKey> pollOtherSelectors() {
         Collection<SelectionKey> ret = null;
         boolean growable = false;
         
@@ -548,7 +566,7 @@ public class NIODispatcher implements Runnable {
      * Wakes up the primary selector if it wasn't already woken up,
      * and the current thread is not the dispatch thread.
      */
-    private void wakeup() {
+    void wakeup() {
         if(!wokeup && Thread.currentThread() != dispatchThread) {
             wokeup = true;
             primarySelector.wakeup();
@@ -572,10 +590,16 @@ public class NIODispatcher implements Runnable {
             try {
                 if(!immediate && checkTime)
                     startSelect = System.currentTimeMillis();
-                    
-                if(!immediate)
-                    primarySelector.select(100);
-                else
+                
+                if(!immediate) {
+                	long delay = nextSelectTimeout();
+                	if (delay == 0)
+                		immediate = true;
+                	else
+                		primarySelector.select(delay);
+                }
+                
+                if (immediate)
                     primarySelector.selectNow();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
@@ -620,10 +644,10 @@ public class NIODispatcher implements Runnable {
             }
             
             if(LOG.isTraceEnabled())
-                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + ").");
+                LOG.trace("Selected keys: (" + keys.size() + "), polled: (" + polled.size() + "). wokeup "+wokeup+" immediate "+immediate);
             
             Collection<SelectionKey> allKeys;
-            if(immediate) {
+            if(!polled.isEmpty()) {
                 allKeys = new HashSet<SelectionKey>(keys.size() + polled.size());
                 allKeys.addAll(keys);
                 allKeys.addAll(polled);
@@ -634,15 +658,42 @@ public class NIODispatcher implements Runnable {
             readyThrottles(allKeys);
             
             long now = System.currentTimeMillis();
-            for(SelectionKey sk : allKeys) {
+            for(SelectionKey sk : allKeys) 
 				process(now, sk, sk.attachment(), 0xFFFF);
-            }
             
             keys.clear();
             iteration++;
             TIMEOUTER.processTimeouts(now);
             wokeup = false;
         }
+    }
+    
+    /**
+     * @return the timeout of the next select call. 0 if it should be immediate
+     */
+    private long nextSelectTimeout() {
+    	// first see when the next throttle should tick
+    	long next = Long.MAX_VALUE;
+    	for (Throttle t: THROTTLE)
+    		next = Math.min(next, t.nextTickTime());
+    	long now = System.currentTimeMillis(); 
+    	next -= now;
+    	if (next <= 0)
+    		return 0;
+    	
+    	// then check when the next timeout is due
+    	long timeout = TIMEOUTER.getNextExpireTime();
+    	if (timeout > -1)
+    		next = Math.min(next, timeout - now);
+    	if (next <= 0)
+    		return 0;
+    	
+    	// then see when the next scheduled task is due
+    	// Note: DelayedQueue.peek() returns the element even if not expired.
+    	Delayed nextScheduled = DELAYED.peek(); 
+    	if (nextScheduled != null) 
+    		next = Math.min(next, nextScheduled.getDelay(TimeUnit.MILLISECONDS));
+    	return Math.max(0, next);
     }
     
     /**
@@ -734,7 +785,7 @@ public class NIODispatcher implements Runnable {
         
         // We do not have to concern ourselves with secondary selectors,
         // because we only retrieves keys from the primary one.
-        for(SelectionKey key : oldKeys) {
+        for(SelectionKey key : oldKeys ) {
             try {
                 SelectableChannel channel = key.channel();
                 Attachment attachment = (Attachment)key.attachment();
@@ -901,7 +952,7 @@ public class NIODispatcher implements Runnable {
             registerImpl(getSelectorFor(channel), channel, op, handler, timeout);
         }
     }
-
+    
     private static class SpinningException extends Exception {
         public SpinningException() { super(); }
     }
@@ -909,6 +960,22 @@ public class NIODispatcher implements Runnable {
     private static class ProcessingException extends Exception {
         public ProcessingException() { super(); }
         public ProcessingException(Throwable t) { super(t); }
+    }
+    
+    public SchedulingThreadPool getSchedulingThreadPool() {
+    	return SCHEDULER;
+    }
+    
+    private static class MyThreadPool implements SchedulingThreadPool {
+
+		public Future invokeLater(Runnable r, long delay) {
+			return instance().invokeLater(r, delay);
+		}
+
+		public void invokeLater(Runnable runner) {
+			instance().invokeLater(runner);
+		}
+    	
     }
 }
 
