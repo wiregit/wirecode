@@ -456,7 +456,7 @@ BTLinkListener {
 	public void addEndpoint(TorrentLocation to) {
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
-		if (RouterService.getIpFilter().allow(to.getAddress()))
+		if (!RouterService.getIpFilter().allow(to.getAddress()))
 			return;
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;
