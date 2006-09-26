@@ -119,9 +119,6 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     static int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
-    /** The throttle. */
-    private static final Throttle THROTTLE = new NBThrottle(false, Float.MAX_VALUE);
-
     private RemoteFileDesc _rfd;
 	private long _index;
 	private String _filename; 
@@ -330,7 +327,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		_amountRead = 0;
 		_totalAmountRead = 0;
         _inNetwork = inNetwork;
-		applyRate();
     }
 
     ////////////////////////Alt Locs methods////////////////////////
@@ -430,7 +426,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _socket.setKeepAlive(true);
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(THROTTLE));
+        _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getThrottle(true)));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         
@@ -1630,7 +1626,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		String allWorkers = null;
 		URN urn = _rfd.getSHA1Urn();
 		if (urn != null) {
-			ManagedDownloader myDownloader = RouterService.getDownloadManager().getDownloaderForURN(urn);
+			ManagedDownloader myDownloader = (ManagedDownloader)
+			RouterService.getDownloadManager().getDownloaderForURN(urn);
 			if (myDownloader == null)
 				allWorkers = "couldn't find my downloader???";
 			else
@@ -1791,28 +1788,8 @@ public class HTTPDownloader implements BandwidthTracker {
     }
             
     /**
-     * Set bandwidth limitation for downloads.
-     */
-    public static void setRate(float bytesPerSecond) {
-        THROTTLE.setRate(bytesPerSecond);
-    }
-    
-    /**
      * Apply bandwidth limitation from settings.
      */
-    public static void applyRate() {
-        float downloadRate = Float.MAX_VALUE;
-        int downloadThrottle = DownloadSettings.DOWNLOAD_SPEED.getValue();
-        
-        if ( downloadThrottle < 100 )
-        {
-            downloadRate = ((downloadThrottle/100.f)*
-             (ConnectionSettings.CONNECTION_SPEED.getValue()/8.f))*1024.f;
-        }
-        setRate( downloadRate );
-    }
-    
-    
 	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {

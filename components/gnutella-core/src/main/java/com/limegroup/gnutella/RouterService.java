@@ -13,13 +13,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -56,9 +60,11 @@ import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.ThreadFactory;
@@ -115,6 +121,11 @@ public class RouterService {
 	 */
     private static final Acceptor acceptor = new Acceptor();
     
+	/**
+	 * <tt>TorrentManager</tt> instance for handling torrents
+	 */
+	private static TorrentManager torrentManager = new TorrentManager();
+    
     /**
      * ConnectionDispatcher instance that will dispatch incoming connections to
      * the appropriate managers.
@@ -141,11 +152,17 @@ public class RouterService {
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
     private static DownloadManager downloadManager = new DownloadManager();
-
+    
+    /**
+     * <tt>UploadSlotManager</tt> for controlling upload slots.
+     */
+    private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
+    
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = new UploadManager();
+    private static UploadManager uploadManager = 
+    	new UploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -204,6 +221,11 @@ public class RouterService {
     private static MessageRouter router;
     
     /**
+     * A central location for the upload and download throttles
+     */
+    private static BandwidthManager bandwidthManager = new BandwidthManager();
+    
+    /**
      * The UDPMultiplexor.
      */
     private static UDPMultiplexor UDP_MULTIPLEXOR;
@@ -247,7 +269,7 @@ public class RouterService {
 	 */
 	private static boolean _fullPower = true;
 	
-	private static final byte [] MYGUID;
+	private static final byte [] MYGUID, MYBTGUID;
 	static {
 	    byte [] myguid=null;
 	    try {
@@ -257,6 +279,14 @@ public class RouterService {
 	        ApplicationSettings.CLIENT_ID.setValue((new GUID(myguid)).toHexString());
 	    }
 	    MYGUID=myguid;
+	    
+	    byte []mybtguid = new byte[20];
+	    mybtguid[0] = 0x4C; // L
+	    mybtguid[1] = 0x49; // I
+	    mybtguid[2] = 0x4D; // M
+	    mybtguid[3] = 0x45; // E
+	    System.arraycopy(MYGUID,0,mybtguid,4,16);
+	    MYBTGUID = mybtguid;
 	}
 
 	/**
@@ -418,6 +448,14 @@ public class RouterService {
             fileManager.start();
             LOG.trace("STOP FileManager");
     
+            LOG.trace("START TorrentManager");
+			torrentManager.initialize();
+			LOG.trace("STOP TorrentManager");
+			
+			LOG.trace("START ExternalControl");
+			ExternalControl.instance();
+			LOG.trace("STOP ExternalControl");
+			
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");
             callback.componentLoading("DOWNLOAD_MANAGER_POST_GUI");
@@ -545,6 +583,10 @@ public class RouterService {
 	public static MessageRouter getMessageRouter() {
 		return router;
 	}
+	
+	public static BandwidthManager getBandwidthManager() {
+		return bandwidthManager;
+	}
     
 	/**
 	 * Accessor for the <tt>FileManager</tt> instance in use.
@@ -562,6 +604,10 @@ public class RouterService {
      */
     public static DownloadManager getDownloadManager() {
         return downloadManager;
+    }
+    
+    public static TorrentManager getTorrentManager() {
+    	return torrentManager;
     }
 
     public static AltLocManager getAltlocManager() {
@@ -597,6 +643,15 @@ public class RouterService {
      */
 	public static UploadManager getUploadManager() {
 		return uploadManager;
+	}
+
+    /** 
+     * Accessor for the <tt>UploadSlotManager</tt> instance.
+     *
+     * @return the <tt>UploadSlotManager</tt> in use
+     */
+	public static UploadSlotManager getUploadSlotManager() {
+		return uploadSlotManager;
 	}
 	
 	/**
@@ -664,6 +719,10 @@ public class RouterService {
 	public static byte [] getMyGUID() {
 	    return MYGUID;
 	}
+	
+	public static byte [] getMyBTGUID() {
+		return MYBTGUID;
+	}
 
     /**
      * Schedules the given task for repeated fixed-delay execution on this's
@@ -677,8 +736,15 @@ public class RouterService {
      * @exception IllegalArgumentException delay or period negative
      * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
-    public static void schedule(Runnable task, long delay, long period) {
-        SimpleTimer.sharedTimer().schedule(task, delay, period);
+    public static TimerTask schedule(Runnable task, long delay, long period) {
+        return SimpleTimer.sharedTimer().schedule(task, delay, period);
+    }
+    
+    /**
+     * @return an object that can be used as a <tt>SchedulingThreadPool</tt>
+     */
+    public static SchedulingThreadPool getSchedulingThreadPool() {
+    	return SimpleTimer.sharedTimer();
     }
 
     /**
@@ -816,7 +882,7 @@ public class RouterService {
      * Returns the number of uploads in progress.
      */
     public static int getNumUploads() {
-        return uploadManager.uploadsInProgress();
+        return uploadManager.uploadsInProgress() + torrentManager.getNumActiveTorrents();
     }
 
     /**
@@ -901,6 +967,9 @@ public class RouterService {
             //Update fractional uptime statistics (before writing limewire.props)
             Statistics.instance().shutdown();
             
+			// start closing all active torrents
+			// torrentManager.shutdown();
+			
             //Update firewalled status
             ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
 
@@ -917,6 +986,8 @@ public class RouterService {
             cleanupPreviewFiles();
             
             downloadManager.writeSnapshot();
+            
+           // torrentManager.writeSnapshot();
             
             fileManager.stop(); // Saves UrnCache and CreationTimeCache
 
@@ -1528,6 +1599,20 @@ public class RouterService {
         return downloadManager.download(incompleteFile);
     }
 
+    
+    /**
+	 * Starts a torrent download for a given Inputstream to the .torrent file
+	 * 
+	 * @param is
+	 *            the InputStream belonging to the .torrent file
+	 * @throws IOException
+	 *             in case there was a problem reading the file 
+	 */
+	public static Downloader downloadTorrent(BTMetaInfo info, boolean overwrite)
+			throws SaveLocationException {
+		return downloadManager.downloadTorrent(info, overwrite);
+	}
+    
 	/**
 	 * Creates and returns a new chat to the given host and port.
 	 */

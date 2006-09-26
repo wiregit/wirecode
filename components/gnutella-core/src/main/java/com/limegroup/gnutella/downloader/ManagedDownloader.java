@@ -27,7 +27,6 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
@@ -98,7 +97,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * unconnected. <b>Furthermore, it is necessary to explicitly call
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
-public class ManagedDownloader implements Downloader, MeshHandler, AltLocListener, Serializable {
+public class ManagedDownloader extends AbstractDownloader
+implements MeshHandler, AltLocListener {
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
@@ -465,32 +465,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * The time the last query was sent out.
      */
     private long lastQuerySent;
-    
-    /**
-     * The current priority of this download -- only valid if inactive.
-     * Has no bearing on the download itself, and is used only so that the
-     * download doesn't have to be indexed in DownloadManager's inactive list
-     * every second, for GUI updates.
-     */
-    private volatile int inactivePriority;
-    
-    /**
-     * A map of attributes associated with the download. The attributes
-     * may be used by GUI, to keep some additional information about
-     * the download.
-     */
-    protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
-
-    protected Map<String, Serializable> propertiesMap;
-    
-    protected static final String DEFAULT_FILENAME = "defaultFileName";
-    protected static final String FILE_SIZE = "fileSize";
-    protected static final String ATTRIBUTES = "attributes";
-    /**
-	 * The key under which the saveFile File is stored in the attribute map
-     * used in serializing and deserializing ManagedDownloaders. 
-	 */
-    protected static final String SAVE_FILE = "saveFile";
     
     /** The key under which the URN is stored in the attribute map */
     protected static final String SHA1_URN = "sha1Urn";
@@ -1087,7 +1061,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(incompleteFileManager, getSaveFile().getName(),
-                                               downloadSHA1, getContentLength());
+                                               downloadSHA1, (int)getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -1217,13 +1191,13 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * @param fileSize, can be 0
 	 * @return
 	 */
-	public boolean conflicts(URN urn, String fileName, int fileSize) {
+	public boolean conflicts(URN urn, int fileSize, File... fileName) {
 		if (urn != null && downloadSHA1 != null) {
 			return urn.equals(downloadSHA1);
 		}
 		if (fileSize > 0) {
 			try {
-				File file = incompleteFileManager.getFile(fileName, null, fileSize);
+				File file = incompleteFileManager.getFile(fileName[0].getName(), null, fileSize);
 				return conflictsWithIncompleteFile(file);
 			} catch (IOException e) {
 			}
@@ -1338,7 +1312,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         final long otherLength = other.getFileSize();
 
         synchronized (this) {
-            int ourLength = getContentLength();
+            int ourLength = (int)getContentLength();
             
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
@@ -1394,7 +1368,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public synchronized void locationAdded(AlternateLocation loc) {
         Assert.that(loc.getSHA1Urn().equals(getSHA1Urn()));
-        addDownload(loc.createRemoteFileDesc(getContentLength()),false);
+        addDownload(loc.createRemoteFileDesc((int)getContentLength()),false);
     }
     
     /** 
@@ -1517,6 +1491,18 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
     public boolean hasNewSources() {
         return !paused && receivedNewSources;
     }
+    
+    public boolean shouldBeRestarted() {
+    	return hasNewSources() || getRemainingStateTime() <= 0;
+    }
+    
+    public boolean shouldBeRemoved() {
+    	return isCancelled() || isCompleted();
+    }
+    
+    public boolean canBeInQueue() {
+    	return !isPaused();
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -1590,6 +1576,20 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      */
     public boolean isPaused() {
         return paused == true;
+    }
+    
+    public boolean isPausable() {
+    	int state = getState();
+    	return !isPaused() && !isCompleted() && state != SAVING && state != HASHING;
+    }
+    
+    public boolean isResumable() {
+    	// inactive but not queued
+    	return isInactive() && state != QUEUED;
+    }
+    
+    public boolean isLaunchable() {
+    	return getAmountRead() > 0;
     }
     
     /**
@@ -1870,59 +1870,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return 0;//Nothing to preview!
     }
 
-    /**
-	 * Sets the file name and directory where the download will be saved once
-	 * complete.
-     * 
-     * @param overwrite true if overwriting an existing file is allowed
-     * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
-     */
-    public void setSaveFile(File saveDirectory, String fileName,
-							boolean overwrite) 
-		throws SaveLocationException {
-        if (saveDirectory == null)
-            saveDirectory = SharingSettings.getSaveDirectory();
-        if (fileName == null)
-            fileName = getDefaultFileName();
-        
-        if (!saveDirectory.isDirectory()) {
-            if (saveDirectory.exists())
-                throw new SaveLocationException(SaveLocationException.NOT_A_DIRECTORY, saveDirectory);
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_DOES_NOT_EXIST, saveDirectory);
-        }
-        
-        File candidateFile = new File(saveDirectory, fileName);
-        try {
-            if (!FileUtils.isReallyParent(saveDirectory, candidateFile))
-                throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, candidateFile);
-        } catch (IOException e) {
-            throw new SaveLocationException(SaveLocationException.FILESYSTEM_ERROR, candidateFile);
-        }
-		
-        if (! FileUtils.setWriteable(saveDirectory))    
-            throw new SaveLocationException(SaveLocationException.DIRECTORY_NOT_WRITEABLE,saveDirectory);
-		
-        if (candidateFile.exists()) {
-            if (!candidateFile.isFile())
-                throw new SaveLocationException(SaveLocationException.FILE_NOT_REGULAR, candidateFile);
-            if (!overwrite)
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, candidateFile);
-        }
-		
-		// check if another existing download is being saved to this download
-		// we ignore the overwrite flag on purpose in this case
-		if (RouterService.getDownloadManager().isSaveLocationTaken(candidateFile)) {
-			throw new SaveLocationException(SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, candidateFile);
-		}
-         
-        // Passed sanity checks, so save file
-        synchronized (this) {
-            if (!isRelocatable())
-                throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-            propertiesMap.put(SAVE_FILE, candidateFile);
-        }
-    }
-   
     /** 
      * This method is used to determine where the file will be saved once downloaded.
      *
@@ -2252,7 +2199,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incFile, String name) {
-        corruptFileBytes=getAmountRead();        
+        corruptFileBytes= (int) getAmountRead();        
         incompleteFileManager.removeEntry(incFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
@@ -2710,26 +2657,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
             this.stateTime=System.currentTimeMillis()+time;
     }
     
-    /**
-     * Sets the inactive priority of this download.
-     */
-    public void setInactivePriority(int priority) {
-        inactivePriority = priority;
-    }
-    
-    /**
-     * Gets the inactive priority of this download.
-     */
-    public int getInactivePriority() {
-        return inactivePriority;
-    }
-
-
-    /*************************************************************************
-     * Accessors that delegate to dloader. Synchronized because dloader can
-     * change.
-     *************************************************************************/
-
     /** @return the GUID of the query that spawned this downloader.  may be null.
      */
     public GUID getQueryGUID() {
@@ -2757,23 +2684,6 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         }
     }
 
-    /**
-	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
-	 * the properties map.
-	 * <p>
-	 * Subclasses should put the name into the map or overriede this
-	 * method.
-	 */
-    protected synchronized String getDefaultFileName() {       
-        String fileName = (String)propertiesMap.get(DEFAULT_FILENAME); 
-         if (fileName == null) {
-             Assert.that(false,"defaultFileName is null, "+
-                         "subclass may have not overridden getDefaultFileName");
-         }
-		 return CommonUtils.convertFileName(fileName);
-    }
-
-
 	/**
      *  Certain subclasses would like to know whether we have at least one good
 	 *  RFD.
@@ -2786,7 +2696,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 	 * Return -1 if the file size is not known yet, i.e. is not stored in the
 	 * properties map under {@link #FILE_SIZE}.
 	 */
-    public synchronized int getContentLength() {
+    public synchronized long getContentLength() {
         Integer i = (Integer)propertiesMap.get(FILE_SIZE);
         return i != null ? i.intValue() : -1;
     }
@@ -2800,7 +2710,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
      * All other times it will return the amount downloaded.
      * All return values are in bytes.
      */
-    public int getAmountRead() {
+    public long getAmountRead() {
         VerifyingFile ourFile;
         synchronized(this) {
             if ( state == CORRUPT_FILE )
@@ -3018,7 +2928,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
         return averageBandwidth;
 	}	    
 
-	public int getAmountVerified() {
+	public long getAmountVerified() {
         VerifyingFile ourFile;
         synchronized(this) {
             ourFile = commonOutFile;
@@ -3026,7 +2936,7 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
 		return ourFile == null? 0 : ourFile.getVerifiedBlockSize();
 	}
 	
-	public int getAmountLost() {
+	public long getAmountLost() {
         VerifyingFile ourFile;
         synchronized(this) {
             ourFile = commonOutFile;
@@ -3059,40 +2969,5 @@ public class ManagedDownloader implements Downloader, MeshHandler, AltLocListene
            Math.random() > 0.5f)
             return true;
         return false;
-    }
-    
-    /**
-     * Sets a new attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
-     * information about the download.
-     * @param key A key used to identify the attribute.
-     * @patam value The value of the key.
-     * @return A prvious value of the attribute, or <code>null</code>
-     *         if the attribute wasn't set.
-     */
-    public Serializable setAttribute( String key, Serializable value ) {
-        return attributes.put( key, value );
-    }
-
-    /**
-     * Gets a value of attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
-     * information about the download.
-     * @param key A key which identifies the attribue.
-     * @return The value of the specified attribute,
-     *         or <code>null</code> if value was not specified.
-     */
-    public Serializable getAttribute( String key ) {
-        return attributes.get( key );
-    }
-
-    /**
-     * Removes an attribute associated with this download.
-     * @param key A key which identifies the attribute do remove.
-     * @return A value of the attribute or <code>null</code> if
-     *         attribute was not set.
-     */
-    public Object removeAttribute( String key ) {
-        return attributes.remove( key );
     }
 }

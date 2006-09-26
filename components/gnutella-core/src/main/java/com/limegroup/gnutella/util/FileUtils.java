@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +16,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -25,6 +29,53 @@ import com.limegroup.gnutella.UploadManager;
  * @author Anurag Singla
  */
 public class FileUtils {
+
+    /**
+     * Writes the passed map to corresponding file
+     * @param filename The name of the file to which to write the passed map
+     * @param map The map to be stored
+     */
+    public static void writeObject(String filename, Object obj)
+        throws IOException {
+        ObjectOutputStream out = null;
+        try {
+        	File f = new File(filename);
+        	if (f.exists())
+        		f.createNewFile();
+            //open the file
+            out = new ObjectOutputStream(
+            		new BufferedOutputStream(
+            				new FileOutputStream(f)));
+            //write to the file
+            out.writeObject(obj);	
+            out.flush();
+        } finally {
+            //close the stream
+            IOUtils.close(out);
+        }
+    }
+    
+    /**
+     * Reads the map stored, in serialized object form, 
+     * in the passed file and returns it. from the file where it is stored
+     * @param filename The file from where to read the Map
+     * @return The map that was read
+     */
+    public static Object readObject(String filename)
+        throws IOException, ClassNotFoundException {
+        ObjectInputStream in = null;
+        try {
+            //open the file
+            in = new ObjectInputStream(
+            		new BufferedInputStream(
+            				new FileInputStream(filename)));
+            //read and return the object
+            return in.readObject();	
+        } finally {
+            //close the file
+            IOUtils.close(in);
+        }    
+    }
     
     private static final Log LOG = LogFactory.getLog(FileUtils.class);
 
@@ -220,11 +271,14 @@ public class FileUtils {
                 // This must all be synchronized so that a new upload
                 // doesn't lock the file before we rename it.
                 synchronized(upMan) {
-                    if( upMan.killUploadsForFileDesc(fd) )
+                    if( upMan.killUploadsForFileDesc(fd))
                         success = a.renameTo(b);
                 }
             }
         }
+        
+        if (!success && RouterService.getTorrentManager().killTorrentForFile(a)) 
+        	success = a.renameTo(b);
         
         // If that didn't work, try copying the file.
         if (!success) {
@@ -424,5 +478,69 @@ public class FileUtils {
     	};
     	
     	return command;
+    }
+    
+    public static boolean deleteRecursive(File file) {
+		// make sure we only delete canonical children of the parent file we
+		// wish to delete. I have a hunch this might be an issue on OSX and
+		// Linux under certain circumstances.
+		// If anyone can test whether this really happens (possibly related to
+		// symlinks), I would much appreciate it.
+		String canonicalParent;
+		try {
+			canonicalParent = file.getCanonicalPath();
+		} catch (IOException ioe) {
+			return false;
+		}
+
+		if (!file.isDirectory())
+			return file.delete();
+
+		File[] files = file.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			try {
+				if (!files[i].getCanonicalPath().startsWith(canonicalParent))
+					continue;
+			} catch (IOException ioe) {
+				return false;
+			}
+			if (!deleteRecursive(files[i]))
+				return false;
+		}
+
+		return file.delete();
+	}
+    
+    /**
+     * @return true if the two files are the same.  If they are both
+     * directories returns true if there is at least one file that 
+     * conflicts.
+     */
+    public static boolean conflictsAny(File a, File b) {
+    	if (a.equals(b))
+    		return true;
+    	Set<File> unique = new HashSet<File>();
+    	unique.add(a);
+    	for (File recursive: getFilesRecursive(a,null))
+    		unique.add(recursive);
+    	
+    	if (unique.contains(b))
+    		return true;
+    	for (File recursive: getFilesRecursive(b,null)) {
+    		if (unique.contains(recursive))
+    			return true;
+    	}
+    	
+    	return false;
+    	
+    }
+    
+    public static long getLengthRecursive(File f) {
+    	if (!f.isDirectory())
+    		return f.length();
+    	long ret = 0;
+    	for (File file : getFilesRecursive(f,null))
+    		ret += file.length();
+    	return ret;
     }
 }

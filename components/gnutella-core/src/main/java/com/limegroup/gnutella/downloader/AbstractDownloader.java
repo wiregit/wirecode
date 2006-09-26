@@ -27,7 +27,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 
 	protected static final String FILE_SIZE = "fileSize";
 
-	protected Map propertiesMap = new HashMap();
+	protected Map<String, Serializable> propertiesMap = new HashMap<String, Serializable>();
 
 	/**
 	 * The key under which the saveFile File is stored in the attribute map
@@ -48,10 +48,10 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * may be used by GUI, to keep some additional information about
 	 * the download.
 	 */
-	protected Map attributes = new HashMap();
+	protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
 	protected AbstractDownloader() {
-		propertiesMap.put(ATTRIBUTES, attributes);
+		propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
 	}
 	/**
 	 * Sets the inactive priority of this download.
@@ -76,7 +76,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * @return A prvious value of the attribute, or <code>null</code>
 	 *         if the attribute wasn't set.
 	 */
-	public Object setAttribute(String key, Object value) {
+	public Serializable setAttribute(String key, Serializable value) {
 	    return attributes.put( key, value );
 	}
 
@@ -88,7 +88,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * @return The value of the specified attribute,
 	 *         or <code>null</code> if value was not specified.
 	 */
-	public Object getAttribute(String key) {
+	public Serializable getAttribute(String key) {
 	    return attributes.get( key );
 	}
 
