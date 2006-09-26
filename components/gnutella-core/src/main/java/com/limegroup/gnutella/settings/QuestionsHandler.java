@@ -147,4 +147,32 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static IntSetting GRAB_ASSOCIATIONS =
     	FACTORY.createIntSetting("GRAB_ASSOCIATIONS",0);
+    
+    /**
+     * Setting for whether or not to display a message that a .torrent file 
+     * could not be opened 
+     */
+    public static final BooleanSetting TORRENT_OPEN_FAILURE =
+        FACTORY.createBooleanSetting("TORRENT_OPEN_FAILURE ", false);
+
+    /**
+     * Setting for whether or not to display a message that a .torrent file 
+     * could not be downloaded 
+     */
+    public static final BooleanSetting TORRENT_DOWNLOAD_FAILURE =
+        FACTORY.createBooleanSetting("TORRENT_DOWNLOAD_FAILURE ", false);
+    
+    /**
+     * Setting for whether ot not to display a message that cancelling a 
+     * torrent upload will kill its corresponding download
+     */
+    public static final IntSetting TORRENT_STOP_UPLOAD =
+    	FACTORY.createIntSetting("TORRENT_STOP_UPLOAD", 0);
+    
+    /**
+     * Setting for whether ot not to display a message that the user
+     * should let a seeding torrent reach 1:1 ratio.
+     */
+    public static final IntSetting TORRENT_SEED_MORE =
+    	FACTORY.createIntSetting("TORRENT_SEED_MORE", 0);
 }
