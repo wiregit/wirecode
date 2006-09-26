@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
@@ -115,7 +114,7 @@ BTLinkListener {
 			EventDispatcher<TorrentEvent, TorrentEventListener> dispatcher) {
 		_info = info;
 		_folder = info.getDiskManager();
-		_peers = Collections.EMPTY_SET;
+		_peers = Collections.emptySet();
 		linkManager = BTLinkManagerFactory.instance().getLinkManager();
 		trackerManager = TrackerManagerFactory.instance().getTrackerManager(this);
 		this.dispatcher = dispatcher;
@@ -457,7 +456,7 @@ BTLinkListener {
 	public void addEndpoint(TorrentLocation to) {
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
-		if (!IPFilter.instance().allow(to.getAddress()))
+		if (RouterService.getIpFilter().allow(to.getAddress()))
 			return;
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;

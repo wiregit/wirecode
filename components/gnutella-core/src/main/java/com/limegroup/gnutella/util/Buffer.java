@@ -37,7 +37,7 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
      *            size>=2
      */
     private final int size;
-    private E buf[];
+    protected E buf[];
     private int head;
     private int tail;
 
@@ -57,25 +57,28 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /** "Copy constructor": constructs a new shallow copy of other. */
-    @SuppressWarnings("unchecked")
     public Buffer(Buffer<? extends E> other) {
         this.size=other.size;
         this.head=other.head;
         this.tail=other.tail;
 
         if(other.buf != null) {
-            this.buf = (E[])new Object[other.buf.length];
+            this.buf = createArray(other.buf.length);
             System.arraycopy(other.buf, 0,
                             this.buf, 0,
                             other.buf.length);
         }
     }
     
-    /** Initializes the internal buf if necessary. */
     @SuppressWarnings("unchecked")
-    private void initialize() {
+    protected E[] createArray(int size) {
+    	return (E[]) new Object[size];
+    }
+    
+    /** Initializes the internal buf if necessary. */
+    protected void initialize() {
         if(buf == null)
-            buf = (E[])new Object[size+1];
+            buf = createArray(size+1);
     }
 
     /** Returns true iff this is empty. */

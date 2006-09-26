@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -10,6 +11,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -548,6 +551,34 @@ public class StringUtils {
         else
             retString = fileName.substring(0, extStart);
         return retString;
+    }
+    
+    /**
+     * Utility wrapper for getting a String object out of
+     * byte [] using the ascii encoding.
+     */
+    public static String getASCIIString(byte [] bytes) {
+    	return getEncodedString(bytes, Constants.ASCII_ENCODING);
+    }
+    
+    /**
+     * Utility wrapper for getting a String object out of
+     * byte [] using the UTF-8 encoding.
+     */
+    public static String getUTF8String(byte [] bytes) {
+    	return getEncodedString(bytes, Constants.UTF_8_ENCODING);
+    }
+    
+    /**
+     * @return a string with an encoding we know we support.
+     */
+    private static String getEncodedString(byte [] bytes, String encoding) {
+    	try {
+    		return new String(bytes, encoding);
+    	} catch (UnsupportedEncodingException impossible) {
+    		ErrorService.error(impossible);
+    		return null;
+    	}
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
