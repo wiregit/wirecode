@@ -125,7 +125,7 @@ public class FindNodeResponseHandler
                 Entry<Contact, QueryKey> e = entry.getValue();
                 nearest.put(e.getKey(), e.getValue());
                 
-                if (nearest.size() >= responses.size()) {
+                if (nearest.size() >= getResultSetSize()) {
                     return SelectStatus.EXIT;
                 }
                 
