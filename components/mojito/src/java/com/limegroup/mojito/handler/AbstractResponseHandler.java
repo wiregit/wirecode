@@ -323,7 +323,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                     started = true;
                     start();
                 }
-            
+                
                 try {
                     return exchanger.get(getLockTimeout(), TimeUnit.MILLISECONDS);
                 } catch (TimeoutException err) {

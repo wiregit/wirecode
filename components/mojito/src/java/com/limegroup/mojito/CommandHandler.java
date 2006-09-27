@@ -36,6 +36,7 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.event.BootstrapEvent.EventType;
 import com.limegroup.mojito.routing.RouteTable;
@@ -144,7 +145,7 @@ public class CommandHandler {
         out.println(buffer);
     }
     
-    public static Future<Contact> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static Future<PingEvent> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
@@ -170,10 +171,11 @@ public class CommandHandler {
             }
         });*/
         
-        Future<Contact> future = dht.ping(addr);
+        Future<PingEvent> future = dht.ping(addr);
         try {
-            Contact result = future.get();
-            out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
+            PingEvent result = future.get();
+            Contact node = result.getContact();
+            out.println("Ping to " + node + " succeeded: " + node.getRoundTripTime() + "ms");
         } catch (Exception err) {
             err.printStackTrace(out);
         }

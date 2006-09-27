@@ -54,6 +54,7 @@ import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.NotBootstrappedException;
@@ -279,7 +280,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             LOG.info("Changing local Node ID from " + getLocalNodeID() + " to " + newID);
         }
         
-        rebuildRouteTable(newID);
+        setLocalNodeID(newID);
         purgeDatabase(true);
     }
     
@@ -290,7 +291,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * 
      * @param localNodeID the local node's KUID
      */
-    private void rebuildRouteTable(KUID localNodeID) {
+    private void setLocalNodeID(KUID localNodeID) {
         synchronized (routeTable) {
             // Change the Node ID
             localNode.setNodeID(localNodeID);
@@ -699,17 +700,17 @@ public class Context implements MojitoDHT, RouteTable.Callback {
      * @param l the PingListener for incoming pongs
      * @throws IOException
      */
-    public DHTFuture<Contact> ping(SocketAddress address) {
+    public DHTFuture<PingEvent> ping(SocketAddress address) {
         return pingManager.ping(address);
     }
     
     /** Pings the given Node */
-    public DHTFuture<Contact> ping(Contact node) {
+    public DHTFuture<PingEvent> ping(Contact node) {
         return pingManager.ping(node);
     }
     
     /** Sends a special collision test Ping to the given Node */
-    public DHTFuture<Contact> collisionPing(Contact node) {
+    public DHTFuture<PingEvent> collisionPing(Contact node) {
         return pingManager.collisionPing(node);
     }
     

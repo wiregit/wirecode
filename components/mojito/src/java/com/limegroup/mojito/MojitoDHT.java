@@ -36,6 +36,7 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindValueEvent;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
@@ -200,7 +201,7 @@ public interface MojitoDHT {
     /**
      * Tries to ping the given address
      */
-    public DHTFuture<Contact> ping(SocketAddress dst);
+    public DHTFuture<PingEvent> ping(SocketAddress dst);
     
     /**
      * Returns a Set of all keys in the Database

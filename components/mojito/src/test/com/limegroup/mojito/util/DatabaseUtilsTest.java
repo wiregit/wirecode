@@ -10,6 +10,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -41,7 +42,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         
         RouteTable routeTable = new RouteTableImpl();
         routeTable.setRouteTableCallback(new RouteTable.Callback() {
-            public DHTFuture<Contact> ping(Contact node) {
+            public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }
         });

@@ -321,7 +321,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             // try again!
             for (Contact c : evt.getCollisions()) {
                 try {
-                    Contact collidesWith = context.collisionPing(c).get();
+                    Contact collidesWith = context.collisionPing(c).get().getContact();
                     throw new CollisionException(collidesWith, 
                         context.getLocalNode() + " collides with " + collidesWith); 
                 } catch (ExecutionException err) {

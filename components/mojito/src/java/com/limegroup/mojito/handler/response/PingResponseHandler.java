@@ -20,11 +20,13 @@
 package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.MessageID;
@@ -37,7 +39,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
  * The PingResponseHandler handles ping responses from Nodes
  * that we have pinged.
  */
-public class PingResponseHandler extends AbstractResponseHandler<Contact> {
+public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
     
     //private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
@@ -91,9 +93,11 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
     protected void response(ResponseMessage message, long time) throws IOException {
         
         PingResponse response = (PingResponse)message;
-        SocketAddress externalAddress = response.getExternalAddress();
         
         Contact node = response.getContact();
+        SocketAddress externalAddress = response.getExternalAddress();
+        BigInteger estimatedSize = response.getEstimatedSize();
+        
         if (node.getContactAddress().equals(externalAddress)) {
             setException(new IllegalArgumentException(node + " is trying to set our external address to its address!"));
             return;
@@ -110,15 +114,15 @@ public class PingResponseHandler extends AbstractResponseHandler<Contact> {
             if (sender == null) {
                 setException(new IllegalArgumentException(node + " is trying to spoof our Node ID"));
             } else {
-                setReturnValue(message.getContact());
+                setReturnValue(new PingEvent(node, externalAddress, estimatedSize));
             }
             return;
         }
         
         context.setExternalAddress(externalAddress);
-        context.addEstimatedRemoteSize(response.getEstimatedSize());
+        context.addEstimatedRemoteSize(estimatedSize);
         
-        setReturnValue(message.getContact());
+        setReturnValue(new PingEvent(node, externalAddress, estimatedSize));
     }
 
     @Override

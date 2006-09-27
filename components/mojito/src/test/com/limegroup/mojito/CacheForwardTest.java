@@ -41,9 +41,9 @@ public class CacheForwardTest extends BaseTestCase {
     
     private static final int PORT = 3000;
     
-    /*static {
+    static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }*/
+    }
     
     public CacheForwardTest(String name) {
         super(name);
@@ -120,7 +120,7 @@ public class CacheForwardTest extends BaseTestCase {
             nearest.start();
             bootstrap(nearest, dhts.values());
             Thread.sleep(250);
-            
+
             // The 'furthest' Node should no longer have the value
             assertEquals(1, nearest.getValues().size());
             assertEquals(0, furthest.getValues().size());

@@ -148,10 +148,17 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     protected synchronized void start() throws Exception {
 
         if (isSingleNodeStore()) {
+            
             // Get the QueryKey if we don't have it
             if (queryKey == null) {
-                GetQueryKeyHandler handler = new GetQueryKeyHandler(node);
-                queryKey = handler.call();
+                GetQueryKeyHandler handler = new GetQueryKeyHandler(context, node);
+                
+                try {
+                    queryKey = handler.call();
+                } catch (Exception err) {
+                    LOG.error("Exception", err);
+                    throw err;
+                }
             }
             
             if (queryKey == null) {
@@ -405,12 +412,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     /**
      * GetQueryKeyHandler tries to get the QueryKey of a Node
      */
-    private class GetQueryKeyHandler extends AbstractResponseHandler<QueryKey> {
+    private static class GetQueryKeyHandler extends AbstractResponseHandler<QueryKey> {
         
         private Contact node;
         
-        private GetQueryKeyHandler(Contact node) {
-            super(StoreResponseHandler.this.context);
+        private GetQueryKeyHandler(Context context, Contact node) {
+            super(context);
             
             this.node = node;
         }
@@ -419,9 +426,15 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         protected void start() throws Exception {
             RequestMessage request = context.getMessageHelper()
                 .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
-            context.getMessageDispatcher().send(node, request, this);
+            context.getMessageDispatcher().send(node, request, GetQueryKeyHandler.this);
         }
 
+        @Override
+        public void handleResponse(ResponseMessage response, long time) throws IOException {
+            System.out.println("Response: " + response);
+            super.handleResponse(response, time);
+        }
+        
         protected void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
@@ -451,7 +464,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             setReturnValue(response.getQueryKey());
         }
-
+        
         protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
             fireTimeoutException(nodeId, dst, message, time);
         }

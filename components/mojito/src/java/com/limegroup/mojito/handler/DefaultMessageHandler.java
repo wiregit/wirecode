@@ -185,6 +185,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 Contact furthest = nodes.get(nodes.size()-1);
                 
                 //System.out.println(CollectionUtils.toString(nodes));
+                //System.out.println("RT nearest: " + closest);
                 //System.out.println("RT furthest: " + furthest);
                 //System.out.println(context.getLocalNode());
                 //System.out.println(node);
@@ -208,9 +209,9 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     if (nodeId.equals(furthestId) 
                             || nodeId.isNearerTo(valueId, furthestId)) {
                         
-                        //System.out.println("CONDITION B");
-                        //System.out.println(context.getLocalNode());
-                        //System.out.println(node);
+                        //System.out.println("CONDITION B (FORWARD)");
+                        //System.out.println("Local (from): " + context.getLocalNode());
+                        //System.out.println("Remote (to): " + node);
                         //System.out.println(CollectionUtils.toString(nodes));
                         //System.out.println();
                         

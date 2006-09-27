@@ -49,6 +49,9 @@ public class BootstrapManagerTest extends BaseTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
+        
+        System.out.println("HERE!!!");
+        
         //setup bootstrap node
         BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
         BOOTSTRAP_DHT.bind(BOOTSTRAP_DHT_PORT);

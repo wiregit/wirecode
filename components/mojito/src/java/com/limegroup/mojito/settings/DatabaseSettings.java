@@ -80,6 +80,6 @@ public final class DatabaseSettings extends MojitoProps {
      */
     // TODO: Set to false!!!
     public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
-        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", true, 
+        = FACTORY.createSettableBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, 
                 "delete_value_if_furthest_node");
 }

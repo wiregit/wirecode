@@ -36,6 +36,7 @@ import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.routing.RouteTable;
@@ -225,7 +226,7 @@ public class RouteTableImpl implements RouteTable {
     
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         PingListener listener = new PingListener() {
-            public void handleResult(Contact result) {
+            public void handleResult(PingEvent result) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to spoof " + result);
                 }
@@ -275,6 +276,7 @@ public class RouteTableImpl implements RouteTable {
                 }
             }
         };
+        
         ping(existing).addDHTEventListener(listener);
         touchBucket(bucket);
     }
@@ -639,7 +641,7 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    DHTFuture<Contact> ping(Contact node) {
+    DHTFuture<PingEvent> ping(Contact node) {
         return callback.ping(node);
     }
     

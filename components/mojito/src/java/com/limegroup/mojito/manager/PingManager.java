@@ -28,6 +28,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
@@ -36,7 +37,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The PingManager takes care of concurrent Pings and makes sure
  * a single Node cannot be pinged multiple times in parallel.
  */
-public class PingManager extends AbstractManager<Contact> {
+public class PingManager extends AbstractManager<PingEvent> {
     
     private Map<SocketAddress, PingFuture> futureMap 
         = new HashMap<SocketAddress, PingFuture>();
@@ -58,15 +59,15 @@ public class PingManager extends AbstractManager<Contact> {
         return futureMap;
     }
     
-    public DHTFuture<Contact> ping(SocketAddress address) {
+    public DHTFuture<PingEvent> ping(SocketAddress address) {
         return ping(null, null, address);
     }
 
-    public DHTFuture<Contact> ping(Contact node) {
+    public DHTFuture<PingEvent> ping(Contact node) {
         return ping(null, node.getNodeID(), node.getContactAddress());
     }
     
-    public DHTFuture<Contact> ping(KUID nodeId, SocketAddress address) {
+    public DHTFuture<PingEvent> ping(KUID nodeId, SocketAddress address) {
         return ping(null, nodeId, address);
     }
     
@@ -74,7 +75,7 @@ public class PingManager extends AbstractManager<Contact> {
      * Sends a special ping to the given Node to test if there
      * is a Node ID collision
      */
-    public DHTFuture<Contact> collisionPing(Contact node) {
+    public DHTFuture<PingEvent> collisionPing(Contact node) {
         // The idea is to invert our local Node so that the
         // other Node doesn't get the impression we're trying
         // to spoof anything and we don't want that the other
@@ -90,7 +91,7 @@ public class PingManager extends AbstractManager<Contact> {
         return ping(sender, node.getNodeID(), node.getContactAddress());
     }
     
-    private DHTFuture<Contact> ping(Contact sender, KUID nodeId, SocketAddress address) {
+    private DHTFuture<PingEvent> ping(Contact sender, KUID nodeId, SocketAddress address) {
         synchronized (getPingLock()) {
             
             PingFuture future = futureMap.get(address);
@@ -116,7 +117,7 @@ public class PingManager extends AbstractManager<Contact> {
 
         private SocketAddress address;
         
-        public PingFuture(SocketAddress address, Callable<Contact> handler) {
+        public PingFuture(SocketAddress address, Callable<PingEvent> handler) {
             super(handler);
             this.address = address;
         }
@@ -133,7 +134,7 @@ public class PingManager extends AbstractManager<Contact> {
         }
 
         @Override
-        protected void fireResult(Contact result) {
+        protected void fireResult(PingEvent result) {
             networkStats.PINGS_OK.incrementStat();
             super.fireResult(result);
         }

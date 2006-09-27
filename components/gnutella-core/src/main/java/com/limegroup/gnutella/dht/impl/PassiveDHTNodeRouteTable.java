@@ -15,6 +15,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.event.DHTEventListener;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
@@ -55,13 +56,14 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
         }
         
         final InetSocketAddress addr = new InetSocketAddress(host, port);
-        DHTFuture<Contact> future = dht.ping(addr);
-        future.addDHTEventListener(new DHTEventListener<Contact>() {
-            public void handleResult(Contact node) {
+        DHTFuture<PingEvent> future = dht.ping(addr);
+        future.addDHTEventListener(new DHTEventListener<PingEvent>() {
+            public void handleResult(PingEvent result) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Ping succeeded to: " + node);
+                    LOG.debug("Ping succeeded to: " + result);
                 }
                 
+                Contact node = result.getContact();
                 synchronized (PassiveDHTNodeRouteTable.this) {
                     KUID previous = leafDHTNodes.put(addr, node.getNodeID());
                     

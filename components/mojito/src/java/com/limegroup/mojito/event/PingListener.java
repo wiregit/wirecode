@@ -19,11 +19,10 @@
 
 package com.limegroup.mojito.event;
 
-import com.limegroup.mojito.Contact;
 
 /**
  * A listener to receive Ping responses
  */
-public interface PingListener extends DHTEventListener<Contact> {
+public interface PingListener extends DHTEventListener<PingEvent> {
     
 }
