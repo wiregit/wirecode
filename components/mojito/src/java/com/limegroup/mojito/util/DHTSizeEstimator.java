@@ -20,6 +20,8 @@
 package com.limegroup.mojito.util;
 
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -128,7 +130,7 @@ public class DHTSizeEstimator {
      * If <tt>nodes</tt> is null it will use the local RouteTable to
      * estimate the DHT size
      */
-    public synchronized void updateSize(List<? extends Contact> nodes) {
+    public synchronized void updateSize(Collection<? extends Contact> nodes) {
         if ((System.currentTimeMillis() - updateEstimatedSizeTime) 
                 >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getValue()) {
 
@@ -161,7 +163,7 @@ public class DHTSizeEstimator {
      * Computes and returns the approximate DHT size based 
      * on the given List of Contacts
      */
-    public synchronized BigInteger computeSize(List<? extends Contact> nodes) {
+    public synchronized BigInteger computeSize(Collection<? extends Contact> nodes) {
         
         // Works only with more than two Nodes
         if (nodes.size() < MIN_NODE_COUNT) {
@@ -169,8 +171,12 @@ public class DHTSizeEstimator {
             return BigInteger.ONE.max(BigInteger.valueOf(nodes.size()));
         }
 
-        // The algorithm works relative to the ID space
-        KUID nearestId = nodes.get(0).getNodeID();
+        // Get the Iterator. We assume the Contacts are sorted by
+        // their xor distance!
+        Iterator<? extends Contact> contacts = nodes.iterator();
+        
+        // The algorithm works relative to the ID space.
+        KUID nearestId = contacts.next().getNodeID();
         
         // See Azureus DHTControlImpl.estimateDHTSize()
         // Di = nearestId xor NodeIDi
@@ -181,8 +187,8 @@ public class DHTSizeEstimator {
         BigInteger sum2 = BigInteger.ZERO;
         
         // We start 1 because the nearest Node is the 0th item!
-        for (int i = 1; i < nodes.size(); i++) {
-            Contact node = nodes.get(i);
+        for (int i = 1; contacts.hasNext(); i++) {
+            Contact node = contacts.next();
 
             BigInteger distance = nearestId.xor(node.getNodeID()).toBigInteger();
             BigInteger j = BigInteger.valueOf(i);

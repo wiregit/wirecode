@@ -21,11 +21,12 @@ package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.TrieUtils;
+import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -117,18 +118,26 @@ public class FindNodeResponseHandler
         lookupStat.setHops(hop, false);
         lookupStat.setTime((int)time, false);
         
-        List<Entry<Contact,QueryKey>> entries 
-                = TrieUtils.select(responses, lookupId, responses.size());
+        // Use a LinkedHashMap which preserves the insertion order...
+        final Map<Contact, QueryKey> nearest = new LinkedHashMap<Contact, QueryKey>();
+        responses.select(lookupId, new Cursor<KUID, Entry<Contact,QueryKey>>() {
+            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, QueryKey>> entry) {
+                Entry<Contact, QueryKey> e = entry.getValue();
+                nearest.put(e.getKey(), e.getValue());
+                
+                if (nearest.size() >= responses.size()) {
+                    return SelectStatus.EXIT;
+                }
+                
+                return SelectStatus.CONTINUE;
+            }
+        });
         
-        FindNodeEvent evt = new FindNodeEvent(getLookupID(), entries, 
+        FindNodeEvent evt = new FindNodeEvent(getLookupID(), nearest, 
                 collisions, time, hop, routeTableFailures);
         
         // TODO We can use the result from a Node lookup to estimate the DHT size
-        /*List<Contact> nodes = new ArrayList<Contact>(entries.size());
-        for (Entry<Contact,QueryKey> e : entries) {
-            nodes.add(e.getKey());
-        }
-        context.updateEstimatedSize(nodes);*/
+        //context.updateEstimatedSize(nearest.keySet());
         
         setReturnValue(evt);
     }

@@ -20,7 +20,7 @@
 package com.limegroup.mojito.event;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
@@ -35,7 +35,7 @@ public class FindNodeEvent {
     
     private KUID lookupId;
     
-    private List<Entry<Contact, QueryKey>> nodes;
+    private Map<Contact, QueryKey> nodes;
     
     private Collection<Contact> collisions;
     
@@ -47,12 +47,12 @@ public class FindNodeEvent {
     
     @SuppressWarnings("unchecked")
     public FindNodeEvent(KUID lookupId, 
-            List<? extends Entry<Contact, QueryKey>> nodes, 
+            Map<? extends Contact, ? extends QueryKey> nodes, 
             Collection<? extends Contact> collisions,
             long time, int hop, int failures) {
     	
         this.lookupId = lookupId;
-        this.nodes = (List<Entry<Contact, QueryKey>>)nodes;
+        this.nodes = (Map<Contact, QueryKey>)nodes;
         this.collisions = (Collection<Contact>)collisions;
         this.time = time;
         this.hop = hop;
@@ -74,9 +74,9 @@ public class FindNodeEvent {
     }
     
     /**
-     * Returns a List of Contacts and their QueryKeys
+     * Returns a Map of Contacts and their QueryKeys
      */
-    public List<Entry<Contact, QueryKey>> getNodes() {
+    public Map<Contact, QueryKey> getNodes() {
         return nodes;
     }
     
@@ -106,7 +106,7 @@ public class FindNodeEvent {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
         int i = 0;
-        for (Entry<Contact, QueryKey> entry : nodes) {
+        for (Entry<Contact, QueryKey> entry : nodes.entrySet()) {
             buffer.append(i++).append(": ").append(entry.getKey())
                 .append(", qk=").append(entry.getValue()).append("\n");
         }

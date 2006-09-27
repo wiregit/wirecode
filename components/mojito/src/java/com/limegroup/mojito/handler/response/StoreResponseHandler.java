@@ -168,9 +168,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             // Use only alive Contacts from the RouteTable
             handler.setFullLiveNodesLookup(true);
-            List<Entry<Contact,QueryKey>> nodes = handler.call().getNodes();
+            Map<Contact,QueryKey> nodes = handler.call().getNodes();
             
-            for (Entry<Contact,QueryKey> entry : nodes) {
+            for (Entry<Contact,QueryKey> entry : nodes.entrySet()) {
                 Contact node = entry.getKey();
                 QueryKey queryKey = entry.getValue();
                 processList.add(new StoreProcess(node, queryKey, values));

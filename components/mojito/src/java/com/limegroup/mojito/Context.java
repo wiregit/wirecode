@@ -32,7 +32,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -857,7 +856,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
     /**
      * Updates the approxmiate DHT size based on the given Contacts
      */
-    public void updateEstimatedSize(List<? extends Contact> nodes) {
+    public void updateEstimatedSize(Collection<? extends Contact> nodes) {
         estimator.updateSize(nodes);
     }
     
