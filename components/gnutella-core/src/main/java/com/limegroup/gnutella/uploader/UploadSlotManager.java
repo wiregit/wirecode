@@ -140,8 +140,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	 *    0 if not in the queue
 	 */
 	private int positionInQueue(UploadSlotRequest request) {
-		List queue = getQueue(request.getUser());
-		return queue.indexOf(request);
+		return getQueue(request.getUser()).indexOf(request);
 	}
 	
 	public synchronized int positionInQueue(UploadSlotUser user) {
@@ -275,7 +274,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	private float getTotalBandwidth() {
 		float ret = 0;
 		for (UploadSlotRequest request : active) {
-			UploadSlotUser user = (UploadSlotUser) request.getUser();
+			UploadSlotUser user = request.getUser();
 			user.measureBandwidth();
 			try {
 				ret += user.getMeasuredBandwidth();
@@ -288,7 +287,8 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * adds a request to the appropriate queue if not already there
 	 * @return the position in the queue (>= 1)
 	 */
-	private <Request_t extends UploadSlotRequest>int queueRequest(Request_t request) {
+	@SuppressWarnings("unchecked")
+    private <Request_t extends UploadSlotRequest>int queueRequest(Request_t request) {
 		List<Request_t> queue = (List<Request_t>)getQueue(request.user);
 		if (queue.size() == UploadSettings.UPLOAD_QUEUE_SIZE.getValue())
 			return -1;
@@ -306,7 +306,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	private void addActiveRequest(UploadSlotRequest request) {
 		int i = 0;
 		for(; i < active.size(); i++) {
-			UploadSlotRequest current = (UploadSlotRequest) active.get(i);
+			UploadSlotRequest current = active.get(i);
 			if (current.getPriority() < request.getPriority()) 
 				break;
 		}
@@ -332,9 +332,9 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * @return if the user was in the queue.
 	 */
 	private boolean removeIfQueued(UploadSlotUser user) {
-		List queue = getQueue(user);
-		for (Iterator iter = queue.iterator(); iter.hasNext();) {
-			UploadSlotRequest request = (UploadSlotRequest) iter.next();
+		List<? extends UploadSlotRequest> queue = getQueue(user);
+		for (Iterator<? extends UploadSlotRequest> iter = queue.iterator(); iter.hasNext();) {
+			UploadSlotRequest request = iter.next();
 			if (request.getUser() == user) {
 				iter.remove();
 				if (LOG.isDebugEnabled())
@@ -349,8 +349,8 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * Notification that the UploadSlotUser is done with its request.
 	 */
 	public synchronized void requestDone(UploadSlotUser user) {
-		for (Iterator iter = active.iterator(); iter.hasNext();) {
-			UploadSlotRequest request = (UploadSlotRequest) iter.next();
+		for (Iterator<? extends UploadSlotRequest> iter = active.iterator(); iter.hasNext();) {
+			UploadSlotRequest request = iter.next();
 			if (request.getUser() == user) {
 				if (LOG.isDebugEnabled())
 					LOG.debug("request finished for "+user);
@@ -369,10 +369,10 @@ public class UploadSlotManager implements BandwidthTracker {
 		// can't resume if someone is still active
 		if (existActiveHigherPriority(BT_SEED))
 			return;
+        
 		// consider moving this to an external collection
-		for(Iterator iter = queuedResumable.iterator();
-		iter.hasNext() && hasFreeSlot(active.size());) {
-			BTSlotRequest queuedRequest = (BTSlotRequest) iter.next();
+		for(Iterator<BTSlotRequest> iter = queuedResumable.iterator(); iter.hasNext() && hasFreeSlot(active.size());) {
+			BTSlotRequest queuedRequest = iter.next();
 			iter.remove();
 			
 			if (LOG.isDebugEnabled())

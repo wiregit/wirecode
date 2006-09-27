@@ -20,7 +20,7 @@ import com.limegroup.gnutella.io.BufferUtils;
  * http://en.wikipedia.org/wiki/Bencoding
  * http://www.bittorrent.org/protocol.html in the section titled "The connectivity is as follows".
  */
-public abstract class Token {
+public abstract class Token<T> {
 
 	/** An undefined Token. */
     protected static final int INTERNAL = -1;
@@ -83,7 +83,7 @@ public abstract class Token {
     protected final ReadableByteChannel chan;
 
     /** The parsed Java object this Token made from the bencoded data it read. */
-    protected Object result;
+    protected T result;
 
     /**
      * Makes a new object to represent a bencoded token to be read and parsed.
@@ -123,7 +123,7 @@ public abstract class Token {
      * @return The Object we parsed.
      *         null if we haven't read enough bencoded data from our channel to make it yet.
      */
-    public Object getResult() {
+    public T getResult() {
         if (!isDone())
             return null;
         return result;
@@ -131,7 +131,7 @@ public abstract class Token {
 
     /** A Token that marks the end of a list of Token objects. */
     static final EndElement TERMINATOR = new EndElement();
-    private static class EndElement extends Token {
+    private static class EndElement extends Token<EndElement> {
     	EndElement() {
             super(null); // No channel to read from
             result = this; // The object we parsed is this one
@@ -153,18 +153,15 @@ public abstract class Token {
      * @return             A possibly incomplete Token object, or null
      * @throws IOException if a read from the channel throws
      */
-    public static Token getNextToken(ReadableByteChannel chan) throws IOException {
-
-    	/*
-    	 * There's some bencoded data in the given chanel for us to read and parse.
-    	 * It might be a string like "5:hello", or a list that starts "l", has other elements, and ends "e".
-    	 * 
-    	 * First, it reads a single byte from the channel.
-    	 * This is going to be a number like "5", or a letter that identifies a type like "l".
-    	 * 
-    	 * Based on what letter it reads, it hands off control to a type specific constructor.
-    	 * If it's a "d" for dictionary for instance, it gives the channel to the BEDictionary constructor.
-    	 */
+    public static Token<?> getNextToken(ReadableByteChannel chan) throws IOException {
+        // There's some bencoded data in the given chanel for us to read and parse.
+        // It might be a string like "5:hello", or a list that starts "l", has other elements, and ends "e".
+        // 
+        // First, it reads a single byte from the channel.
+        // This is going to be a number like "5", or a letter that identifies a type like "l".
+        //
+        // Based on what letter it reads, it hands off control to a type specific constructor.
+        // If it's a "d" for dictionary for instance, it gives the channel to the BEDictionary constructor.
 
     	byte []b = new byte[1];
     	ByteBuffer one_byte = ByteBuffer.wrap(b);
@@ -197,7 +194,7 @@ public abstract class Token {
      *             null if the byte array didn't contain a complete bencoded object.
      */
     public static Object parse(byte[] data) throws IOException {
-        Token t = getNextToken(new BufferChannel(data)); // Reads the first letter like "l" to see what's next
+        Token<?> t = getNextToken(new BufferChannel(data)); // Reads the first letter like "l" to see what's next
         if (t == null)
         	return null; // The channel couldn't even give 1 byte
         t.handleRead(); // Tell t to read from its channel and parse the data it reads

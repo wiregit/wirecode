@@ -70,10 +70,10 @@ public class BEncoder {
      * @param output An OutputStream for this method to write bencoded data to
      * @param list   A Java List object to bencode and write
      */
-    public static void encodeList(OutputStream output, List list) throws IOException {
+    public static void encodeList(OutputStream output, List<?> list) throws IOException {
         output.write(Token.L);
-        for (Iterator iter = list.iterator(); iter.hasNext(); ) // Loop for each object, calling encode() on each one
-            encode(output, iter.next());
+        for(Object next : list) 
+            encode(output, next);
         output.write(Token.E);
     }
 
@@ -96,21 +96,18 @@ public class BEncoder {
      * @param o   An OutputStream for this method to write bencoded data to
      * @param map The Java Map object to bencode and write
      */
-    public static void encodeDict(OutputStream output, Map map) throws IOException {
+    public static void encodeDict(OutputStream output, Map<?, ?> map) throws IOException {
 
     	// The BitTorrent specification requires that dictionary keys are sorted in alphanumeric order
-    	SortedMap sorted = new TreeMap();
-    	for (Iterator iter = map.keySet().iterator(); iter.hasNext(); ) {
-    		Object key = iter.next();
-    		sorted.put(key.toString(), map.get(key));
-    	}
+    	SortedMap<String, Object> sorted = new TreeMap<String, Object>();
+        for(Map.Entry<?, ?> entry : map.entrySet())
+            sorted.put(entry.getKey().toString(), entry.getValue());
 
     	output.write(Token.D);
-    	for (Iterator iter = sorted.keySet().iterator(); iter.hasNext(); ) {
-    		String key = (String)iter.next();
-    		encodeByteArray(output, key.getBytes(Token.ASCII));
-    		encode(output, sorted.get(key));
-    	}
+        for(Map.Entry<String, Object> entry : sorted.entrySet()) {
+            encodeByteArray(output, entry.getKey().getBytes(Token.ASCII));
+            encode(output, entry.getValue());
+        }
     	output.write(Token.E);
     }
 

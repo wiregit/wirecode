@@ -8,7 +8,7 @@ import java.nio.channels.ReadableByteChannel;
 /**
  * A token used for the parsing of a Long value.
  */
-class BELong extends Token {
+class BELong extends Token<Long> {
     
     private static final byte MINUS;
     static {

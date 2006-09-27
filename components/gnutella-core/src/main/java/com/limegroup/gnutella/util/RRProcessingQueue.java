@@ -53,7 +53,7 @@ public class RRProcessingQueue extends ProcessingQueue {
 	protected synchronized Runnable next() {
 		Runnable ret = null;
 		while (lists.size() > 0) {
-			NamedQueue next = (NamedQueue)lists.next();
+			NamedQueue next = lists.next();
 			ret = next.next();
 			if (ret == null || next.list.isEmpty()) {
 				lists.removeAllOccurences(next);
@@ -83,7 +83,7 @@ public class RRProcessingQueue extends ProcessingQueue {
 	}
 	
 	public synchronized void clear(Object name) {
-		NamedQueue toRemove = (NamedQueue)queues.remove(name);
+		NamedQueue toRemove = queues.remove(name);
 		if (toRemove == null)
 			return;
 		lists.removeAllOccurences(toRemove);

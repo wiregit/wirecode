@@ -273,7 +273,7 @@ public class NBThrottle implements Throttle {
 	 * @param bytesPerSecond
 	 */
 	public void limit(int bytesPerSecond) {
-		_bytesPerTick = (int)(bytesPerSecond * MILLIS_PER_TICK / 1000);
+		_bytesPerTick = bytesPerSecond * MILLIS_PER_TICK / 1000;
 	}
     
     /**

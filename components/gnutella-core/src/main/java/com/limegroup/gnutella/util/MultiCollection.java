@@ -16,7 +16,8 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		this.collections = l;
 	}
 
-	public MultiCollection(Collection<? extends T>... collections) {
+	@SuppressWarnings("cast")
+    public MultiCollection(Collection<? extends T>... collections) {
 		super((Iterable<? extends T>[])collections);
 		List<Collection<? extends T>> l = new ArrayList<Collection<? extends T>>(collections.length);
 		for (Collection<? extends T> o : collections)
@@ -28,7 +29,7 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean addAll(Collection c) {
+	public boolean addAll(Collection<? extends T> c) {
 		throw new UnsupportedOperationException();	
 	}
 
@@ -45,7 +46,7 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		return false;
 	}
 
-	public boolean containsAll(Collection c) {
+	public boolean containsAll(Collection<?> c) {
 		for (Object obj : c) {
 			if (contains(obj))
 				return true;
@@ -69,7 +70,7 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		return false;
 	}
 
-	public boolean removeAll(Collection c) {
+	public boolean removeAll(Collection<?> c) {
 		boolean ret = false;
 		for (Object o : c) {
 			if (remove(o))

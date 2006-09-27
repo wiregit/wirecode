@@ -156,11 +156,10 @@ public class TorrentFileSystem implements Serializable {
 	 * @return List of <tt>TorrentFile</tt>
 	 * @throws ValueException if parsing fails.
 	 */
-	private List<TorrentFile> parseFiles(List files, String basePath)
+	private List<TorrentFile> parseFiles(List<?> files, String basePath)
 			throws ValueException {
 		ArrayList<TorrentFile> ret = new ArrayList<TorrentFile>();
-		for (Iterator iter = files.iterator(); iter.hasNext();) {
-			Object t_file = iter.next();
+        for(Object t_file : files) {
 			if (!(t_file instanceof Map))
 				throw new ValueException("bad metainfo - bad file value");
 			ret.add(parseFile((Map) t_file, basePath));
@@ -176,7 +175,7 @@ public class TorrentFileSystem implements Serializable {
 	 * @return instance of <tt>TorrentFile</tt>
 	 * @throws ValueException if parsing fails.
 	 */
-	private TorrentFile parseFile(Map file, String basePath)
+	private TorrentFile parseFile(Map<?, ?> file, String basePath)
 			throws ValueException {
 
 		Object t_length = file.get("length");
@@ -190,7 +189,7 @@ public class TorrentFileSystem implements Serializable {
 		if (!(t_path instanceof List))
 			throw new ValueException("bad metainfo - bad path");
 		
-		List path = (List) t_path;
+		List<?> path = (List) t_path;
 		if (path.isEmpty())
 			throw new ValueException("bad metainfo - bad path");
 
@@ -207,8 +206,8 @@ public class TorrentFileSystem implements Serializable {
 		
 		// prefer the utf8 path if possible
 		if (t_path_utf8 != null) {
-			List pathUtf8 = (List) t_path_utf8;
-			for (Iterator iter = pathUtf8.iterator(); iter.hasNext();) {
+			List<?> pathUtf8 = (List) t_path_utf8;
+			for (Iterator<?> iter = pathUtf8.iterator(); iter.hasNext();) {
 				Object t_next = iter.next();
 				if ( ! (t_next instanceof byte [])) {
 					// invalid UTF-8 path, fall through to asscii path

@@ -645,7 +645,7 @@ class VerifyingFolder implements TorrentDiskManager {
 				// part of it (a.k.a. endgame?)
 				if (endgame && needed.isEmpty() && !iterator.hasNext()) {
 					LOG.debug("endgame");
-					needed = (IntervalSet)requested.clone();
+					needed = requested.clone();
 					
 					// exclude the specified intervals again
 					for (Interval excluded : exclude) 
@@ -886,14 +886,14 @@ class VerifyingFolder implements TorrentDiskManager {
 		public long byteSize() {
 			long ret = 0;
 			for (IntervalSet set : values()) 
-				ret += (long)set.getSize();
+				ret += set.getSize();
 			return ret;
 		}
 		
 		public Object clone() {
 			BlockRangeMap clone = new BlockRangeMap(size());
 			for (Map.Entry<Integer, IntervalSet> e : entrySet())
-				clone.put(e.getKey(), (IntervalSet)e.getValue().clone());
+				clone.put(e.getKey(), e.getValue().clone());
 			return clone;
 		}
 	}

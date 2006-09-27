@@ -536,15 +536,15 @@ public class ByteOrder {
     
     /**
      * Big-endian bytes to long.  Unlike beb2long(x, offset), this version can
-     * read fewer than 4 bytes.  If n &lt; 4, the returned value is never negative.
+     * read fewer than 8 bytes.  If n &lt; 8, the returned value is never negative.
      *
      * @param x the source of the bytes
      * @param offset the index to start reading bytes
-     * @param n the number of bytes to read, which must be between 1 and 4,
+     * @param n the number of bytes to read, which must be between 1 and 8,
      *   inclusive
-     * @return the value of x[offset .. offset + N] as an int, assuming x is
+     * @return the value of x[offset .. offset + N] as a long, assuming x is
      *   interpreted as an unsigned big-endian number (i.e., x[offset] is MSB).
-     * @exception IllegalArgumentException if n is less than 1 or greater than 4
+     * @exception IllegalArgumentException if n is less than 1 or greater than 8
      * @exception IndexOutOfBoundsException if offset &lt; 0 or
      *   offset + n &gt; x.length
      */
@@ -552,49 +552,49 @@ public class ByteOrder {
 			throws IndexOutOfBoundsException, IllegalArgumentException {
 		switch (n) {
 		case 1:
-			return (long) x[offset] & 0xFFL;
+			return       x[offset    ] & 0xFFL;
 		case 2:
-			return ((long) x[offset + 1] & 0xFFL)
-					| (((long) x[offset] & 0xFFL) << 8);
+			return     ( x[offset + 1] & 0xFFL)
+					| (( x[offset    ] & 0xFFL) <<  8);
 		case 3:
-			return ((long) x[offset + 2] & 0xFFL)
-					| (((long) x[offset + 1] & 0xFFL) << 8)
-					| (((long) x[offset] & 0xFFL) << 16);
+			return     ( x[offset + 2] & 0xFFL)
+					| (( x[offset + 1] & 0xFFL) <<  8)
+					| (( x[offset    ] & 0xFFL) << 16);
 		case 4:
-			return ((long) x[offset + 3] & 0xFFL)
-					| (((long) x[offset + 2] & 0xFFL) << 8)
-					| (((long) x[offset + 1] & 0xFFL) << 16)
-					| (((long) x[offset] & 0xFFL) << 24);
+			return     ( x[offset + 3] & 0xFFL)
+					| (( x[offset + 2] & 0xFFL) <<  8)
+					| (( x[offset + 1] & 0xFFL) << 16)
+					| (( x[offset    ] & 0xFFL) << 24);
 		case 5:
-			return ((long) x[offset + 4] & 0xFFL)
-					| (((long) x[offset + 3] & 0xFFL) << 8)
-					| (((long) x[offset + 2] & 0xFFL) << 16)
-					| (((long) x[offset + 1] & 0xFFL) << 24)
-					| (((long) x[offset] & 0xFFL) << 32);
+			return     ( x[offset + 4] & 0xFFL)
+					| (( x[offset + 3] & 0xFFL) <<  8)
+					| (( x[offset + 2] & 0xFFL) << 16)
+					| (( x[offset + 1] & 0xFFL) << 24)
+					| (( x[offset    ] & 0xFFL) << 32);
 		case 6:
-			return ((long) x[offset + 5] & 0xFFL)
-					| (((long) x[offset + 4] & 0xFFL) << 8)
-					| (((long) x[offset + 3] & 0xFFL) << 16)
-					| (((long) x[offset + 2] & 0xFFL) << 24)
-					| (((long) x[offset + 1] & 0xFFL) << 32)
-					| (((long) x[offset] & 0xFFL) << 40);
+			return     ( x[offset + 5] & 0xFFL)
+					| (( x[offset + 4] & 0xFFL) <<  8)
+					| (( x[offset + 3] & 0xFFL) << 16)
+					| (( x[offset + 2] & 0xFFL) << 24)
+					| (( x[offset + 1] & 0xFFL) << 32)
+					| (( x[offset    ] & 0xFFL) << 40);
 		case 7:
-			return ((long) x[offset + 6] & 0xFFL)
-					| (((long) x[offset + 5] & 0xFFL) << 8)
-					| (((long) x[offset + 4] & 0xFFL) << 16)
-					| (((long) x[offset + 3] & 0xFFL) << 24)
-					| (((long) x[offset + 2] & 0xFFL) << 32)
-					| (((long) x[offset + 1] & 0xFFL) << 40)
-					| (((long) x[offset] & 0xFFL) << 48);
+			return     ( x[offset + 6] & 0xFFL)
+					| (( x[offset + 5] & 0xFFL) << 8)
+					| (( x[offset + 4] & 0xFFL) << 16)
+					| (( x[offset + 3] & 0xFFL) << 24)
+					| (( x[offset + 2] & 0xFFL) << 32)
+					| (( x[offset + 1] & 0xFFL) << 40)
+					| (( x[offset    ] & 0xFFL) << 48);
 		case 8:
-			return ((long) x[offset + 7] & 0xFFL)
-					| (((long) x[offset + 6] & 0xFFL) << 8)
-					| (((long) x[offset + 5] & 0xFFL) << 16)
-					| (((long) x[offset + 4] & 0xFFL) << 24)
-					| (((long) x[offset + 3] & 0xFFL) << 32)
-					| (((long) x[offset + 2] & 0xFFL) << 40)
-					| (((long) x[offset + 1] & 0xFFL) << 48)
-					| ((long) x[offset] << 56);
+			return     ( x[offset + 7] & 0xFFL)
+					| (( x[offset + 6] & 0xFFL) << 8)
+					| (( x[offset + 5] & 0xFFL) << 16)
+					| (( x[offset + 4] & 0xFFL) << 24)
+					| (( x[offset + 3] & 0xFFL) << 32)
+					| (( x[offset + 2] & 0xFFL) << 40)
+					| (( x[offset + 1] & 0xFFL) << 48)
+					|  ( x[offset    ]          << 56);
 		default:
 			throw new IllegalArgumentException("No bytes specified");
 		}

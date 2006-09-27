@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * A token used to represent a bencoded Dictionary (Mapping) of keys to values.
  */
-class BEDictionary extends BEList {
+class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
     
     BEDictionary(ReadableByteChannel chan) {
         super(chan);
@@ -18,17 +18,16 @@ class BEDictionary extends BEList {
         return DICTIONARY;
     }
     
-    protected Object createCollection() {
-        return new HashMap();
+    protected Map<String, Object> createCollection() {
+        return new HashMap<String, Object>();
     }
     
     protected void add(Object o) {
-        Map m = (Map)result;
         BEEntry e = (BEEntry)o;
-        m.put(e.key, e.value);
+        result.put(e.key, e.value);
     }
     
-    protected Token getNewElement() {
+    protected Token<?> getNewElement() {
         return new BEEntry(chan);
     }
     
@@ -36,7 +35,7 @@ class BEDictionary extends BEList {
      * A token used to represent a bencoded mapping of a Key -> Value
      * The Key must be a String.
      */
-    private static class BEEntry extends Token {
+    private static class BEEntry extends Token<Object> {
         /** Token for the parsing of the key */
         private BEString keyToken;
         /** The key itself */
@@ -55,7 +54,7 @@ class BEDictionary extends BEList {
         
         public void handleRead() throws IOException {
             if (keyToken == null && key == null) {
-                Token t = getNextToken(chan);
+                Token<?> t = getNextToken(chan);
                 if (t != null) {
                     if (t instanceof BEString) { 
                         keyToken = (BEString)t;
@@ -73,7 +72,7 @@ class BEDictionary extends BEList {
                 if (keyToken.getResult() != null) {
                 	// technically keys don't necesssarily need to be String objects
                 	// but in practice they are
-                    key = new String((byte [])keyToken.getResult(),Token.ASCII);
+                    key = new String(keyToken.getResult(),Token.ASCII);
                     keyToken = null; 
                 }
                 else

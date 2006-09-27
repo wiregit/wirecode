@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,11 +58,9 @@ public class ConnectionDispatcher {
     
     public void removeConnectionAcceptor(String [] words) {
     	synchronized(protocols) {
-    		for (int i = 0; i < words.length; i++)
-    			protocols.remove(words[i]);
+            protocols.keySet().removeAll(Arrays.asList(words));
     		longestWordSize = 0;
-    		for (Iterator iter = protocols.keySet().iterator();iter.hasNext();){
-    			String word = (String) iter.next();
+            for(String word : protocols.keySet()) {
     			if (word.length() > longestWordSize)
     				longestWordSize = word.length();
     		}
@@ -86,7 +85,7 @@ public class ConnectionDispatcher {
         }
         
         // try to find someone who understands this protocol
-        Delegator delegator = (Delegator) protocols.get(word);
+        Delegator delegator = protocols.get(word);
        
         // no protocol available to handle this word 
         if (delegator == null) {

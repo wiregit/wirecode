@@ -282,7 +282,7 @@ implements TorrentEventListener {
 	}
 
 	public int getChunkSize() {
-		return (int) _info.getPieceLength();
+		return _info.getPieceLength();
 	}
 
 	public long getAmountLost() {

@@ -17,7 +17,7 @@ import java.nio.channels.ReadableByteChannel;
  * Calling beString.getToken() returns a Java String with the payload text.
  * 
  */
-class BEString extends Token {
+class BEString extends Token<byte[]> {
 
 	/**
 	 * The largest bencoded string we'll read.
@@ -120,7 +120,7 @@ class BEString extends Token {
     	
         sizeToken.handleRead();
         
-        Long l = (Long)sizeToken.getResult();
+        Long l = sizeToken.getResult();
         if (l != null) { // Same as size == -1
             sizeToken = null; // We don't need the object anymore
             long l2 = l.longValue();
@@ -130,7 +130,7 @@ class BEString extends Token {
 
             	size = (int)l2;
                 result = new byte[size];
-                buf = ByteBuffer.wrap((byte[])result);
+                buf = ByteBuffer.wrap(result);
                 return true;
 
             // The bencoded string data is "0:", this is valid
