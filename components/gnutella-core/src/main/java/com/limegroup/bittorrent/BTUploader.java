@@ -126,7 +126,12 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		case STOPPED : 
 			torrentStopped();
 			dispatcher.removeEventListener(this);
-			break; 
+			break;
+            
+        // the below don't need any special handling...
+        case COMPLETE:
+        case STARTING:
+        case STOP_REQUESTED:
 		}
 	}
 	

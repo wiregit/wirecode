@@ -342,6 +342,11 @@ implements TorrentEventListener {
 		case STARTED : torrentStarted(); break;
 		case COMPLETE : torrentComplete(); break;
 		case STOPPED : torrentStopped(); break;
+        
+        // the below aren't handled...
+        case STARTING:
+        case STOP_APPROVED:
+        case STOP_REQUESTED:
 		}
 	}
 	

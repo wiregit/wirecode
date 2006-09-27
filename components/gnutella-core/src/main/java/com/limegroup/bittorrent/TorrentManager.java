@@ -149,6 +149,10 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		case STARTED: torrentStarted(t); break;
 		case STOPPED: torrentStopped(t); break;
 		case COMPLETE: torrentComplete(t); break;
+        
+        // the below aren't handled specially...
+        case STOP_APPROVED:
+        case STOP_REQUESTED:
 		}
 	}
 	
