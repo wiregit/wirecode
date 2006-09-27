@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.BufferUtils;
+
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -37,7 +38,7 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public class Acceptor {
+public class Acceptor implements ConnectionAcceptor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
@@ -292,6 +293,11 @@ public class Acceptor {
         MulticastService.instance().start();
         UDPService.instance().start();
         RouterService.schedule(new IncomingValidator(), TIME_BETWEEN_VALIDATES, TIME_BETWEEN_VALIDATES);
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+        		new String[]{"CONNECT","\n\n"},
+        		false,
+        		false);
         _started = true;
     }
 	
@@ -479,6 +485,12 @@ public class Acceptor {
 	    return true;
 	}
 	
+	public void acceptConnection(String word, Socket s) {
+        if (ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+            checkFirewall(s.getInetAddress());
+        IOUtils.close(s);
+	}
+	
 	/**
 	 * Updates the firewalled status with info from the given incoming address.
 	 */
@@ -537,7 +549,8 @@ public class Acceptor {
         // If the client was closed before we were able to get the address,
         // then getInetAddress will return null.
         InetAddress address = client.getInetAddress();
-        if (address == null) {
+        if (address == null || !NetworkUtils.isValidAddress(address) ||
+        		!NetworkUtils.isValidPort(client.getPort())) {
             IOUtils.close(client);
             LOG.warn("connection closed while accepting");
         } else if (isBannedIP(address.getAddress())) {
@@ -713,6 +726,10 @@ public class Acceptor {
         
         public int read(ByteBuffer dst) {
             return BufferUtils.transfer(buffer, dst, false);
+        }
+
+        public long read(ByteBuffer [] dst) {
+        	return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
         }
     }
 
