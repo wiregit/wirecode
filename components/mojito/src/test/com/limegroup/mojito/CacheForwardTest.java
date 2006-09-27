@@ -57,6 +57,10 @@ public class CacheForwardTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    public void testGetQueryKey() {
+        fail("Implement Test!");
+    }
+    
     public void testCacheForward() throws Exception {
         
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
