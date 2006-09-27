@@ -41,9 +41,9 @@ public class CacheForwardTest extends BaseTestCase {
     
     private static final int PORT = 3000;
     
-    static {
+    /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }
+    }*/
     
     public CacheForwardTest(String name) {
         super(name);

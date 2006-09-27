@@ -638,7 +638,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         }
         
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Stopping DHT "+name);
+            LOG.debug("Stopping " + name);
         }
         
         running = false;
