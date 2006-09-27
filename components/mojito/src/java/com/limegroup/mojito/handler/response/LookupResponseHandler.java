@@ -72,10 +72,12 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     protected Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of Contacts we're going to query */
-    protected Trie<KUID, Contact> toQuery = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
+    protected Trie<KUID, Contact> toQuery 
+        = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    protected Trie<KUID, Entry<Contact,QueryKey>> responses = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_ANALYZER);
+    protected Trie<KUID, Entry<Contact,QueryKey>> responses 
+        = new PatriciaTrie<KUID, Entry<Contact,QueryKey>>(KUID.KEY_ANALYZER);
     
     /** Collection of Contacts that collide with our Node ID */
     protected Collection<Contact> collisions = new HashSet<Contact>();
