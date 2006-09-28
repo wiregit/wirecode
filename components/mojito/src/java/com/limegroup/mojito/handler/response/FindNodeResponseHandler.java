@@ -137,7 +137,7 @@ public class FindNodeResponseHandler
                 collisions, time, hop, routeTableFailures);
         
         // TODO We can use the result from a Node lookup to estimate the DHT size
-        //context.updateEstimatedSize(nearest.keySet());
+        context.updateEstimatedSize(nearest.keySet());
         
         setReturnValue(evt);
     }
