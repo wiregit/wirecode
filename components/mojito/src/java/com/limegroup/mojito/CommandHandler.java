@@ -19,6 +19,8 @@
  
 package com.limegroup.mojito;
 
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +32,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
+
+import javax.swing.JFrame;
 
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
@@ -45,6 +49,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.CollectionUtils;
+import com.limegroup.mojito.visual.RouteTableVisualizer;
 
 public class CommandHandler {
     
@@ -68,7 +73,8 @@ public class CommandHandler {
             "exhaustive",
             "id .+",
             "select .+",
-            "nextid"
+            "nextid",
+            "gui"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -407,5 +413,24 @@ public class CommandHandler {
             out.println("Starting " + dht.getName());
             dht.start();
         }
+    }
+    
+    public static void gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        final RouteTableVisualizer viz = new RouteTableVisualizer((Context)dht);
+        final JFrame jf = new JFrame();
+        jf.getContentPane().add (viz.getComponent());
+        jf.pack();
+        jf.setVisible(true);
+        jf.addWindowListener(new WindowListener() {
+            public void windowActivated(WindowEvent e) {}
+            public void windowClosed(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+                viz.stop();
+            }
+            public void windowDeactivated(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {}
+            public void windowOpened(WindowEvent e) {}
+        });
     }
 }

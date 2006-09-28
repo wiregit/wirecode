@@ -12,6 +12,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -197,7 +198,7 @@ public class RouteTableVisualizerDemo {
         Context dht = (Context)MojitoFactory.createDHT();
         RouteTableImpl rt = (RouteTableImpl)dht.getRouteTable();
         populateRouteTable(rt);
-        RouteTableVisualizer viz = new RouteTableVisualizer(rt);
+        RouteTableVisualizer viz = new RouteTableVisualizer(dht);
         
         JFrame jf = new JFrame();
         jf.getContentPane().add ( viz.getComponent());
@@ -209,7 +210,7 @@ public class RouteTableVisualizerDemo {
 
     public void populateRouteTable(RouteTableImpl rt) {
         rt.setRouteTableCallback(new RouteTable.Callback() {
-            public DHTFuture<Contact> ping(Contact node) {
+            public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }
         });

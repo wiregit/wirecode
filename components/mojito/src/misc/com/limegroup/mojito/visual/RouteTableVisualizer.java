@@ -3,22 +3,29 @@ package com.limegroup.mojito.visual;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.Timer;
+
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.visual.BinaryEdge.EdgeType;
 
 import edu.uci.ics.jung.graph.ArchetypeEdge;
 import edu.uci.ics.jung.graph.ArchetypeVertex;
+import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.decorators.DefaultToolTipFunction;
 import edu.uci.ics.jung.graph.decorators.EdgeShape;
 import edu.uci.ics.jung.graph.decorators.EdgeStringer;
 import edu.uci.ics.jung.graph.decorators.PickableEdgePaintFunction;
 import edu.uci.ics.jung.graph.decorators.VertexStringer;
 import edu.uci.ics.jung.graph.impl.SparseTree;
+import edu.uci.ics.jung.utils.UserData;
 import edu.uci.ics.jung.visualization.DefaultGraphLabelRenderer;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.Layout;
@@ -36,20 +43,44 @@ public class RouteTableVisualizer {
     /**
      * the graph
      */
-    private SparseTree graph;
+    private RootableSparseTree graph;
     
     private RouteTableImpl routeTable;
     
-    private InteriorNodeVertex root;
+    private Vertex root;
     
     private Component graphComponent;
     
-    public RouteTableVisualizer(RouteTableImpl rt) {
-        this.routeTable = rt;
+    Timer timer;
+    
+    private VisualizationViewer vv;
+    
+    public RouteTableVisualizer(Context dht) {
+        this.routeTable = (RouteTableImpl)dht.getRouteTable();
         init();
+        timer = scheduleTimerTask();
+        timer.start();
+    }
+    
+    private Timer scheduleTimerTask() {
+        Timer timer = new Timer(1000, new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                updateGraph();
+                vv.setGraphLayout(new TreeLayout(graph));
+                vv.invalidate();
+                vv.revalidate();
+                vv.repaint();
+            }
+        });
+        return timer;
     }
     
     private void init() {
+        List<Bucket> buckets = new ArrayList<Bucket>(routeTable.getBuckets());
+        //create new sparse tree graph
+        root = new BucketVertex(buckets.get(0), true);
+        graph = new RootableSparseTree(root);
+        
         updateGraph();
         PluggableRenderer pr = new PluggableRenderer();
         pr.setVertexPaintFunction(new RouteTableVertexPaintFunction(
@@ -62,6 +93,9 @@ public class RouteTableVisualizer {
         
         EdgeStringer edgeStringer = new EdgeStringer(){
             public String getLabel(ArchetypeEdge e) {
+                if(!(e instanceof BinaryEdge)) {
+                    return e.toString();
+                }
                 BinaryEdge be = (BinaryEdge)e;
                 return (be.getType().equals(EdgeType.LEFT)?"0":"1");
             }
@@ -85,7 +119,7 @@ public class RouteTableVisualizer {
 
         Layout layout = new TreeLayout(graph);
 
-        VisualizationViewer vv =  new VisualizationViewer(layout, pr, new Dimension(400,400));
+        vv =  new VisualizationViewer(layout, pr, new Dimension(400,400));
         vv.setPickSupport(new ShapePickSupport());
         pr.setEdgeShapeFunction(new EdgeShape.Line()); 
         vv.setBackground(Color.white);
@@ -106,20 +140,17 @@ public class RouteTableVisualizer {
         return graphComponent;
     }
     
-    public void updateGraph() {
-        root = new InteriorNodeVertex();
+    public synchronized void updateGraph() {
         List<Bucket> buckets = new ArrayList<Bucket>(routeTable.getBuckets());
         int count = buckets.size();
         
-        if(count == 0) {
-            return;
-        }
-        
-        //create new sparse tree graph
         if(count < 2) {
-            graph = new SparseTree(new BucketVertex(buckets.get(0), true));
+            root = new BucketVertex(buckets.get(0), true);
+            graph.newRoot(root);
+            return;
         } else {
-            graph = new SparseTree(root);
+            root = new InteriorNodeVertex();
+            graph.newRoot(root);
         }
         
         //TODO: optimization -- or not?
@@ -131,15 +162,14 @@ public class RouteTableVisualizer {
             currentBucket = (Bucket) it.next();
             
             int depth = currentBucket.getDepth();
-            previousVertex = root;
+            previousVertex = (InteriorNodeVertex)root;
             for(int i=1; i < depth ; i++) {
                 if(currentBucket.getBucketID().isBitSet(i-1)) {
                     if(previousVertex.getRightChild() == null) {
                         previousVertex = createInteriorNode(previousVertex, EdgeType.RIGHT);
                         
                     } else if(previousVertex.getRightChild() instanceof BucketVertex) {
-                        throw new IllegalStateException("Cannot insert bucket after a bucket");
-                        
+                        break;
                     } else {
                         previousVertex = (InteriorNodeVertex)previousVertex.getRightChild();
                     }
@@ -148,8 +178,7 @@ public class RouteTableVisualizer {
                         previousVertex = createInteriorNode(previousVertex, EdgeType.LEFT);
                         
                     } else if(previousVertex.getLeftChild() instanceof BucketVertex) {
-                        throw new IllegalStateException("Cannot insert bucket after a bucket");
-                        
+                        break;
                     } else {
                         previousVertex = (InteriorNodeVertex)previousVertex.getLeftChild();
                     }
@@ -178,5 +207,28 @@ public class RouteTableVisualizer {
         graph.addVertex(bv);
         graph.addEdge(new BinaryEdge(predecessor, bv, type));
         return bv;
+    }
+    
+    public void stop() {
+        timer.stop();
+    }
+    
+    private class RootableSparseTree extends SparseTree {
+        public RootableSparseTree(Vertex root) {
+            super(root);
+        }
+        
+        /**
+         * Clears the tree and add this <tt>Vertex</tt>
+         * as the new root
+         */
+        public synchronized void newRoot(Vertex root) {
+            removeAllEdges();
+            removeAllVertices();
+            this.mRoot = root;
+            addVertex( root );
+            mRoot.setUserDatum(SPARSE_ROOT_KEY, SPARSE_ROOT_KEY, UserData.SHARED);
+            mRoot.setUserDatum(IN_TREE_KEY, IN_TREE_KEY, UserData.SHARED);
+        }
     }
 }
