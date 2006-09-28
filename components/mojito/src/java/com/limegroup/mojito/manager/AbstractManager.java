@@ -101,14 +101,16 @@ abstract class AbstractManager<V> {
             
             deregister();
             
-            try {
-                V result = get();
-                fireResult(result);
-            } catch (InterruptedException ignore) {
-            } catch (ExecutionException ex) {
-                Throwable cause = ex.getCause();
-                if (!(cause instanceof CancellationException)) {
-                    fireThrowable(cause);
+            if (!isCancelled()) {
+                try {
+                    V result = get();
+                    fireResult(result);
+                } catch (InterruptedException ignore) {
+                } catch (ExecutionException ex) {
+                    Throwable cause = ex.getCause();
+                    if (!(cause instanceof CancellationException)) {
+                        fireThrowable(cause);
+                    }
                 }
             }
         }
