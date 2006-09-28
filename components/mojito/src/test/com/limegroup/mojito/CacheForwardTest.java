@@ -86,7 +86,7 @@ public class CacheForwardTest extends BaseTestCase {
             Field futureField = BootstrapManager.class.getDeclaredField("future");
             futureField.setAccessible(true);
             
-            Class clazz = Class.forName(BootstrapManager.class.getName() + "$BootstrapFuture");
+            Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
             Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
             con.setAccessible(true);
             
@@ -114,7 +114,7 @@ public class CacheForwardTest extends BaseTestCase {
             assertFalse(context2.isBootstrapping());
             
             // Get the QueryKey...
-            clazz = Class.forName("com.limegroup.mojito.handler.response.GetQueryKeyHandler");
+            clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
             con = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
