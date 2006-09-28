@@ -2,13 +2,17 @@
 
 <!-- set global properties for this basedir -->
 <property name="basedir" value="."/>
+<property name="mojitodir" value="../mojito"/>
+
 <property name="lib" value="../lib"/>
 <property name="jars" value="${lib}/jars"/>
 <property name="xmlrpc" value="../../LimeXMLRPC"/>
 <property name="xmlrpcsrc" value="${xmlrpc}/src/java"/>	
 <property name="xmlrpclib" value="${xmlrpc}/lib"/>	
-<property name="mojitosrc" value="../mojito/src/java"/>
-
+<property name="mojitosrc" value="${mojitodir}/src/java"/>
+<property name="mojitomisc" value="${mojitodir}/src/misc"/>
+<property name="mojitomiscjars" value="${mojitodir}/lib/misc"/>	
+	
 <!-- constants -->
 <property name="DEBUG" value="yes"/>  
 <property name="OPTIMIZE" value="no"/>  
@@ -19,6 +23,7 @@
      environment with the jar files necessary for compilation appended. -->
 <path id="default.classpath" >
   <fileset dir="${jars}" includes="**/*.jar"/>
+  <fileset dir="${mojitomiscjars}" includes="**/*.jar"/>
 </path>
 
 <path id="xmlrpc.classpath" >
@@ -29,6 +34,7 @@
 <!-- Initialization stuff -->
 <target name="init">
     <available file="${jars}" type="dir" property="jars.present"/>
+	<available file="${mojitomiscjars}" type="dir" property="jars.present"/>
 	<tstamp/>
 	<antcall target="checkjars"/>
 </target>
@@ -45,7 +51,7 @@
 	<javac debug="${DEBUG}" 
            optimize="${OPTIMIZE}" 
            deprecation="${DEPRECATION}"
-		   srcdir="${basedir}:${mojitosrc}" 
+		   srcdir="${basedir}:${mojitosrc}:${mojitomisc}" 
            destdir="${basedir}"
            nowarn="${NOWARN}"
       source="1.5"

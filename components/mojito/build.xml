@@ -4,19 +4,22 @@
 
     <property name="basedir" value="."/>
     <property name="src" value="${basedir}/src/java"/>
-
+	<property name="misc" value="${basedir}/src/java"/>
+	
     <property name="coredir" value="../core"/>
 	<property name="guidir" value="../gui"/>
     <property name="lib" value="../lib"/>
     <property name="jars" value="${lib}/jars"/>
-
+    <property name="miscjars" value="${basedir}/lib/misc"/>
+	
     <path id="default.classpath" >
         <fileset dir="${jars}" includes="**/*.jar"/>
-        <pathelement location="${coredir}" />
+        <fileset dir="${miscjars}" includes="**/*.jar"/>
+    	<pathelement location="${coredir}" />
     </path>
 
     <target name="build">
-        <javac srcdir="${src}" 
+        <javac srcdir="${src}:${misc}" 
 				destdir="${src}"
 		    		target="1.5"
 		    		source="1.5"
@@ -34,7 +37,7 @@
 	            compiler="javac1.5" 
 	            debug="true" 
 	            optimize="false">
-            <src path="${src}" />
+            <src path="${src}:${misc}" />
             <src path="${coredir}" />
             <classpath refid="default.classpath"/>
         </javac>
@@ -56,7 +59,7 @@
     <target name="jar" depends="clean, build">
         <delete file="mojito.jar"/>
         <jar destfile="mojito.jar" 
-				basedir="${src}"
+				basedir="${src}:${misc}"
 				includes="**/*.class"
 				compress="false">
         </jar>

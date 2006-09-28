@@ -6,6 +6,9 @@ CLASSPATH=\
 for JAR in $(find ../lib/jars -name *.jar); do 
    CLASSPATH="${CLASSPATH};${JAR}"
 done
+for JAR in $(find lib/misc -name *.jar); do 
+   CLASSPATH="${CLASSPATH};${JAR}"
+done
 
 export CLASSPATH
 
