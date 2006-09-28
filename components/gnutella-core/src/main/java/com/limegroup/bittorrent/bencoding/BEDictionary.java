@@ -54,7 +54,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
         
         public void handleRead() throws IOException {
             if (keyToken == null && key == null) {
-                Token<?> t = getNextToken(chan);
+                Token t = getNextToken(chan);
                 if (t != null) {
                     if (t instanceof BEString) { 
                         keyToken = (BEString)t;
