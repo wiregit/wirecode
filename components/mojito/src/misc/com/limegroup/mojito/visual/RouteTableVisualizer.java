@@ -1,10 +1,9 @@
 package com.limegroup.mojito.visual;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -12,6 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -25,7 +27,6 @@ import edu.uci.ics.jung.graph.ArchetypeEdge;
 import edu.uci.ics.jung.graph.ArchetypeVertex;
 import edu.uci.ics.jung.graph.Edge;
 import edu.uci.ics.jung.graph.Vertex;
-import edu.uci.ics.jung.graph.decorators.DefaultToolTipFunction;
 import edu.uci.ics.jung.graph.decorators.EdgeShape;
 import edu.uci.ics.jung.graph.decorators.EdgeStringer;
 import edu.uci.ics.jung.graph.decorators.PickableEdgePaintFunction;
@@ -55,7 +56,9 @@ public class RouteTableVisualizer implements RouteTableImpl.RouteTableCallback{
     
     private Vertex root;
     
-    private Component graphComponent;
+    private JPanel graphComponent;
+    
+    private JTextArea txtArea;
     
     Timer timer;
     
@@ -142,7 +145,7 @@ public class RouteTableVisualizer implements RouteTableImpl.RouteTableCallback{
         vv.setPickSupport(new ShapePickSupport());
         vv.setBackground(Color.white);
         // add a listener for ToolTips
-        vv.setToolTipFunction(new DefaultToolTipFunction());
+        vv.setToolTipFunction(new RouteTableToolTipFunction());
 
         PluggableGraphMouse graphMouse = new PluggableGraphMouse();
         graphMouse.add(new PickingGraphMousePlugin());
@@ -150,8 +153,17 @@ public class RouteTableVisualizer implements RouteTableImpl.RouteTableCallback{
         graphMouse.add(new CrossoverScalingGraphMousePlugin());
         vv.setGraphMouse(graphMouse);
         
+        //create south panel
+        txtArea = new JTextArea();
+        JScrollPane pane = new JScrollPane(txtArea);
+        
         //create main compononent
-        graphComponent = new GraphZoomScrollPane(vv);
+        JPanel graphPanel = new GraphZoomScrollPane(vv);
+        graphComponent = new JPanel(new BorderLayout());
+        graphComponent.add(graphPanel, BorderLayout.CENTER);
+        graphComponent.add(pane, BorderLayout.SOUTH);
+        
+        
     }
     
     public Component getComponent() {
@@ -250,10 +262,16 @@ public class RouteTableVisualizer implements RouteTableImpl.RouteTableCallback{
     }
     
     private void updateLayout() {
+        updateTextArea();
         vv.setGraphLayout(new TreeLayout(graph));
         vv.invalidate();
         vv.revalidate();
         vv.repaint();
+    }
+    
+    private void updateTextArea() {
+        String rtString = routeTable.toString();
+        txtArea.setText(rtString.substring(rtString.indexOf("Total")));
     }
     
     public void stop() {
@@ -263,6 +281,7 @@ public class RouteTableVisualizer implements RouteTableImpl.RouteTableCallback{
     
     /** RouteTable callbacks **/
     public void add(Bucket bucket, Contact node) {
+        updateTextArea();
     }
 
     public void check(Bucket bucket, Contact existing, Contact node) {

@@ -1,6 +1,5 @@
 package com.limegroup.mojito.visual;
 
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.impl.Bucket;
 
 import edu.uci.ics.jung.graph.DirectedEdge;
@@ -10,15 +9,12 @@ import edu.uci.ics.jung.graph.impl.DirectedSparseVertex;
 
 class BucketVertex extends DirectedSparseVertex{
 
-    private int depth;
-    private KUID bucketId;
-    
+    private Bucket bucket;
     private boolean isLocalBucket;
     
     public BucketVertex(Bucket bucket, boolean isLocalBucket) {
         super();
-        this.depth = bucket.getDepth();
-        this.bucketId = bucket.getBucketID();
+        this.bucket = bucket;
         this.isLocalBucket = isLocalBucket;
     }
     
@@ -34,9 +30,13 @@ class BucketVertex extends DirectedSparseVertex{
     public boolean isLocalBucket() {
         return isLocalBucket;
     }
+    
+    public Bucket getBucket() {
+        return bucket;
+    }
 
     @Override
     public String toString() {
-        return bucketId.toBinString().substring(0, depth);
+        return bucket.getBucketID().toBinString().substring(0, bucket.getDepth());
     }
 }
