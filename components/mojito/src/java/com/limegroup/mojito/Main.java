@@ -49,6 +49,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapEvent.EventType;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -264,6 +265,13 @@ public class Main {
                     d.start();
                     dht = d;
                     CommandHandler.info(dht, null, out);
+                } else if (line.indexOf("keycount") >= 0) {
+                    int keycount = 0;
+                    for (MojitoDHT mojito : dhts) {
+                        Database db = ((Context)mojito).getDatabase();
+                        keycount += db.getKeyCount();
+                    }
+                    System.out.println("Key count: " + keycount);
                 } else {
                     CommandHandler.handle(dht, line, out);
                 }
