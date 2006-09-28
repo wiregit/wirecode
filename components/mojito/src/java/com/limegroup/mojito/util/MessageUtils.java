@@ -44,15 +44,15 @@ public class MessageUtils {
             return false;
         }
         
-        Contact fakeSender = message.getContact();
+        Contact sender = message.getContact();
         
-        // The fake sender must be firewalled!
-        if (!fakeSender.isFirewalled()) {
+        // The sender must be firewalled!
+        if (!sender.isFirewalled()) {
             return false;
         }
         
         // See PingManager.collisionPing()
         KUID expectedSenderId = nodeId.invert();
-        return expectedSenderId.equals(fakeSender.getNodeID());
+        return expectedSenderId.equals(sender.getNodeID());
     }
 }
