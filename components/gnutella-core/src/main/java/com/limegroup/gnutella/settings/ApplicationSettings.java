@@ -228,6 +228,12 @@ public class ApplicationSettings extends LimeProps {
      */
     public static final BooleanSetting HANDLE_MAGNETS = 
     	FACTORY.createBooleanSetting("HANDLE_MAGNETS", true);
+    
+    /**
+     * Whether LimeWire should handle torrents.
+     */
+    public static final BooleanSetting HANDLE_TORRENTS = 
+    	FACTORY.createBooleanSetting("HANDLE_TORRENTS", true);
     			
     /**
      * Whether or not to use 'secure results' to screen search results.
