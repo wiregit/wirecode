@@ -161,7 +161,7 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     public void writeOpCode(OpCode opcode) throws IOException {
-        writeByte(opcode.getOpCode());
+        writeByte(opcode.toByte());
     }
     
     public void writeStatsType(Type type) throws IOException {

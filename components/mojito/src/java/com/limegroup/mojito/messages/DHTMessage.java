@@ -58,12 +58,12 @@ public interface DHTMessage {
             this.opcode = opcode;
         }
     
-        public int getOpCode() {
+        public int toByte() {
             return opcode;
         }
         
         public String toString() {
-            return name() + "(" + getOpCode() + ")";
+            return name() + " (" + toByte() + ")";
         }
         
         private static OpCode[] OPCODES;

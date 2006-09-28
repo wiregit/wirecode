@@ -42,6 +42,10 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
             return type;
         }
         
+        public String toString() {
+            return name() + " (" + toByte() + ")";
+        }
+        
         private static final Type[] TYPES;
         
         static {

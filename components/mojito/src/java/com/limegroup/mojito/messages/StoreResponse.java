@@ -47,6 +47,10 @@ public interface StoreResponse extends ResponseMessage {
             return status;
         }
         
+        public String toString() {
+            return name() + " (" + toByte() + ")";
+        }
+        
         private static Status[] STATUS;
         
         static {
