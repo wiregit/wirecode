@@ -36,6 +36,7 @@ import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.DHTException;
@@ -72,9 +73,14 @@ public class RouteTableImpl implements RouteTable {
     private Bucket smallestSubtreeBucket = null;
    
     /**
-     * A reference to the RouteTable callback
+     * A reference to the PingCallback
      */
-    private transient Callback callback;
+    private transient PingCallback pingCallback;
+    
+    /**
+     * 
+     */
+    private transient RouteTableCallback routeTableCallback;
     
     /**
      * The local Node
@@ -94,10 +100,14 @@ public class RouteTableImpl implements RouteTable {
         smallestSubtreeBucket = null;
     }
     
-    public void setRouteTableCallback(Callback callback) {
-        this.callback = callback;
+    public void setPingCallback(PingCallback pingCallback) {
+        this.pingCallback = pingCallback;
     }
 
+    public void setRouteTableCallback(RouteTableCallback routeTableCallback) {
+        this.routeTableCallback = routeTableCallback;
+    }
+    
     public synchronized void add(Contact node) {
         
         // The first Node we're adding to the RouteTable
@@ -183,6 +193,10 @@ public class RouteTableImpl implements RouteTable {
                 
                 bucket.updateContact(node);
                 this.localNode = node;
+                
+                if (routeTableCallback != null) {
+                    routeTableCallback.update(bucket, existing, node);
+                }
             }
             
             return;
@@ -216,6 +230,10 @@ public class RouteTableImpl implements RouteTable {
                 pingLeastRecentlySeenNode(bucket);
             }
             touchBucket(bucket);
+            
+            if (routeTableCallback != null) {
+                routeTableCallback.update(bucket, existing, node);
+            }
             
         } else if (node.isAlive() 
                 && !existing.hasBeenRecentlyAlive()) {
@@ -260,15 +278,21 @@ public class RouteTableImpl implements RouteTable {
                          * See JIRA issue MOJITO-54
                          */
                         
+                        // NOTE: We cannot call updateContactInBucket(...) here
+                        // because it would do the spoof check again.
                         node.updateWithExistingContact(current);
                         Contact replaced = bucket.updateContact(node);
                         assert (replaced == current);
+                        
+                        if (routeTableCallback != null) {
+                            routeTableCallback.update(bucket, current, node);
+                        }
                         
                         // If the Node is in the Cache then ping the least recently
                         // seen live Node which might promote the new Node to a
                         // live Contact!
                         if (bucket.containsCachedContact(nodeId)) {
-                            ping (bucket.getLeastRecentlySeenActiveContact());
+                            ping (bucket.getLeastRecentlySeenActiveContact(), null);
                         }
                     } else {
                         add(node);
@@ -277,7 +301,11 @@ public class RouteTableImpl implements RouteTable {
             }
         };
         
-        ping(existing).addDHTEventListener(listener);
+        if (routeTableCallback != null) {
+            routeTableCallback.check(bucket, existing, node);
+        }
+        
+        ping(existing, listener);
         touchBucket(bucket);
     }
     
@@ -290,6 +318,10 @@ public class RouteTableImpl implements RouteTable {
             } else {
                 routingStats.UNKNOWN_NODE_COUNT.incrementStat();
             }
+        }
+        
+        if (routeTableCallback != null) {
+            routeTableCallback.add(bucket, node);
         }
     }
     
@@ -339,6 +371,10 @@ public class RouteTableImpl implements RouteTable {
                 routingStats.BUCKET_COUNT.incrementStat();
             }
             
+            if (routeTableCallback != null) {
+                routeTableCallback.split(left, right);
+            }
+            
             // WHOHOOO! WE SPLIT THE BUCKET!!!
             return true;
         }
@@ -376,6 +412,10 @@ public class RouteTableImpl implements RouteTable {
                 
                 if (routingStats != null) {
                     routingStats.LIVE_NODE_COUNT.incrementStat();
+                }
+                
+                if (routeTableCallback != null) {
+                    routeTableCallback.replace(bucket, leastRecentlySeen, node);
                 }
                 
                 return;
@@ -462,11 +502,19 @@ public class RouteTableImpl implements RouteTable {
                     
                     bucket.addActiveContact(mrs);
                     
+                    if (routeTableCallback != null) {
+                        routeTableCallback.replace(bucket, node, mrs);
+                    }
+                    
                 } else if(node.getFailures() 
                             >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
                     
                     bucket.removeActiveContact(nodeId);
                     assert (bucket.isActiveFull() == false);
+                    
+                    if (routeTableCallback != null) {
+                        routeTableCallback.remove(bucket, node);
+                    }
                 }
             } else {
                 
@@ -637,12 +685,16 @@ public class RouteTableImpl implements RouteTable {
     private void pingLeastRecentlySeenNode(Bucket bucket) {
         Contact lrs = bucket.getLeastRecentlySeenActiveContact();
         if (!isLocalNode(lrs)) {
-            ping(lrs);
+            ping(lrs, null);
         }
     }
     
-    DHTFuture<PingEvent> ping(Contact node) {
-        return callback.ping(node);
+    DHTFuture<PingEvent> ping(Contact node, DHTEventListener<PingEvent> listener) {
+        DHTFuture<PingEvent> future = pingCallback.ping(node);
+        if (listener != null) {
+            future.addDHTEventListener(listener);
+        }
+        return future;
     }
     
     public Contact getLocalNode() {
@@ -799,5 +851,14 @@ public class RouteTableImpl implements RouteTable {
         if (localNode != null) {
             routingStats = new RoutingStatisticContainer(localNode.getNodeID());
         }
+    }
+    
+    public static interface RouteTableCallback {
+        public void split(Bucket left, Bucket right);
+        public void add(Bucket bucket, Contact node);
+        public void update(Bucket bucket, Contact existing, Contact node);
+        public void replace(Bucket bucket, Contact existing, Contact node);
+        public void remove(Bucket bucket, Contact node);
+        public void check(Bucket bucket, Contact existing, Contact node);
     }
 }

@@ -12,7 +12,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.Contact.State;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.routing.ContactFactory;
-import com.limegroup.mojito.routing.RouteTable.Callback;
+import com.limegroup.mojito.routing.RouteTable.PingCallback;
 import com.limegroup.mojito.settings.ContextSettings;
 
 public class BucketNodeTest extends BaseTestCase {
@@ -47,7 +47,7 @@ public class BucketNodeTest extends BaseTestCase {
         		instanceId, false);
         
         routeTable = new RouteTableImpl();
-        routeTable.setRouteTableCallback(new Callback() {
+        routeTable.setPingCallback(new PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 throw new UnsupportedOperationException();
             }

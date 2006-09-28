@@ -41,7 +41,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         assertEquals(20, KademliaSettings.REPLICATION_PARAMETER.getValue());
         
         RouteTable routeTable = new RouteTableImpl();
-        routeTable.setRouteTableCallback(new RouteTable.Callback() {
+        routeTable.setPingCallback(new RouteTable.PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }

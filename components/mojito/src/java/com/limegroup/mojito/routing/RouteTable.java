@@ -135,15 +135,15 @@ public interface RouteTable extends Serializable {
     public Contact getLocalNode();
     
     /**
-     * Sets the RouteTable Callback
+     * Sets the RouteTable PingCallback
      */
-    public void setRouteTableCallback(Callback callback);
+    public void setPingCallback(PingCallback callback);
     
     /**
      * An interface utilized by the RouteTable to access 
      * external resources
      */
-    public static interface Callback {
+    public static interface PingCallback {
         
         /** Sends a PING to the given Node */
         public DHTFuture<PingEvent> ping(Contact node);

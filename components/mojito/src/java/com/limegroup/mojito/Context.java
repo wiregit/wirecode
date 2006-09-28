@@ -88,7 +88,7 @@ import com.limegroup.mojito.util.DatabaseUtils;
  * The Context is the heart of Mojito where everything comes 
  * together. 
  */
-public class Context implements MojitoDHT, RouteTable.Callback {
+public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
@@ -174,7 +174,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
         if (routeTable == null) {
             setRouteTable(null);
         } else {
-            routeTable.setRouteTableCallback(this);
+            routeTable.setPingCallback(this);
         }
         
         if (database == null) {
@@ -365,7 +365,7 @@ public class Context implements MojitoDHT, RouteTable.Callback {
             localNode = (LocalContact)routeTable.getLocalNode();
         }
         
-        routeTable.setRouteTableCallback(this);
+        routeTable.setPingCallback(this);
         this.routeTable = routeTable;
         
         if (database != null) {

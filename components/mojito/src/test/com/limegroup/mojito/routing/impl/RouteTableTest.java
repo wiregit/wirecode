@@ -474,7 +474,7 @@ public class RouteTableTest extends BaseTestCase {
         
         toPing.clear();
         routeTable = new RouteTableImpl();
-        routeTable.setRouteTableCallback(new RouteTable.Callback() {
+        routeTable.setPingCallback(new RouteTable.PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 toPing.add(node);
                 return null;
@@ -690,7 +690,7 @@ public class RouteTableTest extends BaseTestCase {
     
     public void testSelectLiveNodes() throws Exception { 
         RouteTable rt = new RouteTableImpl();
-        rt.setRouteTableCallback(new RouteTable.Callback() {
+        rt.setPingCallback(new RouteTable.PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }
