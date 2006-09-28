@@ -5,10 +5,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import com.limegroup.mojito.Context;
@@ -54,6 +57,27 @@ public class RouteTableVisualizer {
     Timer timer;
     
     private VisualizationViewer vv;
+    
+    public static RouteTableVisualizer show(Context context) {
+        final RouteTableVisualizer viz = new RouteTableVisualizer(context);
+        final JFrame jf = new JFrame();
+        jf.getContentPane().add (viz.getComponent());
+        jf.pack();
+        jf.addWindowListener(new WindowListener() {
+            public void windowActivated(WindowEvent e) {}
+            public void windowClosed(WindowEvent e) {}
+            public void windowClosing(WindowEvent e) {
+                viz.stop();
+            }
+            public void windowDeactivated(WindowEvent e) {}
+            public void windowDeiconified(WindowEvent e) {}
+            public void windowIconified(WindowEvent e) {}
+            public void windowOpened(WindowEvent e) {}
+        });
+        
+        jf.setVisible(true);
+        return viz;
+    }
     
     public RouteTableVisualizer(Context dht) {
         this.routeTable = (RouteTableImpl)dht.getRouteTable();
