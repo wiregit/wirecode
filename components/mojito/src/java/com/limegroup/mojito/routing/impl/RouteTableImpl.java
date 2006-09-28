@@ -292,7 +292,7 @@ public class RouteTableImpl implements RouteTable {
                         // seen live Node which might promote the new Node to a
                         // live Contact!
                         if (bucket.containsCachedContact(nodeId)) {
-                            ping (bucket.getLeastRecentlySeenActiveContact(), null);
+                            pingLeastRecentlySeenNode(bucket);
                         }
                     } else {
                         add(node);
@@ -717,6 +717,10 @@ public class RouteTableImpl implements RouteTable {
         localNode = null;
         routingStats = null;
         init();
+        
+        if (routeTableCallback != null) {
+            routeTableCallback.clear();
+        }
     }
     
     public synchronized void purge() {
@@ -797,6 +801,10 @@ public class RouteTableImpl implements RouteTable {
                 add(node);
             }
         }
+        
+        if (routeTableCallback != null) {
+            routeTableCallback.clear();
+        }
     }
     
     public synchronized String toString() {
@@ -854,9 +862,9 @@ public class RouteTableImpl implements RouteTable {
     }
     
     /**
-     * An interface to track varios RouteTable operations. It's meant
-     * for interbal use only and we assume implementations don't throw
-     * any exceptions and are super fast!
+     * An interface to track various RouteTable operations. It's meant
+     * for internal use only and we assume implementations don't throw
+     * any exceptions and are non-blocking and super fast!
      */
     public static interface RouteTableCallback {
         
@@ -914,5 +922,10 @@ public class RouteTableImpl implements RouteTable {
          * @param node The new Contact
          */
         public void check(Bucket bucket, Contact existing, Contact node);
+        
+        /**
+         * Called when the route table is cleared or purged.
+         */
+        public void clear();
     }
 }

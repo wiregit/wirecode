@@ -27,6 +27,7 @@ class InteriorNodeVertex extends DirectedSparseVertex {
                     "implementation only accepts binary edges");
 
         BinaryEdge be = (BinaryEdge) e;
+        
         if(this == be.getSource()) {
             if(be.getType().equals(EdgeType.LEFT)) {
                 if(leftChild == null) {
@@ -47,6 +48,35 @@ class InteriorNodeVertex extends DirectedSparseVertex {
     }
     
     @Override
+    protected void removeNeighbor_internal(Edge e, Vertex v) {
+        super.removeNeighbor_internal(e, v);
+        
+        if (! (e instanceof BinaryEdge))
+            throw new IllegalArgumentException("This vertex " + 
+                    "implementation only accepts binary edges");
+
+        BinaryEdge be = (BinaryEdge) e;
+        
+        if(this == be.getSource()) {
+            if(be.getType().equals(EdgeType.LEFT)) {
+                if(leftChild == null) {
+                    throw new IllegalArgumentException("This vertex " + 
+                    "has no left child!");
+                } else {
+                    leftChild = null;
+                }
+            } else {
+                if(rightChild == null) {
+                    throw new IllegalArgumentException("This vertex " + 
+                    "has no right child!");
+                } else {
+                    rightChild = null;
+                }
+            }
+        }
+    }
+
+    @Override
     public Set getSuccessors() {
         Set<Vertex> res = new LinkedHashSet<Vertex>();
         res.add(leftChild);
@@ -61,5 +91,4 @@ class InteriorNodeVertex extends DirectedSparseVertex {
     public Vertex getRightChild() {
         return rightChild;
     }
-    
 }
