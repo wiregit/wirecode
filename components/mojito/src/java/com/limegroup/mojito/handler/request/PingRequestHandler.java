@@ -21,6 +21,9 @@ package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
@@ -28,11 +31,14 @@ import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.MessageUtils;
 
 /**
  * The PingRequestHandler handles incoming Ping requests.
  */
 public class PingRequestHandler extends AbstractRequestHandler {
+    
+    private static final Log LOG = LogFactory.getLog(PingRequestHandler.class);
     
     private final NetworkStatisticContainer networkStats;
     
@@ -47,8 +53,23 @@ public class PingRequestHandler extends AbstractRequestHandler {
         networkStats.PING_REQUESTS.incrementStat();
         
         PingRequest request = (PingRequest)message;
-        
         Contact node = request.getContact();
+        
+        // Don't respond to pings while we're bootstrapping! This
+        // makes sure nobody can use us as the initial bootstrap
+        // Node as we've (likely) poor knowledge of the DHT in this
+        // stage. The only exception from this are collision test
+        // pings!
+        if (context.isBootstrapping() 
+                && !MessageUtils.isCollisionPingRequest(
+                        context.getLocalNodeID(), message)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Received a PingRequest from " + node 
+                        + " but local Node is bootstrapping");
+            }
+            return;
+        }
+        
         PingResponse response = context.getMessageHelper()
                 .createPingResponse(request, node.getContactAddress());
 

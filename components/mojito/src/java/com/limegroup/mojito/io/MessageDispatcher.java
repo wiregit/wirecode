@@ -65,6 +65,7 @@ import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.FixedSizeHashMap;
+import com.limegroup.mojito.util.MessageUtils;
 
 /**
  * MessageDispatcher is an abstract class that takes care of
@@ -243,7 +244,8 @@ public abstract class MessageDispatcher {
         // Node that has our local Node ID but we have to permit
         // this case for ID collision test pings
         if (context.isLocalNodeID(nodeId) 
-                && !isCollisionPingRequest(message)) {
+                && !MessageUtils.isCollisionPingRequest(
+                        context.getLocalNodeID(), message)) {
             
             String msg = "Cannot send Message of type " 
                 + message.getClass().getName() 
@@ -301,26 +303,6 @@ public abstract class MessageDispatcher {
         
         tag.setData(data);
         return enqueueOutput(tag);
-    }
-    
-    /**
-     * Returns true if the given DHTMessage is a Node ID collision test ping
-     */
-    private boolean isCollisionPingRequest(DHTMessage message) {
-        if (!(message instanceof PingRequest)) {
-            return false;
-        }
-        
-        Contact fakeSender = message.getContact();
-        
-        // The fake sender must be firewalled!
-        if (!fakeSender.isFirewalled()) {
-            return false;
-        }
-        
-        // See PingManager.collisionPing()
-        KUID expectedSenderId = context.getLocalNodeID().invert();
-        return expectedSenderId.equals(fakeSender.getNodeID());
     }
     
     /**
@@ -511,10 +493,6 @@ public abstract class MessageDispatcher {
             if (context.getLocalNode().isFirewalled()) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Local Node is firewalled, dropping " + message);
-                }
-            } else if(context.isBootstrapping()){
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Local Node is bootstrapping, dropping "+ message);
                 }
             } else {
                 processRequest((RequestMessage)message);

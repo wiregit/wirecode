@@ -20,6 +20,7 @@
 package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,8 +66,10 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         LookupRequest request = (LookupRequest)message;
         
         KUID lookup = request.getLookupID();
-        QueryKey queryKey = QueryKey.getQueryKey(
-                request.getContact().getContactAddress());
+        
+        Contact node = request.getContact();
+        SocketAddress addr = node.getSourceAddress();
+        QueryKey queryKey = QueryKey.getQueryKey(addr);
         
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
@@ -100,6 +103,6 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         FindNodeResponse response = context.getMessageHelper()
                     .createFindNodeResponse(request, queryKey, nodes);
         
-        context.getMessageDispatcher().send(request.getContact(), response);
+        context.getMessageDispatcher().send(node, response);
     }
 }

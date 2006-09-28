@@ -39,6 +39,7 @@ import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
@@ -321,7 +322,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             // try again!
             for (Contact c : evt.getCollisions()) {
                 try {
-                    Contact collidesWith = context.collisionPing(c).get().getContact();
+                    PingEvent result = context.collisionPing(c).get();
+                    Contact collidesWith = result.getContact();
                     throw new CollisionException(collidesWith, 
                         context.getLocalNode() + " collides with " + collidesWith); 
                 } catch (ExecutionException err) {
@@ -375,7 +377,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     
                     if(!retriedBootstrap) {
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("Too many failures: " + failures
+                            LOG.debug("Too many failures: " + failures 
                                     + ". Retrying bootstrap from phase 2");
                         }
                         retriedBootstrap = true;
