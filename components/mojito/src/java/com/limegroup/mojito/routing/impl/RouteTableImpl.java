@@ -78,7 +78,7 @@ public class RouteTableImpl implements RouteTable {
     private transient PingCallback pingCallback;
     
     /**
-     * 
+     * A reference to the RouteTableCallback
      */
     private transient RouteTableCallback routeTableCallback;
     
@@ -372,7 +372,7 @@ public class RouteTableImpl implements RouteTable {
             }
             
             if (routeTableCallback != null) {
-                routeTableCallback.split(left, right);
+                routeTableCallback.split(bucket, left, right);
             }
             
             // WHOHOOO! WE SPLIT THE BUCKET!!!
@@ -853,12 +853,66 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * An interface to track varios RouteTable operations. It's meant
+     * for interbal use only and we assume implementations don't throw
+     * any exceptions and are super fast!
+     */
     public static interface RouteTableCallback {
-        public void split(Bucket left, Bucket right);
+        
+        /**
+         * Called on Bucket splits
+         * 
+         * @param bucket The old Bucket
+         * @param left The new left hand Bucket
+         * @param right The new right hand Bucket
+         */
+        public void split(Bucket bucket, Bucket left, Bucket right);
+        
+        /**
+         * Called when a new (active) Contact was added
+         * 
+         * @param bucket The Bucket where the new Node was added
+         * @param node The new Node
+         */
         public void add(Bucket bucket, Contact node);
+        
+        /**
+         * Called when a Contact gets updated (both Contacts are the same
+         * except for things like instance ID or RTT).
+         * 
+         * @param bucket The Bucket of the Contacts
+         * @param existing The existing Contact
+         * @param node The new Contact
+         */
         public void update(Bucket bucket, Contact existing, Contact node);
+        
+        /**
+         * Called when an existing Contact is being replaced by a different
+         * Contact
+         * 
+         * @param bucket The Bucket of the Contacts
+         * @param existing The existing Contact
+         * @param node The new Contact
+         */
         public void replace(Bucket bucket, Contact existing, Contact node);
+        
+        /**
+         * Called when a Contact is removed from the RouteTable
+         * 
+         * @param bucket The Bucket of the Contact
+         * @param node The Contact that is removed
+         */
         public void remove(Bucket bucket, Contact node);
+        
+        /**
+         * Called when the existing Contact collides with the other
+         * Contact and a check is necessary
+         * 
+         * @param bucket The Bucket of the Contacts
+         * @param existing The existing Contact
+         * @param node The new Contact
+         */
         public void check(Bucket bucket, Contact existing, Contact node);
     }
 }

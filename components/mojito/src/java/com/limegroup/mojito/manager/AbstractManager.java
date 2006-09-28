@@ -82,6 +82,9 @@ abstract class AbstractManager<V> {
                         listener.handleResult(result);
                     } catch (InterruptedException ignore) {
                     } catch (ExecutionException ex) {
+                        // NOTE: This is different from Future.cancel()!
+                        // It's possible to cancel a ResponseHandler which
+                        // is also throwing a CancellationException!
                         Throwable cause = ex.getCause();
                         if (!(cause instanceof CancellationException)) {
                             listener.handleThrowable(cause);
@@ -107,6 +110,9 @@ abstract class AbstractManager<V> {
                     fireResult(result);
                 } catch (InterruptedException ignore) {
                 } catch (ExecutionException ex) {
+                    // NOTE: This is different from Future.cancel()!
+                    // It's possible to cancel a ResponseHandler which
+                    // is also throwing a CancellationException!
                     Throwable cause = ex.getCause();
                     if (!(cause instanceof CancellationException)) {
                         fireThrowable(cause);
