@@ -335,6 +335,11 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                         throw new LockTimeoutException("Timeout: " + timeout + ", State: " + state);
                     }
                 } catch (CancellationException err) {
+                    // ResponseHandler was cancelled (back-end)
+                    cancelled();
+                    throw err;
+                } catch (InterruptedException err) {
+                    // Future was cancelled (front-end)
                     cancelled();
                     throw err;
                 }

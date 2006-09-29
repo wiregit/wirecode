@@ -192,6 +192,15 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 //System.out.println(CollectionUtils.toString(nodes));
                 //System.out.println();
                 
+                // We store forward if:
+                // #1 We're the nearest Node of the k-closest Nodes to
+                //    the given valueId
+                //
+                // #2 We're the second nearest of the k-closest Nodes to
+                //    the given valueId AND the other Node is the nearest.
+                //    In other words it changed its instance ID 'cause it
+                //    was offile for a short period of time or whatsoever.
+                //
                 // The first condition applies if the Node is new
                 // and we're the closest Node. The second condition
                 // applies if the Node has changed it's instanceId.
@@ -206,6 +215,8 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                     KUID nodeId = node.getNodeID();
                     KUID furthestId = furthest.getNodeID();
                     
+                    // #3 The other Node must be equal to the furthest Node
+                    //    or better
                     if (nodeId.equals(furthestId) 
                             || nodeId.isNearerTo(valueId, furthestId)) {
                         

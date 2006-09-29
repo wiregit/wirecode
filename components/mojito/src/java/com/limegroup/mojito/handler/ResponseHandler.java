@@ -64,10 +64,10 @@ public interface ResponseHandler {
     /**
      * Called if an error occured in handleResponse() or handleTimeout()
      * 
-     * @param nodeId
-     * @param dst
-     * @param message
-     * @param e
+     * @param nodeId The Node ID of the Contact (can be null)
+     * @param dst The Address of the Contact
+     * @param message The RequestMessage that failed to be send
+     * @param e The Exception that was thrown
      */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
     
