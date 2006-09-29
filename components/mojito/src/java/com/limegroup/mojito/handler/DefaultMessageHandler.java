@@ -200,6 +200,8 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 //    the given valueId AND the other Node is the nearest.
                 //    In other words it changed its instance ID 'cause it
                 //    was offile for a short period of time or whatsoever.
+                //    (see also pre-condition(s) from where we're calling
+                //    this method)
                 //
                 // The first condition applies if the Node is new
                 // and we're the closest Node. The second condition
