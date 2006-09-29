@@ -24,8 +24,8 @@ public class SharingSettings extends LimeProps {
 	 */
 	private static final Hashtable<String, FileSetting> downloadDirsByDescription =
         new Hashtable<String, FileSetting>();
+
 	
-    
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
 
@@ -42,7 +42,7 @@ public class SharingSettings extends LimeProps {
     public static final FileSetting DIRECTORY_FOR_SAVING_FILES = 
         FACTORY.createFileSetting("DIRECTORY_FOR_SAVING_FILES", 
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
-    
+
     /**
      * The directory where incomplete files are stored (downloads in progress).
      */

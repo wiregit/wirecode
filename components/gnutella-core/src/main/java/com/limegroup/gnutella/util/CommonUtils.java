@@ -801,7 +801,11 @@ public final class CommonUtils {
             return SETTINGS_DIRECTORY;
         
         File settingsDir = new File(getUserHomeDir(), LIMEWIRE_PREFS_DIR_NAME);
-        if (isWindows()) {
+        
+        File portableDir = readRuntimeSettings();
+        if (portableDir != null) {
+        	settingsDir = portableDir;
+        } else if (isWindows()) {
             String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
             if (appdata != null && appdata.length() > 0) {
                 File tempSettingsDir = new File(appdata, "LimeWire");
@@ -824,6 +828,43 @@ public final class CommonUtils {
             throw new RuntimeException(e);
         }
         return settingsDir;
+    }
+
+    /**
+     * Reads runtime.props to determine where we should keep our settings.
+     * 
+     * If runtime.props is there at all, it will be next to this running LimeWire.jar.
+     * Path values in runtime.props can be relative, like "..\\Shared".
+     * They can also be based on platform-specific special folders, like "Desktop>My LimeWire Files".
+     * 
+     * SETTINGS is the path to the settings folder, which must be writable.
+     * If SETTINGS isn't there yet, this method will copy SOURCE there.
+     * SOURCE can be read-only.
+     * 
+     * @return A File with the path where runtime.props says we should store our settings.
+     *         null if there is no runtime.props, or it doesn't have a property named SETTINGS.
+     */
+    private static File readRuntimeSettings() {
+
+    	// Read and parse the settings in runtime.props
+    	File settings = null, source = null;
+		try {
+			File file = new File("runtime.props").getAbsoluteFile();
+			FileInputStream stream = new FileInputStream(file);
+			Properties properties = new Properties();
+			properties.load(stream);
+			stream.close();
+			settings = FileUtils.parseSpecialPath(properties.getProperty("SETTINGS"));      // Path to settings folder
+			source = FileUtils.parseSpecialPath(properties.getProperty("SETTINGS_SOURCE")); // Files to copy there
+		} catch (IOException e) {
+		}
+
+		// If there's no directory at SETTINGS, copy SOURCE there
+		if (source != null && settings != null && source.isDirectory() && !settings.exists())
+			FileUtils.copyDirectory(source, settings);
+
+		// Return the path where runtime.props says we should keep our settings
+		return settings;
     }
 
     /**
