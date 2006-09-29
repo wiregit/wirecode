@@ -52,11 +52,11 @@ public final class NetworkSettings extends MojitoProps {
                 "min_timeout_rtt", 10L, 30L*1000L);
     
     /**
-     * The maximum number of times we're trying to re-send a
-     * request before geiving up
+     * The maximum number of errors (timeouts) that may occur 
+     * before we're giving up to re-send requests
      */
     public static final IntSetting MAX_ERRORS
-        = FACTORY.createSettableIntSetting("MAX_ERRORS", 3, "max_errors", 0, 10);
+        = FACTORY.createSettableIntSetting("MAX_ERRORS", 2, "max_errors", 1, 10);
     
     /**
      * The maximum size of a serialized message

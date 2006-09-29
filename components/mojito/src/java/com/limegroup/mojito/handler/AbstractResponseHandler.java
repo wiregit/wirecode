@@ -161,23 +161,23 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     }
     
     /**
-     * Returns the number of errors
+     * Returns the number of errors that have occured
      */
     protected int getErrors() {
         return errors;
     }
     
     /**
-     * Sets the maximum number of errors that
-     * may occur before we're giving up
+     * Sets the maximum number of errors that may occur before
+     * we're giving up to re-send a request
      */
     public void setMaxErrors(int maxErrors) {
         this.maxErrors = maxErrors;
     }
     
     /**
-     * Returns the maximum number of errors that
-     * may occur
+     * Returns the maximum number of errors that may occur before
+     * we're giving up to re-send a request
      */
     public int getMaxErrors() {
         return maxErrors;
@@ -232,13 +232,14 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         
         elapsedTime += time;
         
-        // maxErrors is actually the total number of
-        // retries. Since the first try failed there
-        // are maxErrors-1 retries left.
-        if (errors++ >= (maxErrors-1)) {
-            timeout(nodeId, dst, request, getElapsedTime());
-        } else {
-            resend(nodeId, dst, request);
+        try {
+            if (errors < maxErrors) {
+                resend(nodeId, dst, request);
+            } else {
+                timeout(nodeId, dst, request, getElapsedTime());
+            }
+        } finally {
+            errors++;
         }
     }
     
