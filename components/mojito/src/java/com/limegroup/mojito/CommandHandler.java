@@ -31,7 +31,6 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
-import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -125,24 +124,15 @@ public class CommandHandler {
     
     public static void database(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
-        
         Database database = ((Context)dht).getDatabase();
-        for(DHTValue value : database.values()) {    
-            buffer.append("VALUE: ").append(value).append("\n\n");
-        }
-        buffer.append("-------------\n");
-        buffer.append("TOTAL: ").append(database.getKeyCount())
-            .append("/").append(database.getValueCount()).append("\n");
-        
+        buffer.append(database.toString());
         out.println(buffer);
     }
     
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         StringBuilder buffer = new StringBuilder("\n");
-        
         RouteTable routingTable = ((Context)dht).getRouteTable();
         buffer.append(routingTable.toString());
-        
         out.println(buffer);
     }
     

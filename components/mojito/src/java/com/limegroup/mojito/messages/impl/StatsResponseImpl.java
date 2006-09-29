@@ -82,13 +82,6 @@ public class StatsResponseImpl extends AbstractResponseMessage
     }
     
     public String toString() {
-        String s = statistics;
-        if (s != null) {
-            if (s.length() > 128) {
-                s = s.substring(0, 128);
-            }
-        }
-        
-        return "StatsResponse: " + s;
+        return "StatsResponse: " + statistics;
     }
 }

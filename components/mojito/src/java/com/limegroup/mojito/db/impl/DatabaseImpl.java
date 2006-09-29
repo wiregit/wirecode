@@ -226,6 +226,17 @@ public class DatabaseImpl implements Database {
         in.defaultReadObject();
     }
     
+    public synchronized String toString() {
+        StringBuilder buffer = new StringBuilder();
+        for(DHTValue value : values()) {    
+            buffer.append(value).append("\n\n");
+        }
+        buffer.append("-------------\n");
+        buffer.append("TOTAL: ").append(getKeyCount())
+            .append("/").append(getValueCount()).append("\n");
+        return buffer.toString();
+    }
+    
     /**
      * 
      */
