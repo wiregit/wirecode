@@ -1611,6 +1611,8 @@ SETUP_FINISH_LABEL=Настройка LimeWire выполнена. Щёлкни�
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
+#### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
+#? ASSOCIATIONS_TORRENT_DESCRIPTION=
 #### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
