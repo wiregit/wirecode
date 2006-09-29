@@ -68,7 +68,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueEve
     }
 
     @Override
-    protected boolean isGlobalTimeout(long time) {
+    protected boolean isLookupTimeout(long time) {
         long lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }

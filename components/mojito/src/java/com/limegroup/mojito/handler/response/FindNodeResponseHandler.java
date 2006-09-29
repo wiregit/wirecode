@@ -73,7 +73,7 @@ public class FindNodeResponseHandler
     }
     
     @Override
-    protected boolean isGlobalTimeout(long time) {
+    protected boolean isLookupTimeout(long time) {
         long lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
         return lookupTimeout > 0L && time >= lookupTimeout;
     }
@@ -125,11 +125,11 @@ public class FindNodeResponseHandler
                 Entry<Contact, QueryKey> e = entry.getValue();
                 nearest.put(e.getKey(), e.getValue());
                 
-                if (nearest.size() >= getResultSetSize()) {
-                    return SelectStatus.EXIT;
+                if (nearest.size() < getResultSetSize()) {
+                    return SelectStatus.CONTINUE;
                 }
                 
-                return SelectStatus.CONTINUE;
+                return SelectStatus.EXIT;
             }
         });
         

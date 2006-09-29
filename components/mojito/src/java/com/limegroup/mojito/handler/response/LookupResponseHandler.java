@@ -159,7 +159,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /**
      * Returns whether or not the lookup has timed out
      */
-    protected abstract boolean isGlobalTimeout(long time);
+    protected abstract boolean isLookupTimeout(long time);
     
     /**
      * Returns the number of parallel lookups
@@ -269,7 +269,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Go Go Go!
         startTime = System.currentTimeMillis();
         for(Contact node : alphaList) {
-            sendLookupRequest(node);                
+            //try {
+                sendLookupRequest(node);
+            //} catch (IOException err) {
+            //    LOG.error("IOException", err);
+            //}
         }
         
         finishLookupIfDone();
@@ -356,14 +360,17 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     @Override
-    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
+    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage request, long time) throws IOException {
+        
         // Synchronizing this method so that timeout() doesn't get called
         // if the handler isDone() or isCancelled()
         super.handleTimeout(nodeId, dst, request, time);
     }
 
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+    protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
         
         decrementActiveSearches();
         if (LOG.isTraceEnabled()) {
@@ -391,14 +398,18 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     @Override
-    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, Exception e) {
+        
         // Synchronizing this method so that error() doesn't get called
         // if the handler isDone() or isCancelled()
         super.handleError(nodeId, dst, message, e);
     }
 
     @Override
-    protected synchronized void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    protected synchronized void error(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, Exception e) {
+        
         if (e instanceof SocketException && hasActiveSearches()) {
             try {
                 timeout(nodeId, dst, message, -1L);
@@ -424,7 +435,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         long totalTime = getElapsedTime();
         
-        if (isGlobalTimeout(totalTime)) {
+        if (isLookupTimeout(totalTime)) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Lookup for " + lookupId + " terminates after "
                         + currentHop + " hops and " + totalTime + "ms due to timeout.");
@@ -645,7 +656,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     protected String getState() {
         long time = getElapsedTime();
-        boolean timeout = isGlobalTimeout(time);
+        boolean timeout = isLookupTimeout(time);
         int activeSearches = getActiveSearches();
         
         return "Class: " + getClass().getName() 
