@@ -428,12 +428,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
             context.getMessageDispatcher().send(node, request, GetQueryKeyHandler.this);
         }
-
-        @Override
-        public void handleResponse(ResponseMessage response, long time) throws IOException {
-            System.out.println("Response: " + response);
-            super.handleResponse(response, time);
-        }
         
         protected void response(ResponseMessage message, long time) throws IOException {
             
