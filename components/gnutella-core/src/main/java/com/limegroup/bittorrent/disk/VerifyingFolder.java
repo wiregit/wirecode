@@ -104,8 +104,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	/** whether the cached bitfield is dirty LOCKING: this */
 	private boolean bitFieldDirty = true;
 
-	/*
-	 * the number of corrupted bytes, encountered
+	/**
+	 * the number of bytes that failed verification, either
+	 * during download or initial checking.
 	 */
 	private long _corruptedBytes;
 
@@ -409,6 +410,7 @@ class VerifyingFolder implements TorrentDiskManager {
 					public void run() {
 						if (isOpen()) {
 							isVerifying = false;
+							_corruptedBytes = 0;
 							torrent.verificationComplete();
 						}
 					}
@@ -771,7 +773,8 @@ class VerifyingFolder implements TorrentDiskManager {
 				if (verify(pieceNum, true)) {
 					markPieceCompleted(pieceNum);
 					handleVerified(pieceNum);
-				}
+				} else 
+					_corruptedBytes += getPieceSize(pieceNum);
 				if (SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
 						SharingSettings.FRIENDLY_HASHING.getValue()) {
 					

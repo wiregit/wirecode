@@ -205,8 +205,18 @@ implements TorrentEventListener {
 	}
 
 	public long getAmountRead() {
-		return _info != null ?_info.getDiskManager().getBlockSize() :
-			getContentLength();
+		// if the download is complete, just return the length
+		if (_info == null )
+			return getContentLength();
+		
+		// return the number of verified bytes
+		long ret = _info.getDiskManager().getBlockSize();
+		
+		// if this is initial checking, add the number of processed bytes
+		// too.
+		if (_torrent.getState() == ManagedTorrent.VERIFYING)
+			ret += _info.getDiskManager().getNumCorruptedBytes();
+		return ret;
 	}
 
 	public String getVendor() {
