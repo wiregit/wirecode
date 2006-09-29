@@ -156,7 +156,7 @@ implements TorrentEventListener {
 		case ManagedTorrent.WAITING_FOR_TRACKER :
 			return WAITING_FOR_RESULTS;
 		case ManagedTorrent.VERIFYING:
-			return HASHING;
+			return RESUMING;
 		case ManagedTorrent.CONNECTING:
 			return CONNECTING;
 		case ManagedTorrent.DOWNLOADING:

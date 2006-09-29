@@ -33,6 +33,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int RECOVERY_FAILED         = 17;
     public static final int PAUSED                  = 18;
     public static final int INVALID                 = 19;
+    public static final int RESUMING				= 20;
     
     
     /**
