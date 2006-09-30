@@ -16,7 +16,7 @@ public class UnitTestUtils {
         
     }
     
-    public static void setBootstrapping(MojitoDHT dht) throws Exception {
+    public static void setBootstrapping(MojitoDHT dht, boolean bootstrapping) throws Exception {
         Context context = (Context)dht;
         Field bmField = Context.class.getDeclaredField("bootstrapManager");
         bmField.setAccessible(true);
@@ -25,17 +25,21 @@ public class UnitTestUtils {
         Field futureField = BootstrapManager.class.getDeclaredField("future");
         futureField.setAccessible(true);
         
-        Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
-        Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
-        con.setAccessible(true);
-        
-        Object future = con.newInstance(bootstrapManager, new Callable() { 
-            public Object call() { 
-                throw new UnsupportedOperationException();
-            }
-        });
-        
-        futureField.set(bootstrapManager, future);
+        if (bootstrapping) {
+            Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
+            Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
+            con.setAccessible(true);
+            
+            Object future = con.newInstance(bootstrapManager, new Callable() { 
+                public Object call() { 
+                    throw new UnsupportedOperationException();
+                }
+            });
+            
+            futureField.set(bootstrapManager, future);
+        } else {
+            futureField.set(bootstrapManager, null);
+        }
     }
     
     public static void setBootstrapped(MojitoDHT dht, boolean bootstrapped) throws Exception {

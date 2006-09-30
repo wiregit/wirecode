@@ -77,7 +77,7 @@ public class CacheForwardTest extends BaseTestCase {
             dht1.start();
             Context context1 = (Context)dht1;
             
-            UnitTestUtils.setBootstrapping(dht1);            
+            UnitTestUtils.setBootstrapping(dht1, true);            
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             

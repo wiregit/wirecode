@@ -59,7 +59,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             // Pings to prevent other Nodes from seleting it as
             // their initial bootstrap Node
             Context context1 = (Context)dht1;
-            UnitTestUtils.setBootstrapping(dht1);            
+            UnitTestUtils.setBootstrapping(dht1, true);            
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             
