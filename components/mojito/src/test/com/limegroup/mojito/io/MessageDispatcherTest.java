@@ -1,11 +1,15 @@
-package com.limegroup.mojito;
+package com.limegroup.mojito.io;
 
 import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.io.MessageDispatcher;
+import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;

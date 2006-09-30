@@ -20,14 +20,12 @@
 package com.limegroup.mojito;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import junit.framework.TestSuite;
 
@@ -38,10 +36,10 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
-import com.limegroup.mojito.manager.BootstrapManager;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.UnitTestUtils;
 
 
 public class CacheForwardTest extends BaseTestCase {
@@ -77,27 +75,9 @@ public class CacheForwardTest extends BaseTestCase {
             dht1 = MojitoFactory.createDHT();
             dht1.bind(2000);
             dht1.start();
-            
             Context context1 = (Context)dht1;
-            Field bmField = Context.class.getDeclaredField("bootstrapManager");
-            bmField.setAccessible(true);
             
-            BootstrapManager bootstrapManager1 = (BootstrapManager)bmField.get(context1);
-            Field futureField = BootstrapManager.class.getDeclaredField("future");
-            futureField.setAccessible(true);
-            
-            Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
-            Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
-            con.setAccessible(true);
-            
-            Object future = con.newInstance(bootstrapManager1, new Callable() { 
-                public Object call() { 
-                    throw new UnsupportedOperationException();
-                }
-            });
-            
-            futureField.set(bootstrapManager1, future);
-            
+            UnitTestUtils.setBootstrapping(dht1);            
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             
@@ -107,15 +87,13 @@ public class CacheForwardTest extends BaseTestCase {
             dht2.start();
             Context context2 = (Context)dht2;
             
-            BootstrapManager bootstrapManager2 = (BootstrapManager)bmField.get(context2);
-            bootstrapManager2.setBootstrapped(true);
-            
+            UnitTestUtils.setBootstrapped(dht2, true);
             assertTrue(dht2.isBootstrapped());
             assertFalse(context2.isBootstrapping());
             
             // Get the QueryKey...
-            clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
-            con = clazz.getDeclaredConstructor(Context.class, Contact.class);
+            Class clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
+            Constructor con = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
             AbstractResponseHandler<QueryKey> handler 
