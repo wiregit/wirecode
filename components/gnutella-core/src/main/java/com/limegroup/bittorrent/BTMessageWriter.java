@@ -134,7 +134,7 @@ public class BTMessageWriter implements BTChannelWriter {
 			if ( _out[1].remaining() == 0) {
                 // allow the data to be gc'd...
 				currentMessage = null;
-                _out[1] = null;
+                _out[1] = BufferUtils.getEmptyBuffer();
 				
                 // If this returns true, it is guaranteed
                 // that out[0] & out[1] are reset with new buffers.
