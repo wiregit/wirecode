@@ -8,7 +8,7 @@ import com.limegroup.gnutella.downloader.Interval;
 public class BTInterval extends Interval {
 	private static final long serialVersionUID = 6565199693843714608L;
 
-	private final Integer blockId;
+	private final int blockId;
 	
 	private int hashCode;
 
@@ -16,7 +16,7 @@ public class BTInterval extends Interval {
 		super(low, high);
 		if (id < 0)
 			throw new IllegalArgumentException("negative id");
-		blockId = new Integer(id);
+		blockId = id;
 	}
 	
 	public BTInterval(Interval other, int id) {
@@ -25,11 +25,11 @@ public class BTInterval extends Interval {
 
 	public BTInterval(long singleton, int id) {
 		super(singleton);
-		blockId = new Integer(id);
+		blockId = id;
 	}
 	
 	public int getId() {
-		return blockId.intValue();
+		return blockId;
 	}
 	
 	public boolean equals(Object other) {
