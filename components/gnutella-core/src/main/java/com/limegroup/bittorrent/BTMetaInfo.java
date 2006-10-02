@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -261,7 +261,7 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * private utility method for initializing the DiskManager
 	 */
-	private void initializeDiskManager(Map<String, Serializable> data, boolean complete) {
+	private void initializeDiskManager(Serializable data, boolean complete) {
 		_folder = DiskManagerFactory.instance().getManager(this, data, complete);
 	}
 
@@ -299,22 +299,26 @@ public class BTMetaInfo implements Serializable {
 		fullBitField = new BitFieldSet(fullSet, getNumBlocks());
 		initializeDiskManager(null, false);
 	}
+    
+    // keys used between read/write object.
+    private static enum SerialKeys {
+        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA;
+    }
 	
 	/**
 	 * Serializes this, including information about the written ranges.
 	 */
 	private synchronized void writeObject(ObjectOutputStream out)
 			throws IOException {
-		Map<String,Serializable> toWrite = new HashMap<String, Serializable>();
+		Map<SerialKeys,Serializable> toWrite = new EnumMap<SerialKeys, Serializable>(SerialKeys.class);
 		
-		toWrite.put("_hashes",(Serializable)_hashes);
-		toWrite.put("_pieceLength",new Integer(_pieceLength));
-		toWrite.put("_fileSystem",fileSystem);
-		toWrite.put("_infoHash",_infoHash);
-		toWrite.put("_trackers",_trackers);
-		toWrite.put("ratio", getRatio());
-		
-		toWrite.put("folder data",_folder.getSerializableObject());
+		toWrite.put(SerialKeys.HASHES,(Serializable)_hashes);
+		toWrite.put(SerialKeys.PIECE_LENGTH, _pieceLength);
+		toWrite.put(SerialKeys.FILE_SYSTEM,fileSystem);
+		toWrite.put(SerialKeys.INFO_HASH,_infoHash);
+		toWrite.put(SerialKeys.TRACKERS,_trackers);
+		toWrite.put(SerialKeys.RATIO, getRatio());		
+		toWrite.put(SerialKeys.FOLDER_DATA,_folder.getSerializableObject());
 		
 		out.writeObject(toWrite);
 	}
@@ -325,27 +329,23 @@ public class BTMetaInfo implements Serializable {
 	private synchronized void readObject(ObjectInputStream in)
 			throws IOException, ClassNotFoundException {
 		Object read = in.readObject();
-		Map<String, Serializable> toRead = 
+		Map<SerialKeys, Serializable> toRead = 
 			GenericsUtils.scanForMap(read, 
-					String.class, Serializable.class, 
+                    SerialKeys.class, Serializable.class, 
 					GenericsUtils.ScanMode.EXCEPTION);
 		
-		_hashes = (List<byte[]>) toRead.get("_hashes");
-		Integer pieceLength = (Integer)toRead.get("_pieceLength");
-		fileSystem = (TorrentFileSystem) toRead.get("_fileSystem");
-		_infoHash = (byte []) toRead.get("_infoHash");
+		_hashes = (List<byte[]>) toRead.get(SerialKeys.HASHES);
+		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
+		fileSystem = (TorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
+		_infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
 		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
-		_trackers = (URI []) toRead.get("_trackers");
-		Float ratio = (Float) toRead.get("ratio");
-		
-		read = toRead.get("folder data");
-		Map<String, Serializable> folderData = GenericsUtils.scanForMap(read, 
-				String.class, Serializable.class, 
-				GenericsUtils.ScanMode.EXCEPTION); 
+		_trackers = (URI []) toRead.get(SerialKeys.TRACKERS);
+		Float ratio = (Float) toRead.get(SerialKeys.RATIO);
+        Serializable folderData = toRead.get(SerialKeys.FOLDER_DATA); 
 		
 		if (_hashes == null || pieceLength == null || fileSystem == null ||
 				 _infoHash == null || _trackers == null ||
-				folderData == null || ratio == null)
+                 folderData == null || ratio == null)
 			throw new IOException("cannot read BTMetaInfo");
 		
 		_pieceLength = pieceLength.intValue();

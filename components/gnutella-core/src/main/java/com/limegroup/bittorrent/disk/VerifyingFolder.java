@@ -141,7 +141,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	VerifyingFolder(BTMetaInfo info, 
 			boolean complete, 
-			Map<String, Serializable> data,
+            Serializable data,
 			DiskController<TorrentFile> diskController) {
 		TorrentFileSystem system = info.getFileSystem();
 		_files = complete? system.getFiles() : system.getIncompleteFiles();
@@ -159,10 +159,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		if (complete) {
 			verifiedBlocks = _info.getFullBitSet();
 			verified = _info.getFullBitField();
-		}else {
+		} else {
 			verifiedBlocks = new BitSet(_info.getNumBlocks());
-			if (data != null)
-				initialize(data);
+			if (data != null && data instanceof SerialData)
+				initialize((SerialData)data);
 			verified = new BitFieldSet(verifiedBlocks, _info.getNumBlocks());
 		}
 		
@@ -173,17 +173,14 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * populates various fields from data object that was 
 	 * deserialized.
 	 */
-	private void initialize(Map<String, Serializable> data) {
-		BlockRangeMap partial = (BlockRangeMap) data.get("partial");
-		if (partial != null) 
-			partialBlocks.putAll(partial);
+	private void initialize(SerialData data) {
+		if (data.getPartialBlocks() != null) 
+			partialBlocks.putAll(data.getPartialBlocks());
 		
-		BitSet verified = (BitSet) data.get("verified");
-		if (verified != null) 
-			verifiedBlocks = verified;
+		if (data.getVerifiedBlocks() != null) 
+			verifiedBlocks = data.getVerifiedBlocks();
 		
-		Boolean wasVerifying = (Boolean) data.get("wasVerifying");
-		isVerifying = wasVerifying == null ? false : wasVerifying.booleanValue();
+		isVerifying = data.isVerifying();
 	}
 	
 	
@@ -818,13 +815,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	public synchronized Serializable getSerializableObject() {
-		Map<String, Serializable> toWrite = new HashMap<String, Serializable>();
-		toWrite.put("verified",(Serializable)verifiedBlocks.clone());
-		toWrite.put("partial",(Serializable)partialBlocks.clone());
-		toWrite.put("wasVerifying", new Boolean(isVerifying));
-		return (Serializable)toWrite;
-	}
-	
+        return new SerialData((BitSet)verifiedBlocks.clone(), partialBlocks.clone(), isVerifying);
+    }
+    
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.TorrentFileManager#getAmountPending()
 	 */
@@ -893,11 +886,37 @@ class VerifyingFolder implements TorrentDiskManager {
 			return ret;
 		}
 		
-		public Object clone() {
+		public BlockRangeMap clone() {
 			BlockRangeMap clone = new BlockRangeMap(size());
 			for (Map.Entry<Integer, IntervalSet> e : entrySet())
 				clone.put(e.getKey(), e.getValue().clone());
 			return clone;
 		}
 	}
+    
+    /** Data that's serialized. */
+    private static class SerialData implements Serializable {
+        private BitSet verifiedBlocks;
+        private BlockRangeMap partialBlocks;
+        private boolean isVerifying;
+        
+        private SerialData(BitSet verifiedBlocks, BlockRangeMap partialBlocks, boolean isVerifying) {
+            this.verifiedBlocks = verifiedBlocks;
+            this.partialBlocks = partialBlocks;
+            this.isVerifying = isVerifying;
+        }
+
+        public boolean isVerifying() {
+            return isVerifying;
+        }
+
+        public BlockRangeMap getPartialBlocks() {
+            return partialBlocks;
+        }
+
+        public BitSet getVerifiedBlocks() {
+            return verifiedBlocks;
+        }
+        
+    }
 }

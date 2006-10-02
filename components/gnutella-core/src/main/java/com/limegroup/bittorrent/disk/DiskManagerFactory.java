@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent.disk;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFile;
@@ -17,7 +16,7 @@ public class DiskManagerFactory {
 	protected DiskManagerFactory(){}
 	
 	public TorrentDiskManager getManager(BTMetaInfo info,
-			Map<String, Serializable> serializedData,
+			Serializable serializedData,
 			boolean complete) {
 		return new VerifyingFolder(info, 
 				complete,
