@@ -44,6 +44,19 @@ public class SharingSettings extends LimeProps {
             DEFAULT_SAVE_DIR).setAlwaysSave(true);
 
     /**
+     * The special directory for saving files.
+     * 
+     * The setting DIRECTORY_FOR_SAVING_FILES above tells the path to the Shared folder.
+     * There may also be another setting, SPECIAL_DIRECTORY_FOR_SAVING_FILES, this one.
+     * It can contain a relative path like "..\\Shared", or special folder path, "Documents>Shared".
+     * It is set manually by the user in the settings file, the program reads it but does not change it.
+     * 
+     * If present, SPECIAL_DIRECTORY_FOR_SAVING_FILES controls all the other settings.
+     */
+    public static final StringSetting SPECIAL_DIRECTORY_FOR_SAVING_FILES =
+    	FACTORY.createStringSetting("SPECIAL_DIRECTORY_FOR_SAVING_FILES", "");
+
+    /**
      * The directory where incomplete files are stored (downloads in progress).
      */
     public static final FileSetting INCOMPLETE_DIRECTORY =
@@ -141,14 +154,42 @@ public class SharingSettings extends LimeProps {
         DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
         DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
     }
-    
+
     /**
      * Retrieves the save directory.
+     * 
+     * If the settings file specifies a special save directory, uses it.
+     * Sets all the other sharing settings around it.
      */
     public static final File getSaveDirectory() {
+
+    	// Look for a special save directory
+    	File special = getSpecialSaveDirectory();
+    	File save = DIRECTORY_FOR_SAVING_FILES.getValue();
+    	if (special != null && !special.equals(save)) {
+    		try {
+    			setSaveDirectory(special); // Put all the saving folders around it
+    		} catch (IOException e) {}
+    	}
+
         return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
-    
+
+    /**
+     * Gets the special save directory.
+     * Reads the relative or special folder path.
+     * Expands it based on where we're running from and where special folders are.
+     * 
+     * @return A File with the special save directory expanded.
+     *         null if the setting is blank or not found, or on error parsing it.
+     */
+    private static File getSpecialSaveDirectory() {
+    	String special = SPECIAL_DIRECTORY_FOR_SAVING_FILES.getValue();
+    	if (special.equals(""))
+    		return null;
+    	return FileUtils.parseSpecialPath(special);
+    }
+
     /**  
       * Gets all potential save directories.  
      */  
