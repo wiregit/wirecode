@@ -293,16 +293,6 @@ PieceSendListener, PieceReadListener {
 		if (_socket == null)
 			return; 
 		
-		try {
-			_socket.shutdownOutput();
-		} catch (IOException ioe1) {}
-		try {
-			_socket.shutdownInput();
-		} catch (IOException ioe2) {}
-		
-		_reader.shutdown();
-		_writer.shutdown();
-		
 		IOUtils.close(_socket);
 		
 		clearRequests();
