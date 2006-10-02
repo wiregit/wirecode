@@ -114,7 +114,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
             if (sender == null) {
                 setException(new IllegalArgumentException(node + " is trying to spoof our Node ID"));
             } else {
-                setReturnValue(new PingEvent(node, externalAddress, estimatedSize));
+                setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
             }
             return;
         }
@@ -122,7 +122,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
         context.setExternalAddress(externalAddress);
         context.addEstimatedRemoteSize(estimatedSize);
         
-        setReturnValue(new PingEvent(node, externalAddress, estimatedSize));
+        setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
     }
 
     @Override

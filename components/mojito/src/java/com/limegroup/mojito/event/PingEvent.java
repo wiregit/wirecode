@@ -29,41 +29,65 @@ import com.limegroup.mojito.Contact;
  */
 public class PingEvent {
     
+    /** The remote Contact */
     private Contact node;
     
+    /** My external address */
     private SocketAddress externalAddress;
     
+    /** The estimated DHT size */
     private BigInteger estimatedSize;
     
-    public PingEvent(Contact node, SocketAddress externalAddress, BigInteger estimatedSize) {
+    /** the Round Trip Time (RTT) */
+    private long time;
+    
+    /**
+     * Constructs a new PingEvent
+     * 
+     * @param node The remote Contact
+     * @param externalAddress My external address
+     * @param estimatedSize The estimated DHT size
+     * @param time The Round Trip Time (RTT)
+     */
+    public PingEvent(Contact node, SocketAddress externalAddress, 
+            BigInteger estimatedSize, long time) {
         this.node = node;
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;
+        this.time = time;
     }
     
     /**
-     * 
+     * Returns the remote Node's Contact info
      */
     public Contact getContact() {
         return node;
     }
     
     /**
-     * 
+     * Returns the external address
      */
     public SocketAddress getExternalAddress() {
         return externalAddress;
     }
     
     /**
-     * 
+     * Returns the estimated DHT size
      */
     public BigInteger getEstimatedSize() {
         return estimatedSize;
     }
     
+    /**
+     * Returns the Round Trip Time (RTT)
+     */
+    public long getTime() {
+        return time;
+    }
+    
     public String toString() {
         return node + ", externalAddress=" + externalAddress 
-                    + ", estimatedSize=" + estimatedSize;
+                    + ", estimatedSize=" + estimatedSize
+                    + ", time=" + time + "ms";
     }
 }

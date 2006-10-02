@@ -165,8 +165,7 @@ public class CommandHandler {
         Future<PingEvent> future = dht.ping(addr);
         try {
             PingEvent result = future.get();
-            Contact node = result.getContact();
-            out.println("Ping to " + node + " succeeded: " + node.getRoundTripTime() + "ms");
+            out.println(result);
         } catch (Exception err) {
             err.printStackTrace(out);
         }
