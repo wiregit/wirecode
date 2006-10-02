@@ -1,6 +1,5 @@
 package com.limegroup.bittorrent;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,6 +21,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.bencoding.Token;
+import com.limegroup.bittorrent.disk.DiskManagerFactory;
+import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
@@ -31,12 +33,6 @@ import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.GenericsUtils;
-import com.limegroup.gnutella.util.StringUtils;
-
-import com.limegroup.bittorrent.bencoding.BEncoder;
-import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.bittorrent.disk.DiskManagerFactory;
-import com.limegroup.bittorrent.disk.TorrentDiskManager;
 
 /**
  * Contains information usually parsed in a .torrent file
@@ -243,10 +239,11 @@ public class BTMetaInfo implements Serializable {
 	 * @return new instance of BTMetaInfo if all went well
 	 * @throws IOException if parsing or reading failed.
 	 */
-	public static BTMetaInfo readFromBytes(byte []torrent)
-			throws IOException {
+	public static BTMetaInfo readFromBytes(byte []torrent) throws IOException {
 		Object metaInfo = Token.parse(torrent);
-		return new BTMetaInfo(metaInfo);
+        if(!(metaInfo instanceof Map))
+            throw new ValueException("metaInfo not a Map!");
+        return new BTMetaInfo(new BTData((Map)metaInfo));
 	}
 
 	/**
@@ -269,58 +266,19 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Constructs a BTMetaInfo from an Object parsed from BEncoded data.
-	 * 
-	 * @throws ValueException if the structure of the object does not match
-	 * what we understand or expect.
+	 * Constructs a BTMetaInfo based on the BTData.
 	 */
-	private BTMetaInfo(Object t_metaInfo) throws ValueException {
-
-		// meta info must be map
-		if (!(t_metaInfo instanceof Map))
-			throw new ValueException("Unknown type of MetaInfo");
-
-		Map metaInfo = (Map) t_metaInfo;
-
-		// get the trackers, we only expect one tracker, we will throw if the
-		// tracker is invalid or does not even exist.
-		Object t_announce = metaInfo.get("announce");
-		if (!(t_announce instanceof byte []))
-			throw new ValueException("bad metainfo - no tracker");
-		String url = StringUtils.getASCIIString((byte[])t_announce);
+	private BTMetaInfo(BTData data) throws ValueException {
 		try {
 			// Note: this kills UDP trackers so we will eventually
 			// use a different object.
-			_trackers = new URL[] { new URL(url) };
+			_trackers = new URL[] { new URL(data.getAnnounce()) };
 		} catch (MalformedURLException mue) {
-			throw new ValueException("bad metainfo - bad tracker");
+			throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
 		// TODO: add proper support for multi-tracker torrents later.
-
-		// the main data from the meta info
-		Object t_info = metaInfo.get("info");
-		if (!(t_info instanceof Map))
-			throw new ValueException("bad metainfo - bad info");
-		Map info = (Map) t_info;
-
-		// create the info hash, we could create the info hash while reading it
-		// but that would make the code a lot more complex. This works well too,
-		// because the order of a list is not changed during the process of
-		// decoding or encoding it and Maps are always sorted alphanumerically
-		// when encoded.
-		// So the data we encoded is always exactly the same as the data before
-		// we decoded it. This is intended that way by the protocol.
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			BEncoder.encodeDict(baos, info);
-		} catch (IOException ioe) {
-			ErrorService.error(ioe);
-		}
-		
-		MessageDigest md = new SHA1();
-		_infoHash = md.digest(baos.toByteArray());
-		baos = null;
+		_infoHash = data.getInfoHash();
 		
 		try {
 			_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
@@ -328,23 +286,15 @@ public class BTMetaInfo implements Serializable {
 			ErrorService.error(impossible);
 		}
 
-		// the hashes from the meta info
-		Object t_pieces = info.remove("pieces");
-		if (!(t_pieces instanceof byte []))
-			throw new ValueException("bad metainfo - no pieces key found");
-		_hashes = parsePieces((byte [])t_pieces);
-		t_pieces = null; // this byte [] is usually big.
-		
-		// piece length
-		Object t_pieceLength = info.get("piece length");
-		if (!(t_pieceLength instanceof Long))
-			throw new ValueException("bad metainfo - illegal piece length");
-		_pieceLength = (int)((Long) t_pieceLength).longValue();
+		_hashes = parsePieces(data.getPieces());
+        data.clearPieces(); // save memory.
+        
+		_pieceLength = (int)data.getPieceLength().longValue();
 		if (_pieceLength <= 0)
-			throw new ValueException("bad metainfo - illegal piece length");
+			throw new ValueException("bad metainfo - illegal piece length: " + data.getPieceLength());
 
 
-		fileSystem = new TorrentFileSystem(info, _hashes.size(), _pieceLength, _infoHash);
+		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
 		fullBitField = new BitFieldSet(fullSet, getNumBlocks());
 		initializeDiskManager(null, false);
 	}

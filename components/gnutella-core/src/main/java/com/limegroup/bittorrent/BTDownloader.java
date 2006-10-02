@@ -30,7 +30,7 @@ import com.limegroup.gnutella.util.NumericBuffer;
  * This class enables the rest of LW to treat this as a regular download.
  */
 public class BTDownloader extends AbstractDownloader 
-implements TorrentEventListener {
+                          implements TorrentEventListener {
 	
 	private static final long serialVersionUID = -7785186190441081641L;
 

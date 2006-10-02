@@ -3,23 +3,17 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.bitzi.util.Base32;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.MultiCollection;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Information about the file hierarchy contained in the torrent.
@@ -64,40 +58,23 @@ public class TorrentFileSystem implements Serializable {
 	private File _completeFile;
 
 	
-	TorrentFileSystem(Map info, int numHashes, long pieceLength, byte [] infoHash) 
-	throws ValueException {
-//		 name of the torrent, also specifying the directory under which to
-		// save the torrents, as per extension spec, name.urf-8 specifies the
-		// utf-8 name of the torrent
-		String name = null;
-		Object t_name = info.get("name");
-		if (!(t_name instanceof byte []))
-			throw new ValueException("bad metainfo - bad name");
-
-		// if possible prefer the name.utf-8 key but we are already sure that
-		// we have a safe name value to fallback to
-		Object t_name_utf8 = info.get("name.utf-8");
-		if (t_name_utf8 instanceof byte[]) {
-			try {
-				name = new String((byte [])t_name_utf8, 
-						Constants.UTF_8_ENCODING);
-			} catch (UnsupportedEncodingException uee) {
-				// fail silently
-			}
-		}
-		
-		if (name == null)
-			name = StringUtils.getASCIIString((byte [])t_name);
-
-		_name = CommonUtils.convertFileName(name);
+    /**
+     * Constructs the file system using the given BTData & hash information.
+     * If any of the information is malformed, throws a ValueException.
+     * 
+     * @param data
+     * @param numHashes
+     * @param pieceLength
+     * @param infoHash
+     * @throws ValueException
+     */
+	TorrentFileSystem(BTData data, int numHashes, long pieceLength, byte [] infoHash) throws ValueException {
+	    // name of the torrent, also specifying the directory under which to save the torrents.
+		_name = CommonUtils.convertFileName(data.getName());
 
 		// we need to check the name of the torrent, security risk!
 		if (_name.length() == 0)
 			throw new ValueException("bad torrent name");
-
-		// read the files belonging to the torrent
-		if (info.containsKey("files") == info.containsKey("length"))
-			throw new ValueException("single/multiple file mix or neither");
 
 		File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
 		try {
@@ -108,138 +85,39 @@ public class TorrentFileSystem implements Serializable {
 				Base32.encode(infoHash)+File.separator+_name);
 		_completeFile = new File(SharingSettings.getSaveDirectory(), _name);
 		
-		if (info.containsKey("files")) {
-			Object t_files = info.get("files");
-			if (!(t_files instanceof List))
-				throw new ValueException("bad metainfo - bad files value");
-			List<TorrentFile> files = parseFiles((List) t_files, _completeFile
-					.getAbsolutePath());
+        if(data.getFiles() != null) {
+            List<BTData.BTFileData> files = data.getFiles();
+            List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
+            for(BTData.BTFileData file : files)
+                torrents.add(new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath()));
+            
 			if (files.size() == 0)
-				throw new ValueException("bad metainfo - bad files value " + t_files);
+				throw new ValueException("bad metainfo, no files!");
 			
 			// add the beginning and ending chunks for each file.
 			long position = 0;
-			for (TorrentFile file : files) {
+			for (TorrentFile file : torrents) {
 				file.setBegin((int) (position / pieceLength));
 				position += file.length();
 				file.setEnd((int) (position / pieceLength));
 			}
 			
-			_files = files;
+			_files = torrents;
+            
+            // add folders, for easier conflict checking later on
+            for(String folderPath : data.getFolders())
+                _folders.add(new File(_completeFile, folderPath));
 			_folders.add(_completeFile);
 		} else {
-			Object t_length = info.get("length");
-			if (!(t_length instanceof Long))
-				throw new ValueException("bad metainfo - bad file length");
-			long length = ((Long) t_length).longValue();
-			_files = new ArrayList<TorrentFile>(1);
-			try {
-				TorrentFile f = new TorrentFile(length, _completeFile
-						.getCanonicalPath());
-				f.setBegin(0);
-				f.setEnd(numHashes);
-				_files.add(f);
-			} catch (IOException bad) {
-				throw new ValueException("bad path");
-			}
-			
+            TorrentFile f = new TorrentFile(data.getLength(), _completeFile.getAbsolutePath());
+            f.setBegin(0);
+            f.setEnd(numHashes);
+            
+            _files = new ArrayList<TorrentFile>(1);
+            _files.add(f);
 		}
 		
 		_totalSize = calculateTotalSize(_files);
-	}
-	
-	/**
-	 * Parse a list of files from the meta info
-	 * 
-	 * @param files a <tt>List</tt> containing the file info
-	 * @param basePath the <tt>String</tt> identifying the torrent's saving folder
-	 * @return List of <tt>TorrentFile</tt>
-	 * @throws ValueException if parsing fails.
-	 */
-	private List<TorrentFile> parseFiles(List<?> files, String basePath)
-			throws ValueException {
-		ArrayList<TorrentFile> ret = new ArrayList<TorrentFile>();
-        for(Object t_file : files) {
-			if (!(t_file instanceof Map))
-				throw new ValueException("bad metainfo - bad file value");
-			ret.add(parseFile((Map) t_file, basePath));
-		}
-		return ret;
-	}
-
-	/**
-	 * Utility method to parse a single file from the meta info
-	 * 
-	 * @param file the <tt>Map</tt> containing the file info
-	 * @param basePath the <tt>String</tt> identifying the torrent
-	 * @return instance of <tt>TorrentFile</tt>
-	 * @throws ValueException if parsing fails.
-	 */
-	private TorrentFile parseFile(Map<?, ?> file, String basePath)
-			throws ValueException {
-
-		Object t_length = file.get("length");
-
-		if (!(t_length instanceof Long))
-			throw new ValueException("bad metainfo - bad file length");
-
-		long length = ((Long) t_length).longValue();
-
-		Object t_path = file.get("path");
-		if (!(t_path instanceof List))
-			throw new ValueException("bad metainfo - bad path");
-		
-		List<?> path = (List) t_path;
-		if (path.isEmpty())
-			throw new ValueException("bad metainfo - bad path");
-
-		Object t_path_utf8 = file.get("path.utf-8");
-		// the extension specs introduced the utf-8 path.
-		if ( ! (t_path_utf8 instanceof List)) {
-			// invalid - ignore
-			t_path_utf8 = null;
-		}
-
-		StringBuffer paths = new StringBuffer(basePath);
-		
-		Set<File> folders = new HashSet<File>();
-		
-		// prefer the utf8 path if possible
-		if (t_path_utf8 != null) {
-			List<?> pathUtf8 = (List) t_path_utf8;
-			for (Iterator<?> iter = pathUtf8.iterator(); iter.hasNext();) {
-				Object t_next = iter.next();
-				if ( ! (t_next instanceof byte [])) {
-					// invalid UTF-8 path, fall through to asscii path
-					paths = new StringBuffer(basePath);
-					folders.clear();
-					break; 
-				}
-				
-				String pathElement = StringUtils.getUTF8String((byte []) t_next);
-				paths.append(File.separator);
-				paths.append(CommonUtils.convertFileName(pathElement));
-				if (iter.hasNext())
-					folders.add(new File(paths.toString()));
-			}
-		} 
-		
-		// parse asccii paths  
-		if (paths.length() == basePath.length()) {
-			for (int i = 0; i < path.size(); i++) {
-				Object next = path.get(i);
-				if (! (next instanceof byte []))
-					throw new ValueException("bad paths");
-				String pathElement = StringUtils.getASCIIString((byte [])next);
-				paths.append(File.separator);
-				paths.append(CommonUtils.convertFileName(pathElement));
-				if (i < path.size() - 1)
-					folders.add(new File(paths.toString()));
-			}
-		}
-		
-		_folders.addAll(folders);
-		return new TorrentFile(length, paths.toString());
 	}
 	
 	/**

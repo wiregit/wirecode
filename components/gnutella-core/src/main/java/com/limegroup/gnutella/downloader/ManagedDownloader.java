@@ -98,7 +98,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * initialize(..) after reading a ManagedDownloader from disk.</b>
  */
 public class ManagedDownloader extends AbstractDownloader
-implements MeshHandler, AltLocListener {
+                               implements MeshHandler, AltLocListener {
+    
     /*
       IMPLEMENTATION NOTES: The basic idea behind swarmed (multisource)
       downloads is to download one file in parallel from multiple servers.  For
