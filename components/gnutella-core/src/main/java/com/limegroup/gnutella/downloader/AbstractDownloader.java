@@ -2,6 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,13 +23,24 @@ import com.limegroup.gnutella.util.FileUtils;
 
 public abstract class AbstractDownloader implements Downloader, Serializable {
 
+    /** 
+     * Make everything transient.  This class does not serialize or deserialize
+     * anything, even though it behaves as if propertiesMap would be persisted.
+     * Therefore it is essential that implementing classes: 
+     *   1. serialize & deserialize propertiesMap
+     *   2. store the attributes field inside propertiesMap and scan for it
+     *      when deserializing.
+     */
+    private static final ObjectStreamField[] serialPersistentFields = 
+    	ObjectStreamClass.NO_FIELDS;
+    
 	protected static final String ATTRIBUTES = "attributes";
 
 	protected static final String DEFAULT_FILENAME = "defaultFileName";
 
 	protected static final String FILE_SIZE = "fileSize";
 
-	protected Map<String, Serializable> propertiesMap = new HashMap<String, Serializable>();
+	protected Map<String, Serializable> propertiesMap;
 
 	/**
 	 * The key under which the saveFile File is stored in the attribute map
@@ -51,6 +64,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
 
 	protected AbstractDownloader() {
+		propertiesMap = new HashMap<String, Serializable>();
 		propertiesMap.put(ATTRIBUTES, (Serializable)attributes);
 	}
 	/**
