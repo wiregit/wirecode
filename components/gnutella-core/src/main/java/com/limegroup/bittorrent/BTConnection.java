@@ -90,7 +90,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * the Set of BTInterval requested by the remote host.
 	 */
-	final Set<BTInterval> _requested;
+	private final Set<BTInterval> _requested;
 
 	/**
 	 * the metaInfo of this torrent
@@ -106,7 +106,7 @@ PieceSendListener, PieceReadListener {
 	 * whether we choke them: if we are choking, all requests from the remote
 	 * host will be ignored
 	 */
-	boolean _isChoked;
+	private boolean _isChoked;
 
 	/**
 	 * whether they choke us: only send requests if they are not choking us
@@ -137,7 +137,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * The # of the round this connection was unchoked last time.
 	 */
-	int unchokeRound;
+	private int unchokeRound;
 	
 	/** Whether this connection is currently using an upload slot */
 	private volatile boolean usingSlot;
