@@ -772,10 +772,6 @@ class VerifyingFolder implements TorrentDiskManager {
 					handleVerified(pieceNum);
 				} else 
 					_corruptedBytes += getPieceSize(pieceNum);
-				if (SystemUtils.getIdleTime() < URN.MIN_IDLE_TIME &&
-						SharingSettings.FRIENDLY_HASHING.getValue()) {
-					
-				}
 			} catch (IOException bad) {
 				storedException = bad;
 			} catch (InterruptedException iex) { // should not happen
