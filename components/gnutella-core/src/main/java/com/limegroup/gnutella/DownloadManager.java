@@ -347,7 +347,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
                 active.add(md);
                 md.startDownload();
             } else {
-                if(md.canBeInQueue())
+                if(md.isQueuable())
                     md.setInactivePriority(index++);
                 md.handleInactivity();
             }

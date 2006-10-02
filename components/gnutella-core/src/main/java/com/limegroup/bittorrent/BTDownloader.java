@@ -16,6 +16,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -266,6 +267,10 @@ public class BTDownloader extends AbstractDownloader
 	public int getQueuedHostCount() {
 		return _torrent.getNumChockingPeers();
 	}
+	
+	public GUID getQueryGUID() {
+		return null;
+	}
 
 	public boolean isCompleted() {
 		switch(_torrent.getState()) {
@@ -440,7 +445,7 @@ public class BTDownloader extends AbstractDownloader
 		return false; // doesn't apply to torrents
 	}
 
-	public boolean canBeInQueue() {
+	public boolean isQueuable() {
 		return !isResumable();
 	}
 	

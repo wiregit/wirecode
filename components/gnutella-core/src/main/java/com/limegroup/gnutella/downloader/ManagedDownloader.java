@@ -1501,7 +1501,7 @@ public class ManagedDownloader extends AbstractDownloader
     	return isCancelled() || isCompleted();
     }
     
-    public boolean canBeInQueue() {
+    public boolean isQueuable() {
     	return !isPaused();
     }
 

@@ -116,9 +116,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	    return attributes.remove( key );
 	}
 
-	public GUID getQueryGUID() {
-		return null;
-	}
+	public abstract GUID getQueryGUID();
 	
 	/**
      * Starts the download.
@@ -148,7 +146,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 */
 	public abstract void handleInactivity();
 	
-	public abstract boolean canBeInQueue();
+	public abstract boolean isQueuable();
 	
     /**
      * Cleans up any resources before this downloader 

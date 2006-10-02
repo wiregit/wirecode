@@ -2,11 +2,11 @@ package com.limegroup.bittorrent.tracking;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +60,7 @@ class Tracker {
 
 	private static final String AND = "&";
 	
-	private final URL url;
+	private final URI uri;
 	
 	private final BTMetaInfo info;
 	
@@ -68,8 +68,8 @@ class Tracker {
 	
 	private int failures;
 	
-	public Tracker(URL url, BTMetaInfo info, ManagedTorrent torrent) {
-		this.url = url;
+	public Tracker(URI uri, BTMetaInfo info, ManagedTorrent torrent) {
+		this.uri = uri;
 		this.info = info;
 		this.torrent = torrent;
 	}
@@ -106,11 +106,8 @@ class Tracker {
 	 *         tracker did not send any data
 	 */
 	public TrackerResponse request(Event event) {
-		if (url.getProtocol().startsWith("http")) {
-			String queryStr = createQueryString(event);
-			return connectHTTP(url, queryStr);
-		} else
-			return null;
+		String queryStr = createQueryString(event);
+		return connectHTTP(uri, queryStr);
 	}
 
 	/**
@@ -174,8 +171,8 @@ class Tracker {
 	 *            the HTTP GET query string, sent to the tracker
 	 * @return InputStream
 	 */
-	private static TrackerResponse connectHTTP(URL url, String query) {
-		HttpMethod get = new GetMethod(url.toExternalForm() + query);
+	private static TrackerResponse connectHTTP(URI uri, String query) {
+		HttpMethod get = new GetMethod(uri + query);
 		get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
 		get.addRequestHeader("Cache-Control", "no-cache");
 		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),

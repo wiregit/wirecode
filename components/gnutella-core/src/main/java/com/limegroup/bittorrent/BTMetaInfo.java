@@ -7,8 +7,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -83,7 +83,7 @@ public class BTMetaInfo implements Serializable {
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
-	private URL[] _trackers;
+	private URI[] _trackers;
 
 	/*
 	 * FileDesc for the GUI
@@ -208,7 +208,7 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * @return array of <tt>URL</tt> storing the addresses of the trackers
 	 */
-	public URL[] getTrackers() {
+	public URI[] getTrackers() {
 		return _trackers;
 	}
 
@@ -270,10 +270,11 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private BTMetaInfo(BTData data) throws ValueException {
 		try {
-			// Note: this kills UDP trackers so we will eventually
-			// use a different object.
-			_trackers = new URL[] { new URL(data.getAnnounce()) };
-		} catch (MalformedURLException mue) {
+			URI trackerURI = new URI(data.getAnnounce());
+			if (!"http".equalsIgnoreCase(trackerURI.getScheme()))
+				throw new ValueException("unsupported tracker protocol: "+trackerURI.getScheme());
+			_trackers = new URI[] { trackerURI };
+		} catch (URIException mue) {
 			throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
@@ -334,7 +335,7 @@ public class BTMetaInfo implements Serializable {
 		fileSystem = (TorrentFileSystem) toRead.get("_fileSystem");
 		_infoHash = (byte []) toRead.get("_infoHash");
 		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
-		_trackers = (URL []) toRead.get("_trackers");
+		_trackers = (URI []) toRead.get("_trackers");
 		Float ratio = (Float) toRead.get("ratio");
 		
 		read = toRead.get("folder data");
