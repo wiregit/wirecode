@@ -1,13 +1,11 @@
 package com.limegroup.bittorrent;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 
 import com.bitzi.util.Base32;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.IpPortImpl;
 
 /**
  * A TorrentLocation object represents a remote computer on the Internet running BitTorrent software.
@@ -15,7 +13,7 @@ import com.limegroup.gnutella.ErrorService;
  * 
  * The TorrentLocation class extends Endpoint to have an IP address and port number.
  */
-public class TorrentLocation extends Endpoint {
+public class TorrentLocation extends IpPortImpl {
 	private static final long serialVersionUID = 7953314787152210101L;
 
 	/**
@@ -23,11 +21,20 @@ public class TorrentLocation extends Endpoint {
 	 */
 	private static final byte [] NULL_PEER_STRING = new byte[20];
 
-	private static final byte[] ZERO_BYTES = new byte[] { 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00 };
+	/**
+	 * The extention bytes that we support.
+	 * Since we don't support any extentions atm, they're all 0.
+	 */
+	private static final byte[] EXTENTION_BYTES = new byte[8];
 
+	/**
+	 * How many times can a connect attempt to this endpoint fail.
+	 */
 	private static final int MAX_STRIKES = 1;
 
+	/**
+	 * How much time to wait before retrying in case of failure.
+	 */
 	private static final int BUSY_WAIT_TIME = 5 * 60 * 1000;
 
 	/** 
@@ -37,26 +44,40 @@ public class TorrentLocation extends Endpoint {
 	 */
 	private final byte [] PEER_ID;
 
+	/**
+	 * Extention bytes for this location.
+	 */
 	private final byte[] EXTENSION_BYTES;
 
+	/**
+	 * # of times connecting to this location has failed
+	 */
 	private int _strikes = 0;
 
+	/**
+	 * time for the next attempt.
+	 */
 	private long _nextRetryTime = 0;
 
-	/*
-	 * constructors
+	/**
+	 * Constructs a torrent location with the specified address, port,
+	 * peerId and extention bytes.
 	 */
 	public TorrentLocation(InetAddress address, int port, byte[] peerId,
 			byte[] extensionBytes) {
-		super(address.getHostAddress(), port);
+		super(address, address.getHostAddress(), port);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
 		EXTENSION_BYTES = extensionBytes;
 	}
 
+	/**
+	 * Creates a new torrent location with unknown extention bytes
+	 * (Tracker responses do not carry that information)
+	 */
 	public TorrentLocation(InetAddress address, int port, byte [] peerId) {
-		super(address.getHostAddress(), port);
+		super(address, address.getHostAddress(), port);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
-		EXTENSION_BYTES = ZERO_BYTES;
+		EXTENSION_BYTES = EXTENTION_BYTES;
 	}
 
 	public TorrentLocation(TorrentLocation to) {
@@ -109,21 +130,6 @@ public class TorrentLocation extends Endpoint {
 	}
 
 	/**
-	 * @return a byte representation of this location, the four bytes big endian
-	 *         ip address followed by the two byte big endian port
-	 */
-	public byte[] toBytes() {
-		byte[] ret = new byte[6];
-		try  {
-			System.arraycopy(getHostBytes(), 0, ret, 0, 4);
-		} catch (IOException ioe) {
-			ErrorService.error(ioe);
-		}
-		ByteOrder.short2beb((short) getPort(), ret, 4);
-		return ret;
-	}
-
-	/**
 	 * @return true, if this is an Endpoint to a LimeWire node
 	 */
 	public boolean isLimePeer() {
@@ -133,23 +139,13 @@ public class TorrentLocation extends Endpoint {
 		PEER_ID[3] == (byte)'E';
 	}
 
-	/**
-	 * @return true if the remote supports alt-loc requests
-     * TODO: ask gregorio where is this documented if anywhere
-	 */
-	public boolean supportsAltLocRequests() {
-		return (0x02 & EXTENSION_BYTES[7]) == 0x02;
-	}
-
 	public boolean equals(Object o) {
 		if (!(o instanceof TorrentLocation))
 			return false;
-		TorrentLocation other = (TorrentLocation) o;
-		if (!other.getAddress().equals(getAddress()))
+		TorrentLocation other = (TorrentLocation)o;
+		if (IpPort.COMPARATOR.compare(this, other) != 0)
 			return false;
-		if (!Arrays.equals(other.PEER_ID,this.PEER_ID))
-			return false;
-		return true;
+		return Arrays.equals(other.PEER_ID,this.PEER_ID);
 	}
 
 	public String toString() {
