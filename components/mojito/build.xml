@@ -92,8 +92,9 @@
 				includes="**/*.class"
 				compress="false">
         </jar>
-    	<jar destfile="mojito.jar" 
-    			update="true"
+    	
+    	<delete file="mojito-misc.jar"/>
+    	<jar destfile="mojito-misc.jar" 
 				basedir="${misc}"
 				includes="**/*.class"
 				compress="false">
