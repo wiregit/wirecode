@@ -61,14 +61,8 @@ public class DHTSizeEstimator {
     /** The time when we made the last estimation */
     private long localEstimateTime = 0L;
 
-    /** */
+    /** The time when we updated the estimated DHT size */
     private long updateEstimatedSizeTime = 0L;
-    
-    private RouteTable routeTable;
-    
-    public DHTSizeEstimator(RouteTable routeTable) {
-        this.routeTable = routeTable;
-    }
 
     /**
      * Clears the history and sets everyting to
@@ -86,10 +80,18 @@ public class DHTSizeEstimator {
     /**
      * Returns the approximate DHT size
      */
-    public synchronized BigInteger getEstimatedSize() {
-        if ((System.currentTimeMillis() - localEstimateTime) 
-                >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
-            updateSize(null);
+    public synchronized BigInteger getEstimatedSize(RouteTable routeTable) {
+        if (routeTable != null && 
+                (System.currentTimeMillis() - localEstimateTime) 
+                    >= ContextSettings.ESTIMATE_NETWORK_SIZE_EVERY.getValue()) {
+            
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+
+            // TODO only live nodes?
+            KUID localNodeId = routeTable.getLocalNode().getNodeID();
+            List<Contact> nodes = routeTable.select(localNodeId, k, false);
+            
+            updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();
         }
         
@@ -134,29 +136,11 @@ public class DHTSizeEstimator {
         if ((System.currentTimeMillis() - updateEstimatedSizeTime) 
                 >= ContextSettings.UPDATE_NETWORK_SIZE_EVERY.getValue()) {
 
-            if (nodes == null) {
-                estimatedSize = computeSize();
-                updateEstimatedSizeTime = System.currentTimeMillis();
-                
-            } else if (nodes.size() >= MIN_NODE_COUNT) {
+            if (nodes.size() >= MIN_NODE_COUNT) {
                 estimatedSize = computeSize(nodes);
                 updateEstimatedSizeTime = System.currentTimeMillis();
             }
         }
-    }
-    
-    /**
-     * Computes and returns the approximate DHT size based 
-     * on the local RouteTable
-     */
-    public synchronized BigInteger computeSize() {
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-
-        // TODO only live nodes?
-        KUID localNodeId = routeTable.getLocalNode().getNodeID();
-        List<Contact> nodes = routeTable.select(localNodeId, k, false);
-        
-        return computeSize(nodes);
     }
     
     /**
@@ -175,9 +159,6 @@ public class DHTSizeEstimator {
         // their xor distance!
         Iterator<? extends Contact> contacts = nodes.iterator();
         
-        // The algorithm works relative to the ID space.
-        KUID nearestId = contacts.next().getNodeID();
-        
         // See Azureus DHTControlImpl.estimateDHTSize()
         // Di = nearestId xor NodeIDi
         // Dc = sum(i * Di) / sum(i * i)
@@ -185,6 +166,9 @@ public class DHTSizeEstimator {
 
         BigInteger sum1 = BigInteger.ZERO;
         BigInteger sum2 = BigInteger.ZERO;
+        
+        // The algorithm works relative to the ID space.
+        KUID nearestId = contacts.next().getNodeID();
         
         // We start 1 because the nearest Node is the 0th item!
         for (int i = 1; contacts.hasNext(); i++) {

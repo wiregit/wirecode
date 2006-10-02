@@ -220,13 +220,13 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	
     	assertEquals(490, routeTable.size());
     	
-    	DHTSizeEstimator estimator = new DHTSizeEstimator(routeTable);
+    	DHTSizeEstimator estimator = new DHTSizeEstimator();
     	
     	int[] remote = {525, 601, 310, 750, 455, 654, 512, 210, 497, 101 };
     	for (int size : remote) {
             estimator.addEstimatedRemoteSize(BigInteger.valueOf(size));
     	}
     	
-    	assertEquals(BigInteger.valueOf(490), estimator.getEstimatedSize());
+    	assertEquals(BigInteger.valueOf(490), estimator.getEstimatedSize(routeTable));
     }
 }

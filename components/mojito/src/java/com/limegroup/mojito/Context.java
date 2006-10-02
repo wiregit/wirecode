@@ -623,7 +623,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         running = true;
         
-        estimator = new DHTSizeEstimator(getRouteTable());
+        estimator = new DHTSizeEstimator();
         messageDispatcher.start();
         bucketRefresher.start();
         publisher.start();
@@ -842,7 +842,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             return BigInteger.ZERO;
         }
         
-        return estimator.getEstimatedSize();
+        return estimator.getEstimatedSize(getRouteTable());
     }
     
     /**
