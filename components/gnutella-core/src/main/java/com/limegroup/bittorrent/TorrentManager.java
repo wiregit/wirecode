@@ -189,9 +189,11 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		if (_seeding.remove(t))
 			_active.remove(t);
 			
-		// unless we implement force start the # active will never be greater
-		// than the limit.
-		while (_active.size() >= getMaxActiveTorrents()) {
+		// when force-start is implemented, this needs to become a while
+        // and we need to have a way to potentially stop a started torrent
+        // from really starting. (or disable some of the force-started ones),
+        // or etc....
+		if (_active.size() >= getMaxActiveTorrents()) {
 			ManagedTorrent best = null;
 			for (ManagedTorrent torrent : _seeding) {
 				if (best == null || torrent.getRatio() > best.getRatio())
