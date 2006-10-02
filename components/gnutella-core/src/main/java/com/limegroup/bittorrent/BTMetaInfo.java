@@ -268,7 +268,7 @@ public class BTMetaInfo implements Serializable {
 	/**
 	 * Constructs a BTMetaInfo based on the BTData.
 	 */
-	private BTMetaInfo(BTData data) throws ValueException {
+	private BTMetaInfo(BTData data) throws IOException {
 		try {
 			URI trackerURI = new URI(data.getAnnounce());
 			if (!"http".equalsIgnoreCase(trackerURI.getScheme()))

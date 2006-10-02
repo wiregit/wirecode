@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
@@ -68,7 +69,8 @@ public class TorrentFileSystem implements Serializable {
      * @param infoHash
      * @throws ValueException
      */
-	TorrentFileSystem(BTData data, int numHashes, long pieceLength, byte [] infoHash) throws ValueException {
+	TorrentFileSystem(BTData data, int numHashes, long pieceLength, byte [] infoHash) 
+	throws IOException {
 	    // name of the torrent, also specifying the directory under which to save the torrents.
 		_name = CommonUtils.convertFileName(data.getName());
 
@@ -76,20 +78,22 @@ public class TorrentFileSystem implements Serializable {
 		if (_name.length() == 0)
 			throw new ValueException("bad torrent name");
 
-		File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-		try {
-			incompleteDir = incompleteDir.getCanonicalFile();
-		} catch (IOException iox){}
-		
-		_incompleteFile = new File(incompleteDir, 
+		_incompleteFile = new File(SharingSettings.INCOMPLETE_DIRECTORY.getValue(), 
 				Base32.encode(infoHash)+File.separator+_name);
 		_completeFile = new File(SharingSettings.getSaveDirectory(), _name);
+		
+		if (!FileUtils.isReallyParent(SharingSettings.getSaveDirectory(), _completeFile))
+		 throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, _completeFile);
 		
         if(data.getFiles() != null) {
             List<BTData.BTFileData> files = data.getFiles();
             List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
-            for(BTData.BTFileData file : files)
-                torrents.add(new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath()));
+            for(BTData.BTFileData file : files) {
+            	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
+            	if (!FileUtils.isReallyParent(_completeFile, f))
+            		throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, f);
+                torrents.add(f);
+            }
             
 			if (files.size() == 0)
 				throw new ValueException("bad metainfo, no files!");
@@ -238,75 +242,19 @@ public class TorrentFileSystem implements Serializable {
 	}
 	
 	void moveToCompleteFolder() throws IOException {
-		saveFile(_incompleteFile, _completeFile);
-		
-		FileUtils.deleteRecursive(_incompleteFile.getParentFile());
-	}
-	
-	/**
-	 * private helper, copies file, updates FileManager and _files
-	 * 
-	 * @param incFile
-	 *            the <tt>File</tt> from incomplete directory
-	 * @param completeDest
-	 *            the <tt>File</tt> the file in the save destination
-	 * @throws IOException on failure
-	 */
-	private void saveFile(File incFile, File completeDest) throws IOException {
-		completeDest = completeDest.getCanonicalFile();
-
-		FileUtils.setWriteable(completeDest.getParentFile());
-		if (incFile.isDirectory()) {
-			saveDirectory(incFile, completeDest);
-			return;
+		boolean success = _incompleteFile.renameTo(_completeFile);
+		if (!success) {
+			success = CommonUtils.copy(_incompleteFile, _completeFile);
+			if (success)
+				_incompleteFile.delete();
 		}
-
-		// overwrite complete file and make it writeable
-		completeDest.delete();
-		FileUtils.setWriteable(completeDest);
-		if (!FileUtils.forceRename(incFile, completeDest)) 
-			throw new IOException("could not rename file " + incFile);
-	}
-
-	/**
-	 * Saves a directory
-	 * 
-	 * @param incFile
-	 *            the directory to move
-	 * @param completeDir
-	 *            the destination to move the directory to
-	 * @throws IOException if failed.
-	 */
-	private void saveDirectory(File incFile, File completeDir) 
-	throws IOException {
-
-		// we will delete completeDir if it exists and if it is not a directory
-		if (completeDir.exists()) {
-			// completeDir is not a directory
-			if (!completeDir.isDirectory()) {
-				if (!(completeDir.delete() && completeDir.mkdirs())) 
-					throw new IOException("could not create complete dir " + completeDir);
-			}
-		} else if (!completeDir.mkdirs()) {
-			// completeDir does not exist...
-			throw new IOException("could not create complete dir " + completeDir);
-		}
-
-		FileUtils.setWriteable(completeDir);
-
-		for (File f : incFile.listFiles()) 
-			saveFile(f, new File(completeDir, f.getName())); 
-
-		// remove the empty directory from the incomplete folder.
-		// all its contents have been moved to the shared folder
-		FileUtils.deleteRecursive(incFile);
 	}
 	
 	void addToLibrary() {
-		for (File f : _folders)
-			RouterService.getFileManager().addSharedFolder(f);
-		for (File f : _files)
-			RouterService.getFileManager().addFileIfShared(f);
+		if (_completeFile.isFile())
+			RouterService.getFileManager().addFileIfShared(_completeFile);
+		else if (_completeFile.isDirectory())
+			RouterService.getFileManager().addSharedFolder(_completeFile);
 	}
 	
 	private static long calculateTotalSize(List<TorrentFile> files) {
