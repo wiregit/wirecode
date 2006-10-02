@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestWriteChannel;
@@ -91,6 +92,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		this.ioxObserver = ioxObserver;
 		this.pieceListener = pieceListener;
 		_out[0] = ByteBuffer.allocate(5);
+        _out[1] = BufferUtils.getEmptyBuffer();
 		myKeepAlive.flip();
 	}
 
@@ -129,9 +131,13 @@ public class BTMessageWriter implements BTChannelWriter {
 				needsFlush = true;
 			}
 			
-			if (_out[1] == null || _out[1].remaining() == 0) {
+			if ( _out[1].remaining() == 0) {
+                // allow the data to be gc'd...
 				currentMessage = null;
+                _out[1] = null;
 				
+                // If this returns true, it is guaranteed
+                // that out[0] & out[1] are reset with new buffers.
 				if (!sendNextMessage()) {
 					if (LOG.isDebugEnabled())
 						LOG.debug("no more messages to send on "+this+" needs flush "+needsFlush);
@@ -146,11 +152,9 @@ public class BTMessageWriter implements BTChannelWriter {
 			written = delayer.write(_out[0]);
 			written += delayer.write(_out[1]);
 			
-			if (!_out[1].hasRemaining()) {
-				_out[1] = null; // can be gc'd now
+			if (!_out[1].hasRemaining())
 				messageSent(currentMessage);
-			}
-			
+            
 			if (written > 0) {
 				count(written);
 				if (LOG.isDebugEnabled())
