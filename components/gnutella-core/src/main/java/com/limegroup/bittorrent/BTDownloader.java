@@ -27,6 +27,8 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.NumericBuffer;
 
+import com.limegroup.bittorrent.Torrent.TorrentState;
+
 /**
  * This class enables the rest of LW to treat this as a regular download.
  */
@@ -89,7 +91,7 @@ public class BTDownloader extends AbstractDownloader
 	 */
 	public void stop() {
 		if (_torrent.isActive() &&
-				_torrent.getState() != ManagedTorrent.SEEDING) {
+				_torrent.getState() != TorrentState.SEEDING) {
 			_torrent.stop();
 		} else if (isInactive()) 
 			manager.remove(this, true);
@@ -109,7 +111,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 
 	public boolean isInactive() {
-		return isResumable() || _torrent.getState() == ManagedTorrent.QUEUED;
+		return isResumable() || _torrent.getState() == TorrentState.QUEUED;
 	}
 	
 	public boolean isLaunchable() {
@@ -118,8 +120,8 @@ public class BTDownloader extends AbstractDownloader
 	
 	public boolean isResumable() {
 		switch(_torrent.getState()) {
-		case ManagedTorrent.PAUSED:
-		case ManagedTorrent.TRACKER_FAILURE:
+		case PAUSED:
+		case TRACKER_FAILURE:
 			return true;
 		}
 		return false;
@@ -154,29 +156,29 @@ public class BTDownloader extends AbstractDownloader
 		if (_torrent.isComplete()) 
 			return COMPLETE;
 		switch(_torrent.getState()) {
-		case ManagedTorrent.WAITING_FOR_TRACKER :
+		case WAITING_FOR_TRACKER :
 			return WAITING_FOR_RESULTS;
-		case ManagedTorrent.VERIFYING:
+		case VERIFYING:
 			return RESUMING;
-		case ManagedTorrent.CONNECTING:
+		case CONNECTING:
 			return CONNECTING;
-		case ManagedTorrent.DOWNLOADING:
+		case DOWNLOADING:
 			return DOWNLOADING;
-		case ManagedTorrent.SAVING:
+		case SAVING:
 			return SAVING;
-		case ManagedTorrent.SEEDING:
+		case SEEDING:
 			return COMPLETE;
-		case ManagedTorrent.QUEUED:
+		case QUEUED:
 			return QUEUED;
-		case ManagedTorrent.PAUSED:
+		case PAUSED:
 			return PAUSED;
-		case ManagedTorrent.STOPPED:
+		case STOPPED:
 			return ABORTED;
-		case ManagedTorrent.DISK_PROBLEM:
+		case DISK_PROBLEM:
 			return DISK_PROBLEM;
-		case ManagedTorrent.TRACKER_FAILURE:
+		case TRACKER_FAILURE:
 			return WAITING_FOR_USER; // let the user trigger a scrape
-		case ManagedTorrent.SCRAPING:
+		case SCRAPING:
 			return ITERATIVE_GUESSING; // bad name but practically the same
 		}
 		throw new IllegalStateException("unknown torrent state");
@@ -215,7 +217,7 @@ public class BTDownloader extends AbstractDownloader
 		
 		// if this is initial checking, add the number of processed bytes
 		// too.
-		if (_torrent.getState() == ManagedTorrent.VERIFYING)
+		if (_torrent.getState() == TorrentState.VERIFYING)
 			ret += _info.getDiskManager().getNumCorruptedBytes();
 		return ret;
 	}
@@ -274,10 +276,10 @@ public class BTDownloader extends AbstractDownloader
 
 	public boolean isCompleted() {
 		switch(_torrent.getState()) {
-		case ManagedTorrent.SEEDING:
-		case ManagedTorrent.STOPPED:
-		case ManagedTorrent.DISK_PROBLEM:
-		case ManagedTorrent.TRACKER_FAILURE:
+		case SEEDING:
+		case STOPPED:
+		case DISK_PROBLEM:
+		case TRACKER_FAILURE:
 			return true;
 		}
 		return false;
@@ -285,8 +287,8 @@ public class BTDownloader extends AbstractDownloader
 	
 	public boolean shouldBeRemoved() {
 		switch(_torrent.getState()) {
-		case ManagedTorrent.DISK_PROBLEM:
-		case ManagedTorrent.SEEDING:
+		case DISK_PROBLEM:
+		case SEEDING:
 			return true;
 		}
 		return false;

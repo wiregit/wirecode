@@ -99,8 +99,8 @@ public class BTUploader implements Uploader, TorrentEventListener {
 
 	public boolean isInactive() {
 		switch(_torrent.getState()) {
-		case ManagedTorrent.PAUSED:
-		case ManagedTorrent.STOPPED:
+		case PAUSED:
+		case STOPPED:
 			return true;
 		}
 		return false;

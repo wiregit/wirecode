@@ -7,7 +7,7 @@ import java.util.List;
 public class FinishedTorrentDownload implements Torrent {
 
 	private final long totalDownloaded, lost;
-	private final int state;
+	private final TorrentState state;
 	public FinishedTorrentDownload(Torrent active) {
 		this.totalDownloaded = active.getTotalDownloaded();
 		this.lost = active.getAmountLost();
@@ -61,7 +61,7 @@ public class FinishedTorrentDownload implements Torrent {
 		return 0;
 	}
 
-	public int getState() {
+	public TorrentState getState() {
 		return state;
 	}
 
@@ -70,7 +70,7 @@ public class FinishedTorrentDownload implements Torrent {
 	}
 
 	public boolean isComplete() {
-		return state == SEEDING;
+		return state == TorrentState.SEEDING;
 	}
 
 	public void measureBandwidth() {}

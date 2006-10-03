@@ -23,11 +23,11 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.StrictIpPortSet;
+import com.limegroup.gnutella.util.SyncWrapper;
 import com.limegroup.gnutella.util.ThreadPool;
 
 
@@ -91,10 +91,8 @@ BTLinkListener {
 	 */
 	private Choker choker;
 	
-	/** 
-	 * The current state of this torrent.
-	 */
-	private final IntWrapper _state = new IntWrapper(QUEUED);
+	private final SyncWrapper<TorrentState> state = 
+		new SyncWrapper<TorrentState>(TorrentState.QUEUED);
 	
 	/** The downloaded data this session */
 	private volatile long totalDown;
@@ -124,9 +122,9 @@ BTLinkListener {
 	 * notification that a request to the tracker(s) has started.
 	 */
 	public void setScraping() {
-		synchronized(_state) {
-			if (_state.getInt() == WAITING_FOR_TRACKER)
-				_state.setInt(SCRAPING);
+		synchronized(state.getLock()) {
+			if (state.get() == TorrentState.WAITING_FOR_TRACKER)
+				state.set(TorrentState.SCRAPING);
 		}
 	}
 	
@@ -152,7 +150,7 @@ BTLinkListener {
 	 * @see com.limegroup.bittorrent.Torrent#isComplete()
 	 */
 	public boolean isComplete() {
-		return _state.getInt() != DISK_PROBLEM && _folder.isComplete();
+		return state.get() != TorrentState.DISK_PROBLEM && _folder.isComplete();
 	}
 
 	/* (non-Javadoc)
@@ -162,14 +160,14 @@ BTLinkListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting torrent start", new Exception());
 		
-		if (_state.getInt() != QUEUED)
+		if (state.get() != TorrentState.QUEUED)
 			throw new IllegalStateException();
 		dispatchEvent(TorrentEvent.Type.STARTING);
 		
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
 				
-				if (_state.getInt() != QUEUED) // something happened, do not start.
+				if (state.get() != TorrentState.QUEUED) // something happened, do not start.
 					return;
 				
 				LOG.debug("executing torrent start");
@@ -179,8 +177,8 @@ BTLinkListener {
 				
 				dispatchEvent(TorrentEvent.Type.STARTED); 
 				
-				int state = _state.getInt();
-				if (state == SEEDING || state == VERIFYING) 
+				TorrentState s = state.get();
+				if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING) 
 					return;
 				
 				startConnecting();
@@ -194,16 +192,17 @@ BTLinkListener {
 	 */
 	private void startConnecting() {
 		boolean shouldFetch = false;
-		synchronized(_state) {
-			if (_state.getInt() != VERIFYING && _state.getInt() != QUEUED)
-				throw new IllegalArgumentException("cannot start connecting "+_state.getInt());
+		synchronized(state.getLock()) {
+			TorrentState currentState = state.get();
+			if (currentState != TorrentState.VERIFYING && currentState != TorrentState.QUEUED)
+				throw new IllegalArgumentException("cannot start connecting "+currentState);
 			
 			// kick off connectors if we already have some addresses
 			if (_peers.size() > 0) {
-				_state.setInt(CONNECTING);
+				state.set(TorrentState.CONNECTING);
 				shouldFetch = true;
 			} else
-				_state.setInt(SCRAPING);
+				state.set(TorrentState.SCRAPING);
 		}
 
 		if (shouldFetch)
@@ -224,7 +223,7 @@ BTLinkListener {
 		if (!isActive())
 			throw new IllegalStateException("torrent cannot be stopped");
 		
-		_state.setInt(STOPPED);
+		state.set(TorrentState.STOPPED);
 		
 		stopImpl();
 	}
@@ -233,10 +232,10 @@ BTLinkListener {
 	 * @see com.limegroup.bittorrent.DiskManagerListener#diskExceptionHappened()
 	 */
 	public void diskExceptionHappened() {
-		synchronized(_state) {
-			if (_state.getInt() == DISK_PROBLEM)
+		synchronized(state.getLock()) {
+			if (state.get() == TorrentState.DISK_PROBLEM)
 				return;
-			_state.setInt(DISK_PROBLEM);
+			state.set(TorrentState.DISK_PROBLEM);
 		}
 		stopImpl();
 	}
@@ -247,7 +246,7 @@ BTLinkListener {
 	private synchronized void stopImpl() {
 		
 		if (!stopState())
-			throw new IllegalStateException("stopping in wrong state "+_state);
+			throw new IllegalStateException("stopping in wrong state "+state.get());
 		
 		// close the folder and stop the periodic tasks
 		_folder.close();
@@ -291,7 +290,7 @@ BTLinkListener {
 	 * @return if the current state is a stopped state.
 	 */
 	private boolean stopState() {
-		switch(_state.getInt()) {
+		switch(state.get()) {
 			case PAUSED:
 			case STOPPED:
 			case DISK_PROBLEM:
@@ -306,12 +305,12 @@ BTLinkListener {
 	 */
 	public void pause() {
 		boolean wasActive = false;
-		synchronized(_state) {
-			if (!isActive() && _state.getInt() != QUEUED)
+		synchronized(state.getLock()) {
+			if (!isActive() && state.get() != TorrentState.QUEUED)
 				throw new IllegalStateException("torrent not pausable");
 			
 			wasActive = isActive();
-			_state.setInt(PAUSED);
+			state.set(TorrentState.PAUSED);
 		}
 		if (wasActive)
 			stopImpl();
@@ -321,11 +320,11 @@ BTLinkListener {
 	 * @see com.limegroup.bittorrent.Torrent#resume()
 	 */
 	public boolean resume() {
-		synchronized(_state) {
-			if (_state.getInt() != PAUSED && _state.getInt() != STOPPED)
+		synchronized(state.getLock()) {
+			if (state.get() != TorrentState.PAUSED && state.get() != TorrentState.STOPPED)
 				throw new IllegalStateException("torrent not resumable");
 			
-			_state.setInt(QUEUED);
+			state.set(TorrentState.QUEUED);
 		}
 		return true;
 	}
@@ -345,8 +344,8 @@ BTLinkListener {
 		if (!needsMoreConnections())
 			return;
 		
-		int state = _state.getInt();
-		if (state == DOWNLOADING || state == CONNECTING) 
+		TorrentState s = state.get();
+		if (s == TorrentState.DOWNLOADING || s == TorrentState.CONNECTING) 
 			_connectionFetcher.fetch();
 	}
 
@@ -384,7 +383,7 @@ BTLinkListener {
 			if (LOG.isDebugEnabled()) 
 				LOG.debug("unrecoverable error", ioe);
 			
-			_state.setInt(DISK_PROBLEM);
+			state.set(TorrentState.DISK_PROBLEM);
 			return;
 		} 
 		
@@ -394,7 +393,7 @@ BTLinkListener {
 		if (_folder.isComplete()) 
 			completeTorrentDownload();
 		else if (_folder.isVerifying())
-			_state.setInt(VERIFYING);
+			state.set(TorrentState.VERIFYING);
 	}
 
 	/* (non-Javadoc)
@@ -403,7 +402,7 @@ BTLinkListener {
 	public void verificationComplete() {
 		diskInvoker.invokeLater(new Runnable() {
 			public void run() {
-				if (_state.getInt() != VERIFYING) 
+				if (state.get() != TorrentState.VERIFYING) 
 					return;
 				startConnecting();
 				if (_folder.isComplete())
@@ -444,8 +443,8 @@ BTLinkListener {
 	/**
 	 * @return the state of this torrent
 	 */
-	public int getState() {
-		return _state.getInt();
+	public TorrentState getState() {
+		return state.get();
 	}
 	
 	/**
@@ -461,9 +460,9 @@ BTLinkListener {
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;
 		if (_peers.add(to)) {
-			synchronized(_state) {
-				if (_state.getInt() == SCRAPING)
-					_state.setInt(CONNECTING);
+			synchronized(state.getLock()) {
+				if (state.get() == TorrentState.SCRAPING)
+					state.set(TorrentState.CONNECTING);
 			}
 			_connectionFetcher.fetch();
 		}
@@ -473,13 +472,13 @@ BTLinkListener {
 	 * Stops the torrent because of tracker failure.
 	 */
 	public void stopVoluntarily() {
-		synchronized(_state) {
+		synchronized(state.getLock()) {
 			if (!isActive())
 				return;
-			if (_state.getInt() == SEEDING) 
-				_state.setInt(STOPPED);
+			if (state.get() == TorrentState.SEEDING) 
+				state.set(TorrentState.STOPPED);
 			else
-				_state.setInt(TRACKER_FAILURE);
+				state.set(TorrentState.TRACKER_FAILURE);
 		}
 		stopImpl();
 	}
@@ -520,12 +519,12 @@ BTLinkListener {
 			LOG.debug("trying to add connection " + btc.toString());
 		
 		boolean shouldAdd = false;
-		synchronized(_state) {
-			switch(_state.getInt()) {
+		synchronized(state.getLock()) {
+			switch(state.get()) {
 			case CONNECTING :
 			case SCRAPING :
 			case WAITING_FOR_TRACKER :
-				_state.setInt(DOWNLOADING);
+				state.set(TorrentState.DOWNLOADING);
 			case DOWNLOADING :
 			case SEEDING:
 				shouldAdd = true;
@@ -553,12 +552,12 @@ BTLinkListener {
 			rechoke();
 		boolean connectionsEmpty = linkManager.getNumConnections() == 0;
 		boolean peersEmpty = _peers.isEmpty();
-		synchronized(_state) {
-			if (connectionsEmpty && _state.getInt() == DOWNLOADING) {
+		synchronized(state.getLock()) {
+			if (connectionsEmpty && state.get() == TorrentState.DOWNLOADING) {
 				if (peersEmpty)
-					_state.setInt(WAITING_FOR_TRACKER);
+					state.set(TorrentState.WAITING_FOR_TRACKER);
 				else
-					_state.setInt(CONNECTING);
+					state.set(TorrentState.CONNECTING);
 			}
 		}
 	}
@@ -588,7 +587,7 @@ BTLinkListener {
 			return;
 		}
 		
-		_state.setInt(SEEDING);
+		state.set(TorrentState.SEEDING);
 		
 		// switch the choker logic and resume uploads
 		choker.shutdown();
@@ -620,7 +619,7 @@ BTLinkListener {
 			LOG.debug("folder closed");
 		
 		// move it to the complete location
-		_state.setInt(SAVING);
+		state.set(TorrentState.SAVING);
 		_info.moveToCompleteFolder();
 		
 		// and re-open it for seeding.
@@ -672,7 +671,7 @@ BTLinkListener {
 	 * @see com.limegroup.bittorrent.Torrent#isPaused()
 	 */
 	public boolean isPaused() {
-		return _state.getInt() == PAUSED;
+		return state.get() == TorrentState.PAUSED;
 	}
 
 	/**
@@ -691,10 +690,10 @@ BTLinkListener {
 	 * seeding, saving or verifying
 	 */
 	public boolean isActive() {
-		synchronized(_state) {
+		synchronized(state.getLock()) {
 			if (isDownloading())
 				return true;
-			switch(_state.getInt()) {
+			switch(state.get()) {
 			case SEEDING: 
 			case VERIFYING:
 			case SAVING:
@@ -708,10 +707,10 @@ BTLinkListener {
 	 * @return if the torrent can be paused
 	 */
 	public boolean isPausable() {
-		synchronized(_state) {
+		synchronized(state.getLock()) {
 			if (isDownloading())
 				return true;
-			switch(_state.getInt()) {
+			switch(state.get()) {
 			case QUEUED:
 			case VERIFYING:
 				return true;
@@ -723,7 +722,7 @@ BTLinkListener {
 	 * @return if the torrent is currently in one of the downloading states.
 	 */
 	boolean isDownloading() {
-		switch(_state.getInt()) {
+		switch(state.get()) {
 		case WAITING_FOR_TRACKER:
 		case SCRAPING: 
 		case CONNECTING:
