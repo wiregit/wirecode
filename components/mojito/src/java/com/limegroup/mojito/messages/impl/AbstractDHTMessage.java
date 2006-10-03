@@ -126,7 +126,6 @@ abstract class AbstractDHTMessage implements DHTMessage {
         return messageId;
     }
     
-    //@Override
     public void write(OutputStream os) throws IOException {
         serialize();
         
