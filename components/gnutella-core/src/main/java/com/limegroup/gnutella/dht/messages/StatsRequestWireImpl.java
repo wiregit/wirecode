@@ -1,0 +1,38 @@
+package com.limegroup.gnutella.dht.messages;
+
+import java.security.Signature;
+import java.security.SignatureException;
+
+import com.limegroup.mojito.messages.StatsRequest;
+
+public class StatsRequestWireImpl extends AbstractMessageWire<StatsRequest> 
+        implements StatsRequest {
+
+    StatsRequestWireImpl(StatsRequest delegate) {
+        super(delegate);
+    }
+
+    public byte[] getSecureSignature() {
+        return delegate.getSecureSignature();
+    }
+
+    public int getSecureStatus() {
+        return delegate.getSecureStatus();
+    }
+
+    public void setSecureStatus(int secureStatus) {
+        delegate.setSecureStatus(secureStatus);
+    }
+
+    public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
+        delegate.updateSignatureWithSecuredBytes(signature);
+    }
+
+    public Type getType() {
+        return delegate.getType();
+    }
+
+    public boolean isSecure() {
+        return delegate.isSecure();
+    }
+}

@@ -40,17 +40,9 @@ import com.limegroup.mojito.routing.ContactFactory;
 /**
  * An abstract implementation of DHTMessage
  */
-abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage {
+abstract class AbstractDHTMessage implements DHTMessage {
 
     private static final int FIREWALLED = 0x01;
-    
-    /*
-     *  To remove the (Gnutella) Message dependence don't
-     *  extend from AbstractMessage and scroll down to the
-     *  bottom of this class.
-     *  
-     *  See also DefaultMessageFactory!
-     */
     
     protected final Context context;
     
@@ -134,7 +126,7 @@ abstract class AbstractDHTMessage extends AbstractMessage implements DHTMessage 
         return messageId;
     }
     
-    @Override
+    //@Override
     public void write(OutputStream os) throws IOException {
         serialize();
         

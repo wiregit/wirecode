@@ -31,6 +31,17 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.messages.FindNodeRequestWireImpl;
+import com.limegroup.gnutella.dht.messages.FindNodeResponseWireImpl;
+import com.limegroup.gnutella.dht.messages.FindValueRequestWireImpl;
+import com.limegroup.gnutella.dht.messages.FindValueResponseWireImpl;
+import com.limegroup.gnutella.dht.messages.MessageFactoryWire;
+import com.limegroup.gnutella.dht.messages.PingRequestWireImpl;
+import com.limegroup.gnutella.dht.messages.PingResponseWireImpl;
+import com.limegroup.gnutella.dht.messages.StatsRequestWireImpl;
+import com.limegroup.gnutella.dht.messages.StatsResponseWireImpl;
+import com.limegroup.gnutella.dht.messages.StoreRequestWireImpl;
+import com.limegroup.gnutella.dht.messages.StoreResponseWireImpl;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -44,16 +55,6 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.impl.FindNodeRequestImpl;
-import com.limegroup.mojito.messages.impl.FindNodeResponseImpl;
-import com.limegroup.mojito.messages.impl.FindValueRequestImpl;
-import com.limegroup.mojito.messages.impl.FindValueResponseImpl;
-import com.limegroup.mojito.messages.impl.PingRequestImpl;
-import com.limegroup.mojito.messages.impl.PingResponseImpl;
-import com.limegroup.mojito.messages.impl.StatsRequestImpl;
-import com.limegroup.mojito.messages.impl.StatsResponseImpl;
-import com.limegroup.mojito.messages.impl.StoreRequestImpl;
-import com.limegroup.mojito.messages.impl.StoreResponseImpl;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.security.CryptoHelper;
 
@@ -77,22 +78,29 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         processingQueue = new ProcessingQueue(
                 context.getName() + "-LimeMessageDispatcherPQ");
 
+        // Get Context's MessageFactory and wrap it into a
+        // MessageFactoryWire and set it as the MessageFactory
+        context.setMessageFactory(
+                new MessageFactoryWire(context.getMessageFactory()));
+        
         // Register the Message type
-        LimeDHTMessageParser parser = new LimeDHTMessageParser(context.getMessageFactory());
+        LimeDHTMessageParser parser = new LimeDHTMessageParser(
+                context.getMessageFactory());
+        
         MessageFactory.setParser((byte)DHTMessage.F_DHT_MESSAGE, parser);
         
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        messageRouter.setUDPMessageHandler(PingRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(PingResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(StoreRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(StoreResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindNodeRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindNodeResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindValueRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(FindValueResponseImpl.class, this);
-        messageRouter.setUDPMessageHandler(StatsRequestImpl.class, this);
-        messageRouter.setUDPMessageHandler(StatsResponseImpl.class, this);
+        messageRouter.setUDPMessageHandler(PingRequestWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(PingResponseWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreRequestWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(StoreResponseWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeRequestWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindNodeResponseWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueRequestWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(FindValueResponseWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsRequestWireImpl.class, this);
+        messageRouter.setUDPMessageHandler(StatsResponseWireImpl.class, this);
     }
 
     @Override

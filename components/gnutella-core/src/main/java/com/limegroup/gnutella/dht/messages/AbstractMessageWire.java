@@ -17,23 +17,22 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.messages.impl;
+package com.limegroup.gnutella.dht.messages;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.MessageID;
 
 /**
- * An abstract class that inherits from CORE's Message and its
- * primary function is to give us the ability to interact with
- * the CORE (if Java had multiple inheritance we wouldn't need this).
- * 
- * See AbstractDHTMessage for how to remove this dependence if
- * you're not planning to send Messages through the CORE! 
+ * An abstract class that extends from Message and takes a 
+ * DHTMessage as a delegate argument
  */
-abstract class AbstractMessage extends Message {
+abstract class AbstractMessageWire<T extends DHTMessage> 
+        extends Message implements DHTMessage {
     
     /** 
      * An empty GUID, it's never written to Network.
@@ -47,8 +46,18 @@ abstract class AbstractMessage extends Message {
     /** Default HOPS */
     private static final byte HOPS = (byte)0x00;
     
-    AbstractMessage() {
+    protected final T delegate;
+    
+    AbstractMessageWire(T delegate) {
         super(GUID, (byte)DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, N_UNKNOWN);
+        
+        /*if (delegate == null) {
+            throw new NullPointerException("Delegate is null");
+        } else if (delegate instanceof AbstractMessageWire) {
+            throw new IllegalArgumentException("Recursive delegation");
+        }*/
+        
+        this.delegate = delegate;
     }
 
     public void recordDrop() {
@@ -58,8 +67,22 @@ abstract class AbstractMessage extends Message {
         return this;
     }
 
+    public Contact getContact() {
+        return delegate.getContact();
+    }
+
+    public MessageID getMessageID() {
+        return delegate.getMessageID();
+    }
+
+    public OpCode getOpCode() {
+        return delegate.getOpCode();
+    }
+    
     @Override
-    public abstract void write(OutputStream out) throws IOException;
+    public void write(OutputStream out) throws IOException {
+        delegate.write(out);
+    }
     
     @Override
     public final void write(OutputStream out, byte[] buf) throws IOException {
@@ -74,5 +97,9 @@ abstract class AbstractMessage extends Message {
     @Override
     protected final void writePayload(OutputStream out) throws IOException {
         throw new UnsupportedOperationException();
+    }
+    
+    public String toString() {
+        return delegate.toString();
     }
 }
