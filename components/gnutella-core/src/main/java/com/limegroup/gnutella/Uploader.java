@@ -23,6 +23,11 @@ public interface Uploader extends BandwidthTracker {
     public static final int THEX_REQUEST      = 15;
     public static final int BROWSER_CONTROL   = 16;
     public static final int NOT_VALIDATED     = 17;
+    
+    /**
+     * Marker string for bt-specific values.
+     */
+    public static final String BITTORRENT_UPLOAD = "";
 
     /**
 	 * Stops this upload.  If the download is already 
@@ -73,7 +78,7 @@ public interface Uploader extends BandwidthTracker {
 	 * of the host being uploaded to.
 	 */
 	public String getHost();
-
+	
     /**
      * Returns the current state of this uploader.
      */

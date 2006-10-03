@@ -61,7 +61,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public String getHost() {
-		return "Swarm for "+getFileName();
+		return BITTORRENT_UPLOAD;
 	}
 
 	public int getState() {
@@ -90,7 +90,7 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public String getUserAgent() {
-		return "BitTorrent";
+		return BITTORRENT_UPLOAD;
 	}
 
 	public int getQueuePosition() {

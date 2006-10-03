@@ -223,7 +223,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 
 	public String getVendor() {
-		return "BitTorrent";
+		return BITTORRENT_DOWNLOAD;
 	}
 
 	public Endpoint getChatEnabledHost() {
