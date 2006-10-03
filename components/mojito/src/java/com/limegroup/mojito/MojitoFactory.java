@@ -122,9 +122,6 @@ public class MojitoFactory {
             // Name
             oos.writeObject(context.getName());
             
-            // Contact
-//            oos.writeObject(context.getLocalNode());
-            
             // RouteTable
             oos.writeObject(context.getRouteTable());
 
@@ -162,18 +159,13 @@ public class MojitoFactory {
         // Name
         String name = (String)ois.readObject();
         
-        // Contact
-//        LocalContact localNode = (LocalContact)ois.readObject();
-        
         // RouteTable
         RouteTable routeTable = (RouteTable)ois.readObject();
-//      assert (localNode == routeTable.get(localNode.getNodeID()));
         
         // This happens if you do something stupid like:
         // MojitoDHT.getRouteTable().clear();
         // MojitoDHT.store(OutputStream);
         if (routeTable.size() == 0) {
-            //routeTable.add(localNode);
             throw new IOException("The RouteTable is in an inconsistent state");
         }
         
