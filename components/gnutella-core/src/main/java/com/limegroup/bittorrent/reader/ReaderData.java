@@ -8,7 +8,7 @@ class ReaderData {
 	private final BTDataSource dataSource;
 	private final PieceParseListener pieceListener;
 	
-	private boolean first = true;
+	private boolean dataArrived;
 	private int length;
 	private BTReadMessageState entryState;
 	
@@ -20,12 +20,12 @@ class ReaderData {
 		this.pieceListener = listener;
 	}
 	
-	public boolean isFirst() {
-		return first;
+	public boolean anyDataRead() {
+		return dataArrived;
 	}
 	
-	public void clearFirst() {
-		this.first = false;
+	public void dataRead() {
+		this.dataArrived = true;
 	}
 	
 	public int getLength() {

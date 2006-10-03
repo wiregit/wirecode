@@ -29,11 +29,13 @@ class TypeState extends BTReadMessageState {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" parsed type "+type);
 		
-		boolean wasFirst = readerState.isFirst();
-		readerState.clearFirst();
-		if (wasFirst && type == BTMessage.BITFIELD)
-			return new BitFieldState(readerState); // only sent as first message if at all.
-		else if (type == BTMessage.PIECE)
+		boolean wasFirst = !readerState.anyDataRead();
+		readerState.dataRead();
+		if (type == BTMessage.BITFIELD) {
+			if (!wasFirst)
+				throw new BadBTMessageException("Bitfield can be only first message");
+			return new BitFieldState(readerState); 
+		} else if (type == BTMessage.PIECE)
 			return new PieceState(readerState);
 		else 
 			return new MessageState(readerState,type);

@@ -35,7 +35,7 @@ class LengthState extends BTReadMessageState {
 		
 		if (length == 0) {
 			BTMessage.countKeepAlive();
-			readerState.clearFirst();
+			readerState.dataRead(); 
 			return this;
 		}
 		
