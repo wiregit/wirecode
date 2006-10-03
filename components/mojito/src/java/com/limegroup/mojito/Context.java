@@ -195,6 +195,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         getValueManager = new GetValueManager(this);
     }
     
+    /**
+     * Initializes the Stats package
+     */
     private void initStats() {
         stats = DHTStatsManager.getInstance(localNode.getNodeID());
         networkStats = new NetworkStatisticContainer(localNode.getNodeID());
@@ -202,6 +205,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
     }
     
+    /**
+     * Initializes Context's scheduled Executor
+     */
     private void initContextTimer() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
@@ -215,6 +221,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         scheduledExecutor = Executors.newScheduledThreadPool(1, factory);
     }
     
+    /**
+     * Initializes Context's (regular) Executor
+     */
     private void initContextExecutor() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
@@ -300,18 +309,32 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
     }
     
+    /**
+     * Returns true if the given Contact is equal to the
+     * local Node.
+     */
     public boolean isLocalNode(Contact node) {
         return node.equals(getLocalNode());
     }
     
+    /**
+     * 
+     */
     public boolean isLocalNode(KUID nodeId, SocketAddress addr) {
         return isLocalNodeID(nodeId) && isLocalContactAddress(addr);
     }
     
+    /**
+     * Returns true if the given KUID is equal to local Node's KUID
+     */
     public boolean isLocalNodeID(KUID nodeId) {
         return nodeId != null && nodeId.equals(localNode.getNodeID());
     }
     
+    /**
+     * Returns true if the given SocketAddress is equal to local 
+     * Node's SocketAddress
+     */
     public boolean isLocalContactAddress(SocketAddress address) {
         return localNode.getContactAddress().equals(address);
     }
@@ -386,6 +409,12 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         setDatabase(database, true);
     }
     
+    /**
+     * Sets the Database
+     * 
+     * @param database The Database (can be null to use the default Database implemetation)
+     * @param remove Whether or not to remove non local DHTValues
+     */
     private synchronized void setDatabase(Database database, boolean remove) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch Database while DHT is running");
@@ -395,20 +424,21 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             database = new DatabaseImpl(
                     DatabaseSettings.MAX_DATABASE_SIZE.getValue(), 
                     DatabaseSettings.MAX_VALUES_PER_KEY.getValue());
-            
-        } else {
-            purgeDatabase(remove);
         }
         
         this.database = database;
+        purgeDatabase(remove);
     }
     
     /**
+     * Purge Database makes sure the originator of all local DHTValues 
+     * is the LocalContact and that all non local DHTValues get removed
+     * from the Database if they're expired or if <tt>remove</tt> is
+     * true.
      * 
-     * @param remove
+     * @param remove Whether or not to remove non local DHTValues
      */
     private void purgeDatabase(boolean remove) {
-        
         synchronized (database) {
             int oldValueCount = database.getValueCount();
             int removedCount = 0;
@@ -539,9 +569,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         return messageDispatcher.isOpen();
     }
     
-    /**
-     * Returns whether or not the MojitoDHT is running
-     */
     public synchronized boolean isRunning() {
         return running;
     }
@@ -553,9 +580,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         return isRunning() && bootstrapManager.isBootstrapping();
     }
     
-    /**
-     * Returns whether or not the MojitoDHT is bootstrapped
-     */
     public synchronized boolean isBootstrapped() {
         return isRunning() && bootstrapManager.isBootstrapped();
     }
@@ -601,9 +625,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         messageDispatcher.bind(localAddress);
     }
     
-    /**
-     * Starts the DHT
-     */
     public synchronized void start() {
         if (!isOpen()) {
             throw new IllegalStateException("DHT is not bound");
@@ -629,9 +650,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         publisher.start();
     }
     
-    /**
-     * Stops the DHT
-     */
     public synchronized void stop() {
         if (!isRunning()) {
             return;
@@ -791,7 +809,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     }
    
     /**
-     * 
+     * Stores a Collection of DHTValue(s). All values must have the same
+     * valueId!
      */
     public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
@@ -802,7 +821,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     }
     
     /** 
-     * Stores the given KeyValue 
+     * Stores the given DHTValue 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
         if(!isBootstrapped()) {
@@ -813,7 +832,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     }
     
     /**
-     * 
+     * Stores a Collection of DHTValue(s) at the given Node. 
+     * All values must have the same valueId!
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
@@ -834,9 +854,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
     }
     
-    /**
-     * Returns the approximate DHT size
-     */
     public synchronized BigInteger size() {
         if (!isRunning()) {
             return BigInteger.ZERO;
