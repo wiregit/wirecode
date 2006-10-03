@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
 
@@ -17,11 +18,11 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	private static final DefaultThreadPool POOL = 
 		new DefaultThreadPool("HttpClient pool", true);
 	
-	public void execute(HttpMethod method, HTTPClientListener listener, int timeout) {
-		execute(method, listener, timeout, POOL);
+	public Shutdownable execute(HttpMethod method, HTTPClientListener listener, int timeout) {
+		return execute(method, listener, timeout, POOL);
 	}
 
-	public void execute(final HttpMethod method, final HTTPClientListener listener,
+	public Shutdownable execute(final HttpMethod method, final HTTPClientListener listener,
 			final int timeout,
 			ThreadPool executor) {
 		
@@ -42,6 +43,18 @@ public class DefaultHttpExecutor implements HttpExecutor {
 			}
 		};
 		executor.invokeLater(r);
+		return new Aborter(method);
+	}
+	
+	private class Aborter implements Shutdownable {
+		private final HttpMethod toAbort;
+		Aborter(HttpMethod toAbort) {
+			this.toAbort = toAbort;
+		}
+		
+		public void shutdown() {
+			toAbort.abort();
+		}
 	}
 
 }

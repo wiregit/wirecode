@@ -2,6 +2,7 @@ package com.limegroup.gnutella.http;
 
 import org.apache.commons.httpclient.HttpMethod;
 
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.ThreadPool;
 
 /**
@@ -13,13 +14,13 @@ public interface HttpExecutor {
 	 * provided <tt>HTTPClientListener</tt> using a default
 	 * <tt>ThreadPool</tt>
 	 */
-	public void execute(HttpMethod method, HTTPClientListener listener, int timeout);
+	public Shutdownable execute(HttpMethod method, HTTPClientListener listener, int timeout);
 	
 	/**
 	 * Execute the provided <tt>HttpMethod</tt> using the provided <tt>ThreadPool</tt>
 	 * and notifies the provided <tt>HTTPClientListener</tt> on the same thread.
 	 */
-	public void execute(HttpMethod method, 
+	public Shutdownable execute(HttpMethod method, 
 			HTTPClientListener listener,
 			int timeout,
 			ThreadPool executor);
