@@ -314,7 +314,8 @@ public class RemoteContact implements Contact {
     }
     
     public boolean equals(Object o) {
-        if (!(o instanceof Contact)) {
+        if (!(o instanceof Contact) 
+                || o instanceof LocalContact) {
             return false;
         }
         
