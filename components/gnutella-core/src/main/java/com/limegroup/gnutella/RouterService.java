@@ -36,6 +36,8 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.http.DefaultHttpExecutor;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -241,6 +243,11 @@ public class RouterService {
         } catch(IOException ignored) {}
         NIODispatcher.instance().registerSelector(UDP_MULTIPLEXOR, socketChannel.getClass());
     }
+    
+    /**
+     * An executor of http requests.
+     */
+    private static final HttpExecutor HTTP_EXECUTOR = new DefaultHttpExecutor();
     
     /**
      * A list of items that require running prior to shutting down LW.
@@ -714,6 +721,10 @@ public class RouterService {
     /** Gets the UDP Multiplexor. */
     public static UDPMultiplexor getUDPMultiplexor() {
         return UDP_MULTIPLEXOR;
+    }
+    
+    public static HttpExecutor getHttpExecutor() {
+    	return HTTP_EXECUTOR;
     }
 	
 	public static byte [] getMyGUID() {
