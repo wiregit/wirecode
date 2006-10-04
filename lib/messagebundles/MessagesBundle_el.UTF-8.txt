@@ -1207,8 +1207,16 @@ DOWNLOAD_STATUS_PAUSED=Σταματημένο
 #? DOWNLOAD_INVALID_EXPLAIN=
 #### DOWNLOAD_STATUS_RESUMING=Resuming...
 #? DOWNLOAD_STATUS_RESUMING=
+#### DOWNLOAD_STATUS_FETCHING=Downloading .torrent file...
+#? DOWNLOAD_STATUS_FETCHING=
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
 DOWNLOAD_AWAITING_SOURCES=Ίσως χρειάζεται μια πιο συγκεκριμένη αναζήτηση...
+#### DOWNLOAD_BITTORRENT_VENDOR=BitTorrent
+#? DOWNLOAD_BITTORRENT_VENDOR=
+#### DOWNLOAD_BITTORRENT_UNSAFE_PATHS=The selected .torrent file may contain a security hazard.
+#? DOWNLOAD_BITTORRENT_UNSAFE_PATHS=
+#### DOWNLOAD_BITTORRENT_FETCH_FAIL=LimeWire could not download a .torrent file from the provided URL.
+#? DOWNLOAD_BITTORRENT_FETCH_FAIL=
 # {0} the name of the skin
 # {1} the localized name of the menu item "Refresh Skins"
 # {2} the localized name of the "View" menu
@@ -1332,6 +1340,11 @@ UPLOAD_QUEUED=στην ουρά
 #? UPLOAD_BT_STOP=
 #### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
+# {0} is the name of the torrent
+#### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
+#? UPLOAD_BITTORRENT_HOSTNAME=
+#### UPLOAD_BITTORRENT_AGENTS=Multiple
+#? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
 # Key/value pairs for MonitorView
@@ -2375,6 +2388,8 @@ ERROR_THEME_OUT_OF_DATE_GET_MORE=Λήψη περισσότερες εμφανί�
 ERROR_THEME_OUT_OF_DATE_LATER=Αργότερα
 #### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
 ERROR_BAD_MAGNET_LINK=Αδύνατη η επεξεργασία κακού συνδέσμου MAGNET
+#### ERROR_BAD_TORRENT_URL=Invalid torrent URL
+#? ERROR_BAD_TORRENT_URL=
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 ERROR_INVALID_URLS_IN_MAGNET=Μία ή περισσότερες διευθύνσεις στον σύνδεσμο MAGNET ήταν άκυρες. Το αρχείο που ζητάτε μπορεί να μην κατεβεί σωστά.
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
