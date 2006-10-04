@@ -35,9 +35,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
 				} catch (IOException failed) {
 					listener.requestFailed(method, failed);
 					return;
-				} finally {
-					method.releaseConnection();
-				}
+				} 
 				
 				listener.requestComplete(method);
 			}
@@ -55,6 +53,10 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		public void shutdown() {
 			toAbort.abort();
 		}
+	}
+	
+	public void releaseResources(HttpMethod method) {
+		method.releaseConnection();
 	}
 
 }

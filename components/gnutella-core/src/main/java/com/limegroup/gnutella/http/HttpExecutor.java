@@ -24,4 +24,11 @@ public interface HttpExecutor {
 			HTTPClientListener listener,
 			int timeout,
 			ThreadPool executor);
+	
+	/**
+	 * Release any resources held by the provided method.
+	 * The users of this class must call this method once they're done
+	 * processing their HttpMethod object.
+	 */
+	public void releaseResources(HttpMethod method);
 }
