@@ -345,7 +345,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     public synchronized MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> clazz) {
         if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageDispatcher while DHT is running");
+            throw new IllegalStateException("Cannot switch MessageDispatcher while " + getName() + " is running");
         }
 
         if (clazz == null) {
@@ -373,7 +373,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     public synchronized void setRouteTable(RouteTable routeTable) {
         if (isRunning()) {
-            throw new IllegalStateException("Cannot switch RouteTable while DHT is running");
+            throw new IllegalStateException("Cannot switch RouteTable while " + getName() + " is running");
         }
 
         if (routeTable == null) {
@@ -417,7 +417,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     private synchronized void setDatabase(Database database, boolean remove) {
         if (isRunning()) {
-            throw new IllegalStateException("Cannot switch Database while DHT is running");
+            throw new IllegalStateException("Cannot switch Database while " + getName() + " is running");
         }
         
         if (database == null) {
@@ -495,7 +495,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     public synchronized void setMessageFactory(MessageFactory messageFactory) {
         if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageFactory while DHT is running");
+            throw new IllegalStateException("Cannot switch MessageFactory while " + getName() + " is running");
         }
         
         messageHelper.setMessageFactory(messageFactory);
@@ -517,7 +517,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public synchronized void setMessageHelper(MessageHelper messageHelper) {
         if (isRunning()) {
-            throw new IllegalStateException("Cannot switch MessageHelper while DHT is running");
+            throw new IllegalStateException("Cannot switch MessageHelper while " + getName() + " is running");
         }
         
         this.messageHelper = messageHelper;
@@ -600,7 +600,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public synchronized void bind(SocketAddress localAddress) throws IOException {
         if (isOpen()) {
-            throw new IOException("DHT is already bound");
+            throw new IOException(getName() + " is already bound");
         }
         
         int port = ((InetSocketAddress)localAddress).getPort();
@@ -609,7 +609,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
         
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Binding DHT "+ name+ " to address: "+localAddress);
+            LOG.debug("Binding " + getName() + " to address: " + localAddress);
         }
         
         // If we not firewalled and the external port has not 
@@ -627,11 +627,11 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     public synchronized void start() {
         if (!isOpen()) {
-            throw new IllegalStateException("DHT is not bound");
+            throw new IllegalStateException(getName() + " is not bound");
         }
         
         if (isRunning()) {
-            LOG.error("DHT is already running!");
+            LOG.error(getName() + " is already running!");
             return;
         }
         
@@ -735,7 +735,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     /** Starts a value lookup for the given KUID */
     public DHTFuture<FindValueEvent> get(KUID key) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException("get");
+            throw new NotBootstrappedException(getName() + " get()");
         }
         
         return findValueManager.lookup(key);
