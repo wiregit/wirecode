@@ -53,7 +53,7 @@ public class BTDownloader extends AbstractDownloader
 	private BTMetaInfo _info;
 	
 	/** Local ref to the urn */
-	private final URN urn;
+	private URN urn;
 	
 	/**
 	 * Object containing 
@@ -410,6 +410,7 @@ public class BTDownloader extends AbstractDownloader
 				String.class, Serializable.class, 
 				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
+		urn = _info.getURN();
 		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
 			throw new IOException("invalid serailized data");
