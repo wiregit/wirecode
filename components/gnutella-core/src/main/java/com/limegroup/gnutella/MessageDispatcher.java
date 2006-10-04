@@ -8,74 +8,84 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 /**
  * Dispatches messages to the MessageRouter.
  */
-class MessageDispatcher {
-    
-    private static final MessageDispatcher INSTANCE = new MessageDispatcher();
-    private MessageDispatcher() {}
-    public static MessageDispatcher instance() { return INSTANCE; }
+public class MessageDispatcher {
     
     private final ProcessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
+    
+    private final MessageRouter messageRouter;
+    
+    public MessageDispatcher(MessageRouter messageRouter) {
+        this.messageRouter = messageRouter;
+    }
+    
+    public ProcessingQueue getProcessingQueue() {
+        return DISPATCH;
+    }
     
     /**
      * Dispatches a UDP message.
      */
     public void dispatchUDP(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new UDPDispatch(m, addr));
+        DISPATCH.add(new UDPDispatch(messageRouter, m, addr));
     }
     
     /**
      * Dispatches a Multicast message.
      */
     public void dispatchMulticast(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new MulticastDispatch(m, addr));
+        DISPATCH.add(new MulticastDispatch(messageRouter, m, addr));
     }
     
     /**
      * Dispatches a TCP message.
      */
     public void dispatchTCP(Message m, ManagedConnection conn) {
-        DISPATCH.add(new TCPDispatch(m, conn));
+        DISPATCH.add(new TCPDispatch(messageRouter, m, conn));
     }
     
     
     private static class UDPDispatch implements Runnable {
+        private final MessageRouter messageRouter;
         private final Message m;
         private final InetSocketAddress addr;
         
-        UDPDispatch(Message m, InetSocketAddress addr) {
+        UDPDispatch(MessageRouter messageRouter, Message m, InetSocketAddress addr) {
+            this.messageRouter = messageRouter;
             this.m = m; this.addr = addr;
         }
         
         public void run() {
-            RouterService.getMessageRouter().handleUDPMessage(m, addr);
+            messageRouter.handleUDPMessage(m, addr);
         }
     }
     
     private static class MulticastDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
+        private final MessageRouter messageRouter;
         private final Message m;
         private final InetSocketAddress addr;
         
-        MulticastDispatch(Message m, InetSocketAddress addr) {
+        MulticastDispatch(MessageRouter messageRouter, Message m, InetSocketAddress addr) {
+            this.messageRouter = messageRouter;
             this.m = m; this.addr = addr;
         }
 
         public void run() {
-            ROUTER.handleMulticastMessage(m, addr);
+            messageRouter.handleMulticastMessage(m, addr);
         }
     }
     
     private static class TCPDispatch implements Runnable {
-        private static final MessageRouter ROUTER = RouterService.getMessageRouter();
+        private final MessageRouter messageRouter;
         private final Message m;
         private final ManagedConnection conn;
 
-        TCPDispatch(Message m, ManagedConnection conn) {
+        TCPDispatch(MessageRouter messageRouter, Message m, ManagedConnection conn) {
+            this.messageRouter = messageRouter;
             this.m = m; this.conn = conn;
         }
         
         public void run() {
-            ROUTER.handleMessage(m, conn);
+            messageRouter.handleMessage(m, conn);
         }
     }
 }

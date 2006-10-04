@@ -68,16 +68,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private static final Log LOG = LogFactory.getLog(LimeMessageDispatcherImpl.class);
     
-    private ProcessingQueue processingQueue;
-    
     private volatile boolean running = false;
     
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
-        processingQueue = new ProcessingQueue(
-                context.getName() + "-LimeMessageDispatcherPQ");
-
         // Get Context's MessageFactory and wrap it into a
         // MessageFactoryWire and set it as the MessageFactory
         context.setMessageFactory(
@@ -129,7 +124,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         running = false;
         super.stop();
         
-        processingQueue.clear();
         clear();
     }
 
@@ -194,6 +188,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     protected void process(Runnable runnable) {
         if (isRunning()) {
+            ProcessingQueue processingQueue 
+                = RouterService.getMessageDispatcher().getProcessingQueue();
             processingQueue.add(runnable);
         }
     }

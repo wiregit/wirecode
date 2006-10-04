@@ -209,7 +209,7 @@ public final class MulticastService implements Runnable {
                     Message message = MessageFactory.read(in, HEADER_BUF, Message.N_MULTICAST);
                     if(message == null)
                         continue;
-                    MessageDispatcher.instance().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
+                    RouterService.getMessageDispatcher().dispatchMulticast(message, (InetSocketAddress)datagram.getSocketAddress());
                 }
                 catch (IOException e) {
                     continue;

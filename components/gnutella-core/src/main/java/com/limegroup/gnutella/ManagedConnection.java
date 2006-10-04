@@ -845,7 +845,7 @@ public class ManagedConnection extends Connection
                 else if (m instanceof QueryStatusResponse)
                     m = morphToStopQuery((QueryStatusResponse) m);
             }
-            MessageDispatcher.instance().dispatchTCP(m, this);
+            RouterService.getMessageDispatcher().dispatchTCP(m, this);
         }
     }
     

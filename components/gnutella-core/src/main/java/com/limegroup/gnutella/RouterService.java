@@ -203,7 +203,7 @@ public class RouterService {
 	 * Variable for the <tt>MessageRouter</tt> that routes Gnutella
 	 * messages.
 	 */
-    private static MessageRouter router;
+    private static MessageRouter messageRouter;
     
     /**
      * The UDPMultiplexor.
@@ -214,6 +214,8 @@ public class RouterService {
      * Initialize the class that manages the DHT.
      */
     private static DHTManager dhtManager = new LimeDHTManager();
+    
+    private static MessageDispatcher messageDispatcher;
     
     /**
      * The Node assigner class
@@ -302,8 +304,8 @@ public class RouterService {
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
         fileManager.registerFileManagerEventListener(callback);
-        RouterService.router = router;
-
+        RouterService.setMessageRouter(router);
+        
         manager.registerLifecycleListener(callback);
         manager.registerLifecycleListener(dhtManager);
         
@@ -312,6 +314,15 @@ public class RouterService {
                                         manager);
   	}
 
+    public static void setMessageRouter(MessageRouter messageRouter) {
+        RouterService.messageRouter = messageRouter;
+        RouterService.messageDispatcher = new MessageDispatcher(messageRouter);
+    }
+    
+    public static MessageDispatcher getMessageDispatcher() {
+        return messageDispatcher;
+    }
+        
   	/**
   	 * Performs startup tasks that should happen while the GUI loads
   	 */
@@ -390,7 +401,7 @@ public class RouterService {
 
             LOG.trace("START MessageRouter");
             callback.componentLoading("MESSAGE_ROUTER");
-    		router.initialize();
+    		messageRouter.initialize();
     		LOG.trace("STOPMessageRouter");
     		
             LOG.trace("START Acceptor");
@@ -566,7 +577,7 @@ public class RouterService {
 	 *  has not been constructed
 	 */
 	public static MessageRouter getMessageRouter() {
-		return router;
+		return messageRouter;
 	}
     
 	/**
@@ -1210,7 +1221,7 @@ public class RouterService {
         _lastQueryTime = System.currentTimeMillis();
         VERIFIER.record(qr, type);
         RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
-        router.sendDynamicQuery(qr);
+        messageRouter.sendDynamicQuery(qr);
     }
 
 	/**
@@ -1230,7 +1241,7 @@ public class RouterService {
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
-        router.queryKilled(guid);
+        messageRouter.queryKilled(guid);
         if(RouterService.isSupernode())
             QueryDispatcher.instance().addToRemove(guid);
         MutableGUIDFilter.instance().removeGUID(guid.bytes());
