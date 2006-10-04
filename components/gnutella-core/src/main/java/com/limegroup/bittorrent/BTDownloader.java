@@ -482,10 +482,6 @@ public class BTDownloader extends AbstractDownloader
 		return "downloader facade for "+fileSystem.getCompleteFile().getName();
 	}
 	
-	public int hashCode() {
-		return getSHA1Urn().hashCode();
-	}
-	
 	public boolean equals(Object o) {
 		if (! (o instanceof Downloader))
 			return false;
