@@ -6,4 +6,5 @@ public interface RouteTableGraphCallback {
     
     public void handleGraphInfoUpdated();
 
+    public void handleRouteTableCleared();
 }

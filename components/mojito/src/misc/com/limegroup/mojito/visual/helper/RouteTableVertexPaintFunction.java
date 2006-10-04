@@ -1,10 +1,13 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.helper;
 import java.awt.Paint;
+
+import com.limegroup.mojito.visual.components.RouteTableVertex;
+
 import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.decorators.PickableVertexPaintFunction;
 import edu.uci.ics.jung.visualization.PickedInfo;
 
-class RouteTableVertexPaintFunction extends PickableVertexPaintFunction {
+public class RouteTableVertexPaintFunction extends PickableVertexPaintFunction {
     
     private Paint localPaint;
     private Paint bucketFillPaint;
@@ -32,15 +35,14 @@ class RouteTableVertexPaintFunction extends PickableVertexPaintFunction {
             return picked_paint;
         }
         
-        if(v instanceof BucketVertex) {
-            BucketVertex bv = (BucketVertex) v;
-            if(bv.isLocalBucket()) {
+        if(v instanceof RouteTableVertex) {
+            RouteTableVertex rtv = (RouteTableVertex) v;
+            if(rtv.isLocal()) {
                 return localPaint;
             } else {
                 return bucketFillPaint;
             }
         } 
-        
         return super.getFillPaint(v);
     }
 }

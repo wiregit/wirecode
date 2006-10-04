@@ -1,15 +1,15 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.components;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.limegroup.mojito.visual.BinaryEdge.EdgeType;
+import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
 
 import edu.uci.ics.jung.graph.Edge;
 import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.impl.DirectedSparseVertex;
 
-class InteriorNodeVertex extends DirectedSparseVertex {
+public class InteriorNodeVertex extends DirectedSparseVertex {
     
     private Vertex leftChild;
     private Vertex rightChild;
@@ -79,8 +79,13 @@ class InteriorNodeVertex extends DirectedSparseVertex {
     @Override
     public Set getSuccessors() {
         Set<Vertex> res = new LinkedHashSet<Vertex>();
-        res.add(leftChild);
-        res.add(rightChild);
+        if(leftChild!= null) {
+            res.add(leftChild);
+        }
+        
+        if(rightChild != null) {
+            res.add(rightChild);
+        }
         return res;
     }
 

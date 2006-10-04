@@ -1,4 +1,4 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.components;
 
 import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.impl.DirectedSparseEdge;

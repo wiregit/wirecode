@@ -14,8 +14,17 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
-import com.limegroup.mojito.visual.BinaryEdge.EdgeType;
+import com.limegroup.mojito.visual.components.BinaryEdge;
+import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
+import com.limegroup.mojito.visual.graph.BucketGraph;
+import com.limegroup.mojito.visual.graph.NodeGraph;
+import com.limegroup.mojito.visual.graph.RouteTableGraph;
+import com.limegroup.mojito.visual.helper.RouteTableGraphMousePlugin;
+import com.limegroup.mojito.visual.helper.RouteTableToolTipFunction;
+import com.limegroup.mojito.visual.helper.RouteTableVertexPaintFunction;
+import com.limegroup.mojito.visual.helper.RouteTableVertexShapeFunction;
 
 import edu.uci.ics.jung.graph.ArchetypeEdge;
 import edu.uci.ics.jung.graph.ArchetypeVertex;
@@ -35,7 +44,12 @@ import edu.uci.ics.jung.visualization.control.PickingGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.PluggableGraphMouse;
 import edu.uci.ics.jung.visualization.control.ViewScalingGraphMousePlugin;
 
-public class RouteTableVisualizer implements RouteTableGraphCallback{
+/**
+ * A visualizer for the Routing table. This is only experimental!
+ *
+ */
+public class RouteTableVisualizer implements RouteTableGraphCallback,
+                                             RouteTableUICallback{
     
     private JPanel graphComponent;
     
@@ -44,6 +58,8 @@ public class RouteTableVisualizer implements RouteTableGraphCallback{
     private VisualizationViewer vv;
     
     private RouteTableGraph routeTableGraph;
+    
+    RouteTableImpl routeTable;
     
     public static RouteTableVisualizer show(Context context) {
         final RouteTableVisualizer viz = new RouteTableVisualizer(context);
@@ -71,7 +87,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback{
     
     public RouteTableVisualizer(Context dht) {
         //TODO: change constructor
-        RouteTableImpl routeTable = (RouteTableImpl)dht.getRouteTable();
+        routeTable = (RouteTableImpl)dht.getRouteTable();
         routeTableGraph = new BucketGraph(routeTable, this);
         init();
     }
@@ -95,10 +111,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback{
         pr.setVertexShapeFunction(new RouteTableVertexShapeFunction());
         VertexStringer vertStringer = new VertexStringer() {
             public String getLabel(ArchetypeVertex v) {
-                if(v instanceof BucketVertex) {
-                    return v.toString();
-                }
-                else return "";
+                return getLabelForVertex(v);
             }
             
         };
@@ -129,11 +142,12 @@ public class RouteTableVisualizer implements RouteTableGraphCallback{
         graphMouse.add(new PickingGraphMousePlugin());
         graphMouse.add(new ViewScalingGraphMousePlugin());
         graphMouse.add(new CrossoverScalingGraphMousePlugin());
-        graphMouse.add(new RouteTableGraphMousePlugin());
+        graphMouse.add(new RouteTableGraphMousePlugin(this));
         vv.setGraphMouse(graphMouse);
         
         //create south panel
         txtArea = new JTextArea();
+        txtArea.setText(routeTableGraph.getGraphInfo());        
         JScrollPane pane = new JScrollPane(txtArea);
         
         //create main compononent
@@ -141,19 +155,73 @@ public class RouteTableVisualizer implements RouteTableGraphCallback{
         graphComponent = new JPanel(new BorderLayout());
         graphComponent.add(graphPanel, BorderLayout.CENTER);
         graphComponent.add(pane, BorderLayout.SOUTH);
-        
-        
+        repaint();
+    }
+    
+    private synchronized void repaint() {
+        vv.setGraphLayout(new TreeLayout(routeTableGraph.getTree()));
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                vv.invalidate();
+                vv.revalidate();
+                vv.repaint();
+                txtArea.setText(routeTableGraph.getGraphInfo());
+            }
+        });
+    }
+    
+    /**
+     * Displays the graph containing all the Route Table's buckets
+     */
+    private synchronized void showBucketGraph() {
+        stop();
+        routeTableGraph = new BucketGraph(routeTable, this);
+        routeTableGraph.populateGraph();
+        repaint();
+    }
+    
+    /**
+     * Displays the graph containing all the specified bucket's contacts
+     * 
+     */
+    private synchronized void showNodeGraph(Bucket bucket) {
+        stop();
+        routeTableGraph = new NodeGraph(routeTable, this, bucket);
+        routeTableGraph.populateGraph();
+        repaint();
+    }
+    
+    private synchronized void updateTextArea() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                txtArea.setText(routeTableGraph.getGraphInfo());
+            }
+        });
+    }
+    
+    private String getLabelForVertex(ArchetypeVertex v) {
+        return routeTableGraph.getLabelForVertex(v);
     }
     
     public synchronized void handleGraphLayoutUpdated() {
-        vv.setGraphLayout(new TreeLayout(routeTableGraph.getTree()));
-        vv.invalidate();
-        vv.revalidate();
-        vv.repaint();
+        repaint();
     }
     
+    public void handleRouteTableCleared() {
+        showBucketGraph();
+    }
+
     public synchronized void handleGraphInfoUpdated() {
-        txtArea.setText(routeTableGraph.getGraphInfo());        
+        updateTextArea();        
+    }
+    
+    public void handleBucketSelected(Bucket bucket) {
+        showNodeGraph(bucket);
+        updateTextArea();
+    }
+
+    public void handleNodeGraphRootSelected() {
+        showBucketGraph();
     }
 
     public Component getComponent() {

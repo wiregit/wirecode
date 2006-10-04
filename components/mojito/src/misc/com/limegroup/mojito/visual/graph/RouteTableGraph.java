@@ -1,8 +1,14 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.graph;
 
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.routing.impl.RouteTableImpl.RouteTableCallback;
+import com.limegroup.mojito.visual.RouteTableGraphCallback;
+import com.limegroup.mojito.visual.components.BinaryEdge;
+import com.limegroup.mojito.visual.components.InteriorNodeVertex;
+import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
 
+import edu.uci.ics.jung.graph.ArchetypeVertex;
+import edu.uci.ics.jung.graph.Edge;
 import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.impl.SparseTree;
 import edu.uci.ics.jung.utils.UserData;
@@ -24,6 +30,23 @@ public abstract class RouteTableGraph implements RouteTableCallback{
     
     public abstract String getGraphInfo();
     
+    public abstract String getLabelForVertex(ArchetypeVertex v);
+    
+    protected InteriorNodeVertex createInteriorNode(InteriorNodeVertex previousVertex, EdgeType type) {
+        InteriorNodeVertex vertex = new InteriorNodeVertex();
+        tree.addVertex(vertex);
+        tree.addEdge(new BinaryEdge(previousVertex, vertex, type));
+        return vertex;
+    }
+    
+    protected InteriorNodeVertex removeRouteTableVertex(Vertex vertex) {
+        InteriorNodeVertex predecessor = 
+            (InteriorNodeVertex)vertex.getPredecessors().iterator().next(); 
+        tree.removeEdge((Edge)vertex.getInEdges().iterator().next());
+        tree.removeVertex(vertex);
+        return predecessor;
+    }
+    
     public SparseTree getTree(){
         return tree;
     }
@@ -32,6 +55,10 @@ public abstract class RouteTableGraph implements RouteTableCallback{
         routeTable.setRouteTableCallback(null);
     }
     
+    public void clear() {
+        callback.handleRouteTableCleared();
+    }
+
     public class RootableSparseTree extends SparseTree {
         public RootableSparseTree(Vertex root) {
             super(root);

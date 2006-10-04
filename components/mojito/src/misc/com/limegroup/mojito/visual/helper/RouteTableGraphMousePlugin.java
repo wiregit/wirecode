@@ -1,19 +1,28 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.helper;
 
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Set;
 
+import com.limegroup.mojito.visual.RouteTableUICallback;
+import com.limegroup.mojito.visual.components.BucketVertex;
+import com.limegroup.mojito.visual.components.InteriorNodeVertex;
+
+import edu.uci.ics.jung.graph.Vertex;
+import edu.uci.ics.jung.graph.impl.SparseTree;
 import edu.uci.ics.jung.visualization.PickedState;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.AbstractGraphMousePlugin;
 
 public class RouteTableGraphMousePlugin extends AbstractGraphMousePlugin
             implements MouseListener{
-
-    public RouteTableGraphMousePlugin() {
+    
+    private RouteTableUICallback callback;
+    
+    public RouteTableGraphMousePlugin(RouteTableUICallback callback) {
         super(InputEvent.BUTTON1_DOWN_MASK);
+        this.callback = callback;
     }
 
     public void mouseClicked(MouseEvent e) {
@@ -33,11 +42,25 @@ public class RouteTableGraphMousePlugin extends AbstractGraphMousePlugin
             return;
         }
         Object o = vSet.iterator().next();
-        if(o == null || !(o instanceof BucketVertex)) {
+        
+        if(o == null) {
             return;
         }
-        BucketVertex bucketVertex = (BucketVertex)o;
         
+        if(o instanceof InteriorNodeVertex) {
+            SparseTree tree = (SparseTree)vv.getGraphLayout().getGraph();
+            Vertex root = tree.getRoot();
+            if(o.equals(root)) {
+                callback.handleNodeGraphRootSelected();
+                return;
+            }
+        }
+        
+        if(o instanceof BucketVertex) {
+            BucketVertex bucketVertex = (BucketVertex)o;
+            callback.handleBucketSelected(bucketVertex.getNode());
+            return;
+        } 
     }
 
     public void mouseEntered(MouseEvent e) {}

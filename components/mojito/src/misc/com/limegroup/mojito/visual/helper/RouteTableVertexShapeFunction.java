@@ -1,9 +1,12 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.helper;
 import java.awt.Shape;
+
+import com.limegroup.mojito.visual.components.InteriorNodeVertex;
+
 import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.decorators.AbstractVertexShapeFunction;
 
-class RouteTableVertexShapeFunction extends AbstractVertexShapeFunction{
+public class RouteTableVertexShapeFunction extends AbstractVertexShapeFunction{
     public Shape getShape(Vertex v)
     {
         if(v instanceof InteriorNodeVertex) {

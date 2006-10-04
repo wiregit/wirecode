@@ -1,4 +1,4 @@
-package com.limegroup.mojito.visual;
+package com.limegroup.mojito.visual.graph;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,9 +9,14 @@ import javax.swing.SwingUtilities;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
-import com.limegroup.mojito.visual.BinaryEdge.EdgeType;
+import com.limegroup.mojito.visual.RouteTableGraphCallback;
+import com.limegroup.mojito.visual.components.BinaryEdge;
+import com.limegroup.mojito.visual.components.BucketVertex;
+import com.limegroup.mojito.visual.components.InteriorNodeVertex;
+import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
 
-import edu.uci.ics.jung.graph.Edge;
+import edu.uci.ics.jung.graph.ArchetypeVertex;
+import edu.uci.ics.jung.graph.Vertex;
 
 public class BucketGraph extends RouteTableGraph {
     
@@ -40,8 +45,8 @@ public class BucketGraph extends RouteTableGraph {
         //TODO: optimization -- or not?
         //BucketUtils.sortByDepth(buckets);
         Bucket currentBucket;
-        for(Iterator it = buckets.iterator(); it.hasNext();) {
-            currentBucket = (Bucket) it.next();
+        for(Iterator<Bucket> it = buckets.iterator(); it.hasNext();) {
+            currentBucket = it.next();
             updateGraphBucket(currentBucket);
             it.remove();
         }
@@ -64,12 +69,8 @@ public class BucketGraph extends RouteTableGraph {
         }
     }
     
-    private InteriorNodeVertex splitBucket(BucketVertex vertex, boolean isLeftChild) {
-        InteriorNodeVertex predecessor = 
-            (InteriorNodeVertex)vertex.getPredecessors().iterator().next(); 
-        tree.removeEdge((Edge)vertex.getInEdges().iterator().next());
-        tree.removeVertex(vertex);
-        EdgeType type = (isLeftChild?EdgeType.LEFT:EdgeType.RIGHT);
+    private InteriorNodeVertex splitBucket(BucketVertex vertex, EdgeType type) {
+        InteriorNodeVertex predecessor = removeRouteTableVertex(vertex);
         return createInteriorNode(predecessor, type);
     }
     
@@ -77,38 +78,31 @@ public class BucketGraph extends RouteTableGraph {
         int depth = bucket.getDepth();
 
         InteriorNodeVertex vertex = (InteriorNodeVertex)root;
+        Vertex child;
+        EdgeType type;
         for(int i=1; i < depth ; i++) {
+            child = null;
+
             if(bucket.getBucketID().isBitSet(i-1)) {
-                if(vertex.getRightChild() == null) {
-                    vertex = createInteriorNode(vertex, EdgeType.RIGHT);
-                    
-                } else if(vertex.getRightChild() instanceof BucketVertex) {
-                    //we have found a bucket along this bucket path
-                    //--> split it in order to be able to insert new bucket
-                    BucketVertex bv = (BucketVertex)vertex.getRightChild();
-                    vertex = splitBucket(bv, false);
-                } else {
-                    vertex = (InteriorNodeVertex)vertex.getRightChild();
-                }
+                child = vertex.getRightChild();
+                type = EdgeType.RIGHT;
             } else {
-                if(vertex.getLeftChild() == null) {
-                    vertex = createInteriorNode(vertex, EdgeType.LEFT);
-                    
-                } else if(vertex.getLeftChild() instanceof BucketVertex) {
-                    BucketVertex bv = (BucketVertex)vertex.getLeftChild();
-                    vertex = splitBucket(bv, true);
-                } else {
-                    vertex = (InteriorNodeVertex)vertex.getLeftChild();
-                }
+                child = vertex.getLeftChild();
+                type = EdgeType.LEFT;
+            }
+
+            if(child == null) {
+                vertex = createInteriorNode(vertex, type);
+                
+            } else if(child instanceof BucketVertex) {
+                //we have found a bucket along this bucket path
+                //--> split it in order to be able to insert new bucket
+                BucketVertex bv = (BucketVertex)child;
+                vertex = splitBucket(bv, type);
+            } else {
+                vertex = (InteriorNodeVertex)child;
             }
         }
-        return vertex;
-    }
-    
-    private InteriorNodeVertex createInteriorNode(InteriorNodeVertex previousVertex, EdgeType type) {
-        InteriorNodeVertex vertex = new InteriorNodeVertex();
-        tree.addVertex(vertex);
-        tree.addEdge(new BinaryEdge(previousVertex, vertex, type));
         return vertex;
     }
     
@@ -119,21 +113,20 @@ public class BucketGraph extends RouteTableGraph {
         tree.addEdge(new BinaryEdge(predecessor, bv, type));
         return bv;
     }
+    
+    @Override
+    public String getLabelForVertex(ArchetypeVertex v) {
+        if(v instanceof BucketVertex) {
+            return v.toString()+"("+((BucketVertex)v).getNode().getActiveSize()+")";
+        }
+        else return "";
+    }
 
     public void add(Bucket bucket, Contact node) {
         callback.handleGraphInfoUpdated();
     }
 
     public void check(Bucket bucket, Contact existing, Contact node) {
-    }
-
-    public void clear() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                populateGraph();
-                callback.handleGraphLayoutUpdated();
-            }
-        });
     }
 
     public void remove(Bucket bucket, Contact node) {
@@ -159,5 +152,4 @@ public class BucketGraph extends RouteTableGraph {
 
     public void update(Bucket bucket, Contact existing, Contact node) {
     }
-
 }
