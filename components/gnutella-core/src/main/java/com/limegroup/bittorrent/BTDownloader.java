@@ -24,6 +24,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.NumericBuffer;
 
@@ -424,7 +425,8 @@ public class BTDownloader extends AbstractDownloader
 		this.manager = manager;
 		ifm = manager.getIncompleteFileManager();
 		TorrentManager torrentManager = RouterService.getTorrentManager();
-		_torrent = new ManagedTorrent(_info, torrentManager); 
+		_torrent = new ManagedTorrent(_info, torrentManager,
+				NIODispatcher.instance().getSchedulingThreadPool()); 
 		torrentManager.addEventListener(this);
 		ifm.addTorrentEntry(_info.getURN());
 	}
