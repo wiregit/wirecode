@@ -448,6 +448,10 @@ public class RouteTableImpl implements RouteTable {
         
         // This should never happen -- who knows?!!
         if(nodeId.equals(getLocalNode().getNodeID())) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot handle local Node's errors: " 
+                        + ContactUtils.toString(nodeId, address));
+            }
             return;
         }
         
