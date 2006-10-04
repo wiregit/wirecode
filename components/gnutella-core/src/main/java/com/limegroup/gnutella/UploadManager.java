@@ -451,11 +451,12 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
             }
             
             synchronized(this) {
-                // If this uploader is still in the queue, remove it.
-                // Also change its state from COMPLETE to INTERRUPTED
-                // because it didn't really complete.
+                // Always release the resource of the uploader, by removing
+                // it from the necessary slots (queue or active).
+                // If it was queued, also set the state to INTERRUPTED
+                // (changing from COMPLETE).
             	boolean stillInQueue = slotManager.positionInQueue(session) > -1;
-            	slotManager.requestDone(session);
+            	slotManager.cancelRequest(session);
                 if(stillInQueue)
                     uploader.setState(Uploader.INTERRUPTED);
             }
