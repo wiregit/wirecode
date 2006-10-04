@@ -116,6 +116,8 @@ public abstract class MessageDispatcher {
     
     private ByteBuffer inputBuffer;
     
+    private MessageDispatcherCallback callback;
+    
     public MessageDispatcher(Context context) {
         this.context = context;
         
@@ -501,6 +503,11 @@ public abstract class MessageDispatcher {
         } else if (LOG.isFatalEnabled()) {
             LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
         }
+        
+        
+        if (callback != null) {
+            callback.receive(message);
+        }
     }
     
     /**
@@ -606,6 +613,10 @@ public abstract class MessageDispatcher {
         
         networkStats.SENT_MESSAGES_COUNT.incrementStat();
         networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
+        
+        if (callback != null) {
+            callback.send(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
+        }
     }
     
     /** Called to indicate an interest in reading */
@@ -660,6 +671,13 @@ public abstract class MessageDispatcher {
         synchronized (receiptMapLock) {
             receiptMap.cleanup();
         }
+    }
+    
+    /**
+     * 
+     */
+    public void setMessageDispatcherCallback(MessageDispatcherCallback callback) {
+        this.callback = callback;
     }
     
     /**
@@ -954,5 +972,10 @@ public abstract class MessageDispatcher {
         public void run() {
             tag.handleError(exception);
         }
+    }
+    
+    public static interface MessageDispatcherCallback {
+        public void send(KUID nodeId, SocketAddress dst, DHTMessage message);
+        public void receive(DHTMessage message);
     }
 }

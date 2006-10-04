@@ -31,6 +31,8 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
+import javax.swing.JFrame;
+
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
@@ -44,6 +46,7 @@ import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.CollectionUtils;
+import com.limegroup.mojito.visual.TilesVisualizer;
 
 public class CommandHandler {
     
@@ -400,8 +403,17 @@ public class CommandHandler {
     }
     
     public static void gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("com.limegroup.mojito.visual.RouteTableVisualizer");
+        /*Class clazz = Class.forName("com.limegroup.mojito.visual.RouteTableVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
-        show.invoke(null, dht);
+        show.invoke(null, dht);*/
+        
+        TilesVisualizer tiles = new TilesVisualizer(dht.getLocalNodeID());
+        
+        ((Context)dht).getMessageDispatcher().setMessageDispatcherCallback(tiles);
+        
+        JFrame frame = new JFrame();
+        frame.getContentPane().add(tiles);
+        frame.setBounds(20, 30, 640, 640);
+        frame.setVisible(true);
     }
 }
