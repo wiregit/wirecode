@@ -801,10 +801,6 @@ public class RouteTableImpl implements RouteTable {
                 add(node);
             }
         }
-        
-        if (routeTableCallback != null) {
-            routeTableCallback.clear();
-        }
     }
     
     public synchronized String toString() {
