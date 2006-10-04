@@ -23,7 +23,7 @@ import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
-import com.limegroup.gnutella.browser.ExternalControl;
+import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
@@ -459,9 +459,9 @@ public class RouterService {
 			torrentManager.initialize();
 			LOG.trace("STOP TorrentManager");
 			
-			LOG.trace("START ExternalControl");
-			ExternalControl.instance();
-			LOG.trace("STOP ExternalControl");
+			LOG.trace("START ControlRequestAcceptor");
+			(new ControlRequestAcceptor()).register(getConnectionDispatcher());
+			LOG.trace("STOP ControlRequestAcceptor");
 			
             // Restore any downloads in progress.
             LOG.trace("START DownloadManager.postGuiInit");

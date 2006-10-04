@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
@@ -26,13 +25,12 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
-public class ExternalControl implements ConnectionAcceptor {
+public class ExternalControl {
     
     private static final Log LOG = LogFactory.getLog(ExternalControl.class);
 
@@ -51,28 +49,6 @@ public class ExternalControl implements ConnectionAcceptor {
 		return arg.toString();
 	}
 	
-	private static ExternalControl INSTANCE;
-	
-	private ExternalControl() {
-		RouterService.getConnectionDispatcher().
-		addConnectionAcceptor(this,
-				new String[]{"MAGNET","TORRENT"},
-				true,
-				true);
-	}
-	
-	public static synchronized ExternalControl instance() {
-		if (INSTANCE == null) 
-			INSTANCE = new ExternalControl();
-		return INSTANCE;
-	}
-	
-	public void acceptConnection(String word, Socket sock) {
-		if (word.equals("MAGNET"))
-			HTTPStat.MAGNET_REQUESTS.incrementStat(); 
-		fireControlThread(sock, word.equals("MAGNET"));
-	}
-
     /**
      * Uses the magnet infrastructure to check if LimeWire is running.
      * If it is, it is restored and this instance exits.
