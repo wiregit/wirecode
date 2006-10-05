@@ -17,10 +17,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.security;
+package com.limegroup.mojito.exceptions;
 
 import java.security.SignatureException;
 
+/**
+ * A SignatureVerificationException is thrown if a signature cannot be verifed.
+ */
 public class SignatureVerificationException extends SignatureException {
 
     private static final long serialVersionUID = -200788227455219189L;

@@ -56,7 +56,7 @@ import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.Tag;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.routing.impl.RemoteContact;
-import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.CryptoUtils;
 
 /**
  * LimeMessageDispatcher re-routes DHTMessage(s) through the
@@ -197,7 +197,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
-        verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
+        verifier.verify(context.getMasterKey(), CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 
     @Override

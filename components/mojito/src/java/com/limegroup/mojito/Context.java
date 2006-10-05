@@ -73,7 +73,6 @@ import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
-import com.limegroup.mojito.security.CryptoHelper;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -81,6 +80,7 @@ import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.util.CryptoUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
 import com.limegroup.mojito.util.DatabaseUtils;
 
@@ -165,7 +165,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
             if (file.exists() && file.isFile()) {
-                masterKey = CryptoHelper.loadMasterKey(file);
+                masterKey = CryptoUtils.loadMasterKey(file);
             }
         } catch (Exception err) {
             LOG.error("Loading the MasterKey failed!", err);

@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.security;
+package com.limegroup.mojito.util;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -25,8 +25,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -36,20 +34,29 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.zip.GZIPInputStream;
 
+import com.limegroup.mojito.exceptions.SignatureVerificationException;
+
 /**
- * 
+ * Miscellaneous utilities for Cryptography
  */
-public final class CryptoHelper {
+public final class CryptoUtils {
     
+    /** The algorithm of the Key */
     public static final String KEY_ALGORITHM = "DSA";
+    
+    /** The key size in bit */
     public static final int KEY_SIZE = 512;
     
+    /** The Signature algorithm */
     public static final String SIGNATURE_ALGORITHM = "SHA1withDSA";
     
     private static Signature SIGNATURE;
     
-    private CryptoHelper() {}
+    private CryptoUtils() {}
     
+    /**
+     * Loads a PublicKey from the given File 
+     */
     public static PublicKey loadMasterKey(File file) 
             throws IOException, SignatureException, InvalidKeyException {
         
@@ -77,7 +84,10 @@ public final class CryptoHelper {
         }
     }
     
-    public static KeyPair createKeyPair() {
+    /**
+     * Creates a new KeyPair
+     */
+    /*public static KeyPair createKeyPair() {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(KEY_ALGORITHM);
             kpg.initialize(KEY_SIZE);
@@ -85,11 +95,14 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException err) {
             throw new RuntimeException(err);
         }
-    }
+    }*/
     
-    public static PublicKey createPublicKey(byte[] encodedKey) {
+    /**
+     * Turns a X509 encoded key into a PublicKey object
+     */
+    public static PublicKey createPublicKey(byte[] x509EncodedKey) {
         try {
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encodedKey);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(x509EncodedKey);
             KeyFactory factory = KeyFactory.getInstance(KEY_ALGORITHM);
             return factory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException err) {
@@ -99,7 +112,11 @@ public final class CryptoHelper {
         }
     }
     
-    public static Signature createSignSignature(PrivateKey privateKey) {
+    /**
+     * Creates a Signature with the given PrivateKey that can be used 
+     * for signing Data
+     */
+    /*public static Signature createSignSignature(PrivateKey privateKey) {
         try {
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
             signature.initSign(privateKey);
@@ -109,9 +126,13 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException err) {
             throw new RuntimeException(err);
         }
-    }
+    }*/
     
-    public static Signature createVerifySignature(PublicKey publicKey) {
+    /**
+     * Creates a Signature with the given PublicKey that can be used
+     * for verifying Data
+     */
+    /*public static Signature createVerifySignature(PublicKey publicKey) {
         try {
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
             signature.initVerify(publicKey);
@@ -121,8 +142,11 @@ public final class CryptoHelper {
         } catch (NoSuchAlgorithmException err) {
             throw new RuntimeException(err);
         }
-    }
+    }*/
     
+    /**
+     * Signs the given array of byte-arrays with the given PrivateKey
+     */
     public static synchronized byte[] sign(PrivateKey privateKey, byte[]... data)
             throws SignatureException, InvalidKeyException {
         
@@ -143,6 +167,9 @@ public final class CryptoHelper {
         }
     }
 
+    /**
+     * Verifies given signature is correct
+     */
     public static synchronized boolean verify(PublicKey publicKey, byte[] signature, byte[]... data) 
             throws SignatureException, InvalidKeyException {
         

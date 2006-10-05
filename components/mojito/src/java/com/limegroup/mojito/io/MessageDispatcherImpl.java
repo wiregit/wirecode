@@ -41,7 +41,7 @@ import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.security.CryptoHelper;
+import com.limegroup.mojito.util.CryptoUtils;
 
 /**
  * This is a stand alone/reference implementation of MessageDispatcher
@@ -180,7 +180,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
-        verifier.verify(context.getMasterKey(), CryptoHelper.SIGNATURE_ALGORITHM, secureMessage, smc);
+        verifier.verify(context.getMasterKey(), CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 
     private void interest(int ops, boolean on) {
