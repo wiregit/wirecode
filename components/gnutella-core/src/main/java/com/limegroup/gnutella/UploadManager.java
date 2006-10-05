@@ -967,15 +967,8 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         if (LOG.isDebugEnabled())
         	LOG.debug("queued at "+queued);
         
-        if (queued == -1) {
-            //Note: The current policy is to not put uploadrers in a queue, if they 
-            //do not send am X-Queue header. Further. uploaders are removed from 
-            //the queue if they do not send the header in the subsequent request.
-            //To change this policy, chnage the way queue is set.
-        	if (!session.getUploader().supportsQueueing())
-        		slotManager.cancelRequest(session);
+        if (queued == -1) // not accepted nor queued.
         	return REJECTED;
-        }
         
         if (queued > 0 && session.poll()) {
         	slotManager.cancelRequest(session);
