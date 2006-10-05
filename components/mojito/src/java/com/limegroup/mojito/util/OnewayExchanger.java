@@ -122,7 +122,7 @@ public class OnewayExchanger<V, E extends Exception> {
         
         synchronized (lock) {
             if (!done) {
-                lock.wait(unit.toMillis(timeout));
+                unit.timedWait(lock, timeout);
                 
                 // Not done? Must be a timeout!
                 if (!done) {
