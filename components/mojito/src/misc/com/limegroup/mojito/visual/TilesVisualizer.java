@@ -2,11 +2,15 @@ package com.limegroup.mojito.visual;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.net.SocketAddress;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
+import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherCallback;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -31,6 +35,31 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
     private Tile[] tiles = new Tile[TILES * TILES];
     
     private KUID localNodeId;
+    
+    public static TilesVisualizer show(final Context context) {
+        final TilesVisualizer tiles = new TilesVisualizer(context.getLocalNodeID());
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JFrame frame = new JFrame();
+                frame.getContentPane().add(tiles);
+                frame.setBounds(20, 30, 640, 640);
+                frame.addWindowListener(new WindowListener() {
+                    public void windowActivated(WindowEvent e) {}
+                    public void windowClosed(WindowEvent e) {}
+                    public void windowClosing(WindowEvent e) {
+                        context.getMessageDispatcher().setMessageDispatcherCallback(null);
+                    }
+                    public void windowDeactivated(WindowEvent e) {}
+                    public void windowDeiconified(WindowEvent e) {}
+                    public void windowIconified(WindowEvent e) {}
+                    public void windowOpened(WindowEvent e) {}
+                });
+                frame.setVisible(true);
+            }
+        });
+        context.getMessageDispatcher().setMessageDispatcherCallback(tiles);
+        return tiles;
+    }
     
     public TilesVisualizer(KUID localNodeId) {
         this.localNodeId = localNodeId;
