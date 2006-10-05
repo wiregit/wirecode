@@ -20,10 +20,11 @@
 package com.limegroup.mojito.exceptions;
 
 /**
- * 
+ * The NotBootstrappedException is thrown if the user is attempting
+ * to execute certain operations that require a bootstrapped DHT.
  */
 @SuppressWarnings("serial")
-public class NotBootstrappedException extends RuntimeException{
+public class NotBootstrappedException extends IllegalStateException {
     
     public NotBootstrappedException(String operation) {
         super("Attempting to execute a " + operation 

@@ -17,10 +17,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.io;
+package com.limegroup.mojito.exceptions;
 
 import java.net.SocketException;
 
+/**
+ * The IllegalSocketAddressException is thrown for "illegal" SocketAddresses.
+ * Illegal means InetAddresses from the private address space for example.
+ */
 public class IllegalSocketAddressException extends SocketException {
 
     private static final long serialVersionUID = 5043640414346690375L;

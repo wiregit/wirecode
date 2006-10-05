@@ -36,6 +36,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.exceptions.IllegalSocketAddressException;
 import com.limegroup.mojito.handler.DefaultMessageHandler;
 import com.limegroup.mojito.handler.RequestHandler;
 import com.limegroup.mojito.handler.ResponseHandler;

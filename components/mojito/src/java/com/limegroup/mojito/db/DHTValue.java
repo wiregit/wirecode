@@ -90,55 +90,74 @@ public class DHTValue implements Serializable {
         this.isLocalValue = isLocalValue;
     }
     
+    /**
+     * Initializes the DHTValue
+     */
     private void init() {
         lastRepublishingTime = 0L;
         locations = 0;
     }
     
-    /** Returns the ValueID */
+    /** 
+     * Returns the ValueID
+     */
     public KUID getValueID() {
         return valueId;
     }
     
-    /** Returns the Value */
+    /** 
+     * Returns the Value. Beware: The returned byte array is 
+     * <b>NOT</b> a copy!
+     */
     public byte[] getData() {
         return data;
     }
     
-    /** Returns the size of the value */
+    /** 
+     * Returns the size of the value 
+     */
     public int size() {
         return data.length;
     }
     
-    /** Whether or not the value is empty */
+    /** 
+     * Returns whether or not the value is empty
+     */
     public boolean isEmpty() {
         return size() == 0;
     }
     
-    /** Sets the originator, meant for internal use only! */
+    /** 
+     * Sets the originator, meant for internal use only! 
+     */
     public void setOriginator(Contact originator) {
         this.originator = originator;
     }
     
-    /** Returns the originator of the value */
+    /** 
+     * Returns the originator of the value 
+     */
     public Contact getOriginator() {
         return originator;
     }
     
+    /**
+     * Returns the Node ID of the originator
+     */
     public KUID getOriginatorID() {
         return originator.getNodeID();
     }
     
-    /*public void setSender(Contact sender) {
-        this.sender = sender;
-    }*/
-    
-    /** Returns the sender of the value */
+    /** 
+     * Returns the sender of the value 
+     */
     public Contact getSender() {
         return sender;
     }
     
-    /** Returns the creationTime of this DHTValue object */ 
+    /** 
+     * Returns the creationTime of this DHTValue object 
+     */ 
     public long getCreationTime() {
         return creationTime;
     }
@@ -151,7 +170,9 @@ public class DHTValue implements Serializable {
         return originator.getNodeID().equals(sender.getNodeID());
     }
     
-    /** Returns whether or not this is a local DHTValue */
+    /** 
+     * Returns whether or not this is a local DHTValue 
+     */
     public boolean isLocalValue() {
         return isLocalValue;
     }
