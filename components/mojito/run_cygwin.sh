@@ -1,7 +1,7 @@
 #!/bin/sh
 
 CLASSPATH=\
-".;src/java;../core;"
+".;src/java;src/misc;../core;"
 
 for JAR in $(find ../lib/jars -name *.jar); do 
    CLASSPATH="${CLASSPATH};${JAR}"
