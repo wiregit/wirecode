@@ -865,7 +865,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     	} catch (IOException ioe) {
     		fail("d4 should have been queued", ioe);
     	}            
-    	//System.out.println("passed");
+    	
     }
         
     
@@ -1036,8 +1036,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch (TryAgainLaterException expected){}
         
         // now kill the queued downloader
-        d2.stop();
-        Thread.sleep(1000);
+        kill(d2);
         
         // and a new d4 which should get queued.
         HTTPDownloader d4 = addUploader(upManager, rfd4, "1.1.1.4", true);
@@ -1045,6 +1044,47 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         	connectDloader(d4, true, rfd4, true);
         	fail("d4 should have been queued");
         } catch (QueuedException expected){}
+    }
+    
+    /**
+     * tests that even if the limit for a host is reached, its queued
+     * requests will stay queued while polling.
+     */
+    public void testHostLimitExcludesQueued() throws Exception {
+    	UploadSettings.HARD_MAX_UPLOADS.setValue(1);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(1);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
+        
+        // take up the free slot
+        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+        connectDloader(d1,true,rfd1,true);
+        
+        // take up the queue slot
+        HTTPDownloader d2 = addUploader(upManager, rfd2, "1.1.1.1", true);
+        try {
+        	connectDloader(d2, true, rfd2, true);
+        	fail("d2 should have been queued");
+        } catch (QueuedException expected){}
+        
+        // third request should get rejected
+        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+    	try {
+    		connectDloader(d3,true,rfd3,true);
+    		fail("Host limit reached, should not have accepted d3");
+    	} catch (QueuedException qx) {
+    		fail("host limit reached should not queue", qx);
+    	} catch (TryAgainLaterException expectedException) {
+    	} catch (IOException ioe) {}
+    	
+    	// have the queued downloader re-poll, it should 
+    	// still be queued.
+    	
+    	Thread.sleep(HTTPSession.MIN_POLL_TIME + HTTPSession.MAX_POLL_TIME / 2);
+    	try {
+    		connectDloader(d2, true, rfd2, true);
+    		fail("should have been queued");
+    	} catch (QueuedException expected){}
     }
     
 
