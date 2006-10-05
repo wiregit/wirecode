@@ -828,6 +828,9 @@ public abstract class MessageDispatcher {
             }
         }
         
+        /**
+         * Processes a regular response
+         */
         private void processResponse() {
             try {
                 defaultHandler.handleResponse(response, receipt.time());
@@ -840,6 +843,15 @@ public abstract class MessageDispatcher {
             }
         }
         
+        /**
+         * A late response is a response that arrived after a timeout.
+         * We rely on the fact that MessageIDs are tagged with a QueryKey
+         * so that we can still figure out if we've ever send a request
+         * to the remote Node.
+         * 
+         * The fact that the remote Node respond is a valuable information
+         * and we'll use a higher timeout next time.
+         */
         private void processLateResponse() {
             
             Contact node = response.getContact();
@@ -859,7 +871,10 @@ public abstract class MessageDispatcher {
             }
             
             networkStats.LATE_MESSAGES_COUNT.incrementStat();
-            context.getRouteTable().add(node);
+            
+            if (!node.isFirewalled()) {
+                context.getRouteTable().add(node); // update
+            }
         }
     }
     
