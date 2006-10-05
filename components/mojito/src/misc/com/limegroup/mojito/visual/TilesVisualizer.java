@@ -105,11 +105,8 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
         byte[] data = new byte[2];
         nodeId.xor(localNodeId).getBytes(0, data, 0, data.length);
         
-        //int row = (data[0] >> 1) & 0x7F;
-        //int column = ((data[0] & 1) << 6) | (data[1] >> 1) & 0x7F;
-        
-        int row = (data[0] >> 4) & 0xF;
-        int column = (data[0] ) & 0xF;
+        int row = ((data[0] & 0xF0) >> 4);
+        int column = (data[0] & 0x0F);
         
         return (row * TILES) + column;
     }
@@ -138,33 +135,17 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
             timeStamp = System.currentTimeMillis();
         }
         
-        private int toColor(long delta) {
-            return (int)(255f/DURATION * delta);
-        }
-        
         public void paint(Graphics g, int width, int height) {
             if (local) {
-                //g.setColor(Color.red);
-                g.setColor(Color.black);
+                g.setColor(Color.red);
             } else {
                 long delta = System.currentTimeMillis() - timeStamp;
                 if (delta < DURATION) {
+                    int alpha = 255 - (int)(255f/DURATION * delta);
                     if (send) {
-                        /*int red = 255;
-                        int green = 255;
-                        int blue = toColor(delta);*/
-                        int red = 0;
-                        int green = 0;
-                        int blue = 255;
-                        g.setColor(new Color(red, green, blue));
+                        g.setColor(new Color(0, 0, 255, alpha));
                     } else {
-                        /*int red = 255;
-                        int green = toColor(delta);
-                        int blue = 255;*/
-                        int red = 0;
-                        int green = 255;
-                        int blue = 0;
-                        g.setColor(new Color(red, green, blue));
+                        g.setColor(new Color(0, 255, 0, alpha));
                     }
                 } else {
                     g.setColor(Color.white);
