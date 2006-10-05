@@ -952,15 +952,17 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         		LOG.debug("host is now greedy");
         		greedy = true;
         		rqc.limitReached(sha1);
-        	} else if (greedy && slotManager.getNumQueued() > 0) {
+        	} 
+        	if (greedy) {
         		if(LOG.isDebugEnabled())
         			LOG.debug(session.getUploader()+" limited");
+        		UploadStat.LIMIT_REACHED_GREEDY.incrementStat();
         		return REJECTED;
         	}
         }
         
         int queued = slotManager.pollForSlot(session, 
-        		!greedy && session.getUploader().supportsQueueing());
+        		session.getUploader().supportsQueueing());
         
         if (LOG.isDebugEnabled())
         	LOG.debug("queued at "+queued);

@@ -871,36 +871,51 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     public void testGreedyLimitReached() throws Exception {
     	
+    	/*
+    	 * 2 slots, 1 file/person limit.
+    	 * 
+    	 * d1 - host 1, slot 1
+    	 * d2 - host 1, rejected
+    	 * d3 - host 2, slot 2
+    	 * d4 - host 2, rejected (test rejection in queue)
+    	 * d5 - host 3, queued 1
+    	 */
         UploadSettings.HARD_MAX_UPLOADS.setValue(2);
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
-        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+        UploadSettings.UPLOADS_PER_PERSON.setValue(1);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
    
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
         HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
-        connectDloader(d2,true,rfd1,true);
-        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
         try {
-            connectDloader(d3,true,rfd1,true);
-            fail("Host limit reached, should not have accepted d3");
+            connectDloader(d2,true,rfd2,true);
+            fail("Host limit reached, should not have accepted d2");
         } catch (QueuedException qx) {
             fail("host limit reached should not queue", qx);
         } catch (TryAgainLaterException expectedException) {
         } catch (IOException ioe) {//This is similar to d5 being rejected
             //in testNormalQueueing, IOE may be thrown if uploader
             //closes the socket. 
-        }            
+        }           
+        HTTPDownloader d3 = addUploader(upManager,rfd3, "1.1.1.2", true);
+        connectDloader(d3, true, rfd3, true);
         HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.2",true);
         try {
-            connectDloader(d4,true,rfd1,true);
+            connectDloader(d4,true,rfd4,true);
             fail("Host limit reached, should not have accepted d4");
-        } catch (TryAgainLaterException tx) {
-            fail("d4 should have been queued", tx);
-        } catch (QueuedException expectedException) {
+        } catch (TryAgainLaterException expected) {
+        } catch (QueuedException que) {
+        	fail("d4 should have been rejected", que);
         } catch (IOException ioe) {
             fail("d4 should have been queued", ioe);
         }
+        
+        HTTPDownloader d5 = addUploader(upManager, rfd5, "1.1.1.3", true);
+        try {
+        	connectDloader(d5, true, rfd5, true);
+        	fail("d5 should be queued");
+        } catch (QueuedException expected){}
         
         assertEquals("should have 1 queued uploads",
             1, upManager.getNumQueuedUploads());
@@ -908,20 +923,20 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             2, upManager.uploadsInProgress());                
         
         kill(d1);
-        kill(d2);
+        kill(d3);
         
         assertEquals("should have 1 queued uploads",
             1, upManager.getNumQueuedUploads());
         assertEquals("should have 0 active uploads",
             0, upManager.uploadsInProgress());
         
-        // We now have room for d3 to connect again, but it shouldn't
+        // We now have room for d2 to connect again, but it shouldn't
         // be allowed because the 15 minute alloted timespan isn't up
         // yet.
         try {
-            d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
-            connectDloader(d3,true,rfd1,true);
-            fail("d3 is greedy, should have sent limit reached");
+            d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+            connectDloader(d2,true,rfd2,true);
+            fail("d2 is greedy, should have sent limit reached");
         } catch (QueuedException qx) {
             fail("host limit reached should not queue", qx);
         } catch (TryAgainLaterException expectedException) {
