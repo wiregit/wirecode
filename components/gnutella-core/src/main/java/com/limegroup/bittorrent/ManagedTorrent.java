@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
@@ -277,7 +279,7 @@ BTLinkListener {
 			Runnable saver = new Runnable() {
 				public void run() {
 					try {
-						_info.saveInfoMapInIncomplete();
+						saveInfoMapInIncomplete();
 					} catch (IOException ignored){}
 				}
 			};
@@ -297,6 +299,12 @@ BTLinkListener {
 		dispatchEvent(TorrentEvent.Type.STOPPED); 
 		
 		LOG.debug("Torrent stopped!");
+	}
+	
+	private void saveInfoMapInIncomplete() throws IOException {
+		String path = context.getFileSystem().getBaseFile().getParent()+
+		File.separator+".dat"+context.getFileSystem().getName();
+		FileUtils.writeObject(path, context.getMetaInfo());
 	}
 	
 	private void dispatchEvent(TorrentEvent.Type type) {
@@ -394,7 +402,7 @@ BTLinkListener {
 	private void initializeFolder() {
 		try {
 			_folder.open(this);
-			_info.saveInfoMapInIncomplete();
+			saveInfoMapInIncomplete();
 			
 		} catch (IOException ioe) {
 			// problem opening files cannot recover.
@@ -638,10 +646,15 @@ BTLinkListener {
 		
 		// move it to the complete location
 		state.set(TorrentState.SAVING);
-		_info.moveToCompleteFolder();
+		context.getFileSystem().moveToCompleteFolder();
+		context.getFileSystem().addToLibrary();
+		LOG.trace("saved files");
+		context.initializeDiskManager(true);
+		LOG.trace("initialized folder");
+		context.getMetaInfo().resetFileDesc();
 		
 		// and re-open it for seeding.
-		_folder = getContext().getDiskManager();
+		_folder = context.getDiskManager();
 		if (LOG.isDebugEnabled())
 			LOG.debug("new veryfing folder");
 		

@@ -18,22 +18,18 @@ import java.util.Set;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.GenericsUtils;
 
 /**
  * Contains information usually parsed in a .torrent file
  */
 public class BTMetaInfo implements Serializable {
-	private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
 
 	static final long serialVersionUID = -2693983731217045071L;
 	
@@ -187,21 +183,8 @@ public class BTMetaInfo implements Serializable {
 		return _desc;
 	}
 
-	/**
-	 * Moves all files of this torrent to saving directory
-	 * @throws IOException if failed
-	 */
-	public void moveToCompleteFolder() throws IOException {
-
-		fileSystem.moveToCompleteFolder();
-		fileSystem.addToLibrary();
-		
-		// purge the stored FakeFileDesc
+	public void resetFileDesc() {
 		_desc = null;
-
-		LOG.trace("saved files");
-		context.initializeDiskManager(true);
-		LOG.trace("initialized folder");
 	}
 
 	/**
@@ -246,18 +229,6 @@ public class BTMetaInfo implements Serializable {
         return new BTMetaInfo(new BTData((Map)metaInfo));
 	}
 
-	/**
-	 * Saves the torrent data in the incomplete folder for this torrent
-	 * for easier resuming.
-	 */
-	public void saveInfoMapInIncomplete() 
-	throws IOException {
-		FileUtils.writeObject(fileSystem.getBaseFile().getParent()+
-				File.separator +
-				".dat"+fileSystem.getName(),
-				this);
-	}
-	
 	/**
 	 * Constructs a BTMetaInfo based on the BTData.
 	 */
