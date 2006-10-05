@@ -4,11 +4,12 @@ import java.util.Collection;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
@@ -44,9 +45,9 @@ public class TrackerManager {
 	
 	TrackerManager(ManagedTorrent torrent) {
 		this.torrent = torrent;
-		BTMetaInfo info = torrent.getMetaInfo();
-		for (int i = 0; i < info.getTrackers().length;i++) 
-			trackers.add(new Tracker(info.getTrackers()[i],info, torrent));
+		TorrentContext context = torrent.getContext();
+		for (URI uri : context.getMetaInfo().getTrackers())
+			trackers.add(new Tracker(uri, context, torrent));
 	}
 	
 	public void add(Tracker t) {

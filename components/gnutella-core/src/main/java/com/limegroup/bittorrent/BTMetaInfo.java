@@ -22,15 +22,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.bittorrent.disk.DiskManagerFactory;
-import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.GenericsUtils;
 
@@ -47,10 +42,6 @@ public class BTMetaInfo implements Serializable {
 
 	/** a marker for a hash that has been verified */
 	private static final byte [] VERIFIED_HASH = new byte[0];
-
-	/** a single instance of the full bitset */
-	private BitSet fullSet = new FullBitSet();
-	private BitField fullBitField;
 
 	/** a list the hashes for this file */
 	private List<byte []> _hashes;
@@ -74,11 +65,6 @@ public class BTMetaInfo implements Serializable {
 	private URN _infoHashURN;
 
 	/*
-	 * The VerifyingFolder for this torrent. 
-	 */
-	private TorrentDiskManager _folder;
-
-	/*
 	 * an array of URL[] containing any trackers. This field is non-final
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
@@ -88,7 +74,17 @@ public class BTMetaInfo implements Serializable {
 	/*
 	 * FileDesc for the GUI
 	 */
-	private transient FileDesc _desc = null;
+	private FileDesc _desc = null;
+	
+	/**
+	 * Object that can save/restore the diskManager
+	 */
+	private Serializable diskManagerData;
+	
+	/**
+	 * The current <tt>TorrentContext</tt>
+	 */
+	private TorrentContext context;
 	
 	/**
 	 * The amount of data uploaded in previous session(s)
@@ -102,6 +98,11 @@ public class BTMetaInfo implements Serializable {
 	private volatile long uploadedNow;
 	
 	/**
+	 * The ratio from previous sessions
+	 */
+	private float historicRatio;
+	
+	/**
 	 * @return piece length for this torrent
 	 */
 	public int getPieceLength() {
@@ -110,6 +111,23 @@ public class BTMetaInfo implements Serializable {
 
 	public TorrentFileSystem getFileSystem() {
 		return fileSystem;
+	}
+	
+	public Serializable getDiskManagerData() {
+		return diskManagerData;
+	}
+	
+	public void setContext(TorrentContext context) {
+		if (context == null) // initialize cross-session ratio
+			initRatio(context);
+		this.context = context;
+	}
+	
+	private void initRatio(TorrentContext context) {
+		if (historicRatio == 0) 
+			return;
+		uploadedBefore = (long)
+		(context.getDiskManager().getBlockSize() * historicRatio);
 	}
 	
 	long getAmountUploaded() {
@@ -121,7 +139,7 @@ public class BTMetaInfo implements Serializable {
 	}
 	
 	float getRatio() {
-		long downloaded = _folder.getBlockSize();
+		long downloaded = context.getDiskManager().getBlockSize();
 		if (downloaded == 0)
 			return 0;
 		return (uploadedBefore + uploadedNow) * 1f / downloaded;
@@ -170,14 +188,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * @return a <tt>TorrentDiskManager</tt> instance to 
-	 * be used by a torrent for this.
-	 */
-	public TorrentDiskManager getDiskManager() {
-		return _folder;
-	}
-
-	/**
 	 * Moves all files of this torrent to saving directory
 	 * @throws IOException if failed
 	 */
@@ -190,7 +200,7 @@ public class BTMetaInfo implements Serializable {
 		_desc = null;
 
 		LOG.trace("saved files");
-		initializeDiskManager(null, true);
+		context.initializeDiskManager(true);
 		LOG.trace("initialized folder");
 	}
 
@@ -223,16 +233,6 @@ public class BTMetaInfo implements Serializable {
 	}
 
 	/**
-	 * Creates a new bitfield identifying the available ranges in a super sparse
-	 * manner
-	 * 
-	 * @return array of byte, the bitfield
-	 */
-	public byte[] createBitField() {
-		return _folder.createBitField();
-	}
-
-	/**
 	 * Reads a BTMetaInfo from byte []
 	 * 
 	 * @param torrent byte array with the contents of .torrent
@@ -258,13 +258,6 @@ public class BTMetaInfo implements Serializable {
 				this);
 	}
 	
-	/**
-	 * private utility method for initializing the DiskManager
-	 */
-	private void initializeDiskManager(Serializable data, boolean complete) {
-		_folder = DiskManagerFactory.instance().getManager(this, data, complete);
-	}
-
 	/**
 	 * Constructs a BTMetaInfo based on the BTData.
 	 */
@@ -296,8 +289,6 @@ public class BTMetaInfo implements Serializable {
 
 
 		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
-		fullBitField = new BitFieldSet(fullSet, getNumBlocks());
-		initializeDiskManager(null, false);
 	}
     
     // keys used between read/write object.
@@ -318,7 +309,7 @@ public class BTMetaInfo implements Serializable {
 		toWrite.put(SerialKeys.INFO_HASH,_infoHash);
 		toWrite.put(SerialKeys.TRACKERS,_trackers);
 		toWrite.put(SerialKeys.RATIO, getRatio());		
-		toWrite.put(SerialKeys.FOLDER_DATA,_folder.getSerializableObject());
+		toWrite.put(SerialKeys.FOLDER_DATA,context.getDiskManager().getSerializableObject());
 		
 		out.writeObject(toWrite);
 	}
@@ -340,20 +331,16 @@ public class BTMetaInfo implements Serializable {
 		_infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
 		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
 		_trackers = (URI []) toRead.get(SerialKeys.TRACKERS);
-		Float ratio = (Float) toRead.get(SerialKeys.RATIO);
-        Serializable folderData = toRead.get(SerialKeys.FOLDER_DATA); 
+		Float ratio = (Float)toRead.get(SerialKeys.RATIO);
+        diskManagerData = toRead.get(SerialKeys.FOLDER_DATA); 
 		
 		if (_hashes == null || pieceLength == null || fileSystem == null ||
 				 _infoHash == null || _trackers == null ||
-                 folderData == null || ratio == null)
+                 diskManagerData == null || ratio == null)
 			throw new IOException("cannot read BTMetaInfo");
 		
+		historicRatio = ratio.floatValue();
 		_pieceLength = pieceLength.intValue();
-		initializeDiskManager(folderData, false);
-		if (ratio.floatValue() != 0)
-			uploadedBefore = (long)(_folder.getBlockSize() * ratio.floatValue()); 
-		fullSet = new FullBitSet();
-		fullBitField = new BitFieldSet(fullSet,getNumBlocks());
 	}
 
 	/**
@@ -379,40 +366,6 @@ public class BTMetaInfo implements Serializable {
 	public static class FakeFileDesc extends FileDesc {
 		public FakeFileDesc(File file, Set<? extends URN> s) {
 			super(file, s, Integer.MAX_VALUE);
-		}
-	}
-
-	/**
-	 * @return a <tt>BitSet</tt> to be used to represent a complete torrent.
-	 */
-	public BitSet getFullBitSet() {
-		return fullSet;
-	}
-	
-	public BitField getFullBitField() {
-		return fullBitField;
-	}
-	
-	/**
-	 * A bitset that has fixed size and every bit in it is set.
-	 */
-	private class FullBitSet extends BitSet {
-		private static final long serialVersionUID = -2621319856548383315L;
-		public void set(int i) {}
-		public void clear(int i){}
-		public boolean get(int i) {
-			return true;
-		}
-		public int cardinality() {
-			return getNumBlocks();
-		}
-		public int length() {
-			return getNumBlocks();
-		}
-		public int nextSetBit(int i) {
-			if (i >= cardinality())
-				return -1;
-			return i;
 		}
 	}
 }

@@ -2,7 +2,7 @@ package com.limegroup.bittorrent.messages;
 
 import java.nio.ByteBuffer;
 
-import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.TorrentContext;
 
 /**
  * A BitField message.  
@@ -26,8 +26,8 @@ public class BTBitField extends BTMessage {
 	 *            bitfield
 	 * @return new instance of BTBitField
 	 */
-	public static BTBitField createMessage(BTMetaInfo info) {
-		byte[] bitfield = info.createBitField();
+	public static BTBitField createMessage(TorrentContext context) {
+		byte[] bitfield = context.getDiskManager().createBitField();
 		return new BTBitField(ByteBuffer.wrap(bitfield));
 	}
 

@@ -11,8 +11,8 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -62,15 +62,15 @@ class Tracker {
 	
 	private final URI uri;
 	
-	private final BTMetaInfo info;
+	private final TorrentContext context;
 	
 	private final ManagedTorrent torrent;
 	
 	private int failures;
 	
-	public Tracker(URI uri, BTMetaInfo info, ManagedTorrent torrent) {
+	public Tracker(URI uri, TorrentContext context, ManagedTorrent torrent) {
 		this.uri = uri;
-		this.info = info;
+		this.context = context;
 		this.torrent = torrent;
 	}
 
@@ -124,7 +124,8 @@ class Tracker {
 	private String createQueryString(Event event) {
 		StringBuffer buf = new StringBuffer();
 		try {
-			String infoHash = URLEncoder.encode(StringUtils.getASCIIString(info.getInfoHash()),
+			String infoHash = URLEncoder.encode(
+					StringUtils.getASCIIString(context.getMetaInfo().getInfoHash()),
 					Constants.ASCII_ENCODING);
 			addGetField(buf, "info_hash", infoHash);
 
@@ -150,8 +151,8 @@ class Tracker {
 		addGetField(buf, "uploaded", 
 				String.valueOf(torrent.getTotalUploaded()));
 
-		addGetField(buf, "left", String.valueOf(info.getFileSystem().getTotalSize()
-				- info.getDiskManager().getBlockSize()));
+		addGetField(buf, "left", String.valueOf(context.getFileSystem().getTotalSize()
+				- context.getDiskManager().getBlockSize()));
 
 		addGetField(buf, "compact", "1");
 

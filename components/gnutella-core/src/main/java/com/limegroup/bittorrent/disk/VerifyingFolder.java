@@ -21,6 +21,7 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.PieceReadListener;
+import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.ErrorService;
@@ -110,7 +111,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	private long _corruptedBytes;
 
-	private final BTMetaInfo _info;
+	private final TorrentContext context;
 	
 	/**
 	 * an exception indicating Disk operation failed.
@@ -139,13 +140,13 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @param info a BTMetaInfo for which to create this Folder.
 	 * @param complete if the download is completed
 	 */
-	VerifyingFolder(BTMetaInfo info, 
+	VerifyingFolder(TorrentContext context, 
 			boolean complete, 
             Serializable data,
 			DiskController<TorrentFile> diskController) {
-		TorrentFileSystem system = info.getFileSystem();
+		TorrentFileSystem system = context.getFileSystem();
 		_files = complete? system.getFiles() : system.getIncompleteFiles();
-		_info = info;
+		this.context = context;
 		_corruptedBytes = 0;
 		partialBlocks = new BlockRangeMap();
 		requestedRanges = new BlockRangeMap();
@@ -157,13 +158,13 @@ class VerifyingFolder implements TorrentDiskManager {
 					requestedRanges.keySet());
 		
 		if (complete) {
-			verifiedBlocks = _info.getFullBitSet();
-			verified = _info.getFullBitField();
+			verifiedBlocks = context.getFullBitSet();
+			verified = context.getFullBitField();
 		} else {
-			verifiedBlocks = new BitSet(_info.getNumBlocks());
+			verifiedBlocks = new BitSet(context.getMetaInfo().getNumBlocks());
 			if (data != null && data instanceof SerialData)
 				initialize((SerialData)data);
-			verified = new BitFieldSet(verifiedBlocks, _info.getNumBlocks());
+			verified = new BitFieldSet(verifiedBlocks, context.getMetaInfo().getNumBlocks());
 		}
 		
 		missing = new NotView(verified);
@@ -187,7 +188,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	public void writeBlock(NECallable<BTPiece> factory) {
 		if (storedException != null)
 			return;
-		QUEUE.invokeLater(new WriteJob(factory),_info.getURN());
+		QUEUE.invokeLater(new WriteJob(factory),context.getMetaInfo().getURN());
 	}
 	
 	/**
@@ -241,7 +242,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	private void writeBlockImpl(BTInterval in, byte[] buf) 
 	throws IOException {
 		
-		long startOffset = (long)in.getId() * _info.getPieceLength() + in.low;
+		long startOffset = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
 		diskController.write(startOffset, buf);
 		
 		synchronized(this) {
@@ -268,9 +269,9 @@ class VerifyingFolder implements TorrentDiskManager {
 		requestedRanges.remove(blockId);
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
-		if (verifiedBlocks.cardinality() == _info.getNumBlocks()) {
-			verifiedBlocks = _info.getFullBitSet();
-			verified = _info.getFullBitField();
+		if (verifiedBlocks.cardinality() == context.getMetaInfo().getNumBlocks()) {
+			verifiedBlocks = context.getFullBitSet();
+			verified = context.getFullBitField();
 			missing = new NotView(verified);
 		}
 	}
@@ -291,12 +292,12 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	private boolean verify(int pieceNum, boolean slow) 
 	throws IOException, InterruptedException {
-		MessageDigest md = _info.getMessageDigest();
+		MessageDigest md = context.getMetaInfo().getMessageDigest();
 		md.reset();
 		int pieceSize = getPieceSize(pieceNum);
 		byte [] buf = new byte[Math.min(65536,pieceSize)];
 		int read = 0;
-		long offset = (long)pieceNum * _info.getPieceLength();
+		long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
 		while (read < pieceSize) {
 			
 			int readNow = diskController.read(offset, buf, 0, buf.length, true);
@@ -322,7 +323,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 		
 		byte [] sha1 = md.digest();
-		return _info.verify(sha1, pieceNum);
+		return context.getMetaInfo().verify(sha1, pieceNum);
 	}
 	
 	/**
@@ -411,7 +412,7 @@ class VerifyingFolder implements TorrentDiskManager {
 							torrent.verificationComplete();
 						}
 					}
-				}, _info.getURN());
+				}, context.getMetaInfo().getURN());
 			}
 		} else
 			isVerifying = false;
@@ -425,7 +426,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @return true if the whole torrent has been written and verified
 	 */
 	public synchronized boolean isComplete() {
-		return verified == _info.getFullBitField();
+		return verified == context.getFullBitField();
 	}
 
 	/* (non-Javadoc)
@@ -440,8 +441,9 @@ class VerifyingFolder implements TorrentDiskManager {
 		
 		listener = null;
 		// kill all jobs for this torrent
-		VERIFY_QUEUE.clear(_info.getURN());
-		QUEUE.clear(_info.getURN());
+		URN urn = context.getMetaInfo().getURN();
+		VERIFY_QUEUE.clear(urn);
+		QUEUE.clear(urn);
 		
 	}
 
@@ -458,7 +460,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	public void requestPieceRead(BTInterval in, PieceReadListener c) {
 		if (storedException != null)
 				return;
-		QUEUE.invokeLater(new SendJob(in, c),_info.getURN());
+		QUEUE.invokeLater(new SendJob(in, c),context.getMetaInfo().getURN());
 	}
 	
 	private class SendJob implements Runnable {
@@ -478,7 +480,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			if (LOG.isDebugEnabled())
 				LOG.debug("reading piece " + in);
 			int length = in.high - in.low + 1;
-			long position = (long)in.getId() * _info.getPieceLength() + in.low;
+			long position = (long)in.getId() * context.getMetaInfo().getPieceLength() + in.low;
 			int offset = 0;
 			byte[] buf = new byte[length];
 			boolean success = false;
@@ -687,10 +689,12 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * except the last one have the same size.
 	 */
 	private int getPieceSize(int pieceNum) {
-		if (pieceNum == _info.getNumBlocks() - 1)
-			return (int)(_info.getFileSystem().getTotalSize() % _info.getPieceLength());
+		BTMetaInfo info = context.getMetaInfo();
+		if (pieceNum == info.getNumBlocks() - 1)
+			return (int)(context.getFileSystem().getTotalSize() % 
+					info.getPieceLength());
 		else
-			return _info.getPieceLength();
+			return info.getPieceLength();
 	}
 	
 	/**
@@ -716,13 +720,13 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	public synchronized byte[] createBitField() {
 		if (bitField == null) 
-			bitField = new byte[(_info.getNumBlocks() + 7) / 8];
+			bitField = new byte[(context.getMetaInfo().getNumBlocks() + 7) / 8];
 		
 		if (bitFieldDirty) {
 			if (isComplete()) {
 				for(int i = 0; i < bitField.length; i++)
 					bitField[i] = (byte)0xFF;
-				int odd = _info.getNumBlocks() % 8;
+				int odd = context.getMetaInfo().getNumBlocks() % 8;
 				if (odd != 0) 
 					bitField[bitField.length - 1] <<= (8 - odd);
 				
@@ -746,7 +750,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 		for (TorrentFile f : l) {
 			for (int i = Math.max(lastSet,f.getBegin()); i <= f.getEnd(); i++) 
-				VERIFY_QUEUE.invokeLater(new VerifyJob(i),_info.getURN());
+				VERIFY_QUEUE.invokeLater(new VerifyJob(i),context.getMetaInfo().getURN());
 		}
 	}
 
@@ -787,10 +791,11 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * @return number of bytes written and verified
 	 */
 	public synchronized long getVerifiedBlockSize() {
-		long ret = verified.cardinality() * (long)_info.getPieceLength();
-		if (verified.get(_info.getNumBlocks() - 1)) {
-			ret = ret - _info.getPieceLength() + 
-				getPieceSize(_info.getNumBlocks() -1 );
+		BTMetaInfo info = context.getMetaInfo();
+		long ret = verified.cardinality() * (long)info.getPieceLength();
+		if (verified.get(info.getNumBlocks() - 1)) {
+			ret = ret - info.getPieceLength() + 
+				getPieceSize(info.getNumBlocks() -1 );
 		}
 		return ret;
 	}

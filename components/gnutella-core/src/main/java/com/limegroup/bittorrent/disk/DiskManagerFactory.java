@@ -2,7 +2,7 @@ package com.limegroup.bittorrent.disk;
 
 import java.io.Serializable;
 
-import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 
 public class DiskManagerFactory {
@@ -15,10 +15,10 @@ public class DiskManagerFactory {
 	
 	protected DiskManagerFactory(){}
 	
-	public TorrentDiskManager getManager(BTMetaInfo info,
+	public TorrentDiskManager getManager(TorrentContext context,
 			Serializable serializedData,
 			boolean complete) {
-		return new VerifyingFolder(info, 
+		return new VerifyingFolder(context, 
 				complete,
 				serializedData, 
 				new RAFDiskController<TorrentFile>());

@@ -118,7 +118,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 			finishingHandshakes = true;
 			
 			if (torrent.shouldAddConnection(loc)) {
-				BTConnection btc = new BTConnection(torrent.getMetaInfo(), 
+				BTConnection btc = new BTConnection(torrent.getContext(), 
 						loc);
 
 				if (LOG.isDebugEnabled())

@@ -95,7 +95,7 @@ PieceSendListener, PieceReadListener {
 	/**
 	 * the metaInfo of this torrent
 	 */
-	private final BTMetaInfo _info;
+	private final TorrentContext context;
 
 	/**
 	 * the id of the remote client
@@ -169,13 +169,13 @@ PieceSendListener, PieceReadListener {
 	 * @param torrent
 	 * 			  the ManagedTorrent to whom this connection belongs.
 	 */
-	public BTConnection(BTMetaInfo info, TorrentLocation ep) {
+	public BTConnection(TorrentContext context, TorrentLocation ep) {
 		_endpoint = ep;
-		_availableRanges = new BitSet(info.getNumBlocks());
-		_available = new BitFieldSet(_availableRanges, info.getNumBlocks());
+		this.context = context;
+		_availableRanges = new BitSet(context.getMetaInfo().getNumBlocks());
+		_available = new BitFieldSet(_availableRanges, context.getMetaInfo().getNumBlocks());
 		_requesting = new HashSet<BTInterval>();
 		_requested = new HashSet<BTInterval>();
-		_info = info;
 
 		// connections start choked and not interested
 		_isChoked = true;
@@ -224,8 +224,8 @@ PieceSendListener, PieceReadListener {
 		_socket.setWriteObserver(_writer);
 		
 		// if we have downloaded anything send a bitfield
-		if (_info.getDiskManager().getVerifiedBlockSize() > 0) {
-			numMissing = _info.getDiskManager().getNumMissing(_available);
+		if (context.getDiskManager().getVerifiedBlockSize() > 0) {
+			numMissing = context.getDiskManager().getNumMissing(_available);
 			sendBitfield();
 		}
 	}
@@ -344,7 +344,7 @@ PieceSendListener, PieceReadListener {
 	 */
 	public void wroteBytes(int written) {
 		up.count(written);
-		_info.countUploaded(written);
+		context.getMetaInfo().countUploaded(written); //TODO: move/rename the persistent info to its own place
 	}
 
 	/**
@@ -447,7 +447,7 @@ PieceSendListener, PieceReadListener {
 
 		// we should indicate that we are not interested anymore, so we are
 		// not unchoked when we do not want to request anything.
-		if (!_info.getDiskManager().containsAnyWeMiss(_available)) {
+		if (!context.getDiskManager().containsAnyWeMiss(_available)) {
 			sendNotInterested();
 			return;
 		}
@@ -469,7 +469,7 @@ PieceSendListener, PieceReadListener {
 	 * Sends a bitfield message to the remote host.
 	 */
 	private void sendBitfield() {
-		_writer.enqueue(BTBitField.createMessage(_info));
+		_writer.enqueue(BTBitField.createMessage(context));
 	}
 
 	private void sendCancel(BTInterval in) {
@@ -507,7 +507,7 @@ PieceSendListener, PieceReadListener {
 		usingSlot = true;
 		int proceed = RouterService.getUploadSlotManager().requestSlot(
 					this,
-					!_info.getDiskManager().isComplete());
+					!context.getDiskManager().isComplete());
 		
 		if (proceed == -1) { // denied, choke the connection
 			usingSlot = false;
@@ -529,7 +529,7 @@ PieceSendListener, PieceReadListener {
 		if (LOG.isDebugEnabled())
 			LOG.debug(this+" requesting disk read for "+in);
 		
-		_info.getDiskManager().requestPieceRead(in, this);
+		context.getDiskManager().requestPieceRead(in, this);
 		
 	}
 
@@ -558,7 +558,7 @@ PieceSendListener, PieceReadListener {
 	
 	private void clearRequests() {
 		for (BTInterval clear : _requesting)
-			_info.getDiskManager().releaseInterval(clear);
+			context.getDiskManager().releaseInterval(clear);
 		_requesting.clear();
 	}
 
@@ -591,7 +591,7 @@ PieceSendListener, PieceReadListener {
 			listener.linkNotInterested(this);
 			// if we have all pieces and the remote is not interested,
 			// disconnect, - they have obviously completed their download, too
-			if (_info.getDiskManager().isComplete())
+			if (context.getDiskManager().isComplete())
 				close();
 			break;
 
@@ -645,7 +645,7 @@ PieceSendListener, PieceReadListener {
 		// ignore, that's a buggy client sending this request (didn't manage to
 		// find out which one) - we could also throw an exception causing us to
 		// disconnect...
-		if (in.getId() > _info.getNumBlocks()) {
+		if (in.getId() > context.getMetaInfo().getNumBlocks()) {
 			if (LOG.isDebugEnabled())
 				LOG.debug("got bad request " + message);
 			return;
@@ -658,7 +658,7 @@ PieceSendListener, PieceReadListener {
 			return;
 		}
 
-		if (_info.getDiskManager().hasBlock(in.getId())) 
+		if (context.getDiskManager().hasBlock(in.getId())) 
 			_requested.add(in);
 		
 		if (!_requested.isEmpty() && !usingSlot)
@@ -699,7 +699,7 @@ PieceSendListener, PieceReadListener {
 		
 		// get new ranges to request if necessary
 		while (_requesting.size() < MAX_REQUESTS) {
-			BTInterval in = _info.getDiskManager().leaseRandom(_available, _requesting);
+			BTInterval in = context.getDiskManager().leaseRandom(_available, _requesting);
 			if (in == null)
 				break;
 			_requesting.add(in);
@@ -711,7 +711,7 @@ PieceSendListener, PieceReadListener {
 	 * @see com.limegroup.bittorrent.BTMessageHandler#handlePiece(com.limegroup.bittorrent.BTPieceFactory)
 	 */
 	public void handlePiece(NECallable<BTPiece> factory) {
-		_info.getDiskManager().writeBlock(factory);
+		context.getDiskManager().writeBlock(factory);
 	}
 
 	/**
@@ -721,7 +721,7 @@ PieceSendListener, PieceReadListener {
 		ByteBuffer field = message.getPayload();
 
 		// the number of pieces
-		int numBits = _info.getNumBlocks();
+		int numBits = context.getMetaInfo().getNumBlocks();
 
 		int bitFieldLength = (numBits + 7) / 8;
 
@@ -733,7 +733,7 @@ PieceSendListener, PieceReadListener {
 		for (int i = 0; i < numBits; i++) {
 			byte mask = (byte) (0x80 >>> (i % 8));
 			if ((mask & field.get(i / 8)) == mask) {
-				if (!willBeInteresting && !_info.getDiskManager().hasBlock(i))
+				if (!willBeInteresting && !context.getDiskManager().hasBlock(i))
 					willBeInteresting = true;
 				_availableRanges.set(i);
 			}
@@ -741,10 +741,10 @@ PieceSendListener, PieceReadListener {
 		
 		if (_available.cardinality() == numBits) {
 			_availableRanges = null;
-			_available = _info.getFullBitField();
+			_available = context.getFullBitField();
 			numMissing = 0;
 		} else
-			numMissing = _info.getDiskManager().getNumMissing(_available);
+			numMissing = context.getDiskManager().getNumMissing(_available);
 		
 		if (willBeInteresting)
 			sendInterested();
@@ -758,7 +758,7 @@ PieceSendListener, PieceReadListener {
 		if (_available.get(pieceNum))
 			return; // dublicate Have, ignore.
 		
-		TorrentDiskManager v = _info.getDiskManager();
+		TorrentDiskManager v = context.getDiskManager();
 		_availableRanges.set(pieceNum);
 
 		
@@ -768,13 +768,13 @@ PieceSendListener, PieceReadListener {
 		else
 			sendInterested();
 		
-		if (_available.cardinality() == _info.getNumBlocks()) {
+		if (_available.cardinality() == context.getMetaInfo().getNumBlocks()) {
 			if (LOG.isDebugEnabled())
 				LOG.debug(this+" now has everything");
 			_availableRanges = null;
-			_available = _info.getFullBitField();
+			_available = context.getFullBitField();
 			numMissing = 0;
-			if (_info.getDiskManager().isComplete()) // we're also seed - goodbye
+			if (v.isComplete()) // we're also seed - goodbye
 				shutdown();
 		}
 	}
@@ -878,7 +878,7 @@ PieceSendListener, PieceReadListener {
 	 * @see com.limegroup.bittorrent.Chokable#isSeed()
 	 */
 	public boolean isSeed() {
-		return _available.cardinality() == _info.getNumBlocks();
+		return _available.cardinality() == context.getMetaInfo().getNumBlocks();
 	}
 
 	/* (non-Javadoc)

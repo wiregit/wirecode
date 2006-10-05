@@ -71,12 +71,16 @@ public class BTDownloader extends AbstractDownloader
 	 */
 	private IncompleteFileManager ifm;
 	
+	// TODO: figure out how to init this
+	private TorrentContext context;
+	
 	private volatile long startTime, stopTime;
 	
 	private NumericBuffer<Float> averagedBandwidth = 
 		new NumericBuffer<Float>(10);
 	
 	public BTDownloader(BTMetaInfo info) {
+		context = new BTContext(info);
 		_info = info;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
@@ -214,12 +218,12 @@ public class BTDownloader extends AbstractDownloader
 			return getContentLength();
 		
 		// return the number of verified bytes
-		long ret = _info.getDiskManager().getBlockSize();
+		long ret = context.getDiskManager().getBlockSize();
 		
 		// if this is initial checking, add the number of processed bytes
 		// too.
 		if (_torrent.getState() == TorrentState.VERIFYING)
-			ret += _info.getDiskManager().getNumCorruptedBytes();
+			ret += context.getDiskManager().getNumCorruptedBytes();
 		return ret;
 	}
 
@@ -296,7 +300,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 
 	public long getAmountVerified() {
-		return _info.getDiskManager().getVerifiedBlockSize();
+		return context.getDiskManager().getVerifiedBlockSize();
 	}
 
 	public int getChunkSize() {
@@ -344,7 +348,7 @@ public class BTDownloader extends AbstractDownloader
 	}
 	
 	public int getAmountPending() {
-		return _info.getDiskManager().getAmountPending();
+		return context.getDiskManager().getAmountPending();
 	}
 
 
@@ -411,6 +415,7 @@ public class BTDownloader extends AbstractDownloader
 				String.class, Serializable.class, 
 				GenericsUtils.ScanMode.EXCEPTION);
 		_info = (BTMetaInfo)propertiesMap.get(METAINFO);
+		context = new BTContext(_info);
 		urn = _info.getURN();
 		fileSystem = _info.getFileSystem();
 		if (attributes == null || _info == null)
@@ -425,7 +430,7 @@ public class BTDownloader extends AbstractDownloader
 		this.manager = manager;
 		ifm = manager.getIncompleteFileManager();
 		TorrentManager torrentManager = RouterService.getTorrentManager();
-		_torrent = new ManagedTorrent(_info, torrentManager,
+		_torrent = new ManagedTorrent(context, torrentManager,
 				NIODispatcher.instance().getSchedulingThreadPool()); 
 		torrentManager.addEventListener(this);
 		ifm.addTorrentEntry(_info.getURN());
