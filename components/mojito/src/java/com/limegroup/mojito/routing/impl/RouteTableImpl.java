@@ -25,6 +25,7 @@ import java.io.ObjectOutputStream;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -46,6 +47,10 @@ import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 
+/**
+ * A PatriciaTrie bases RouteTable implementation for the Mojito DHT.
+ * This is the reference implementation.
+ */
 public class RouteTableImpl implements RouteTable {
     
     private static final long serialVersionUID = -7351267868357880369L;
@@ -92,6 +97,9 @@ public class RouteTableImpl implements RouteTable {
         init();
     }
     
+    /**
+     * Initializes the RouteTable
+     */
     private void init() {
         KUID bucketId = KUID.MINIMUM;
         bucketTrie.put(bucketId, new BucketNode(this, bucketId, 0));
@@ -100,14 +108,31 @@ public class RouteTableImpl implements RouteTable {
         smallestSubtreeBucket = null;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#setPingCallback(com.limegroup.mojito.routing.RouteTable.PingCallback)
+     */
     public void setPingCallback(PingCallback pingCallback) {
         this.pingCallback = pingCallback;
     }
 
+    /**
+     * Sets the RouteTableCallback or use null to unset it.
+     * 
+     * NOTE: This method is not Thread safe and it's not intended to be.
+     * That means setting and unsetting the callback at runtime can
+     * cause problems like NullPointerExceptions.
+     * 
+     * @param routeTableCallback The RouteTableCallback instance
+     */
     public void setRouteTableCallback(RouteTableCallback routeTableCallback) {
         this.routeTableCallback = routeTableCallback;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#add(com.limegroup.mojito.Contact)
+     */
     public synchronized void add(Contact node) {
         
         // The first Node we're adding to the RouteTable
@@ -163,6 +188,13 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * This method updates an existing Contact with data from a new Contact.
+     * The initial state is that both Contacts have the same Node ID which
+     * doesn't mean they're really the same Node. In order to figure out
+     * if they're really equal it's peforming some additional checks and
+     * there are a few side conditions.
+     */
     protected synchronized void updateContactInBucket(Bucket bucket, Contact existing, Contact node) {
         assert (existing.getNodeID().equals(node.getNodeID()));
         
@@ -177,7 +209,7 @@ public class RouteTableImpl implements RouteTable {
                     LOG.debug(node + " collides with " + existing);
                 }
                 
-            // Must be of instance LocalContact!
+            // Must be instance of LocalContact!
             } else if (!(node instanceof LocalContact)) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Attempting to replace the local Node " 
@@ -242,6 +274,11 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * This method tries to ping the existing Contact and if it doesn't
+     * respond it will try to replace it with the new Contact. The initial 
+     * state is that both Contacts have the same Node ID.
+     */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         PingListener listener = new PingListener() {
             public void handleResult(PingEvent result) {
@@ -309,6 +346,9 @@ public class RouteTableImpl implements RouteTable {
         touchBucket(bucket);
     }
     
+    /**
+     * This method adds the given Contact to the given Bucket.
+     */
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
         bucket.addActiveContact(node);
         
@@ -325,6 +365,11 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * This method splits the given Bucket into two new Buckets.
+     * There are a few conditions in which cases we do split and
+     * in which cases we don't.
+     */
     protected synchronized boolean split(Bucket bucket) {
         
         // Three conditions for splitting:
@@ -382,6 +427,13 @@ public class RouteTableImpl implements RouteTable {
         return false;
     }
     
+    /**
+     * This method tries to replace an existing Contact in the given
+     * Bucket with the given Contact or tries to add the given Contact
+     * to the Bucket's replacement Cache. There are certain conditions
+     * in which cases we replace Contacts and if it's not possible we're
+     * trying to add the Contact to the replacement cache.
+     */
     protected synchronized void replaceContactInBucket(Bucket bucket, Contact node) {
         
         if (node.isAlive()) {
@@ -437,6 +489,10 @@ public class RouteTableImpl implements RouteTable {
         pingLeastRecentlySeenNode(bucket);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#handleFailure(com.limegroup.mojito.KUID, java.net.SocketAddress)
+     */
     public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
         
         // NodeID might be null if we sent a ping to
@@ -538,34 +594,65 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * Removes the given Contact from the RouteTable
+     */
     protected synchronized boolean remove(Contact node) {
         return remove(node.getNodeID());
     }
     
+    /**
+     * Removes the given KUID (Contact with that KUID) 
+     * from the RouteTable
+     */
     protected synchronized boolean remove(KUID nodeId) {
         return bucketTrie.select(nodeId).remove(nodeId);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getBucketID(com.limegroup.mojito.KUID)
+     */
     public synchronized KUID getBucketID(KUID nodeId) {
         return bucketTrie.select(nodeId).getBucketID();
     }
     
+    /**
+     * Returns a Bucket that is nearest (xor distance) 
+     * to the given KUID
+     */
     public synchronized Bucket getBucket(KUID nodeId) {
         return bucketTrie.select(nodeId);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#select(com.limegroup.mojito.KUID)
+     */
     public synchronized Contact select(KUID nodeId) {
         return bucketTrie.select(nodeId).select(nodeId);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#get(com.limegroup.mojito.KUID)
+     */
     public synchronized Contact get(KUID nodeId) {
         return bucketTrie.select(nodeId).get(nodeId);
     }
     
+    /**
+     * Returns 'count' number of Contacts that are nearest (xor distance)
+     * to the given KUID.
+     */
     public synchronized List<Contact> select(KUID nodeId, int count) {
         return select(nodeId, count, false);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#select(com.limegroup.mojito.KUID, int, boolean)
+     */
     public synchronized List<Contact> select(final KUID nodeId, final int count, 
             final boolean activeContacts) {
         
@@ -602,6 +689,10 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getContacts()
+     */
     public synchronized List<Contact> getContacts() {
         List<Contact> live = getActiveContacts();
         List<Contact> cached = getCachedContacts();
@@ -612,6 +703,10 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getActiveContacts()
+     */
     public synchronized List<Contact> getActiveContacts() {
         List<Contact> nodes = new ArrayList<Contact>();
         for (Bucket bucket : bucketTrie.values()) {
@@ -620,6 +715,10 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getCachedContacts()
+     */
     public synchronized List<Contact> getCachedContacts() {
         List<Contact> nodes = new ArrayList<Contact>();
         for (Bucket bucket : bucketTrie.values()) {
@@ -628,17 +727,15 @@ public class RouteTableImpl implements RouteTable {
         return nodes;
     }
     
-    /**
-     * Returns a List of KUIDs that need to be looked up in order
-     * to refresh the RouteTable.
-     * 
+    /*
      * If we are bootstrapping, we don't want to refresh the bucket
      * that contains the local node ID, as phase 1 already takes 
      * care of this. Additionally, when we bootstrap, we don't 
      * look at the bucket's timestamp (isRefreshRequired) so 
      * that we randomly fill up our routing table.
      * 
-     * @param bootstrapping whether or not this refresh is done during bootstrap
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getRefreshIDs(boolean)
      */
     public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
         List<KUID> randomIds = new ArrayList<KUID>();
@@ -674,10 +771,16 @@ public class RouteTableImpl implements RouteTable {
         return randomIds;
     }
     
+    /**
+     * Returns all Buckets as an Collection
+     */
     public synchronized Collection<Bucket> getBuckets() {
-        return bucketTrie.values();
+        return Collections.unmodifiableCollection(bucketTrie.values());
     }
     
+    /**
+     * Touches the given Bucket (i.e. updates its timeStamp)
+     */
     private void touchBucket(Bucket bucket) {
         if(LOG.isTraceEnabled()) {
             LOG.trace("Touching bucket: " + bucket);
@@ -686,6 +789,9 @@ public class RouteTableImpl implements RouteTable {
         bucket.touch();
     }
     
+    /**
+     * Pings the least recently seen active Contact in the given Bucket
+     */
     private void pingLeastRecentlySeenNode(Bucket bucket) {
         Contact lrs = bucket.getLeastRecentlySeenActiveContact();
         if (!isLocalNode(lrs)) {
@@ -693,6 +799,10 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /**
+     * Pings the given Contact and adds the given DHTEventListener to
+     * the DHTFuture if it's not null
+     */
     DHTFuture<PingEvent> ping(Contact node, DHTEventListener<PingEvent> listener) {
         DHTFuture<PingEvent> future = pingCallback.ping(node);
         if (listener != null) {
@@ -701,6 +811,10 @@ public class RouteTableImpl implements RouteTable {
         return future;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getLocalNode()
+     */
     public Contact getLocalNode() {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
@@ -708,14 +822,26 @@ public class RouteTableImpl implements RouteTable {
         return localNode;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#isLocalNode(com.limegroup.mojito.Contact)
+     */
     public boolean isLocalNode(Contact node) {
         return node.equals(getLocalNode());
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#size()
+     */
     public synchronized int size() {
         return getActiveContacts().size() + getCachedContacts().size();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#clear()
+     */
     public synchronized void clear() {
         bucketTrie.clear();
         localNode = null;
@@ -727,6 +853,10 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#purge()
+     */
     public synchronized void purge() {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
@@ -747,6 +877,10 @@ public class RouteTableImpl implements RouteTable {
         rebuild(false);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#rebuild()
+     */
     public synchronized void rebuild() {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");

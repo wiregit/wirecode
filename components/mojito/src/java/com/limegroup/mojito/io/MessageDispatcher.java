@@ -674,7 +674,14 @@ public abstract class MessageDispatcher {
     }
     
     /**
+     * Sets the MessageDispatcherCallback. Use null as an argument to
+     * unset it.
      * 
+     * NOTE: This method is not Thread safe and it's not intended to be.
+     * That means setting and unsetting the callback at runtime can
+     * cause problems like NullPointerExceptions.
+     * 
+     * @param callback The MessageDispatcherCallback instance
      */
     public void setMessageDispatcherCallback(MessageDispatcherCallback callback) {
         this.callback = callback;
@@ -974,8 +981,32 @@ public abstract class MessageDispatcher {
         }
     }
     
+    /**
+     * The MessageDispatcherCallback is called for every 
+     * send or received Message. The receive() method is
+     * called from the MessageDispatcher Thread and the
+     * send() method from various Threads.
+     * 
+     * It's meant for internal use only and we assume 
+     * implementations don't throw any exceptions and 
+     * are non-blocking and super fast!
+     */
     public static interface MessageDispatcherCallback {
+        
+        /**
+         * The send() method is called for every message we're sending
+         * 
+         * @param nodeId The remote Node's Node ID (can be null)
+         * @param dst The remote Node's address
+         * @param message The message we're sending
+         */
         public void send(KUID nodeId, SocketAddress dst, DHTMessage message);
+        
+        /**
+         * The receive() method is called for every message we're receiving
+         * 
+         * @param message The Message we received
+         */
         public void receive(DHTMessage message);
     }
 }

@@ -93,7 +93,7 @@ public interface RouteTable extends Serializable {
      * Returns a List of KUIDs that need to be looked up in order
      * to refresh (or bootstrap) the RouteTable.
      * 
-     * @param bootstrapping whether or not this refresh is done during bootstrap
+     * @param bootstrapping Whether or not this refresh is done during bootstrap
      */
     public List<KUID> getRefreshIDs(boolean bootstrapping);
     
