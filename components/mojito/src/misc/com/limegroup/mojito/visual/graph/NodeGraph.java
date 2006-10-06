@@ -35,7 +35,9 @@ public class NodeGraph extends RouteTableGraph {
 
     @Override
     public String getGraphInfo() {
-        return bucket.toString();
+        synchronized (routeTable) {
+            return bucket.toString();
+        }
     }
 
     /**

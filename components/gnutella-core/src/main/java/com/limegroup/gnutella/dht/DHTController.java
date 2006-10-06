@@ -70,6 +70,10 @@ public interface DHTController {
     
     /**
      * Returns this controller's Mojito DHT instance.
+     * NOTE: This is for internal use only and should be used only
+     * within the dht.impl package. The DHT should not be handled directly
+     * by external classes.
+     * 
      */
-    MojitoDHT getMojitoDHT();
+    public MojitoDHT getMojitoDHT();
 }

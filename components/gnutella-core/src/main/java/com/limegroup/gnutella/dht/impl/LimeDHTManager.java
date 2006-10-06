@@ -126,6 +126,12 @@ public class LimeDHTManager implements DHTManager {
         return false;
     }
 
+    /**
+     * This getter is for internal use only. The Mojito DHT is not meant to
+     * be handled or passed around independently, as only the DHT controllers 
+     * know how to interact correctly with it.
+     * 
+     */
     public synchronized MojitoDHT getMojitoDHT() {
         if(controller != null) {
             return controller.getMojitoDHT();
