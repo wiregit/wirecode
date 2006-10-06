@@ -242,6 +242,15 @@ public interface Downloader extends BandwidthTracker {
     public int getQueuedHostCount();
     
     /**
+     * Returns the number of hosts that were attempted to connect to. 
+     * Should be reset whenever the downloader returns to the 
+     * {@link #CONNECTING} state.
+     * 
+     * @return -1 if downloader does not support it
+     */
+    public int getTriedHostCount();
+    
+    /**
      * Determines if the download is completed.
      */
     public boolean isCompleted();

@@ -677,6 +677,7 @@ public class DownloadWorker {
         if (LOG.isDebugEnabled())   
             LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":" + _rfd.getPort());        
         
+        _manager.incrementTriedHostsCount();
         DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
 
         if (_rfd.isReplyToMulticast()) {

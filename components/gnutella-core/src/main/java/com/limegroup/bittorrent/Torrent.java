@@ -51,6 +51,8 @@ interface Torrent {
 	public List<BTLink> getConnections();
 
 	public int getNumConnections();
+	
+	public int getTriedHostCount();
 
 	public int getNumPeers();
 

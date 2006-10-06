@@ -88,6 +88,11 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	 */
 	private final Periodic scheduled;
 	
+	/**
+	 * The number of connection attempts.
+	 */
+	private volatile int _triedHosts;
+	
 	BTConnectionFetcher(ManagedTorrent torrent, SchedulingThreadPool scheduler) {
 		_torrent = torrent;
 		ByteBuffer handshake = ByteBuffer.allocate(68);
@@ -149,6 +154,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 
 		TorrentConnector connector = new TorrentConnector(ep);
 		connecting.add(connector);
+		++_triedHosts;
 		try {
 			connector.toCancel = Sockets.connect(ep.getAddress(),
 					ep.getPort(), Constants.TIMEOUT, connector);
@@ -210,6 +216,13 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 	public void handshakerDone(BTHandshaker shaker) {
 		Assert.that(handshaking.contains(shaker));
 		handshaking.remove(shaker);
+	}
+	
+	/**
+	 * @return the number of connection tries
+	 */
+	public int getTriedHostCount() {
+		return _triedHosts;
 	}
 	
 	/**

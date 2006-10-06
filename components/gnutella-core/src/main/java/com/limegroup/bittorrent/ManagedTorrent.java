@@ -890,4 +890,8 @@ BTLinkListener {
 	public float getMeasuredBandwidth(boolean downstream) {
 		return linkManager.getMeasuredBandwidth(downstream);
 	}
+
+	public int getTriedHostCount() {
+		return _connectionFetcher.getTriedHostCount();
+	}
 }

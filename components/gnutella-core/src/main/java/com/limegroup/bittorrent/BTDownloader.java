@@ -496,4 +496,8 @@ public class BTDownloader extends AbstractDownloader
 		Downloader other = (Downloader)o;
 		return getSHA1Urn().equals(other.getSHA1Urn());
 	}
+
+	public int getTriedHostCount() {
+		return _torrent.getTriedHostCount();
+	}
 }

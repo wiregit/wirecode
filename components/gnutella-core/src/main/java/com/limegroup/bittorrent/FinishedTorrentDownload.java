@@ -82,4 +82,8 @@ public class FinishedTorrentDownload implements Torrent {
 	public long getAmountLost() {
 		return lost;
 	}
+
+	public int getTriedHostCount() {
+		return -1;
+	}
 }

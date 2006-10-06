@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -469,7 +470,12 @@ public class ManagedDownloader extends AbstractDownloader
     
     /** The key under which the URN is stored in the attribute map */
     protected static final String SHA1_URN = "sha1Urn";
-
+	
+	/**
+	 * The number of hosts that were tried to be connected to. Value is reset
+	 * in {@link #startDownload()};
+	 */
+    private volatile int triedHosts;
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -716,6 +722,8 @@ public class ManagedDownloader extends AbstractDownloader
                     dloaderManagerThread = Thread.currentThread();
                     validateDownload();
                     receivedNewSources = false;
+                    // reset tried hosts count
+                    triedHosts = 0;
                     int status = performDownload();
                     completeDownload(status);
                 } catch(Throwable t) {
@@ -2971,4 +2979,15 @@ public class ManagedDownloader extends AbstractDownloader
             return true;
         return false;
     }
+
+    /**
+     * Increments the count of tried hosts
+     */
+	synchronized void incrementTriedHostsCount() {
+    	++triedHosts;
+    }
+
+	public int getTriedHostCount() {
+		return triedHosts;
+	}
 }
