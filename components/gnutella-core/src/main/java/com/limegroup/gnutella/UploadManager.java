@@ -38,7 +38,6 @@ import com.limegroup.gnutella.uploader.PushProxyUploadState;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -945,19 +944,13 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         if (rqc.isDupe(sha1))
         	return REJECTED;
         
-        boolean greedy = rqc.isGreedy(sha1);
-        if (slotManager.positionInQueue(session) == -1) {
-        	if (!greedy && hostLimitReached(session.getHost())) {
-        		LOG.debug("host is now greedy");
-        		greedy = true;
-        		rqc.limitReached(sha1);
-        	} 
-        	if (greedy) {
-        		if(LOG.isDebugEnabled())
-        			LOG.debug(session.getUploader()+" limited");
+        // check the host limit unless this is a poll
+        if (slotManager.positionInQueue(session) == -1 &&
+        		hostLimitReached(session.getHost())) {
+        		if (LOG.isDebugEnabled())
+        			LOG.debug("host limit reached for "+session.getHost());
         		UploadStat.LIMIT_REACHED_GREEDY.incrementStat();
         		return REJECTED;
-        	}
         }
         
         int queued = slotManager.pollForSlot(session, 
@@ -1552,16 +1545,10 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
     
 	/**
 	 * This class keeps track of client requests.
-	 * 
-	 * IMPORTANT: Always call isGreedy() method, because it counts requests,
-	 * expires lists, etc.
 	 */
     private static class RequestCache {
 		// we don't allow more than 1 request per 5 seconds
     	private static final double MAX_REQUESTS = 5 * 1000;
-    	
-    	// don't keep more than this many entries
-    	private static final int MAX_ENTRIES = 10;
     	
     	// time we expect the downloader to wait before sending 
     	// another request after our initial LIMIT_REACHED reply
@@ -1578,8 +1565,6 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
 		/**
 		 * The set of sha1 requests we've seen in the past WAIT_TIME.
 		 */
-		private final Set /* of SHA1 (URN) */ REQUESTS;
-		
 		private final Set /* of SHA1 (URN) */ ACTIVE_UPLOADS; 
 		
 		/**
@@ -1601,22 +1586,11 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
          * Constructs a new RequestCache.
          */
      	RequestCache() {
-    		REQUESTS = new FixedSizeExpiringSet(MAX_ENTRIES, WAIT_TIME);
     		ACTIVE_UPLOADS = new HashSet();
     		_numRequests = 0;
     		_lastRequest = _firstRequest = System.currentTimeMillis();
         }
         
-        /**
-         * Determines whether or not the host is being greedy.
-         *
-         * Calling this method has a side-effect of counting itself
-         * as a request.
-         */
-    	boolean isGreedy(URN sha1) {
-    		return REQUESTS.contains(sha1);
-    	}
-    	
     	/**
     	 * tells the cache that an upload to the host has started.
     	 * @param sha1 the urn of the file being uploaded.
@@ -1635,13 +1609,6 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
     		    return ((_lastRequest - _firstRequest) / _numRequests)
     		           < MAX_REQUESTS;
     		}
-    	}
-    	
-    	/**
-    	 * Informs the cache that the limit has been reached for this SHA1.
-    	 */
-    	void limitReached(URN sha1) {
-			REQUESTS.add(sha1);
     	}
     	
     	/**
