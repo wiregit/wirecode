@@ -275,6 +275,10 @@ public class Tag {
          * Returns the Round Trip Time (RTT)
          */
         public long time() {
+            if (received < 0L) {
+                throw new IllegalStateException("The RTT is unknown as we have not received a response yet");
+            }
+            
             return received - sent;
         }
         
