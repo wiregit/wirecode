@@ -199,7 +199,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                 // #2 We're the second nearest of the k-closest Nodes to
                 //    the given valueId AND the other Node is the nearest.
                 //    In other words it changed its instance ID 'cause it
-                //    was offile for a short period of time or whatsoever.
+                //    was offline for a short period of time or whatsoever.
                 //    (see also pre-condition(s) from where we're calling
                 //    this method)
                 //
