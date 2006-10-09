@@ -175,4 +175,12 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting TORRENT_SEED_MORE =
     	FACTORY.createIntSetting("TORRENT_SEED_MORE", 0);
+	
+	/**
+	 * Setting for whether to show the question dialog when files have been
+	 * dropped somewhere on limewire.
+	 */
+	public static final BooleanSetting SHARE_DROPPED_FILES =
+		FACTORY.createBooleanSetting("SHARE_DROPPED_FILES", false);
+
 }
