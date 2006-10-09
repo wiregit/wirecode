@@ -141,4 +141,47 @@ class BTLinkManager implements Shutdownable {
 		}
 		return ret;
 	}
+	
+	/**
+	 * @return true if any of the links managed by this are currently uploading.
+	 */
+	public boolean hasUploading() {
+		synchronized(_connections) {
+			for (BTLink link : _connections) {
+				if (link.isUploading())
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @return true if any of the links managed by this are not choked.
+	 */
+	public boolean hasUnchoked() {
+		synchronized(_connections) {
+			if (_connections.isEmpty())
+				return false;
+			for (BTLink link : _connections) {
+				if (!link.isChoked())
+					return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * @return true if any of the links managed by this are interested.
+	 */
+	public boolean hasInterested() {
+		synchronized(_connections) {
+			if (_connections.isEmpty())
+				return false;
+			for (BTLink link : _connections) {
+				if (!link.isInterested())
+					return true;
+			}
+		}
+		return false;
+	}
 }

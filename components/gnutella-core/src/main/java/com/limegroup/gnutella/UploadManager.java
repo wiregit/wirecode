@@ -865,7 +865,7 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
 	public synchronized int getNumQueuedUploads() {
         return slotManager.getNumQueued();
     }
-
+	
 	/**
 	 * Returns true if this has ever successfully uploaded a file
      * during this session.<p>
@@ -929,7 +929,6 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
 	    	rqc = new RequestCache();
 	    // make sure we don't forget this RequestCache too soon!
 		REQUESTS.put(session.getHost(), rqc);
-
         rqc.countRequest();
         if (rqc.isHammering()) {
             if(LOG.isWarnEnabled())

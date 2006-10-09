@@ -894,4 +894,21 @@ BTLinkListener {
 	public int getTriedHostCount() {
 		return _connectionFetcher.getTriedHostCount();
 	}
+	
+	/**
+	 * @return true if this torrent is currently uploading
+	 */
+	public boolean isUploading() {
+		return linkManager.hasUploading();
+	}
+	
+	/**
+	 * @return true if this torrent is currently suspended
+	 * A torrent is considered suspended if there are connections interested
+	 * in it but all are choked.
+	 */
+	public boolean isSuspended() {
+		return isComplete() && linkManager.hasInterested() &&
+		!linkManager.hasUnchoked();
+	}
 }

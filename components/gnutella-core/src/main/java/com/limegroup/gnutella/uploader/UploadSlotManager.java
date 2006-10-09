@@ -384,7 +384,11 @@ public class UploadSlotManager implements BandwidthTracker {
 	}
 	
 	public synchronized int getNumQueued() {
-		return queued.size() + queuedResumable.size();
+		return queued.size();
+	}
+	
+	public synchronized int getNumQueuedResumable() {
+		return queuedResumable.size();
 	}
 	
 	public synchronized int getNumUsersForHost(String host) {

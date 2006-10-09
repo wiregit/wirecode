@@ -24,6 +24,10 @@ public interface Uploader extends BandwidthTracker {
     public static final int BROWSER_CONTROL   = 16;
     public static final int NOT_VALIDATED     = 17;
     
+    /** Some BT-specific states */
+    public static final int SUSPENDED = 18;
+    public static final int WAITING_REQUESTS = 19;
+    
     /**
      * Marker string for bt-specific values.
      */
