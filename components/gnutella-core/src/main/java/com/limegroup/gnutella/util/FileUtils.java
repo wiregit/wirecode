@@ -136,6 +136,17 @@ public class FileUtils {
         return true;
     }
     
+    /**
+     * Detects attempts at directory traversal by testing if testDirectory 
+     * really is a parent of testPath.
+     * @see isReallyParent
+     */
+    public static final boolean isReallyInParentPath(File testParent, File testChild) throws IOException {
+
+    	String testParentName = getCanonicalPath(testParent);
+    	String testChildParentName = getCanonicalPath(testChild.getAbsoluteFile().getParentFile());
+    	return testChildParentName.startsWith(testParentName);
+    }
     
     /**
      * Utility method that returns the file extension of the given file.

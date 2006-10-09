@@ -90,7 +90,7 @@ public class TorrentFileSystem implements Serializable {
             List<TorrentFile> torrents = new ArrayList<TorrentFile>(files.size());
             for(BTData.BTFileData file : files) {
             	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
-            	if (!FileUtils.isReallyParent(_completeFile, f))
+            	if (!FileUtils.isReallyInParentPath(_completeFile, f))
             		throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, f);
                 torrents.add(f);
             }
