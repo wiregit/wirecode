@@ -84,7 +84,7 @@ public class DefaultMessageFactory implements MessageFactory {
             in.skip(4);
             
             // --- CONTINUTE WITH MOJITO HEADER ---
-            OpCode opcode = OpCode.valueOf(in.readUnsignedByte());
+            OpCode opcode = in.readOpCode();
             
             switch(opcode) {
                 case PING_REQUEST:

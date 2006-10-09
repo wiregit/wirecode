@@ -38,6 +38,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -53,20 +54,32 @@ public class MessageInputStream extends DataInputStream {
         super(in);
     }
     
+    /**
+     * Reads the given number of bytes
+     */
     public byte[] readBytes(int bytes) throws IOException {
         byte[] buf = new byte[bytes];
         readFully(buf);
         return buf;
     }
     
+    /**
+     * Reads a KUID from the InputStream 
+     */
     public KUID readKUID() throws IOException {
         return KUID.create(readBytes(KUID.LENGTH));
     }
     
+    /**
+     * Reads a MessageID from the InputStream 
+     */
     public MessageID readMessageID() throws IOException {
         return MessageID.create(readBytes(MessageID.LENGTH));
     }
     
+    /**
+     * Reads a BigInteger from the InputStream 
+     */
     public BigInteger readDHTSize() throws IOException {
         int length = readUnsignedByte();
         if (length > KUID.LENGTH) { // can't be more than 2**160 bit
@@ -77,6 +90,11 @@ public class MessageInputStream extends DataInputStream {
         return new BigInteger(1 /* unsigned */, num);
     }
     
+    /**
+     * Reads a DHTValue from the InputStream 
+     * 
+     * @param sender The Contact that send us the DHTValue
+     */
     public DHTValue readDHTValue(Contact sender) throws IOException {
         Contact originator = readContact();
         KUID valueId = readKUID();
@@ -90,6 +108,9 @@ public class MessageInputStream extends DataInputStream {
         return DHTValue.createRemoteValue(originator, sender, valueId, data);
     }
     
+    /**
+     * Reads multiple DHTValues from the InputStream 
+     */
     public List<DHTValue> readDHTValues(Contact sender) throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
@@ -103,7 +124,10 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(values);
     }
     
-    public Collection<KUID> readValueIDs() throws IOException {
+    /**
+     * Reads multiple KUIDs from the InputStream 
+     */
+    public Collection<KUID> readKUIDs() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptySet();
@@ -117,20 +141,9 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(keys);
     }
     
-    public Collection<KUID> readNodeIDs() throws IOException {
-        int size = readUnsignedByte();
-        if (size == 0) {
-            return Collections.emptySet();
-        }
-        
-        KUID[] keys = new KUID[size];
-        for (int i = 0; i < size; i++) {
-            keys[i] = readKUID();
-        }
-        
-        return Arrays.asList(keys);
-    }
-    
+    /**
+     * Reads a Signature from the InputStream  
+     */
     public byte[] readSignature() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
@@ -142,6 +155,9 @@ public class MessageInputStream extends DataInputStream {
         return signature;
     }
 	
+    /**
+     * Reads a Contact from the InputStream 
+     */
     public Contact readContact() throws IOException {
         int vendor = readInt();
         int version = readUnsignedShort();
@@ -155,7 +171,10 @@ public class MessageInputStream extends DataInputStream {
         return ContactFactory.createUnknownContact(vendor, version, nodeId, addr);
     }
     
-    public List<Contact> readContacts() throws IOException {
+    /**
+     * Reads multiple Contacts from the InputStream 
+     */
+    public Collection<Contact> readContacts() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
@@ -168,6 +187,9 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(nodes);
     }
 
+    /**
+     * Reads an InetAddress from the InputStream 
+     */
     public InetAddress readInetAddress() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
@@ -180,10 +202,16 @@ public class MessageInputStream extends DataInputStream {
         return InetAddress.getByAddress(address);
     }
     
+    /**
+     * Reads a Port number from the InputStream 
+     */
     public int readPort() throws IOException {
         return readUnsignedShort();
     }
     
+    /**
+     * Reads a SocketAddress from the InputStream 
+     */
     public InetSocketAddress readSocketAddress() throws IOException {
         InetAddress addr = readInetAddress();
         if (addr == null) {
@@ -194,6 +222,9 @@ public class MessageInputStream extends DataInputStream {
         return new InetSocketAddress(addr, port);
     }
     
+    /**
+     * Reads a QueryKey from the InputStream 
+     */
     public QueryKey readQueryKey() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
@@ -205,6 +236,9 @@ public class MessageInputStream extends DataInputStream {
         return QueryKey.getQueryKey(queryKey, true);
     }
     
+    /**
+     * Reads an encoded Statistics 
+     */
     public byte[] readStatistics() throws IOException {
         int length = readUnsignedShort();
         if (length == 0) {
@@ -216,6 +250,16 @@ public class MessageInputStream extends DataInputStream {
         return statistics;
     }
     
+    /**
+     * Reads an OpCode from the InputStream
+     */
+    public OpCode readOpCode() throws IOException {
+        return OpCode.valueOf(readUnsignedByte());
+    }
+    
+    /**
+     * Reads an Type from the InputStream
+     */
     public Type readStatsType() throws IOException {
         return Type.valueOf(readUnsignedByte());
     }

@@ -52,7 +52,7 @@ public class FindValueRequestImpl extends AbstractLookupRequest
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
         
-        this.keys = in.readNodeIDs();
+        this.keys = in.readKUIDs();
     }
     
     public Collection<KUID> getKeys() {

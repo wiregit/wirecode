@@ -48,6 +48,9 @@ public class MessageOutputStream extends DataOutputStream {
         super(out);
     }
 	
+    /**
+     * Writes the given KUID to the OutputStream
+     */
     public void writeKUID(KUID kuid) throws IOException {
         if (kuid == null) {
             throw new NullPointerException("KUID cannot be null");
@@ -56,6 +59,9 @@ public class MessageOutputStream extends DataOutputStream {
         kuid.write(this);
     }
     
+    /**
+     * Writes the given MessageID to the OutputStream
+     */
     public void writeMessageID(MessageID messageId) throws IOException {
         if (messageId == null) {
             throw new NullPointerException("MessageID cannot be null");
@@ -64,6 +70,9 @@ public class MessageOutputStream extends DataOutputStream {
         messageId.write(this);
     }
     
+    /**
+     * Writes the given BigInteger to the OutputStream
+     */
     public void writeDHTSize(BigInteger estimatedSize) throws IOException {
         byte[] data = estimatedSize.toByteArray();
         if (data.length > KUID.LENGTH) { // Can't be more than 2**160 bit
@@ -73,6 +82,9 @@ public class MessageOutputStream extends DataOutputStream {
         write(data, 0, data.length);
     }
     
+    /**
+     * Writes the given DHTValue to the OutputStream
+     */
     public void writeDHTValue(DHTValue value) throws IOException {
         writeContact(value.getOriginator());
         value.getValueID().write(this);
@@ -82,6 +94,9 @@ public class MessageOutputStream extends DataOutputStream {
         write(data, 0, data.length);
     }
     
+    /**
+     * Writes the given Collection of KUIDs to the OutputStream
+     */
     public void writeKUIDs(Collection<KUID> keys) throws IOException {
         writeCollectionSize(keys);
         for (KUID k : keys) {
@@ -89,6 +104,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given Collection of DHTValues to the OutputStream
+     */
     public void writeDHTValues(Collection<? extends DHTValue> values) throws IOException {
         writeCollectionSize(values);
         for(DHTValue value : values) {
@@ -96,6 +114,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given Signature to the OutputStream
+     */
     public void writeSignature(byte[] signature) throws IOException {
         if (signature != null && signature.length > 0) {
             writeByte(signature.length);
@@ -105,6 +126,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given Contact to the OutputStream
+     */
     public void writeContact(Contact node) throws IOException {
         writeInt(node.getVendor());
         writeShort(node.getVersion());
@@ -112,6 +136,9 @@ public class MessageOutputStream extends DataOutputStream {
         writeSocketAddress(node.getContactAddress());
     }
     
+    /**
+     * Writes the given Collection of Contact to the OutputStream
+     */
     public void writeContacts(Collection<? extends Contact> nodes) throws IOException {
         writeCollectionSize(nodes);
         for(Contact node : nodes) {
@@ -119,16 +146,25 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given InetAddress to the OutputStream
+     */
     public void writeInetAddress(InetAddress addr) throws IOException {
         byte[] address = addr.getAddress();
         writeByte(address.length);
         write(address, 0, address.length);
     }
     
+    /**
+     * Writes the given Port number to the OutputStream
+     */
     public void writePort(int port) throws IOException {
         writeShort(port);
     }
     
+    /**
+     * Writes the given SocketAddress to the OutputStream
+     */
     public void writeSocketAddress(SocketAddress addr) throws IOException {
         if (addr instanceof InetSocketAddress
                 && !((InetSocketAddress)addr).isUnresolved()) {
@@ -141,6 +177,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given QueryKey to the OutputStream
+     */
     public void writeQueryKey(QueryKey queryKey) throws IOException {
         if (queryKey != null) {
             byte[] qk = queryKey.getBytes();
@@ -151,6 +190,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes an encoded Statistics payload to the OutputStream
+     */
     public void writeStatistics(byte[] statistics) throws IOException {
         if (statistics != null) {
             writeShort(statistics.length);
@@ -160,14 +202,23 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the given OpCode to the OutputStream
+     */
     public void writeOpCode(OpCode opcode) throws IOException {
         writeByte(opcode.toByte());
     }
     
+    /**
+     * Writes the given Type to the OutputStream
+     */
     public void writeStatsType(Type type) throws IOException {
         writeByte(type.toByte());
     }
     
+    /**
+     * Writes the given Contact to the OutputStream
+     */
     public void writeStoreStatus(Collection<? extends Entry<KUID, Status>> status) throws IOException {
         writeCollectionSize(status);
         for (Entry<KUID, Status> e : status) {
@@ -176,6 +227,9 @@ public class MessageOutputStream extends DataOutputStream {
         }
     }
     
+    /**
+     * Writes the size of the given Collection to the OutputStream
+     */
     private void writeCollectionSize(Collection c) throws IOException {
         int size = c.size();
         if (size > 0xFF) {
