@@ -71,7 +71,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     /** A handle to Context */
     protected final Context context;
     
-    /** */
+    /** The time of the last response we received */
     protected long lastResponseTime = 0L;
     
     /**
@@ -134,6 +134,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         this.timeout = timeout;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#timeout()
+     */
     public long timeout() {
         return timeout;
     }
@@ -197,6 +201,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      */
     protected abstract void response(ResponseMessage message, long time) throws IOException;
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleResponse(com.limegroup.mojito.messages.ResponseMessage, long)
+     */
     public void handleResponse(ResponseMessage response, long time) throws IOException {
         
         if (isCancelled() || isDone()) {
@@ -218,6 +226,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      */
     protected abstract void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException;
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleTimeout(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, long)
+     */
     public void handleTimeout(KUID nodeId, 
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
@@ -260,6 +272,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      */
     protected abstract void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleError(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, java.lang.Exception)
+     */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         
         if (isCancelled() || isDone()) {
@@ -279,6 +295,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     protected void tick() {
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleTick()
+     */
     public void handleTick() {
         
         if (isCancelled() || isDone()) {
@@ -288,6 +308,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         tick();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#isCancelled()
+     */
     public boolean isCancelled() {
         return exchanger.isCancelled();            
     }
@@ -317,6 +341,10 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
         exchanger.setException(ex);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
     public V call() throws Exception {
         synchronized (lock) { 
             try {

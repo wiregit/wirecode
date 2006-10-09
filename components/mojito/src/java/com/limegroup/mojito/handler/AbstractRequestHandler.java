@@ -46,6 +46,10 @@ public abstract class AbstractRequestHandler implements RequestHandler {
      */
     protected abstract void request(RequestMessage message) throws IOException;
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.RequestHandler#handleRequest(com.limegroup.mojito.messages.RequestMessage)
+     */
     public void handleRequest(RequestMessage message) throws IOException {
         
         if (LOG.isTraceEnabled()) {

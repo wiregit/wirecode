@@ -65,35 +65,62 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         databaseStats = context.getDatabaseStats();
     }
     
+    /**
+     * Hardcoded to return Long.MAX_VALUE 
+     */
     public long timeout() {
         return Long.MAX_VALUE;
     }
 
+    /**
+     * Hardcoded to return false
+     */
     public boolean isCancelled() {
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleResponse(com.limegroup.mojito.messages.ResponseMessage, long)
+     */
     public void handleResponse(ResponseMessage message, long time) throws IOException {
         addLiveContactInfo(message.getContact(), message);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.ResponseHandler#handleTimeout(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, long)
+     */
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         context.getRouteTable().handleFailure(nodeId, dst);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.handler.RequestHandler#handleRequest(com.limegroup.mojito.messages.RequestMessage)
+     */
     public void handleRequest(RequestMessage message) throws IOException {
         addLiveContactInfo(message.getContact(), message);
     }
     
+    /**
+     * Not implemented as never called
+     */
     public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
         // never called
     }
     
+    /**
+     * Not implemeted as never called
+     */
     public void handleTick() {
         // never called
     }
     
+    /**
+     * Adds the given Contact or updates it if it's already in our RouteTable
+     */
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
         if (node.isFirewalled()) {
@@ -163,6 +190,11 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         routeTable.add(node);
     }
     
+    /**
+     * This method depends on addLiveContactInfo(...) and does two things.
+     * It either forwards or removes a DHTValue it from the local Database.
+     * For details see Kademlia spec!
+     */
     private void forwardOrRemoveValues(Contact node, Contact existing, DHTMessage message) throws IOException {
         
         RouteTable routeTable = context.getRouteTable();
