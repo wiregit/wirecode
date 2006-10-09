@@ -411,6 +411,21 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	}
     	return null;
     }
+    
+    /**
+     * Returns the active or waiting downloader that uses or will use 
+     * <code>file</code> as incomplete file.
+     * @param file the incomplete file candidate
+     * @return <code>null</code> if no downloader for the file is found
+     */
+    public synchronized Downloader getDownloaderForIncompleteFile(File file) {
+    	for (AbstractDownloader dl : activeAndWaiting) {
+    		if (dl.conflictsWithIncompleteFile(file)) {
+    			return dl;
+    		}
+    	}
+    	return null;
+    }
 
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
     	for (AbstractDownloader md : activeAndWaiting) {
