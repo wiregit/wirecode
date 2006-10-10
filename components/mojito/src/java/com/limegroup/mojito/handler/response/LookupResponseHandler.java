@@ -221,7 +221,9 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // and add them to the yet-to-be queried list.
         List<Contact> nodes = null;
         if (selectAliveNodesOnly) {
-            nodes = context.getRouteTable().select(lookupId, getResultSetSize(), true);
+            // Select twice as many Contacts which should guarantee that
+            // we've k-closest Nodes at the end of the lookup
+            nodes = context.getRouteTable().select(lookupId, 2 * getResultSetSize(), true);
         } else {
             nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         }
