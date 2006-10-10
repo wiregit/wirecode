@@ -3,12 +3,12 @@ package com.limegroup.gnutella.dht;
 import java.net.SocketAddress;
 
 /**
- * 
+ * The DHT Bootstrapper bootstraps this DHT node to the network
  */
 public interface DHTBootstrapper {
     
     /**
-     * Bootstraps the given dht to the network.
+     * Bootstraps this node to the network.
      */
     public void bootstrap();
     

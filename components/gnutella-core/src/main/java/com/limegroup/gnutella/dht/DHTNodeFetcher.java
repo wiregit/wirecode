@@ -24,10 +24,11 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 
 /**
- * This class takes care of fetching DHT hosts from the Gnutella network. 
+ * This class takes care of fetching DHT hosts from the Gnutella network through
+ * the use of a UDP ping.
 
- * Implicitely, this will also propagate the knowledge through the network,
- * as the MessageRouter forwards pongs to the leafs!
+ * Implicitely, a request for DHT hosts will also propagate the knowledge 
+ * through the network, thanks to the MessageRouter's pong forwarding logic!
  * 
  * First tries to get active nodes directly from the HostCatcher. if that fails, 
  * it tries to send UDP pings to nodes who support the DHT. If that fails too, it
@@ -45,16 +46,35 @@ public class DHTNodeFetcher {
     
     private static final Log LOG = LogFactory.getLog(DHTNodeFetcher.class);
     
+    /**
+     * The instance of the bootstrapper to which we hand back bootstrap hosts.
+     * Also used to cancel this node fetcher if the DHT was able to bootstrap.
+     */
     private final DHTBootstrapper bootstrapper;
     
+    /**
+     * The time of the last ping request(s) in the network.
+     */
     private volatile long lastRequest = 0L;
     
+    /**
+     * The Runnable that requests DHT hosts.
+     */
     private TimedFetcher fetcher = null;
     
+    /**
+     * Whether or the fethcer is currently pinging a single host
+     */
     private AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
+    /**
+     * The pinger used to send out the UDP pings.
+     */
     private UDPPinger pinger;
     
+    /**
+     * A settable expiry time for the pings.
+     */
     private int pingExpireTime = -1;
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
@@ -135,6 +155,11 @@ public class DHTNodeFetcher {
         }
     }
     
+    /**
+     * Sends a UDP ping requesting DHT node to the specified host.
+     * 
+     * @param hostAddress The <tt>SocketAddress</tt> of the host to send the ping to.
+     */
     public void requestDHTHosts(SocketAddress hostAddress) {
         
         if(!RouterService.isConnected()) {
@@ -171,6 +196,11 @@ public class DHTNodeFetcher {
         RouterService.schedule(fetcher, initialFetch, fetcherTime);
     }
     
+    /**
+     * Processes the ping reply containing DHT IP:Ports and
+     * hands those back to the DHT bootstrapper.
+     * 
+     */
     private void processPingReply(Message m) {
         
         if(!(m instanceof PingReply)) {
@@ -203,6 +233,15 @@ public class DHTNodeFetcher {
         pingExpireTime = expireTime;
     }
     
+    /**
+     * This <tt>Cancellable</tt> is used to cancel UDP ping requests
+     * sent to sets of hosts. Cancelling is triggered by any of the following conditions:
+     * 1) We are now sending a ping to a single host.
+     * 2) The maximum delay has been exceeded
+     * 3) We are not connected to the network
+     * 4) We are not anymore waiting for DHT nodes to bootstrap
+     *
+     */
     private class UDPPingRankerCanceller implements Cancellable{
         
         /** Cancels the HostCatcher pings **/

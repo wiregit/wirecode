@@ -8,7 +8,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
 /**
- * 
+ * Controls this DHT node. 
  */
 public interface DHTController {
     

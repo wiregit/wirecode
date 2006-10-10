@@ -10,6 +10,8 @@ import com.limegroup.gnutella.util.IpPort;
 /**
  * The DHT Manager interface currently defines method to start, stop and perform
  * operations related to the maintenance of the DHT (bootstrapping, etc.).
+ * It also takes care of switching an active DHT node to a passive DHT node 
+ * and vice versa.
  * 
  * TODO: The manager will later expose the methods to use the DHT, i.e. store 
  * and retrieve values.
