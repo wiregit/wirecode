@@ -11,13 +11,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.SAXParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 
 import com.limegroup.gnutella.ErrorService;
 
@@ -116,15 +118,18 @@ public class XMLParsingUtils {
         boolean _isFirstElement=true;
         
         LimeParser() {
-            XMLReader reader;
+            XMLReader reader; 
             try {
-                reader = new SAXParser();
+                reader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
                 reader.setContentHandler(this);
                 reader.setErrorHandler(this);
                 reader.setFeature("http://xml.org/sax/features/namespaces", false);
             }catch(SAXException bad) {
                 ErrorService.error(bad);
                 reader = null; 
+            } catch (ParserConfigurationException bad) {
+            	ErrorService.error(bad);
+            	reader = null;
             }
             _reader=reader;
         }

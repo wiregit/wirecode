@@ -3,9 +3,12 @@ package com.limegroup.gnutella.simpp;
 import java.io.IOException;
 import java.io.StringReader;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,13 +16,22 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class SimppParser {
     
     private static final Log LOG = LogFactory.getLog(SimppParser.class);
 
-    private static DOMParser parser = new DOMParser();
+    private static DocumentBuilder parser;
+    static {
+    	try {
+    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    	} catch (ParserConfigurationException bad) {
+    		ErrorService.error(bad);
+    		parser = null;
+    	}
+    }
     
     private static final String VERSION = "version";
     
@@ -51,8 +63,7 @@ public class SimppParser {
         InputSource inputSource = new InputSource(new StringReader(xmlStr));
         Document d = null;
         synchronized(SimppParser.parser) {
-            parser.parse(inputSource);
-            d = parser.getDocument();
+            d = parser.parse(inputSource);
         }
         if(d == null)
             throw new SAXException("parsed documemt is null");

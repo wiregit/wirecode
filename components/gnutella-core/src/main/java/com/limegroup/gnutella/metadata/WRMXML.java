@@ -3,7 +3,11 @@ package com.limegroup.gnutella.metadata;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.apache.xerces.parsers.DOMParser;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -81,17 +85,20 @@ public class WRMXML {
     
     /** Parses the content encryption XML. */
     protected void parse(String xml) {
-        DOMParser parser = new DOMParser();
-        InputSource is = new InputSource(new StringReader(xml));
+    	Document d = null;
         try {
-            parser.parse(is);
+        	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        	InputSource is = new InputSource(new StringReader(xml));
+            d = parser.parse(is);
         } catch (IOException ioe) {
             return;
         } catch (SAXException saxe) {
             return;
+        } catch (ParserConfigurationException pce) {
+        	return;
         }
         
-        parseDocument(parser.getDocument().getDocumentElement());
+        parseDocument(d.getDocumentElement());
     }
     
     /**

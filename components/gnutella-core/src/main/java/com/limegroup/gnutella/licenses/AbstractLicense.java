@@ -5,16 +5,21 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -25,6 +30,16 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
     
     private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
+    
+    private static DocumentBuilder parser;
+    static {
+    	try {
+    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    	} catch (ParserConfigurationException bad) {
+    		ErrorService.error(bad);
+    		parser = null;
+    	}
+    }
     
     /**
      * The queue that all license verification attempts are processed in.
@@ -132,10 +147,10 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
         if(LOG.isTraceEnabled())
             LOG.trace("Attempting to parse: " + xml);
 
-        DOMParser parser = new DOMParser();
         InputSource is = new InputSource(new StringReader(xml));
+        Document d;
         try {
-            parser.parse(is);
+            d = parser.parse(is);
         } catch (IOException ioe) {
             LOG.debug("IOX parsing XML\n" + xml, ioe);
             return;
@@ -144,7 +159,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
             return;
         }
         
-        parseDocumentNode(parser.getDocument().getDocumentElement(), liveData);
+        parseDocumentNode(d.getDocumentElement(), liveData);
     }
     
     /**

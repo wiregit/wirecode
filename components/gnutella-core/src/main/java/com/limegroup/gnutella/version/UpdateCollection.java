@@ -6,15 +6,20 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -29,6 +34,17 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 class UpdateCollection {
     
     private static final Log LOG = LogFactory.getLog(UpdateCollection.class);
+    
+    
+    private static DocumentBuilder parser;
+    static {
+    	try {
+    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    	} catch (ParserConfigurationException bad) {
+    		ErrorService.error(bad);
+    		parser = null;
+    	}
+    }
     
     /**
      * The id of this UpdateCollection.
@@ -137,10 +153,10 @@ class UpdateCollection {
      * Parses the XML and fills in the data of this collection.
      */
     private void parse(String xml) {
-        DOMParser parser = new DOMParser();
+    	Document d;
         InputSource is = new InputSource(new StringReader(xml));
         try {
-            parser.parse(is);
+            d = parser.parse(is);
         } catch(IOException ioe) {
             LOG.error("Unable to parse: " + xml, ioe);
             return;
@@ -149,7 +165,7 @@ class UpdateCollection {
             return;
         }
         
-        parseDocumentElement(parser.getDocument().getDocumentElement());
+        parseDocumentElement(d.getDocumentElement());
     }
     
     /**

@@ -3,7 +3,10 @@ package com.limegroup.gnutella.updates;
 import java.io.IOException;
 import java.io.StringReader;
 
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -12,13 +15,21 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class UpdateFileParser {
     
-    //initilaize this once per class. 
-    private static DOMParser parser = new DOMParser();
+	 private static DocumentBuilder parser;
+	    static {
+	    	try {
+	    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+	    	} catch (ParserConfigurationException bad) {
+	    		ErrorService.error(bad);
+	    		parser = null;
+	    	}
+	    }
     
     /**
      * For the first release the only value we need is the new version.
@@ -40,8 +51,7 @@ public class UpdateFileParser {
         InputSource inputSource = new InputSource(new StringReader(xml));
         Document d = null;
         synchronized(parser) {
-            parser.parse(inputSource);
-            d = parser.getDocument();
+            d = parser.parse(inputSource);
         }
         if(d==null)//problems parsing?
             throw new SAXException("document is null");
