@@ -390,7 +390,7 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
         	Object next = iter.next();
         	if (! (next instanceof ManagedDownloader))
         		continue; // TODO: count torrents separately
-            ManagedDownloader md=(ManagedDownloader)iter.next();
+            ManagedDownloader md=(ManagedDownloader)next;
             ret += md.getNumDownloaders();
        }
        return ret;
