@@ -99,7 +99,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	private BitSet verifiedBlocks;
 	
 	private BitField missing, verified;
-
+	
 	/** a cached bitfield. LOCKING: this*/
 	private byte [] bitField;
 	/** whether the cached bitfield is dirty LOCKING: this */
@@ -266,6 +266,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	private synchronized void markPieceCompleted(int blockId) {
+		partialBlocks.remove(blockId);
 		requestedRanges.remove(blockId);
 		verifiedBlocks.set(blockId);
 		bitFieldDirty = true;
@@ -403,19 +404,31 @@ class VerifyingFolder implements TorrentDiskManager {
 				}
 			}
 			verifyFiles(filesToVerify);
-			if (torrent != null) {
-				VERIFY_QUEUE.invokeLater(new Runnable(){
-					public void run() {
-						if (isOpen()) {
-							isVerifying = false;
-							_corruptedBytes = 0;
-							torrent.verificationComplete();
-						}
-					}
-				}, context.getMetaInfo().getURN());
-			}
 		} else
 			isVerifying = false;
+
+		// always verify any partial blocks that are large enough
+		// (could happen if lw was shutdown during verification)
+		for (int block : partialBlocks.keySet() ) {
+			if (isCompleteBlock(block, partialBlocks)) {
+				isVerifying = true;
+				VERIFY_QUEUE.invokeLater(new VerifyJob(block),context.getMetaInfo().getURN());
+			}
+		}
+		
+		// if we had to verify anything, enqueue a notification
+		// after we're done.
+		if (isVerifying) {
+			VERIFY_QUEUE.invokeLater(new Runnable(){
+				public void run() {
+					if (isOpen()) {
+						isVerifying = false;
+						_corruptedBytes = 0;
+						torrent.verificationComplete();
+					}
+				}
+			}, context.getMetaInfo().getURN());
+		}
 	}
 	
 	public boolean isVerifying() {
@@ -816,7 +829,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	public synchronized Serializable getSerializableObject() {
-        return new SerialData((BitSet)verifiedBlocks.clone(), partialBlocks.clone(), isVerifying);
+        return new SerialData((BitSet)verifiedBlocks.clone(), 
+        		partialBlocks.clone(), 
+        		isVerifying);
     }
     
 	/* (non-Javadoc)
@@ -898,11 +913,13 @@ class VerifyingFolder implements TorrentDiskManager {
     /** Data that's serialized. */
     private static class SerialData implements Serializable {
     	private static final long serialVersionUID = -6901065516261232111l;
-        private BitSet verifiedBlocks;
-        private BlockRangeMap partialBlocks;
-        private boolean isVerifying;
+        private final BitSet verifiedBlocks;
+        private final BlockRangeMap partialBlocks;
+        private final boolean isVerifying;
         
-        private SerialData(BitSet verifiedBlocks, BlockRangeMap partialBlocks, boolean isVerifying) {
+        private SerialData(BitSet verifiedBlocks, 
+        		BlockRangeMap partialBlocks, 
+        		boolean isVerifying) {
             this.verifiedBlocks = verifiedBlocks;
             this.partialBlocks = partialBlocks;
             this.isVerifying = isVerifying;
@@ -919,6 +936,5 @@ class VerifyingFolder implements TorrentDiskManager {
         public BitSet getVerifiedBlocks() {
             return verifiedBlocks;
         }
-        
     }
 }

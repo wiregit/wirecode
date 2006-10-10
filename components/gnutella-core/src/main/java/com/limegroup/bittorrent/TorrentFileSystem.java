@@ -29,7 +29,7 @@ public class TorrentFileSystem implements Serializable {
 	/*
 	 * the total length of this torrent.
 	 */
-	private long _totalSize;
+	private final long _totalSize;
 	
 	/**
 	 * a list of <tt>TorrentFile</tt> for every file in this torrent
