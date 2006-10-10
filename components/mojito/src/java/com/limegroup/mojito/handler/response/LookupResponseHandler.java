@@ -119,7 +119,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Whether or not this lookup tries to return k live nodes.
      * This will increase the size of the set of hosts to query.
      */
-    private boolean isFullLiveNodesLookup = false;
+    private boolean selectAliveNodesOnly = false;
     
     LookupResponseHandler(Context context, KUID lookupId) {
         this(context, null, lookupId, -1);
@@ -209,8 +209,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * refresh the local RouteTable but in some cases it's
      * useful to use 'guaranteed' alive Contacts.
      */
-    public void setFullLiveNodesLookup(boolean isFullLiveNodesLookup) {
-        this.isFullLiveNodesLookup = isFullLiveNodesLookup;
+    public void setSelectAliveNodesOnly(boolean selectAliveNodesOnly) {
+        this.selectAliveNodesOnly = selectAliveNodesOnly;
     }
     
     @Override
@@ -218,10 +218,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         super.start();
         
         // Get the closest Contacts from our RouteTable 
-        // and add them to the yet-to-be queried list
-        List<Contact> nodes;
-        if(isFullLiveNodesLookup) {
-            nodes = context.getRouteTable().select(lookupId, 2 * getResultSetSize(), true);
+        // and add them to the yet-to-be queried list.
+        List<Contact> nodes = null;
+        if (selectAliveNodesOnly) {
+            nodes = context.getRouteTable().select(lookupId, getResultSetSize(), true);
         } else {
             nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         }

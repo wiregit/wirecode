@@ -173,7 +173,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 = new FindNodeResponseHandler(context, valueId);
             
             // Use only alive Contacts from the RouteTable
-            handler.setFullLiveNodesLookup(true);
+            handler.setSelectAliveNodesOnly(true);
             Map<Contact,QueryKey> nodes = handler.call().getNodes();
             
             for (Entry<Contact,QueryKey> entry : nodes.entrySet()) {
