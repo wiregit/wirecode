@@ -244,7 +244,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             }
         }
         
-        // No active states left? We're done!
+        // No active processes left? We're done!
         if (activeProcesses.isEmpty()) {
             done();
         }
@@ -275,7 +275,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     }
     
     /**
-     * The StoreState class manages storing of values on a single Node
+     * The StoreProcess class manages storing of values on a single Node
      */
     private class StoreProcess {
         
