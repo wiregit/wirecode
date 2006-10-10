@@ -22,7 +22,6 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -232,14 +231,15 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
      */
     private synchronized void sendNextAndExitIfDone() {
         while(activeProcesses.size() < parallelism && processes.hasNext()) {
-            StoreProcess state = processes.next();
+            StoreProcess process = processes.next();
             
             try {
-                if (state.start()) {
-                    activeProcesses.put(state.node.getNodeID(), state);
+                if (process.start()) {
+                    Contact node = process.node;
+                    activeProcesses.put(node.getNodeID(), process);
                 }
             } catch (IOException err) {
-                state.exception = err;
+                process.exception = err;
                 LOG.error("IOException", err);
             }
         }
@@ -289,7 +289,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         private Iterator<DHTValue> it;
         
         /** The value that is currently beeing stored */
-        private DHTValue lastValue = null;
+        private DHTValue value = null;
         
         /** A List of values that couldn't be stored */
         private List<DHTValue> failed = new ArrayList<DHTValue>();
@@ -337,35 +337,41 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
          */
         @SuppressWarnings("unchecked")
         public boolean start() throws IOException {
+            // We start by saying we've received a fictive response
             return !response(null);
         }
         
         /**
          * Handles a response and returns true if done
          */
-        public boolean response(Collection<? extends Entry<KUID,Status>> status) throws IOException {
-            if (lastValue != null) {
+        public boolean response(Collection<? extends Entry<KUID, Status>> status) throws IOException {
+            // value is null on this first iteration
+            if (value != null) {
+                
+                // We store one value per request (scroll down).
                 if (status != null && status.size() == 1) {
                     Entry<KUID,Status> e = status.iterator().next();
-                    if (e.getValue() != StoreResponse.Status.SUCCEEDED) {
-                        failed.add(lastValue);
+                    if (!Status.SUCCEEDED.equals(e.getValue())) {
+                        failed.add(value);
                     }
                 } else {
-                    failed.add(lastValue);
+                    failed.add(value);
                 }
                 
-                lastValue = null;
+                value = null;
             }
             
+            // We're finished if nothing left to store
             if (!it.hasNext()) {
                 return true;
             }
             
+            // Get the next value and store it at the remote Node
             // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
             
-            lastValue = it.next();
+            value = it.next();
             StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), queryKey, Arrays.asList(lastValue));
+                .createStoreRequest(node.getContactAddress(), queryKey, Collections.singleton(value));
             context.getMessageDispatcher().send(node, request, StoreResponseHandler.this);
 
             return false;
@@ -396,9 +402,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
          * stored at the given Node
          */
         public List<DHTValue> getFailedValues() {
-            if (lastValue != null) {
-                failed.add(lastValue);
-                lastValue = null;
+            if (value != null) {
+                failed.add(value);
+                value = null;
             }
             
             while(it.hasNext()) {
@@ -426,7 +432,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         protected void start() throws Exception {
             RequestMessage request = context.getMessageHelper()
                 .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
-            context.getMessageDispatcher().send(node, request, GetQueryKeyHandler.this);
+            context.getMessageDispatcher().send(node, request, this);
         }
         
         protected void response(ResponseMessage message, long time) throws IOException {
@@ -438,14 +444,25 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 
                 if (!ContactUtils.isValidContact(response.getContact(), node)) {
                     if (LOG.isInfoEnabled()) {
-                        LOG.info("Dropping " + node);
+                        LOG.info("Dropping invalid Contact " + node);
+                    }
+                    continue;
+                }
+                
+                // Make sure we're not mixing IPv4 and IPv6 addresses.
+                // See RouteTableImpl.add() for more Info!
+                if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+                    
+                    // Log as ERROR so that we're not missing this
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error(node + " is from a different IP address space than local Node");
                     }
                     continue;
                 }
                 
                 if (ContactUtils.isLocalContact(context, node, null)) {
                     if (LOG.isInfoEnabled()) {
-                        LOG.info("Dropping " + node);
+                        LOG.info("Dropping local Contact " + node);
                     }
                     continue;
                 }
