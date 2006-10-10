@@ -242,12 +242,16 @@ public class TorrentFileSystem implements Serializable {
 	}
 	
 	void moveToCompleteFolder() throws IOException {
+		File parent = _incompleteFile.getParentFile();
 		boolean success = _incompleteFile.renameTo(_completeFile);
 		if (!success) {
 			success = CommonUtils.copy(_incompleteFile, _completeFile);
 			if (success)
 				_incompleteFile.delete();
 		}
+		
+		if (success)
+			FileUtils.deleteRecursive(parent);
 	}
 	
 	void addToLibrary() {
