@@ -897,6 +897,7 @@ class VerifyingFolder implements TorrentDiskManager {
     
     /** Data that's serialized. */
     private static class SerialData implements Serializable {
+    	private static final long serialVersionUID = -6901065516261232111l;
         private BitSet verifiedBlocks;
         private BlockRangeMap partialBlocks;
         private boolean isVerifying;

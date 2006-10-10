@@ -23,6 +23,7 @@ import com.limegroup.gnutella.downloader.Interval;
  */
 public class IntervalSet implements Iterable<Interval>, Serializable{
     
+	private static final long serialVersionUID = -7791242963023638684L;
     /**
      * The sorted set of intervals this contains.
      */
