@@ -661,7 +661,17 @@ public class RouteTableImpl implements RouteTable {
         bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
-                List<Contact> list = bucket.select(nodeId, count - nodes.size());
+                
+                Collection<Contact> list = null;
+                if (activeContacts) {
+                    // Select all Contacts from the Bucket to compensate
+                    // the fact that not all of them will be alive. We're
+                    // using Bucket.select() instead of Bucket.getActiveContacts()
+                    // to get the Contacts sorted by xor distance!
+                    list = bucket.select(nodeId, bucket.getActiveSize());
+                } else {
+                    list = bucket.select(nodeId, count);
+                }
                 
                 for(Contact contact : list) {
                     if (contact.isDead()) {
