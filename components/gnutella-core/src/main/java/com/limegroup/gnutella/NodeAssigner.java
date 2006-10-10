@@ -123,7 +123,7 @@ public class NodeAssigner {
     
     /**
      * Schedules a timer event to continually updates the upload and download
-     * bandwidth used.  Non-blocking.
+     * bandwidth used, and assign this node accordingly.  Non-blocking.
      * Router provides the schedule(..) method for the timing
      */
     public void start() {
@@ -131,6 +131,13 @@ public class NodeAssigner {
             public void run() {
                 try {
                     collectBandwidthData();
+                    //check if became Hardcore capable
+                    setHardcoreCapable();
+                    //check if became ultrapeer capable
+                    assignUltrapeerNode();
+                    //check if became DHT capable
+                    assignActiveDHTNode();
+                    
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 }
@@ -174,13 +181,6 @@ public class NodeAssigner {
             _maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
             DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
         }
-        
-        setHardcoreCapable();
-        
-        //check if became ultrapeer capable
-        assignUltrapeerNode();
-        //check if became DHT capable
-        assignActiveDHTNode();
     }
     
     /**
