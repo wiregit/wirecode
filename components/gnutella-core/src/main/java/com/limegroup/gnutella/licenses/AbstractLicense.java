@@ -19,7 +19,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -30,16 +29,6 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable {
     
     private static final Log LOG = LogFactory.getLog(AbstractLicense.class);
-    
-    private static DocumentBuilder parser;
-    static {
-    	try {
-    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    	} catch (ParserConfigurationException bad) {
-    		ErrorService.error(bad);
-    		parser = null;
-    	}
-    }
     
     /**
      * The queue that all license verification attempts are processed in.
@@ -147,9 +136,10 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
         if(LOG.isTraceEnabled())
             LOG.trace("Attempting to parse: " + xml);
 
-        InputSource is = new InputSource(new StringReader(xml));
         Document d;
         try {
+        	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        	InputSource is = new InputSource(new StringReader(xml));
             d = parser.parse(is);
         } catch (IOException ioe) {
             LOG.debug("IOX parsing XML\n" + xml, ioe);
@@ -157,6 +147,9 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
         } catch (SAXException saxe) {
             LOG.debug("SAX parsing XML\n" + xml, saxe);
             return;
+        } catch (ParserConfigurationException bad) {
+        	LOG.debug("couldn't instantiate parser", bad);
+        	return;
         }
         
         parseDocumentNode(d.getDocumentElement(), liveData);

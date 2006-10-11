@@ -15,21 +15,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class UpdateFileParser {
-    
-	 private static DocumentBuilder parser;
-	    static {
-	    	try {
-	    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-	    	} catch (ParserConfigurationException bad) {
-	    		ErrorService.error(bad);
-	    		parser = null;
-	    	}
-	    }
     
     /**
      * For the first release the only value we need is the new version.
@@ -48,10 +37,13 @@ public class UpdateFileParser {
         if(xml==null || xml.equals(""))
             throw new SAXException("xml is null or empty string");
         timestamp = -1l;
-        InputSource inputSource = new InputSource(new StringReader(xml));
         Document d = null;
-        synchronized(parser) {
+        try {
+        	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        	InputSource inputSource = new InputSource(new StringReader(xml));
             d = parser.parse(inputSource);
+        } catch (ParserConfigurationException bad) {
+        	throw new IOException("parser creation failed");
         }
         if(d==null)//problems parsing?
             throw new SAXException("document is null");

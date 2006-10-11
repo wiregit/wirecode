@@ -19,7 +19,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -34,17 +33,6 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 class UpdateCollection {
     
     private static final Log LOG = LogFactory.getLog(UpdateCollection.class);
-    
-    
-    private static DocumentBuilder parser;
-    static {
-    	try {
-    		parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    	} catch (ParserConfigurationException bad) {
-    		ErrorService.error(bad);
-    		parser = null;
-    	}
-    }
     
     /**
      * The id of this UpdateCollection.
@@ -153,16 +141,20 @@ class UpdateCollection {
      * Parses the XML and fills in the data of this collection.
      */
     private void parse(String xml) {
-    	Document d;
-        InputSource is = new InputSource(new StringReader(xml));
+        Document d;
         try {
-            d = parser.parse(is);
+        	DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        	InputSource is = new InputSource(new StringReader(xml));
+            d = builder.parse(is);
         } catch(IOException ioe) {
             LOG.error("Unable to parse: " + xml, ioe);
             return;
         } catch(SAXException sax) {
             LOG.error("Unable to parse: " + xml, sax);
             return;
+        } catch (ParserConfigurationException bad) {
+        	LOG.error("unable to create parser", bad);
+        	return;
         }
         
         parseDocumentElement(d.getDocumentElement());
