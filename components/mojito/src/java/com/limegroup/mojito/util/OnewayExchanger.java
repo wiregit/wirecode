@@ -106,7 +106,7 @@ public class OnewayExchanger<V, E extends Exception> {
      */
     public V get() throws InterruptedException, E {
         try {
-            return get(0, TimeUnit.MILLISECONDS);
+            return get(0L, TimeUnit.MILLISECONDS);
         } catch (TimeoutException cannotHappen) {
             throw new Error(cannotHappen);
         }
@@ -122,7 +122,11 @@ public class OnewayExchanger<V, E extends Exception> {
         
         synchronized (lock) {
             if (!done) {
-                unit.timedWait(lock, timeout);
+                if (timeout == 0L) {
+                    lock.wait();
+                } else {
+                    unit.timedWait(lock, timeout);
+                }
                 
                 // Not done? Must be a timeout!
                 if (!done) {
@@ -163,7 +167,7 @@ public class OnewayExchanger<V, E extends Exception> {
     public boolean cancel() {
         synchronized (lock) {
             if (done) {
-                return false;
+                return cancelled;
             }
             
             done = true;
