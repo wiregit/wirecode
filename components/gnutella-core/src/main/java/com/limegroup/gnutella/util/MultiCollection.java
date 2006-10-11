@@ -25,7 +25,7 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		this.collections = l;
 	}
 	
-	public boolean add(Object o) {
+	public boolean add(T o) {
 		throw new UnsupportedOperationException();
 	}
 
