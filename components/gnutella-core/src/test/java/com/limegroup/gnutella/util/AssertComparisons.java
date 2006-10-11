@@ -12,7 +12,7 @@ import junit.framework.TestCase;
  * A set of assert comparisons to check greater than / less than
  * situations, instanceof and not equals.
  */
-public class AssertComparisons extends TestCase {
+public abstract class AssertComparisons extends TestCase {
         
     private static final int BLANK = -1;
     private static final int LESS_THAN = 0;

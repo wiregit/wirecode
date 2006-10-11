@@ -45,7 +45,7 @@ import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
-public class BaseTestCase extends AssertComparisons implements ErrorCallback {
+public abstract class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
     protected static File _baseDir;
     protected static File _sharedDir;
