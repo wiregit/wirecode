@@ -21,7 +21,7 @@ public class FileTransferableTest extends BaseTestCase {
 		Transferable transferable = new FileTransferable(files);
 		assertEquals(files, transferable.getTransferData(DataFlavor.javaFileListFlavor));
 		assertEquals("file:/test/file1\nfile:/test/file2",
-				transferable.getTransferData(FileTransferable.linuxURIFlavor));
+				transferable.getTransferData(FileTransferable.URIFlavor));
 	}
 
 }
