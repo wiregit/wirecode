@@ -11,7 +11,9 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.StringUtils;
 
 public class BEncodeTest extends BaseTestCase {
 
@@ -100,7 +102,7 @@ public class BEncodeTest extends BaseTestCase {
         t.handleRead();
         assertNotNull(t.getResult());
         assertEquals(Token.STRING, t.getType());
-        assertEquals("asdf", t.getResult());
+        assertEquals("asdf", StringUtils.getASCIIString((byte [])t.getResult()));
         // make sure the channel has been consumed completely
         assertFalse(chan.src.hasRemaining());
         
@@ -110,7 +112,7 @@ public class BEncodeTest extends BaseTestCase {
         t.handleRead();
         assertNotNull(t.getResult());
         assertEquals(Token.STRING, t.getType());
-        assertEquals("asdf", t.getResult());
+        assertEquals("asdf", StringUtils.getASCIIString((byte [])t.getResult()));
         // there should be 4 bytes left in the channel
         assertEquals(4,chan.src.remaining());
         
@@ -129,7 +131,7 @@ public class BEncodeTest extends BaseTestCase {
         chan.setString("s");
         t.handleRead();
         assertNotNull(t.getResult());
-        assertEquals("as",t.getResult());
+        assertEquals("as",StringUtils.getASCIIString((byte[])t.getResult()));
         
         // try an empty read call
         chan.setString("2:a");
@@ -140,7 +142,7 @@ public class BEncodeTest extends BaseTestCase {
         chan.setString("s");
         t.handleRead();
         assertNotNull(t.getResult());
-        assertEquals("as",t.getResult());
+        assertEquals("as",StringUtils.getASCIIString((byte[])t.getResult()));
         
         // try a closed channel before end of string
         chan.setString("2:a");
@@ -166,7 +168,7 @@ public class BEncodeTest extends BaseTestCase {
         t = Token.getNextToken(chan);
         assertEquals(Token.STRING,t.getType());
         t.handleRead();
-        assertEquals("",t.getResult());
+        assertEquals("",StringUtils.getASCIIString((byte[])t.getResult()));
     }
     
     /**
@@ -285,7 +287,7 @@ public class BEncodeTest extends BaseTestCase {
         t.handleRead();
         l = (List) t.getResult();
         assertEquals(2, l.size());
-        assertTrue(l.contains("as"));
+        assertTrue(l.contains(new StringByte("as")));
         assertTrue(l.contains(new Long(44)));
         assertEquals(4, chan.src.remaining());
     }
@@ -313,7 +315,7 @@ public class BEncodeTest extends BaseTestCase {
         Map m = (Map)t.getResult();
         assertEquals(1,m.size());
         assertTrue(m.containsKey("as"));
-        assertTrue(m.containsValue("df"));
+        assertTrue(m.containsValue(new StringByte("df")));
         
         // an empty dictionary
         chan.setString("de");
@@ -401,13 +403,13 @@ public class BEncodeTest extends BaseTestCase {
         assertTrue(empty.isEmpty());
         List badgers = (List) inner.get("key11");
         assertEquals(5, badgers.size());
-        assertEquals("badger",badgers.get(0));
-        assertEquals("badger",badgers.get(1));
+        assertEquals(new StringByte("badger"),badgers.get(0));
+        assertEquals(new StringByte("badger"),badgers.get(1));
         assertEquals(new Long(3),badgers.get(2));
         List mushrooms = (List)badgers.get(3);
         assertEquals(2,mushrooms.size());
-        assertEquals("mushroom",mushrooms.get(0));
-        assertEquals("mushroom",mushrooms.get(1));
+        assertEquals(new StringByte("mushroom"),mushrooms.get(0));
+        assertEquals(new StringByte("mushroom"),mushrooms.get(1));
         Map emptyMap = (Map)badgers.get(4);
         assertTrue(emptyMap.isEmpty());
         
@@ -417,9 +419,21 @@ public class BEncodeTest extends BaseTestCase {
         assertEquals(1,nestedList1.size());
         List nestedList2 = (List)nestedList1.get(0);
         assertEquals(2,nestedList2.size());
-        assertTrue(nestedList2.contains("snake"));
+        assertTrue(nestedList2.contains(new StringByte("snake")));
         List nestedList3 = (List) nestedList2.get(0);
         assertEquals(1,nestedList3.size());
-        assertTrue(nestedList3.contains("snake"));
+        assertTrue(nestedList3.contains(new StringByte("snake")));
+    }
+    
+    private static class StringByte  {
+    	final String s;
+    	StringByte(String s) {
+    		this.s = s;
+    	}
+    	public boolean equals(Object o) {
+    		if (!(o instanceof byte[]))
+    			return false;
+    		return s.equals(StringUtils.getASCIIString((byte[])o));
+    	}
     }
 }
