@@ -24,8 +24,8 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
 
 /**

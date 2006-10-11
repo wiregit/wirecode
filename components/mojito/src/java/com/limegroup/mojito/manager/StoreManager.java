@@ -26,7 +26,8 @@ import java.util.concurrent.Callable;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
+import com.limegroup.mojito.concurrent.AbstractDHTFuture;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
@@ -82,7 +83,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     /**
      * 
      */
-    private class StoreFuture extends AbstractDHTFuture {
+    private class StoreFuture extends AbstractDHTFuture<StoreEvent> {
         
         public StoreFuture(Callable<StoreEvent> callable) {
             super(callable);

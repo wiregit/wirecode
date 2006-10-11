@@ -49,6 +49,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapEvent.EventType;

@@ -26,8 +26,9 @@ import java.util.concurrent.Callable;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.AbstractDHTFuture;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -113,7 +114,7 @@ public class PingManager extends AbstractManager<PingEvent> {
     /**
      * 
      */
-    private class PingFuture extends AbstractDHTFuture {
+    private class PingFuture extends AbstractDHTFuture<PingEvent> {
 
         private SocketAddress address;
         
@@ -134,13 +135,13 @@ public class PingManager extends AbstractManager<PingEvent> {
         }
 
         @Override
-        protected void fireResult(PingEvent result) {
+        public void fireResult(PingEvent result) {
             networkStats.PINGS_OK.incrementStat();
             super.fireResult(result);
         }
         
         @Override
-        protected void fireThrowable(Throwable ex) {
+        public void fireThrowable(Throwable ex) {
             networkStats.PINGS_FAILED.incrementStat();
             super.fireThrowable(ex);
         }

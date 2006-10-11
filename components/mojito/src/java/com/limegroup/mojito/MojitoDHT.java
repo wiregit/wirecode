@@ -32,6 +32,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.event.BootstrapEvent;

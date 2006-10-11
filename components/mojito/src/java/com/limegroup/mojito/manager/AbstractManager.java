@@ -19,17 +19,7 @@
 
 package com.limegroup.mojito.manager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
-import com.limegroup.mojito.event.DHTEventListener;
 
 /**
  * An abstract class for various types of Managers.
@@ -38,111 +28,7 @@ abstract class AbstractManager<V> {
     
     protected final Context context;
     
-    private List<DHTEventListener<V>> globalListeners 
-        = new CopyOnWriteArrayList<DHTEventListener<V>>();
-    
     public AbstractManager(Context context) {
         this.context = context;
-    }
-    
-    public void addDHTEventListener(DHTEventListener<V> listener) {
-        globalListeners.add(listener);
-    }
-    
-    public void removeDHTEventListener(DHTEventListener<V> listener) {
-        globalListeners.remove(listener);
-    }
-
-    public DHTEventListener[] getDHTEventListeners() {
-        return globalListeners.toArray(new DHTEventListener[0]);
-    }
-    
-    protected abstract class AbstractDHTFuture extends FutureTask<V> implements DHTFuture<V> {
-        
-        private List<DHTEventListener<V>> listeners 
-            = new ArrayList<DHTEventListener<V>>();
-        
-        public AbstractDHTFuture(Callable<V> callable) {
-            super(callable);
-        }
-        
-        public void addDHTEventListener(DHTEventListener<V> listener) {
-            if (listener == null) {
-                return;
-            }
-            
-            if (isCancelled()) {
-                return;
-            }
-            
-            synchronized (listeners) {
-                if (isDone()) {
-                    try {
-                        V result = get();
-                        listener.handleResult(result);
-                    } catch (InterruptedException ignore) {
-                    } catch (ExecutionException ex) {
-                        // NOTE: This is different from Future.cancel()!
-                        // It's possible to cancel a ResponseHandler which
-                        // is also throwing a CancellationException!
-                        Throwable cause = ex.getCause();
-                        if (!(cause instanceof CancellationException)) {
-                            listener.handleThrowable(cause);
-                        }
-                    }
-                } else {
-                    listeners.add(listener);
-                }
-            }
-        }
-
-        protected abstract void deregister();
-        
-        @Override
-        protected void done() {
-            super.done();
-            
-            deregister();
-            
-            if (!isCancelled()) {
-                try {
-                    V result = get();
-                    fireResult(result);
-                } catch (InterruptedException ignore) {
-                } catch (ExecutionException ex) {
-                    // NOTE: This is different from Future.cancel()!
-                    // It's possible to cancel a ResponseHandler which
-                    // is also throwing a CancellationException!
-                    Throwable cause = ex.getCause();
-                    if (!(cause instanceof CancellationException)) {
-                        fireThrowable(cause);
-                    }
-                }
-            }
-        }
-        
-        protected void fireResult(V result) {
-            for (DHTEventListener<V> l : globalListeners) {
-                l.handleResult(result);
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<V> l : listeners) {
-                    l.handleResult(result);
-                }
-            }
-        }
-        
-        protected void fireThrowable(Throwable ex) {
-            for (DHTEventListener<V> l : globalListeners) {
-                l.handleThrowable(ex);
-            }
-            
-            synchronized(listeners) {
-                for (DHTEventListener<V> l : listeners) {
-                    l.handleThrowable(ex);
-                }
-            }
-        }
     }
 }

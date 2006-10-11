@@ -23,8 +23,9 @@ import java.util.Collection;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.AbstractDHTFuture;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.response.GetValueResponseHandler;
 
@@ -49,7 +50,7 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
         return future;
     }
     
-    private class GetValueFuture extends AbstractDHTFuture {
+    private class GetValueFuture extends AbstractDHTFuture<Collection<DHTValue>> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
             super(callable);

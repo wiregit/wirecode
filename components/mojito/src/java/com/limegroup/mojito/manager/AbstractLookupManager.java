@@ -23,8 +23,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.AbstractDHTFuture;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
 
 /**
@@ -72,7 +73,7 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
     
     protected abstract LookupResponseHandler<V> createLookupHandler(KUID lookupId, int count);
     
-    private class LookupFuture extends AbstractDHTFuture {
+    private class LookupFuture extends AbstractDHTFuture<V> {
 
         private KUID lookupId;
         

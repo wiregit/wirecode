@@ -35,8 +35,9 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.DHTFuture;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.AbstractDHTFuture;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.PingEvent;
@@ -265,7 +266,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         private Contact bootstrapFromHostSet() throws Exception {
             
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Bootstrapping from host Set: "+hostSet);
+                LOG.debug("Bootstrapping from host Set: " + hostSet);
             }
             
             BootstrapPingResponseHandler<SocketAddress> handler 
@@ -393,7 +394,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
     }
     
-    private class BootstrapFuture extends AbstractDHTFuture {
+    private class BootstrapFuture extends AbstractDHTFuture<BootstrapEvent> {
         
         public BootstrapFuture(Callable<BootstrapEvent> task) {
             super(task);

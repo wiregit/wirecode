@@ -46,16 +46,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.NotBootstrappedException;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -822,27 +821,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         contextExecutor.execute(command);
     }
     
-    /** 
-     * Adds a global PingListener
-     */
-    public void addPingListener(PingListener listener) {
-        pingManager.addDHTEventListener(listener);
-    }
-    
-    /** 
-     * Removes a global PingListener 
-     */
-    public void removePingListener(PingListener listener) {
-        pingManager.removeDHTEventListener(listener);
-    }
-    
-    /** 
-     * Returns all global PingListeners 
-     */
-    public DHTEventListener[] getPingListeners() {
-        return pingManager.getDHTEventListeners();
-    }
-    
     /**
      * Pings the DHT node with the given SocketAddress. 
      * Warning: This method should not be used to ping contacts from the routing table
@@ -990,7 +968,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Stores a Collection of DHTValue(s) at the given Node. 
      * All values must have the same valueId!
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, Collection<? extends DHTValue> values) {
+    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
+            Collection<? extends DHTValue> values) {
+        
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName() + " store()");
         }
