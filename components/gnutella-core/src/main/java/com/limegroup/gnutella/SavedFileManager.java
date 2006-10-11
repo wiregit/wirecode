@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -129,7 +130,7 @@ public final class SavedFileManager implements Runnable {
             if(urns.isEmpty()) // if not calculated, calculate at some point.
                 UrnCache.instance().calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.
-                tempUrns.addAll(urns);
+                ((Collection<? super URN>)tempUrns).addAll(urns);
         }
     }
 }

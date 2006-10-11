@@ -241,7 +241,7 @@ public class TorrentFileSystem implements Serializable {
 		_folders.addAll(newFolders); 
 	}
 	
-	void moveToCompleteFolder() throws IOException {
+	void moveToCompleteFolder() {
 		File parent = _incompleteFile.getParentFile();
 		boolean success = _incompleteFile.renameTo(_completeFile);
 		if (!success) {

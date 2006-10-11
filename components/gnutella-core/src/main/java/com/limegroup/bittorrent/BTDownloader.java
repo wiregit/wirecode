@@ -123,13 +123,13 @@ public class BTDownloader extends AbstractDownloader
 		return fileSystem.getFiles().size() == 1 && _torrent.isComplete();
 	}
 	
-	public boolean isResumable() {
+    public boolean isResumable() {
 		switch(_torrent.getState()) {
 		case PAUSED:
 		case TRACKER_FAILURE:
 			return true;
 		}
-		return false;
+        return false;
 	}
 
 	public boolean resume() {
