@@ -332,6 +332,14 @@ public class Connection implements IpPort {
     }
     
     /**
+     * Initializes this with a timeout
+     */
+    public void initialize(Properties requestHeaders, HandshakeResponder responder, int timeout)
+            throws IOException, NoGnutellaOkException, BadHandshakeException {
+        initialize(requestHeaders, responder, timeout, null);
+    }
+    
+    /**
      * Initializes this without a timeout, using the given ConnectObserver.
      */
     public void initialize(Properties requestHeaders, HandshakeResponder responder, GnetConnectObserver observer) 

@@ -195,9 +195,9 @@ public abstract class ServerSideTestCase extends BaseTestCase {
 		buildConnections();
         // init connections
         for (int i = ULTRAPEER.length-1; i > -1; i--)
-            ULTRAPEER[i].initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+            ULTRAPEER[i].initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         for (int i = 0; i < LEAF.length; i++)
-            LEAF[i].initialize(new LeafHeaders("localhost"), new EmptyResponder());
+            LEAF[i].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
 
         for (int i = 0; i < ULTRAPEER.length; i++)
             assertTrue(ULTRAPEER[i].isOpen());
