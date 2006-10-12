@@ -10,7 +10,7 @@ public class StubReadObserver implements ReadObserver, ReadTimeout {
     private boolean shutdown = false;
     private IOException iox;
     private SocketChannel channel;
-    private int readsHandled;
+    private volatile int readsHandled;
     private ByteBuffer buffer;
     
     public void setChannel(SocketChannel channel) {

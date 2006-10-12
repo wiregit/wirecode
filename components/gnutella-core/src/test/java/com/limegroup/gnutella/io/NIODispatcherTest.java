@@ -333,7 +333,7 @@ public class NIODispatcherTest extends BaseTestCase {
             channel.setReadyOps(SelectionKey.OP_READ);
             NIODispatcher.instance().wakeup();
             observer.waitForEvent(2000);
-            assertEquals(1, observer.getReadsHandled());
+            assertGreaterThanOrEquals(1, observer.getReadsHandled());
         } finally {
             NIODispatcher.instance().removeSelector(stub);
         }
@@ -352,7 +352,7 @@ public class NIODispatcherTest extends BaseTestCase {
     		}
     	});
     	
-    	while(t.get() != null)
+    	while(t.get() == null)
     		Thread.sleep(10);
     	
     	final CountDownLatch executed = new CountDownLatch(1);

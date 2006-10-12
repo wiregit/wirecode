@@ -55,7 +55,7 @@ public class StubReadConnectObserver implements ReadObserver, ConnectObserver, R
         notify();
     }
     
-    public int getReadsHandled() {
+    public synchronized int getReadsHandled() {
         return readDelegate.getReadsHandled();
     }
     
