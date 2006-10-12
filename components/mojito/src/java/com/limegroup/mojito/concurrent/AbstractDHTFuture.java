@@ -63,7 +63,7 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
         
         // TODO: Not sure if it's a good or bad idea to
-        // call the listener of the caller thread if the
+        // call the listener on the caller Thread if the
         // DHTFuture is done
         synchronized (listeners) {
             if (isDone()) {
