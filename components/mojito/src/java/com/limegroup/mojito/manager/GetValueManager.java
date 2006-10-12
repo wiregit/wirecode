@@ -55,9 +55,5 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
         public GetValueFuture(GetValueResponseHandler callable) {
             super(callable);
         }
-
-        @Override
-        protected void deregister() {
-        }
     }
 }

@@ -28,6 +28,9 @@ import java.util.concurrent.FutureTask;
 
 import com.limegroup.mojito.event.DHTEventListener;
 
+/**
+ * An abstract implementation of DHTFuture
+ */
 public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTFuture<V> {
 
     private List<DHTEventListener<V>> listeners 
@@ -37,8 +40,19 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         super(callable);
     }
     
-    protected abstract void deregister();
+    /**
+     * This method is called after a DHTFuture has finished its task.
+     * You may override it to deregister a DHTFuture from a pool of
+     * Futures for example
+     */
+    protected void deregister() {
+        // DO NOTHING
+    }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTEventListener(com.limegroup.mojito.event.DHTEventListener)
+     */
     public void addDHTEventListener(DHTEventListener<V> listener) {
         if (listener == null) {
             return;
@@ -48,6 +62,9 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
             return;
         }
         
+        // TODO: Not sure if it's a good or bad idea to
+        // call the listener of the caller thread if the
+        // DHTFuture is done
         synchronized (listeners) {
             if (isDone()) {
                 try {
@@ -69,6 +86,10 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
     }
     
+    /*
+     * (non-Javadoc)
+     * @see java.util.concurrent.FutureTask#done()
+     */
     @Override
     protected void done() {
         super.done();
@@ -92,6 +113,10 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
     }
     
+    /**
+     * Notifies all listeners about the result. Meant to
+     * be called on the DHTFuture Thread!
+     */
     public void fireResult(V result) {
         synchronized(listeners) {
             for (DHTEventListener<V> l : listeners) {
@@ -100,6 +125,10 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
     }
     
+    /**
+     * Notifies all listeners about an Exception that occured. 
+     * Meant to be called on the DHTFuture Thread!
+     */
     public void fireThrowable(Throwable ex) {
         synchronized(listeners) {
             for (DHTEventListener<V> l : listeners) {

@@ -88,9 +88,5 @@ public class StoreManager extends AbstractManager<StoreEvent> {
         public StoreFuture(Callable<StoreEvent> callable) {
             super(callable);
         }
-
-        @Override
-        protected void deregister() {
-        }
     }
 }
