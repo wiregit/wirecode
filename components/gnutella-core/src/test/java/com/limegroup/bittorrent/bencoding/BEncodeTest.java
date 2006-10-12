@@ -11,7 +11,6 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.StringUtils;
 
