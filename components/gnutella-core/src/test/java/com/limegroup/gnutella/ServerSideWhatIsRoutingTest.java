@@ -182,9 +182,9 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
@@ -200,7 +200,7 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
 
 	    LEAF = new Connection("localhost", PORT);
         //3. routed leaf, with route table for "test"
-        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
         qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
