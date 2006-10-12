@@ -124,7 +124,7 @@ public class I18NSendReceiveTest
         UltrapeerHeaders headers = new UltrapeerHeaders("localhost");
         headers.put(HeaderNames.X_DEGREE,"42");
         CONN_1 = new Connection("localhost", TEST_PORT);
-        CONN_1.initialize(headers, new EmptyResponder());
+        CONN_1.initialize(headers, new EmptyResponder(), 1000);
         drain(CONN_1);
     }
 

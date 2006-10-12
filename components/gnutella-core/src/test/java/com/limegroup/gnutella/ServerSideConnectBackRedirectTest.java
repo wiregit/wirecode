@@ -89,7 +89,7 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
 	    LEAF[0] = new Connection("localhost", PORT);
-        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         //  Give the connection a chance to send its initial messages

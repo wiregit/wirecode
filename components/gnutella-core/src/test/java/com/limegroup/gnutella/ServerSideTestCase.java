@@ -222,7 +222,7 @@ public abstract class ServerSideTestCase extends BaseTestCase {
     /** Builds a single connection with the given headers. */
     protected Connection createConnection(Properties headers) throws Exception {
         Connection c = new Connection("localhost", PORT);
-        c.initialize(headers, new EmptyResponder());
+        c.initialize(headers, new EmptyResponder(), 1000);
         assertTrue(c.isOpen());
         return c;
     }

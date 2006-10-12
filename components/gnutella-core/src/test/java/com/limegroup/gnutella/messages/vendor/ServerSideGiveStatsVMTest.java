@@ -320,16 +320,16 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         //3. routed leaf, with route table for "test"
-        LEAF_1.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        LEAF_4.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        TCP_TEST_LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_1.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_4.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        TCP_TEST_LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
                 
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("ashish");

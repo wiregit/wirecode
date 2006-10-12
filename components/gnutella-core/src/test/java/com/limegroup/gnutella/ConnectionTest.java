@@ -49,7 +49,7 @@ public class ConnectionTest extends BaseTestCase {
     public void testBlockingConnectFailing() throws Exception {
         Connection c = new Connection("127.0.0.1", LISTEN_PORT+1);
         try {
-            c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"));
+            c.initialize(new Properties(), new UltrapeerHandshakeResponder("127.0.0.1"), 1000);
             fail("shouldn't have initialized");
         } catch(IOException iox) {
             // timed out.
@@ -154,7 +154,7 @@ public class ConnectionTest extends BaseTestCase {
                         }
                         
                         final Connection con = new Connection(socket);
-                        con.initialize(null, new UltrapeerHandshakeResponder("127.0.0.1"));
+                        con.initialize(null, new UltrapeerHandshakeResponder("127.0.0.1"), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);
                     }

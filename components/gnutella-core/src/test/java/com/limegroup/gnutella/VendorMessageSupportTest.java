@@ -73,7 +73,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
 
         // Set up a connection to the host....
         _leaf1=new Connection(_remoteHost, _remotePort);
-        _leaf1.initialize(new LeafHeaders(""), new EmptyResponder());
+        _leaf1.initialize(new LeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.send((RouteTableMessage)iter.next());
         _leaf1.flush();
@@ -82,7 +82,7 @@ public class VendorMessageSupportTest extends BaseTestCase {
         
         // Set up another connection to the host....
         _leaf2=new Connection(_remoteHost, _remotePort);
-        _leaf2.initialize(new LeafHeaders(""), new EmptyResponder());
+        _leaf2.initialize(new LeafHeaders(""), new EmptyResponder(), 1000);
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.send((RouteTableMessage)iter.next());
         _leaf2.flush();

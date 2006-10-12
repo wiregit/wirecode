@@ -409,7 +409,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
                         }
 
                         final Connection con = new Connection(socket);
-                        con.initialize(null, new StubHandshakeResponder());
+                        con.initialize(null, new StubHandshakeResponder(), 1000);
                     } catch (Exception e) {
                         ErrorService.error(e);
                     }

@@ -130,7 +130,7 @@ public class UnicastSimulator {
 
                 if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
                     Connection conn = new Connection(sock);
-                    conn.initialize(null, null);
+                    conn.initialize(null, null, 1000);
                     for (int i = 0; i < _pongs.length; i++) {
                         conn.send(_pongs[i]);
                         Thread.sleep(10);

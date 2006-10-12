@@ -176,14 +176,14 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
     private static void connect() throws Exception {
 		buildConnections();
         //ultrapeers 
-        UP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
-        UP2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
-        UP3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        UP1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
+        UP3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         
         //leafs
-        LEAF_1.initialize(new LeafHeaders("localhost"),new EmptyResponder());
-        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder());
-        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF_1.initialize(new LeafHeaders("localhost"),new EmptyResponder(), 1000);
+        LEAF_2.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
+        LEAF_3.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
                 
 
 		assertTrue("ULTRAPEER_2 should be connected", UP2.isOpen());

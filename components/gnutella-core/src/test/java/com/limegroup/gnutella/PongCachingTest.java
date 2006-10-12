@@ -182,23 +182,23 @@ public final class PongCachingTest extends BaseTestCase {
     private void connect() throws Exception {
 		buildConnections();
         //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_2.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_2.isOpen());
         assertTrue("should be up", ULTRAPEER_2.isSupernodeSupernodeConnection());
-        ULTRAPEER_3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_3.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_3.isOpen());
         assertTrue("should be up", ULTRAPEER_3.isSupernodeSupernodeConnection());
 
-        ULTRAPEER_4.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_4.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_4.isOpen());
         assertTrue("should be up", ULTRAPEER_4.isSupernodeSupernodeConnection());
 
         //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder());
+        ULTRAPEER_1.initialize(new UltrapeerHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", ULTRAPEER_1.isOpen());
         assertTrue("should be up", ULTRAPEER_1.isSupernodeSupernodeConnection());        
         //3. routed leaf, with route table for "test"
-        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF.initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
         assertTrue("should be open", LEAF.isOpen());
         assertTrue("should be up", LEAF.isClientSupernodeConnection());        
         QueryRouteTable qrt = new QueryRouteTable();

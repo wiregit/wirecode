@@ -108,7 +108,7 @@ public final class ServerSidePushProxyTest extends ServerSideTestCase {
 
         LEAF[0] = new Connection("localhost", PORT);
         // routed leaf, with route table for "test"
-        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder());
+        LEAF[0].initialize(new LeafHeaders("localhost"), new EmptyResponder(), 1000);
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
