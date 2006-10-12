@@ -8,18 +8,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.io.AbstractNBSocket;
-import com.limegroup.gnutella.*;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ConnectionAcceptor;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.bittorrent.ManagedTorrent;
 
 /**
  * Class which manages active torrents and dispatching of 

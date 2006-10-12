@@ -3,12 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.net.Socket;
 
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.messages.QueryReply;
