@@ -20,6 +20,7 @@
 package com.limegroup.mojito.manager;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
@@ -30,9 +31,10 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.response.GetValueResponseHandler;
 
 /**
- * GetValueManager is in wiedest sense equivalent to FindValueManager
+ * GetValueManager is in widest sense equivalent to FindValueManager
  * but the main difference is that it's used to retrieve the value
- * rather than to find it.  
+ * rather than to find it. That means you must know which Node is storing
+ * a value!
  */
 public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
 
@@ -40,6 +42,17 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
         super(context);
     }
     
+    /**
+     * Tries to get a value from the remote Node
+     */
+    public DHTFuture<Collection<DHTValue>> get(Contact node, 
+            KUID valueId, KUID nodeId) {
+        return get(node, valueId, Collections.singleton(nodeId));
+    }
+    
+    /**
+     * Tries to get one or more values from the remote Node
+     */
     public DHTFuture<Collection<DHTValue>> get(Contact node, 
             KUID valueId, Collection<KUID> nodeIds) {
         
@@ -50,6 +63,9 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
         return future;
     }
     
+    /**
+     * A "get value" specific implementation of DHTFuture
+     */
     private class GetValueFuture extends AbstractDHTFuture<Collection<DHTValue>> {
 
         public GetValueFuture(GetValueResponseHandler callable) {

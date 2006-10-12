@@ -34,6 +34,9 @@ public class FindValueManager extends AbstractLookupManager<FindValueEvent> {
         super(context);
     }
 
+    /**
+     * Creates and returns a FindValueResponseHandler
+     */
     @Override
     protected LookupResponseHandler<FindValueEvent> createLookupHandler(
             KUID lookupId, int count) {

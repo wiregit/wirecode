@@ -47,16 +47,31 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
         }
     }
     
+    /**
+     * Returns the lock Object
+     */
     private Object getLookupLock() {
         return futureMap;
     }
     
+    /**
+     * Starts a lookup for the given KUID
+     */
     public DHTFuture<V> lookup(KUID lookupId) {
         return lookup(lookupId, -1);
     }
     
-    public DHTFuture<V> lookup(KUID lookupId, int count) {
+    /**
+     * Starts a lookup for the given KUID and expects 'count' 
+     * number of results
+     */
+    private DHTFuture<V> lookup(KUID lookupId, int count) {
         synchronized(getLookupLock()) {
+            
+            // TODO: There is an almost non-existend possibility
+            // that somebody is doing a lookup for Value and the
+            // system is trying to make the exact same lookup for
+            // a Node.
             LookupFuture future = futureMap.get(lookupId);
             if (future == null) {
                 LookupResponseHandler<V> handler = createLookupHandler(lookupId, count);
@@ -71,8 +86,17 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
         }
     }
     
+    /**
+     * A factory method to create LookupResponseHandler(s)
+     * 
+     * @param lookupId The KUID we're looking for
+     * @param count The result set size (i.e. k)
+     */
     protected abstract LookupResponseHandler<V> createLookupHandler(KUID lookupId, int count);
     
+    /**
+     * A lookup specific implementation of DHTFuture
+     */
     private class LookupFuture extends AbstractDHTFuture<V> {
 
         private KUID lookupId;

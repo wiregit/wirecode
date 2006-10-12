@@ -81,7 +81,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     }
     
     /**
-     * 
+     * A store specific implementation of DHTFuture
      */
     private class StoreFuture extends AbstractDHTFuture<StoreEvent> {
         

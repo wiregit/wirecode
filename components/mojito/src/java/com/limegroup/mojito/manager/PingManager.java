@@ -56,18 +56,30 @@ public class PingManager extends AbstractManager<PingEvent> {
         }
     }
     
-    public Object getPingLock() {
+    /**
+     * Returns the lock Object
+     */
+    private Object getPingLock() {
         return futureMap;
     }
     
+    /**
+     * Sends a ping to the remote Host
+     */
     public DHTFuture<PingEvent> ping(SocketAddress address) {
         return ping(null, null, address);
     }
 
+    /**
+     * Sends a ping to the remote Node
+     */
     public DHTFuture<PingEvent> ping(Contact node) {
         return ping(null, node.getNodeID(), node.getContactAddress());
     }
     
+    /**
+     * Sends a ping to the remote Node
+     */
     public DHTFuture<PingEvent> ping(KUID nodeId, SocketAddress address) {
         return ping(null, nodeId, address);
     }
@@ -92,6 +104,13 @@ public class PingManager extends AbstractManager<PingEvent> {
         return ping(sender, node.getNodeID(), node.getContactAddress());
     }
     
+    /**
+     * Sends a ping to the remote Node
+     * 
+     * @param sender The local Node
+     * @param nodeId The remote Node's KUID (can be null)
+     * @param address The remote Node's address
+     */
     private DHTFuture<PingEvent> ping(Contact sender, KUID nodeId, SocketAddress address) {
         synchronized (getPingLock()) {
             
@@ -112,7 +131,7 @@ public class PingManager extends AbstractManager<PingEvent> {
     }
     
     /**
-     * 
+     * A ping specific implementation of DHTFuture 
      */
     private class PingFuture extends AbstractDHTFuture<PingEvent> {
 
@@ -121,10 +140,6 @@ public class PingManager extends AbstractManager<PingEvent> {
         public PingFuture(SocketAddress address, Callable<PingEvent> handler) {
             super(handler);
             this.address = address;
-        }
-        
-        public SocketAddress getSocketAddress() {
-            return address;
         }
         
         @Override

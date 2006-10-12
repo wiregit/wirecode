@@ -67,10 +67,17 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     }
     
     /**
+     * Returns the lock Object
+     */
+    private Object getBootstrapLock() {
+        return lock;
+    }
+    
+    /**
      * Returns true if this Node is currently bootstrapping
      */
     public boolean isBootstrapping() {
-        synchronized(lock) {
+        synchronized(getBootstrapLock()) {
             return future != null;
         }
     }
@@ -102,7 +109,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      * Bootstrap from the given Set of Hosts
      */
     public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
-        synchronized (lock) {
+        synchronized (getBootstrapLock()) {
             // Copy the hostSet but preserve the order of the Set
             Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>();
             for (SocketAddress addr : hostSet) {
@@ -394,6 +401,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         }
     }
     
+    /**
+     * A bootstrap specific implementation of DHTFuture
+     */
     private class BootstrapFuture extends AbstractDHTFuture<BootstrapEvent> {
         
         public BootstrapFuture(Callable<BootstrapEvent> task) {
