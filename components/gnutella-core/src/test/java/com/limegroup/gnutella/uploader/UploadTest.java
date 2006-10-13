@@ -332,6 +332,9 @@ public class UploadTest extends BaseTestCase {
         c.flush();
         ss.setSoTimeout(2000);
         
+        assertNotNull(ss.accept()); // get one.
+        
+        // the last two shouldn't be gotten.
         try {
             ss.accept();
             fail("node replied to duplicate push request");
