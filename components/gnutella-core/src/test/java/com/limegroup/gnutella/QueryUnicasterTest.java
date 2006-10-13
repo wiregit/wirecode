@@ -242,7 +242,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
             numMessages++;
             if (currMessage instanceof QueryRequest) {
                 QueryRequest currQR = (QueryRequest) currMessage;
-                assertTrue(currQR.getQuery().equals("Daswani"));
+                assertEquals("daswani", currQR.getQuery());
                 numQRs++;
             }
             else if (currMessage instanceof PingRequest) {
