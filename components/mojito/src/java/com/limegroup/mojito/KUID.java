@@ -515,7 +515,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     private static KUID createPrefxNodeID(KUID prefix, int depth, byte[] random) {
         depth++;
-        int length = (int)depth/8;
+        int length = depth/8;
         System.arraycopy(prefix.id, 0, random, 0, length);
         
         int bitsToCopy = depth % 8;
