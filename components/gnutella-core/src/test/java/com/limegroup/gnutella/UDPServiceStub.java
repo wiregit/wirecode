@@ -22,6 +22,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -156,7 +157,7 @@ public final class UDPServiceStub extends UDPService {
         	_timer.cancel();
         }
         private void receive(MessageWrapper msg) {
-        	DatagramPacket datagram = msg._dp;
+        	final DatagramPacket datagram = msg._dp;
 			// swap the port to the sender from the receiver
 			datagram.setPort(_fromPort);
 
@@ -172,9 +173,14 @@ public final class UDPServiceStub extends UDPService {
 			try {
 				// we do things the old way temporarily
 				InputStream in = new ByteArrayInputStream(data);
-				Message message = MessageFactory.read(in, Message.N_UDP);
-				if(message == null) return;                    
-				_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
+				final Message message = MessageFactory.read(in, Message.N_UDP);
+				if(message == null) return;
+				NIODispatcher.instance().invokeLater(new Runnable() {
+					public void run() {
+						_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
+					}
+				});
+				
 			} catch (IOException e) {
 				return;
 			} catch (BadPacketException e) {
@@ -332,7 +338,6 @@ public final class UDPServiceStub extends UDPService {
         public void run() {
             // send away
             // ------
-
 			try {
 				internalSend(_dp);
 			} catch(NoRouteToHostException nrthe) {
