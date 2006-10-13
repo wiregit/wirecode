@@ -209,9 +209,10 @@ public class NBThrottle implements Throttle {
             
             _active = true;
             long now = System.currentTimeMillis();
-            for(Iterator i = _interested.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry next = (Map.Entry)i.next();
-                ThrottleListener listener = (ThrottleListener)next.getValue();
+            Iterator<Map.Entry<Object, ThrottleListener>> i = _interested.entrySet().iterator();
+            for(; i.hasNext(); ) {
+                Map.Entry<Object, ThrottleListener> next = i.next();
+                ThrottleListener listener = next.getValue();
                 Object attachment = next.getKey();
                 SelectionKey key = _ready.remove(attachment);
                 if(!listener.isOpen()) {

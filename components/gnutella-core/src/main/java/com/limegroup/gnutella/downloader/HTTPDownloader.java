@@ -423,7 +423,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _socket.setKeepAlive(true);
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
-        _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getThrottle(true)));
+        _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getReadThrottle()));
         ((NIOMultiplexor)_socket).setReadObserver(_stateMachine);
         ((NIOMultiplexor)_socket).setWriteObserver(_stateMachine);
         

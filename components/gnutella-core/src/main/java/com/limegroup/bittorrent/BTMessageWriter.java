@@ -98,7 +98,7 @@ public class BTMessageWriter implements BTChannelWriter {
 
 	public void init(SchedulingThreadPool scheduler, int keepAliveInterval) {
 		ThrottleWriter throttle = new ThrottleWriter(
-				RouterService.getBandwidthManager().getThrottle(false));
+				RouterService.getBandwidthManager().getWriteThrottle());
 		delayer = new DelayedBufferWriter(1400, 3000);
 		_channel = throttle; 
 		delayer.setWriteChannel(throttle);

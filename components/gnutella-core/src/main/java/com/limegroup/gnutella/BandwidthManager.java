@@ -34,8 +34,13 @@ public class BandwidthManager {
 		UP_TCP.setRate(UploadManager.getUploadSpeed());
 	}
 	
-	public Throttle getThrottle(boolean reading) {
-		applyRate();
-		return reading ? DOWN_TCP : UP_TCP;
+	public Throttle getReadThrottle() {
+	    applyDownloadRate();
+        return DOWN_TCP;
+    }
+    
+    public Throttle getWriteThrottle() {
+        applyUploadRate();
+        return UP_TCP;
 	}
 }

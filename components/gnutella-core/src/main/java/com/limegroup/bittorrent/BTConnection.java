@@ -217,7 +217,7 @@ PieceSendListener, PieceReadListener {
 		_writer.init(invoker, CONNECTION_TIMEOUT - 5000);
 		
 		ThrottleReader readThrottle = new ThrottleReader(
-				RouterService.getBandwidthManager().getThrottle(true));
+				RouterService.getBandwidthManager().getReadThrottle());
 		_reader.setReadChannel(readThrottle);
 		readThrottle.interest(true);
 		_socket.setReadObserver(_reader);
