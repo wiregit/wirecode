@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.db;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import com.limegroup.mojito.Contact;
@@ -38,9 +39,17 @@ public interface DHTValue {
     public static final byte[] EMPTY_DATA = new byte[0];
     
     /**
-     *
+     * ValueType specifies the type of a DHTValue
      */
-    public static final class ValueType implements Comparable<ValueType> {
+    public static final class ValueType implements Comparable<ValueType>, Serializable {
+        
+        private static final long serialVersionUID = -3662336008253896020L;
+        
+        // NOTE: We cannot use enums for the ValueType! The simple
+        // reason is that it's not possible to create new enums at
+        // runtime which is a problem if somebody sends us a DHTValue
+        // we don't understand. It'd be impossible to wrap the type
+        // code into an enum.
         
         public static final ValueType BINARY = new ValueType("BINARY", 0x00);
         //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
