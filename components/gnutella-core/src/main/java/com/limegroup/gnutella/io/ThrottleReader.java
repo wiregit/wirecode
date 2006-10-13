@@ -101,24 +101,28 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
         if(chain == null)
             throw new IllegalStateException("reading with no chain!");
             
-        if(available == 0)
-            return 0;
-
-        int priorLimit = buffer.limit();
-        if(buffer.remaining() > available) {
-            //LOG.debug("Limting amount remaining to read from " + buffer.remaining() + " to " + available);
-            buffer.limit(buffer.position() + available);
-        }
-
-        int totalRead = -1;
-        try {
-            totalRead = channel.read(buffer);
-        } finally {
-            buffer.limit(priorLimit);
-        }
         
-        if (totalRead > 0)
-            available -= totalRead;
+        int totalRead = 0;
+        if(available > 0) {
+        	int priorLimit = buffer.limit();
+        	if(buffer.remaining() > available) {
+        		//LOG.debug("Limting amount remaining to read from " + buffer.remaining() + " to " + available);
+        		buffer.limit(buffer.position() + available);
+        	}
+
+        	try {
+        		totalRead = channel.read(buffer);
+        	} finally {
+        		buffer.limit(priorLimit);
+        	}
+
+        	if (totalRead > 0)
+        		available -= totalRead;
+        } else {
+        	channel.interest(false);
+        	if(lastInterestState)
+        		throttle.interest(this);
+        }
         //LOG.debug("Read: " + totalRead  + ", leaving: " + available + " left.");
         
         return totalRead;
@@ -142,7 +146,6 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      */
     public void requestBandwidth() {
         available = throttle.request();
-        channel.interest(false);
     }
     
     /**
