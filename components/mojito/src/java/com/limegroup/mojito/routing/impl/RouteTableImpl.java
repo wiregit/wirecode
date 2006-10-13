@@ -688,14 +688,18 @@ public class RouteTableImpl implements RouteTable {
                     }
                     
                     nodes.add(contact);
+                    
+                    // Exit the loop if done
+                    if (nodes.size() >= count) {
+                        return SelectStatus.EXIT;
+                    }
                 }
                 
-                if (nodes.size() < count) {
-                    return SelectStatus.CONTINUE;
-                }
-                return SelectStatus.EXIT;
+                return SelectStatus.CONTINUE;
             }
         });
+        
+        assert (nodes.size() <= count);
         return nodes;
     }
     
