@@ -267,11 +267,11 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload.
      *  It is assumed that the initial word of the request (e.g., "GET") has
      *  been consumed (e.g., by Acceptor)
-     * @param forceAllow forces the UploadManager to allow all requests
-     *  on this socket to take place.
+     * @param lan whether this is a socket over a local area connection. 
+     *  That forces the UploadManager to allow all requests on this socket to take place.
 	 */
     public void acceptUpload(final HTTPRequestMethod method,
-                             Socket socket, boolean forceAllow) {
+                             Socket socket, boolean lan) {
         
         LOG.trace("accepting upload");
         HTTPSession session = new HTTPSession(socket, this);
@@ -371,7 +371,7 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
                 // If we have not accepted this file already, then
                 // find out whether or not we should.
                 if( queued != ACCEPTED ) {                	
-                    queued = processNewRequest(session, forceAllow);
+                    queued = processNewRequest(session, lan);
                     
                     // If we just accepted this request,
                     // set the start time appropriately.

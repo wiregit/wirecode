@@ -46,15 +46,15 @@ public final class PushManager {
 	 * @param host the ip address of the host to upload to
 	 * @param port the port over which the transfer will occur
 	 * @param guid the unique identifying client guid of the uploading client
-     * @param forceAllow whether or not to force the UploadManager to send
-     *  accept this request when it comes back.
+     * @param lan whether or not this is a request over a local network (
+     * (force the UploadManager to accept this request when it comes back)
      * @param isFWTransfer whether or not to use a UDP pipe to service this
      * upload.
 	 */
 	public void acceptPushUpload(final String host, 
                                  final int port, 
                                  final String guid,
-                                 final boolean forceAllow,
+                                 final boolean lan,
                                  final boolean isFWTransfer) {
         if (LOG.isDebugEnabled())
             LOG.debug("Accepting Push Upload from ip:" + host + " port:" + port + " FW:" + isFWTransfer);
@@ -79,7 +79,7 @@ public final class PushManager {
         // 1) hammering us, or 2) is actually firewalled.  1) is done above us
         // now, and 2) isn't as much an issue with the advent of connectback
         
-        PushData data = new PushData(host, port, guid, forceAllow);
+        PushData data = new PushData(host, port, guid, lan);
         
         // If the transfer is to be done using FW-FW, then immediately start a new thread
         // which will connect using FWT.  Otherwise, do a non-blocking connect and have
@@ -105,17 +105,17 @@ public final class PushManager {
         private final String host;
         private final int port;
         private final String guid;
-        private final boolean forceAllow;
+        private final boolean lan;
         
-        PushData(String host, int port, String guid, boolean forceAllow) {
+        PushData(String host, int port, String guid, boolean lan) {
             this.host = host;
             this.port = port;
             this.guid = guid;
-            this.forceAllow = forceAllow;
+            this.lan = lan;
         }
         
-        public boolean isForceAllow() {
-            return forceAllow;
+        public boolean isLan() {
+            return lan;
         }
         public String getGuid() {
             return guid;
@@ -187,10 +187,10 @@ public final class PushManager {
 
                 if (word.equals("GET")) {
                     UploadStat.PUSHED_GET.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, socket, data.isForceAllow());
+                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.GET, socket, data.isLan());
                 } else if (word.equals("HEAD")) {
                     UploadStat.PUSHED_HEAD.incrementStat();
-                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, socket, data.isForceAllow());
+                    RouterService.getUploadManager().acceptUpload(HTTPRequestMethod.HEAD, socket, data.isLan());
                 } else {
                     UploadStat.PUSHED_UNKNOWN.incrementStat();
                     throw new IOException();
