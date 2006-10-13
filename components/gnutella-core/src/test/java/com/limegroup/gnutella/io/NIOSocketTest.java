@@ -261,7 +261,7 @@ public final class NIOSocketTest extends BaseTestCase {
     private static class Listener {
         
         private ServerSocket server;
-        private Socket accepted;
+        private volatile Socket accepted;
         
         Listener(int port) throws Exception {
             server = new ServerSocket();
@@ -282,15 +282,23 @@ public final class NIOSocketTest extends BaseTestCase {
             }).start();
         }
         
-        Stream getStream() {
+        Stream getStream() throws Exception {
+            // Wait 1 second for accepted to be gotten.
+            for(int i = 0; i < 10; i++) {
+                if(accepted != null)
+                    break;
+                Thread.sleep(100);
+            }
             return new Stream(accepted);
         }
     }
     
     private static class Stream {
-        private Socket socket;
+        private final Socket socket;
         
         Stream(Socket socket) {
+            if(socket == null)
+                throw new NullPointerException("no null sockets allowed");
             this.socket = socket;
         }
         

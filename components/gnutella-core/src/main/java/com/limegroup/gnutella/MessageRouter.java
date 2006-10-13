@@ -530,9 +530,9 @@ public abstract class MessageRouter {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
         synchronized (_bypassedResults) {
-        if (!_callback.isQueryAlive(guid) && 
-            !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-            _bypassedResults.remove(guid);
+            if (!_callback.isQueryAlive(guid) && 
+              !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
+                _bypassedResults.remove(guid);
         }
     }
     
