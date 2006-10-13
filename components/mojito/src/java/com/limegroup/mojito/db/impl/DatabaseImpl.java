@@ -214,7 +214,7 @@ public class DatabaseImpl implements Database {
         for (DHTValueBag bag : database.values()) {
             values.addAll(bag.values());
         }
-        return Collections.unmodifiableCollection(values);
+        return Collections.unmodifiableList(values);
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
