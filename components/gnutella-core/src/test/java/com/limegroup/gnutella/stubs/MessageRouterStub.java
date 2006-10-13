@@ -10,7 +10,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
@@ -18,8 +17,6 @@ public class MessageRouterStub extends MessageRouter {
     @Override
     public void downloadFinished(GUID guid) throws IllegalArgumentException {
     }
-
-    private static final byte [] MYGUID = GUID.makeGuid();
 
     @Override
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
@@ -48,14 +45,5 @@ public class MessageRouterStub extends MessageRouter {
                                     boolean isFromMcast,
                                     boolean shouldMarkForFWTransfer) {
         return new LinkedList();
-    }
-    
-    /**
-     * the proper constructor may not initialize our guid, 
-     * so we create a fake one
-     */
-    @Override
-    public byte []getOurGUID() {
-        return MYGUID;
     }
 }
