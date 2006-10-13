@@ -82,8 +82,6 @@ public class HeadTest extends BaseTestCase {
 		return buildTestSuite(HeadTest.class);
 	}
 	
-	private static final byte [] SOMEGUID=GUID.makeGuid();
-	
 	/**
 	 * sets up the testing environment for the UDPHeadPong.
 	 * two files are shared - _complete and _incomplete
@@ -97,11 +95,7 @@ public class HeadTest extends BaseTestCase {
 	    
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 	    
-	    MessageRouterStub mrStub = new MessageRouterStub() {
-	        public byte[] getOurGUID() {
-	            return SOMEGUID;
-	        }
-	    };
+	    MessageRouterStub mrStub = new MessageRouterStub();
 	    
 	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
 	    
