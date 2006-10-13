@@ -10,6 +10,8 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
@@ -59,7 +61,8 @@ public class DatabaseUtilsTest extends BaseTestCase {
         
         Contact originator = routeTable.getLocalNode();
         KUID valueId = originator.getNodeID().invert();
-        DHTValue value = DHTValue.createRemoteValue(originator, originator, valueId, "Hello World".getBytes());
+        DHTValue value = DHTValueFactory.createRemoteValue(
+                originator, originator, valueId, ValueType.BINARY, "Hello World".getBytes());
         
         long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));

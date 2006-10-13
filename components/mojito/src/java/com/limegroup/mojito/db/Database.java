@@ -47,7 +47,7 @@ public interface Database extends Serializable {
     /**
      * Adds the given DHTValue to the Database
      * 
-     * @param DHTValue to add
+     * @param DHTValueImpl to add
      * @return Whether or not the given DHTValue was added
      */
     public boolean add(DHTValue value);
@@ -55,7 +55,7 @@ public interface Database extends Serializable {
     /**
      * Removes the given DHTValue from the Database
      * 
-     * @param DHTValue to remove
+     * @param DHTValueImpl to remove
      * @return Whether or not the given DHTValue was removed
      */
     public boolean remove(DHTValue value);

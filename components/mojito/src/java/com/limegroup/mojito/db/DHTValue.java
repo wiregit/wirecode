@@ -19,16 +19,10 @@
 
 package com.limegroup.mojito.db;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Arrays;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.settings.DatabaseSettings;
-import com.limegroup.mojito.settings.KademliaSettings;
 
 /**
  * The DHTValue class represents a <key, value> tuple that
@@ -36,222 +30,157 @@ import com.limegroup.mojito.settings.KademliaSettings;
  * it's also storing the originator of the DHTValue as well as
  * the sender of the DHTValue.
  */
-public class DHTValue implements Serializable {
-    
-    private static final long serialVersionUID = -5172585009004184680L;
-
-    public static final byte[] EMPTY_DATA = new byte[0];
-
-    /** The originator of the DHTValue */
-    private Contact originator;
-    
-    /** The sender who sent the DHTValue to us (store forward) */
-    private Contact sender;
-    
-    /** The Key of the DHTValue */
-    private KUID valueId;
-    
-    /** The Value */
-    private byte[] data;
-    
-    /** The time when this DHTValue object was created */
-    private long creationTime = System.currentTimeMillis();
-    
-    /** The time when this DHTValue was republished */
-    private transient long lastRepublishingTime = 0L;
-    
-    /** The number of locations where this value was stored */
-    private transient int locations = 0;
-    
-    /** Whether or not this DHTValue is a local value */
-    private boolean isLocalValue = true;
-    
-    /** The hashCode, lazy initialization */
-    private volatile int hashCode = -1;
-    
-    /** Creates and returns a local DHTValue */
-    public static DHTValue createLocalValue(Contact originator, 
-            KUID valueId, byte[] data) {
-        return new DHTValue(originator, originator, valueId, data, true);
-    }
-    
-    /** Creates and returns a remote DHTValue */
-    public static DHTValue createRemoteValue(Contact originator, Contact sender, 
-            KUID valueId, byte[] data) {
-        return new DHTValue(originator, sender, valueId, data, false);
-    }
-    
-    private DHTValue(Contact originator, Contact sender, KUID valueId, byte[] data, 
-            boolean isLocalValue) {
-        this.originator = originator;
-        this.sender = sender;
-        this.valueId = valueId;
-        this.data = (data != null) ? data : EMPTY_DATA;
-        this.isLocalValue = isLocalValue;
-    }
+public interface DHTValue {
     
     /**
-     * Initializes the DHTValue
+     * An empty value
      */
-    private void init() {
-        lastRepublishingTime = 0L;
-        locations = 0;
-    }
+    public static final byte[] EMPTY_DATA = new byte[0];
     
+    /**
+     *
+     */
+    public static final class ValueType implements Comparable<ValueType> {
+        
+        public static final ValueType BINARY = new ValueType("BINARY", 0x00);
+        //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
+        
+        private static final ValueType[] TYPES = new ValueType[] {
+            BINARY
+        };
+        
+        static {
+            Arrays.sort(TYPES);
+        }
+        
+        private String name;
+        
+        private int type;
+        
+        private ValueType(String name, int type) {
+            this.name = name;
+            this.type = type;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public int toInt() {
+            return type;
+        }
+        
+        public int compareTo(ValueType o) {
+            return type - o.type;
+        }
+
+        public int hashCode() {
+            return type & Integer.MAX_VALUE;
+        }
+        
+        public boolean equals(Object o) {
+            if (!(o instanceof ValueType)) {
+                return false;
+            }
+            
+            ValueType other = (ValueType)o;
+            return compareTo(other)==0 && name.equals(other.name);
+        }
+        
+        public String toString() {
+            return name + " (0x" + Long.toHexString((type & 0xFFFFFFFFL)) + ")";
+        }
+        
+        public static ValueType valueOf(int type) {
+            ValueType unknown = new ValueType("UNKNOWN", type);
+            int index = Arrays.binarySearch(TYPES, unknown);
+            if (index < 0) {
+                return unknown;
+            } else {
+                return TYPES[index];
+            }
+        }
+        
+        /*private static int parse(String type) {
+            char[] chars = type.toCharArray();
+            if (chars.length != 4) {
+                throw new IllegalArgumentException();
+            }
+            
+            int id = 0;
+            for(char c : chars) {
+                id = (id << 8) | (int)(c & 0xFF);
+            }
+            return id;
+        }*/
+    }
+
     /** 
      * Returns the ValueID
      */
-    public KUID getValueID() {
-        return valueId;
-    }
+    public KUID getValueID();
+    
+    /**
+     * Returns the Type of the Value
+     */
+    public ValueType getValueType();
     
     /** 
      * Returns the Value. Beware: The returned byte array is 
      * <b>NOT</b> a copy!
      */
-    public byte[] getData() {
-        return data;
-    }
+    public byte[] getData();
     
     /** 
      * Returns the size of the value 
      */
-    public int size() {
-        return data.length;
-    }
+    public int size();
     
     /** 
      * Returns whether or not the value is empty
      */
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-    
-    /** 
-     * Sets the originator, meant for internal use only! 
-     */
-    public void setOriginator(Contact originator) {
-        this.originator = originator;
-    }
+    public boolean isEmpty();
     
     /** 
      * Returns the originator of the value 
      */
-    public Contact getOriginator() {
-        return originator;
-    }
+    public Contact getOriginator();
     
     /**
      * Returns the Node ID of the originator
      */
-    public KUID getOriginatorID() {
-        return originator.getNodeID();
-    }
+    public KUID getOriginatorID();
     
     /** 
      * Returns the sender of the value 
      */
-    public Contact getSender() {
-        return sender;
-    }
+    public Contact getSender();
     
     /** 
      * Returns the creationTime of this DHTValue object 
      */ 
-    public long getCreationTime() {
-        return creationTime;
-    }
+    public long getCreationTime();
     
     /** 
      * Returns whether or not the originator and sender 
      * of the DHTValue are the same
      */
-    public boolean isDirect() {
-        return originator.getNodeID().equals(sender.getNodeID());
-    }
+    public boolean isDirect();
     
     /** 
      * Returns whether or not this is a local DHTValue 
      */
-    public boolean isLocalValue() {
-        return isLocalValue;
-    }
+    public boolean isLocalValue();
     
     /**
      * Returns true if this DHTValue requires republishing. Returns
      * always false if this is a non-local value.
      */
-    public boolean isRepublishingRequired() {
-        if (!isLocalValue()) {
-            return false;
-        }
-        
-        long t = (long)((locations 
-                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
-                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
-        
-        // never republish more than every X minutes
-        long nextPublishTime = Math.max(t, DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
-        long time = lastRepublishingTime + nextPublishTime;
-
-        return System.currentTimeMillis() >= time;
-    }
+    public boolean isRepublishingRequired();
     
     /**
      * Sets the number of locations where this DHTValue was stored and 
      * the lastRepublishingTime to the current System time
      */
-    public void publishedTo(int locations) {
-        if (locations < 0) {
-            throw new IllegalArgumentException("locations: " + locations);
-        }
-        
-        this.locations = locations;
-        this.lastRepublishingTime = System.currentTimeMillis();
-    }
-    
-    public int hashCode() {
-        if (hashCode == -1) {
-            hashCode = 17*valueId.hashCode() + Arrays.hashCode(data);
-            if (hashCode == -1) {
-                hashCode = 0;
-            }
-        }
-        return hashCode;
-    }
-    
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (!(o instanceof DHTValue)) {
-            return false;
-        }
-        
-        DHTValue c = (DHTValue)o;
-        return valueId.equals(c.valueId) && Arrays.equals(data, c.data);
-    }
-    
-    public String toString() {
-        StringBuilder buffer = new StringBuilder();
-        if (isEmpty()) {
-            buffer.append(valueId).append(", originator=")
-                .append(getOriginator()).append(" (REMOVE)");
-        } else {
-            buffer.append(valueId).append("\n")
-                .append("Originator: ").append(getOriginator()).append("\n")
-                .append("Sender: ").append(getSender()).append("\n")
-                //.append("Hex: ").append(ArrayUtils.toHexString(data, 80));
-                .append("Data: ").append(new String(data));
-        }
-        return buffer.toString();
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        init(); // Init transient fields
-    }
+    public void publishedTo(int locations);
 }

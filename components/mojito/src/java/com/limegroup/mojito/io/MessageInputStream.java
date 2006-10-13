@@ -37,6 +37,8 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.Type;
@@ -98,6 +100,8 @@ public class MessageInputStream extends DataInputStream {
     public DHTValue readDHTValue(Contact sender) throws IOException {
         Contact originator = readContact();
         KUID valueId = readKUID();
+        ValueType type = readValueType();
+        
         byte[] data = null;
         int length = readUnsignedShort();
         if (length > 0) {
@@ -105,7 +109,7 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return DHTValue.createRemoteValue(originator, sender, valueId, data);
+        return DHTValueFactory.createRemoteValue(originator, sender, valueId, type, data);
     }
     
     /**
@@ -264,6 +268,9 @@ public class MessageInputStream extends DataInputStream {
         return Type.valueOf(readUnsignedByte());
     }
     
+    /**
+     * 
+     */
     @SuppressWarnings("unchecked")
     public Collection<Entry<KUID, Status>> readStoreStatus() throws IOException {
         int size = readUnsignedByte();
@@ -278,5 +285,12 @@ public class MessageInputStream extends DataInputStream {
             entries[i] = new EntryImpl<KUID, Status>(valueId, status);
         }
         return Arrays.asList(entries);
+    }
+    
+    /***
+     * 
+     */
+    public ValueType readValueType() throws IOException {
+        return ValueType.valueOf(readInt());
     }
 }

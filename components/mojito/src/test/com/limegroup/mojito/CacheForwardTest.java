@@ -140,7 +140,7 @@ public class CacheForwardTest extends BaseTestCase {
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
             KUID valueId = KUID.createRandomID();
             byte[] value = "Hello World".getBytes();
-            StoreEvent evt = originator.put(valueId, value).get();
+            StoreEvent evt = originator.put(valueId, null, value).get();
             assertEquals(k, evt.getNodes().size());
             
             // And check the initial state

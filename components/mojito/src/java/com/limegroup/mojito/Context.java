@@ -48,8 +48,10 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueFactory;
 import com.limegroup.mojito.db.DHTValuePublisher;
 import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindNodeEvent;
@@ -494,7 +496,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
                 if (value.isLocalValue()) {
                     // Make sure all local DHTValues have the
                     // local Node as the originator
-                    value.setOriginator(localNode);
+                    DHTValueFactory.setOriginator(value, localNode);
                 } else {
                     
                     // Remove all non local DHTValues. We're assuming
@@ -907,12 +909,12 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, byte[])
      */
-    public DHTFuture<StoreEvent> put(KUID key, byte[] value) {
+    public DHTFuture<StoreEvent> put(KUID key, ValueType type, byte[] value) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName() + " put()");
         }
         
-        DHTValue dhtValue = DHTValue.createLocalValue(getLocalNode(), key, value);
+        DHTValue dhtValue = DHTValueFactory.createLocalValue(getLocalNode(), key, type, value);
         database.store(dhtValue);
         return store(dhtValue);
     }
@@ -927,7 +929,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
         
         // To remove a KeyValue you just store an empty value!
-        return put(key, DHTValue.EMPTY_DATA);
+        return put(key, ValueType.BINARY, DHTValue.EMPTY_DATA);
     }
     
     /** 
