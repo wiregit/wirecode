@@ -656,7 +656,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         responseCount++;
     }
     
-    protected String getState() {
+    public String toString() {
         long time = getElapsedTime();
         boolean timeout = isLookupTimeout(time);
         int activeSearches = getActiveSearches();

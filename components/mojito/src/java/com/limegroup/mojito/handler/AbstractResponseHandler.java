@@ -356,12 +356,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
                 try {
                     return exchanger.get(getLockTimeout(), TimeUnit.MILLISECONDS);
                 } catch (TimeoutException err) {
-                    String state = getState();
-                    if (state == null) {
-                        throw new LockTimeoutException("Timeout: " + timeout);
-                    } else {
-                        throw new LockTimeoutException("Timeout: " + timeout + ", State: " + state);
-                    }
+                    throw new LockTimeoutException("Timeout: " + timeout + ", State: " + toString());
                 } catch (CancellationException err) {
                     // ResponseHandler was cancelled (back-end)
                     cancelled();
@@ -390,15 +385,6 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Called if this handler was cancelled externally (interrupted)
      */
     protected void cancelled() {
-    }
-    
-    /**
-     * Returns the current processing State (it's called on a lock timeout). 
-     * The default implementation returns null. Subclasses may override this 
-     * method for debugging purposes. 
-     */
-    protected String getState() {
-        return null;
     }
     
     /**
