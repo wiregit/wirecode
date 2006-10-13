@@ -15,26 +15,30 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
     
+    @Override
+    public void downloadFinished(GUID guid) throws IllegalArgumentException {
+    }
+
     private static final byte [] MYGUID = GUID.makeGuid();
 
+    @Override
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID,
                                             ReplyHandler handler) {
         return false;
     }
 
-    
-    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
-    }    
-
+    @Override
     protected void respondToPingRequest(PingRequest request,
                                         ReplyHandler handler) {
 	}
 
+    @Override
     protected void respondToUDPPingRequest(PingRequest request, 
                                            InetSocketAddress addr,
                                            ReplyHandler handler) {}
 
+    @Override
     protected List createQueryReply(byte[] guid, byte ttl,
                                     long speed, 
                                     Response[] res, byte[] clientGUID, 
@@ -50,6 +54,7 @@ public class MessageRouterStub extends MessageRouter {
      * the proper constructor may not initialize our guid, 
      * so we create a fake one
      */
+    @Override
     public byte []getOurGUID() {
         return MYGUID;
     }

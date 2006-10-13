@@ -93,8 +93,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
         RouterService.getAltlocManager().purge();
-            PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-            PrivilegedAccessor.setValue(RouterService.class,"router",router);
+        PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+        PrivilegedAccessor.setValue(RouterService.class,"router",router);
     }
 
     
@@ -312,7 +312,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         try {
             //Start uploader and download.
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
-            uploader.stopAfter(100);
+            uploader.stopAfter(500);
             uploader.setSendThexTreeHeader(false);
             uploader.setSendThexTree(false);
             downloader=
@@ -327,7 +327,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
             // input from the user
-            assertEquals("should have read 100 bytes", 100, 
+            assertEquals("should have read 500 bytes", 500, 
                          downloader.getAmountRead());
             assertEquals("should be waiting for user",
                          Downloader.WAITING_FOR_USER, 
@@ -339,7 +339,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             // we will wait for connections (since we have no one to query)
             assertEquals(Downloader.WAITING_FOR_CONNECTIONS, 
                          downloader.getState());
-            assertEquals(100, 
+            assertEquals(500, 
                          downloader.getAmountRead());
         } finally {
             if (uploader!=null)
@@ -376,7 +376,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 						SaveLocationException.DIRECTORY_NOT_WRITEABLE,
 						sle.getErrorCode());
 			}
-			}
+		}
+        
 		try {
 			new ManagedDownloader(rfds,
 					new IncompleteFileManager(), new GUID(GUID.makeGuid()),
