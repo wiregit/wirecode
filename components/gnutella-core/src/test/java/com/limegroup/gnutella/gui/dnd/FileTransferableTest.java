@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 
 public class FileTransferableTest extends BaseTestCase {
 
@@ -17,11 +18,19 @@ public class FileTransferableTest extends BaseTestCase {
 	}
 	
 	public void testGetTransferData() throws UnsupportedFlavorException, IOException {
-		List<File> files = Arrays.asList(new File("/test/file1"), new File("/test/file2"));
+		List<File> files = Arrays.asList(new File("/test/file 1"), new File("/Test Dir/file2"));
 		Transferable transferable = new FileTransferable(files);
 		assertEquals(files, transferable.getTransferData(DataFlavor.javaFileListFlavor));
-		assertEquals("file:/test/file1\nfile:/test/file2",
-				transferable.getTransferData(FileTransferable.URIFlavor));
+		if (CommonUtils.isWindows()) {
+			files = Arrays.asList(new File("C:\\test\file 1"),
+					new File("C:\\Test Dir\\file2"));
+			assertEquals("file:/C:/test/file%201\nfile:/C:/Test%20Dir/file2",
+					transferable.getTransferData(FileTransferable.URIFlavor));
+		}
+		else {
+			assertEquals("file:/test/file%201\nfile:/Test%20Dir/file2",
+					transferable.getTransferData(FileTransferable.URIFlavor));
+		}
 	}
 
 }
