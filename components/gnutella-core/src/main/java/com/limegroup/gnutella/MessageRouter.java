@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
@@ -633,7 +634,8 @@ public abstract class MessageRouter {
         // for routing to the appropriate connection processor
         if (msg instanceof UDPConnectionMessage) {
             RouterService.getUDPMultiplexor().routeMessage(
-                    (UDPConnectionMessage) msg, addr);
+                    (UDPConnectionMessage) msg, addr, 
+                    NIODispatcher.instance().getTransportListener());
             return;
         } else if(msg instanceof QueryReply) {
             // check to see if it was from the multicast map.

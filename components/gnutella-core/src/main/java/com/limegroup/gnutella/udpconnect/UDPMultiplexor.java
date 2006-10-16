@@ -18,6 +18,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.io.TransportListener;
+
 /** 
  *  Manage the assignment of connectionIDs and the routing of 
  *  UDPConnectionMessages. 
@@ -72,16 +74,17 @@ public class UDPMultiplexor extends AbstractSelector {
     /**
      *  Route a message to the UDPConnectionProcessor identified in the messages
 	 *  connectionID;
+	 *  Notifies the provided listener (if any) if the channel is ready to produce events
      */
-	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
+	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr, TransportListener listener) {
         UDPSocketChannel[] array = _channels;
 		int connID = msg.getConnectionID() & 0xff;
-
+		UDPSocketChannel channel = null;
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
 			for (int i = 1; i < array.length; i++) {
-                UDPSocketChannel channel = array[i];
+                channel = array[i];
                 if(channel == null)
                     continue;
                 
@@ -94,10 +97,15 @@ public class UDPMultiplexor extends AbstractSelector {
 			// so it is safe to throw away premature ones
 
 		} else if(array[connID] != null) {  // If valid connID then send on to connection
-            UDPSocketChannel channel = array[connID];
+            channel = array[connID];
 			if (channel.getRemoteSocketAddress().equals(addr) )
                 channel.getProcessor().handleMessage(msg);
 		}
+		
+		if (listener != null && 
+				channel != null && 
+				channel.getProcessor().readyOps() != 0)
+			listener.eventPending();
 	}
 
     protected void implCloseSelector() throws IOException {

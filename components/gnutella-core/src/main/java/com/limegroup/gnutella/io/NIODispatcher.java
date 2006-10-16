@@ -69,6 +69,9 @@ public class NIODispatcher implements Runnable {
     private final SchedulingThreadPool SCHEDULER =
     	new MyThreadPool();
     
+    private final TransportListener TRANSPORT_LISTENER = 
+    	new MyTransportListener();
+    
     /**
      * Constructs the sole NIODispatcher, starting its thread.
      */
@@ -976,6 +979,16 @@ public class NIODispatcher implements Runnable {
 			instance().invokeLater(runner);
 		}
     	
+    }
+
+    public TransportListener getTransportListener() {
+    	return TRANSPORT_LISTENER;
+    }
+    
+    private class MyTransportListener implements TransportListener {
+    	public void eventPending() {
+    		wakeup();
+    	}
     }
 }
 
