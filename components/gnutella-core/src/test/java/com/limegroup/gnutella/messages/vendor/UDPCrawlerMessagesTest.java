@@ -395,9 +395,11 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
                 == (int)UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.LOCALE_INFO)
                 == (int)UDPCrawlerPing.LOCALE_INFO);
+        assertTrue((format & UDPCrawlerPing.DHT_STATUS)
+                == (int)UDPCrawlerPing.DHT_STATUS);
         
         //see if the result we got had any uptime (it should!)
-        short uptime = ByteOrder.leb2short(payload,13);
+        short uptime = ByteOrder.leb2short(payload,14);
         assertGreaterThan(0,uptime);
  	}
  	
