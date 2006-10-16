@@ -175,11 +175,7 @@ public final class UDPServiceStub extends UDPService {
 				InputStream in = new ByteArrayInputStream(data);
 				final Message message = MessageFactory.read(in, Message.N_UDP);
 				if(message == null) return;
-				NIODispatcher.instance().invokeLater(new Runnable() {
-					public void run() {
-						_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
-					}
-				});
+					_router.handleUDPMessage(message, (InetSocketAddress)datagram.getSocketAddress());
 				
 			} catch (IOException e) {
 				return;
