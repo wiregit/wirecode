@@ -51,7 +51,7 @@ public interface DHTValue {
         // we don't understand. It'd be impossible to wrap the type
         // code into an enum.
         
-        public static final ValueType BINARY = new ValueType("BINARY", 0x00);
+        public static final ValueType BINARY = new ValueType("BINARY", 0x00000000);
         //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
         
         private static final ValueType[] TYPES = new ValueType[] {
@@ -70,7 +70,7 @@ public interface DHTValue {
             this.name = name;
             this.type = type;
         }
-        
+
         public String getName() {
             return name;
         }
@@ -98,6 +98,12 @@ public interface DHTValue {
         
         public String toString() {
             return name + " (0x" + Long.toHexString((type & 0xFFFFFFFFL)) + ")";
+        }
+        
+        public static ValueType[] values() {
+            ValueType[] copy = new ValueType[TYPES.length];
+            System.arraycopy(TYPES, 0, copy, 0, copy.length);
+            return copy;
         }
         
         public static ValueType valueOf(int type) {
