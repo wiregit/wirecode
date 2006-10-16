@@ -65,8 +65,8 @@ public class DHTValueImpl implements DHTValue, Serializable {
     /** Whether or not this DHTValue is a local value */
     private boolean isLocalValue = true;
     
-    /** The hashCode, lazy initialization */
-    private volatile int hashCode = -1;
+    /** The hashCode */
+    private int hashCode;
     
     /**
      * Creates an instance of DHTValueImpl
@@ -85,15 +85,22 @@ public class DHTValueImpl implements DHTValue, Serializable {
         this.sender = sender;
         this.valueId = valueId;
         
-        if (data != null) {
-            this.type = (type != null) ? type : ValueType.BINARY;
-            this.data = data;
-        } else {
+        if (type == null) {
+            type = ValueType.BINARY;
+        }
+        
+        if (data == null) {
             this.type = ValueType.BINARY;
             this.data = EMPTY_DATA;
+        } else {
+            this.type = type;
+            this.data = data;
         }
         
         this.isLocalValue = isLocalValue;
+        
+        // Compute the HashCode
+        hashCode = 17 * valueId.hashCode() + Arrays.hashCode(data);
     }
     
     /**
@@ -233,12 +240,6 @@ public class DHTValueImpl implements DHTValue, Serializable {
     }
     
     public int hashCode() {
-        if (hashCode == -1) {
-            hashCode = 17*valueId.hashCode() + Arrays.hashCode(data);
-            if (hashCode == -1) {
-                hashCode = 0;
-            }
-        }
         return hashCode;
     }
     
