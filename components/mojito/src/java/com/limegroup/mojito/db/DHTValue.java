@@ -176,6 +176,11 @@ public interface DHTValue {
      */ 
     public long getCreationTime();
     
+    /**
+     * Returns the time when this DHTValue was republished
+     */
+    public long getPublishTime();
+    
     /** 
      * Returns whether or not the originator and sender 
      * of the DHTValue are the same
@@ -197,5 +202,10 @@ public interface DHTValue {
      * Sets the number of locations where this DHTValue was stored and 
      * the lastRepublishingTime to the current System time
      */
-    public void publishedTo(int locations);
+    public void setLocationCount(int locationCount);
+    
+    /**
+     * Returns the number of locations where this DHTValue was stored
+     */
+    public int getLocationCount();
 }

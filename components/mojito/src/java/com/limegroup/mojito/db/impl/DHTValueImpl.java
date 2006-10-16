@@ -60,7 +60,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
     private transient long lastRepublishingTime = 0L;
     
     /** The number of locations where this value was stored */
-    private transient int locations = 0;
+    private transient int locationCount = 0;
     
     /** Whether or not this DHTValue is a local value */
     private boolean isLocalValue = true;
@@ -108,7 +108,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      */
     private void init() {
         lastRepublishingTime = 0L;
-        locations = 0;
+        locationCount = 0;
     }
     
     /*
@@ -192,6 +192,14 @@ public class DHTValueImpl implements DHTValue, Serializable {
     
     /*
      * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValue#getPublishTime()
+     */
+    public long getPublishTime() {
+        return lastRepublishingTime;
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValue#isDirect()
      */
     public boolean isDirect() {
@@ -215,28 +223,37 @@ public class DHTValueImpl implements DHTValue, Serializable {
             return false;
         }
         
-        long t = (long)((locations 
+        long t = (long)((locationCount 
                 * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());
         
-        // never republish more than every X minutes
-        long nextPublishTime = Math.max(t, DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
+        // Do never republish more than every X minutes
+        long nextPublishTime = Math.max(t, 
+                DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
+        
         long time = lastRepublishingTime + nextPublishTime;
-
         return System.currentTimeMillis() >= time;
     }
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.db.DHTValue#publishedTo(int)
+     * @see com.limegroup.mojito.db.DHTValue#setLocationCount(int)
      */
-    public void publishedTo(int locations) {
-        if (locations < 0) {
-            throw new IllegalArgumentException("locations: " + locations);
+    public void setLocationCount(int locationCount) {
+        if (locationCount < 0) {
+            throw new IllegalArgumentException("locations: " + locationCount);
         }
         
-        this.locations = locations;
+        this.locationCount = locationCount;
         this.lastRepublishingTime = System.currentTimeMillis();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValue#getLocationCount()
+     */
+    public int getLocationCount() {
+        return locationCount;
     }
     
     public int hashCode() {
