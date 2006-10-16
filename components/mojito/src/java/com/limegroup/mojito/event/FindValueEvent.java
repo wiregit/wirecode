@@ -101,6 +101,11 @@ public class FindValueEvent implements Iterable<Future<DHTValue>> {
         buffer.append(lookupId).append(" (time=").append(time)
             .append("ms, hop=").append(hop).append(")\n");
         
+        if(responses.isEmpty()) {
+            buffer.append("No values found!");
+            return buffer.toString();
+        }
+        
         int i = 0;
         for (Future<DHTValue> future : this) {
             try {
