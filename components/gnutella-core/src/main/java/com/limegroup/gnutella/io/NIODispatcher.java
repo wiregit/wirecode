@@ -598,8 +598,9 @@ public class NIODispatcher implements Runnable {
                 	long delay = nextSelectTimeout();
                 	if (delay == 0)
                 		immediate = true;
-                	else
-                		primarySelector.select(delay);
+                	else {
+                        primarySelector.select(Math.min(delay, Integer.MAX_VALUE));
+                    }
                 }
                 
                 if (immediate)

@@ -49,8 +49,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
      */
     private static QueryStatusResponse getFirstQueryStatus(Connection c) 
                                         throws BadPacketException, IOException {
-        return (QueryStatusResponse)
-            getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
+        return getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
 
     static MyActivityCallback myCallback = new MyActivityCallback();
@@ -162,13 +161,13 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         for (int i = 0; i < testUP.length; i++) {
             for (int j = 0; j < testUP.length; j++) {
                 QueryStatusResponse stat = getFirstQueryStatus(testUP[j]);
-                assertNotNull(stat);
-                assertEquals(new GUID(stat.getGUID()), queryGuid);
+                assertNotNull("failed on up: " + j, stat);
+                assertEquals("failed on up: " + j, new GUID(stat.getGUID()), queryGuid);
                 // depending on how far along the query is we could have a
                 // number or 65535 - the number 11 depends on settings such as
                 // REPORT_INTERVAL
                 if (stat.getNumResults() == MAX_RESULTS) {
-                    assertEquals(testUP.length-1, i);
+                    assertEquals("failed on up: " + j, testUP.length-1, i);
                     maxResultsEncountered = true;
                 } else {
                     //assertEquals(11*(i+1), stat.getNumResults());
@@ -227,9 +226,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         // all UPs should get a QueryStatusResponse
         for (int i = 0; i < testUP.length; i++) {
             QueryStatusResponse stat = getFirstQueryStatus(testUP[i]);
-            assertNotNull(stat);
-            assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(REPORT_INTERVAL, stat.getNumResults());
+            assertNotNull("failed on up: " + i, stat);
+            assertEquals("failed on up: " + i, new GUID(stat.getGUID()), queryGuid);
+            assertEquals("failed on up: " + i, REPORT_INTERVAL, stat.getNumResults());
         }
 
 

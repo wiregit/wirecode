@@ -635,9 +635,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         TCP_TEST_LEAF.flush();        
         
         StatisticVendorMessage statsAck = 
-        (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
-                                                               Class.forName(
-            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
+            getFirstInstanceOfMessageType(TCP_TEST_LEAF, StatisticVendorMessage.class);
 
         //Gnutella outgoing by TCP
         GiveStatsVendorMessage statsVM2 = new GiveStatsVendorMessage(
@@ -648,9 +646,7 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         TCP_TEST_LEAF.flush();
 
         StatisticVendorMessage statsAck2 = 
-        (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
-                                                               Class.forName(
-            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
+         getFirstInstanceOfMessageType(TCP_TEST_LEAF, StatisticVendorMessage.class);;
 
         //Gnutella incoming by UDP        
         GiveStatsVendorMessage statsVM3 = new GiveStatsVendorMessage(

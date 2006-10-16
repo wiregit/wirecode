@@ -722,12 +722,12 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      * Returns the first message of the expected type, ignoring
      * RouteTableMessages and PingRequests.
      */
-    public static Message getFirstMessageOfType(Connection c, Class type) {
+    public static <T extends Message> T getFirstMessageOfType(Connection c, Class<T> type) {
         return getFirstMessageOfType(c, type, TIMEOUT);
     }
 
-    public static Message getFirstMessageOfType(Connection c,
-                                                Class type,
+    public static <T extends Message> T getFirstMessageOfType(Connection c,
+                                                Class<T> type,
                                                 int timeout) {
         for(int i = 0; i < 100; i++) {
             if(!c.isOpen()){
@@ -743,7 +743,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
                 else if (m instanceof PingRequest)
                     ;
                 else if (type.isInstance(m))
-                    return m;
+                    return (T)m;
                 else
                     return null;  // this is usually an error....
                 i = 0;
@@ -761,13 +761,13 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
         throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
-    public static Message getFirstInstanceOfMessageType(Connection c,
-                          Class type) throws BadPacketException {
+    public static <T extends Message> T getFirstInstanceOfMessageType(Connection c,
+                          Class<T> type) throws BadPacketException {
         return getFirstInstanceOfMessageType(c, type, TIMEOUT);
     }
 
-    public static Message getFirstInstanceOfMessageType(Connection c,
-               Class type, int timeout) throws BadPacketException {
+    public static <T extends Message> T getFirstInstanceOfMessageType(Connection c,
+               Class<T> type, int timeout) throws BadPacketException {
         for(int i = 0; i < 200; i++) {
             if(!c.isOpen()){
                 //System.out.println(c + " is not open");
@@ -778,7 +778,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
                 Message m = c.receive(timeout);
                 //System.out.println("m: " + m + ", class: " + m.getClass());
                 if (type.isInstance(m))
-                    return m;
+                    return (T)m;
                 i = 0;
             } catch (InterruptedIOException ie) {
 //                ie.printStackTrace();
@@ -795,7 +795,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      * the time out, so it's possible to wait upto almost 2 * timeout for this
      * method to return
      */
-    public static Message getFirstInstanceOfMessage(Socket socket, Class type, 
+    public static <T extends Message> T getFirstInstanceOfMessage(Socket socket, Class<T> type, 
                            int timeout) throws IOException, BadPacketException {
         int oldTimeout = socket.getSoTimeout();
         try {
@@ -806,7 +806,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
                 socket.setSoTimeout(timeout);
                 Message m=MessageFactory.read(socket.getInputStream(), Message.N_TCP);
                 if(type.isInstance(m))
-                    return m;
+                    return (T)m;
                 else if(m == null) //interruptedIOException thrown
                     return null;                    
                 i=0;
@@ -819,16 +819,13 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
         }
         return null;
     }
-    
-
 
     public static QueryRequest getFirstQueryRequest(Connection c) {
         return getFirstQueryRequest(c, TIMEOUT);
     }
     
     public static QueryRequest getFirstQueryRequest(Connection c, int tout) {
-        return (QueryRequest)getFirstMessageOfType(c, 
-                                    QueryRequest.class, tout);
+        return getFirstMessageOfType(c, QueryRequest.class, tout);
     }
     
     public static QueryReply getFirstQueryReply(Connection c) {
@@ -836,7 +833,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
     }
     
     public static QueryReply getFirstQueryReply(Connection c, int tout) {
-        return (QueryReply)getFirstMessageOfType(c, QueryReply.class, tout);
+        return getFirstMessageOfType(c, QueryReply.class, tout);
     }
     
     public static void failIfAnyArrive(final Connection []connections, final Class type) 

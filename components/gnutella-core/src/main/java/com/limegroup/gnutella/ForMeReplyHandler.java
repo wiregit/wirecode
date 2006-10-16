@@ -227,7 +227,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
         // check whether we serviced this push request already
     	GUID guid = new GUID(pushRequest.getGUID());
-    	if (GUID_REQUESTS.put(guid,guid) != null)
+    	if (GUID_REQUESTS.put(guid, guid) != null)
     		return;
 
        // make sure the guy isn't hammering us
