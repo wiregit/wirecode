@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.udpconnect;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.io.TransportListener;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class UDPMultiplexorTest extends BaseTestCase {
@@ -133,10 +136,43 @@ public class UDPMultiplexorTest extends BaseTestCase {
         assertEquals(SelectionKey.OP_READ | SelectionKey.OP_WRITE, key.readyOps());        
     }
     
+    /** 
+     * Tests that if a channel becomes ready for 
+     * some event, a provided listener is notified 
+     **/
+    public void testTransportEventGenerated() throws Exception {
+    	StubListener listener = new StubListener();
+    	Selector selector = UDPSelectorProvider.instance().openSelector();
+        assertInstanceof(UDPMultiplexor.class, selector);
+        
+        StubUDPSocketChannel channel = new StubUDPSocketChannel();
+        channel.addr = new InetSocketAddress(InetAddress.getLocalHost(),1);
+        SelectionKey key = channel.register(selector, 0);
+        
+        assertEquals(0, selector.selectNow());
+        
+        key.interestOps(SelectionKey.OP_CONNECT);
+        SynMessage syn = new SynMessage((byte)1);
+        UDPMultiplexor plexor = (UDPMultiplexor) selector;
+        
+        StubProcessor processor = (StubProcessor)channel.getProcessor();
+        assertNull(processor.msg);
+        
+        // send a message, do not change readiness.  No notification 
+        plexor.routeMessage(syn, channel.addr, listener);
+        assertSame(syn,processor.msg);
+        assertFalse(listener.notified);
+        
+        // send a message, change readiness.  Should be notified
+        channel.setReadyOps(1);
+        plexor.routeMessage(syn, channel.addr, listener);
+        assertTrue(listener.notified);
+    }
+    
     
     private static class StubUDPSocketChannel extends UDPSocketChannel {
         private StubProcessor stubProcessor = new StubProcessor(this);
-        
+        InetSocketAddress addr;
         StubUDPSocketChannel() {
             super((SelectorProvider)null);
         }
@@ -148,11 +184,24 @@ public class UDPMultiplexorTest extends BaseTestCase {
         void setReadyOps(int readyOps) {
             stubProcessor.setReadyOps(readyOps);
         }
+
+		@Override
+		public InetSocketAddress getRemoteSocketAddress() {
+			return addr;
+		}
+
+		@Override
+		public boolean isConnectionPending() {
+			return true;
+		}
+        
+        
     }
     
     private static class StubProcessor extends UDPConnectionProcessor {
         private int readyOps;
-        
+
+        UDPConnectionMessage msg;
         StubProcessor(UDPSocketChannel channel) {
             super(channel);
         }
@@ -164,5 +213,18 @@ public class UDPMultiplexorTest extends BaseTestCase {
         void setReadyOps(int readyOps) {
             this.readyOps = readyOps;
         }
+
+		void handleMessage(UDPConnectionMessage msg) {
+			this.msg = msg;
+		}
+        
+    }
+    
+    private static class StubListener implements TransportListener {
+    	boolean notified;
+
+		public void eventPending() {
+			notified = true;
+		}
     }
 }
