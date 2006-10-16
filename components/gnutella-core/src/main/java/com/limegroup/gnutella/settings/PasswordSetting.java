@@ -174,7 +174,7 @@ public final class PasswordSetting extends Setting {
      * Encodes and returns b as hex string
      */
     private static String toHexString(byte[] b) {
-        StringBuffer buffer = new StringBuffer(b.length * 2);
+        StringBuilder buffer = new StringBuilder(b.length * 2);
         for(int i = 0; i < b.length; i++) {
             buffer.append(HEX[((b[i] >> 4) & 0xF)]).append(HEX[b[i] & 0xF]);
         }

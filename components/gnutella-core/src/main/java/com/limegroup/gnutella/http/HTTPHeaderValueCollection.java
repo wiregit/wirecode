@@ -12,7 +12,7 @@ public class HTTPHeaderValueCollection implements HTTPHeaderValue {
 
     public String httpStringValue() {
         final String commaSpace = ", "; 
-		StringBuffer writeBuffer = new StringBuffer();
+        StringBuilder writeBuffer = new StringBuilder();
 		boolean wrote = false;
         
         for(HTTPHeaderValue value : _delegate) {

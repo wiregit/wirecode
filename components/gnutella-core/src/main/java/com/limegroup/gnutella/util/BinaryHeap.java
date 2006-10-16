@@ -328,7 +328,7 @@ public class BinaryHeap<T extends Comparable<T>> implements Iterable<T> {
 
     public String toString()
     {
-        StringBuffer ret=new StringBuffer("[");
+        StringBuilder ret=new StringBuilder("[");
         for(T t : this) {
             ret.append(t.toString()+ ", ");
         }

@@ -164,7 +164,7 @@ public class FileArraySetting extends Setting {
             return "";
         }
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         
         for(int i = 0; i < src.length; i++) {
             buffer.append(src[i].getAbsolutePath());

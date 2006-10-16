@@ -184,7 +184,7 @@ public abstract class AudioMetaData extends MetaData {
     /**
      * Appends the key/value & a "\" to the string buffer.
      */
-    protected void appendStrings(String key, String value, StringBuffer appendTo) {
+    protected void appendStrings(String key, String value, StringBuilder appendTo) {
         appendTo.append(key);
         appendTo.append(value);
         appendTo.append("\"");

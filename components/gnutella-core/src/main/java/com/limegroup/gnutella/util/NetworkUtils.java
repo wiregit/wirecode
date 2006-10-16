@@ -257,7 +257,7 @@ public final class NetworkUtils {
      */
     public static final String ip2string(byte[] ip, int offset) {
         // xxx.xxx.xxx.xxx => 15 chars
-        StringBuffer sbuf = new StringBuffer(16);   
+        StringBuilder sbuf = new StringBuilder(16);   
         sbuf.append(ByteOrder.ubyte2int(ip[offset]));
         sbuf.append('.');
         sbuf.append(ByteOrder.ubyte2int(ip[offset+1]));

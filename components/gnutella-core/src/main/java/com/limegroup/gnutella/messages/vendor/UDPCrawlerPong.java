@@ -187,7 +187,7 @@ public class UDPCrawlerPong extends VendorMessage {
 		//if the ping asked for user agents, copy the reported strings verbatim
 		//in the same order as the results.
 		if (request.hasUserAgent()) {
-			StringBuffer agents = new StringBuffer();
+            StringBuilder agents = new StringBuilder();
             for(Connection c: endpointsUP) {
 				String agent = c.getUserAgent();
 				agent = StringUtils.replace(agent,AGENT_SEP,"\\"+AGENT_SEP);

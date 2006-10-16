@@ -72,7 +72,7 @@ public class LimeXMLUtils {
      */
     public static InputSource getInputSource(File file) throws IOException {
         //open the file, read it, and derive the structure, store internally
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String line = "";
      
         //open the file
@@ -113,7 +113,7 @@ public class LimeXMLUtils {
      * those other nodes are ignored.
      */
     public static String getText(NodeList nodeList) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             switch(node.getNodeType()) {

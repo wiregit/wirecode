@@ -367,7 +367,7 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     public String toString() {
-        StringBuffer buf=new StringBuffer();
+        StringBuilder buf=new StringBuilder();
         buf.append("[");
         boolean isFirst=true;
         for (Iterator iter=iterator(); iter.hasNext(); ) {

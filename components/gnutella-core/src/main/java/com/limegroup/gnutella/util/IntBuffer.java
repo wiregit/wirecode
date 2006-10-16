@@ -385,7 +385,7 @@ public final class IntBuffer implements Cloneable {
 
 	// overrides Object.toString to return more information
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
         boolean isFirst=true;
         for (IntBufferIterator iter=iterator(); iter.hasNext(); ) {

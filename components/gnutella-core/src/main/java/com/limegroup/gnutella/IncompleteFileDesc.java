@@ -129,7 +129,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * Returns the available ranges as an HTTP string value.
      */
     public String getAvailableRanges() {
-        StringBuffer ret = new StringBuffer("bytes");
+        StringBuilder ret = new StringBuilder("bytes");
         boolean added = false;
         // This must be synchronized so that downloaders writing
         // to the verifying file do not cause concurrent mod

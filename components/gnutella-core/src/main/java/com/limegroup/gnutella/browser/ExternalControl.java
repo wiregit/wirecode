@@ -42,7 +42,7 @@ public class ExternalControl {
 	public static String preprocessArgs(String args[]) {
 	    LOG.trace("enter proprocessArgs");
 
-		StringBuffer arg = new StringBuffer();
+        StringBuilder arg = new StringBuilder();
 		for (int i = 0; i < args.length; i++) {
 			arg.append(args[i]);
 		}

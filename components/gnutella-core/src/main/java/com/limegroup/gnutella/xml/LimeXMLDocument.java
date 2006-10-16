@@ -418,7 +418,7 @@ public class LimeXMLDocument implements Serializable {
      * Constructs an XML string from this document.
      */
     public String getXMLString() {
-        StringBuffer fullXML = new StringBuffer();
+        StringBuilder fullXML = new StringBuilder();
         LimeXMLDocumentHelper.buildXML(fullXML, getSchema(), getAttributeString() + "/>");
         return fullXML.toString();
     }
@@ -456,7 +456,7 @@ public class LimeXMLDocument implements Serializable {
         if(attributes.isEmpty())
             return ""; // invalid.
             
-        StringBuffer tag = new StringBuffer();
+        StringBuilder tag = new StringBuilder();
         String root = getSchema().getRootXMLName();
         String type = getSchema().getInnerXMLName();
         String canonicalKey = root + "__" + type + "__";

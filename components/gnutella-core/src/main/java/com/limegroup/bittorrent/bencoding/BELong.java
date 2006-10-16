@@ -22,7 +22,7 @@ class BELong extends Token<Long> {
     }
     
     /** Storage for the value of the token */
-    private StringBuffer sb = new StringBuffer();
+    private StringBuilder sb = new StringBuilder();
     private byte [] currentByte = new byte[1];
     private ByteBuffer buf = ByteBuffer.wrap(currentByte);
 

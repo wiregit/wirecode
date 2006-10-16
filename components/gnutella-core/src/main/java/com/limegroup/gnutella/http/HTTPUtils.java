@@ -183,7 +183,7 @@ public final class HTTPUtils {
     }
     
     public static String createHeader(String name, String value) {
-        StringBuffer sb = new StringBuffer(name.length() + value.length() + 4);
+        StringBuilder sb = new StringBuilder(name.length() + value.length() + 4);
 		return sb.append(name).append(COLON_SPACE).append(value).append(CRLF).toString();
 	}
 

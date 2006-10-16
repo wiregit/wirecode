@@ -34,7 +34,7 @@ abstract class AbstractI18NConverter {
         else {
             int blockb4 = of(s.charAt(0));
             int curBlock;
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append(s.charAt(0));
             for(int i = 1, n = s.length(); i < n; i++) {
                 curBlock = of(s.charAt(i));

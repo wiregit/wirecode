@@ -45,7 +45,7 @@ class Tracker {
 			this.description = description;
 		}
 		
-		public void addEventFields(StringBuffer buf) {
+		public void addEventFields(StringBuilder buf) {
 			if (description != null)
 				addGetField(buf,"event",description);
 			if (numWant != null)
@@ -122,7 +122,7 @@ class Tracker {
 	 * @return string, the HTTP GET query string we send to the tracker
 	 */
 	private String createQueryString(Event event) {
-		StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 		try {
 			String infoHash = URLEncoder.encode(
 					StringUtils.getASCIIString(context.getMetaInfo().getInfoHash()),
@@ -217,7 +217,7 @@ class Tracker {
 	 *         necessary because the StringBuffer given as argument will be
 	 *         modified)
 	 */
-	private static StringBuffer addGetField(StringBuffer buf, String key,
+	private static StringBuilder addGetField(StringBuilder buf, String key,
 			String value) {
 		if (buf.length() == 0)
 			buf.append(QUESTION_MARK);

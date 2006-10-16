@@ -90,7 +90,7 @@ public class MacAddressFinder {
         if(address.length()!=17)
             return null;
         //check that we have six pair of numbers, separated by : or -
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         StringTokenizer tok = new StringTokenizer(address,":.-");
         for(int i=0; i<6;i++) {
             String val=null;
@@ -117,7 +117,7 @@ public class MacAddressFinder {
         //able to execute the command
         Process process = Runtime.getRuntime().exec(command);
         InputStream iStream = new BufferedInputStream(process.getInputStream());
-        StringBuffer buffer = new StringBuffer();//store the resutls
+        StringBuilder buffer = new StringBuilder();//store the resutls
         while(true) {
             int c = iStream.read();
             if(c==-1) //eof?

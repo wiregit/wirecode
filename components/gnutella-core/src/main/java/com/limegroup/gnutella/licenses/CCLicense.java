@@ -111,7 +111,7 @@ class CCLicense extends AbstractLicense {
             required = details.required;
         }
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if(permitted != null && !permitted.isEmpty()) {
             sb.append("Permitted: ");
             for(Iterator<String> i = permitted.iterator(); i.hasNext(); ) {

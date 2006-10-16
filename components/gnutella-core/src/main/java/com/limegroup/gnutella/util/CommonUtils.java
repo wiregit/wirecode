@@ -967,7 +967,7 @@ public final class CommonUtils {
      * Copied from URLDecoder.java
      */
     public static String decode(String s) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(int i=0; i<s.length(); i++) {
             char c = s.charAt(i);
             switch (c) {
@@ -1162,7 +1162,7 @@ public final class CommonUtils {
 	    int days = hours / 24;
 	    hours = hours - days * 24;
 	    // build the numbers into a string
-	    StringBuffer time = new StringBuffer();
+        StringBuilder time = new StringBuilder();
 	    if (days != 0) {
 	        time.append(Integer.toString(days));
 	        time.append(":");
@@ -1197,7 +1197,7 @@ public final class CommonUtils {
                 }
             });
             
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             for(Map.Entry<Thread, StackTraceElement[]> entry : sorted) {
                 Thread key = entry.getKey();
                 StackTraceElement[] value = entry.getValue();

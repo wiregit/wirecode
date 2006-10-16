@@ -132,7 +132,7 @@ public abstract class UploadState implements HTTPMessage {
 	    
 	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
 	    
-	    StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 	    int proxiesWritten =0;
 	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
 	        IpPort current = iter.next();
@@ -166,7 +166,7 @@ public abstract class UploadState implements HTTPMessage {
 	    
 	    Set<IpPort> proxies = RouterService.getConnectionManager().getPushProxies();
 	    
-	    StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 	    int proxiesWritten =0;
 	    for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext() && proxiesWritten <4 ;) {
 	        IpPort current = iter.next();

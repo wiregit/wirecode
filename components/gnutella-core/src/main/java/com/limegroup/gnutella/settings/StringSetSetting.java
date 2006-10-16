@@ -61,7 +61,7 @@ public class StringSetSetting extends Setting {
         if (src == null || src.isEmpty())
             return "";
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(Iterator<String> i = src.iterator(); i.hasNext(); ) {
             buffer.append(i.next());
             if (i.hasNext())

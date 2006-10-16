@@ -357,7 +357,7 @@ public class StringUtils {
      */
     public static String replace(String str, String old_str, String new_str) {
 		int o = 0;
-		StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 		for (int i = str.indexOf(old_str) ; i > -1 ; i = str.indexOf(old_str, i+1)) {
 			if (i > o ) {
 				buf.append (str.substring(o, i));
@@ -435,7 +435,7 @@ public class StringUtils {
             retString = StringUtils.removeIllegalChars(name);
             retString = StringUtils.truncate(retString, MAX_LEN);
         } else {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             int numWritten = 0;
             for(String currKey : intersection) {
                 if(numWritten >= MAX_LEN)
@@ -484,7 +484,7 @@ public class StringUtils {
         
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
-        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
+        StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(FileManager.DELIMITERS);
         StringTokenizer st = new StringTokenizer(name, sb.toString());        
         while(st.hasMoreTokens())
@@ -519,7 +519,7 @@ public class StringUtils {
         Set<String> ret=new LinkedHashSet<String>();
         String delim = FileManager.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
-        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
+        StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(FileManager.DELIMITERS);
 
         StringTokenizer st = new StringTokenizer(fileName, sb.toString());

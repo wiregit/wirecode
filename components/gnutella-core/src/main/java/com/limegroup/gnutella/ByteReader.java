@@ -102,7 +102,7 @@ public class ByteReader {
         if (_istream == null)
             return "";
 
-		StringBuffer sBuffer = new StringBuffer();
+        StringBuilder sBuffer = new StringBuilder();
         int c = -1; //the character just read
         boolean keepReading = true;
         

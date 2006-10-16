@@ -72,7 +72,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 			LOG.debug("initializing TorrentManager");
 		
 		// register ourselves as an acceptor.
-		StringBuffer word = new StringBuffer();
+        StringBuilder word = new StringBuilder();
 		word.append((char)19);
 		word.append("BitTorrent");
 		RouterService.getConnectionDispatcher().addConnectionAcceptor(

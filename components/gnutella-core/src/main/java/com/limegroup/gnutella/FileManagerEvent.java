@@ -149,7 +149,7 @@ public class FileManagerEvent extends EventObject {
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer("FileManagerEvent: [event=");
+        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=");
         
         switch(kind) {
             case ADD:

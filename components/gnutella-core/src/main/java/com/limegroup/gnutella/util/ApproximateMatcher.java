@@ -110,7 +110,7 @@ final public class ApproximateMatcher
         if (! (ignoreCase || compareBackwards || ignoreWhitespace))
             return s;
 
-        StringBuffer buf=new StringBuffer(s.length());
+        StringBuilder buf=new StringBuilder(s.length());
         if (compareBackwards) {
             for (int i=0; i<s.length(); i++) {
                 char c=s.charAt(s.length()-i-1);

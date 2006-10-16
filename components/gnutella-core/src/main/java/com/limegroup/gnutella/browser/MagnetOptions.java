@@ -72,7 +72,7 @@ public class MagnetOptions implements Serializable {
 		InetSocketAddress isa = fileDetails.getSocketAddress();
 		String url = null;
 		if (isa != null && urn != null) {
-			StringBuffer addr = new StringBuffer("http://");
+            StringBuilder addr = new StringBuilder("http://");
 			addr.append(isa.getAddress().getHostAddress()).append(':')
 			.append(isa.getPort()).append("/uri-res/N2R?");
 			addr.append(urn.httpStringValue());
@@ -230,7 +230,7 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public String toExternalForm() {
-		StringBuffer ret = new StringBuffer(MAGNET);
+        StringBuilder ret = new StringBuilder(MAGNET);
 		
         for(String xt : getExactTopics())
 			ret.append("&xt=").append(xt);

@@ -400,7 +400,7 @@ public final class RouteTable {
 
     public synchronized String toString() {
         //Inefficient, but this is only for debugging anyway.
-        StringBuffer buf=new StringBuffer("{");
+        StringBuilder buf=new StringBuilder("{");
         Map<byte[], RouteTableEntry> bothMaps=new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
         bothMaps.putAll(_oldMap);
         bothMaps.putAll(_newMap);

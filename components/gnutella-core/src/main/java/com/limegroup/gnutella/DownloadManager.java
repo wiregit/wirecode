@@ -1492,8 +1492,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     
     private class GivParser extends AbstractChannelInterestRead {
         private final Socket socket;
-        private final StringBuffer givSB   = new StringBuffer();
-        private final StringBuffer blankSB = new StringBuffer();
+        private final StringBuilder givSB   = new StringBuilder();
+        private final StringBuilder blankSB = new StringBuilder();
         private boolean readBlank;
         private GIVLine giv;
         

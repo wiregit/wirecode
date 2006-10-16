@@ -51,12 +51,12 @@ class HandshakeSupport extends HeaderSupport {
     }
     
     /** Appends the connect line to the given StringBuffer. */
-    void appendConnectLine(StringBuffer sb) {
+    void appendConnectLine(StringBuilder sb) {
         sb.append(GNUTELLA_CONNECT_06).append(CRLF);
     }
     
     /** Appends a response (using the given response) to the given StringBuffer */
-    void appendResponse(HandshakeResponse response, StringBuffer sb) {        
+    void appendResponse(HandshakeResponse response, StringBuilder sb) {        
         sb.append(GNUTELLA_06).append(" ").append(response.getStatusLine()).append(CRLF);
         appendHeaders(response.props(), sb);
     }
@@ -67,7 +67,7 @@ class HandshakeSupport extends HeaderSupport {
      * @param props The headers to be sent. Note: null argument is acceptable,
      *  if no headers need to be sent the trailer will be sent.
      */
-    void appendHeaders(Properties props, StringBuffer sb)  {
+    void appendHeaders(Properties props, StringBuilder sb)  {
         if (props != null) {
             Enumeration names = props.propertyNames();
             while (names.hasMoreElements()) {

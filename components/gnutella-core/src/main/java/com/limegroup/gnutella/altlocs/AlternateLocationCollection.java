@@ -230,7 +230,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 	 */	
 	public String httpStringValue() {
 		final String commaSpace = ", "; 
-		StringBuffer writeBuffer = new StringBuffer();
+        StringBuilder writeBuffer = new StringBuilder();
 		boolean wrote = false;
         synchronized(this) {
             for(AlternateLocation current : LOCATIONS) {
@@ -267,7 +267,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 	 *  this collection
 	 */
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 		sb.append("Alternate Locations: ");
 		synchronized(this) {
             for(T curLoc : LOCATIONS) {

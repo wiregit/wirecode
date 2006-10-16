@@ -105,14 +105,14 @@ class BlockingHandshakeSupport extends HandshakeSupport {
     
     /** Writes the initial connection line. */
     void writeConnectLine() throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         appendConnectLine(sb);
         writeLine(sb.toString());
     }
     
     /** Writes a response using the given HandshakeResponse. */
     void writeResponse(HandshakeResponse response) throws IOException {       
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         appendResponse(response, sb);
         writeLine(sb.toString());
     }
@@ -140,7 +140,7 @@ class BlockingHandshakeSupport extends HandshakeSupport {
      *  if no headers need to be sent the trailer will be sent.
      */
     void sendHeaders(Properties props) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         appendHeaders(props, sb);
         writeLine(sb.toString());
     }

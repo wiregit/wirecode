@@ -18,7 +18,7 @@ public class PublishedCCLicense{
     	
         Assert.that(holder!=null && year!=null && title!=null && uri!=null);
     	
-    	StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         ret.append(CCConstants.CC_RDF_HEADER).append("\n");
         
         // append the work opening line
@@ -53,7 +53,7 @@ public class PublishedCCLicense{
     public static String getEmbeddableString(String holder, String title, 
             String year, String url,String description, int type) {
     	 Assert.that(holder!=null && year!=null && title!=null && url!=null);
-        StringBuffer ret = new StringBuffer();
+         StringBuilder ret = new StringBuilder();
         ret.append(year+" ");
         ret.append(holder+". ");
         ret.append("Licensed to the public under ");

@@ -76,7 +76,7 @@ public class StatisticVendorMessage extends VendorMessage {
         }
         byte[] part2;
 
-        StringBuffer buff;
+        StringBuilder buff;
         switch(type) {
         case GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC:
         case GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC:
@@ -87,7 +87,7 @@ public class StatisticVendorMessage extends VendorMessage {
         case GiveStatsVendorMessage.HTTP_DOWNLOAD_TRAFFIC_STATS:
             //NOTE: in this case we ignore the granularity control, since
             //HTTP traffic is not connection specific
-            buff = new StringBuffer();
+            buff = new StringBuilder();
             buff.append(
                      BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.getTotal());
             buff.append(DELIMITER2);
@@ -99,7 +99,7 @@ public class StatisticVendorMessage extends VendorMessage {
         case GiveStatsVendorMessage.HTTP_UPLOAD_TRAFFIC_STATS:
             //NOTE: in this case we ignore the granularity control, since
             //HTTP traffic is not connection specific
-            buff = new StringBuffer();
+            buff = new StringBuilder();
             buff.append(
                        BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.getTotal());
             buff.append(DELIMITER2);
@@ -122,7 +122,7 @@ public class StatisticVendorMessage extends VendorMessage {
 
     private static byte[] getGnutellaStats(byte control, boolean incoming) {
         List<ManagedConnection> conns = RouterService.getConnectionManager().getConnections();
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
 
         switch(control) {
         case GiveStatsVendorMessage.PER_CONNECTION_STATS:

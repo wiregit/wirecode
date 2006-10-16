@@ -85,7 +85,7 @@ final class I18NConvertICU extends AbstractI18NConverter {
     private String convert(String s) {
     	//decompose to NFKD
     	String nfkd = Normalizer.decompose(s, true);
-    	StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
     	int len = nfkd.length();
     	String lower;
     	char c;

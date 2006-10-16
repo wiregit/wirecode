@@ -503,7 +503,7 @@ public class HandshakeResponse {
      *  hosts
 	 */
 	private static String createEndpointString(Collection<? extends IpPort> hosts, int limit) {
-		StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int i = 0;
         Iterator<? extends IpPort> iter = hosts.iterator();
 		while(iter.hasNext() && i<limit) {

@@ -76,7 +76,7 @@ public final class CCConstants {
         Integer licenseTypeI = new Integer(licenseType);
         Assert.that(LICENSE_URI_MAP.containsKey(licenseTypeI));
         
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         // header - the description of the license
         ret.append("<License rdf:about=\"").append(LICENSE_URI_MAP.get(licenseTypeI)).append("\">");
         

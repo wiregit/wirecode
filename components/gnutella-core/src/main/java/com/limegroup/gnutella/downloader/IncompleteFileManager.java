@@ -719,7 +719,7 @@ public class IncompleteFileManager implements Serializable {
     }    
 
     public synchronized String toString() {
-        StringBuffer buf=new StringBuffer();
+        StringBuilder buf=new StringBuilder();
         buf.append("{");
         boolean first=true;
         for(File file : blocks.keySet()) {

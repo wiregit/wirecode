@@ -176,7 +176,7 @@ public class Archives {
 		
 		name = BAD_CHARS.matcher( name ).replaceAll(REPLACE_STR);
 		
-		final StringBuffer nameBuf = new StringBuffer( name );
+		final StringBuilder nameBuf = new StringBuilder( name );
 		
 		while ( nameBuf.length() < MIN_LENGTH ) {
 			nameBuf.append( REPLACE_STR );

@@ -479,7 +479,7 @@ public class StringTrie<V> {
      * a representation of the abstract state of this.
      */
     public String toString() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append("<root>");
         toStringHelper(root, buf, 1);
         return buf.toString();
@@ -489,7 +489,7 @@ public class StringTrie<V> {
      * Prints a description of the substree starting with start to buf.
      * The printing starts with the given indent level. (internal)
      */
-    private void toStringHelper(TrieNode start, StringBuffer buf, int indent) {
+    private void toStringHelper(TrieNode start, StringBuilder buf, int indent) {
         // Print value of node.
         if (start.getValue() != null) {
             buf.append(" -> ");

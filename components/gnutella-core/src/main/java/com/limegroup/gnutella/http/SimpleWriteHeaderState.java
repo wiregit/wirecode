@@ -20,7 +20,7 @@ public class SimpleWriteHeaderState extends WriteHeadersIOState {
     }
 
     protected ByteBuffer createOutgoingData() throws IOException {
-        StringBuffer sb = new StringBuffer(connectLine.length() + headers.size() * 25);
+        StringBuilder sb = new StringBuilder(connectLine.length() + headers.size() * 25);
         sb.append(connectLine).append("\r\n");
         for(Map.Entry<? extends HTTPHeaderName, ? extends HTTPHeaderValue> entry : headers.entrySet())
             sb.append(HTTPUtils.createHeader(entry.getKey(), entry.getValue()));

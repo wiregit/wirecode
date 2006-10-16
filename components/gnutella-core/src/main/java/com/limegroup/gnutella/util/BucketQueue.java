@@ -271,7 +271,7 @@ public class BucketQueue<E> implements Cloneable {
     }
 
     public String toString() {
-        StringBuffer buf=new StringBuffer();
+        StringBuilder buf=new StringBuilder();
         buf.append("[");
         for (int i=buckets.length-1; i>=0; i--) {
             if (i!=buckets.length-1)

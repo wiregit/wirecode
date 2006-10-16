@@ -76,7 +76,7 @@ public final class UUID {
      * Creates the string of this UUID.
      */
     private static String genString(byte[] info) {
-        StringBuffer sb = new StringBuffer(32);
+        StringBuilder sb = new StringBuilder(32);
         for(int i = 0; i < 16; i++) {
             if (i==4 || i==6 || i==8 || i==10)
                 sb.append('-');

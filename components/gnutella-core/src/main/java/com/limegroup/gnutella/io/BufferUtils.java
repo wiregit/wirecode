@@ -143,7 +143,7 @@ public class BufferUtils {
      * if more data needs to be inserted into the buffer until a full line
      * can be read.
      */
-    public static boolean readLine(ByteBuffer buffer, StringBuffer sBuffer) {
+    public static boolean readLine(ByteBuffer buffer, StringBuilder sBuffer) {
         int c = -1; //the character just read        
         while(buffer.hasRemaining()) {
             c = buffer.get();

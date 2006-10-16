@@ -54,7 +54,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
             else
                 theirResponse = support.getReadHandshakeResponse();
             response = responder.respond(theirResponse, outgoing);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             support.appendResponse(response, sb);
             return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??
         }
@@ -109,7 +109,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
 
         /** Returns a ByteBuffer of the initial connect request & headers. */
         protected ByteBuffer createOutgoingData() {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             support.appendConnectLine(sb);
             support.appendHeaders(request, sb);
             return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion??

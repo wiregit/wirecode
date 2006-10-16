@@ -99,7 +99,7 @@ class WeedLicense extends AbstractLicense {
         if(artist == null && title == null && price == null) {
             return "Details unknown.";
         } else {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             if(artist != null)
                 sb.append("Artist: " + artist + "\n");
             if(title != null)

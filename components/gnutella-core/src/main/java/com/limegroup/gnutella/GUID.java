@@ -397,7 +397,7 @@ public class GUID implements Comparable<GUID> {
      *  Integer.parseByte(String s, int radix)  call like this in reverse
      */
     public String toHexString() {
-        StringBuffer buf=new StringBuffer();
+        StringBuilder buf=new StringBuilder();
         String       str;
         int val;
         for (int i=0; i<SZ; i++) {

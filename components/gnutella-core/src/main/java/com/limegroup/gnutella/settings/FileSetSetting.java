@@ -129,7 +129,7 @@ public class FileSetSetting extends Setting {
         if (src == null || src.isEmpty())
             return "";
         
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(Iterator<? extends File> i = src.iterator(); i.hasNext(); ) {
             buffer.append(i.next().getAbsolutePath());
             if (i.hasNext())

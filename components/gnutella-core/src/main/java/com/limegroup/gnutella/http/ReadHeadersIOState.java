@@ -27,7 +27,7 @@ public abstract class ReadHeadersIOState extends ReadState {
     /** Whether or not we've finished reading the initial connect line. */
     protected boolean doneConnect;
     /** The current header we're in the process of reading. */
-    protected StringBuffer currentHeader = new StringBuffer(1024);
+    protected StringBuilder currentHeader = new StringBuilder(1024);
     /** The connect line. */
     protected String connectLine;
     /** The amount of data read. */

@@ -79,7 +79,7 @@ public final class DataUtils {
      * of a URN.
      */
     public static String listSet(Set<?> s) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(Iterator<?> i = s.iterator(); i.hasNext();)
             sb.append(i.next().toString());
         return sb.toString();
@@ -89,7 +89,7 @@ public final class DataUtils {
      * Prints out the contents of the input array as a hex string.
      */
     public static String toHexString(byte[] bytes) {
-        StringBuffer buf=new StringBuffer();
+        StringBuilder buf=new StringBuilder();
         String str;
         int val;
         for (int i=0; i<bytes.length; i++) {

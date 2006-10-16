@@ -89,14 +89,14 @@ public final class LimeXMLDocumentHelper{
      * If no responses have XML, an empty string is returned.
      */
     public static String getAggregateString(Response[] responses) {
-        Map<LimeXMLSchema, StringBuffer> allXML = new HashMap<LimeXMLSchema, StringBuffer>();
+        Map<LimeXMLSchema, StringBuilder> allXML = new HashMap<LimeXMLSchema, StringBuilder>();
         for(int i = 0; i < responses.length; i++) {
             LimeXMLDocument doc = responses[i].getDocument();
             if(doc != null) {
                 LimeXMLSchema schema = doc.getSchema();
-                StringBuffer built = allXML.get(schema);
+                StringBuilder built = allXML.get(schema);
                 if(built == null) {
-                    built = new StringBuffer();
+                    built = new StringBuilder();
                     allXML.put(schema, built);
                 }
                 built.append(doc.getAttributeStringWithIndex(i));
@@ -105,8 +105,8 @@ public final class LimeXMLDocumentHelper{
      
         // Iterate through each schema and build a string containing
         // a bunch of XML docs, each beginning with XML_HEADER.   
-        StringBuffer fullXML = new StringBuffer();
-        for(Map.Entry<LimeXMLSchema, StringBuffer> entry : allXML.entrySet())
+        StringBuilder fullXML = new StringBuilder();
+        for(Map.Entry<LimeXMLSchema, StringBuilder> entry : allXML.entrySet())
             buildXML(fullXML, entry.getKey(), entry.getValue().toString());
         
         return fullXML.toString();
@@ -116,7 +116,7 @@ public final class LimeXMLDocumentHelper{
      * Wraps the inner element around the root tags, with the correct
      * XML headers.
      */
-    public static void buildXML(StringBuffer buffer, LimeXMLSchema schema, String inner) {
+    public static void buildXML(StringBuilder buffer, LimeXMLSchema schema, String inner) {
         buffer.append(XML_HEADER);
         buffer.append("<");
         buffer.append(schema.getRootXMLName());

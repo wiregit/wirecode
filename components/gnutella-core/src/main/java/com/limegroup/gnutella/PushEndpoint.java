@@ -470,7 +470,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	public String httpStringValue() {
-	    StringBuffer httpString =new StringBuffer(_guid.toHexString()).append(";");
+        StringBuilder httpString =new StringBuilder(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
 	    int fwtVersion=supportsFWTVersion();
