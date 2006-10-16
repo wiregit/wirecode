@@ -28,7 +28,8 @@ public class FileTransferableTest extends BaseTestCase {
 					transferable.getTransferData(FileTransferable.URIFlavor));
 		}
 		else {
-			assertEquals("file:/test/file%201\nfile:/Test%20Dir/file2",
+			assertEquals("file:/test/file%201" + System.getProperty("line.separator")
+					+ "file:/Test%20Dir/file2",
 					transferable.getTransferData(FileTransferable.URIFlavor));
 		}
 	}
