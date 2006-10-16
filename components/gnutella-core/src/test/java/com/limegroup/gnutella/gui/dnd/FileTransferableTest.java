@@ -24,7 +24,8 @@ public class FileTransferableTest extends BaseTestCase {
 		if (CommonUtils.isWindows()) {
 			files = Arrays.asList(new File("C:\\test\file 1"),
 					new File("C:\\Test Dir\\file2"));
-			assertEquals("file:/C:/test/file%201\nfile:/C:/Test%20Dir/file2",
+			assertEquals("file:/C:/test/file%201" + System.getProperty("line.separator")
+					+ "file:/C:/Test%20Dir/file2",
 					transferable.getTransferData(FileTransferable.URIFlavor));
 		}
 		else {
