@@ -233,8 +233,7 @@ public class VerifyingFile {
     }
 
     public void registerWriteCallback(WriteRequest request, WriteCallback callback) {
-    	if (request.isInvalidForCallback())
-    		throw new IllegalArgumentException("invalid request");
+    	request.startScheduling();
     	
         if (writeBlockImpl(request)) {
             callback.writeScheduled();
@@ -242,7 +241,6 @@ public class VerifyingFile {
             synchronized (CACHE) {
                 DELAYED.add(new DelayedWrite(request, callback, this));
             }
-            request.setScheduled();
         }
     }
 
@@ -260,10 +258,8 @@ public class VerifyingFile {
         if(!validateState(request))
         	return true;
         
-        if (request.isInvalidForWriting()) 
-        	throw new IllegalArgumentException("invalid request");
+        request.startProcessing();
         updateState(request.in);
-        request.setProcessed();
         boolean canWrite;
         synchronized(CACHE) {
             canWrite = DELAYED.isEmpty();
@@ -295,6 +291,8 @@ public class VerifyingFile {
         if(temp == null)
             return false;
         
+        request.setDone();
+        
         if(temp.length < request.length)
             Assert.that(false, "bad length: " + request.length + ", needed <= " + temp.length);
         System.arraycopy(request.buf, request.start, temp, 0, request.length);
@@ -303,7 +301,6 @@ public class VerifyingFile {
             chunksScheduled++;
             QUEUE.add(new ChunkHandler(temp, request.in));
         }
-        request.setDone();
         return true;
     }
     
@@ -1006,15 +1003,21 @@ public class VerifyingFile {
     		in = new Interval(currPos, currPos + length - 1);
     	}
     	
-    	private synchronized void setProcessed() {
+    	private synchronized void startProcessing() {
+    		if (isInvalidForWriting())
+    			throw new IllegalStateException("invalid request state");
     		processed = true;
     	}
     	
-    	private synchronized void setScheduled() {
+    	private synchronized void startScheduling() {
+    		if (isInvalidForCallback())
+    			throw new IllegalStateException("invalid request state");
     		scheduled = true;
     	}
     	
     	private synchronized void setDone() {
+    		if (done)
+    			throw new IllegalStateException("invalid request state");
     		done = true;
     	}
     	
