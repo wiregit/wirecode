@@ -28,8 +28,7 @@ import com.limegroup.gnutella.io.WriteObserver;
  */
 class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
                                                         InterestWriteChannel,
-                                                        ChunkReleaser,
-                                                        TransportListener {
+                                                        ChunkReleaser {
     
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
@@ -373,7 +372,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
         // does nothing.
     }    
     
-    public void eventPending() {
+    void eventPending() {
     	if (listener != null)
     		listener.eventPending();
     }

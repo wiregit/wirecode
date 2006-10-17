@@ -44,12 +44,15 @@ public class UDPMultiplexor extends AbstractSelector {
 		circular assignment algorithm.  This should cut down on message
 		collisions after the connection is shut down. */
 	private int _lastConnectionID;
+	
+	private final TransportListener listener;
 
     /**
      *  Initialize the UDPMultiplexor.
      */
-    UDPMultiplexor(SelectorProvider provider) {
+    UDPMultiplexor(SelectorProvider provider, TransportListener listener) {
         super(provider);
+        this.listener = listener;
 		_channels       = new UDPSocketChannel[256];
 		_lastConnectionID  = 0;
     }
@@ -76,7 +79,7 @@ public class UDPMultiplexor extends AbstractSelector {
 	 *  connectionID;
 	 *  Notifies the provided listener (if any) if the channel is ready to produce events
      */
-	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr, TransportListener listener) {
+	public void routeMessage(UDPConnectionMessage msg, InetSocketAddress addr) {
         UDPSocketChannel[] array = _channels;
 		int connID = msg.getConnectionID() & 0xff;
 		UDPSocketChannel channel = null;

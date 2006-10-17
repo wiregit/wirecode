@@ -27,7 +27,7 @@ public class UDPSelectorProvider extends SelectorProvider {
     }
 
     public AbstractSelector openSelector() {
-        return new UDPMultiplexor(this);
+        return new UDPMultiplexor(this, listener);
     }
 
     public ServerSocketChannel openServerSocketChannel() throws IOException {

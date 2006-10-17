@@ -29,7 +29,8 @@ public class UDPMultiplexorTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    static UDPSelectorProvider provider = new UDPSelectorProvider(null);
+    static StubListener listener = new StubListener();
+    static UDPSelectorProvider provider = new UDPSelectorProvider(listener);
     public void testRegister() throws Exception {
         Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
@@ -141,7 +142,6 @@ public class UDPMultiplexorTest extends BaseTestCase {
      * some event, a provided listener is notified 
      **/
     public void testTransportEventGenerated() throws Exception {
-    	StubListener listener = new StubListener();
     	Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
         
@@ -158,14 +158,15 @@ public class UDPMultiplexorTest extends BaseTestCase {
         StubProcessor processor = (StubProcessor)channel.getProcessor();
         assertNull(processor.msg);
         
+        listener.notified = false;
         // send a message, do not change readiness.  No notification 
-        plexor.routeMessage(syn, channel.addr, listener);
+        plexor.routeMessage(syn, channel.addr);
         assertSame(syn,processor.msg);
         assertFalse(listener.notified);
         
         // send a message, change readiness.  Should be notified
         channel.setReadyOps(1);
-        plexor.routeMessage(syn, channel.addr, listener);
+        plexor.routeMessage(syn, channel.addr);
         assertTrue(listener.notified);
     }
     
