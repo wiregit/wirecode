@@ -201,7 +201,7 @@ public class VerifyingFileTest extends BaseTestCase {
             writer.write();
             writer.waitForComplete();
         } else {
-            if(!vf.writeBlock(pos,chunk))
+            if(!vf.writeBlock(new VerifyingFile.WriteRequest(pos,0, chunk.length,chunk)))
                 fail("can't write: " + pos);
         }
     }
@@ -221,9 +221,10 @@ public class VerifyingFileTest extends BaseTestCase {
         synchronized void write() {
             while (start < data.length) {
                 final int toWrite = Math.min(data.length - start, HTTPDownloader.BUF_LENGTH);
-                if(!vf.writeBlock(filePos, start, toWrite, data)) {
+                VerifyingFile.WriteRequest request = new VerifyingFile.WriteRequest(filePos, start, toWrite, data);
+                if(!vf.writeBlock(request)) {
                     lastWrote = toWrite;
-                    vf.writeBlockWithCallback(filePos, start, toWrite, data, this);
+                    vf.registerWriteCallback(request, this);
                     break;
                 } else {
                     start += toWrite;

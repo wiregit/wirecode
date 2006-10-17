@@ -1597,12 +1597,13 @@ public class HTTPDownloader implements BandwidthTracker {
     			try {
     				// write to disk outside of lock.
     				//LOG.debug("WORKER: " + this + ", left: " + (left-totalRead) +",  writing fp: " + filePosition +", ds: " + dataStart + ", dL: " + dataLength);
-    				if(!_incompleteFile.writeBlock(filePosition, dataStart, dataLength, buffer.array())) {
+    				VerifyingFile.WriteRequest request = new VerifyingFile.WriteRequest(filePosition, dataStart, dataLength, buffer.array());
+    				if(!_incompleteFile.writeBlock(request)) {
     					LOG.debug("Scheduling callback for write.");
     					InterestReadChannel irc = (InterestReadChannel)rc;
     					irc.interest(false);
     					doingWrite = true;
-    					_incompleteFile.writeBlockWithCallback(filePosition, dataStart, dataLength, buffer.array(),
+    					_incompleteFile.registerWriteCallback(request,
     							new DownloadRestarter(irc, buffer, this));
     					return true;
     				}

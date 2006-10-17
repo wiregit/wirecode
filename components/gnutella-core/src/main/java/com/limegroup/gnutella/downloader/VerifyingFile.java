@@ -232,20 +232,17 @@ public class VerifyingFile {
         partialBlocks.add(interval);
     }
 
-    /**
-     * Writes bytes to the underlying file
-     */
-    public boolean writeBlock(long pos, byte[] data) {
-        return writeBlock(pos, 0, data.length, data);
-    }
-    
-    public void writeBlockWithCallback(long currPos, int start, int length, byte[] buf, WriteCallback callback) {
-        if (writeBlock(currPos, start, length, buf)) {
+    public void registerWriteCallback(WriteRequest request, WriteCallback callback) {
+    	if (request.isInvalidForCallback())
+    		throw new IllegalArgumentException("invalid request");
+    	
+        if (writeBlockImpl(request)) {
             callback.writeScheduled();
         } else {
             synchronized (CACHE) {
-                DELAYED.add(new DelayedWrite(currPos, start, length, buf, callback, this));
+                DELAYED.add(new DelayedWrite(request, callback, this));
             }
+            request.setScheduled();
         }
     }
 
@@ -256,19 +253,26 @@ public class VerifyingFile {
      * @param start the start position in the buffer to read from
      * @param length the length of data in the buffer to use
      * @param buf the buffer of data
-     * @return true if this scheduled a write or wasn't open, false if it couldn't.
+     * @return null if this scheduled a write or wasn't open, otherwise Object
+     * that can be used to schedule a write.
      */
-    public boolean writeBlock(long currPos, int start, int length, byte[] buf) {
+    public boolean writeBlock(WriteRequest request) {
+        if(!validateState(request))
+        	return true;
+        
+        if (request.isInvalidForWriting()) 
+        	throw new IllegalArgumentException("invalid request");
+        updateState(request.in);
+        request.setProcessed();
         boolean canWrite;
         synchronized(CACHE) {
             canWrite = DELAYED.isEmpty();
         }
         
-        if(canWrite) {
-            return writeBlockImpl(currPos, start, length, buf, true);
-        } else { // do not try to write if something else is waiting.
+        if(canWrite)
+        	return writeBlockImpl(request);
+         else  // do not try to write if something else is waiting.
             return false;
-        }
     }
 
     /**
@@ -280,68 +284,74 @@ public class VerifyingFile {
      * @param buf the buffer of data
      * @return true if this scheduled a write or wasn't open, false if it couldn't.
      */
-    private boolean writeBlockImpl(long currPos, int start, int length, byte[] buf, boolean runDelayed) {
+    private boolean writeBlockImpl(WriteRequest request) {
         if (LOG.isTraceEnabled())
-            LOG.trace("trying to write block at offset " + currPos + " with size " + length);
+            LOG.trace("trying to write block at offset " + request.currPos + " with size " + request.length);
         
-        if(length == 0) //nothing to write? return
-            return true;
-        
-        if(fos == null)
-            throw new IllegalStateException("no fos!");
-        
-        if (!isOpen())
-            return true;
+        if (!validateState(request))
+        	return true;
         
         byte[] temp = CACHE.getQuick();
         if(temp == null)
             return false;
         
-        if(temp.length < length)
-            Assert.that(false, "bad length: " + length + ", needed <= " + temp.length);
-        System.arraycopy(buf, start, temp, 0, length);
-        
-		Interval intvl = new Interval(currPos, currPos + length - 1);        
-        synchronized(this) {
-    		/// some stuff to help debugging ///
-    		if (!leasedBlocks.contains(intvl)) {
-                releaseChunk(temp, runDelayed);
-                Assert.that(false, "trying to write an interval "+intvl+
-                        " that wasn't leased.\n"+dumpState());
-            }
-    		
-    		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
-                releaseChunk(temp, runDelayed);
-                Assert.that(false,"trying to write an interval "+intvl+
-                        " that was already written"+dumpState());
-    		}
-                
-            leasedBlocks.delete(intvl);
-            
-            // add only the ranges that aren't already verified into pending.
-            // this is necessary because full-scanning may have added unforeseen
-            // blocks into verified.
-            if(verifiedBlocks.containsAny(intvl)) {
-                // technically the code in this if block would work for all cases,
-                // but it's kind of inefficient to do lots of work all the time,
-                // when the if is only necessary after a full-scan.
-                IntervalSet remaining = new IntervalSet();
-                remaining.add(intvl);
-                remaining.delete(verifiedBlocks);
-                pendingBlocks.add(remaining);
-            } else {
-                pendingBlocks.add(intvl);
-            }
-        }
+        if(temp.length < request.length)
+            Assert.that(false, "bad length: " + request.length + ", needed <= " + temp.length);
+        System.arraycopy(request.buf, request.start, temp, 0, request.length);
         
         synchronized(VerifyingFile.class) {
             chunksScheduled++;
-            QUEUE.add(new ChunkHandler(temp, intvl));
+            QUEUE.add(new ChunkHandler(temp, request.in));
         }
-        
+        request.setDone();
         return true;
     }
     
+    private synchronized void updateState(Interval intvl) {
+		/// some stuff to help debugging ///
+		if (!leasedBlocks.contains(intvl)) {
+            Assert.that(false, "trying to write an interval "+intvl+
+                    " that wasn't leased.\n"+dumpState());
+        }
+		
+		if (partialBlocks.contains(intvl) || savedCorruptBlocks.contains(intvl) || pendingBlocks.contains(intvl)) {
+            Assert.that(false,"trying to write an interval "+intvl+
+                    " that was already written"+dumpState());
+		}
+            
+        leasedBlocks.delete(intvl);
+        
+        // add only the ranges that aren't already verified into pending.
+        // this is necessary because full-scanning may have added unforeseen
+        // blocks into verified.
+        if(verifiedBlocks.containsAny(intvl)) {
+            // technically the code in this if block would work for all cases,
+            // but it's kind of inefficient to do lots of work all the time,
+            // when the if is only necessary after a full-scan.
+            IntervalSet remaining = new IntervalSet();
+            remaining.add(intvl);
+            remaining.delete(verifiedBlocks);
+            pendingBlocks.add(remaining);
+        } else {
+            pendingBlocks.add(intvl);
+        }
+    }
+    
+    /**
+     * @return false if this request should return immediately
+     */
+    private boolean validateState(WriteRequest request) {
+    	if(request.length == 0) //nothing to write? return
+    		return false;
+
+    	if(fos == null)
+    		throw new IllegalStateException("no fos!");
+
+    	if (!isOpen())
+    		return false;
+
+    	return true;
+    }
     
     
     /**
@@ -961,24 +971,19 @@ public class VerifyingFile {
     }
     
     private static class DelayedWrite {
-        private final long currPos;
-        private final int start;
-        private final int length;
-        private final byte[] buf;
+        
+    	private final WriteRequest request;
         private final WriteCallback callback;
         private final VerifyingFile vf;
         
-        DelayedWrite(long currPos, int start, int length, byte[] buf, WriteCallback callback, VerifyingFile vf) {
-            this.currPos = currPos;
-            this.start = start;
-            this.length = length;
-            this.buf = buf;
+        DelayedWrite(WriteRequest request, WriteCallback callback, VerifyingFile vf) {
+            this.request = request;
             this.callback = callback;
             this.vf = vf;
         }
         
         private boolean write() {
-            if(vf.writeBlockImpl(currPos, start, length, buf, false)) {
+            if(vf.writeBlockImpl(request)) {
                 callback.writeScheduled();
                 return true;
             } else {
@@ -986,4 +991,41 @@ public class VerifyingFile {
             }
         } 
     }
+    public static class WriteRequest {
+    	public final long currPos;
+    	public final int start;
+    	public final int length;
+    	public final byte[] buf;
+    	public final Interval in;
+    	private boolean processed, done, scheduled;
+    	WriteRequest(long currPos, int start, int length, byte [] buf) {
+    		this.currPos = currPos;
+    		this.start = start;
+    		this.length = length;
+    		this.buf = buf;
+    		in = new Interval(currPos, currPos + length - 1);
+    	}
+    	
+    	private synchronized void setProcessed() {
+    		processed = true;
+    	}
+    	
+    	private synchronized void setScheduled() {
+    		scheduled = true;
+    	}
+    	
+    	private synchronized void setDone() {
+    		done = true;
+    	}
+    	
+    	public synchronized boolean isInvalidForCallback(){
+    		return !processed || done || scheduled;
+    	}
+    	
+    	public synchronized boolean isInvalidForWriting() {
+    		return done || processed;
+    	}
+    	
+    }
 }
+
