@@ -113,7 +113,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     @Override
-    public synchronized void start() {
+    public void start() {
         ThreadFactory factory = new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 Thread thread = context.getThreadFactory().newThread(r);
@@ -134,7 +134,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     @Override
-    public synchronized void stop() {
+    public void stop() {
         super.stop();
         
         try {
@@ -162,7 +162,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
 
     @Override
-    public synchronized boolean isRunning() {
+    public boolean isRunning() {
         return isOpen() && channel.isRegistered();
     }
 
