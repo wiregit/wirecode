@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.limegroup.gnutella.xml.XMLStringUtils;
 
 /**
  * Encapsulates video metadata.  Subclasses must implement parseFile.
@@ -23,21 +23,6 @@ public abstract class VideoMetaData extends MetaData {
     private int width = -1;
     private int height = -1;
     private String licensetype;
-
-	public static String schemaURI = "http://www.limewire.com/schemas/video.xsd";
-    
-    private static final String DLM = XMLStringUtils.DELIMITER;
-    private static final String KPX = "videos" + DLM + "video" + DLM;
-
-	public static final String TITLE_KEY = KPX + "title" + DLM;
-	public static final String YEAR_KEY = KPX + "year" + DLM;
-	public static final String LENGTH_KEY = KPX + "length" + DLM;
-	public static final String LANGUAGE_KEY = KPX + "language" + DLM;
-	public static final String COMMENTS_KEY = KPX + "comments" + DLM;
-	public static final String LICENSE_KEY = KPX + "license" + DLM;
-    public static final String HEIGHT_KEY = KPX + "width" + DLM;
-    public static final String WIDTH_KEY = KPX + "height" + DLM;
-    public static final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
 
     /**
      * Constructs a blank VideoMetaData object.
@@ -71,7 +56,7 @@ public abstract class VideoMetaData extends MetaData {
 		return null;
 	}
 	
-	public String getSchemaURI() { return schemaURI; }
+	public String getSchemaURI() { return LimeXMLNames.VIDEO_SCHEMA; }
 	
     public String getTitle() { return title; }
     public String getYear() { return year; }
@@ -111,15 +96,15 @@ public abstract class VideoMetaData extends MetaData {
 	
 	public List<NameValue<String>> toNameValueList() {
         List<NameValue<String>> list = new ArrayList<NameValue<String>>();
-        add(list, title, TITLE_KEY);
-        add(list, year, YEAR_KEY);
-        add(list, length, LENGTH_KEY);
-        add(list, comment, COMMENTS_KEY);
-        add(list, language, LANGUAGE_KEY);
-        add(list, license, LICENSE_KEY);
-        add(list, width, WIDTH_KEY);
-        add(list, height, HEIGHT_KEY);
-        add(list, licensetype, LICENSE_TYPE_KEY);
+        add(list, title, LimeXMLNames.VIDEO_TITLE);
+        add(list, year, LimeXMLNames.VIDEO_YEAR);
+        add(list, length, LimeXMLNames.VIDEO_LENGTH);
+        add(list, comment, LimeXMLNames.VIDEO_COMMENTS);
+        add(list, language, LimeXMLNames.VIDEO_LANGUAGE);
+        add(list, license, LimeXMLNames.VIDEO_LICENSE);
+        add(list, width, LimeXMLNames.VIDEO_WIDTH);
+        add(list, height, LimeXMLNames.VIDEO_HEIGHT);
+        add(list, licensetype, LimeXMLNames.VIDEO_LICENSETYPE);
         return list;
 	}
     

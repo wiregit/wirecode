@@ -183,7 +183,7 @@ public class MetaFileManager extends FileManager {
                                                        LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
         LimeXMLSchema audioSchema = 
-        LimeXMLSchemaRepository.instance().getSchema(AudioMetaData.schemaURI);
+        LimeXMLSchemaRepository.instance().getSchema(LimeXMLNames.AUDIO_SCHEMA);
         
         for(LimeXMLDocument doc : allDocs) {
             if(doc.getSchema() == audioSchema) {
@@ -215,7 +215,7 @@ public class MetaFileManager extends FileManager {
                 id3List.add(nameVal);
         }
 
-        audioDoc = new LimeXMLDocument(id3List, AudioMetaData.schemaURI);
+        audioDoc = new LimeXMLDocument(id3List, LimeXMLNames.AUDIO_SCHEMA);
         retList.add(audioDoc);
         return retList;
     }

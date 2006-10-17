@@ -14,8 +14,8 @@ import java.util.Map;
 
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.limegroup.gnutella.xml.XMLStringUtils;
 
 /**
  * Encapsulates audio metadata.  Subclasses must implement parseFile.
@@ -40,24 +40,6 @@ public abstract class AudioMetaData extends MetaData {
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
     
-    public static String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
-    
-    private static final String DLM = XMLStringUtils.DELIMITER;
-    private static final String KPX = "audios" + DLM + "audio" + DLM;
-    
-    public static final String TRACK_KEY    = KPX + "track"    + DLM;
-    public static final String ARTIST_KEY   = KPX + "artist"   + DLM;
-    public static final String ALBUM_KEY    = KPX + "album"    + DLM;
-    public static final String TITLE_KEY    = KPX + "title"    + DLM;
-    public static final String GENRE_KEY    = KPX + "genre"    + DLM;
-    public static final String YEAR_KEY     = KPX + "year"     + DLM;
-    public static final String COMMENTS_KEY = KPX + "comments" + DLM;
-    public static final String BITRATE_KEY  = KPX + "bitrate"  + DLM;
-    public static final String SECONDS_KEY  = KPX + "seconds"  + DLM;
-    public static final String LICENSE_KEY  = KPX + "license"  + DLM;
-    public static final String PRICE_KEY    = KPX + "price"    + DLM;
-    public static final String LICENSE_TYPE_KEY = KPX + "licensetype" + DLM;
-        
     protected AudioMetaData() {}
 
     public AudioMetaData(File f) throws IOException{
@@ -84,7 +66,7 @@ public abstract class AudioMetaData extends MetaData {
     }
     
     public String getSchemaURI() {
-        return schemaURI;
+        return LimeXMLNames.AUDIO_SCHEMA;
     }
     
     public String toString() {
@@ -149,17 +131,17 @@ public abstract class AudioMetaData extends MetaData {
      */
     public List<NameValue<String>> toNameValueList() {
         List<NameValue<String>> list = new ArrayList<NameValue<String>>();
-        add(list, title, TITLE_KEY);
-        add(list, artist, ARTIST_KEY);
-        add(list, album, ALBUM_KEY);
-        add(list, year, YEAR_KEY);
-        add(list, comment, COMMENTS_KEY);
-        add(list, track, TRACK_KEY);
-        add(list, genre, GENRE_KEY);
-        add(list, bitrate, BITRATE_KEY);
-        add(list, length, SECONDS_KEY);
-        add(list, license, LICENSE_KEY);
-        add(list, licensetype, LICENSE_TYPE_KEY);
+        add(list, title, LimeXMLNames.AUDIO_TITLE);
+        add(list, artist, LimeXMLNames.AUDIO_ARTIST);
+        add(list, album, LimeXMLNames.AUDIO_ALBUM);
+        add(list, year, LimeXMLNames.AUDIO_YEAR);
+        add(list, comment, LimeXMLNames.AUDIO_COMMENTS);
+        add(list, track, LimeXMLNames.AUDIO_TRACK);
+        add(list, genre, LimeXMLNames.AUDIO_GENRE);
+        add(list, bitrate, LimeXMLNames.AUDIO_BITRATE);
+        add(list, length, LimeXMLNames.AUDIO_SECONDS);
+        add(list, license, LimeXMLNames.AUDIO_LICENSE);
+        add(list, licensetype, LimeXMLNames.AUDIO_LICENSETYPE);
         return list;
     }
     
@@ -212,14 +194,14 @@ public abstract class AudioMetaData extends MetaData {
      * ID3Editor in the past.
      */
     public static boolean isCorrupted(LimeXMLDocument doc) {
-        if(!schemaURI.equals(doc.getSchemaURI()))
+        if(!LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI()))
             return false;
 
         for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
             String name = entry.getKey();
             String value = entry.getValue();
             // album & artist were the corrupted fields ...
-            if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
+            if( name.equals(LimeXMLNames.AUDIO_ALBUM) || name.equals(LimeXMLNames.AUDIO_ARTIST) ) {
                 if( value.length() == 30 ) {
                     // if there is a value in the 29th char, but not
                     // in the 28th, it's corrupted. 
@@ -241,7 +223,7 @@ public abstract class AudioMetaData extends MetaData {
             String name = entry.getKey();
             String value = entry.getValue();
             // album & artist were the corrupted fields ...
-            if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
+            if( name.equals(LimeXMLNames.AUDIO_ALBUM) || name.equals(LimeXMLNames.AUDIO_ARTIST) ) {
                 if( value.length() == 30 ) {
                     // if there is a value in the 29th char, but not
                     // in the 28th, it's corrupted erase & trim.
@@ -255,18 +237,18 @@ public abstract class AudioMetaData extends MetaData {
     }
 
     public static boolean isNonLimeAudioField(String fieldName) {
-        return !fieldName.equals(TRACK_KEY) &&
-               !fieldName.equals(ARTIST_KEY) &&
-               !fieldName.equals(ALBUM_KEY) &&
-               !fieldName.equals(TITLE_KEY) &&
-               !fieldName.equals(GENRE_KEY) &&
-               !fieldName.equals(YEAR_KEY) &&
-               !fieldName.equals(COMMENTS_KEY) &&
-               !fieldName.equals(BITRATE_KEY) &&
-               !fieldName.equals(SECONDS_KEY) &&
-               !fieldName.equals(LICENSE_KEY) &&
-               !fieldName.equals(PRICE_KEY) &&
-               !fieldName.equals(LICENSE_TYPE_KEY)
+        return !fieldName.equals(LimeXMLNames.AUDIO_TRACK) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_ARTIST) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_ALBUM) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_TITLE) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_GENRE) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_YEAR) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_COMMENTS) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_BITRATE) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_SECONDS) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_LICENSE) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_PRICE) &&
+               !fieldName.equals(LimeXMLNames.AUDIO_LICENSETYPE)
                ;
     }
     

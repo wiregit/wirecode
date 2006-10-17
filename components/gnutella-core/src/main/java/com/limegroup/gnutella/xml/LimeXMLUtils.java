@@ -462,9 +462,9 @@ public class LimeXMLUtils {
     public static boolean isSupportedFormatForSchema(File file, String schemaURI) {
         if(isSupportedMultipleFormat(file))
             return true;
-        else if("http://www.limewire.com/schemas/audio.xsd".equals(schemaURI))
+        else if(LimeXMLNames.AUDIO_SCHEMA.equals(schemaURI))
             return isSupportedAudioFormat(file);
-        else if("http://www.limewire.com/schemas/video.xsd".equals(schemaURI))
+        else if(LimeXMLNames.VIDEO_SCHEMA.equals(schemaURI))
             return isSupportedVideoFormat(file);
         else
             return false;

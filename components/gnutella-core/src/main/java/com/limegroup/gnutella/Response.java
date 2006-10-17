@@ -21,13 +21,13 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
-import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 
 /**
@@ -349,10 +349,10 @@ public class Response {
 		
 		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
 		    List<NameValue<String>> values = new ArrayList<NameValue<String>>(3);
-		    values.add(new NameValue<String>("audios__audio__title__", name));
-		    values.add(new NameValue<String>("audios__audio__bitrate__", bitrate));
-		    values.add(new NameValue<String>("audios__audio__seconds__", length));
-		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
+		    values.add(new NameValue<String>(LimeXMLNames.AUDIO_TITLE, name));
+		    values.add(new NameValue<String>(LimeXMLNames.AUDIO_BITRATE, bitrate));
+		    values.add(new NameValue<String>(LimeXMLNames.AUDIO_SECONDS, length));
+		    return new LimeXMLDocument(values, LimeXMLNames.AUDIO_SCHEMA);
 		}
 		
 		return null;
