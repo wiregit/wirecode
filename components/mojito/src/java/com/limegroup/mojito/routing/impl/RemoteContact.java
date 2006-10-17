@@ -246,7 +246,7 @@ public class RemoteContact implements Contact {
     }
     
     public boolean isAlive() {
-        return state == State.ALIVE;
+        return State.ALIVE.equals(state);
     }
     
     public void unknown() {
@@ -256,11 +256,11 @@ public class RemoteContact implements Contact {
     }
     
     public boolean isUnknown() {
-        return state == State.UNKNOWN;
+        return State.UNKNOWN.equals(state);
     }
     
     public boolean isDead() {
-        return state == State.DEAD;
+        return State.DEAD.equals(state) || isShutdown();
     }
     
     public boolean hasBeenRecentlyAlive() {
@@ -276,14 +276,16 @@ public class RemoteContact implements Contact {
         failures++;
         lastFailedTime = System.currentTimeMillis();
         
-        // Node has ever been alive?
-        if (getTimeStamp() > 0L) {
-            if (failures >= RouteTableSettings.MAX_ALIVE_NODE_FAILURES.getValue()) {
-                state = State.DEAD;
-            }
-        } else {
-            if (failures >= RouteTableSettings.MAX_UNKNOWN_NODE_FAILURES.getValue()) {
-                state = State.DEAD;
+        if (!isShutdown()) {
+            // Node has ever been alive?
+            if (getTimeStamp() > 0L) {
+                if (failures >= RouteTableSettings.MAX_ALIVE_NODE_FAILURES.getValue()) {
+                    state = State.DEAD;
+                }
+            } else {
+                if (failures >= RouteTableSettings.MAX_UNKNOWN_NODE_FAILURES.getValue()) {
+                    state = State.DEAD;
+                }
             }
         }
     }
@@ -293,14 +295,14 @@ public class RemoteContact implements Contact {
     }
     
     /**
-     * Returns the State of this Contact
+     * Returns the state of this Contact
      */
     public State getState() {
         return state;
     }
     
     /**
-     * Sets the State of this Contact
+     * Sets the state of this Contact
      */
     public void setState(State state) {
         if (state == null) {
@@ -309,6 +311,14 @@ public class RemoteContact implements Contact {
         this.state = state;
     }
     
+    public void shutdown() {
+        this.state = State.SHUTDOWN;
+    }
+    
+    public boolean isShutdown() {
+        return State.SHUTDOWN.equals(state);
+    }
+
     public int hashCode() {
         return nodeId.hashCode();
     }

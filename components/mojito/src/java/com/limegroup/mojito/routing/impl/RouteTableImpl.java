@@ -673,13 +673,17 @@ public class RouteTableImpl implements RouteTable {
                     list = bucket.select(nodeId, count);
                 }
                 
-                for(Contact contact : list) {
-                    if (contact.isDead()) {
+                for(Contact node : list) {
+                    if (node.isDead()) {
                         if (activeContacts) {
                             continue;
                         }
                         
-                        float fact = (maxNodeFailures - contact.getFailures()) 
+                        if (node.isShutdown()) {
+                            continue;
+                        }
+                        
+                        float fact = (maxNodeFailures - node.getFailures()) 
                                         / (float)Math.max(1, maxNodeFailures);
                         
                         if (Math.random() >= fact) {
@@ -687,7 +691,7 @@ public class RouteTableImpl implements RouteTable {
                         }
                     }
                     
-                    nodes.add(contact);
+                    nodes.add(node);
                     
                     // Exit the loop if done
                     if (nodes.size() >= count) {

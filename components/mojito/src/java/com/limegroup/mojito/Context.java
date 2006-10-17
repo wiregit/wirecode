@@ -32,6 +32,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -67,8 +68,11 @@ import com.limegroup.mojito.manager.FindValueManager;
 import com.limegroup.mojito.manager.GetValueManager;
 import com.limegroup.mojito.manager.PingManager;
 import com.limegroup.mojito.manager.StoreManager;
+import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
+import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
@@ -76,6 +80,7 @@ import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
@@ -765,6 +770,26 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Stopping " + name);
+        }
+        
+        if (isBootstrapped()) {
+            Contact local = getLocalNode();
+            List<Contact> nodes = routeTable.select(local.getNodeID(), 
+                    KademliaSettings.REPLICATION_PARAMETER.getValue(), false);
+            
+            for (Contact node : nodes) {
+                if (!node.equals(getLocalNode())) {
+                    RequestMessage request = getMessageFactory()
+                        .createFindNodeRequest(local, MessageID.createWithSocketAddress(null), 
+                                local.getNodeID(), FindNodeRequest.SHUTDOWN);
+                    
+                    try {
+                        messageDispatcher.send(node, request, null);
+                    } catch (IOException err) {
+                        LOG.error("IOException", err);
+                    }
+                }
+            }
         }
         
         running = false;

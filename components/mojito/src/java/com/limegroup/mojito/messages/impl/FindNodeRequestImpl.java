@@ -26,6 +26,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
+import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.MessageID;
 
@@ -35,18 +36,34 @@ import com.limegroup.mojito.messages.MessageID;
 public class FindNodeRequestImpl extends AbstractLookupRequest
         implements FindNodeRequest {
 
+    private int flags = DEFAULT;
+    
     public FindNodeRequestImpl(Context context, 
-            Contact contact, MessageID messageId, KUID lookupId) {
+            Contact contact, MessageID messageId, KUID lookupId, int flags) {
         super(context, OpCode.FIND_NODE_REQUEST, 
                 contact, messageId, lookupId);
+        
+        this.flags = flags;
     }
     
     public FindNodeRequestImpl(Context context, SocketAddress src, 
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_REQUEST, src, messageId, version, in);
+        
+        this.flags = in.readUnsignedByte();
     }
     
+    @Override
+    protected void writeBody(MessageOutputStream out) throws IOException {
+        super.writeBody(out);
+        out.write(flags);
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
     public String toString() {
-        return "FindNodeRequest: " + lookupId;
+        return "FindNodeRequest: " + lookupId + ", flags=0x" + Integer.toHexString(flags);
     }
 }

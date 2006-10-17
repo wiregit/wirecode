@@ -83,7 +83,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
         } else {
             // Node ID collision test Ping
             assert (sender.isFirewalled());
-            request = context.getMessageFactory().createPingRequest(sender, MessageID.create(address));
+            request = context.getMessageFactory().createPingRequest(sender, MessageID.createWithSocketAddress(address));
         }
         
         context.getMessageDispatcher().send(nodeId, address, request, this);

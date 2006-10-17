@@ -35,6 +35,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.DHTMessage;
+import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -156,6 +157,13 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             }
             
             return;
+        }
+        
+        if (message instanceof FindNodeRequest) {
+            if ((((FindNodeRequest)message).getFlags() 
+                    & FindNodeRequest.SHUTDOWN) != 0) {
+                return;
+            }
         }
         
         RouteTable routeTable = context.getRouteTable();

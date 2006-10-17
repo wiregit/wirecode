@@ -10,6 +10,10 @@ public class FindNodeRequestWireImpl extends AbstractMessageWire<FindNodeRequest
         super(delegate);
     }
 
+    public int getFlags() {
+        return delegate.getFlags();
+    }
+
     public KUID getLookupID() {
         return delegate.getLookupID();
     }

@@ -81,9 +81,9 @@ public class MessageFactoryWire implements MessageFactory {
         return delegate.writeMessage(dst, message);
     }
     
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
+    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId, int flags) {
         return new FindNodeRequestWireImpl(
-                delegate.createFindNodeRequest(contact, messageId, lookupId));
+                delegate.createFindNodeRequest(contact, messageId, lookupId, flags));
     }
 
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 

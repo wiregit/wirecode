@@ -336,6 +336,19 @@ public class LocalContact implements Contact {
     }
     
     /**
+     * Hard coded to return false
+     */
+    public boolean isShutdown() {
+        return false;
+    }
+
+    /**
+     * Does nothing
+     */
+    public void shutdown() {
+    }
+
+    /**
      * Does nothing if 'existing' is the same instance 
      * as 'this'. Throws an UnsupportedOperationException
      * if 'existing' is a different instance.

@@ -77,7 +77,7 @@ public class MessageDispatcherTest extends BaseTestCase {
                     new InetSocketAddress("www.google.com", 5000), 0, false);
             
             RequestMessage request = factory.createPingRequest(
-                    sender, MessageID.create(new InetSocketAddress("www.google.com", 5000)));
+                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
             sent = dispatcher.send(node, request, null);
             assertFalse(sent);
             
@@ -88,7 +88,7 @@ public class MessageDispatcherTest extends BaseTestCase {
                     new InetSocketAddress("www.google.com", 5000), 0, true);
             
             request = factory.createPingRequest(
-                    sender, MessageID.create(new InetSocketAddress("www.google.com", 5000)));
+                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
             sent = dispatcher.send(node, request, null);
             assertTrue(sent);
             

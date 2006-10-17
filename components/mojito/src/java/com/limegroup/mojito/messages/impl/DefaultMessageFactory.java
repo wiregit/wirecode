@@ -132,8 +132,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
-            KUID lookupId) {
-        return new FindNodeRequestImpl(context, contact, messageId, lookupId);
+            KUID lookupId, int flags) {
+        return new FindNodeRequestImpl(context, contact, messageId, lookupId, flags);
     }
 
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 

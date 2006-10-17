@@ -70,7 +70,7 @@ public class MessageHelper {
             throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
         }
         
-        return MessageID.create(dst);
+        return MessageID.createWithSocketAddress(dst);
     }
 
     protected BigInteger getEstimatedSize() {
@@ -92,7 +92,7 @@ public class MessageHelper {
 
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
         return factory.createFindNodeRequest(getLocalNode(), 
-                createMessageID(dst), lookupId);
+                createMessageID(dst), lookupId, FindNodeRequest.DEFAULT);
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 

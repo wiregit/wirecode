@@ -35,14 +35,20 @@ public interface Contact extends Serializable {
      * Various states a Contact may have
      */
     public static enum State {
-        // A Contact is alive either if we 
-        // got a response to a request or 
-        // we received a request from the Contact
+        // A Contact is alive either if we got a 
+        // response to a request or we received a 
+        // request from the Contact
         ALIVE, 
         
         // A Contact is dead if it fails to respond
         // a certain number of times to our requests
         DEAD,
+        
+        // A Contact is in shutdown state if it told
+        // us that it's going to shutdown. A Contact
+        // in shutdown state will never be contacted
+        // or forwared.
+        SHUTDOWN,
         
         // An unknown Contact is neither dead nor
         // alive. Unknown Contacts are Contacts
@@ -145,12 +151,12 @@ public interface Contact extends Serializable {
     public boolean isFirewalled();
     
     /**
-     * Returns whether or not this Contact is alive
+     * Returns whether or not this Contact is ALIVE
      */
     public boolean isAlive();
     
     /**
-     * Returns whether or not this Contact is dead
+     * Returns whether or not this Contact is in DEAD or SHUTDOWN state
      */
     public boolean isDead();
     
@@ -173,14 +179,24 @@ public interface Contact extends Serializable {
     public void handleFailure();
     
     /**
-     * Returns whether or not this Contact is in unknown state
+     * Returns whether or not this Contact is in UNKNOWN state
      */
     public boolean isUnknown();
     
     /**
-     * Sets the Contact state to Unknown
+     * Sets the Contact state to UNKNOWN
      */
     public void unknown();
+    
+    /**
+     * Sets the Contact state to SHUTDOWN
+     */
+    public void shutdown();
+    
+    /**
+     * Returns whether or not this Contact is in UNKNOWN state
+     */
+    public boolean isShutdown();
     
     /**
      * Updates this Contact with information from an existing Contact.
