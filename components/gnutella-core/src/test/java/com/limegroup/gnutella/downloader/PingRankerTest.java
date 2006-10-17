@@ -71,7 +71,7 @@ public class PingRankerTest extends BaseTestCase {
         PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
         ranker.setMeshHandler(new MockMesh(ranker));
-        DownloadSettings.WORKER_INTERVAL.setValue(1);
+        DownloadSettings.WORKER_INTERVAL.setValue(-1);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
         DownloadSettings.PING_BATCH.revertToDefault();
     }
@@ -81,10 +81,8 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testPingsNewHosts() throws Exception {
         
-        for (int i =1;i <= 10;i++) {
+        for (int i =1;i <= 10;i++) 
             ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
-            Thread.sleep(20);
-        }
         
         
         assertEquals(10,pinger.hosts.size());
@@ -176,7 +174,6 @@ public class PingRankerTest extends BaseTestCase {
         GUID g = new GUID(GUID.makeGuid());
         RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
         ranker.addToPool(original);
-        Thread.sleep(30);
         ranker.addToPool(original2);
         
         assertEquals(3,pinger.hosts.size());
@@ -253,7 +250,6 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(RouterService.acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3;1.3.3.3:4","2.2.2.3:5"));
-        Thread.sleep(100);
         
         // two pings should be sent out
         assertEquals(2,pinger.hosts.size());
@@ -286,7 +282,6 @@ public class PingRankerTest extends BaseTestCase {
         
         assertTrue(ranker.hasMore());
         
-        Thread.sleep(100);
         
         // send a pong back from a single host
         MockPong pong = new MockPong(true,true,0,true,false,true,null,null,null);
@@ -452,7 +447,6 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(c.contains(rfd2));
         assertEquals(2,c.size());
         
-        Thread.sleep(100);
         
         // tell the ranker about some altlocs through a headpong
         IpPort ip1, ip2;

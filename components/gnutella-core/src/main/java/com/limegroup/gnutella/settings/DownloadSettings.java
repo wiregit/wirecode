@@ -74,7 +74,7 @@ public class DownloadSettings extends LimeProps {
      * Do not start new workers more than this often
      */
     public static final IntSetting WORKER_INTERVAL =
-        FACTORY.createSettableIntSetting("WORKER_INTERVAL",2000,"ManagedDownloader.workerInterval",1,20000);
+        FACTORY.createIntSetting("WORKER_INTERVAL",2000);
     
     /** The maximum number of headers we'll read when parsing a download */
     public static final IntSetting MAX_HEADERS =
