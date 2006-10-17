@@ -65,8 +65,12 @@ public class DHTValueImpl implements DHTValue, Serializable {
     /** Whether or not this DHTValue is a local value */
     private boolean isLocalValue = true;
     
+    /** The request load corresponding to this value */
+    private transient float requestLoad = 0;
+
     /** The hashCode */
     private int hashCode;
+    
     
     /**
      * Creates an instance of DHTValueImpl
@@ -109,6 +113,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
     private void init() {
         lastRepublishingTime = 0L;
         locationCount = 0;
+        requestLoad = 0;
     }
     
     /*
@@ -256,6 +261,13 @@ public class DHTValueImpl implements DHTValue, Serializable {
         return locationCount;
     }
     
+    /* (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValue#getValueRequestLoad()
+     */
+    public float getValueRequestLoad() {
+        return requestLoad;
+    }
+
     public int hashCode() {
         return hashCode;
     }

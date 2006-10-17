@@ -208,4 +208,9 @@ public interface DHTValue {
      * Returns the number of locations where this DHTValue was stored
      */
     public int getLocationCount();
+    
+    /**
+     * Returns the value's request load, i.e. it's approximate request popularity
+     */
+    public float getValueRequestLoad();
 }
