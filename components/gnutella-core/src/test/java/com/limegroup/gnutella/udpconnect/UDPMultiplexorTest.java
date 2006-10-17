@@ -29,15 +29,15 @@ public class UDPMultiplexorTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    
+    static UDPSelectorProvider provider = new UDPSelectorProvider(null);
     public void testRegister() throws Exception {
-        Selector selector = UDPSelectorProvider.instance().openSelector();
+        Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
         
         SocketChannel channels[] = new SocketChannel[256];
         SelectionKey  keys[] = new SelectionKey[256];
         for(int i = 0; i < channels.length; i++) {
-            channels[i] = UDPSelectorProvider.instance().openSocketChannel();
+            channels[i] = provider.openSocketChannel();
             assertFalse(channels[i].isRegistered());
             keys[i] = channels[i].register(selector, 1);
             assertTrue(channels[i].isRegistered());
@@ -70,10 +70,10 @@ public class UDPMultiplexorTest extends BaseTestCase {
     }
     
     public void testClosedChannelsRemoved() throws Exception {
-        Selector selector = UDPSelectorProvider.instance().openSelector();
+        Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
         
-        SocketChannel channel = UDPSelectorProvider.instance().openSocketChannel();
+        SocketChannel channel = provider.openSocketChannel();
         SelectionKey key = channel.register(selector, 0);
         assertSame(key, channel.keyFor(selector));
         Set keys = selector.keys();
@@ -97,7 +97,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
     }
     
     public void testSelectedKeys()  throws Exception {
-        Selector selector = UDPSelectorProvider.instance().openSelector();
+        Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
         
         StubUDPSocketChannel channel = new StubUDPSocketChannel();
@@ -142,7 +142,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
      **/
     public void testTransportEventGenerated() throws Exception {
     	StubListener listener = new StubListener();
-    	Selector selector = UDPSelectorProvider.instance().openSelector();
+    	Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
         
         StubUDPSocketChannel channel = new StubUDPSocketChannel();
@@ -174,7 +174,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
         private StubProcessor stubProcessor = new StubProcessor(this);
         InetSocketAddress addr;
         StubUDPSocketChannel() {
-            super((SelectorProvider)null);
+            super((SelectorProvider)null, null);
         }
         
         UDPConnectionProcessor getProcessor() {

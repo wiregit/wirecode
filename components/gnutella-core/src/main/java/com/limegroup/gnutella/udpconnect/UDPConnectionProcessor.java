@@ -941,6 +941,7 @@ public class UDPConnectionProcessor {
         if (waitTime > MAX_CONNECT_WAIT_TIME) {
             LOG.debug("Timed out, waited for: " + waitTime);
             _connectionState = FIN_STATE;
+            _channel.eventPending();
         } else {
             // We cannot send the SYN until we've registered in the Multiplexor.
             if(_myConnectionID != 0) {

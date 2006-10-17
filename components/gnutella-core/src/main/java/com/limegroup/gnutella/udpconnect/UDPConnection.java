@@ -33,7 +33,7 @@ public class UDPConnection extends AbstractNBSocket {
      * Creates an unconnected UDPConnection. You must call connect(...) to connect.
      */
     public UDPConnection() {
-        channel = (UDPSocketChannel)UDPSelectorProvider.instance().openSocketChannel();
+        channel = (UDPSocketChannel)RouterService.getUDPSelectorProvider().openSocketChannel();
         channel.setSocket(this);
         setInitialReader();
         setInitialWriter();  

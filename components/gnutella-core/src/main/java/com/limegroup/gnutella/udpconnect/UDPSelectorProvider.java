@@ -8,13 +8,15 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 
+import com.limegroup.gnutella.io.TransportListener;
+
 public class UDPSelectorProvider extends SelectorProvider {
 
-    private static final UDPSelectorProvider instance = new UDPSelectorProvider();
-    
-    public static UDPSelectorProvider instance() {
-        return instance;
-    }
+	private final TransportListener listener;
+	
+	public UDPSelectorProvider(TransportListener listener) {
+		this.listener = listener;
+	}
 
     public DatagramChannel openDatagramChannel() throws IOException {
         throw new IOException("not supported");
@@ -33,7 +35,7 @@ public class UDPSelectorProvider extends SelectorProvider {
     }
 
     public SocketChannel openSocketChannel() {
-        return new UDPSocketChannel(this);
+        return new UDPSocketChannel(this, listener);
     }
 
 }

@@ -232,12 +232,16 @@ public class RouterService {
      */
     private static UDPMultiplexor UDP_MULTIPLEXOR;
     
+    /**
+     * Selector provider for UDP selectors.
+     */
+    private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
     
     static {
         // Link the multiplexor & NIODispatcher together.
-        UDPSelectorProvider provider = UDPSelectorProvider.instance();
-        UDP_MULTIPLEXOR = (UDPMultiplexor)provider.openSelector();
-        SelectableChannel socketChannel = provider.openSocketChannel();
+        UDP_SELECTOR_PROVIDER = new UDPSelectorProvider(NIODispatcher.instance().getTransportListener());
+        UDP_MULTIPLEXOR = (UDPMultiplexor)UDP_SELECTOR_PROVIDER.openSelector();
+        SelectableChannel socketChannel = UDP_SELECTOR_PROVIDER.openSocketChannel();
         try {
             socketChannel.close();
         } catch(IOException ignored) {}
@@ -721,6 +725,11 @@ public class RouterService {
     /** Gets the UDP Multiplexor. */
     public static UDPMultiplexor getUDPMultiplexor() {
         return UDP_MULTIPLEXOR;
+    }
+    
+    /** Gets the SelectorProvider for UDPChannels */
+    public static UDPSelectorProvider getUDPSelectorProvider() {
+    	return UDP_SELECTOR_PROVIDER;
     }
     
     public static HttpExecutor getHttpExecutor() {

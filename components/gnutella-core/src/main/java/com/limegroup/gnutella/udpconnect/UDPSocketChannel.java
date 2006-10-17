@@ -15,6 +15,7 @@ import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.io.TransportListener;
 import com.limegroup.gnutella.io.WriteObserver;
 
 /**
@@ -27,10 +28,14 @@ import com.limegroup.gnutella.io.WriteObserver;
  */
 class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
                                                         InterestWriteChannel,
-                                                        ChunkReleaser {
+                                                        ChunkReleaser,
+                                                        TransportListener {
     
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
+    
+    /** The <tt>TransportListener</tt> to notify for pending events */
+    private final TransportListener listener;
     
     /** The Socket object this UDPSocketChannel is used for. */
     private Socket socket;
@@ -56,8 +61,9 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
     /** Whether or not we've propogated the shutdown to other writers. */
     private boolean shutdown = false;
     
-    UDPSocketChannel(SelectorProvider provider) {
+    UDPSocketChannel(SelectorProvider provider, TransportListener listener) {
         super(provider);
+        this.listener = listener;
         this.processor = new UDPConnectionProcessor(this);
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
@@ -72,6 +78,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
     // for testing.
     UDPSocketChannel(UDPConnectionProcessor processor) {
         super(null);
+        this.listener = null;
         this.processor = processor;
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
@@ -365,4 +372,9 @@ class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
     protected void implConfigureBlocking(boolean block) throws IOException {
         // does nothing.
     }    
+    
+    public void eventPending() {
+    	if (listener != null)
+    		listener.eventPending();
+    }
 }
