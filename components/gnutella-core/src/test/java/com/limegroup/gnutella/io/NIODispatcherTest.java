@@ -365,9 +365,9 @@ public class NIODispatcherTest extends BaseTestCase {
     	}, 500);
 
     	// and not get executed until the timeout elapses
-    	assertFalse(executed.await(495,TimeUnit.MILLISECONDS));
+    	assertFalse(executed.await(480,TimeUnit.MILLISECONDS));
     	assertFalse(f.isDone());
-    	assertTrue(executed.await(10,TimeUnit.MILLISECONDS));
+    	assertTrue(executed.await(40,TimeUnit.MILLISECONDS));
     	assertTrue(f.isDone());
     }
     
