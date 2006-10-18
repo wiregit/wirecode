@@ -119,3 +119,15 @@ HWND GetJavaWindowHandle(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, CStrin
 	// Return the window handle Java told us
 	return window;
 }
+
+// Takes the JNI environment and a text message
+// Throws an IOException in the Java code that called into native
+void ThrowIOException(JNIEnv *e, LPCTSTR t) {
+
+	// Find the Java IOException class
+	jclass c = e->FindClass("java/io/IOException");
+	if (!c) return;
+
+	// Throw a new IOException back to Java
+	e->ThrowNew(c, t);
+}
