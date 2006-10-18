@@ -2257,8 +2257,10 @@ public class DownloadTest extends BaseTestCase {
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         RouterService.download(rfds,false,null);
         Thread.sleep(1000);
-        RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
-        waitForInvalid();       
+        synchronized(COMPLETE_LOCK) {
+        	RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false));
+        	waitForInvalid();       
+        }
     }
 
     /*
