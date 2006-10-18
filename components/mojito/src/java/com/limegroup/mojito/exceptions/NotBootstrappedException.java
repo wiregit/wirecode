@@ -26,8 +26,8 @@ package com.limegroup.mojito.exceptions;
 @SuppressWarnings("serial")
 public class NotBootstrappedException extends IllegalStateException {
     
-    public NotBootstrappedException(String operation) {
-        super("Attempting to execute a " + operation 
+    public NotBootstrappedException(String name, String operation) {
+        super(name + " is attempting to execute a " + operation 
                 + " while not bootstrapped to the network");
     }
 }

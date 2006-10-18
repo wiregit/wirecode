@@ -27,7 +27,7 @@ import java.util.Set;
  * process isn't able to find an initial bootstrap Node.
  */
 @SuppressWarnings("serial")
-public class BootstrapTimeoutException extends Exception {
+public class BootstrapTimeoutException extends DHTException {
     
     private Set<SocketAddress> failedHosts;
     

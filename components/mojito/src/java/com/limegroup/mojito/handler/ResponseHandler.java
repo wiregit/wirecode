@@ -69,7 +69,7 @@ public interface ResponseHandler {
      * @param message The RequestMessage that failed to be send
      * @param e The Exception that was thrown
      */
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e);
     
     /**
      * Called in periodic intervals while we're waiting for a response.

@@ -837,7 +837,7 @@ public abstract class MessageDispatcher {
                 if (receipt.getResponseHandler() != defaultHandler) {
                     receipt.getResponseHandler().handleResponse(response, receipt.time());
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("An error occured dusring processing the response", e);
             }
@@ -926,7 +926,7 @@ public abstract class MessageDispatcher {
                 try {
                     requestHandler.handleRequest(request);
                     defaultHandler.handleRequest(request); // AFTER!
-                } catch (Exception e) {
+                } catch (IOException e) {
                     LOG.error("An exception occured during processing the request", e);
                 }
             }
@@ -955,7 +955,7 @@ public abstract class MessageDispatcher {
                 if (receipt.getResponseHandler() != defaultHandler) {
                     receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
             }
@@ -985,9 +985,9 @@ public abstract class MessageDispatcher {
         
         private Tag tag;
         
-        private Exception exception;
+        private IOException exception;
         
-        private ErrorProcessor(Tag tag, Exception exception) {
+        private ErrorProcessor(Tag tag, IOException exception) {
             this.tag = tag;
             this.exception = exception;
         }

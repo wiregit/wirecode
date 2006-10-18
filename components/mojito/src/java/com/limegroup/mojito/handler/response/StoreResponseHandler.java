@@ -43,6 +43,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -144,8 +145,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     
     @SuppressWarnings("unchecked")
     @Override
-    protected synchronized void start() throws Exception {
-
+    protected synchronized void start() throws DHTException {
+        super.start();
+        
         if (isSingleNodeStore()) {
             
             // Get the QueryKey if we don't have it
@@ -154,9 +156,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 
                 try {
                     queryKey = handler.call();
-                } catch (Exception err) {
-                    LOG.error("Exception", err);
-                    throw err;
+                } catch (InterruptedException e) {
+                    throw new DHTException(e);
                 }
             }
             
@@ -174,13 +175,20 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             
             // Use only alive Contacts from the RouteTable
             handler.setSelectAliveNodesOnly(true);
-            Map<Contact,QueryKey> nodes = handler.call().getNodes();
+            
+            Map<Contact,QueryKey> nodes = null;
+            try {
+                nodes = handler.call().getNodes();
+            } catch (InterruptedException e) {
+                throw new DHTException(e);
+            }
             
             for (Entry<Contact,QueryKey> entry : nodes.entrySet()) {
                 Contact node = entry.getKey();
                 QueryKey queryKey = entry.getValue();
                 processList.add(new StoreProcess(node, queryKey, values));
             }
+            
         }
         
         processes = processList.iterator();
@@ -215,7 +223,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
     
     @Override
     protected synchronized void error(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, Exception e) {
+            RequestMessage message, IOException e) {
         
         StoreProcess state = activeProcesses.get(nodeId);
         if (state != null && state.error(e)) {
@@ -265,7 +273,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         if (processList.size() == 1) {
             StoreProcess s = processList.get(0);
             if (s.exception != null) {
-                setException(s.exception);
+                setException(new DHTException(s.exception));
             } else if (s.timeout >= 0L) {
                 fireTimeoutException(s.nodeId, s.dst, s.message, s.timeout);
             }
@@ -429,12 +437,18 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
         }
 
         @Override
-        protected void start() throws Exception {
+        protected void start() throws DHTException {
             RequestMessage request = context.getMessageHelper()
                 .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
-            context.getMessageDispatcher().send(node, request, this);
+            
+            try {
+                context.getMessageDispatcher().send(node, request, this);
+            } catch (IOException err) {
+                throw new DHTException(err);
+            }
         }
         
+        @Override
         protected void response(ResponseMessage message, long time) throws IOException {
             
             FindNodeResponse response = (FindNodeResponse)message;
@@ -476,16 +490,18 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             setReturnValue(response.getQueryKey());
         }
         
+        @Override
         protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
             fireTimeoutException(nodeId, dst, message, time);
         }
 
-        public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+        @Override
+        protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
             
-            setException(new DHTException(nodeId, dst, message, -1L, e));
+            setException(new DHTBackendException(nodeId, dst, message, e));
         }
     }
 }

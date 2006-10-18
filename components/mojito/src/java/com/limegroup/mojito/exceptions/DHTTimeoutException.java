@@ -19,27 +19,23 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
+import java.net.SocketAddress;
+
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.util.ContactUtils;
 
 /**
- * The CollisionException is thrown if this Node detects
- * a Node ID collision with an another DHT Node.
+ * The DHTTimeoutException is thrown if an operation times out,
+ * for example if a remote Node does not respond to a ping.
  */
 @SuppressWarnings("serial")
-public class CollisionException extends DHTException {
-    
-    /** The Contact that collides with the local Node */
-    private Contact collidesWith;
-    
-    public CollisionException(Contact collidesWith, String message) {
-        super(message);
-        this.collidesWith = collidesWith;
-    }
-    
-    /**
-     * Returns the Contact that collides with the local Node
-     */
-    public Contact getCollidesWith() {
-        return collidesWith;
+public class DHTTimeoutException extends DHTRequestException {
+
+    public DHTTimeoutException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time) {
+        super(nodeId, address, request, time, 
+                ContactUtils.toString(nodeId, address) 
+                    + " timed out after " + time + "ms");
     }
 }

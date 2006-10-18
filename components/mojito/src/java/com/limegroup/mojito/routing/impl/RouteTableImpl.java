@@ -40,7 +40,7 @@ import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.PingListener;
-import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
@@ -293,13 +293,14 @@ public class RouteTableImpl implements RouteTable {
             
             public void handleThrowable(Throwable ex) {
                 
-                if (!(ex instanceof DHTException)) {
+                // We can only make decisions for timeouts! 
+                if (!(ex instanceof DHTTimeoutException)) {
                     return;
                 }
                 
-                DHTException dhtEx = (DHTException)ex;
-                KUID nodeId = dhtEx.getNodeID();
-                SocketAddress address = dhtEx.getSocketAddress();
+                DHTTimeoutException timeout = (DHTTimeoutException)ex;
+                KUID nodeId = timeout.getNodeID();
+                SocketAddress address = timeout.getSocketAddress();
                 
                 if (LOG.isInfoEnabled()) {
                     LOG.info(ContactUtils.toString(nodeId, address) 

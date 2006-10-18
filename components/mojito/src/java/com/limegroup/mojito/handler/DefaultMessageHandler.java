@@ -107,7 +107,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
     /**
      * Not implemented as never called
      */
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
         // never called
     }
     

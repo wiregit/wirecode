@@ -19,27 +19,37 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
- * The CollisionException is thrown if this Node detects
- * a Node ID collision with an another DHT Node.
+ * An abstract base class for Exceptions that are triggered
+ * by responses.
  */
-@SuppressWarnings("serial")
-public class CollisionException extends DHTException {
+abstract class DHTResponseException extends DHTException {
     
-    /** The Contact that collides with the local Node */
-    private Contact collidesWith;
+    private ResponseMessage response;
     
-    public CollisionException(Contact collidesWith, String message) {
+    public DHTResponseException(ResponseMessage response) {
+        super();
+        this.response = response;
+    }
+
+    public DHTResponseException(ResponseMessage response, String message, Throwable cause) {
+        super(message, cause);
+        this.response = response;
+    }
+
+    public DHTResponseException(ResponseMessage response, String message) {
         super(message);
-        this.collidesWith = collidesWith;
+        this.response = response;
+    }
+
+    public DHTResponseException(ResponseMessage response, Throwable cause) {
+        super(cause);
+        this.response = response;
     }
     
-    /**
-     * Returns the Contact that collides with the local Node
-     */
-    public Contact getCollidesWith() {
-        return collidesWith;
+    public ResponseMessage getResponse() {
+        return response;
     }
 }

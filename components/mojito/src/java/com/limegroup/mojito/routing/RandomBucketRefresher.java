@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindNodeEvent;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
@@ -111,14 +112,20 @@ public class RandomBucketRefresher implements Runnable {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
                 
-                FindNodeEvent event = handler.call();
-                
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Finished refresh ("+(i+1)+"/"+ids.size()+") with " + event.getNodes().size() + " nodes");
+                try {
+                    FindNodeEvent event = handler.call();
+                    
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Finished refresh ("+(i+1)+"/"+ids.size()+") with " 
+                                + event.getNodes().size() + " nodes");
+                    }
+                } catch (DHTException err) {
+                    LOG.error("DHTException", err);
+                    // Continue with refrshing!
                 }
             }
-        } catch (Exception err) {
-            LOG.error("Exception", err);
+        } catch (InterruptedException err) {
+            LOG.error("InterruptedException", err);
         }
     }
 }

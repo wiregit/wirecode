@@ -19,27 +19,17 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.messages.ResponseMessage;
 
 /**
- * The CollisionException is thrown if this Node detects
- * a Node ID collision with an another DHT Node.
+ * The DHTNoSuchElementException is thrown if an attempt was made to get
+ * a DHTValue from a remote Node and the Node did not have the requested
+ * value.
  */
 @SuppressWarnings("serial")
-public class CollisionException extends DHTException {
-    
-    /** The Contact that collides with the local Node */
-    private Contact collidesWith;
-    
-    public CollisionException(Contact collidesWith, String message) {
-        super(message);
-        this.collidesWith = collidesWith;
-    }
-    
-    /**
-     * Returns the Contact that collides with the local Node
-     */
-    public Contact getCollidesWith() {
-        return collidesWith;
+public class DHTNoSuchElementException extends DHTResponseException {
+
+    public DHTNoSuchElementException(ResponseMessage response, String message) {
+        super(response, message);
     }
 }

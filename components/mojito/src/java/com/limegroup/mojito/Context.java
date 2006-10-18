@@ -852,7 +852,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<FindValueEvent> get(KUID key) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " get()");
+            throw new NotBootstrappedException(getName(), "get()");
         }
         
         return findValueManager.lookup(key);
@@ -911,7 +911,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<StoreEvent> put(KUID key, ValueType type, byte[] value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " put()");
+            throw new NotBootstrappedException(getName(), "put()");
         }
         
         DHTValue dhtValue = DHTValueFactory.createLocalValue(getLocalNode(), key, type, value);
@@ -925,7 +925,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<StoreEvent> remove(KUID key) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " remove()");
+            throw new NotBootstrappedException(getName(), "remove()");
         }
         
         // To remove a KeyValue you just store an empty value!
@@ -937,7 +937,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<StoreEvent> store(DHTValue value) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " store()");
+            throw new NotBootstrappedException(getName(), "store()");
         }
         
         return storeManager.store(value);
@@ -949,7 +949,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " store()");
+            throw new NotBootstrappedException(getName(), "store()");
         }
         
         return storeManager.store(values);
@@ -959,11 +959,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Stores the given DHTValue 
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " store()");
-        }
-        
-        return storeManager.store(node, queryKey, value);
+        return store(node, queryKey, Collections.singleton(value));
     }
     
     /**
@@ -972,10 +968,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
             Collection<? extends DHTValue> values) {
-        
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName() + " store()");
-        }
         
         return storeManager.store(node, queryKey, values);
     }
@@ -1073,6 +1065,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         buffer.append("Local Node: ").append(getLocalNode()).append("\n");
         buffer.append("Is running: ").append(isRunning()).append("\n");
+        buffer.append("Is bootstrapped/ing: ").append(isBootstrapped()).append("/")
+                                            .append(isBootstrapping()).append("\n");
         buffer.append("Database Size (Keys): ").append(getDatabase().getKeyCount()).append("\n");
         buffer.append("Database Size (Values): ").append(getDatabase().getValueCount()).append("\n");
         buffer.append("RouteTable Size: ").append(getRouteTable().size()).append("\n");

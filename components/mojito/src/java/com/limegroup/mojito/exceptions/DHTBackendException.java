@@ -19,27 +19,21 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
+import java.net.SocketAddress;
+
+import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.messages.RequestMessage;
 
 /**
- * The CollisionException is thrown if this Node detects
- * a Node ID collision with an another DHT Node.
+ * The DHTBackendException is thrown if an Exception occured
+ * in the backend which leads to the termination of the process
+ * (ping, lookup, store, whatever).
  */
 @SuppressWarnings("serial")
-public class CollisionException extends DHTException {
-    
-    /** The Contact that collides with the local Node */
-    private Contact collidesWith;
-    
-    public CollisionException(Contact collidesWith, String message) {
-        super(message);
-        this.collidesWith = collidesWith;
-    }
-    
-    /**
-     * Returns the Contact that collides with the local Node
-     */
-    public Contact getCollidesWith() {
-        return collidesWith;
+public class DHTBackendException extends DHTRequestException {
+
+    public DHTBackendException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, Throwable cause) {
+        super(nodeId, address, request, -1L, cause);
     }
 }

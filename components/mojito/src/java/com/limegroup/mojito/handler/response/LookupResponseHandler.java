@@ -40,6 +40,8 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
@@ -214,7 +216,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     }
     
     @Override
-    protected synchronized void start() throws Exception {
+    protected synchronized void start() throws DHTException {
         super.start();
         
         // Get the closest Contacts from our RouteTable 
@@ -271,11 +273,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Go Go Go!
         startTime = System.currentTimeMillis();
         for(Contact node : alphaList) {
-            //try {
+            try {
                 sendLookupRequest(node);
-            //} catch (IOException err) {
-            //    LOG.error("IOException", err);
-            //}
+            } catch (IOException err) {
+                throw new DHTException(err);
+            }
         }
         
         finishLookupIfDone();
@@ -401,7 +403,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     
     @Override
     public synchronized void handleError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, Exception e) {
+            RequestMessage message, IOException e) {
         
         // Synchronizing this method so that error() doesn't get called
         // if the handler isDone() or isCancelled()
@@ -410,7 +412,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
 
     @Override
     protected synchronized void error(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, Exception e) {
+            RequestMessage message, IOException e) {
         
         if (e instanceof SocketException && hasActiveSearches()) {
             try {
@@ -419,11 +421,11 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 LOG.error("IOException", err);
                 
                 if (hasActiveSearches() == false) {
-                    setException(err);
+                    setException(new DHTException(err));
                 }
             }
         } else {
-            setException(e);
+            setException(new DHTBackendException(nodeId, dst, message, e));
         }
     }
     

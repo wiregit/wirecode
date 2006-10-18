@@ -44,6 +44,7 @@ import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -182,7 +183,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             this.hostSet = (Set<SocketAddress>)hostSet;
         }
         
-        public BootstrapEvent call() throws Exception {
+        public BootstrapEvent call() throws InterruptedException, DHTException {
             start = System.currentTimeMillis();
             Contact node = null;
             if (hostSet != null && !hostSet.isEmpty()) {
@@ -242,7 +243,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * @return true if phase 1 and phase 2 succeeded, false in case of failure
          * @throws Exception
          */
-        private boolean startBootstrapLookups(Contact node) throws Exception {
+        private boolean startBootstrapLookups(Contact node) 
+                throws InterruptedException, DHTException {
             
             while(true) {
                 try {
@@ -254,7 +256,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                     break;
                 } catch (CollisionException err) {
                     LOG.error("CollisionException", err);
-                    handleCollision(err.getCollideContact());
+                    handleCollision(err.getCollidesWith());
                 }
             }
             
@@ -270,7 +272,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * Tries to ping the IPPs from the hostList and returns the first
          * Contact that responds or null if none of them did respond
          */
-        private Contact bootstrapFromHostSet() throws Exception {
+        private Contact bootstrapFromHostSet() throws InterruptedException, DHTException {
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Bootstrapping from host Set: " + hostSet);
@@ -291,7 +293,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * Tries to ping the IPPs from the Route Table and returns the
          * first Contact that responds or null if none of them did respond
          */
-        private Contact bootstrapFromRouteTable() throws Exception {
+        private Contact bootstrapFromRouteTable() throws InterruptedException, DHTException {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Bootstrapping from RouteTable : " + context.getRouteTable());
             }
@@ -319,7 +321,8 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         /**
          * Do a lookup for myself (Phase one)
          */
-        private FindNodeEvent phaseOne(Contact node) throws Exception {
+        private FindNodeEvent phaseOne(Contact node) 
+                throws InterruptedException, DHTException {
             
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
@@ -336,10 +339,16 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                         context.getLocalNode() + " collides with " + collidesWith); 
                 } catch (ExecutionException err) {
                     Throwable cause = err.getCause();
+                    
                     if (cause instanceof DHTException) {
-                        LOG.info("DHTException", cause);
+                        if (cause instanceof DHTTimeoutException) {
+                            // Timeout! Try next Contact...!
+                            LOG.info("DHTTimeoutException", cause);
+                        } else {
+                            throw (DHTException)cause;
+                        }
                     } else {
-                        throw err;
+                        throw new DHTException(err);
                     }
                 }
             }
@@ -362,7 +371,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
          * i.e. routing tables that have more than k nodes.
          * 
          */
-        private boolean phaseTwo(Contact node) throws Exception {
+        private boolean phaseTwo(Contact node) throws InterruptedException, DHTException {
             
             boolean foundNewContacts = false;
             int failures = 0;

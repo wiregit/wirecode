@@ -22,13 +22,14 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTNoSuchElementException;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -56,13 +57,17 @@ public class GetValueResponseHandler extends AbstractResponseHandler<Collection<
     }
     
     @Override
-    protected void start() throws Exception {
+    protected void start() throws DHTException {
         super.start();
         
         FindValueRequest request = context.getMessageHelper()
             .createFindValueRequest(node.getContactAddress(), valueId, nodeIds);
         
-        context.getMessageDispatcher().send(node, request, this);
+        try {
+            context.getMessageDispatcher().send(node, request, this);
+        } catch (IOException err) {
+            throw new DHTException(err);
+        }
     }
 
     @Override
@@ -77,7 +82,8 @@ public class GetValueResponseHandler extends AbstractResponseHandler<Collection<
         // it may no longer exists and the remote Node returns us
         // a Set of the k-closest Nodes instead.
         } else {
-            setException(new NoSuchElementException());
+            setException(new DHTNoSuchElementException(message, 
+                    node + " did not have " + valueId + "=" + nodeIds));
         }
     }
     
@@ -88,7 +94,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<Collection<
     }
     
     @Override
-    protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        setException(new DHTException(nodeId, dst, message, -1L, e));
+    protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+        setException(new DHTBackendException(nodeId, dst, message, e));
     }
 }

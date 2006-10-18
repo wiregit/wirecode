@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.exceptions.LockTimeoutException;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -84,7 +85,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * In other words, the front-end is waiting for the result
      * from the back-end.
      */
-    private OnewayExchanger<V, Exception> exchanger = new OnewayExchanger<V, Exception>(true);
+    private OnewayExchanger<V, DHTException> exchanger 
+        = new OnewayExchanger<V, DHTException>(true);
     
     public AbstractResponseHandler(Context context) {
         this(context, -1L, -1);
@@ -116,8 +118,9 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     
     /**
      * Is called by call()
+     * @throws DHTException TODO
      */
-    protected void start() throws Exception {
+    protected void start() throws DHTException {
     }
     
     /**
@@ -270,13 +273,13 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     /**
      * See handleError()
      */
-    protected abstract void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e);
+    protected abstract void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e);
     
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleError(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, java.lang.Exception)
      */
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
         
         if (isCancelled() || isDone()) {
             return;
@@ -337,7 +340,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * Sets the Exception which will be thrown by the
      * call() method
      */
-    protected void setException(Exception ex) {
+    protected void setException(DHTException ex) {
         exchanger.setException(ex);
     }
     
@@ -345,7 +348,7 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
      * (non-Javadoc)
      * @see java.util.concurrent.Callable#call()
      */
-    public V call() throws Exception {
+    public V call() throws InterruptedException, DHTException {
         synchronized (lock) { 
             try {
                 if (!started) {
@@ -390,10 +393,8 @@ public abstract class AbstractResponseHandler<V> implements ResponseHandler, Cal
     /**
      * A helper method to throw Timeout Exceptions
      */
-    protected void fireTimeoutException(KUID nodeId, SocketAddress address, RequestMessage request, long time) {
-        TimeoutException timeout = new TimeoutException(
-                ContactUtils.toString(nodeId, address) + " timed out after " + time + "ms");
-        
-        setException(new DHTException(nodeId, address, request, time, timeout));
+    protected void fireTimeoutException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time) {
+        setException(new DHTTimeoutException(nodeId, address, request, time));
     }
 }

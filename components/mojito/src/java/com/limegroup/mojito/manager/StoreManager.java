@@ -61,13 +61,6 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     }
     
     /**
-     * Stores a single DHTValue at the given Contact. 
-     */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
-        return store(node, queryKey, Collections.singletonList(value));
-    }
-    
-    /**
      * Stores a collection of DHTValues at the given Contact.
      */
     public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 

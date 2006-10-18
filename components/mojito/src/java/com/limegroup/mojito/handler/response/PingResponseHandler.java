@@ -28,6 +28,8 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTIllegalArgumentException;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
@@ -74,7 +76,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
     }
 
     @Override
-    protected void start() throws Exception {
+    protected void start() throws DHTException {
+        super.start();
+        
         PingRequest request = null;
         
         if (sender == null) {
@@ -86,7 +90,11 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
             request = context.getMessageFactory().createPingRequest(sender, MessageID.create(address));
         }
         
-        context.getMessageDispatcher().send(nodeId, address, request, this);
+        try {
+            context.getMessageDispatcher().send(nodeId, address, request, this);
+        } catch (IOException err) {
+            throw new DHTException(err);
+        }
     }
     
     @Override
@@ -99,7 +107,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
         BigInteger estimatedSize = response.getEstimatedSize();
         
         if (node.getContactAddress().equals(externalAddress)) {
-            setException(new IllegalArgumentException(node + " is trying to set our external address to its address!"));
+            setException(new DHTIllegalArgumentException(node + " is trying to set our external address to its address!"));
             return;
         }
         
@@ -112,7 +120,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
             // actual Node ID
             
             if (sender == null) {
-                setException(new IllegalArgumentException(node + " is trying to spoof our Node ID"));
+                setException(new DHTIllegalArgumentException(node + " is trying to spoof our Node ID"));
             } else {
                 setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
             }
@@ -131,7 +139,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
     }
     
     @Override
-    public void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
-        setException(new DHTException(nodeId, dst, message, -1L, e));
+    protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+        setException(new DHTBackendException(nodeId, dst, message, e));
     }
 }

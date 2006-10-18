@@ -33,6 +33,9 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
+import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTIllegalArgumentException;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
@@ -70,11 +73,17 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
     }
     
     @Override
-    protected synchronized void start() throws Exception {
-        sendPings();
+    protected synchronized void start() throws DHTException {
+        super.start();
+        
+        try {
+            sendPings();
+        } catch (IOException err) {
+            throw new DHTException(err);
+        }
     }
 
-    private void sendPings() throws IOException{
+    private void sendPings() throws IOException {
         for (Iterator<V> iter = hostsToPing.iterator(); 
                 iter.hasNext() && (activePings < parallelism); ) {
             
@@ -109,13 +118,15 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         }
         
         if (activePings == 0) {
-            setException(new IllegalArgumentException("All SocketAddresses were invalid and there are no Hosts left to Ping"));
+            setException(new DHTIllegalArgumentException(
+                    "All SocketAddresses were invalid and there are no Hosts left to Ping"));
         }
     }
     
     private boolean shouldStop() {
-        return ((hostsToPing.isEmpty()) 
-                || (failedHosts.size() >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()));
+        return (hostsToPing.isEmpty()
+                || (failedHosts.size() 
+                        >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()));
     }
 
     @Override
@@ -133,7 +144,8 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         Contact node = response.getContact();
         if (node.getContactAddress().equals(externalAddress)) {
             if (hostsToPing.isEmpty()) {
-                setException(new IllegalArgumentException(node + " is trying to set our external address to its address!"));
+                setException(new DHTIllegalArgumentException(node 
+                                + " is trying to set our external address to its address!"));
             } else {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to set our external address to its address!");
@@ -154,17 +166,19 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
     }
 
     @Override
-    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, IOException e) {
         // Synchronizing handleError() so that error()
         // doesn't get called if this Handler isDone or isCancelled
         super.handleError(nodeId, dst, message, e);
     }
     
     @Override
-    protected synchronized void error(KUID nodeId, SocketAddress dst, RequestMessage message, Exception e) {
+    protected synchronized void error(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, IOException e) {
         
         if(LOG.isErrorEnabled()) {
-            LOG.error("Bootstrap error: "+e);
+            LOG.error("Bootstrap error", e);
         }
         
         if(e instanceof SocketException && !shouldStop()) {
@@ -174,23 +188,25 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
                 LOG.error("IOException", err);
                 
                 if (hostsToPing.isEmpty()) {
-                    setException(err);
+                    setException(new DHTException(err));
                 }
             }
         } else {
-            setException(e);
+            setException(new DHTBackendException(nodeId, dst, message, e));
         }
     }
     
     @Override
-    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
+    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage request, long time) throws IOException {
         // Synchronizing handleTimeout() so that timeout()
         // doesn't get called if this Handler isDone or isCancelled
         super.handleTimeout(nodeId, dst, request, time);
     }
     
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+    protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, long time) throws IOException {
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Timeout on bootstrap ping to " + ContactUtils.toString(nodeId, dst));

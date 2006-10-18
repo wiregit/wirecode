@@ -19,27 +19,26 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
-
 /**
- * The CollisionException is thrown if this Node detects
- * a Node ID collision with an another DHT Node.
+ * The DHTIllegalArgumentException is thrown if we received an
+ * illegal argument from a remote Node.
  */
 @SuppressWarnings("serial")
-public class CollisionException extends DHTException {
-    
-    /** The Contact that collides with the local Node */
-    private Contact collidesWith;
-    
-    public CollisionException(Contact collidesWith, String message) {
-        super(message);
-        this.collidesWith = collidesWith;
+public class DHTIllegalArgumentException extends DHTException {
+
+    public DHTIllegalArgumentException() {
+        super();
     }
-    
-    /**
-     * Returns the Contact that collides with the local Node
-     */
-    public Contact getCollidesWith() {
-        return collidesWith;
+
+    public DHTIllegalArgumentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DHTIllegalArgumentException(String message) {
+        super(message);
+    }
+
+    public DHTIllegalArgumentException(Throwable cause) {
+        super(cause);
     }
 }

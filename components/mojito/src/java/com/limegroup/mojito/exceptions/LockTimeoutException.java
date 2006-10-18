@@ -20,10 +20,13 @@
 package com.limegroup.mojito.exceptions;
 
 /**
- * The LockTimeoutException is thrown whenever an operation takes too long. 
+ * The LockTimeoutException is thrown whenever an operation takes too long
+ * (too long in sense of that we're giving up to wait for the operation to
+ * finish in order to prevent the system from getting locked up which could
+ * be a bug). 
  */
 @SuppressWarnings("serial")
-public class LockTimeoutException extends Exception {
+public class LockTimeoutException extends DHTException {
 
     public LockTimeoutException() {
         super();

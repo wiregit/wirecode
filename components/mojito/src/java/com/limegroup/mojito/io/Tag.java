@@ -199,7 +199,7 @@ public class Tag {
      * A delegate method to notify the ResponseHandler that
      * an error occured
      */
-    public void handleError(Exception e) {
+    public void handleError(IOException e) {
         if (responseHandler != null) {
             responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
         }
@@ -378,7 +378,7 @@ public class Tag {
          * A delegate method to notify the ResponseHandler that 
          * an error occured
          */
-        public void handleError(Exception e) {
+        public void handleError(IOException e) {
             if (responseHandler != null) {
                 responseHandler.handleError(nodeId, dst, (RequestMessage)message, e);
             }
