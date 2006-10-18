@@ -186,7 +186,8 @@ ABOUT_I18N_BLURB=LimeWire ayn� zamanda uluslararas�la�t�rma projesine ka
 ABOUT_COMMUNITY_BLURB=Gnutella toplumundaki bir ka� meslekta� �zel takdire lay�k olmu�tur. Bunlar: 
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 ABOUT_CONCLUSION=Sonu� olarak, LimeWire projeye fikirleri ile kat�lan di�er herkeze, kullan�c�lara ve bu geli�tiricilere i�ten te��ek�rlerini sunar. LimeWire kullan�c�lar� olmadan, LimeWire network'u var olmazd�
-
+#### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
+#? ABOUT_BT_NOTICE=
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################

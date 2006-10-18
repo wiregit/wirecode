@@ -186,7 +186,8 @@ ABOUT_I18N_BLURB=LimeWire সেই সকল সহায়তাকারীদ�
 ABOUT_COMMUNITY_BLURB=Gnutella কমিটির কিছু সহকর্মীগণ বিশেষ ধন্যবাদ পাওয়ার যোগ্য । তারা হলেন :
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 ABOUT_CONCLUSION=অবশেষে LimeWire তার আন্তরিক ধন্যবাদকে প্রসারিত করতে চায় এই ডেভেলাপার, ব্যবহারকারী, এবং অন্য সকলের প্রতি যারা বুদ্ধি দিয়ে এই প্রজেক্টে অবদান রেখেছেন । LimeWireএর ব্যবহারকারীদের ব্যতীত LimeWire নেটওয়ার্কের অস্তিত্ব থাকত না ।
-
+#### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
+#? ABOUT_BT_NOTICE=
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################

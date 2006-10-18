@@ -189,7 +189,8 @@ ABOUT_I18N_BLURB=LimeWireはまた、アプリケーション自体とLimeWire�
 ABOUT_COMMUNITY_BLURB=グヌーテラ・コミュニティのスタッフ数名は、特別な謝辞に値します以下を参照：
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 ABOUT_CONCLUSION=最後ではありますが、LimeWireはプロジェクトに考え方を与えた開発者、ユーザー、その他貢献者に深くお礼を申し上げます。LimeWireのユーザー無くしては、LimeWireのネットワークは存在していなかったでしょう。
-
+#### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
+#? ABOUT_BT_NOTICE=
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
