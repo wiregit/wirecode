@@ -64,7 +64,7 @@ public class DatabaseImpl implements Database {
     
     private static final long serialVersionUID = -4857315774747734947L;
     
-    private DHTValueDatabase database = null;
+    private DHTValueDatabase<DHTValueBag> database = null;
     
     /**
      * The maximum database size. Can be negative to make the size unbound
@@ -81,7 +81,7 @@ public class DatabaseImpl implements Database {
         this.maxDatabaseSize = maxDatabaseSize;
         this.maxValuesPerKey = maxValuesPerKey;
         
-        database = new DHTValueDatabase();
+        database = new DHTValueDatabase<DHTValueBag>();
     }
     
     public synchronized int getKeyCount() {
@@ -133,7 +133,7 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canAddValue(Map<KUID, DHTValueBag> database, DHTValue value) {
+    protected boolean canAddValue(Map<KUID, ? extends DHTValueBag> database, DHTValue value) {
         
         if (value.isLocalValue()) {
             return true;
@@ -197,7 +197,7 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canRemoveValue(Map<KUID, DHTValueBag> database, DHTValue value) {
+    protected boolean canRemoveValue(Map<KUID, ? extends DHTValueBag> database, DHTValue value) {
         return true;
     }
     
@@ -248,7 +248,7 @@ public class DatabaseImpl implements Database {
     /**
      * 
      */
-    private class DHTValueDatabase extends HashMap<KUID, DHTValueBag> {
+    private class DHTValueDatabase<V extends DHTValueBag> extends HashMap<KUID, V> {
 
         private static final long serialVersionUID = 2646628989065603637L;
         
