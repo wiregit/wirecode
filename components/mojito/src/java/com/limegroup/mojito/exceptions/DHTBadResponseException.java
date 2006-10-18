@@ -20,25 +20,25 @@
 package com.limegroup.mojito.exceptions;
 
 /**
- * The DHTIllegalArgumentException is thrown if we received an
- * illegal argument from a remote Node.
+ * The DHTBadResponseException is thrown if we received a
+ * bad response from a remote Node.
  */
 @SuppressWarnings("serial")
-public class DHTIllegalArgumentException extends DHTException {
+public class DHTBadResponseException extends DHTException {
 
-    public DHTIllegalArgumentException() {
+    public DHTBadResponseException() {
         super();
     }
 
-    public DHTIllegalArgumentException(String message, Throwable cause) {
+    public DHTBadResponseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DHTIllegalArgumentException(String message) {
+    public DHTBadResponseException(String message) {
         super(message);
     }
 
-    public DHTIllegalArgumentException(Throwable cause) {
+    public DHTBadResponseException(Throwable cause) {
         super(cause);
     }
 }

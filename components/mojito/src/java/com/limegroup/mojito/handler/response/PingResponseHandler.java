@@ -27,9 +27,9 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.exceptions.DHTIllegalArgumentException;
 import com.limegroup.mojito.exceptions.DHTBackendException;
+import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.exceptions.DHTBadResponseException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
@@ -107,7 +107,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
         BigInteger estimatedSize = response.getEstimatedSize();
         
         if (node.getContactAddress().equals(externalAddress)) {
-            setException(new DHTIllegalArgumentException(node + " is trying to set our external address to its address!"));
+            setException(new DHTBadResponseException(node + " is trying to set our external address to its address!"));
             return;
         }
         
@@ -120,7 +120,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
             // actual Node ID
             
             if (sender == null) {
-                setException(new DHTIllegalArgumentException(node + " is trying to spoof our Node ID"));
+                setException(new DHTBadResponseException(node + " is trying to spoof our Node ID"));
             } else {
                 setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
             }

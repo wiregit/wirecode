@@ -33,9 +33,9 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
-import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.exceptions.DHTIllegalArgumentException;
 import com.limegroup.mojito.exceptions.DHTBackendException;
+import com.limegroup.mojito.exceptions.DHTBadResponseException;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
@@ -90,7 +90,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             V host = iter.next();
             iter.remove();
             
-            if(host instanceof Contact) {
+            if (host instanceof Contact) {
                 Contact contact = (Contact) host;
                 
                 if(LOG.isDebugEnabled()) {
@@ -118,8 +118,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         }
         
         if (activePings == 0) {
-            setException(new DHTIllegalArgumentException(
-                    "All SocketAddresses were invalid and there are no Hosts left to Ping"));
+            setException(new DHTException("All SocketAddresses were invalid and there are no Hosts left to Ping"));
         }
     }
     
@@ -144,12 +143,13 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
         Contact node = response.getContact();
         if (node.getContactAddress().equals(externalAddress)) {
             if (hostsToPing.isEmpty()) {
-                setException(new DHTIllegalArgumentException(node 
+                setException(new DHTBadResponseException(node 
                                 + " is trying to set our external address to its address!"));
             } else {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to set our external address to its address!");
                 }
+                
                 sendPings();
             }
             return;
@@ -221,6 +221,7 @@ public class BootstrapPingResponseHandler<V> extends AbstractResponseHandler<Con
             setException(new BootstrapTimeoutException(failedHosts));
             return;
         }
+        
         sendPings();
     }
 }
