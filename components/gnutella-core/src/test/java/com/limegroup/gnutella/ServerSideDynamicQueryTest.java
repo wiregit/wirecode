@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.InterruptedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -56,7 +55,6 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             LEAF[0].send((RouteTableMessage)iter.next());
 			LEAF[0].flush();
@@ -239,13 +237,8 @@ public final class ServerSideDynamicQueryTest extends ServerSideTestCase {
         ULTRAPEER[1].send(request);
         ULTRAPEER[1].flush();
 
-        // leaves don't get any unexpected messages, no use using
-        // noUnenexpectedMessages
-        try {
-            LEAF[0].receive(TIMEOUT);
-            fail("expected InterruptedIOException");
-        }
-        catch (InterruptedIOException expected) {}
+        // leaf should not get anything
+        assertTrue(noUnexpectedMessages(LEAF[0]));
 
         reqRecvd = getFirstQueryRequest(ULTRAPEER[0]);
         assertNotNull(reqRecvd);
