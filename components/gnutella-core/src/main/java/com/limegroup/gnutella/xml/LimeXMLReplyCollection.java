@@ -86,6 +86,7 @@ public class LimeXMLReplyCollection {
      */
     private final File dataFile;
 
+    public static final int UNCHANGED = -1;
     public static final int NORMAL = 0;
     public static final int FILE_DEFECTIVE = 1;
     public static final int RW_ERROR = 2;
@@ -521,7 +522,7 @@ public class LimeXMLReplyCollection {
      * Writes this media file to disk, using the XML in the doc.
      */
     public int mediaFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc,  boolean checkBetter) {
-        int writeState = -1;
+        int writeState = UNCHANGED;
         
         if(LOG.isDebugEnabled())
             LOG.debug("writing: " + fileName + " to disk.");
