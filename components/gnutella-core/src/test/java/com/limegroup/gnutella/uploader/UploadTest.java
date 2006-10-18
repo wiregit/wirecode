@@ -210,7 +210,7 @@ public class UploadTest extends BaseTestCase {
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
 		assertGreaterThan("should have data", 0, new File(_sharedDir, fileName).length());
 
-        if ( !RouterService.isStarted() ) {
+        if ( !RouterService.isLoaded() ) {
             startAndWaitForLoad();
             Thread.sleep(2000);
         }

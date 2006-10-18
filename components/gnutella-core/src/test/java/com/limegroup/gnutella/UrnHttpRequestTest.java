@@ -60,7 +60,7 @@ public final class UrnHttpRequestTest extends BaseTestCase {
 
 	protected void setUp() throws Exception {
 
-		if(RouterService.isStarted()) return;
+		if(RouterService.isLoaded()) return;
 
 		final File TEMP_DIR = new File("temp");
 		TEMP_DIR.mkdirs();

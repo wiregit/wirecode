@@ -267,7 +267,8 @@ public class RouterService {
      * 3 - shutting down
      * 4 - shut down
      */
-    private static volatile int _state;
+    private static enum StartStatus {NOTHING, PRE_GUI, STARTING, STARTED, SHUTTING, SHUT};
+    private static volatile StartStatus _state = StartStatus.NOTHING;
 
 
 	/**
@@ -340,10 +341,10 @@ public class RouterService {
   	public static void asyncGuiInit() {
   		
   		synchronized(RouterService.class) {
-  			if (_state > 0) // already did this?
+  			if (_state != StartStatus.NOTHING) // already did this?
   				return;
   			else
-  				_state = 1;
+  				_state = StartStatus.PRE_GUI;
   		}
   		
         ThreadFactory.startThread(new Initializer(), "async gui initializer");
@@ -356,10 +357,10 @@ public class RouterService {
   	public static void preGuiInit() {
   		
   		synchronized(RouterService.class) {
-  			if (_state > 0) // already did this?
+  			if (_state != StartStatus.NOTHING) // already did this?
   				return;
   			else
-  				_state = 1;
+  				_state = StartStatus.PRE_GUI;
   		}
   		
   	    (new Initializer()).run();
@@ -385,11 +386,11 @@ public class RouterService {
 	    synchronized(RouterService.class) {
     	    LOG.trace("START RouterService");
     	    
-    	    if ( isStarted() )
+    	    if ( isLoaded() )
     	        return;
     	        
             preGuiInit();
-            _state = 2;
+            _state = StartStatus.STARTING;
     
     		// Now, link all the pieces together, starting the various threads.
 
@@ -517,6 +518,7 @@ public class RouterService {
                 startManualGCThread();
             
             LOG.trace("STOP RouterService.");
+            _state = StartStatus.STARTED;
         }
 	}
 	
@@ -551,8 +553,13 @@ public class RouterService {
      * @return <tt>true</tt> if the backend threads have been started,
      *  otherwise <tt>false</tt>
      */
+    public static boolean isLoaded() {
+        return isStarted() || _state == StartStatus.STARTING; 
+    }
+    
     public static boolean isStarted() {
-        return _state >= 2;
+    	return _state == StartStatus.STARTED || _state == StartStatus.SHUTTING ||
+        _state == StartStatus.SHUT;
     }
 
     /**
@@ -957,14 +964,14 @@ public class RouterService {
      * Determines if this is shutting down.
      */
     private static boolean isShuttingDown() {
-        return _state >= 3;
+        return _state == StartStatus.SHUTTING;
     }
     
     /**
      * Determines if this is shut down.
      */
     private static boolean isShutdown() {
-        return _state >= 4;
+        return _state == StartStatus.SHUT;
     }
 
     /**
@@ -974,10 +981,10 @@ public class RouterService {
      */
     public static synchronized void shutdown() {
         try {
-            if(!isStarted())
+            if(!isLoaded())
                 return;
                 
-            _state = 3;
+            _state = StartStatus.SHUTTING;
             
             getAcceptor().shutdown();
             
@@ -1019,7 +1026,7 @@ public class RouterService {
             
             runShutdownItems();
             
-            _state = 4;
+            _state = StartStatus.SHUT;
             
         } catch(Throwable t) {
             ErrorService.error(t);

@@ -439,7 +439,7 @@ public class NIODispatcher implements Runnable {
 
         boolean finished = channel.finishConnect();
         if (finished) {
-            sk.interestOps(0); // interested in nothing just yet.
+        	sk.interestOps(0); // interested in nothing just yet.
             handler.handleConnect(channel.socket());
         } else {
             cancel(sk, handler);
