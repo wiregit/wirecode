@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
 
 /*
@@ -65,6 +66,9 @@ public class DatabaseImpl implements Database {
     
     private DHTValueDatabase database = null;
     
+    /**
+     * The maximum database size. Can be negative to make the size unbound
+     */
     private int maxDatabaseSize = -1;
     
     private int maxValuesPerKey = -1;
@@ -117,7 +121,7 @@ public class DatabaseImpl implements Database {
         DHTValueBag bag = database.get(valueId);
         
         if (bag == null) {
-            bag = new DHTValueBag(valueId);
+            bag = new DHTValueBagImpl(valueId);
         }
         
         if (bag.add(value)) {
@@ -129,7 +133,7 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canAddValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
+    protected boolean canAddValue(Map<KUID, DHTValueBag> database, DHTValue value) {
         
         if (value.isLocalValue()) {
             return true;
@@ -137,15 +141,15 @@ public class DatabaseImpl implements Database {
         
         KUID valueId = value.getValueID();
         KUID nodeId = value.getOriginatorID();
-        Map<KUID, DHTValue> map = database.get(valueId);
+        DHTValueBag bag = database.get(valueId);
         
-        if (map == null) {
+        if (bag == null) {
             return maxDatabaseSize < 0 || database.size() < maxDatabaseSize;
-        } else if (maxValuesPerKey < 0 || map.size() < maxValuesPerKey) {
+        } else if (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey) {
             return true;
         }
         
-        return value.isDirect() && map.containsKey(nodeId);
+        return value.isDirect() && bag.containsKey(nodeId);
     }
     
     public synchronized boolean remove(DHTValue value) {
@@ -162,7 +166,15 @@ public class DatabaseImpl implements Database {
         return removedAll;
     }
     
-    private synchronized boolean remove(DHTValue value, boolean remote) {
+    /**
+     * Remove a value from the database. 
+
+     * @param value The DHTValue to remove
+     * @param isRemoteRemove Whether or not the value is 
+     * removed by executing a store with empty data
+     * 
+     */
+    private synchronized boolean remove(DHTValue value, boolean isRemoteRemove) {
         if (!canRemoveValue(database, value)) {
             return false;
         }
@@ -172,11 +184,7 @@ public class DatabaseImpl implements Database {
         if (bag != null) {
             int size = bag.size();
             
-            if (remote) {
-                bag.remoteRemove(value);
-            } else {
-                bag.remove(value);
-            }
+            bag.remove(value, isRemoteRemove);
             
             if (bag.isEmpty()) {
                 database.remove(valueId);
@@ -189,14 +197,14 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canRemoveValue(Map<KUID, ? extends Map<KUID, DHTValue>> database, DHTValue value) {
+    protected boolean canRemoveValue(Map<KUID, DHTValueBag> database, DHTValue value) {
         return true;
     }
     
     public synchronized Map<KUID, DHTValue> get(KUID valueId) {
         DHTValueBag bag = database.get(valueId);
         if (bag != null) {
-            return Collections.unmodifiableMap(new HashMap<KUID, DHTValue>(bag));
+            return Collections.unmodifiableMap(bag.getValuesMap());
         }
         return Collections.emptyMap();
     }
@@ -212,7 +220,7 @@ public class DatabaseImpl implements Database {
     public synchronized Collection<DHTValue> values() {
         List<DHTValue> values = new ArrayList<DHTValue>();
         for (DHTValueBag bag : database.values()) {
-            values.addAll(bag.values());
+            values.addAll(bag.getAllValues());
         }
         return Collections.unmodifiableList(values);
     }
@@ -244,119 +252,5 @@ public class DatabaseImpl implements Database {
 
         private static final long serialVersionUID = 2646628989065603637L;
         
-    }
-    
-    /**
-     * 
-     */
-    private class DHTValueBag extends HashMap<KUID, DHTValue> {
-        
-        private static final long serialVersionUID = 3677203930910637434L;
-
-        private KUID valueId;
-        
-        private transient int modCount = 0;
-        
-        public DHTValueBag(KUID valueId) {
-            this.valueId = valueId;
-        }
-        
-        public boolean add(DHTValue value) {
-            int modCount = this.modCount;
-            put(value.getOriginatorID(), value);
-            return modCount != this.modCount;
-        }
-
-        /**
-         * Removes the given DHTValue from the bag if certain
-         * conditions met like it must be a direct remove
-         * request.
-         */
-        public DHTValue remoteRemove(DHTValue value) {
-            if (value.isDirect() 
-                    || value.isLocalValue()) {
-                
-                KUID originatorId = value.getOriginatorID();
-                DHTValue current = get(originatorId);
-                if (current != null) {
-                    if (!current.isLocalValue()
-                            || (current.isLocalValue() && value.isLocalValue())) {
-                        return remove(originatorId);
-                    }
-                }
-            }
-            
-            return null;
-        }
-        
-        @Override
-        public DHTValue put(KUID key, DHTValue value) {
-            if (!valueId.equals(value.getValueID())) {
-                throw new IllegalArgumentException("Value ID must be " + valueId);
-            }
-            
-            if (!key.equals(value.getOriginatorID())) {
-                throw new IllegalArgumentException("Originator ID must be " + key);
-            }
-            
-            if ((value.isDirect() && putDirectDHTValue(key, value)) 
-                    || (!value.isDirect() && putIndirectDHTValue(key, value))) {
-                
-                modCount++;
-                return super.put(key, value);
-            }
-            
-            return null;
-        }
-        
-        /**
-         * Returns whether or not the given (direct) DHTValue can
-         * be added to the bag
-         */
-        private boolean putDirectDHTValue(KUID key, DHTValue value) {
-            assert (value.isDirect());
-            
-            // Do not replace local with non-local values
-            DHTValue current = get(key);
-            if (current != null 
-                    && current.isLocalValue() 
-                    && !value.isLocalValue()) {
-                return false;
-            }
-            
-            return true;
-        }
-        
-        /**
-         * Returns whether or not the given (indirect) DHTValue can
-         * be added to the bag
-         */
-        private boolean putIndirectDHTValue(KUID key, DHTValue value) {
-            assert (!value.isDirect());
-            assert (!value.isLocalValue()); // cannot be a local value
-            
-            // Do not overwrite an directly stored value
-            DHTValue current = get(key);
-            if (current != null 
-                    && current.isDirect()) {
-                return false;
-            }
-            
-            return true;
-        }
-        
-        @Override
-        public DHTValue remove(Object key) {
-            if (key instanceof DHTValue) {
-                key = ((DHTValue)key).getOriginatorID();
-            }
-            
-            int size = size();
-            DHTValue value = super.remove(key);
-            if (size != size()) {
-                modCount++;
-            }
-            return value;
-        }
     }
 }

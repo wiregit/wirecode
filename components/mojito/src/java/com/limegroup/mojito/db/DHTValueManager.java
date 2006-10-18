@@ -33,12 +33,12 @@ import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.DatabaseUtils;
 
 /**
- * The DHTValuePublisher publishes in periodical intervals
- * all local DHTValues and evicts 
+ * The DHTValueManager periodically publishes all local DHTValues 
+ * and evicts expired ones.
  */
-public class DHTValuePublisher implements Runnable {
+public class DHTValueManager implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(DHTValuePublisher.class);
+    private static final Log LOG = LogFactory.getLog(DHTValueManager.class);
     
     private Context context;
     
@@ -53,14 +53,14 @@ public class DHTValuePublisher implements Runnable {
     
     private long delay = 0L;
     
-    public DHTValuePublisher(Context context) {
+    public DHTValueManager(Context context) {
         this.context = context;
         
         databaseStats = context.getDatabaseStats();
     }
     
     /**
-     * Starts the DHTValuePublisher
+     * Starts the DHTValueManager
      */
     public void start() {
         synchronized (lock) {
@@ -74,7 +74,7 @@ public class DHTValuePublisher implements Runnable {
     }
     
     /**
-     * Stops the DHTValuePublisher
+     * Stops the DHTValueManager
      */
     public void stop() {
         synchronized (lock) {
@@ -86,9 +86,9 @@ public class DHTValuePublisher implements Runnable {
     }
     
     /**
-     * Published the given DHTValue
+     * Publishes or expires the given DHTValue
      */
-    private void publish(DHTValue value) throws Exception {
+    private void manage(DHTValue value) throws Exception {
         
         // Check if value is still in DB because we're
         // working with a copy of the Collection.
@@ -175,7 +175,7 @@ public class DHTValuePublisher implements Runnable {
             }
             
             try {
-                publish(value);
+                manage(value);
             } catch (Exception err) {
                 LOG.error("Exception", err);
             }

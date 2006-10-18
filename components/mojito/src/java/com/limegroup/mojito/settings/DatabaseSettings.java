@@ -67,7 +67,7 @@ public final class DatabaseSettings extends MojitoProps {
                 "value_republish_interval", 3L*60L*1000L, 24L*60L*60L*1000L);
     
     /**
-     * The period of the DHTValuePublisher
+     * The period of the DHTValueManager
      */
     public static final LongSetting REPUBLISH_PERIOD
         = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
