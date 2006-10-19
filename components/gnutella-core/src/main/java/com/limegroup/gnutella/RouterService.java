@@ -964,7 +964,7 @@ public class RouterService {
      * Determines if this is shutting down.
      */
     private static boolean isShuttingDown() {
-        return _state == StartStatus.SHUTTING;
+        return _state == StartStatus.SHUTTING || _state == StartStatus.SHUT;
     }
     
     /**
