@@ -76,9 +76,19 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             Collection<DHTValue> values = Collections.emptyList();
             
             Collection<KUID> nodeIds = request.getKeys();
+            
+            // Nothing specific requested?
             if (nodeIds.isEmpty()) {
-                // Nothing requested? Send just the keys back!
-                keys = map.keySet();
+                // If there's only one value for this key then send 
+                // just the DHTValue
+                if (map.size() == 1) {
+                    values = map.values();
+                    
+                // Otherwise send the keys and the remote Node must
+                // figure out what it's looking for
+                } else {
+                    keys = map.keySet();
+                }
             } else {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
