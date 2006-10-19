@@ -500,4 +500,10 @@ public class BTDownloader extends AbstractDownloader
 	public int getTriedHostCount() {
 		return _torrent.getTriedHostCount();
 	}
+	
+	public String getCustomIconDescriptor() {
+		if (fileSystem.getFiles().size() == 1)
+			return null;
+		return BITTORRENT_DOWNLOAD;
+	}
 }

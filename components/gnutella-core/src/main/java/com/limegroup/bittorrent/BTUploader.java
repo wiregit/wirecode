@@ -160,4 +160,9 @@ public class BTUploader implements Uploader, TorrentEventListener {
 		stopTime = System.currentTimeMillis();
 	}
 	
+	public String getCustomIconDescriptor() {
+		if (_info.getFileSystem().getFiles().size() == 1)
+			return null;
+		return BITTORRENT_UPLOAD;
+	}
 }

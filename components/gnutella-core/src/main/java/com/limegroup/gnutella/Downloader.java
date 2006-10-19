@@ -305,5 +305,11 @@ public interface Downloader extends BandwidthTracker {
      *         attribute was not set.
      */
     public Object removeAttribute( String key );
+    
+    /**
+     * @return a custom icon descriptor, null if the file icon should be
+     * used.
+     */
+    public String getCustomIconDescriptor();
 }
 

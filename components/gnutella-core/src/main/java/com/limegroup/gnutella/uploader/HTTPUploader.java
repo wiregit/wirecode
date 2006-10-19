@@ -1286,6 +1286,10 @@ public final class HTTPUploader implements Uploader {
     public int wantsFWTAlts() {
     	return _FWTVersion;
     }
+    
+    public String getCustomIconDescriptor() {
+    	return null;
+    }
 
 	// overrides Object.toString
 	public String toString() {

@@ -2989,4 +2989,8 @@ public class ManagedDownloader extends AbstractDownloader
 	public int getTriedHostCount() {
 		return triedHosts;
 	}
+	
+	public String getCustomIconDescriptor() {
+		return null; // always use the file icon
+	}
 }

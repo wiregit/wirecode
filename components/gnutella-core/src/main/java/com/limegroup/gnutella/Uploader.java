@@ -124,6 +124,12 @@ public interface Uploader extends BandwidthTracker {
      * Returns whether or not the uploader is in an inactive state.
      */
     public boolean isInactive();
+    
+    /**
+     * @return a custom icon descriptor, null if the file icon should be
+     * used.
+     */
+    public String getCustomIconDescriptor();
 
 }
 
