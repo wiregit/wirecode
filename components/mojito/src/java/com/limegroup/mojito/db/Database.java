@@ -21,7 +21,6 @@ package com.limegroup.mojito.db;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.mojito.KUID;
@@ -67,14 +66,13 @@ public interface Database extends Serializable {
     //public boolean removeAll(Collection<? extends DHTValue> values);
     
     /**
-     * Returns a Map of NodeID -> DHTValue for the given ValueID.
-     * The returned Map is unmodifyable!
+     * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
      * 
      * @param valueId The KUID of the value to lookup in the database
      * @param incrementLoad Whether or not the request load for this value 
      * should be incremented
      */
-    public Map<KUID, DHTValue> get(KUID valueId, boolean incrementLoad);
+    public DHTValueBag get(KUID valueId, boolean incrementLoad);
     
     /**
      * Returns whether or not the given DHTValue is stored in our

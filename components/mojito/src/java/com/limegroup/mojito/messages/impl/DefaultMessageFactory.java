@@ -147,8 +147,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values) {
-        return new FindValueResponseImpl(context, contact, messageId, keys, values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
+        return new FindValueResponseImpl(context, contact, messageId, keys, values, requestLoad);
     }
 
     public PingRequest createPingRequest(Contact contact, MessageID messageId) {

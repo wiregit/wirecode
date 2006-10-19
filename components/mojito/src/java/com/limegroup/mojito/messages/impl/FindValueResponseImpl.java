@@ -41,16 +41,19 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     private Collection<KUID> keys;
     
     private Collection<DHTValue> values;
+    
+    private float requestLoad;
 
     @SuppressWarnings("unchecked")
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<KUID> keys,
-            Collection<? extends DHTValue> values) {
+            Collection<? extends DHTValue> values, float requestLoad) {
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
         
         this.keys = keys;
         this.values = (Collection<DHTValue>)values;
+        this.requestLoad = requestLoad;
     }
 
     public FindValueResponseImpl(Context context, SocketAddress src, 
@@ -58,6 +61,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
         this.keys = in.readKUIDs();
+        this.requestLoad = in.readFloat();
         this.values = in.readDHTValues(getContact());
     }
     
@@ -68,9 +72,14 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     public Collection<DHTValue> getValues() {
         return values;
     }
+    
+    public float getRequestLoad() {
+        return requestLoad;
+    }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeKUIDs(keys);
+        out.writeFloat(requestLoad);
         out.writeDHTValues(values);
     }
     

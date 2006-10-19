@@ -20,8 +20,7 @@ public interface DHTValueBag {
     public boolean add(DHTValue value);
 
     /**
-     * Returns a map values where the key is the originator's ID.
-     * Beware when modifying the collection as this returns the actual map. 
+     * Returns an unmodifiable map of values where the key is the originator's ID.
      * 
      */
     public Map<KUID, DHTValue> getValuesMap();

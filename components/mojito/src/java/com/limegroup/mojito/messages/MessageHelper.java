@@ -109,8 +109,9 @@ public class MessageHelper {
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values) {
-        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
+        return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, 
+                values, requestLoad);
     }
 
     public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, 

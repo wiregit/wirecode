@@ -38,4 +38,9 @@ public interface FindValueResponse extends LookupResponse {
      * Returns a Collection of DHTValue(s)
      */
     public Collection<DHTValue> getValues();
+    
+    /**
+     * Returns the request load for this key
+     */
+    public float getRequestLoad();
 }

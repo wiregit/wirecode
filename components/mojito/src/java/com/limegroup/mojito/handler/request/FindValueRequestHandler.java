@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindValueRequest;
@@ -65,8 +66,17 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         Database database = context.getDatabase();
-        Map<KUID, DHTValue> map = database.get(lookup, true);
+        DHTValueBag bag = database.get(lookup, true);
+
+        if(bag == null) {
+            //OK, send Contacts instead!
+            findNodeDelegate.handleRequest(message);
+            return;
+        }
         
+        Map<KUID, DHTValue> map = bag.getValuesMap();
+        
+        //TODO: should never be empty?
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(map.values()) + "}");
@@ -102,7 +112,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             }
            
             FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, keys, values);
+                        .createFindValueResponse(request, keys, values, bag.getRequestLoad());
             context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send Contacts instead!

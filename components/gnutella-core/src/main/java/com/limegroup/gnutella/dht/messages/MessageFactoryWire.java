@@ -99,9 +99,9 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values) {
+            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
         return new FindValueResponseWireImpl(
-                delegate.createFindValueResponse(contact, messageId, keys, values));
+                delegate.createFindValueResponse(contact, messageId, keys, values, requestLoad));
     }
 
     public PingRequest createPingRequest(Contact contact, MessageID messageId) {

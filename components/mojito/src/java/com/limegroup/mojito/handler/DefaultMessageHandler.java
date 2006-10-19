@@ -33,6 +33,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -265,7 +266,10 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         }
                         
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        valuesToForward.addAll(database.get(valueId, false).values());
+                        DHTValueBag bag = database.get(valueId, false);
+                        if(bag != null) {
+                            valuesToForward.addAll(bag.getAllValues());
+                        }
                     }
                 
                 // We remove a value if:
@@ -303,16 +307,18 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         
                         if (delete) {
                             int count = 0;
-                            for (DHTValue value : database.get(valueId, false).values()) {
-                                if (!value.isLocalValue()) {
-                                    //System.out.println("REMOVING: " + value + "\n");
-                                    
-                                    database.remove(value);
-                                    count++;
+                            DHTValueBag bag = database.get(valueId, false);
+                            if(bag != null ) {
+                                for (DHTValue value : bag.getAllValues()) {
+                                    if (!value.isLocalValue()) {
+                                        //System.out.println("REMOVING: " + value + "\n");
+                                        
+                                        database.remove(value);
+                                        count++;
+                                    }
                                 }
+                                databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                             }
-                            
-                            databaseStats.STORE_FORWARD_REMOVALS.addData(count);
                         }
                     }
                 }

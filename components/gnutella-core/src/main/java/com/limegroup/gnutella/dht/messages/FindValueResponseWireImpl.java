@@ -20,4 +20,8 @@ public class FindValueResponseWireImpl extends AbstractMessageWire<FindValueResp
     public Collection<DHTValue> getValues() {
         return delegate.getValues();
     }
+
+    public float getRequestLoad() {
+        return delegate.getRequestLoad();
+    }
 }

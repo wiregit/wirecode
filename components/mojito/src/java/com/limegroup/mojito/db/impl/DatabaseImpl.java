@@ -201,19 +201,22 @@ public class DatabaseImpl implements Database {
         return true;
     }
     
-    public synchronized Map<KUID, DHTValue> get(KUID valueId, boolean incrementLoad) {
+    public synchronized DHTValueBag get(KUID valueId, boolean incrementLoad) {
         DHTValueBag bag = database.get(valueId);
-        if (bag != null) {
-            if(incrementLoad) {
-                bag.incrementRequestLoad();
-            }
-            return Collections.unmodifiableMap(bag.getValuesMap());
+        if (bag != null && incrementLoad) {
+            bag.incrementRequestLoad();
         }
-        return Collections.emptyMap();
+        return bag;
     }
     
     public synchronized boolean contains(DHTValue value) {
-        return get(value.getValueID(), false).containsValue(value);
+        DHTValueBag bag = get(value.getValueID(), false); 
+        
+        if(bag != null) {
+            return bag.containsKey(value.getOriginatorID());
+        } 
+        
+        return false;
     }
 
     public synchronized Set<KUID> keySet() {

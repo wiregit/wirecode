@@ -1,6 +1,7 @@
 package com.limegroup.mojito.db.impl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ class DHTValueBagImpl implements DHTValueBag{
     /**
      * The request load associated with this DHT value bag
      */
-    private float requestsPerSecond = 0;
+    private float requestLoad = 0;
     
     /**
      * The time the request load was last updated
@@ -71,7 +72,7 @@ class DHTValueBagImpl implements DHTValueBag{
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValuesMap()
      */
     public Map<KUID, DHTValue> getValuesMap(){
-        return valuesMap;
+        return Collections.unmodifiableMap(valuesMap);
     }
     
     /* (non-Javadoc)
@@ -85,7 +86,7 @@ class DHTValueBagImpl implements DHTValueBag{
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getRequestLoad()
      */
     public float getRequestLoad() {
-        return requestsPerSecond;
+        return requestLoad;
     }
     
     /*
@@ -105,11 +106,10 @@ class DHTValueBagImpl implements DHTValueBag{
         }
         
         float delay = (now - lastRequestTime)/1000F; //in sec
-        System.out.println("delay: "+delay);
         
         if(delay <= 0) {
-            requestsPerSecond = 0; //we can't trust the value anymore
-            return requestsPerSecond;
+            requestLoad = 0; //we can't trust the value anymore
+            return requestLoad;
         }
         
         //The new requests per second is always a percentage of the 
@@ -117,11 +117,11 @@ class DHTValueBagImpl implements DHTValueBag{
         //newValue = SF*newLoad + (1 - SF)*previousValue
         //Which is equal to:
         //newValue = previousValue + SF * (newLoad - previousValue)
-        requestsPerSecond = requestsPerSecond 
-            + SMOOTHING_FACTOR*((1/delay) - requestsPerSecond);
+        requestLoad = requestLoad 
+            + SMOOTHING_FACTOR*((1/delay) - requestLoad);
         lastRequestTime = now;
         
-        return requestsPerSecond;
+        return requestLoad;
     }
     
     /* (non-Javadoc)
