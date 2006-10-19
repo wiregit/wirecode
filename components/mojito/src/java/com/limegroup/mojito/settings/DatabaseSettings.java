@@ -20,6 +20,7 @@
 package com.limegroup.mojito.settings;
 
 import com.limegroup.gnutella.settings.BooleanSetting;
+import com.limegroup.gnutella.settings.FloatSetting;
 import com.limegroup.gnutella.settings.IntSetting;
 import com.limegroup.gnutella.settings.LongSetting;
 
@@ -72,6 +73,9 @@ public final class DatabaseSettings extends MojitoProps {
     public static final LongSetting REPUBLISH_PERIOD
         = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
                 "republish_period", 5L*60L*1000L, 60L*60L*1000L);
+    
+    public static final FloatSetting VALUE_LOAD_SMOOTHING_FACTOR 
+        = FACTORY.createFloatSetting("value_load_smoothing_factor", 1/4f);
     
     /**
      * Whether or not to delete a DHTValue from the Database if we're

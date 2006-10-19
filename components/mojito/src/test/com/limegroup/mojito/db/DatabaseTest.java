@@ -88,7 +88,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
+                database.get(value1.getValueID(),false)
                     .get(value1.getOriginatorID()).getData()));
         
         // Neither direct...
@@ -98,7 +98,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getValueID())
+                database.get(value2.getValueID(),false)
                     .get(value2.getOriginatorID()).getData()));
         
         // ...nor indirect values can replace a local value
@@ -108,7 +108,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value3.getValueID())
+                database.get(value3.getValueID(),false)
                     .get(value3.getOriginatorID()).getData()));
         
         // Only local values can replace local values
@@ -118,7 +118,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getValueID())
+                database.get(value4.getValueID(),false)
                     .get(value4.getOriginatorID()).getData()));
         
         // Add a new direct value
@@ -127,7 +127,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getValueID())
+                database.get(value5.getValueID(),false)
                     .get(value5.getOriginatorID()).getData()));
         
         // local values replace direct values
@@ -137,7 +137,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value6.getValueID())
+                database.get(value6.getValueID(),false)
                     .get(value6.getOriginatorID()).getData()));
         
         // Add an indirect value
@@ -146,7 +146,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Bloody".getBytes(), 
-                database.get(value7.getValueID())
+                database.get(value7.getValueID(),false)
                     .get(value7.getOriginatorID()).getData()));
         
         // local values replace indirect values
@@ -156,7 +156,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Lime".getBytes(), 
-                database.get(value8.getValueID())
+                database.get(value8.getValueID(),false)
                     .get(value8.getOriginatorID()).getData()));
 
     }
@@ -170,7 +170,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
+                database.get(value1.getValueID(),false)
                     .get(value1.getOriginatorID()).getData()));
         
         // Shouldn't change
@@ -185,7 +185,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getValueID())
+                database.get(value2.getValueID(),false)
                     .get(value2.getOriginatorID()).getData()));
         
         // A directly stored value cannot be replaced by
@@ -196,7 +196,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value3.getValueID())
+                database.get(value3.getValueID(),false)
                     .get(value3.getOriginatorID()).getData()));
     }
     
@@ -209,7 +209,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
+                database.get(value1.getValueID(),false)
                     .get(value1.getOriginatorID()).getData()));
         
         // Indirect replaces indirect
@@ -219,7 +219,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getValueID())
+                database.get(value2.getValueID(),false)
                     .get(value2.getOriginatorID()).getData()));
         
         // Direct replaces indirect
@@ -229,7 +229,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value3.getValueID())
+                database.get(value3.getValueID(),false)
                     .get(value3.getOriginatorID()).getData()));
         
         // Indirect shouldn't replace direct
@@ -239,7 +239,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getValueID())
+                database.get(value4.getValueID(),false)
                     .get(value4.getOriginatorID()).getData()));
     }
     
@@ -252,7 +252,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
+                database.get(value1.getValueID(),false)
                     .get(value1.getOriginatorID()).getData()));
         
         // Same Key but different originator/sender
@@ -262,7 +262,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value2.getValueID())
+                database.get(value2.getValueID(),false)
                     .get(value2.getOriginatorID()).getData()));
         
         // Same Key but a different originator
@@ -272,7 +272,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value3.getValueID())
+                database.get(value3.getValueID(),false)
                     .get(value3.getOriginatorID()).getData()));
         
         // Different Key
@@ -281,7 +281,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getKeyCount());
         assertEquals(4, database.getValueCount());
         assertTrue(Arrays.equals("Olga".getBytes(), 
-                database.get(value4.getValueID())
+                database.get(value4.getValueID(),false)
                     .get(value4.getOriginatorID()).getData()));
     }
     
@@ -294,7 +294,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
+                database.get(value1.getValueID(),false)
                     .get(value1.getOriginatorID()).getData()));
         
         // It's not possible to remove a value indirectly
@@ -304,7 +304,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getValueID())
+                database.get(value2.getValueID(),false)
                     .get(value2.getOriginatorID()).getData()));
         
         // But we can remove values directly
@@ -320,7 +320,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value4.getValueID())
+                database.get(value4.getValueID(),false)
                     .get(value4.getOriginatorID()).getData()));
         
         // A local value cannot be removed
@@ -330,7 +330,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getValueID())
+                database.get(value5.getValueID(),false)
                     .get(value5.getOriginatorID()).getData()));
         
         // But a local value can remove a local value

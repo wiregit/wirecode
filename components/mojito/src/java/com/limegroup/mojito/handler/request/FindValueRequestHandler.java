@@ -65,7 +65,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         Database database = context.getDatabase();
-        Map<KUID, DHTValue> map = database.get(lookup);
+        Map<KUID, DHTValue> map = database.get(lookup, true);
         
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {

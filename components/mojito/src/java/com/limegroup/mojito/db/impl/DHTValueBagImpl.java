@@ -7,6 +7,7 @@ import java.util.Map;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
+import com.limegroup.mojito.settings.DatabaseSettings;
 
 /**
  * This class allows to store multiple DHT values for the same key,
@@ -19,6 +20,9 @@ class DHTValueBagImpl implements DHTValueBag{
     
     private static final long serialVersionUID = 3677203930910637434L;
     
+    private static final float SMOOTHING_FACTOR = 
+        DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.getValue();
+    
     /**
      * The key if this value
      */
@@ -27,7 +31,12 @@ class DHTValueBagImpl implements DHTValueBag{
     /**
      * The request load associated with this DHT value bag
      */
-    private float requestLoad = 0f;
+    private float requestsPerSecond = 0;
+    
+    /**
+     * The time the request load was last updated
+     */
+    private long lastRequestTime;
     
     /**
      * The Map of <OriginatorID,DHTValue>
@@ -76,30 +85,44 @@ class DHTValueBagImpl implements DHTValueBag{
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getRequestLoad()
      */
     public float getRequestLoad() {
-        return requestLoad;
+        return requestsPerSecond;
     }
-
-//    /**
-//     * Removes the given DHTValue from the bag if certain
-//     * conditions met like it must be a direct remove
-//     * request.
-//     */
-//    public DHTValue remoteRemove(DHTValue value) {
-//        if (value.isDirect() 
-//                || value.isLocalValue()) {
-//            
-//            KUID originatorId = value.getOriginatorID();
-//            DHTValue current = valuesMap.get(originatorId);
-//            if (current != null) {
-//                if (!current.isLocalValue()
-//                        || (current.isLocalValue() && value.isLocalValue())) {
-//                    return remove(current, false);
-//                }
-//            }
-//        }
-//        
-//        return null;
-//    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#incrementRequestLoad()
+     */
+    public float incrementRequestLoad() {
+        
+        //Use Exponentially weighted moving average (EMA) to compute load
+        //on this particular value bag. 
+        
+        long now = System.currentTimeMillis();
+        
+        if(lastRequestTime == 0) {
+            lastRequestTime = now;
+            return 0;
+        }
+        
+        float delay = (now - lastRequestTime)/1000F; //in sec
+        System.out.println("delay: "+delay);
+        
+        if(delay <= 0) {
+            requestsPerSecond = 0; //we can't trust the value anymore
+            return requestsPerSecond;
+        }
+        
+        //The new requests per second is always a percentage of the 
+        //increase over the old one:
+        //newValue = SF*newLoad + (1 - SF)*previousValue
+        //Which is equal to:
+        //newValue = previousValue + SF * (newLoad - previousValue)
+        requestsPerSecond = requestsPerSecond 
+            + SMOOTHING_FACTOR*((1/delay) - requestsPerSecond);
+        lastRequestTime = now;
+        
+        return requestsPerSecond;
+    }
     
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#remove(java.lang.Object)

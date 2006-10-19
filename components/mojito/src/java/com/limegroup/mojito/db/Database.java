@@ -69,8 +69,12 @@ public interface Database extends Serializable {
     /**
      * Returns a Map of NodeID -> DHTValue for the given ValueID.
      * The returned Map is unmodifyable!
+     * 
+     * @param valueId The KUID of the value to lookup in the database
+     * @param incrementLoad Whether or not the request load for this value 
+     * should be incremented
      */
-    public Map<KUID, DHTValue> get(KUID valueId);
+    public Map<KUID, DHTValue> get(KUID valueId, boolean incrementLoad);
     
     /**
      * Returns whether or not the given DHTValue is stored in our

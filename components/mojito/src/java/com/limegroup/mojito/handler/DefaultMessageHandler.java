@@ -265,7 +265,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         }
                         
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        valuesToForward.addAll(database.get(valueId).values());
+                        valuesToForward.addAll(database.get(valueId, false).values());
                     }
                 
                 // We remove a value if:
@@ -303,7 +303,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         
                         if (delete) {
                             int count = 0;
-                            for (DHTValue value : database.get(valueId).values()) {
+                            for (DHTValue value : database.get(valueId, false).values()) {
                                 if (!value.isLocalValue()) {
                                     //System.out.println("REMOVING: " + value + "\n");
                                     

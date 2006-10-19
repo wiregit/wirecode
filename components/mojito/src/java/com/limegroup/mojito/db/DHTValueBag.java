@@ -33,11 +33,17 @@ public interface DHTValueBag {
 
     /**
      * Returns the request load associated with this value bag, i.e. the
-     * approximate request popularity
+     * approximate request popularity.
      * 
      */
     public float getRequestLoad();
 
+    /**
+     * Increments the request load of this bag and returns the new value
+     * 
+     * @return The updated request load
+     */
+    public float incrementRequestLoad();
     
     /**
      * Removes the given value and returns it, or return null 
@@ -49,12 +55,12 @@ public interface DHTValueBag {
     public DHTValue remove(DHTValue value, boolean isRemoteRemove);
 
     /**
-     * Returns the number of values in this bag
+     * Returns the number of values in this bag.
      */
     public int size();
 
     /**
-     * Returns true if this bag is empty
+     * Returns true if this bag is empty.
      */
     public boolean isEmpty();
 
