@@ -16,13 +16,6 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.limegroup.gnutella.ErrorCallback;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
