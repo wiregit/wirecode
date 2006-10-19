@@ -63,7 +63,7 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false);
+        Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG);
         return DHTValueFactory.createRemoteValue(node, node, valueId, ValueType.BINARY, value);
     }
     
@@ -74,8 +74,8 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createIndirectDHTValue(KUID origId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, false);
-        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, false);   
+        Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, Contact.DEFAULT_FLAG);
+        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);   
         return DHTValueFactory.createRemoteValue(orig, sender, valueId, ValueType.BINARY, value);
     }
     

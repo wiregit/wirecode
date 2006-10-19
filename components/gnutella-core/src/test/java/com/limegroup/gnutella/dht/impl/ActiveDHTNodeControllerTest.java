@@ -63,7 +63,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                 kuid,
                 new InetSocketAddress("localhost",4010),
                 0,
-                false,
+                Contact.DEFAULT_FLAG,
                 State.UNKNOWN);
         rt.add(node);
         controller.stop();

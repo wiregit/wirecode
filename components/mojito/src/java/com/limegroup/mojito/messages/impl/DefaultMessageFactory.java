@@ -131,9 +131,8 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
-            KUID lookupId, int flags) {
-        return new FindNodeRequestImpl(context, contact, messageId, lookupId, flags);
+    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
+        return new FindNodeRequestImpl(context, contact, messageId, lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 

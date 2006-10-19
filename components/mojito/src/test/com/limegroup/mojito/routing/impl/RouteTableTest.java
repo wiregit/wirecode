@@ -491,10 +491,10 @@ public class RouteTableTest extends BaseTestCase {
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
             int instanceId = 0;
-            boolean firewalled = false;
+            int flags = Contact.DEFAULT_FLAG;
             
             Contact node = ContactFactory.createLiveContact(
-                    src, vendor, version, nodeId, con, instanceId, firewalled);
+                    src, vendor, version, nodeId, con, instanceId, flags);
             nodes.add(node);
         }
         
@@ -514,7 +514,7 @@ public class RouteTableTest extends BaseTestCase {
         try {
             routeTable.add(ContactFactory.createLiveContact(
                     null, 0, 0, KUID.createRandomID(), 
-                    new InetSocketAddress(0), 0, false));
+                    new InetSocketAddress(0), 0, Contact.DEFAULT_FLAG));
             fail("Contact should have been rejected");
         } catch (Exception err) {}
         
@@ -702,7 +702,7 @@ public class RouteTableTest extends BaseTestCase {
         for(int i = 0; i < 10; i++) {
             node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 3000+i), 0, false);
+                    new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             rt.add(node);
             liveContacts.add(node);
         }
@@ -710,7 +710,7 @@ public class RouteTableTest extends BaseTestCase {
         for(int i = 0; i < 400; i++) {
             node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 4000+i), 0, false);
+                    new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
             node.handleFailure();
             node.handleFailure();
             node.handleFailure();

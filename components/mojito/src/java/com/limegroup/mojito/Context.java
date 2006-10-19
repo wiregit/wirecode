@@ -68,7 +68,6 @@ import com.limegroup.mojito.manager.FindValueManager;
 import com.limegroup.mojito.manager.GetValueManager;
 import com.limegroup.mojito.manager.PingManager;
 import com.limegroup.mojito.manager.StoreManager;
-import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;
@@ -744,6 +743,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             return;
         }
         
+        Contact local = getLocalNode();
+        local.shutdown(false);
+        
         initContextTimer();
         initContextExecutor();
         
@@ -772,16 +774,17 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             LOG.debug("Stopping " + name);
         }
         
+        Contact local = getLocalNode();
+        local.shutdown(true);
+        
         if (isBootstrapped()) {
-            Contact local = getLocalNode();
-            List<Contact> nodes = routeTable.select(local.getNodeID(), 
-                    KademliaSettings.REPLICATION_PARAMETER.getValue(), false);
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            List<Contact> nodes = routeTable.select(local.getNodeID(), 2*k, true);
             
             for (Contact node : nodes) {
                 if (!node.equals(getLocalNode())) {
                     RequestMessage request = getMessageFactory()
-                        .createFindNodeRequest(local, MessageID.createWithSocketAddress(null), 
-                                local.getNodeID(), FindNodeRequest.SHUTDOWN);
+                        .createPingRequest(local, MessageID.createWithSocketAddress(null));
                     
                     try {
                         messageDispatcher.send(node, request, null);
@@ -794,14 +797,14 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         running = false;
         
-        bootstrapManager.setBootstrapped(false);
-        
         bucketRefresher.stop();
         publisher.stop();
         
         scheduledExecutor.shutdownNow();
         contextExecutor.shutdownNow();
         messageDispatcher.stop();
+        
+        bootstrapManager.setBootstrapped(false);
         
         estimator.clear();
     }

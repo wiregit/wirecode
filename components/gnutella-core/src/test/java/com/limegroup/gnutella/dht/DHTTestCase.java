@@ -11,6 +11,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
@@ -83,7 +84,7 @@ public abstract class DHTTestCase extends BaseTestCase {
                     kuid,
                     new InetSocketAddress("localhost",4000+i),
                     0,
-                    false,
+                    Contact.DEFAULT_FLAG,
                     State.UNKNOWN);
             rt.add(node);
         }

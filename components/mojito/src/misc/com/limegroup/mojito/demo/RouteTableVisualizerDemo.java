@@ -223,10 +223,10 @@ public class RouteTableVisualizerDemo {
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", 30000+i);
             int instanceId = 0;
-            boolean firewalled = false;
+            int flags = Contact.DEFAULT_FLAG;
             
             Contact node = ContactFactory.createLiveContact(
-                    src, vendor, version, nodeId, con, instanceId, firewalled);
+                    src, vendor, version, nodeId, con, instanceId, flags);
             nodes.add(node);
         }
         

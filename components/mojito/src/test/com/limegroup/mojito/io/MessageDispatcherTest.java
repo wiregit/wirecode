@@ -74,7 +74,7 @@ public class MessageDispatcherTest extends BaseTestCase {
             Contact sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), 0, 0, 
                     context.getLocalNodeID().invert(), 
-                    new InetSocketAddress("www.google.com", 5000), 0, false);
+                    new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
             
             RequestMessage request = factory.createPingRequest(
                     sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
@@ -85,7 +85,7 @@ public class MessageDispatcherTest extends BaseTestCase {
             sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), 0, 0, 
                     context.getLocalNodeID().invert(), 
-                    new InetSocketAddress("www.google.com", 5000), 0, true);
+                    new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             
             request = factory.createPingRequest(
                     sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));

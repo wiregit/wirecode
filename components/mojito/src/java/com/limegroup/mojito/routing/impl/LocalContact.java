@@ -55,7 +55,7 @@ public class LocalContact implements Contact {
     
     private volatile int instanceId;
     
-    private volatile boolean firewalled;
+    private volatile int flags;
     
     private transient volatile SocketAddress sourceAddress;
     
@@ -65,11 +65,16 @@ public class LocalContact implements Contact {
     
     public LocalContact(int vendor, int version, KUID nodeId, 
             int instanceId, boolean firewalled) {
+        this(vendor, version, nodeId, instanceId, (firewalled ? FIREWALLED_FLAG : DEFAULT_FLAG));
+    }
+    
+    public LocalContact(int vendor, int version, KUID nodeId, 
+            int instanceId, int flags) {
         this.vendor = vendor;
         this.version = version;
         this.nodeId = nodeId;
         this.instanceId = instanceId;
-        this.firewalled = firewalled;
+        this.flags = flags;
         
         init();
     }
@@ -117,6 +122,10 @@ public class LocalContact implements Contact {
         return instanceId;
     }
     
+    public int getFlags() {
+        return flags;
+    }
+    
     /**
      * Sets the instanceId to the next value
      */
@@ -160,14 +169,16 @@ public class LocalContact implements Contact {
     }
     
     public boolean isFirewalled() {
-        return firewalled;
+        return (flags & FIREWALLED_FLAG) != 0;
     }
 
     /**
      * Sets whether or not this Contact is firewalled
      */
     public void setFirewalled(boolean firewalled) {
-        this.firewalled = firewalled;
+        if (isFirewalled() != firewalled) {
+            this.flags ^= FIREWALLED_FLAG;
+        }
     }
     
     /**
@@ -335,19 +346,16 @@ public class LocalContact implements Contact {
     public void unknown() {
     }
     
-    /**
-     * Hard coded to return false
-     */
     public boolean isShutdown() {
-        return false;
+        return (flags & SHUTDOWN_FLAG) != 0;
     }
 
-    /**
-     * Does nothing
-     */
-    public void shutdown() {
+    public void shutdown(boolean shutdown) {
+        if (isShutdown() != shutdown) {
+            this.flags ^= SHUTDOWN_FLAG;
+        }
     }
-
+    
     /**
      * Does nothing if 'existing' is the same instance 
      * as 'this'. Throws an UnsupportedOperationException

@@ -76,7 +76,7 @@ public class BucketNodeTest extends BaseTestCase {
         
         bucket.addActiveContact(node);
         Contact node2 = new RemoteContact(address, vendor, version, 
-                KUID.createRandomID(), address, 0, false, State.DEAD);
+                KUID.createRandomID(), address, 0, Contact.DEFAULT_FLAG, State.DEAD);
         
         bucket.addActiveContact(node2);
         assertEquals(bucket.getActiveContacts().size(), 3);
@@ -89,11 +89,11 @@ public class BucketNodeTest extends BaseTestCase {
         
         bucket.addActiveContact(node);
         node2 = new RemoteContact(address, vendor, version, 
-                KUID.createRandomID(), address, 0, false, State.DEAD);
+                KUID.createRandomID(), address, 0, Contact.DEFAULT_FLAG, State.DEAD);
         bucket.addActiveContact(node2);
         
         Contact node3 = new RemoteContact(address, vendor, version, 
-                KUID.createRandomID(), address, 0, false, State.ALIVE);
+                KUID.createRandomID(), address, 0, Contact.DEFAULT_FLAG, State.ALIVE);
         bucket.addCachedContact(node3);
         
         assertEquals(bucket.getActiveContacts().size(), 3);

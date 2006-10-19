@@ -99,13 +99,13 @@ public class BootstrapManagerTest extends BaseTestCase {
         for(int i= 1; i < 5; i++) {
             node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 3000+i), 0, false);
+                    new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             rt.add(node);
         }
         //add good node
         node = ContactFactory.createLiveContact(null,
                 0,0,BOOTSTRAP_DHT.getLocalNodeID(),
-                BOOTSTRAP_DHT.getContactAddress(), 0, false);
+                BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
         //now try bootstrapping from RT
         BootstrapEvent evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();

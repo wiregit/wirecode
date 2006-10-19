@@ -44,12 +44,6 @@ public interface Contact extends Serializable {
         // a certain number of times to our requests
         DEAD,
         
-        // A Contact is in shutdown state if it told
-        // us that it's going to shutdown. A Contact
-        // in shutdown state will never be contacted
-        // or forwared.
-        SHUTDOWN,
-        
         // An unknown Contact is neither dead nor
         // alive. Unknown Contacts are Contacts
         // we're receiving with FIND_NODE and FIND_VALUE
@@ -73,6 +67,23 @@ public interface Contact extends Serializable {
      * Contact) in a Bucket
      */
     public static final long PRIORITY_CONTACT = Long.MAX_VALUE-1L;
+    
+    /**
+     * The default flag
+     */
+    public static final int DEFAULT_FLAG = 0x00;
+    
+    /**
+     * The flag that indicates whether or not this 
+     * Contact is firewalled
+     */
+    public static final int FIREWALLED_FLAG = 0x01;
+    
+    /**
+     * The flag that indicates whether or not this 
+     * Contact will shutdown
+     */
+    public static final int SHUTDOWN_FLAG = 0x02;
     
     /**
      * Returns the Vendor of this Contact
@@ -108,6 +119,11 @@ public interface Contact extends Serializable {
      * Returns the instance ID of this Contact
      */
     public int getInstanceID();
+    
+    /**
+     * Returns the flags of this Contact
+     */
+    public int getFlags();
     
     /**
      * Sets the time of the last successful Contact
@@ -189,14 +205,14 @@ public interface Contact extends Serializable {
     public void unknown();
     
     /**
-     * Sets the Contact state to SHUTDOWN
-     */
-    public void shutdown();
-    
-    /**
-     * Returns whether or not this Contact is in UNKNOWN state
+     * Returns whether or not this Contact will or is shutdown.
      */
     public boolean isShutdown();
+    
+    /**
+     * Sets whether or not this Contact will shutdown
+     */
+    public void shutdown(boolean shutdown);
     
     /**
      * Updates this Contact with information from an existing Contact.

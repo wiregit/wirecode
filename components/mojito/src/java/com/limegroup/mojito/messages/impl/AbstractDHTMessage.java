@@ -41,8 +41,6 @@ import com.limegroup.mojito.routing.ContactFactory;
  * An abstract implementation of DHTMessage
  */
 abstract class AbstractDHTMessage implements DHTMessage {
-
-    private static final int FIREWALLED = 0x01;
     
     protected final Context context;
     
@@ -101,10 +99,8 @@ abstract class AbstractDHTMessage implements DHTMessage {
         int instanceId = in.readUnsignedByte();
         int flags = in.readUnsignedByte();
         
-        boolean firewalled = (flags & FIREWALLED) != 0;
-        
         this.contact = ContactFactory.createLiveContact(src, vendor, version, 
-                nodeId, contactAddress, instanceId, firewalled);
+                nodeId, contactAddress, instanceId, flags);
         
         int extensions = in.readUnsignedShort();
         in.skip(extensions);
@@ -171,12 +167,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         out.writeKUID(getContact().getNodeID()); // 4-23
         out.writeSocketAddress(getContact().getContactAddress()); // 24-31
         out.writeByte(getContact().getInstanceID()); // 32
-        
-        int flags = 0;
-        if (getContact().isFirewalled()) {
-            flags |= FIREWALLED;
-        }
-        out.writeByte(flags); // 33
+        out.writeByte(getContact().getFlags()); // 33
         
         // We don't support any header extensions so write none
         out.writeShort(0); // 34-35

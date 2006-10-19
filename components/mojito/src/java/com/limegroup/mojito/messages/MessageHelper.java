@@ -92,7 +92,7 @@ public class MessageHelper {
 
     public FindNodeRequest createFindNodeRequest(SocketAddress dst, KUID lookupId) {
         return factory.createFindNodeRequest(getLocalNode(), 
-                createMessageID(dst), lookupId, FindNodeRequest.DEFAULT);
+                createMessageID(dst), lookupId);
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 

@@ -237,7 +237,7 @@ public class RouteTableImpl implements RouteTable {
         /*
          * A non-live Contact will never replace a live Contact!
          */
-        if (existing.isAlive() && !node.isAlive() ) {
+        if (existing.isAlive() && !node.isAlive()) {
             return;
         }
         
@@ -675,10 +675,14 @@ public class RouteTableImpl implements RouteTable {
                 
                 for(Contact node : list) {
                     if (node.isDead()) {
+                        
+                        // Ignore all dead Contacts if only
+                        // active Contacts are requested
                         if (activeContacts) {
                             continue;
                         }
                         
+                        // Ignore all Contacts that are down
                         if (node.isShutdown()) {
                             continue;
                         }
@@ -965,12 +969,17 @@ public class RouteTableImpl implements RouteTable {
         
         int alive = 0;
         int dead = 0;
+        int down = 0;
         int unknown = 0;
         
         for(Bucket bucket : getBuckets()) {
             buffer.append(bucket).append("\n");
             
             for (Contact node : bucket.getActiveContacts()) {
+                if (node.isShutdown()) {
+                    down++;
+                }
+                
                 if (node.isAlive()) {
                     alive++;
                 } else if (node.isDead()) {
@@ -981,6 +990,10 @@ public class RouteTableImpl implements RouteTable {
             }
             
             for (Contact node : bucket.getCachedContacts()) {
+                if (node.isShutdown()) {
+                    down++;
+                }
+                
                 if (node.isAlive()) {
                     alive++;
                 } else if (node.isDead()) {
@@ -996,6 +1009,7 @@ public class RouteTableImpl implements RouteTable {
         buffer.append("Total Cached Contacts: ").append(getCachedContacts().size()).append("\n");
         buffer.append("Total Alive Contacts: ").append(alive).append("\n");
         buffer.append("Total Dead Contacts: ").append(dead).append("\n");
+        buffer.append("Total Down Contacts: ").append(down).append("\n");
         buffer.append("Total Unknown Contacts: ").append(unknown).append("\n");
         return buffer.toString();
     }

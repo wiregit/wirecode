@@ -558,7 +558,7 @@ public abstract class MessageDispatcher {
         
         synchronized (outputQueueLock) {
             Tag tag = null;
-            while (!outputQueue.isEmpty() && isRunning()) {
+            while (!outputQueue.isEmpty()) {
                 tag = outputQueue.get(0);
 
                 if (tag.isCancelled()) {

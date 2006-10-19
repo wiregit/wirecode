@@ -35,7 +35,6 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -124,6 +123,31 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
      */
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
         
+        RouteTable routeTable = context.getRouteTable();
+        
+        // If the Node is going to shutdown then don't bother
+        // further than this.
+        if (node.isShutdown()) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info(node + " is going to shut down");
+            }
+            
+            synchronized (routeTable) {
+                // Make sure there's an existing Contact in the RouteTable.
+                // Otherwise don't bother!
+                Contact existing = routeTable.get(node.getNodeID());
+                if (node.equals(existing)) {
+                    
+                    // Update the new Contact in the RouteTable and 
+                    // mark it as shutdown
+                    routeTable.add(node);
+                    node.shutdown(true);
+                }
+            }
+            return;
+        }
+        
+        // Ignore firewalled Nodes
         if (node.isFirewalled()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(node + " is firewalled");
@@ -158,15 +182,6 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
             
             return;
         }
-        
-        if (message instanceof FindNodeRequest) {
-            if ((((FindNodeRequest)message).getFlags() 
-                    & FindNodeRequest.SHUTDOWN) != 0) {
-                return;
-            }
-        }
-        
-        RouteTable routeTable = context.getRouteTable();
         
         // Only do store forward if it is a new node in our routing table 
         // (we are (re)connecting to the network) or a node that is reconnecting

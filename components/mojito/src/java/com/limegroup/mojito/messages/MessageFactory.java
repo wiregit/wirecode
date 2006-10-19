@@ -68,7 +68,7 @@ public interface MessageFactory {
      * Creates and returns a FindNodeRequest Message
      */
     public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
-            KUID lookupId, int flags);
+            KUID lookupId);
 
     /**
      * Creates and returns a FindNodeResponse Message

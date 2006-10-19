@@ -25,18 +25,4 @@ package com.limegroup.mojito.messages;
  */
 public interface FindNodeRequest extends LookupRequest {
     
-    /**
-     * 
-     */
-    public static final int DEFAULT = 0x00;
-    
-    /**
-     * 
-     */
-    public static final int SHUTDOWN = 0x01;
-    
-    /**
-     * 
-     */
-    public int getFlags();
 }

@@ -99,7 +99,8 @@ public class PingManager extends AbstractManager<PingEvent> {
         int version = context.getVersion();
         KUID nodeId = context.getLocalNodeID().invert();
         SocketAddress addr = context.getContactAddress();
-        Contact sender = ContactFactory.createLiveContact(addr, vendor, version, nodeId, addr, 0, true);
+        Contact sender = ContactFactory.createLiveContact(
+                addr, vendor, version, nodeId, addr, 0, Contact.FIREWALLED_FLAG);
         
         return ping(sender, node.getNodeID(), node.getContactAddress());
     }

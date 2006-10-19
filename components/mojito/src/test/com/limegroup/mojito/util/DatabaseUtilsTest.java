@@ -54,7 +54,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         for (int i = 0; i < 15; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 5000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
         }
         
         assertEquals(16, routeTable.size());
@@ -70,7 +70,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         for (int i = 0; i < 4; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 6000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
             
             assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));
         }
@@ -79,7 +79,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         
         KUID nodeId = KUID.createRandomID();
         SocketAddress addr = new InetSocketAddress("localhost", 7000);
-        routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+        routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
         
         long expiresAt = DatabaseUtils.getExpirationTime(routeTable, value);
         assertLessThan(expectedExpiresAt, expiresAt);
