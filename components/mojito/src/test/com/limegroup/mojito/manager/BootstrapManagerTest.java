@@ -11,12 +11,12 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.NetworkSettings;

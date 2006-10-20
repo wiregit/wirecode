@@ -19,7 +19,7 @@
 
 package com.limegroup.mojito.exceptions;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The CollisionException is thrown if this Node detects

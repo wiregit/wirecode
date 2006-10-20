@@ -25,9 +25,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 

@@ -22,13 +22,13 @@ package com.limegroup.mojito.manager;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.handler.response.GetValueResponseHandler;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * GetValueManager is in widest sense equivalent to FindValueManager

@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
+import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
 import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
-import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.visual.RouteTableGraphCallback;
 import com.limegroup.mojito.visual.components.BinaryEdge;

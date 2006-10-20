@@ -19,10 +19,10 @@
 
 package com.limegroup.mojito.util;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * Miscellaneous untilities for Messages

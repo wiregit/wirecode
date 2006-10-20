@@ -29,7 +29,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
@@ -39,6 +38,7 @@ import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
 

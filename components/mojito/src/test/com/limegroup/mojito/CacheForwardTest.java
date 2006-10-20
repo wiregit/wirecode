@@ -36,6 +36,7 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;

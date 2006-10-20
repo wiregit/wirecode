@@ -28,13 +28,13 @@ import java.security.SignatureException;
 
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 
 /**

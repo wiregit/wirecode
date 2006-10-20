@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueFactory;
@@ -43,6 +42,7 @@ import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.util.EntryImpl;
 

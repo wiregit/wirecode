@@ -42,6 +42,7 @@ import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
 

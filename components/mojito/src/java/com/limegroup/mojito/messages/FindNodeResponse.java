@@ -22,7 +22,7 @@ package com.limegroup.mojito.messages;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * An interface for FindNodeResponse implementations

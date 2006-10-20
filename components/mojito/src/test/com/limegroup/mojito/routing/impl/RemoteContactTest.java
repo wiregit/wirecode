@@ -5,8 +5,8 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
 

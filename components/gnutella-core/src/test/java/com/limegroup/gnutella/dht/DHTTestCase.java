@@ -11,12 +11,12 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
 

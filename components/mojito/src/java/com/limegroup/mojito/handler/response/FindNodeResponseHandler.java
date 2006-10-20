@@ -27,13 +27,13 @@ import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.Trie.Cursor;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 

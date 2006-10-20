@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import com.limegroup.mojito.Contact;
-import com.limegroup.mojito.routing.impl.Bucket;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * Miscellaneous utilities for Buckets

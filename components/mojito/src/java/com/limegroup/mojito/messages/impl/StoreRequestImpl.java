@@ -24,13 +24,13 @@ import java.net.SocketAddress;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StoreRequest;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * An implementation of StoreRequest

@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
 import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
-import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.visual.RouteTableGraphCallback;
 import com.limegroup.mojito.visual.components.BinaryEdge;
 import com.limegroup.mojito.visual.components.ContactVertex;

@@ -24,13 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 

@@ -26,12 +26,12 @@ import java.net.SocketAddress;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.routing.Contact;
 
 
 public class StatsResponseImpl extends AbstractResponseMessage

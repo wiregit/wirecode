@@ -21,9 +21,8 @@ package com.limegroup.mojito.routing;
 
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 

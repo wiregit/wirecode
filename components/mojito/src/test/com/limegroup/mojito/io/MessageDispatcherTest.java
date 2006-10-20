@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -14,6 +13,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 
 public class MessageDispatcherTest extends BaseTestCase {

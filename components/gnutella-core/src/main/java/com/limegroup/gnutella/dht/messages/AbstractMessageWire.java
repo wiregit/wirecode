@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * An abstract class that extends from Message and takes a 

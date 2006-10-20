@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The FindNodeEvent is fired when a FIND_NODE lookup

@@ -23,11 +23,9 @@ import java.io.Serializable;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.routing.impl.Bucket;
 
 /**
  * RouteTable interface that all LimeDHT route table implementations

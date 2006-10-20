@@ -19,10 +19,10 @@
 
 package com.limegroup.mojito.db;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DHTValueImpl;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * A Factory to create DHTValue(s)

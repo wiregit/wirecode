@@ -26,10 +26,10 @@ import java.util.Arrays;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 
 public class DatabaseTest extends BaseTestCase {

@@ -22,8 +22,8 @@ package com.limegroup.mojito.db;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The DHTValue class represents a <key, value> tuple that

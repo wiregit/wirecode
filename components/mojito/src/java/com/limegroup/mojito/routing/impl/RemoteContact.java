@@ -29,8 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;

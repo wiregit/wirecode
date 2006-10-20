@@ -17,10 +17,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito;
+package com.limegroup.mojito.routing;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+
+import com.limegroup.mojito.KUID;
 
 
 /**

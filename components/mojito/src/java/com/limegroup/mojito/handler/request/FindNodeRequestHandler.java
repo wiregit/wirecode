@@ -28,13 +28,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CollectionUtils;

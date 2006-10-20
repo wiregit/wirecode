@@ -72,6 +72,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;

@@ -1,6 +1,6 @@
 package com.limegroup.mojito.visual.components;
 
-import com.limegroup.mojito.routing.impl.Bucket;
+import com.limegroup.mojito.routing.Bucket;
 
 public class BucketVertex extends RouteTableVertex<Bucket>{
 

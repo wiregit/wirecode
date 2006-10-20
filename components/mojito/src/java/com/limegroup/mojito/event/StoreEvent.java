@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The StoreEvent is fired when a STORE request finished

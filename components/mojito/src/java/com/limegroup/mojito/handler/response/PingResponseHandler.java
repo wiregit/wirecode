@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.event.PingEvent;
@@ -34,6 +33,7 @@ import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The PingResponseHandler handles ping responses from Nodes

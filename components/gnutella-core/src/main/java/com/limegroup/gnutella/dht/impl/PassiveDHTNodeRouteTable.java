@@ -10,13 +10,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.routing.impl.Bucket;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 /**

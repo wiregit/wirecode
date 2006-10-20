@@ -24,13 +24,13 @@ import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The StoreManager class manages 

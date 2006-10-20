@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
@@ -46,6 +45,7 @@ import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
 

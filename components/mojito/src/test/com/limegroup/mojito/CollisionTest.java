@@ -30,6 +30,7 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 

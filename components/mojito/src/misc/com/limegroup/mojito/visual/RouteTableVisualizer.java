@@ -14,8 +14,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.visual.components.BinaryEdge;
 import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
 import com.limegroup.mojito.visual.graph.BucketGraph;

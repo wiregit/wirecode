@@ -30,8 +30,8 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;

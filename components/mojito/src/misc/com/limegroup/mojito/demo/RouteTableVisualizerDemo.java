@@ -7,12 +7,12 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;

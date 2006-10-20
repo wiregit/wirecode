@@ -21,10 +21,10 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**

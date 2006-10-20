@@ -22,7 +22,7 @@ package com.limegroup.mojito.event;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * PingEvent(s) are fired for successful pings
