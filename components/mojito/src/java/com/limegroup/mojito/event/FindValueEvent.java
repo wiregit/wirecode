@@ -100,7 +100,7 @@ public class FindValueEvent implements Iterable<Future<DHTValue>> {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append(" (time=").append(time)
             .append("ms, hop=").append(hop).append(")\n");
-        
+
         if(responses.isEmpty()) {
             buffer.append("No values found!");
             return buffer.toString();
@@ -119,6 +119,12 @@ public class FindValueEvent implements Iterable<Future<DHTValue>> {
                 buffer.append(err);
             }
         }
+        
+        for(FindValueResponse resp: responses) {
+            buffer.append("Response from: ").append(resp.getContact().toString())
+                .append("\n").append("Load: ").append(resp.getRequestLoad()).append("\n");
+        }
+        
         return buffer.toString();
     }
     

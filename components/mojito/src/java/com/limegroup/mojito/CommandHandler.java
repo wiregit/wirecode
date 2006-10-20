@@ -74,6 +74,7 @@ public class CommandHandler {
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
         try {
+            command = command.trim();
             for (String c : COMMANDS) {
                 if (command.matches(c)) {
                     String[] args = command.split(" ");

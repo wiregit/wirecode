@@ -108,7 +108,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             }*/
             
             Status s = Status.FAILED;
-            if (context.getDatabase().add(value)) {
+            if (context.getDatabase().store(value)) {
                 networkStats.STORE_REQUESTS_OK.incrementStat();
                 s = Status.SUCCEEDED;
             } else {
