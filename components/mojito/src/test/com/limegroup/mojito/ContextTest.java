@@ -15,9 +15,9 @@ import com.limegroup.mojito.settings.KademliaSettings;
 
 public class ContextTest extends BaseTestCase {
     
-    static {
+    /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }
+    }*/
     
     public ContextTest(String name) {
         super(name);
