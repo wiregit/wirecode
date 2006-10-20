@@ -89,4 +89,12 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final IntSetting PARALLEL_STORES
         = FACTORY.createIntSetting("PARALLEL_STORES", 5);
+    
+    /**
+     * A multiplier that is used to determinate the number
+     * of Nodes to where we're sending shutdown messages.
+     */
+    public static final IntSetting SHUTDOWN_MULTIPLIER
+        = FACTORY.createSettableIntSetting("SHUTDOWN_MULTIPLIER", 2, 
+                "shutdown_multiplier", 0, 20);
 }
