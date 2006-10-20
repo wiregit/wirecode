@@ -75,9 +75,6 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
-import com.limegroup.mojito.routing.RouteTable.RouteTableListener;
-import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -424,7 +421,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
         
         routeTable.setPingCallback(this);
-        routeTable.addRouteTableListener(new RouteTableStatistics());
+        routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
         
         this.routeTable = routeTable;
         
@@ -1094,41 +1091,5 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         buffer.append("Estimated DHT Size: ").append(size()).append("\n");
         
         return buffer.toString();
-    }
-    
-    private static class RouteTableStatistics implements RouteTableListener {
-
-        private RoutingStatisticContainer routingStats;
-        
-        public void handleRouteTableEvent(RouteTableEvent event) {
-            if (routingStats == null) {
-                RouteTable routeTable = event.getRouteTable();
-                routingStats = new RoutingStatisticContainer(routeTable.getLocalNode().getNodeID());
-            }
-            
-            if (event.getEventType().equals(EventType.ADD_ACTIVE_CONTACT)) {
-                if (event.getContact().isAlive()) {
-                    routingStats.LIVE_NODE_COUNT.incrementStat();
-                } else {
-                    routingStats.UNKNOWN_NODE_COUNT.incrementStat();
-                }
-            } else if (event.getEventType().equals(EventType.ADD_CACHED_CONTACT)) {
-                routingStats.REPLACEMENT_COUNT.incrementStat();
-            } else if (event.getEventType().equals(EventType.REMOVE_CONTACT)) {
-                if (event.getContact().isDead()) {
-                    routingStats.DEAD_NODE_COUNT.incrementStat();
-                }
-            } else if (event.getEventType().equals(EventType.REPLACE_CONTACT)) {
-                routingStats.LIVE_NODE_COUNT.incrementStat();
-                
-                if (event.getContact().isDead()) {
-                    routingStats.DEAD_NODE_COUNT.incrementStat();
-                }
-            } else if (event.getEventType().equals(EventType.SPLIT_BUCKET)) {
-                // Increment only by one 'cause splitting a Bucket
-                // creates only one new Bucket
-                routingStats.BUCKET_COUNT.incrementStat();
-            }
-        }
     }
 }

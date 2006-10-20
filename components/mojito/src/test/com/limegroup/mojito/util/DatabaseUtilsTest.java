@@ -42,14 +42,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
     public void testExpirationTime() {
         assertEquals(20, KademliaSettings.REPLICATION_PARAMETER.getValue());
         
-        RouteTable routeTable = new RouteTableImpl();
-        routeTable.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
-                return null;
-            }
-        });
-        
-        routeTable.add(ContactFactory.createLocalContact(0, 0, KUID.create(LOCAL_NODE_ID), 0, false));
+        RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         
         for (int i = 0; i < 15; i++) {
             KUID nodeId = KUID.createRandomID();

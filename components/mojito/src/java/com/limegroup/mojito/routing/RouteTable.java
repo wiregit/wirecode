@@ -21,6 +21,7 @@ package com.limegroup.mojito.routing;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.List;
 
 import com.limegroup.mojito.KUID;
@@ -87,6 +88,11 @@ public interface RouteTable extends Serializable {
      * Returns cached Contacts that are in the replacement cache
      */
     public List<Contact> getCachedContacts();
+    
+    /**
+     * Returns all Buckets as an Collection
+     */
+    public Collection<Bucket> getBuckets();
     
     /**
      * Returns a List of KUIDs that need to be looked up in order

@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
+import com.limegroup.mojito.routing.RouteTable.RouteTableListener;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 
 public class RoutingStatisticContainer extends StatisticContainer {
 
@@ -84,6 +88,42 @@ public class RoutingStatisticContainer extends StatisticContainer {
         public void incrementStat() {
             super.incrementStat();
             NODE_COUNT.incrementStat();
+        }
+    }
+    
+    public static class Listener implements RouteTableListener {
+
+        private RoutingStatisticContainer routingStats;
+        
+        public void handleRouteTableEvent(RouteTableEvent event) {
+            if (routingStats == null) {
+                RouteTable routeTable = event.getRouteTable();
+                routingStats = new RoutingStatisticContainer(routeTable.getLocalNode().getNodeID());
+            }
+            
+            if (event.getEventType().equals(EventType.ADD_ACTIVE_CONTACT)) {
+                if (event.getContact().isAlive()) {
+                    routingStats.LIVE_NODE_COUNT.incrementStat();
+                } else {
+                    routingStats.UNKNOWN_NODE_COUNT.incrementStat();
+                }
+            } else if (event.getEventType().equals(EventType.ADD_CACHED_CONTACT)) {
+                routingStats.REPLACEMENT_COUNT.incrementStat();
+            } else if (event.getEventType().equals(EventType.REMOVE_CONTACT)) {
+                if (event.getContact().isDead()) {
+                    routingStats.DEAD_NODE_COUNT.incrementStat();
+                }
+            } else if (event.getEventType().equals(EventType.REPLACE_CONTACT)) {
+                routingStats.LIVE_NODE_COUNT.incrementStat();
+                
+                if (event.getContact().isDead()) {
+                    routingStats.DEAD_NODE_COUNT.incrementStat();
+                }
+            } else if (event.getEventType().equals(EventType.SPLIT_BUCKET)) {
+                // Increment only by one 'cause splitting a Bucket
+                // creates only one new Bucket
+                routingStats.BUCKET_COUNT.incrementStat();
+            }
         }
     }
 }

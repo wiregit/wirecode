@@ -41,20 +41,8 @@ public class BucketNodeTest extends BaseTestCase {
         vendor = ContextSettings.VENDOR.getValue();
         version = ContextSettings.VERSION.getValue();
         
-        KUID nodeId = KUID.createRandomID();
-        int instanceId = 0;
-        
-        localNode = ContactFactory.createLocalContact(vendor, version, nodeId, 
-        		instanceId, false);
-        
         routeTable = new RouteTableImpl();
-        routeTable.setPingCallback(new PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
-                throw new UnsupportedOperationException();
-            }
-            
-        });
-        routeTable.add(localNode);
+        localNode = routeTable.getLocalNode();
     }
 
     @Override

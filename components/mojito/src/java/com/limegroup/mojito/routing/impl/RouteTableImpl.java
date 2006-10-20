@@ -27,6 +27,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,8 +92,36 @@ public class RouteTableImpl implements RouteTable {
      */
     private transient List<RouteTableListener> listeners;
     
+    /**
+     * Create a new RouteTable and generates a new random Node ID
+     * for the local Node
+     */
     public RouteTableImpl() {
-        localNode = ContactFactory.createLocalContact(0, 0, false);
+        this(KUID.createRandomID());
+    }
+    
+    /**
+     * Create a new RouteTable and uses the given Node ID
+     * for the local Node
+     */
+    public RouteTableImpl(byte[] nodeId) {
+        this(KUID.create(nodeId));
+    }
+    
+    /**
+     * Create a new RouteTable and uses the given Node ID
+     * for the local Node
+     */
+    public RouteTableImpl(String nodeId) {
+        this(KUID.create(nodeId));
+    }
+    
+    /**
+     * Create a new RouteTable and uses the given Node ID
+     * for the local Node
+     */
+    public RouteTableImpl(KUID nodeId) {
+        localNode = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
         bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
     }
@@ -754,8 +785,9 @@ public class RouteTableImpl implements RouteTable {
         return randomIds;
     }
     
-    /**
-     * Returns all Buckets as an Collection
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#getBuckets()
      */
     public synchronized Collection<Bucket> getBuckets() {
         return Collections.unmodifiableCollection(bucketTrie.values());
@@ -787,10 +819,20 @@ public class RouteTableImpl implements RouteTable {
      * the DHTFuture if it's not null
      */
     DHTFuture<PingEvent> ping(Contact node, DHTEventListener<PingEvent> listener) {
-        DHTFuture<PingEvent> future = pingCallback.ping(node);
+        DHTFuture<PingEvent> future = null;
+        
+        if (pingCallback != null) {
+            future = pingCallback.ping(node);
+            
+        } else {
+            future = new DefaultDHTFuture(node);
+            handleFailure(node.getNodeID(), node.getContactAddress());
+        }
+        
         if (listener != null) {
             future.addDHTEventListener(listener);
         }
+        
         return future;
     }
     
@@ -1024,5 +1066,46 @@ public class RouteTableImpl implements RouteTable {
         buffer.append("Total Down Contacts: ").append(down).append("\n");
         buffer.append("Total Unknown Contacts: ").append(unknown).append("\n");
         return buffer.toString();
+    }
+    
+    /**
+     * A dummy implementation of DHTFuture that emulates a ping timeout
+     */
+    @Deprecated // SEE TODO!!!
+    private static class DefaultDHTFuture implements DHTFuture<PingEvent> {
+        
+        private Contact node;
+        
+        public DefaultDHTFuture(Contact node) {
+            this.node = node;
+        }
+        
+        public void addDHTEventListener(DHTEventListener<PingEvent> listener) {
+            // TODO change Exception to DHTTimeoutException
+            listener.handleThrowable(new Exception());
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public PingEvent get() throws InterruptedException, ExecutionException {
+            // TODO change Exception to DHTTimeoutException
+            throw new ExecutionException(new Exception());
+        }
+
+        public PingEvent get(long timeout, TimeUnit unit) 
+                throws InterruptedException, ExecutionException, TimeoutException {
+            // TODO change Exception to DHTTimeoutException
+            throw new ExecutionException(new Exception());
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
     }
 }
