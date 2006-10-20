@@ -66,7 +66,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         Database database = context.getDatabase();
-        DHTValueBag bag = database.get(lookup, true);
+        DHTValueBag bag = database.get(lookup);
 
         if(bag == null) {
             //OK, send Contacts instead!
@@ -112,7 +112,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             }
            
             FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, keys, values, bag.getRequestLoad());
+                        .createFindValueResponse(request, keys, values, bag.incrementRequestLoad());
             context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send Contacts instead!

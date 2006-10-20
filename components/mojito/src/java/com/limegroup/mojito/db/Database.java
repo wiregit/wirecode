@@ -69,10 +69,8 @@ public interface Database extends Serializable {
      * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
      * 
      * @param valueId The KUID of the value to lookup in the database
-     * @param incrementLoad Whether or not the request load for this value 
-     * should be incremented
      */
-    public DHTValueBag get(KUID valueId, boolean incrementLoad);
+    public DHTValueBag get(KUID valueId);
     
     /**
      * Returns whether or not the given DHTValue is stored in our

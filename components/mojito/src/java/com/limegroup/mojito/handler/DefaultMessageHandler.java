@@ -266,7 +266,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         }
                         
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        DHTValueBag bag = database.get(valueId, false);
+                        DHTValueBag bag = database.get(valueId);
                         if(bag != null) {
                             valuesToForward.addAll(bag.getAllValues());
                         }
@@ -307,7 +307,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
                         
                         if (delete) {
                             int count = 0;
-                            DHTValueBag bag = database.get(valueId, false);
+                            DHTValueBag bag = database.get(valueId);
                             if(bag != null ) {
                                 for (DHTValue value : bag.getAllValues()) {
                                     if (!value.isLocalValue()) {
