@@ -671,19 +671,20 @@ public class RouteTableImpl implements RouteTable {
                 }
                 
                 for(Contact node : list) {
+                    
+                    // Ignore all non-alive Contacts if only
+                    // active Contacts are requested.
+                    // TODO: See LocalContact.isAlive() !!! 
+                    if (activeContacts && !node.isAlive()) {
+                        continue;
+                    }
+                    
+                    // Ignore all Contacts that are down
+                    if (node.isShutdown()) {
+                        continue;
+                    }
+                    
                     if (node.isDead()) {
-                        
-                        // Ignore all dead Contacts if only
-                        // active Contacts are requested
-                        if (activeContacts) {
-                            continue;
-                        }
-                        
-                        // Ignore all Contacts that are down
-                        if (node.isShutdown()) {
-                            continue;
-                        }
-                        
                         float fact = (maxNodeFailures - node.getFailures()) 
                                         / (float)Math.max(1, maxNodeFailures);
                         

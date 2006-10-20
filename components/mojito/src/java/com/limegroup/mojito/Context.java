@@ -766,12 +766,13 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             // Nodes which should help to reduce the overall latency.
             int m = KademliaSettings.SHUTDOWN_MULTIPLIER.getValue();
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            int count = m*k;
             
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Sending shutdown message to " + (m*k) + " Nodes");
+                LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            List<Contact> nodes = routeTable.select(localNode.getNodeID(), m*k, true);
+            List<Contact> nodes = routeTable.select(localNode.getNodeID(), count, true);
             
             for (Contact node : nodes) {
                 if (!node.equals(localNode)) {
@@ -784,6 +785,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
                     try {
                         messageDispatcher.send(node, request, null);
                     } catch (IOException err) {
+                        err.printStackTrace();
                         LOG.error("IOException", err);
                     }
                 }
