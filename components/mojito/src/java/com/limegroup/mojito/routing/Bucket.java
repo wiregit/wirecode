@@ -17,13 +17,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.routing.impl;
+package com.limegroup.mojito.routing;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 
 /**
@@ -60,7 +59,7 @@ public interface Bucket extends Serializable {
     /**
      * Add the Contact to the replacement cache.
      */
-    public void addCachedContact(Contact node);
+    public Contact addCachedContact(Contact node);
 
     /**
      * Updates the Contact in this bucket 

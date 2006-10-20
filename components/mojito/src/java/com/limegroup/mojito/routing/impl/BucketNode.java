@@ -33,8 +33,9 @@ import java.util.Map;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.gnutella.util.Trie.Cursor;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -100,7 +101,7 @@ class BucketNode implements Bucket {
         }
     }
     
-    public void addCachedContact(Contact node) {
+    public Contact addCachedContact(Contact node) {
         checkNodeID(node);
         if (cache == Collections.EMPTY_MAP) {
             int maxSize = RouteTableSettings.MAX_CACHE_SIZE.getValue();
@@ -116,8 +117,11 @@ class BucketNode implements Bucket {
                 Contact c = cache.remove(lrs.getNodeID());
                 assert (c == lrs);
                 cache.put(node.getNodeID(), node);
+                return c;
             }
         }
+        
+        return null;
     }
     
     public Contact updateContact(Contact node) {

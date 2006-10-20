@@ -14,8 +14,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.routing.impl.Bucket;
-import com.limegroup.mojito.routing.impl.RouteTableImpl;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.visual.components.BinaryEdge;
 import com.limegroup.mojito.visual.components.BinaryEdge.EdgeType;
 import com.limegroup.mojito.visual.graph.BucketGraph;
@@ -59,7 +59,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
     
     private RouteTableGraph routeTableGraph;
     
-    RouteTableImpl routeTable;
+    RouteTable routeTable;
     
     public static RouteTableVisualizer show(Context context) {
         final RouteTableVisualizer viz = new RouteTableVisualizer(context);
@@ -87,7 +87,7 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
     
     public RouteTableVisualizer(Context dht) {
         //TODO: change constructor
-        routeTable = (RouteTableImpl)dht.getRouteTable();
+        routeTable = dht.getRouteTable();
         routeTableGraph = new BucketGraph(routeTable, this);
         init();
     }

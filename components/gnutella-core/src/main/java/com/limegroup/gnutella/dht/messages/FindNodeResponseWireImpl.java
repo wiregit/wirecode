@@ -3,8 +3,8 @@ package com.limegroup.gnutella.dht.messages;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.messages.FindNodeResponse;
+import com.limegroup.mojito.routing.Contact;
 
 public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeResponse> 
         implements FindNodeResponse {

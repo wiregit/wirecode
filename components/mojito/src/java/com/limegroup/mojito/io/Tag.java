@@ -28,7 +28,6 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.ResponseHandler;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -45,6 +44,7 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.util.ContactUtils;
 
 /**

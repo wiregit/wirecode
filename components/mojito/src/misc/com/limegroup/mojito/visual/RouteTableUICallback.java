@@ -1,6 +1,6 @@
 package com.limegroup.mojito.visual;
 
-import com.limegroup.mojito.routing.impl.Bucket;
+import com.limegroup.mojito.routing.Bucket;
 
 public interface RouteTableUICallback {
     

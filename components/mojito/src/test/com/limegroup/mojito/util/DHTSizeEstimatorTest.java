@@ -7,16 +7,21 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.PingCallback;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 public class DHTSizeEstimatorTest extends BaseTestCase {
 	
+    /*static {
+        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+    }*/
+    
     public static final String LOCAL_NODE_ID = "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEA4";
     
     public static final String[] NODE_IDS = {
@@ -202,20 +207,17 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     }
     
     public void testEstimateSize() {
-    	RouteTable routeTable = new RouteTableImpl();
-    	routeTable.setPingCallback(new RouteTable.PingCallback() {
+    	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
+        routeTable.setPingCallback(new PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }
         });
-    	
-    	routeTable.clear();
-    	routeTable.add(ContactFactory.createLocalContact(0, 0, KUID.create(LOCAL_NODE_ID), 0, false));
-    	
+        
     	for (String id : NODE_IDS) {
             KUID nodeId = KUID.create(id);
             SocketAddress addr = new InetSocketAddress("localhost", 5000);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}
     	
     	assertEquals(490, routeTable.size());

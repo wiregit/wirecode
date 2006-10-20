@@ -17,10 +17,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito;
+package com.limegroup.mojito.routing;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+
+import com.limegroup.mojito.KUID;
 
 
 /**
@@ -35,9 +37,9 @@ public interface Contact extends Serializable {
      * Various states a Contact may have
      */
     public static enum State {
-        // A Contact is alive either if we 
-        // got a response to a request or 
-        // we received a request from the Contact
+        // A Contact is alive either if we got a 
+        // response to a request or we received a 
+        // request from the Contact
         ALIVE, 
         
         // A Contact is dead if it fails to respond
@@ -67,6 +69,23 @@ public interface Contact extends Serializable {
      * Contact) in a Bucket
      */
     public static final long PRIORITY_CONTACT = Long.MAX_VALUE-1L;
+    
+    /**
+     * The default flag
+     */
+    public static final int DEFAULT_FLAG = 0x00;
+    
+    /**
+     * The flag that indicates whether or not this 
+     * Contact is firewalled
+     */
+    public static final int FIREWALLED_FLAG = 0x01;
+    
+    /**
+     * The flag that indicates whether or not this 
+     * Contact will shutdown
+     */
+    public static final int SHUTDOWN_FLAG = 0x02;
     
     /**
      * Returns the Vendor of this Contact
@@ -102,6 +121,11 @@ public interface Contact extends Serializable {
      * Returns the instance ID of this Contact
      */
     public int getInstanceID();
+    
+    /**
+     * Returns the flags of this Contact
+     */
+    public int getFlags();
     
     /**
      * Sets the time of the last successful Contact
@@ -145,12 +169,12 @@ public interface Contact extends Serializable {
     public boolean isFirewalled();
     
     /**
-     * Returns whether or not this Contact is alive
+     * Returns whether or not this Contact is ALIVE
      */
     public boolean isAlive();
     
     /**
-     * Returns whether or not this Contact is dead
+     * Returns whether or not this Contact is in DEAD or SHUTDOWN state
      */
     public boolean isDead();
     
@@ -173,14 +197,24 @@ public interface Contact extends Serializable {
     public void handleFailure();
     
     /**
-     * Returns whether or not this Contact is in unknown state
+     * Returns whether or not this Contact is in UNKNOWN state
      */
     public boolean isUnknown();
     
     /**
-     * Sets the Contact state to Unknown
+     * Sets the Contact state to UNKNOWN
      */
     public void unknown();
+    
+    /**
+     * Returns whether or not this Contact will or is shutdown.
+     */
+    public boolean isShutdown();
+    
+    /**
+     * Sets whether or not this Contact will shutdown
+     */
+    public void shutdown(boolean shutdown);
     
     /**
      * Updates this Contact with information from an existing Contact.

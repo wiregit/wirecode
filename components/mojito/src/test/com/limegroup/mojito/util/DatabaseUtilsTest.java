@@ -6,13 +6,13 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueFactory;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -42,19 +42,12 @@ public class DatabaseUtilsTest extends BaseTestCase {
     public void testExpirationTime() {
         assertEquals(20, KademliaSettings.REPLICATION_PARAMETER.getValue());
         
-        RouteTable routeTable = new RouteTableImpl();
-        routeTable.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
-                return null;
-            }
-        });
-        
-        routeTable.add(ContactFactory.createLocalContact(0, 0, KUID.create(LOCAL_NODE_ID), 0, false));
+        RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         
         for (int i = 0; i < 15; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 5000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
         }
         
         assertEquals(16, routeTable.size());
@@ -70,7 +63,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         for (int i = 0; i < 4; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 6000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
             
             assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));
         }
@@ -79,7 +72,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         
         KUID nodeId = KUID.createRandomID();
         SocketAddress addr = new InetSocketAddress("localhost", 7000);
-        routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, false));
+        routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
         
         long expiresAt = DatabaseUtils.getExpirationTime(routeTable, value);
         assertLessThan(expectedExpiresAt, expiresAt);

@@ -24,12 +24,12 @@ import java.net.SocketAddress;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StatsRequest;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  *

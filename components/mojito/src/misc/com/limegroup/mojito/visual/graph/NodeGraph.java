@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.routing.impl.Bucket;
-import com.limegroup.mojito.routing.impl.RouteTableImpl;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import com.limegroup.mojito.visual.RouteTableGraphCallback;
 import com.limegroup.mojito.visual.components.BinaryEdge;
 import com.limegroup.mojito.visual.components.ContactVertex;
@@ -26,7 +28,7 @@ public class NodeGraph extends RouteTableGraph {
     
     private Bucket bucket; 
 
-    public NodeGraph(RouteTableImpl routeTable, RouteTableGraphCallback callback, Bucket bucket) {
+    public NodeGraph(RouteTable routeTable, RouteTableGraphCallback callback, Bucket bucket) {
         super(routeTable, callback);
         root = new InteriorNodeVertex();
         tree = new RootableSparseTree(root);
@@ -186,42 +188,42 @@ public class NodeGraph extends RouteTableGraph {
         return "";
     }
 
-    public void add(Bucket bucket, Contact node) {
-        if(!bucket.equals(this.bucket)) {
-            return;
+    public void handleRouteTableEvent(RouteTableEvent event) {
+        if (event.getEventType().equals(EventType.ADD_ACTIVE_CONTACT)) {
+            Bucket bucket = event.getBucket();
+            if(!bucket.equals(this.bucket)) {
+                return;
+            }
+            
+            insertNode(event.getContact(), bucket.getActiveContacts());
+            callback.handleGraphLayoutUpdated();
+            
+        } else if (event.getEventType().equals(EventType.REMOVE_CONTACT)) {
+            Bucket bucket = event.getBucket();
+            if(!bucket.equals(this.bucket)) {
+                return;
+            }
+            removeNode(event.getContact());
+            callback.handleGraphLayoutUpdated();
+            
+        } else if (event.getEventType().equals(EventType.REPLACE_CONTACT)) {
+            Bucket bucket = event.getBucket();
+            if(!bucket.equals(this.bucket)) {
+                return;
+            }
+            removeNode(event.getExistingContact());
+            insertNode(event.getContact(), bucket.getActiveContacts());
+            callback.handleGraphLayoutUpdated();
+            
+        } else if (event.getEventType().equals(EventType.UPDATE_CONTACT)) {
+            callback.handleGraphInfoUpdated();
+            
+        } else if (event.getEventType().equals(EventType.SPLIT_BUCKET)) {
+            // This bucket has been split! Go back to bucket tree
+            callback.handleRouteTableCleared();
+        
+        } else if (event.getEventType().equals(EventType.CLEAR)) {
+            callback.handleRouteTableCleared();
         }
-        insertNode(node, bucket.getActiveContacts());
-        callback.handleGraphLayoutUpdated();
     }
-
-    public void check(Bucket bucket, Contact existing, Contact node) {}
-
-    public void remove(Bucket bucket, Contact node) {
-        if(!bucket.equals(this.bucket)) {
-            return;
-        }
-        removeNode(node);
-        callback.handleGraphLayoutUpdated();
-    }
-
-    public void replace(Bucket bucket, Contact existing, Contact node) {
-        if(!bucket.equals(this.bucket)) {
-            return;
-        }
-        removeNode(existing);
-        insertNode(node, bucket.getActiveContacts());
-        callback.handleGraphLayoutUpdated();
-    }
-
-    public void split(Bucket bucket, Bucket left, Bucket right) {
-        //this bucket has been split! Go back to bucket tree
-        callback.handleRouteTableCleared();
-    }
-
-    public void update(Bucket bucket, Contact existing, Contact node) {
-        callback.handleGraphInfoUpdated();
-    }
-    
-    
-
 }

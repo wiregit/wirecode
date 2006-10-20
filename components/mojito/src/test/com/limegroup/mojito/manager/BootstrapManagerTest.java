@@ -11,12 +11,12 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.NetworkSettings;
@@ -99,13 +99,13 @@ public class BootstrapManagerTest extends BaseTestCase {
         for(int i= 1; i < 5; i++) {
             node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 3000+i), 0, false);
+                    new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             rt.add(node);
         }
         //add good node
         node = ContactFactory.createLiveContact(null,
                 0,0,BOOTSTRAP_DHT.getLocalNodeID(),
-                BOOTSTRAP_DHT.getContactAddress(), 0, false);
+                BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
         //now try bootstrapping from RT
         BootstrapEvent evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();

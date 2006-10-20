@@ -15,10 +15,11 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.TrieUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.Bucket;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.RouteTableSettings;
@@ -468,18 +469,18 @@ public class RouteTableTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        localNode = (LocalContact)ContactFactory.createLocalContact(
-                0, 0, KUID.create(NODE_IDS[0]), 0, false);
-        localNode.setExternalPort(PORT);
-        
         toPing.clear();
-        routeTable = new RouteTableImpl();
+        
+        routeTable = new RouteTableImpl(NODE_IDS[0]);
         routeTable.setPingCallback(new RouteTable.PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 toPing.add(node);
                 return null;
             }
         });
+        
+        localNode = (LocalContact)routeTable.getLocalNode();
+        localNode.setExternalPort(PORT);
         
         List<Contact> nodes = new ArrayList<Contact>();
         nodes.add(localNode);
@@ -491,10 +492,10 @@ public class RouteTableTest extends BaseTestCase {
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
             int instanceId = 0;
-            boolean firewalled = false;
+            int flags = Contact.DEFAULT_FLAG;
             
             Contact node = ContactFactory.createLiveContact(
-                    src, vendor, version, nodeId, con, instanceId, firewalled);
+                    src, vendor, version, nodeId, con, instanceId, flags);
             nodes.add(node);
         }
         
@@ -508,35 +509,6 @@ public class RouteTableTest extends BaseTestCase {
         assertEquals(PING_NODE_IDS.length, toPing.size());
     }
 
-    public void testInitRouteTable() {
-        RouteTable routeTable = new RouteTableImpl();
-        
-        try {
-            routeTable.add(ContactFactory.createLiveContact(
-                    null, 0, 0, KUID.createRandomID(), 
-                    new InetSocketAddress(0), 0, false));
-            fail("Contact should have been rejected");
-        } catch (Exception err) {}
-        
-        try {
-            routeTable.add(ContactFactory.createUnknownContact(
-                    0, 0, KUID.createRandomID(), new InetSocketAddress(0)));
-            fail("Contact should have been rejected");
-        } catch (Exception err) {}
-        
-        Contact localNode1 = ContactFactory.createLocalContact(
-                0, 0, KUID.createRandomID(), 0, false);
-        routeTable.add(localNode1);
-        
-        Contact localNode2 = ContactFactory.createLocalContact(
-                1, 1, localNode1.getNodeID(), 0, false);
-        routeTable.add(localNode2);
-        
-        Contact test = routeTable.get(localNode1.getNodeID());
-        assertTrue(test != localNode1);
-        assertTrue(test == localNode2);
-    }
-    
     /**
      * Tests whether or not a RouteTable which was filled with
      * predefined keys in a predefined order has a predefined
@@ -689,28 +661,28 @@ public class RouteTableTest extends BaseTestCase {
     }
     
     public void testSelectLiveNodes() throws Exception { 
-        RouteTable rt = new RouteTableImpl();
+        RouteTable rt = new RouteTableImpl(LOCAL_NODE_ID);
         rt.setPingCallback(new RouteTable.PingCallback() {
             public DHTFuture<PingEvent> ping(Contact node) {
                 return null;
             }
         });
-        rt.add(localNode);
-        Contact node;
+        
         //add 10 live nodes and 10 dead nodes
         List<Contact> liveContacts = new ArrayList<Contact>();
         for(int i = 0; i < 10; i++) {
-            node = ContactFactory.createLiveContact(null,
+            Contact node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 3000+i), 0, false);
+                    new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             rt.add(node);
             liveContacts.add(node);
         }
+        
         List<Contact> deadContacts = new ArrayList<Contact>();;
         for(int i = 0; i < 400; i++) {
-            node = ContactFactory.createLiveContact(null,
+            Contact node = ContactFactory.createLiveContact(null,
                     0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 4000+i), 0, false);
+                    new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
             node.handleFailure();
             node.handleFailure();
             node.handleFailure();

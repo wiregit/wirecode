@@ -73,7 +73,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     /**
      * Creates and returns a MessageID from the given byte Array
      */
-    public static MessageID create(byte[] messageId) {
+    public static MessageID createWithBytes(byte[] messageId) {
         return new MessageID(messageId);
     }
 
@@ -81,7 +81,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
      * Creates a pseudo random MessageID and tags it with the given 
      * SocketAddress. 
      */
-    public static MessageID create(SocketAddress dst) {
+    public static MessageID createWithSocketAddress(SocketAddress dst) {
         byte[] messageId = new byte[LENGTH];
         GENERATOR.nextBytes(messageId);
 
@@ -94,15 +94,15 @@ public class MessageID implements Comparable<MessageID>, Serializable {
             }
         }
 
-        return create(messageId);
+        return createWithBytes(messageId);
     }
 
     /**
      * Creates and returns a MessageID from the given
      * hex encoded String
      */
-    public static MessageID create(String id) {
-        return create(ArrayUtils.parseHexString(id));
+    public static MessageID createWithHexString(String id) {
+        return createWithBytes(ArrayUtils.parseHexString(id));
     }
     
     /**

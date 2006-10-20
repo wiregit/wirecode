@@ -22,7 +22,7 @@ package com.limegroup.mojito.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * This is an abstract base class for all DHT messages.

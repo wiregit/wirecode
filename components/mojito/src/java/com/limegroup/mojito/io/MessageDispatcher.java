@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.IllegalSocketAddressException;
@@ -62,6 +61,7 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
@@ -558,7 +558,7 @@ public abstract class MessageDispatcher {
         
         synchronized (outputQueueLock) {
             Tag tag = null;
-            while (!outputQueue.isEmpty() && isRunning()) {
+            while (!outputQueue.isEmpty()) {
                 tag = outputQueue.get(0);
 
                 if (tag.isCancelled()) {

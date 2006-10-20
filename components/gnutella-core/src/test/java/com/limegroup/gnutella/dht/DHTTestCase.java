@@ -14,8 +14,9 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
@@ -83,7 +84,7 @@ public abstract class DHTTestCase extends BaseTestCase {
                     kuid,
                     new InetSocketAddress("localhost",4000+i),
                     0,
-                    false,
+                    Contact.DEFAULT_FLAG,
                     State.UNKNOWN);
             rt.add(node);
         }

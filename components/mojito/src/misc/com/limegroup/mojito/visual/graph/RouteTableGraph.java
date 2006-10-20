@@ -1,7 +1,7 @@
 package com.limegroup.mojito.visual.graph;
 
-import com.limegroup.mojito.routing.impl.RouteTableImpl;
-import com.limegroup.mojito.routing.impl.RouteTableImpl.RouteTableCallback;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.RouteTableListener;
 import com.limegroup.mojito.visual.RouteTableGraphCallback;
 import com.limegroup.mojito.visual.components.BinaryEdge;
 import com.limegroup.mojito.visual.components.InteriorNodeVertex;
@@ -13,17 +13,17 @@ import edu.uci.ics.jung.graph.Vertex;
 import edu.uci.ics.jung.graph.impl.SparseTree;
 import edu.uci.ics.jung.utils.UserData;
 
-public abstract class RouteTableGraph implements RouteTableCallback{
+public abstract class RouteTableGraph implements RouteTableListener {
     
-    protected RouteTableImpl routeTable;
+    protected RouteTable routeTable;
     protected RootableSparseTree tree;
     protected Vertex root;
     protected RouteTableGraphCallback callback;
 
-    public RouteTableGraph(RouteTableImpl routeTable, RouteTableGraphCallback callback) {
+    public RouteTableGraph(RouteTable routeTable, RouteTableGraphCallback callback) {
         this.routeTable = routeTable;
         this.callback = callback;
-        routeTable.setRouteTableCallback(this);
+        routeTable.addRouteTableListener(this);
     }
     
     public abstract void populateGraph();
@@ -52,11 +52,7 @@ public abstract class RouteTableGraph implements RouteTableCallback{
     }
     
     public void deregister() {
-        routeTable.setRouteTableCallback(null);
-    }
-    
-    public void clear() {
-        callback.handleRouteTableCleared();
+        routeTable.removeRouteTableListener(this);
     }
 
     public class RootableSparseTree extends SparseTree {

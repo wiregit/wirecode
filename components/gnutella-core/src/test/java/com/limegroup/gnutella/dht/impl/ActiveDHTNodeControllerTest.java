@@ -11,11 +11,11 @@ import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
@@ -63,7 +63,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                 kuid,
                 new InetSocketAddress("localhost",4010),
                 0,
-                false,
+                Contact.DEFAULT_FLAG,
                 State.UNKNOWN);
         rt.add(node);
         controller.stop();

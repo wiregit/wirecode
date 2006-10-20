@@ -22,11 +22,11 @@ package com.limegroup.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * An abstract base class for request Messages

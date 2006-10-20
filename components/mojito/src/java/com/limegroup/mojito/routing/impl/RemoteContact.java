@@ -29,8 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.ContactUtils;
@@ -79,11 +79,11 @@ public class RemoteContact implements Contact {
     private transient State state = State.UNKNOWN;
     
     /** Whether or not this Node is firewalled */
-    private boolean firewalled = false;
+    private int flags = DEFAULT_FLAG;
     
     public RemoteContact(SocketAddress sourceAddress, int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress, 
-            int instanceId, boolean firewalled, State state) {
+            int instanceId, int flags, State state) {
         
         if (nodeId == null) {
             throw new NullPointerException("Node ID is null");
@@ -103,10 +103,10 @@ public class RemoteContact implements Contact {
         this.nodeId = nodeId;
         this.contactAddress = contactAddress;
         this.instanceId = instanceId;
-        this.firewalled = firewalled;
+        this.flags = flags;
         this.state = (state != null ? state : State.UNKNOWN);
         
-        if (state == State.ALIVE) {
+        if (State.ALIVE.equals(state)) {
             this.timeStamp = System.currentTimeMillis();
             
             fixSourceAndContactAddress(sourceAddress);
@@ -134,7 +134,7 @@ public class RemoteContact implements Contact {
             
             int port = ((InetSocketAddress)contactAddress).getPort();
             if (port == 0) {
-                if (!firewalled) {
+                if (!isFirewalled()) {
                     if (LOG.isErrorEnabled()) {
                         LOG.error(ContactUtils.toString(nodeId, sourceAddress) 
                                 + " contact address is set to Port 0 but it is not marked as firewalled");
@@ -142,7 +142,7 @@ public class RemoteContact implements Contact {
                 }
                 
                 contactAddress = sourceAddress;
-                firewalled = true; // Force Firewalled!
+                setFirewalled(true); // Force Firewalled!
                 
             } else if (!NetworkSettings.ACCEPT_FORCED_ADDRESS.getValue()) {
                 // If the source address is a PRIVATE address then 
@@ -156,7 +156,7 @@ public class RemoteContact implements Contact {
             
             if (LOG.isInfoEnabled()) {
                 LOG.info("Merged " + sourceAddress + " and " 
-                    + backup + " to " + contactAddress + ", firewalled=" + firewalled);
+                    + backup + " to " + contactAddress + ", firewalled=" + isFirewalled());
             }
         }
     }
@@ -193,6 +193,10 @@ public class RemoteContact implements Contact {
         return instanceId;
     }
     
+    public int getFlags() {
+        return flags;
+    }
+    
     public SocketAddress getContactAddress() {
         return contactAddress;
     }
@@ -223,9 +227,15 @@ public class RemoteContact implements Contact {
     }
 
     public boolean isFirewalled() {
-        return firewalled;
+        return (flags & FIREWALLED_FLAG) != 0;
     }
-
+    
+    private void setFirewalled(boolean firewalled) {
+        if (isFirewalled() != firewalled) {
+            this.flags ^= FIREWALLED_FLAG;
+        }
+    }
+    
     public long getAdaptativeTimeout() {
         //for now, based on failures and previous round trip time
         long timeout = NetworkSettings.TIMEOUT.getValue();
@@ -246,7 +256,7 @@ public class RemoteContact implements Contact {
     }
     
     public boolean isAlive() {
-        return state == State.ALIVE;
+        return State.ALIVE.equals(state);
     }
     
     public void unknown() {
@@ -256,11 +266,11 @@ public class RemoteContact implements Contact {
     }
     
     public boolean isUnknown() {
-        return state == State.UNKNOWN;
+        return State.UNKNOWN.equals(state);
     }
     
     public boolean isDead() {
-        return state == State.DEAD;
+        return State.DEAD.equals(state);
     }
     
     public boolean hasBeenRecentlyAlive() {
@@ -276,14 +286,16 @@ public class RemoteContact implements Contact {
         failures++;
         lastFailedTime = System.currentTimeMillis();
         
-        // Node has ever been alive?
-        if (getTimeStamp() > 0L) {
-            if (failures >= RouteTableSettings.MAX_ALIVE_NODE_FAILURES.getValue()) {
-                state = State.DEAD;
-            }
-        } else {
-            if (failures >= RouteTableSettings.MAX_UNKNOWN_NODE_FAILURES.getValue()) {
-                state = State.DEAD;
+        if (!isShutdown()) {
+            // Node has ever been alive?
+            if (getTimeStamp() > 0L) {
+                if (failures >= RouteTableSettings.MAX_ALIVE_NODE_FAILURES.getValue()) {
+                    state = State.DEAD;
+                }
+            } else {
+                if (failures >= RouteTableSettings.MAX_UNKNOWN_NODE_FAILURES.getValue()) {
+                    state = State.DEAD;
+                }
             }
         }
     }
@@ -293,20 +305,31 @@ public class RemoteContact implements Contact {
     }
     
     /**
-     * Returns the State of this Contact
+     * Returns the state of this Contact
      */
     public State getState() {
         return state;
     }
     
     /**
-     * Sets the State of this Contact
+     * Sets the state of this Contact
      */
     public void setState(State state) {
         if (state == null) {
             state = State.UNKNOWN;
         }
         this.state = state;
+    }
+    
+    public boolean isShutdown() {
+        return (flags & SHUTDOWN_FLAG) != 0;
+    }
+    
+    public void shutdown(boolean shutdown) {
+        if (isShutdown() != shutdown) {
+            this.flags ^= SHUTDOWN_FLAG;
+            this.state = State.DEAD;
+        }
     }
     
     public int hashCode() {
@@ -339,7 +362,7 @@ public class RemoteContact implements Contact {
             .append(", rtt=").append(getRoundTripTime())
             .append(", failures=").append(getFailures())
             .append(", instanceId=").append(getInstanceID())
-            .append(", state=").append(getState())
+            .append(", state=").append(isShutdown() ? "DOWN" : getState())
             .append(", firewalled=").append(isFirewalled());
         
         return buffer.toString();

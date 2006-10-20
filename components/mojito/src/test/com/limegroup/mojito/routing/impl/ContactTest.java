@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 
 public class ContactTest extends BaseTestCase {
@@ -27,9 +28,9 @@ public class ContactTest extends BaseTestCase {
         LocalContact lc2 = (LocalContact)ContactFactory.createLocalContact(0, 0, false);
         
         RemoteContact rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, 0, 0, KUID.createRandomID(), new InetSocketAddress(1000), 0, false);
+            .createLiveContact(null, 0, 0, KUID.createRandomID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         RemoteContact rc2 = (RemoteContact)ContactFactory
-            .createLiveContact(null, 0, 0, KUID.createRandomID(), new InetSocketAddress(1000), 0, false);
+            .createLiveContact(null, 0, 0, KUID.createRandomID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         
         // Initial state
         assertEquals(lc1, lc1);
@@ -58,17 +59,17 @@ public class ContactTest extends BaseTestCase {
         // Two RemoteContacts with the same KUID and SocketAddress are
         // considered to be equal
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, 0, 0, rc2.getNodeID(), new InetSocketAddress(1000), 0, false);
+            .createLiveContact(null, 0, 0, rc2.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertEquals(rc1, rc2);
         
         // But if their SocketAddress is different they're not equal
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, 0, 0, rc2.getNodeID(), new InetSocketAddress(2000), 0, false);
+            .createLiveContact(null, 0, 0, rc2.getNodeID(), new InetSocketAddress(2000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(rc1, rc2);
         
         // A Local- and RemoteContact cannot be equal!
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, 0, 0, lc1.getNodeID(), new InetSocketAddress(1000), 0, false);
+            .createLiveContact(null, 0, 0, lc1.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(lc1, rc1);
     }
 }

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.DHTMessage;
@@ -27,6 +26,7 @@ import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * MessageFactoryWire takes a true MessageFactory as an argument, 

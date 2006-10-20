@@ -1,6 +1,6 @@
 package com.limegroup.mojito.visual.components;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 
 public class ContactVertex extends RouteTableVertex<Contact>{

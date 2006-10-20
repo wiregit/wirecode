@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -14,6 +13,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 
 public class MessageDispatcherTest extends BaseTestCase {
@@ -74,10 +74,10 @@ public class MessageDispatcherTest extends BaseTestCase {
             Contact sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), 0, 0, 
                     context.getLocalNodeID().invert(), 
-                    new InetSocketAddress("www.google.com", 5000), 0, false);
+                    new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
             
             RequestMessage request = factory.createPingRequest(
-                    sender, MessageID.create(new InetSocketAddress("www.google.com", 5000)));
+                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
             sent = dispatcher.send(node, request, null);
             assertFalse(sent);
             
@@ -85,10 +85,10 @@ public class MessageDispatcherTest extends BaseTestCase {
             sender = ContactFactory.createLiveContact(
                     new InetSocketAddress("www.google.com", 5000), 0, 0, 
                     context.getLocalNodeID().invert(), 
-                    new InetSocketAddress("www.google.com", 5000), 0, true);
+                    new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             
             request = factory.createPingRequest(
-                    sender, MessageID.create(new InetSocketAddress("www.google.com", 5000)));
+                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
             sent = dispatcher.send(node, request, null);
             assertTrue(sent);
             

@@ -24,14 +24,13 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +51,10 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     private static final long SELECTOR_SLEEP = 50L;
     
+    private volatile boolean running = false;
+    
+    private Object channelLock = new Object();
+    
     private Selector selector;
     
     private DatagramChannel channel;
@@ -70,22 +73,24 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     public void bind(SocketAddress address) throws IOException {
-        if (isOpen()) {
-            throw new IOException("Already open");
+        synchronized (channelLock) {
+            if (isOpen()) {
+                throw new IOException("Already open");
+            }
+            
+            channel = DatagramChannel.open();
+            channel.configureBlocking(false);
+            
+            selector = Selector.open();
+            channel.register(selector, SelectionKey.OP_READ);
+            
+            DatagramSocket socket = channel.socket();
+            socket.setReuseAddress(false);
+            socket.setReceiveBufferSize(INPUT_BUFFER_SIZE);
+            socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
+            
+            socket.bind(address);
         }
-        
-        channel = DatagramChannel.open();
-        channel.configureBlocking(false);
-        
-        selector = Selector.open();
-        channel.register(selector, SelectionKey.OP_READ);
-        
-        DatagramSocket socket = channel.socket();
-        socket.setReuseAddress(false);
-        socket.setReceiveBufferSize(INPUT_BUFFER_SIZE);
-        socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
-        
-        socket.bind(address);
     }
     
     @Override
@@ -114,56 +119,87 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     public void start() {
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = context.getThreadFactory().newThread(r);
-                thread.setName(context.getName() + "-MessageDispatcherExecutor");
-                thread.setDaemon(true);
-                return thread;
+        synchronized (channelLock) {
+            if (!running) {
+                ThreadFactory factory = new ThreadFactory() {
+                    public Thread newThread(Runnable r) {
+                        Thread thread = context.getThreadFactory().newThread(r);
+                        thread.setName(context.getName() + "-MessageDispatcherExecutor");
+                        thread.setDaemon(true);
+                        return thread;
+                    }
+                };
+                
+                running = true;
+                
+                executor = Executors.newFixedThreadPool(1, factory);
+                
+                thread = context.getThreadFactory().newThread(this);
+                thread.setName(context.getName() + "-MessageDispatcherThread");
+                //thread.setDaemon(true);
+                thread.start();
+                
+                super.start();
             }
-        };
-        
-        executor = Executors.newFixedThreadPool(1, factory);
-        
-        thread = context.getThreadFactory().newThread(this);
-        thread.setName(context.getName() + "-MessageDispatcherThread");
-        //thread.setDaemon(true);
-        thread.start();
-        
-        super.start();
+        }
     }
     
     @Override
     public void stop() {
-        super.stop();
-        
-        try {
-            if (selector != null) {
-                selector.close();
-                channel.close();
-                selector = null;
-                channel = null;
+        synchronized (channelLock) {
+            // Signal the MessageDispatcher Thread that we're
+            // going to shutdown and wait for the MD to finish
+            // whatever it's doing...
+            if (running) {
+                running = false;
+                try {
+                    channelLock.wait(10L*1000L);
+                } catch (InterruptedException e) {
+                    LOG.error("InterruptedException", e);
+                }
             }
-        } catch (IOException err) {
-            LOG.error("An error occured during stopping", err);
+            
+            super.stop();
+            clear();
+            
+            if (executor != null) {
+                executor.shutdown();
+                try {
+                    executor.awaitTermination(10L*1000L, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    LOG.error("InterruptedException", e);
+                }
+                executor = null;
+            }
+            
+            if (thread != null) {
+                thread.interrupt();
+                thread = null;
+            }
+            
+            if (selector != null) {
+                try {
+                    selector.close();
+                    selector = null;
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
+                }
+            }
+            
+            if (channel != null) {
+                try {
+                    channel.close();
+                    channel = null;
+                } catch (IOException err) {
+                    LOG.error("IOException", err);
+                }
+            }
         }
-        
-        if (thread != null) {
-            thread.interrupt();
-            thread = null;
-        }
-        
-        if (executor != null) {
-            executor.shutdownNow();
-            executor = null;
-        }
-        
-        clear();
     }
 
     @Override
     public boolean isRunning() {
-        return isOpen() && channel.isRegistered();
+        return running;
     }
 
     @Override
@@ -173,14 +209,17 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected void process(Runnable runnable) {
-        if (isRunning()) {
-            executor.execute(runnable);
+        synchronized (channelLock) {
+            if (running) {
+                executor.execute(runnable);
+            }
         }
     }
     
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
-        verifier.verify(context.getMasterKey(), CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
+        verifier.verify(context.getMasterKey(), 
+                CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 
     private void interest(int ops, boolean on) {
@@ -224,26 +263,31 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
 
     public void run() {
-        
-        while(isRunning()) {
-            
-            try {
+        try {
+            while (isRunning()) {
+                
                 selector.select(SELECTOR_SLEEP);
                 
-                // READ
-                handleRead();
+                try {
+                    // READ
+                    handleRead();
+                } catch (IOException err) {
+                    LOG.error("IOException-READ", err);
+                }
                 
-                // WRITE
-                handleWrite();
-                
-            } catch (ClosedSelectorException err) {
-                // thrown as close() is called asynchronously
-                //LOG.error("ClosedSelectorException", err);
-            } catch (ClosedChannelException err) {
-                // thrown as close() is called asynchronously
-                //LOG.error("ClosedChannelException", err);
-            } catch (IOException err) {
-                LOG.fatal("IOException", err);
+                try {
+                    // WRITE
+                    handleWrite();
+                } catch (IOException err) {
+                    LOG.error("IOException-WRITE", err);
+                }
+            }
+        } catch (IOException err) {
+            LOG.fatal("IOException", err);
+        } finally {
+            synchronized (channelLock) {
+                running = false;
+                channelLock.notifyAll();
             }
         }
     }

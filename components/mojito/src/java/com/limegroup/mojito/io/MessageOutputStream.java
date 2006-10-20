@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValue.ValueType;
@@ -38,6 +37,7 @@ import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)

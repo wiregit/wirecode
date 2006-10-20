@@ -5,8 +5,8 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
 
@@ -28,7 +28,7 @@ public class RemoteContactTest extends BaseTestCase {
         // External Port == 0 -> force firewalled if it isn't!
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), 
-                new InetSocketAddress("localhost", 0), 0, false);
+                new InetSocketAddress("localhost", 0), 0, Contact.DEFAULT_FLAG);
         
         assertNull(node1.getSourceAddress());
         assertFalse(node1.isFirewalled());
@@ -44,7 +44,7 @@ public class RemoteContactTest extends BaseTestCase {
         // External Port != 0 -> Contact Address = Source Address + external Port
         RemoteContact node2 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), 
-                new InetSocketAddress("dell.com", 2048), 0, false);
+                new InetSocketAddress("dell.com", 2048), 0, Contact.DEFAULT_FLAG);
         
         assertNull(node2.getSourceAddress());
         assertFalse(node2.isFirewalled());
@@ -66,7 +66,7 @@ public class RemoteContactTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
-                0, false);
+                0, Contact.DEFAULT_FLAG);
         
         node1.setTimeStamp(100);
         node1.setRoundTripTime(100);
@@ -76,7 +76,7 @@ public class RemoteContactTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
-                0, false);
+                0, Contact.DEFAULT_FLAG);
         
         node2.setTimeStamp(99); // Node #2 is elder than Node #1
         
@@ -98,7 +98,7 @@ public class RemoteContactTest extends BaseTestCase {
                     new InetSocketAddress("localhost", 1024), 
                     0, 0, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2048), 
-                    0, false);
+                    0, Contact.DEFAULT_FLAG);
             
             node4.updateWithExistingContact(node2);
             fail(node4 + " should have rejected the exsting Node " + node2);
@@ -115,7 +115,7 @@ public class RemoteContactTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 1024), 
                 3, 4, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
-                0, false);
+                0, Contact.DEFAULT_FLAG);
         
         assertEquals(3, node2.getVendor());
         assertEquals(4, node2.getVersion());
@@ -133,7 +133,7 @@ public class RemoteContactTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
-                0, false);
+                0, Contact.DEFAULT_FLAG);
         
         assertEquals(-1L, node1.getRoundTripTime());
         assertEquals(NetworkSettings.TIMEOUT.getValue(), node1.getAdaptativeTimeout());
@@ -168,7 +168,7 @@ public class RemoteContactTest extends BaseTestCase {
         InetSocketAddress externalAddress = new InetSocketAddress("216.244.101.16", 5000);
         
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+                null, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         
         // PUBLIC contact address and PRIVATE source address
         // Result: Don't use the IP from the source address
@@ -182,12 +182,12 @@ public class RemoteContactTest extends BaseTestCase {
         
         // As above...
         node1 = (RemoteContact)ContactFactory.createLiveContact(
-                sourceAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+                sourceAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         assertEquals(contactAddress, node1.getContactAddress());
         
         // As above...
         node1 = (RemoteContact)ContactFactory.createLiveContact(
-                externalAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, false);
+                externalAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         assertEquals(externalAddress, node1.getContactAddress());
     }
 }

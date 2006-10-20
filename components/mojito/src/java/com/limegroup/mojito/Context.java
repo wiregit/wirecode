@@ -32,6 +32,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -69,18 +70,22 @@ import com.limegroup.mojito.manager.PingManager;
 import com.limegroup.mojito.manager.StoreManager;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
-import com.limegroup.mojito.routing.ContactFactory;
+import com.limegroup.mojito.messages.MessageID;
+import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
+import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.CryptoUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
 import com.limegroup.mojito.util.DatabaseUtils;
@@ -96,8 +101,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private KeyPair masterKeyPair;
     
     private String name;
-    
-    private LocalContact localNode;
     
     private Database database;
     private RouteTable routeTable;
@@ -132,10 +135,11 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     Context(String name, int vendor, int version, boolean firewalled) {
         this.name = name;
-        this.localNode = (LocalContact)ContactFactory
-            .createLocalContact(vendor, version, firewalled);
+        init(null, null);
         
-        init();
+        getLocalNode().setVendor(vendor);
+        getLocalNode().setVersion(version);
+        getLocalNode().setFirewalled(firewalled);
     }
     
     /**
@@ -148,20 +152,16 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         assert (routeTable != null);
         assert (database != null);
         
-        this.localNode = (LocalContact)routeTable.getLocalNode();
-        this.localNode.setVendor(vendor);
-        this.localNode.setVersion(version);
+        init(routeTable, database);
         
-        this.routeTable = routeTable;
-        this.database = database;
-        
-        init();
+        getLocalNode().setVendor(vendor);
+        getLocalNode().setVersion(version);
     }
     
     /**
      * Initializes the Context
      */
-    private void init() {
+    private void init(RouteTable routeTable, Database database) {
         PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
@@ -173,17 +173,10 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
         masterKeyPair = new KeyPair(masterKey, null);
         
+        setRouteTable(routeTable);
+        setDatabase(database, false);
+        
         initStats();
-        
-        if (routeTable == null) {
-            setRouteTable(null);
-        } else {
-            routeTable.setPingCallback(this);
-        }
-        
-        if (database == null) {
-            setDatabase(null, false);
-        }
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
@@ -203,10 +196,10 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Initializes the Stats package
      */
     private void initStats() {
-        stats = DHTStatsManager.getInstance(localNode.getNodeID());
-        networkStats = new NetworkStatisticContainer(localNode.getNodeID());
-        globalLookupStats = new GlobalLookupStatisticContainer(localNode.getNodeID());
-        databaseStats = new DatabaseStatisticContainer(localNode.getNodeID());
+        stats = DHTStatsManager.getInstance(getLocalNodeID());
+        networkStats = new NetworkStatisticContainer(getLocalNodeID());
+        globalLookupStats = new GlobalLookupStatisticContainer(getLocalNodeID());
+        databaseStats = new DatabaseStatisticContainer(getLocalNodeID());
     }
     
     /**
@@ -262,7 +255,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getVendor()
      */
     public int getVendor() {
-        return localNode.getVendor();
+        return getLocalNode().getVendor();
     }
     
     /*
@@ -270,7 +263,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getVersion()
      */
     public int getVersion() {
-        return localNode.getVersion();
+        return getLocalNode().getVersion();
     }
     
     /**
@@ -301,8 +294,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getLocalNode()
      */
-    public Contact getLocalNode() {
-        return localNode;
+    public LocalContact getLocalNode() {
+        return (LocalContact)routeTable.getLocalNode();
     }
     
     /**
@@ -336,9 +329,10 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private void setLocalNodeID(KUID localNodeID) {
         synchronized (routeTable) {
             // Change the Node ID
-            localNode.setNodeID(localNodeID);
+            getLocalNode().setNodeID(localNodeID);
             routeTable.rebuild();
-            assert(localNode.equals(routeTable.getLocalNode()));
+            
+            assert(getLocalNode().equals(routeTable.get(localNodeID)));
         }
     }
     
@@ -362,7 +356,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Returns true if the given KUID is equal to local Node's KUID
      */
     public boolean isLocalNodeID(KUID nodeId) {
-        return nodeId != null && nodeId.equals(localNode.getNodeID());
+        return nodeId != null && nodeId.equals(getLocalNodeID());
     }
     
     /**
@@ -370,7 +364,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Node's SocketAddress
      */
     public boolean isLocalContactAddress(SocketAddress address) {
-        return localNode.getContactAddress().equals(address);
+        return getContactAddress().equals(address);
     }
     
     /*
@@ -378,7 +372,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getLocalNodeID()
      */
     public KUID getLocalNodeID() {
-        return localNode.getNodeID();
+        return routeTable.getLocalNode().getNodeID();
     }
     
     /*
@@ -426,15 +420,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             routeTable = new RouteTableImpl();
         }
         
-        // Initialize the RouteTable with the local Node and
-        // if it's pre-initialized then get the local Node
-        if (routeTable.size() == 0) {
-            routeTable.add(localNode);
-        } else {
-            localNode = (LocalContact)routeTable.getLocalNode();
-        }
-        
         routeTable.setPingCallback(this);
+        routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
+        
         this.routeTable = routeTable;
         
         if (database != null) {
@@ -490,6 +478,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     private void purgeDatabase(boolean remove) {
         synchronized (database) {
+            Contact localNode = routeTable.getLocalNode();
             int oldValueCount = database.getValueCount();
             int removedCount = 0;
             for (DHTValue value : database.values()) {
@@ -596,7 +585,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#setExternalPort(int)
      */
     public void setExternalPort(int port) {
-        localNode.setExternalPort(port);
+        getLocalNode().setExternalPort(port);
     }
     
     /*
@@ -604,7 +593,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getExternalPort()
      */
     public int getExternalPort() {
-        return localNode.getExternalPort();
+        return getLocalNode().getExternalPort();
     }
     
     /*
@@ -612,7 +601,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getContactAddress()
      */
     public SocketAddress getContactAddress() {
-        return localNode.getContactAddress();
+        return getLocalNode().getContactAddress();
     }
     
     /**
@@ -620,7 +609,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * we're maybe only using the port number.
      */
     public void setContactAddress(SocketAddress externalAddress) {
-        localNode.setContactAddress(externalAddress);
+        getLocalNode().setContactAddress(externalAddress);
     }
     
     /**
@@ -628,7 +617,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * seeing if this Node is behind a NAT router)
      */
     public void setExternalAddress(SocketAddress externalSocketAddress) {
-        localNode.setExternalAddress(externalSocketAddress);
+        getLocalNode().setExternalAddress(externalSocketAddress);
     }
     
     /*
@@ -636,7 +625,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getLocalAddress()
      */
     public SocketAddress getLocalAddress() {
-        return localNode.getSourceAddress();
+        return getLocalNode().getSourceAddress();
     }
     
     /*
@@ -644,7 +633,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#isFirewalled()
      */
     public boolean isFirewalled() {
-        return localNode.isFirewalled();
+        return getLocalNode().isFirewalled();
     }
 
     /**
@@ -719,8 +708,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             setExternalPort(((InetSocketAddress)localAddress).getPort());
         }
         
-        localNode.setSourceAddress(localAddress);
-        localNode.nextInstanceID();
+        getLocalNode().setSourceAddress(localAddress);
+        getLocalNode().nextInstanceID();
         
         messageDispatcher.bind(localAddress);
     }
@@ -738,6 +727,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             LOG.error(getName() + " is already running!");
             return;
         }
+        
+        getLocalNode().shutdown(false);
         
         initContextTimer();
         initContextExecutor();
@@ -767,9 +758,33 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             LOG.debug("Stopping " + name);
         }
         
-        running = false;
+        Contact localNode = getLocalNode();
+        localNode.shutdown(true);
         
-        bootstrapManager.setBootstrapped(false);
+        if (isBootstrapped()) {
+            // We're nice guys and send shutdown messages to the 2*k-closest
+            // Nodes which should help to reduce the overall latency.
+            int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+            List<Contact> nodes = routeTable.select(localNode.getNodeID(), 2*k, true);
+            
+            for (Contact node : nodes) {
+                if (!node.equals(localNode)) {
+                    // We are not interested in the responses as we're going
+                    // to shutdown. Send pings without tagging the MessageIDs
+                    // and to register a response handler for the pings.
+                    RequestMessage request = getMessageFactory()
+                        .createPingRequest(localNode, MessageID.createWithSocketAddress(null));
+                    
+                    try {
+                        messageDispatcher.send(node, request, null);
+                    } catch (IOException err) {
+                        LOG.error("IOException", err);
+                    }
+                }
+            }
+        }
+        
+        running = false;
         
         bucketRefresher.stop();
         publisher.stop();
@@ -777,6 +792,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         scheduledExecutor.shutdownNow();
         contextExecutor.shutdownNow();
         messageDispatcher.stop();
+        
+        bootstrapManager.setBootstrapped(false);
         
         estimator.clear();
     }

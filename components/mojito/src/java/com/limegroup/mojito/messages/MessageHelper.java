@@ -26,13 +26,13 @@ import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The MessageHelper class simplifies the construction of DHTMessages.
@@ -70,7 +70,7 @@ public class MessageHelper {
             throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
         }
         
-        return MessageID.create(dst);
+        return MessageID.createWithSocketAddress(dst);
     }
 
     protected BigInteger getEstimatedSize() {

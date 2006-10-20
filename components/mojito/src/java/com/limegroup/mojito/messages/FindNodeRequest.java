@@ -19,6 +19,7 @@
  
 package com.limegroup.mojito.messages;
 
+
 /**
  * An interface for FindNodeRequest implementations
  */

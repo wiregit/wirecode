@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.ByteBufferInputStream;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
@@ -52,6 +51,7 @@ import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.Type;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.routing.Contact;
 
 /**
  * The default implementation of the MessageFactory
@@ -131,8 +131,7 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
-            KUID lookupId) {
+    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
         return new FindNodeRequestImpl(context, contact, messageId, lookupId);
     }
 

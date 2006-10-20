@@ -21,9 +21,8 @@ package com.limegroup.mojito.routing;
 
 import java.net.SocketAddress;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.Contact.State;
+import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 
@@ -71,9 +70,9 @@ public class ContactFactory {
      * @param whether or not the Node is firewalled
      */
     public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
-            int version, KUID nodeId, SocketAddress contactAddress, int instanceId, boolean firewalled) {
+            int version, KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
         return new RemoteContact(sourceAddress, vendor, version, 
-                nodeId, contactAddress, instanceId, firewalled, State.ALIVE);
+                nodeId, contactAddress, instanceId, flags, State.ALIVE);
     }
     
     /**
@@ -87,6 +86,6 @@ public class ContactFactory {
     public static Contact createUnknownContact(int vendor, int version, 
             KUID nodeId, SocketAddress contactAddress) {
         return new RemoteContact(null, vendor, version, 
-                nodeId, contactAddress, 0, false, State.UNKNOWN);
+                nodeId, contactAddress, 0, Contact.DEFAULT_FLAG, State.UNKNOWN);
     }
 }

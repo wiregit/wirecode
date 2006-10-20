@@ -7,12 +7,12 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -223,10 +223,10 @@ public class RouteTableVisualizerDemo {
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", 30000+i);
             int instanceId = 0;
-            boolean firewalled = false;
+            int flags = Contact.DEFAULT_FLAG;
             
             Contact node = ContactFactory.createLiveContact(
-                    src, vendor, version, nodeId, con, instanceId, firewalled);
+                    src, vendor, version, nodeId, con, instanceId, flags);
             nodes.add(node);
         }
         
