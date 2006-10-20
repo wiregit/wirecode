@@ -24,8 +24,6 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -267,25 +265,25 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     public void run() {
         try {
             while (isRunning()) {
+                
+                selector.select(SELECTOR_SLEEP);
+                
                 try {
-                    selector.select(SELECTOR_SLEEP);
-                    
                     // READ
                     handleRead();
-                    
+                } catch (IOException err) {
+                    LOG.error("IOException-READ", err);
+                }
+                
+                try {
                     // WRITE
                     handleWrite();
-                    
-                } catch (ClosedSelectorException err) {
-                    // thrown as close() is called asynchronously
-                    //LOG.error("ClosedSelectorException", err);
-                } catch (ClosedChannelException err) {
-                    // thrown as close() is called asynchronously
-                    //LOG.error("ClosedChannelException", err);
                 } catch (IOException err) {
-                    LOG.fatal("IOException", err);
+                    LOG.error("IOException-WRITE", err);
                 }
             }
+        } catch (IOException err) {
+            LOG.fatal("IOException", err);
         } finally {
             synchronized (channelLock) {
                 running = false;

@@ -762,11 +762,16 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         localNode.shutdown(true);
         
         if (isBootstrapped()) {
+            // We're nice guys and send shutdown messages to the 2*k-closest
+            // Nodes which should help to reduce the overall latency.
             int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
             List<Contact> nodes = routeTable.select(localNode.getNodeID(), 2*k, true);
             
             for (Contact node : nodes) {
-                if (!node.equals(getLocalNode())) {
+                if (!node.equals(localNode)) {
+                    // We are not interested in the responses as we're going
+                    // to shutdown. Send pings without tagging the MessageIDs
+                    // and to register a response handler for the pings.
                     RequestMessage request = getMessageFactory()
                         .createPingRequest(localNode, MessageID.createWithSocketAddress(null));
                     
