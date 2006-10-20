@@ -60,7 +60,7 @@ public interface Bucket extends Serializable {
     /**
      * Add the Contact to the replacement cache.
      */
-    public void addCachedContact(Contact node);
+    public Contact addCachedContact(Contact node);
 
     /**
      * Updates the Contact in this bucket 

@@ -19,15 +19,14 @@
  
 package com.limegroup.mojito.routing.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,9 +40,10 @@ import com.limegroup.mojito.event.DHTEventListener;
 import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import com.limegroup.mojito.settings.RouteTableSettings;
-import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
 
@@ -56,11 +56,6 @@ public class RouteTableImpl implements RouteTable {
     private static final long serialVersionUID = -7351267868357880369L;
 
     private static final Log LOG = LogFactory.getLog(RouteTableImpl.class);
-    
-    /**
-     * The <tt>StatisticsContainer</tt> for the routing table stats.
-     */
-    private transient RoutingStatisticContainer routingStats;
     
     /**
      * Trie of Buckets and the Buckets are a Trie of Contacts
@@ -83,16 +78,18 @@ public class RouteTableImpl implements RouteTable {
     private transient PingCallback pingCallback;
     
     /**
-     * A reference to the RouteTableCallback
-     */
-    private transient RouteTableCallback routeTableCallback;
-    
-    /**
      * The local Node
      */
     private Contact localNode;
     
+    /**
+     * A list of RouteTableListeners. It's initialized lazily in
+     * RouteTable#addRouteTableListener() 
+     */
+    private transient List<RouteTableListener> listeners;
+    
     public RouteTableImpl() {
+        localNode = ContactFactory.createLocalContact(0, 0, false);
         bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
     }
@@ -102,7 +99,10 @@ public class RouteTableImpl implements RouteTable {
      */
     private void init() {
         KUID bucketId = KUID.MINIMUM;
-        bucketTrie.put(bucketId, new BucketNode(this, bucketId, 0));
+        Bucket bucket = new BucketNode(this, bucketId, 0);
+        bucketTrie.put(bucketId, bucket);
+        
+        addContactToBucket(bucket, localNode);
         
         consecutiveFailures = 0;
         smallestSubtreeBucket = null;
@@ -117,16 +117,35 @@ public class RouteTableImpl implements RouteTable {
     }
 
     /**
-     * Sets the RouteTableCallback or use null to unset it.
+     * Adds a RouteTableCallback
      * 
-     * NOTE: This method is not Thread safe and it's not intended to be.
-     * That means setting and unsetting the callback at runtime can
-     * cause problems like NullPointerExceptions.
-     * 
-     * @param routeTableCallback The RouteTableCallback instance
+     * @param routeTableCallback The RouteTableCallback instance to add
      */
-    public void setRouteTableCallback(RouteTableCallback routeTableCallback) {
-        this.routeTableCallback = routeTableCallback;
+    public synchronized void addRouteTableListener(RouteTableListener l) {
+        if (l == null) {
+            throw new NullPointerException("RouteTableListener is null");
+        }
+        
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<RouteTableListener>();
+        }
+        
+        listeners.add(l);
+    }
+    
+    /**
+     * Removes a RouteTableCallback
+     * 
+     * @param routeTableCallback The RouteTableCallback instance to remove
+     */
+    public synchronized void removeRouteTableListener(RouteTableListener l) {
+        if (l == null) {
+            throw new NullPointerException("RouteTableListener is null");
+        }
+        
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     /*
@@ -135,21 +154,8 @@ public class RouteTableImpl implements RouteTable {
      */
     public synchronized void add(Contact node) {
         
-        // The first Node we're adding to the RouteTable
-        // is the local Node. Anyting else makes no sense
-        // since all subsequent RouteTable operations
-        // depend on the local Node.
-        if (localNode == null) {
-            if (!(node instanceof LocalContact)) {
-                throw new IllegalArgumentException("The first Contact must be the local Contact: " + node);
-            }
-            
-            this.localNode = node;
-            routingStats = new RoutingStatisticContainer(localNode.getNodeID());
-        }
-        
-        // Don't add firewalled Nodes except if it's the local Node
-        if (node.isFirewalled() && !isLocalNode(node)) {
+        // Don't add firewalled Nodes
+        if (node.isFirewalled()) {
             if (LOG.isTraceEnabled()) {
                 LOG.trace(node + " is firewalled");
             }
@@ -226,9 +232,7 @@ public class RouteTableImpl implements RouteTable {
                 bucket.updateContact(node);
                 this.localNode = node;
                 
-                if (routeTableCallback != null) {
-                    routeTableCallback.update(bucket, existing, node);
-                }
+                fireContactUpdate(bucket, existing, node);
             }
             
             return;
@@ -257,15 +261,13 @@ public class RouteTableImpl implements RouteTable {
             // a good time to ping least recently seen node if we know we
             // have a node alive in the replacement cache. Don't do this too often!
             long delay = System.currentTimeMillis() - bucket.getTimeStamp();
-            if(bucket.containsCachedContact(node.getNodeID())
+            if (bucket.containsCachedContact(node.getNodeID())
                     && (delay > RouteTableSettings.BUCKET_PING_LIMIT.getValue())) {
                 pingLeastRecentlySeenNode(bucket);
             }
             touchBucket(bucket);
             
-            if (routeTableCallback != null) {
-                routeTableCallback.update(bucket, existing, node);
-            }
+            fireContactUpdate(bucket, existing, node);
             
         } else if (node.isAlive() 
                 && !existing.hasBeenRecentlyAlive()) {
@@ -321,9 +323,7 @@ public class RouteTableImpl implements RouteTable {
                         Contact replaced = bucket.updateContact(node);
                         assert (replaced == current);
                         
-                        if (routeTableCallback != null) {
-                            routeTableCallback.update(bucket, current, node);
-                        }
+                        fireContactUpdate(bucket, current, node);
                         
                         // If the Node is in the Cache then ping the least recently
                         // seen live Node which might promote the new Node to a
@@ -338,9 +338,7 @@ public class RouteTableImpl implements RouteTable {
             }
         };
         
-        if (routeTableCallback != null) {
-            routeTableCallback.check(bucket, existing, node);
-        }
+        fireContactCheck(bucket, existing, node);
         
         ping(existing, listener);
         touchBucket(bucket);
@@ -351,18 +349,7 @@ public class RouteTableImpl implements RouteTable {
      */
     protected synchronized void addContactToBucket(Bucket bucket, Contact node) {
         bucket.addActiveContact(node);
-        
-        if (routingStats != null) {
-            if (node.isAlive()) {
-                routingStats.LIVE_NODE_COUNT.incrementStat();
-            } else {
-                routingStats.UNKNOWN_NODE_COUNT.incrementStat();
-            }
-        }
-        
-        if (routeTableCallback != null) {
-            routeTableCallback.add(bucket, node);
-        }
+        fireActiveContactAdded(bucket, node);
     }
     
     /**
@@ -411,14 +398,7 @@ public class RouteTableImpl implements RouteTable {
             Bucket oldRight = bucketTrie.put(right.getBucketID(), right);
             assert (oldRight == null);
             
-            // Increment by one 'cause see above.
-            if (routingStats != null) {
-                routingStats.BUCKET_COUNT.incrementStat();
-            }
-            
-            if (routeTableCallback != null) {
-                routeTableCallback.split(bucket, left, right);
-            }
+            fireSplitBucket(bucket, left, right);
             
             // WHOHOOO! WE SPLIT THE BUCKET!!!
             return true;
@@ -462,13 +442,7 @@ public class RouteTableImpl implements RouteTable {
                 bucket.addActiveContact(node);
                 touchBucket(bucket);
                 
-                if (routingStats != null) {
-                    routingStats.LIVE_NODE_COUNT.incrementStat();
-                }
-                
-                if (routeTableCallback != null) {
-                    routeTableCallback.replace(bucket, leastRecentlySeen, node);
-                }
+                fireReplaceContact(bucket, leastRecentlySeen, node);
                 
                 return;
             }
@@ -480,11 +454,9 @@ public class RouteTableImpl implements RouteTable {
         
         // If the cache is full the least recently seen
         // node will be evicted!
-        bucket.addCachedContact(node);
+        Contact existing = bucket.addCachedContact(node);
         
-        if (routingStats != null) {
-            routingStats.REPLACEMENT_COUNT.incrementStat();
-        }
+        fireCachedContactAdded(bucket, existing, node);
         
         pingLeastRecentlySeenNode(bucket);
     }
@@ -539,10 +511,6 @@ public class RouteTableImpl implements RouteTable {
         node.handleFailure();
         if (node.isDead()) {
             
-            if (routingStats != null) {
-                routingStats.DEAD_NODE_COUNT.incrementStat();
-            }
-            
             if (bucket.containsActiveContact(nodeId)) {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Removing " + node + " and replacing it with the MRS Node from Cache");
@@ -562,19 +530,15 @@ public class RouteTableImpl implements RouteTable {
                     
                     bucket.addActiveContact(mrs);
                     
-                    if (routeTableCallback != null) {
-                        routeTableCallback.replace(bucket, node, mrs);
-                    }
+                    fireReplaceContact(bucket, node, mrs);
                     
-                } else if(node.getFailures() 
+                } else if (node.getFailures() 
                             >= RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue()){
                     
                     bucket.removeActiveContact(nodeId);
                     assert (bucket.isActiveFull() == false);
                     
-                    if (routeTableCallback != null) {
-                        routeTableCallback.remove(bucket, node);
-                    }
+                    fireRemoveContact(bucket, node);
                 }
             } else {
                 
@@ -786,10 +750,6 @@ public class RouteTableImpl implements RouteTable {
             }
         }
         
-        if (routingStats != null) {
-            routingStats.BUCKET_REFRESH_COUNT.addData(randomIds.size());
-        }
-        
         return randomIds;
     }
     
@@ -866,13 +826,8 @@ public class RouteTableImpl implements RouteTable {
      */
     public synchronized void clear() {
         bucketTrie.clear();
-        localNode = null;
-        routingStats = null;
+        fireClear();
         init();
-        
-        if (routeTableCallback != null) {
-            routeTableCallback.clear();
-        }
     }
     
     /*
@@ -884,7 +839,7 @@ public class RouteTableImpl implements RouteTable {
             throw new IllegalStateException("RouteTable is not initialized");
         }
         
-    	bucketTrie.traverse(new Cursor<KUID, Bucket>() {
+        bucketTrie.traverse(new Cursor<KUID, Bucket>() {
             public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
                 Bucket bucket = entry.getValue();
                 bucket.purge();
@@ -963,6 +918,62 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
+    private void fireActiveContactAdded(Bucket bucket, Contact node) {
+        fireRouteTableEvent(bucket, null, null, null, node, EventType.ADD_ACTIVE_CONTACT);
+    }
+    
+    private void fireCachedContactAdded(Bucket bucket, Contact existing, Contact node) {
+        fireRouteTableEvent(bucket, null, null, existing, node, EventType.ADD_CACHED_CONTACT);
+    }
+    
+    private void fireContactUpdate(Bucket bucket, Contact existing, Contact node) {
+        fireRouteTableEvent(bucket, null, null, existing, node, EventType.UPDATE_CONTACT);
+    }
+    
+    private void fireReplaceContact(Bucket bucket, Contact existing, Contact node) {
+        fireRouteTableEvent(bucket, null, null, existing, node, EventType.REPLACE_CONTACT);
+    }
+    
+    private void fireRemoveContact(Bucket bucket, Contact node) {
+        fireRouteTableEvent(bucket, null, null, null, node, EventType.REMOVE_CONTACT);
+    }
+    
+    private void fireContactCheck(Bucket bucket, Contact existing, Contact node) {
+        fireRouteTableEvent(bucket, null, null, existing, node, EventType.CONTACT_CHECK);
+    }
+    
+    private void fireSplitBucket(Bucket bucket, Bucket left, Bucket right) {
+        fireRouteTableEvent(bucket, left, right, null, null, EventType.SPLIT_BUCKET);
+    }
+    
+    private void fireClear() {
+        fireRouteTableEvent(null, null, null, null, null, EventType.CLEAR);
+    }
+    
+    private void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
+            Contact existing, Contact node, EventType type) {
+        
+        // To keep the overhead low we're waiting till last
+        // minute with creating the RouteTableEvent object.
+        
+        List<RouteTableListener> l = listeners;
+        if (l != null) {
+            Iterator<RouteTableListener> it = l.iterator();
+            if (it.hasNext()) {
+                
+                // OK, we know now that there's at least one listener!
+                // Create the RouteTableEvent object!
+                RouteTableEvent event = new RouteTableEvent(
+                        this, bucket, left, right, existing, node, type);
+                
+                // And fire the Events!
+                while(it.hasNext()) {
+                    it.next().handleRouteTableEvent(event);
+                }
+            }
+        }
+    }
+    
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Local: ").append(getLocalNode()).append("\n");
@@ -1012,86 +1023,5 @@ public class RouteTableImpl implements RouteTable {
         buffer.append("Total Down Contacts: ").append(down).append("\n");
         buffer.append("Total Unknown Contacts: ").append(unknown).append("\n");
         return buffer.toString();
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        
-        if (localNode != null) {
-            routingStats = new RoutingStatisticContainer(localNode.getNodeID());
-        }
-    }
-    
-    /**
-     * An interface to track various RouteTable operations. It's meant
-     * for internal use only and we assume implementations don't throw
-     * any exceptions and are non-blocking and super fast!
-     */
-    public static interface RouteTableCallback {
-        
-        /**
-         * Called on Bucket splits
-         * 
-         * @param bucket The old Bucket
-         * @param left The new left hand Bucket
-         * @param right The new right hand Bucket
-         */
-        public void split(Bucket bucket, Bucket left, Bucket right);
-        
-        /**
-         * Called when a new (active) Contact was added
-         * 
-         * @param bucket The Bucket where the new Node was added
-         * @param node The new Node
-         */
-        public void add(Bucket bucket, Contact node);
-        
-        /**
-         * Called when a Contact gets updated (both Contacts are the same
-         * except for things like instance ID or RTT).
-         * 
-         * @param bucket The Bucket of the Contacts
-         * @param existing The existing Contact
-         * @param node The new Contact
-         */
-        public void update(Bucket bucket, Contact existing, Contact node);
-        
-        /**
-         * Called when an existing Contact is being replaced by a different
-         * Contact
-         * 
-         * @param bucket The Bucket of the Contacts
-         * @param existing The existing Contact
-         * @param node The new Contact
-         */
-        public void replace(Bucket bucket, Contact existing, Contact node);
-        
-        /**
-         * Called when a Contact is removed from the RouteTable
-         * 
-         * @param bucket The Bucket of the Contact
-         * @param node The Contact that is removed
-         */
-        public void remove(Bucket bucket, Contact node);
-        
-        /**
-         * Called when the existing Contact collides with the other
-         * Contact and a check is necessary
-         * 
-         * @param bucket The Bucket of the Contacts
-         * @param existing The existing Contact
-         * @param node The new Contact
-         */
-        public void check(Bucket bucket, Contact existing, Contact node);
-        
-        /**
-         * Called when the route table is cleared or purged.
-         */
-        public void clear();
     }
 }

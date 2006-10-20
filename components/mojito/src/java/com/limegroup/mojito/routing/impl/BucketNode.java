@@ -100,7 +100,7 @@ class BucketNode implements Bucket {
         }
     }
     
-    public void addCachedContact(Contact node) {
+    public Contact addCachedContact(Contact node) {
         checkNodeID(node);
         if (cache == Collections.EMPTY_MAP) {
             int maxSize = RouteTableSettings.MAX_CACHE_SIZE.getValue();
@@ -116,8 +116,11 @@ class BucketNode implements Bucket {
                 Contact c = cache.remove(lrs.getNodeID());
                 assert (c == lrs);
                 cache.put(node.getNodeID(), node);
+                return c;
             }
         }
+        
+        return null;
     }
     
     public Contact updateContact(Contact node) {

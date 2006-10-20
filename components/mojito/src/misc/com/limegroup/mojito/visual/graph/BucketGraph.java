@@ -6,7 +6,9 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import com.limegroup.mojito.Contact;
+import com.limegroup.mojito.routing.RouteTable;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent;
+import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import com.limegroup.mojito.routing.impl.Bucket;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 import com.limegroup.mojito.visual.RouteTableGraphCallback;
@@ -20,9 +22,10 @@ import edu.uci.ics.jung.graph.Vertex;
 
 public class BucketGraph extends RouteTableGraph {
     
-    public BucketGraph(RouteTableImpl routeTable, RouteTableGraphCallback callback) {
+    public BucketGraph(RouteTable routeTable, RouteTableGraphCallback callback) {
         super(routeTable, callback);
-        List<Bucket> buckets = new ArrayList<Bucket>(routeTable.getBuckets());
+        
+        List<Bucket> buckets = new ArrayList<Bucket>(((RouteTableImpl)routeTable).getBuckets());
         //create new sparse tree graph with one bucket
         root = new BucketVertex(buckets.get(0), true);
         tree = new RootableSparseTree(root);
@@ -30,7 +33,7 @@ public class BucketGraph extends RouteTableGraph {
 
     @Override
     public void populateGraph() {
-        List<Bucket> buckets = new ArrayList<Bucket>(routeTable.getBuckets());
+        List<Bucket> buckets = new ArrayList<Bucket>(((RouteTableImpl)routeTable).getBuckets());
         int count = buckets.size();
         
         if(count < 2) {
@@ -122,34 +125,25 @@ public class BucketGraph extends RouteTableGraph {
         else return "";
     }
 
-    public void add(Bucket bucket, Contact node) {
-        callback.handleGraphInfoUpdated();
-    }
-
-    public void check(Bucket bucket, Contact existing, Contact node) {
-    }
-
-    public void remove(Bucket bucket, Contact node) {
-    }
-
-    public void replace(Bucket bucket, Contact existing, Contact node) {
-    }
-
-    public void split(Bucket bucket, final Bucket left, final Bucket right) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                //are we splitting the root bucket
-                if(left.getDepth() == 1) {
-                    root = new InteriorNodeVertex();
-                    tree.newRoot(root);
+    public void handleRouteTableEvent(final RouteTableEvent event) {
+        if (event.getEventType().equals(EventType.ADD_ACTIVE_CONTACT)) {
+            callback.handleGraphInfoUpdated();
+        } else if (event.getEventType().equals(EventType.SPLIT_BUCKET)) {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    Bucket left = event.getLeftBucket();
+                    Bucket right = event.getRightBucket();
+                    
+                    //are we splitting the root bucket
+                    if(left.getDepth() == 1) {
+                        root = new InteriorNodeVertex();
+                        tree.newRoot(root);
+                    }
+                    updateGraphBucket(left);
+                    updateGraphBucket(right);
+                    callback.handleGraphLayoutUpdated();
                 }
-                updateGraphBucket(left);
-                updateGraphBucket(right);
-                callback.handleGraphLayoutUpdated();
-            }
-        });
-    }
-
-    public void update(Bucket bucket, Contact existing, Contact node) {
+            });
+        }
     }
 }

@@ -100,6 +100,10 @@ public class RandomBucketRefresher implements Runnable {
         
         List<KUID> ids = context.getRouteTable().getRefreshIDs(false);
         
+        /*if (routingStats != null) {
+            routingStats.BUCKET_REFRESH_COUNT.addData(ids.size());
+        }*/
+        
         try {
             for(int i = 0; i < ids.size(); i++) {
                 KUID nodeId = ids.get(i);

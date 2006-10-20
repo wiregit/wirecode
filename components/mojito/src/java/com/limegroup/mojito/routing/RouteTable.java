@@ -27,6 +27,7 @@ import com.limegroup.mojito.Contact;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.routing.impl.Bucket;
 
 /**
  * RouteTable interface that all LimeDHT route table implementations
@@ -140,6 +141,20 @@ public interface RouteTable extends Serializable {
     public void setPingCallback(PingCallback callback);
     
     /**
+     * Adds a RouteTableListener
+     * 
+     * @param l The RouteTableListener to add
+     */
+    public void addRouteTableListener(RouteTableListener l);
+    
+    /**
+     * Removes a RouteTableListener
+     * 
+     * @param l The RouteTableListener to remove
+     */
+    public void removeRouteTableListener(RouteTableListener l);
+    
+    /**
      * An interface utilized by the RouteTable to access 
      * external resources
      */
@@ -147,5 +162,125 @@ public interface RouteTable extends Serializable {
         
         /** Sends a PING to the given Node */
         public DHTFuture<PingEvent> ping(Contact node);
+    }
+    
+    /**
+     * The interface to receive RouteTable events
+     */
+    public static interface RouteTableListener {
+        
+        /**
+         * Invoked when an event occurs
+         * 
+         * @param event The event that occured
+         */
+        public void handleRouteTableEvent(RouteTableEvent event);
+    }
+    
+    /**
+     * RouteTableEvents are created and fired for various RouteTable events.
+     */
+    public static class RouteTableEvent {
+        
+        /**
+         * The types of events that may occur
+         */
+        public static enum EventType {
+            ADD_ACTIVE_CONTACT,
+            ADD_CACHED_CONTACT,
+            REPLACE_CONTACT,
+            UPDATE_CONTACT,
+            REMOVE_CONTACT,
+            CONTACT_CHECK,
+            SPLIT_BUCKET,
+            CLEAR;
+        }
+        
+        private RouteTable routeTable;
+        
+        private Bucket bucket;
+        
+        private Bucket left;
+        
+        private Bucket right;
+        
+        private Contact existing;
+        
+        private Contact node;
+        
+        private EventType type;
+        
+        private long timeStamp = System.currentTimeMillis();
+        
+        public RouteTableEvent(RouteTable routeTable, 
+                Bucket bucket, Bucket left, Bucket right,
+                Contact existing, Contact node, EventType type) {
+            this.routeTable = routeTable;
+            this.bucket = bucket;
+            this.left = left;
+            this.right = right;
+            this.existing = existing;
+            this.node = node;
+            this.type = type;
+        }
+        
+        /**
+         * Returns the RouteTable which triggered the Event
+         */
+        public RouteTable getRouteTable() {
+            return routeTable;
+        }
+        
+        /**
+         * The Bucket where an Event occured
+         */
+        public Bucket getBucket() {
+            return bucket;
+        }
+        
+        /**
+         * Returns the new left hand Bucket if this is
+         * a SPLIT_BUCKET event and null otherwise
+         */
+        public Bucket getLeftBucket() {
+            return left;
+        }
+        
+        /**
+         * Returns the new right hand Bucket if this is
+         * a SPLIT_BUCKET event and null otherwise
+         */
+        public Bucket getRightBucket() {
+            return right;
+        }
+        
+        /**
+         * Returns the existing Contact that was updated.
+         * This might be null in certain cases!
+         */
+        public Contact getExistingContact() {
+            return existing;
+        }
+        
+        /**
+         * Returns the Contact that was added to the RouteTable
+         */
+        public Contact getContact() {
+            return node;
+        }
+        
+        /**
+         * Returns the type of the Event
+         */
+        public EventType getEventType() {
+            return type;
+        }
+        
+        /**
+         * Returns the time when this Event occured
+         */
+        public long getTimeStamp() {
+            return timeStamp;
+        }
     }
 }
