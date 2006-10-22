@@ -37,16 +37,6 @@ public class KUIDTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void testIsNearer() {
-        
-        KUID lookup = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
-        KUID worst = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
-        KUID best = KUID.create("F2617265969422D11CFB73C75EE8B649132DFB37");
-        
-        assertTrue(worst.isNearerTo(lookup, best));
-        assertFalse(best.isNearerTo(lookup, worst));
-    }
-    
     public void testCompareTo() {
         KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
         KUID b = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
@@ -56,6 +46,32 @@ public class KUIDTest extends BaseTestCase {
         
         assertEquals(0, b.compareTo(b));
         assertEquals(1, b.compareTo(a));
+    }
+    
+    public void testImmutability() {
+        KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID c = null;
+        
+        c = b.flip(10); // tests set+unset
+        assertEquals(a, b);
+        assertNotEquals(b, c);
+        
+        byte[] bytes = b.getBytes();
+        bytes[10] ^= bytes[10];
+        c = KUID.create(bytes);
+        assertEquals(a, b);
+        assertNotEquals(b, c);
+    }
+    
+    public void testIsNearer() {
+        
+        KUID lookup = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID worst = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID best = KUID.create("F2617265969422D11CFB73C75EE8B649132DFB37");
+        
+        assertTrue(worst.isNearerTo(lookup, best));
+        assertFalse(best.isNearerTo(lookup, worst));
     }
     
     public void testSetBit() {
