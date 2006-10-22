@@ -108,7 +108,7 @@ public class DatabaseImpl implements Database {
         }
     }
     
-    public synchronized boolean add(DHTValue value) {
+    private synchronized boolean add(DHTValue value) {
         if (value.isEmpty()) {
             throw new IllegalArgumentException();
         }

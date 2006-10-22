@@ -35,21 +35,12 @@ public interface Database extends Serializable {
     
     /**
      * Adds or removes the given DHTValue depending on
-     * whether or not it's empty. This is the preferred
-     * method.
+     * whether or not it's empty. 
      * 
      * @param value DHTValue to store (add or remove)
      * @return Whether or not the given DHTValue was added or removed
      */
     public boolean store(DHTValue value);
-    
-    /**
-     * Adds the given DHTValue to the Database
-     * 
-     * @param DHTValueImpl to add
-     * @return Whether or not the given DHTValue was added
-     */
-    public boolean add(DHTValue value);
     
     /**
      * Removes the given DHTValue from the Database
