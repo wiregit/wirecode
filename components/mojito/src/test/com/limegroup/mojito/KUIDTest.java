@@ -57,4 +57,30 @@ public class KUIDTest extends BaseTestCase {
         assertEquals(0, b.compareTo(b));
         assertEquals(1, b.compareTo(a));
     }
+    
+    public void testSetBit() {
+        KUID a = KUID.create("0000000000000000000000000000000000000000");
+        KUID b = KUID.create("1000000000000000000000000000000000000000");
+        KUID c = KUID.create("0800000000000000000000000000000000000000");
+        
+        assertFalse(a.isBitSet(3));
+        
+        assertTrue(b.isBitSet(3));
+        assertFalse(b.isBitSet(4));
+        
+        assertFalse(c.isBitSet(3));
+        assertTrue(c.isBitSet(4));
+        
+        c = c.set(4);
+        assertTrue(c.isBitSet(4));
+        
+        c = c.unset(4);
+        assertFalse(c.isBitSet(4));
+        
+        c = c.flip(4);
+        assertTrue(c.isBitSet(4));
+        
+        c = c.flip(4);
+        assertFalse(c.isBitSet(4));
+    }
 }
