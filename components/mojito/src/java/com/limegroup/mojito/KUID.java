@@ -152,11 +152,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         // gonna change
         if (isBitSet != set) {
             byte[] id = getBytes();
-            if (set) {
-                id[index] |= BITS[bit];
-            } else {
-                id[index] &= ~BITS[bit];
-            }
+            id[index] ^= BITS[bit];
             return new KUID(id);
         } else {
             return this;
@@ -533,12 +529,12 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * The default KeyAnalyer for KUIDs
      */
-    public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyCreator();
+    public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyAnalyzer();
     
     /**
      * A PATRICIA Trie KeyCreator for KUIDs
      */
-    private static class KUIDKeyCreator implements KeyAnalyzer<KUID> {
+    private static class KUIDKeyAnalyzer implements KeyAnalyzer<KUID> {
         
         private static final long serialVersionUID = 6412279289438108492L;
 
