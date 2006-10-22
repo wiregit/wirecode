@@ -83,4 +83,12 @@ public class KUIDTest extends BaseTestCase {
         c = c.flip(4);
         assertFalse(c.isBitSet(4));
     }
+    
+    public void testXor() {
+        KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID c = KUID.create("1188A6A8CCB7E7831E1DDE2312074C663663B993");
+        
+        assertEquals(c, a.xor(b));
+    }
 }
