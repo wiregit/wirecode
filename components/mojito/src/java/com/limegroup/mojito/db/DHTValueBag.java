@@ -51,15 +51,6 @@ public interface DHTValueBag {
     public float incrementRequestLoad();
     
     /**
-     * Removes the given value and returns it, or return null 
-     * if the value didn't exist or no value was removed.
-     * 
-     * @param value The DHTValue to remove
-     * @param isRemoteRemove Whether or not this value is removed remotely
-     */
-    public DHTValue remove(DHTValue value, boolean isRemoteRemove);
-
-    /**
      * Returns the number of values in this bag.
      */
     public int size();

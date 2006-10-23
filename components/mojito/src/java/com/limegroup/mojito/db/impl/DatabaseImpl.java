@@ -184,7 +184,7 @@ public class DatabaseImpl implements Database {
         if (bag != null) {
             int size = bag.size();
             
-            bag.remove(value, isRemoteRemove);
+            ((DHTValueBagImpl)bag).remove(value, isRemoteRemove);
             
             if (bag.isEmpty()) {
                 database.remove(valueId);
@@ -250,7 +250,7 @@ public class DatabaseImpl implements Database {
     /**
      * 
      */
-    private class DHTValueDatabase<V extends DHTValueBag> extends HashMap<KUID, V> {
+    private static class DHTValueDatabase<V extends DHTValueBag> extends HashMap<KUID, V> {
 
         private static final long serialVersionUID = 2646628989065603637L;
         
