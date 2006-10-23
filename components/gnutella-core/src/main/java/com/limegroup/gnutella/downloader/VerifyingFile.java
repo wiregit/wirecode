@@ -170,6 +170,12 @@ public class VerifyingFile {
     private static int chunksScheduled = 0;
     
     /**
+     * Holds the iterable for all blocks, is lazily instantiated when
+     * needed for the first time.
+     */
+    private MultiIterable<Interval> allBlocksIterable = null;
+    
+    /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
      * Useful for tests.
@@ -451,11 +457,11 @@ public class VerifyingFile {
     /**
      * @return all downloaded blocks as list
      */
-    public synchronized List<Interval> getBlocksAsList() {
-        IntervalSet ret = new IntervalSet();
-        for(Interval next : new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks, pendingBlocks))
-            ret.add(next);
-        return ret.getAllIntervalsAsList();
+    public synchronized Iterable<Interval> getBlocks() {
+        if (allBlocksIterable == null) {
+        	allBlocksIterable = new MultiIterable<Interval>(verifiedBlocks, partialBlocks, savedCorruptBlocks, pendingBlocks); 
+        }
+        return allBlocksIterable;
     }
     
     /**

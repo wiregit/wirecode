@@ -76,7 +76,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         vf.addInterval(new Interval(0,10));
         ifm.addEntry(file,vf);
         assertEquals(11, ifm.getBlockSize(file));//full inclusive now
-        iter=ifm.getEntry(file).getBlocksAsList().iterator();
+        iter=ifm.getEntry(file).getBlocks().iterator();
         assertEquals(new Interval(0, 10), iter.next());
         assertTrue(! iter.hasNext());
         
@@ -360,7 +360,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
             incomp =  new File(inDir, "T-1839-file name.txt");
             VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(incomp);
             assertTrue(vf2!=null);
-            Iterator /* of Interval */ iter=vf2.getBlocksAsList().iterator();
+            Iterator /* of Interval */ iter=vf2.getBlocks().iterator();
             assertTrue(iter.hasNext());
             assertEquals(new Interval(10, 100), iter.next());
             assertTrue(!iter.hasNext());

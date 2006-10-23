@@ -144,7 +144,7 @@ public class BTDownloader extends AbstractDownloader
 
 	public File getDownloadFragment() {
 		if (!isLaunchable())
-			throw new IllegalStateException("can't preview this torrent");
+			return null;
 		return getFile();
 	}
 
