@@ -429,8 +429,7 @@ public class FileUtils {
     	} else if (CommonUtils.isWindows()) {
     		return SystemUtils.recycle(file);
     	} else {
-    		file.delete();
-    		return !file.exists();
+    		return deleteRecursive(file);
     	}
     }
 

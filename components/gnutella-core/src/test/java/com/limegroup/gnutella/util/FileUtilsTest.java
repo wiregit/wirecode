@@ -225,4 +225,44 @@ public final class FileUtilsTest extends BaseTestCase {
         testFile = new File("a/b/c/../../../e/b/c/d.txt");
         assertFalse("Multi-level malicious case failed.", FileUtils.isReallyParent(testDirectory, testFile));
     }
+    
+    private File createHierarchy() throws IOException {
+    	File tmpFile = File.createTempFile("test", "test");
+    	tmpFile.deleteOnExit();
+    	
+    	File tmpDir = tmpFile.getParentFile();
+    	
+    	File dir = new File(tmpDir, "testRecursiveDeleteDir");
+    	assertTrue(dir.mkdirs());
+    	dir.deleteOnExit();
+    	
+    	File hiddenFile = new File(dir, ".hidden");
+    	assertTrue(hiddenFile.createNewFile());
+    	hiddenFile.deleteOnExit();
+    	
+    	File file = new File(dir, "file.file");
+    	assertTrue(file.createNewFile());
+    	file.deleteOnExit();
+    	
+    	File subDir = new File(dir, "subdir");
+    	assertTrue(subDir.mkdirs());
+    	subDir.deleteOnExit();
+    	
+    	File hiddenSubFile = new File(subDir, ".hidden.file");
+    	assertTrue(hiddenSubFile.createNewFile());
+    	hiddenSubFile.deleteOnExit();
+    	
+    	File hiddenSubdir = new File(dir, ".hiddenSubdir");
+    	assertTrue(hiddenSubdir.mkdirs());
+    	hiddenSubdir.deleteOnExit();
+    	
+    	return dir;
+    }
+    
+    public void testDeleteRecursive() throws IOException { 
+    	File dir = createHierarchy();
+    	assertTrue(FileUtils.deleteRecursive(dir));
+    	assertFalse(dir.exists());
+    }
+    
 }
