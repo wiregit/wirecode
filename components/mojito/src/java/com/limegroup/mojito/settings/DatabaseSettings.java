@@ -74,8 +74,18 @@ public final class DatabaseSettings extends MojitoProps {
         = FACTORY.createSettableLongSetting("REPUBLISH_PERIOD", 5L*60L*1000L, 
                 "republish_period", 5L*60L*1000L, 60L*60L*1000L);
     
-    public static final FloatSetting VALUE_LOAD_SMOOTHING_FACTOR 
-        = FACTORY.createFloatSetting("value_load_smoothing_factor", 1/4f);
+    /**
+     * The *alpha* factor for the Exponentially Moving Average (EMA) 
+     * computation of the value request load
+     */
+    public static final FloatSetting VALUE_REQUEST_LOAD_SMOOTHING_FACTOR 
+        = FACTORY.createFloatSetting("value_request_load_smoothing_factor", 1/4f);
+    
+    /**
+     * The delay (in sec) after which we null back the value request load
+     */
+    public static final IntSetting VALUE_REQUEST_LOAD_NULLING_DELAY
+        = FACTORY.createIntSetting("value_request_load_nulling_delay", 60); //1 minute
     
     /**
      * Whether or not to delete a DHTValue from the Database if we're

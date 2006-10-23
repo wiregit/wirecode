@@ -22,7 +22,10 @@ class DHTValueBagImpl implements DHTValueBag {
     private static final long serialVersionUID = 3677203930910637434L;
     
     private static final float SMOOTHING_FACTOR 
-        = DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.getValue();
+        = DatabaseSettings.VALUE_REQUEST_LOAD_SMOOTHING_FACTOR.getValue();
+    
+    private static final int LOAD_NULLING_DELAY 
+    	= DatabaseSettings.VALUE_REQUEST_LOAD_NULLING_DELAY.getValue();
     
     /**
      * The key if this value
@@ -111,7 +114,8 @@ class DHTValueBagImpl implements DHTValueBag {
         
         float delay = (now - lastRequestTime)/1000f; //in sec
         
-        if (delay <= 0f) {
+        if (delay <= 0f || delay > LOAD_NULLING_DELAY) {
+            lastRequestTime = now;
             requestLoad = 0f; //we can't trust the value anymore
             return requestLoad;
         }

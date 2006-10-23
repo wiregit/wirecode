@@ -35,29 +35,44 @@ public class DHTValueBagImplTest extends BaseTestCase {
         //should start with larger than smoothing factor
         Thread.sleep(500);
         float load = bag.incrementRequestLoad();
-        assertGreaterThan(DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.getValue(), 
+        assertGreaterThan(DatabaseSettings.VALUE_REQUEST_LOAD_SMOOTHING_FACTOR.getValue(), 
                 load);
         Thread.sleep(500);
         assertGreaterThan(load, bag.incrementRequestLoad());
         
         //test a 0 smoothing factor
-        DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.setValue(0);
+        DatabaseSettings.VALUE_REQUEST_LOAD_SMOOTHING_FACTOR.setValue(0);
         bag = new DHTValueBagImpl(KUID.createRandomID());
         Thread.sleep(500);
         assertEquals(0F, bag.incrementRequestLoad());
+        
+        //try a delay larger than nulling time
+        bag = new DHTValueBagImpl(KUID.createRandomID());
+        long now = System.currentTimeMillis();
+        PrivilegedAccessor.setValue(bag, "lastRequestTime", 
+                now - DatabaseSettings.VALUE_REQUEST_LOAD_NULLING_DELAY.getValue()*1000L);
+        Thread.sleep(500);
+        load = bag.incrementRequestLoad();
+        //load should be 0
+        assertEquals(0, (int)load);
         
         //try a very very large delay
         bag = new DHTValueBagImpl(KUID.createRandomID());
         PrivilegedAccessor.setValue(bag, "lastRequestTime", 1);
         load = bag.incrementRequestLoad();
         //load should never get < 0
-        assertGreaterThan(0f, load);
+        assertGreaterThanOrEquals(0f, load);
+        Thread.sleep(200);
+        bag.incrementRequestLoad();
+        Thread.sleep(200);
+        bag.incrementRequestLoad();
         Thread.sleep(200);
         bag.incrementRequestLoad();
         Thread.sleep(200);
         load = bag.incrementRequestLoad();
         //should now have increased (a lot!)
         assertGreaterThan(1f, load);
+        
     }
     
     public void testAddInvalid() throws Exception {
