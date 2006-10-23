@@ -222,6 +222,4 @@ class DHTValueBagImpl implements DHTValueBag {
         
         return buffer.toString();
     }
-    
-    
 }
