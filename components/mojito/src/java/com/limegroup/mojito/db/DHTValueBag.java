@@ -18,6 +18,12 @@ public interface DHTValueBag {
      * @return true if the value was added, false otherwise
      */
     public boolean add(DHTValue value);
+    
+    /**
+     * Return's this Bag's value ID.
+     * 
+     */
+    public KUID getValueId();
 
     /**
      * Returns an unmodifiable map of values where the key is the originator's ID.

@@ -38,7 +38,6 @@ import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.util.CollectionUtils;
 
 /**
  * The FindNodeRequestHandler handles incoming FIND_VALUE requests
@@ -79,7 +78,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         //TODO: should never be empty?
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(map.values()) + "}");
+                LOG.trace("Hit! " + lookup + "\n"+bag.toString());
             }
             
             Set<KUID> keys = Collections.emptySet();
@@ -110,6 +109,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                     }
                 }
             }
+            
+            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
            
             FindValueResponse response = context.getMessageHelper()
                         .createFindValueResponse(request, keys, values, bag.incrementRequestLoad());

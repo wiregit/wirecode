@@ -68,6 +68,10 @@ class DHTValueBagImpl implements DHTValueBag{
         return false;
     }
     
+    public KUID getValueId() {
+        return valueId;
+    }
+
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValuesMap()
      */
@@ -200,4 +204,20 @@ class DHTValueBagImpl implements DHTValueBag{
     public boolean containsKey(KUID key){
         return valuesMap.containsKey(key);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("Bag: "+getValueId()).append("\n");
+        buffer.append("Load: "+getRequestLoad());
+        buffer.append("Values:").append("\n");
+        
+        for(DHTValue value : getAllValues()) {    
+            buffer.append(value).append("\n\n");
+        }
+        
+        return buffer.toString();
+    }
+    
+    
 }

@@ -150,11 +150,15 @@ public class NetworkStatisticContainer extends StatisticContainer {
      */
     public Statistic STORE_REQUESTS_FAILURE = new SizeStatistic();
     
-
-    public Statistic FIND_VALUE_REQUESTS_OK = new SimpleStatistic();
+    /**
+     * <tt>Statistic</tt> for FIND_VALUE requests. Incremented only 
+     * if we have the value.
+     */
+    public Statistic FIND_VALUE_REQUESTS = new SimpleStatistic();
     
-    public Statistic FIND_VALUE_REQUESTS_FAILURE = new SimpleStatistic();
-    
+    /**
+     * <tt>Statistic</tt> for FIND_NODE requests.
+     */
     public Statistic LOOKUP_REQUESTS = new SimpleStatistic();
     
         

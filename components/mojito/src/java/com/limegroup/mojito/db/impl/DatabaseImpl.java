@@ -238,8 +238,8 @@ public class DatabaseImpl implements Database {
     
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
-        for(DHTValue value : values()) {    
-            buffer.append(value).append("\n\n");
+        for (DHTValueBag bag : database.values()) {
+            buffer.append(bag.toString());
         }
         buffer.append("-------------\n");
         buffer.append("TOTAL: ").append(getKeyCount())
