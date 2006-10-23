@@ -34,7 +34,15 @@ public interface StoreResponse extends ResponseMessage {
      * Node was able to store a DHTValue
      */
     public static enum Status {
+        
+        /**
+         * The remote Node was NOT able to store the DHTValue
+         */
         FAILED(0x01),
+        
+        /**
+         * The remote Node was able to store the DHTValue
+         */
         SUCCEEDED(0x02);
         
         private int status;

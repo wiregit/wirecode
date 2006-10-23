@@ -32,6 +32,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
@@ -50,13 +51,14 @@ public class StoreRequestHandler extends AbstractRequestHandler {
     
     private static final Log LOG = LogFactory.getLog(StoreRequestHandler.class);
     
-    private final NetworkStatisticContainer networkStats;
+    private NetworkStatisticContainer networkStats;
     
     public StoreRequestHandler(Context context) {
         super(context);
         this.networkStats = context.getNetworkStats();
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void request(RequestMessage message) throws IOException {
         
@@ -82,9 +84,13 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        List<Entry<KUID,Status>> status = new ArrayList<Entry<KUID,Status>>();
-        
         Collection<DHTValue> values = request.getDHTValues();
+        
+        List<Entry<KUID,Status>> status 
+            = new ArrayList<Entry<KUID,Status>>(values.size());
+        
+        Database database = context.getDatabase();
+        
         for (DHTValue value : values) {
             KUID valueId = value.getValueID();
             
@@ -107,15 +113,13 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 }
             }*/
             
-            Status s = Status.FAILED;
-            if (context.getDatabase().add(value)) {
+            if (database.add(value)) {
                 networkStats.STORE_REQUESTS_OK.incrementStat();
-                s = Status.SUCCEEDED;
+                status.add(new EntryImpl(valueId, Status.SUCCEEDED));
             } else {
                 networkStats.STORE_REQUESTS_FAILURE.incrementStat();
+                status.add(new EntryImpl(valueId, Status.FAILED));
             }
-            
-            status.add(new EntryImpl<KUID,Status>(valueId, s));
         }
         
         StoreResponse response 

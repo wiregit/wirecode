@@ -28,7 +28,7 @@ public class StatsRequestWireImpl extends AbstractMessageWire<StatsRequest>
         delegate.updateSignatureWithSecuredBytes(signature);
     }
 
-    public Type getType() {
+    public StatisticType getType() {
         return delegate.getType();
     }
 

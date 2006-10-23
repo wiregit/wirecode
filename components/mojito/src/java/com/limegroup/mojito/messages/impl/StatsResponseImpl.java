@@ -33,7 +33,9 @@ import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.routing.Contact;
 
-
+/**
+ * An implementation of StatsResponse
+ */
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 

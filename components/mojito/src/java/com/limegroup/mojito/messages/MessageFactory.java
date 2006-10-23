@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.messages.StatsRequest.Type;
+import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.Contact;
 
@@ -104,7 +104,7 @@ public interface MessageFactory {
      * Creates and returns a StatsRequest Message
      */
     public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
-            Type stats);
+            StatisticType stats);
 
     /**
      * Creates and returns a StatsResponse Message

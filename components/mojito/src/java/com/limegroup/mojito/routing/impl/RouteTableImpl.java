@@ -186,6 +186,13 @@ public class RouteTableImpl implements RouteTable {
      */
     public synchronized void add(Contact node) {
         
+        if (localNode.equals(node)) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot add the local Node: " + node);
+            }
+            return;
+        }
+        
         // Don't add firewalled Nodes
         if (node.isFirewalled()) {
             if (LOG.isTraceEnabled()) {
@@ -941,9 +948,6 @@ public class RouteTableImpl implements RouteTable {
         // activeNodes is a copy!
         boolean removed = activeNodes.remove(localNode);
         assert (removed);
-        
-        // Add the local Node first!
-        add(localNode);
         
         // Re-add the active Contacts
         for (Contact node : activeNodes) {

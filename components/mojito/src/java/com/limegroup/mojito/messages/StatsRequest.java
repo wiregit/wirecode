@@ -27,14 +27,26 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
     /**
      * Various types of statistic requests
      */
-    public static enum Type {
+    public static enum StatisticType {
+        
+        /**
+         * Request the remote Node's Statistics
+         */
         STATISTICS(0x01),
+        
+        /**
+         * Request the remote Node's Database
+         */
         DATABASE(0x02),
+        
+        /**
+         * Request the remote Node's RouteTable
+         */
         ROUTETABLE(0x03);
         
         private int type;
         
-        private Type(int type) {
+        private StatisticType(int type) {
             this.type = type;
         }
         
@@ -46,12 +58,12 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
             return name() + " (" + toByte() + ")";
         }
         
-        private static final Type[] TYPES;
+        private static final StatisticType[] TYPES;
         
         static {
-            Type[] types = values();
-            TYPES = new Type[types.length];
-            for (Type t : types) {
+            StatisticType[] types = values();
+            TYPES = new StatisticType[types.length];
+            for (StatisticType t : types) {
                 int index = t.type % TYPES.length;
                 if (TYPES[index] != null) {
                     throw new IllegalStateException("Type collision: index=" + index 
@@ -61,9 +73,9 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
             }
         }
         
-        public static Type valueOf(int type) throws MessageFormatException {
+        public static StatisticType valueOf(int type) throws MessageFormatException {
             int index = type % TYPES.length;
-            Type t = TYPES[index];
+            StatisticType t = TYPES[index];
             if (t.type == type) {
                 return t;
             }
@@ -75,5 +87,5 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
     /**
      * Returns the Type of the request
      */
-    public Type getType();
+    public StatisticType getType();
 }

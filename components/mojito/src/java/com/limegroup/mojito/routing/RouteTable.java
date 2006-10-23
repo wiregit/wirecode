@@ -29,7 +29,7 @@ import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.event.PingEvent;
 
 /**
- * RouteTable interface that all LimeDHT route table implementations
+ * RouteTable interface that all RouteTable implementations
  * must implement.
  */
 public interface RouteTable extends Serializable {
@@ -190,13 +190,29 @@ public interface RouteTable extends Serializable {
          * The types of events that may occur
          */
         public static enum EventType {
+            
+            /** A Contact was added to the RouteTable */
             ADD_ACTIVE_CONTACT,
+            
+            /** A Contact was added to the replacement cache */
             ADD_CACHED_CONTACT,
+            
+            /** A Contact was replaced */
             REPLACE_CONTACT,
+            
+            /** A Contact was updated */
             UPDATE_CONTACT,
+            
+            /** A Contact was removed */
             REMOVE_CONTACT,
+            
+            /** A Contact was contacted to check if it's alive */
             CONTACT_CHECK,
+            
+            /** A Bucket was split */
             SPLIT_BUCKET,
+            
+            /** The RouteTable was cleared */
             CLEAR;
         }
         

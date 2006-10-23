@@ -40,7 +40,7 @@ import com.limegroup.mojito.db.DHTValueFactory;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StatsRequest.Type;
+import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -264,8 +264,8 @@ public class MessageInputStream extends DataInputStream {
     /**
      * Reads an Type from the InputStream
      */
-    public Type readStatsType() throws IOException {
-        return Type.valueOf(readUnsignedByte());
+    public StatisticType readStatisticType() throws IOException {
+        return StatisticType.valueOf(readUnsignedByte());
     }
     
     /**

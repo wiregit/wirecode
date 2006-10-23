@@ -35,7 +35,7 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
-import com.limegroup.mojito.messages.StatsRequest.Type;
+import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.Contact;
 
@@ -216,7 +216,7 @@ public class MessageOutputStream extends DataOutputStream {
     /**
      * Writes the given Type to the OutputStream
      */
-    public void writeStatsType(Type type) throws IOException {
+    public void writeStatisticType(StatisticType type) throws IOException {
         writeByte(type.toByte());
     }
     

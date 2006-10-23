@@ -24,7 +24,7 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
-import com.limegroup.mojito.messages.StatsRequest.Type;
+import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.Contact;
 
@@ -115,7 +115,7 @@ public class MessageFactoryWire implements MessageFactory {
                 delegate.createPingResponse(contact, messageId, externalAddress, estimatedSize));
     }
 
-    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, Type stats) {
+    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, StatisticType stats) {
         return new StatsRequestWireImpl(
                 delegate.createStatsRequest(contact, messageId, stats));
     }

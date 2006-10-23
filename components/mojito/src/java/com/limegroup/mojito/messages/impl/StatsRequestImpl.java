@@ -32,19 +32,19 @@ import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.routing.Contact;
 
 /**
- *
+ * An implementation of StatsRequest
  */
 public class StatsRequestImpl extends AbstractRequestMessage
         implements StatsRequest {
 
-    private Type request;
+    private StatisticType request;
     
     private int secureStatus = INSECURE;
     
     private byte[] signature;
     
     public StatsRequestImpl(Context context, 
-            Contact contact, MessageID messageId, Type request) {
+            Contact contact, MessageID messageId, StatisticType request) {
         super(context, OpCode.STATS_REQUEST, contact, messageId);
 
         this.request = request;
@@ -55,11 +55,11 @@ public class StatsRequestImpl extends AbstractRequestMessage
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.STATS_REQUEST, src, messageId, version, in);
         
-        this.request = in.readStatsType();
+        this.request = in.readStatisticType();
         this.signature = in.readSignature();
     }
     
-    public Type getType() {
+    public StatisticType getType() {
         return request;
     }
 
@@ -85,7 +85,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     }
     
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeStatsType(request);
+        out.writeStatisticType(request);
         out.writeSignature(signature);
     }
     

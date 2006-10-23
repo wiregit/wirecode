@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import junit.framework.TestSuite;
@@ -711,6 +712,55 @@ public class RouteTableTest extends BaseTestCase {
         assertGreaterThan(150, nodes.size());
         assertLessThan(250, nodes.size());
         
+    }
+    
+    public void testPurge() {
+        RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
+        routeTable.setPingCallback(new RouteTable.PingCallback() {
+            public DHTFuture<PingEvent> ping(Contact node) {
+                return null;
+            }
+        });
+        
+        int port = 3000;
+        for(String nodeId : NODE_IDS) {
+            Contact node = ContactFactory.createLiveContact(null,
+                    0,0,KUID.create(nodeId),
+                    new InetSocketAddress("localhost", port++), 0, Contact.DEFAULT_FLAG);
+            routeTable.add(node);
+        }
+        
+        // Save the local Node reference
+        Contact localNode = routeTable.getLocalNode();
+        
+        // Select a random non-local Contact
+        Random generator = new Random();
+        List<Contact> active = routeTable.getActiveContacts();
+        Contact node = null;
+        for(int i = 0; i < 10 && node == null; i++) {
+            int rand = generator.nextInt(active.size());
+            if (!localNode.equals(active.get(rand))) {
+                node = active.get(rand);
+                break;
+            }
+        }
+        assertNotNull(node);
+        
+        // Mark it as dead
+        for (int i = 0; i < 100 && !node.isDead(); i++) {
+            routeTable.handleFailure(node.getNodeID(), node.getContactAddress());
+        }
+        assertTrue(node.isDead());
+        
+        // Purge the RouteTable
+        routeTable.purge();
+        
+        // The dead Node should be gone
+        assertNull(routeTable.get(node.getNodeID()));
+        
+        // The local Node should be still there
+        assertEquals(localNode, routeTable.select(localNode.getNodeID()));
+        assertTrue(localNode == routeTable.select(localNode.getNodeID())); // it should be the same Object
     }
     
     /*public static void main(String[] args) {

@@ -29,7 +29,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.messages.StatsRequest.Type;
+import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
 import com.limegroup.mojito.routing.Contact;
@@ -123,7 +123,7 @@ public class MessageHelper {
         return factory.createStoreResponse(getLocalNode(), request.getMessageID(), status);
     }
 
-    public StatsRequest createStatsRequest(SocketAddress dst, Type request) {
+    public StatsRequest createStatsRequest(SocketAddress dst, StatisticType request) {
         return factory.createStatsRequest(getLocalNode(), createMessageID(dst), request);
     }
 
