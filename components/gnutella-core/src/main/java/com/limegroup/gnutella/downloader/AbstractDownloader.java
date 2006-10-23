@@ -173,10 +173,10 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * @throws IOException if FileUtils.isReallyParent(testParent, testChild) throws IOException
 	 */
 	public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException {
-	    if (saveDirectory == null)
-	        saveDirectory = SharingSettings.getSaveDirectory();
 	    if (fileName == null)
 	        fileName = getDefaultFileName();
+	    if (saveDirectory == null)
+	        saveDirectory = SharingSettings.getSaveDirectory(fileName);
 	    
 	    if (!saveDirectory.isDirectory()) {
 	        if (saveDirectory.exists())
@@ -220,7 +220,7 @@ public abstract class AbstractDownloader implements Downloader, Serializable {
 	 * Returns the value for the key {@link #DEFAULT_FILENAME} from
 	 * the properties map.
 	 * <p>
-	 * Subclasses should put the name into the map or overriede this
+	 * Subclasses should put the name into the map or override this
 	 * method.
 	 */
     protected synchronized String getDefaultFileName() {       

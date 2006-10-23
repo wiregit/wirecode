@@ -236,12 +236,12 @@ public class ConnectionManager implements ConnectionAcceptor {
 	private volatile int _demotionLimit = 0;
 
     /**
-     * The current measured upstream bandwidth.
+     * The current measured upstream bandwidth in kbytes/sec.
      */
     private volatile float _measuredUpstreamBandwidth = 0.f;
 
     /**
-     * The current measured downstream bandwidth.
+     * The current measured downstream bandwidth in kbytes/sec.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
 
@@ -671,8 +671,8 @@ public class ConnectionManager implements ConnectionAcceptor {
     }
 
     /**
-     * Returns the upstream bandwidth between the last two calls to
-     * measureBandwidth.
+     * Returns the upstream bandwidth in kbytes/sec between the last two calls
+     * to measureBandwidth.
      * @see BandwidthTracker#measureBandwidth
      */
     public float getMeasuredUpstreamBandwidth() {
@@ -680,8 +680,8 @@ public class ConnectionManager implements ConnectionAcceptor {
     }
 
     /**
-     * Returns the downstream bandwidth between the last two calls to
-     * measureBandwidth.
+     * Returns the downstream bandwidth in kbytes/sec between the last two calls
+     * to measureBandwidth.
      * @see BandwidthTracker#measureBandwidth
      */
     public float getMeasuredDownstreamBandwidth() {

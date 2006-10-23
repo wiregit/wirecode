@@ -39,7 +39,7 @@ public class SharingSettingsTest extends BaseTestCase {
 		MediaType[] types = MediaType.getDefaultMediaTypes();
 		for (int i = 0; i < types.length; i++) {
 			assertEquals("Should be the save directory", 
-					SharingSettings.getSaveDirectory(),
+					SharingSettings.getSaveDirectory(null),
 					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
 							
 		}
@@ -77,9 +77,12 @@ public class SharingSettingsTest extends BaseTestCase {
 					SharingSettings.getFileSettingForMediaType(
 							types[i]).isDefault());
 			assertEquals("Should be the save directory", 
-					SharingSettings.getSaveDirectory(),
+					SharingSettings.getSaveDirectory(null),
 					SharingSettings.getFileSettingForMediaType(types[i]).getValue());
 		}
 	}
 	
+	public void testGetSaveDirectoryForNoFilenameLabel() {
+		assertEquals(SharingSettings.getSaveDirectory(null), SharingSettings.getSaveDirectory("No Filename"));
+	}
 }

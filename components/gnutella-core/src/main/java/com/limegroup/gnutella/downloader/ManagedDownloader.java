@@ -1889,8 +1889,8 @@ public class ManagedDownloader extends AbstractDownloader
 		if (saveFile != null) {
 			return (File)saveFile;
 		}
-        
-        return new File(SharingSettings.getSaveDirectory(), getDefaultFileName());
+        String fileName = getDefaultFileName(); 
+        return new File(SharingSettings.getSaveDirectory(fileName), fileName);
     }  
     
     //////////////////////////// Core Downloading Logic /////////////////////

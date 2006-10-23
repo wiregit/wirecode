@@ -143,10 +143,28 @@ public class SharingSettings extends LimeProps {
     }
     
     /**
-     * Retrieves the save directory.
+     * Retrieves the default save directory for a given file name.
+     * Getting the save directory for null will result in the
+     * default save directory.
      */
-    public static final File getSaveDirectory() {
+    public static final File getSaveDirectory(String fileName) {
+    	if (fileName == null) {
+    		return DIRECTORY_FOR_SAVING_FILES.getValue();
+    	}
+    	String extension = FileUtils.getFileExtension(fileName);
+    	if (extension == null) {
+    		return DIRECTORY_FOR_SAVING_FILES.getValue();
+    	}
+        MediaType type = MediaType.getMediaTypeForExtension(extension);
+        FileSetting fs = getFileSettingForMediaType(type);
+        if (fs.isDefault()) {
         return DIRECTORY_FOR_SAVING_FILES.getValue();
+    }
+        return fs.getValue();
+    }
+
+    public static final File getSaveDirectory() { 
+    	return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
     
     /**  
