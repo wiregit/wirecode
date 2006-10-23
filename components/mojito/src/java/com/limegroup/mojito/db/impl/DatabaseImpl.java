@@ -19,9 +19,6 @@
 
 package com.limegroup.mojito.db.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,13 +61,18 @@ public class DatabaseImpl implements Database {
     
     private static final long serialVersionUID = -4857315774747734947L;
     
-    private DHTValueDatabase<DHTValueBag> database = null;
+    private Map<KUID, DHTValueBag> database = new HashMap<KUID, DHTValueBag>();
     
     /**
-     * The maximum database size. Can be negative to make the size unbound
+     * The maximum database size. Can be negative to 
+     * make the size unbound
      */
     private int maxDatabaseSize = -1;
     
+    /**
+     * The maximum number of values per primary key. Can 
+     * be negative to make the size unbound
+     */
     private int maxValuesPerKey = -1;
     
     public DatabaseImpl() {
@@ -80,8 +82,6 @@ public class DatabaseImpl implements Database {
     public DatabaseImpl(int maxDatabaseSize, int maxValuesPerKey) {
         this.maxDatabaseSize = maxDatabaseSize;
         this.maxValuesPerKey = maxValuesPerKey;
-        
-        database = new DHTValueDatabase<DHTValueBag>();
     }
     
     public synchronized int getKeyCount() {
@@ -226,15 +226,6 @@ public class DatabaseImpl implements Database {
         }
         return Collections.unmodifiableList(values);
     }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
     
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
@@ -245,14 +236,5 @@ public class DatabaseImpl implements Database {
         buffer.append("TOTAL: ").append(getKeyCount())
             .append("/").append(getValueCount()).append("\n");
         return buffer.toString();
-    }
-    
-    /**
-     * 
-     */
-    private static class DHTValueDatabase<V extends DHTValueBag> extends HashMap<KUID, V> {
-
-        private static final long serialVersionUID = 2646628989065603637L;
-        
     }
 }

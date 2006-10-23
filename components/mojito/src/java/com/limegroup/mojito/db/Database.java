@@ -51,12 +51,6 @@ public interface Database extends Serializable {
     public boolean remove(DHTValue value);
     
     /**
-     * Removes the given DHTValue(s) from the Database.
-     * Returns true if all values were removed.
-     */
-    //public boolean removeAll(Collection<? extends DHTValue> values);
-    
-    /**
      * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
      * 
      * @param valueId The KUID of the value to lookup in the database

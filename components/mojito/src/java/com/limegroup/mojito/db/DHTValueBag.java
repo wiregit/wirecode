@@ -1,5 +1,6 @@
 package com.limegroup.mojito.db;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -9,7 +10,7 @@ import com.limegroup.mojito.KUID;
  * A interface that represents a bag of DHT values that have the same ID. 
  * Used to represent multiple values coming from different originators.
  */
-public interface DHTValueBag {
+public interface DHTValueBag extends Serializable {
 
     /**
      * Adds a <tt>DHTValue</tt> to this value bag. The value must
