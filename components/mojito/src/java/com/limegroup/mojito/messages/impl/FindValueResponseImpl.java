@@ -60,8 +60,8 @@ public class FindValueResponseImpl extends AbstractLookupResponse
             MessageID messageId, int version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
-        this.keys = in.readKUIDs();
         this.requestLoad = in.readFloat();
+        this.keys = in.readKUIDs();
         this.values = in.readDHTValues(getContact());
     }
     
@@ -78,8 +78,8 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeKUIDs(keys);
         out.writeFloat(requestLoad);
+        out.writeKUIDs(keys);
         out.writeDHTValues(values);
     }
     
