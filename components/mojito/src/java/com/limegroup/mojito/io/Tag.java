@@ -395,7 +395,7 @@ public class Tag {
         }
         
         public boolean isCancelled() {
-        	return Tag.this.isCancelled();
+            return Tag.this.isCancelled();
         }
     }
 }
