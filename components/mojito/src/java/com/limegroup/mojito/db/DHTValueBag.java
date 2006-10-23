@@ -69,10 +69,17 @@ public interface DHTValueBag extends Serializable {
     public boolean isEmpty();
 
     /**
+     * 
+     * @param nodeId
+     * @return
+     */
+    public DHTValue get(KUID nodeId);
+    
+    /**
      * Returns true if this bag contains a value coming from the 
      * specified originator <tt>KUID</tt>.
      * 
-     * @param key The value's originator KUID
+     * @param nodeId The value's originator KUID
      */
-    public boolean containsKey(KUID key);
+    public boolean containsKey(KUID nodeId);
 }

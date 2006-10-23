@@ -34,6 +34,10 @@ import com.limegroup.mojito.routing.ContactFactory;
 
 public class DatabaseTest extends BaseTestCase {
     
+    /*static {
+        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+    }*/
+    
     public DatabaseTest(String name) {
         super(name);
     }

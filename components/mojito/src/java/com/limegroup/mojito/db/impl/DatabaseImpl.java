@@ -32,6 +32,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.db.DatabaseSecurityConstraint;
 
 /*
  * Multiple values per key and one value per nodeId under a certain key
@@ -67,13 +68,19 @@ public class DatabaseImpl implements Database {
      * The maximum database size. Can be negative to 
      * make the size unbound
      */
-    private int maxDatabaseSize = -1;
+    final int maxDatabaseSize;
     
     /**
      * The maximum number of values per primary key. Can 
      * be negative to make the size unbound
      */
-    private int maxValuesPerKey = -1;
+    final int maxValuesPerKey;
+    
+    /**
+     * 
+     */
+    private DatabaseSecurityConstraint securityConstraint 
+        = new DefaultDatabaseSecurityConstraint();
     
     public DatabaseImpl() {
         this(-1, -1);
@@ -84,10 +91,28 @@ public class DatabaseImpl implements Database {
         this.maxValuesPerKey = maxValuesPerKey;
     }
     
+    public void setDatabaseSecurityConstraint(
+            DatabaseSecurityConstraint securityConstraint) {
+        
+        if (securityConstraint == null) {
+            securityConstraint = new DefaultDatabaseSecurityConstraint();
+        }
+        
+        this.securityConstraint = securityConstraint;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#getKeyCount()
+     */
     public synchronized int getKeyCount() {
         return database.size();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#getValueCount()
+     */
     public synchronized int getValueCount() {
         int count = 0;
         for (DHTValueBag bag : database.values()) {
@@ -96,11 +121,23 @@ public class DatabaseImpl implements Database {
         return count;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#clear()
+     */
     public synchronized void clear() {
         database.clear();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#store(com.limegroup.mojito.db.DHTValue)
+     */
     public synchronized boolean store(DHTValue value) {
+        if (!allowStore(value)) {
+            return false;
+        }
+        
         if (value.isEmpty()) {
             return remove(value);
         } else {
@@ -108,13 +145,12 @@ public class DatabaseImpl implements Database {
         }
     }
     
+    /**
+     * 
+     */
     private synchronized boolean add(DHTValue value) {
         if (value.isEmpty()) {
             throw new IllegalArgumentException();
-        }
-        
-        if (!canAddValue(database, value)) {
-            return false;
         }
         
         KUID valueId = value.getValueID();
@@ -133,26 +169,7 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canAddValue(Map<KUID, ? extends DHTValueBag> database, DHTValue value) {
-        
-        if (value.isLocalValue()) {
-            return true;
-        }
-        
-        KUID valueId = value.getValueID();
-        KUID nodeId = value.getOriginatorID();
-        DHTValueBag bag = database.get(valueId);
-        
-        if (bag == null) {
-            return maxDatabaseSize < 0 || database.size() < maxDatabaseSize;
-        } else if (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey) {
-            return true;
-        }
-        
-        return value.isDirect() && bag.containsKey(nodeId);
-    }
-    
-    public synchronized boolean removeAll(Collection<? extends DHTValue> values) {
+    /*public synchronized boolean removeAll(Collection<? extends DHTValue> values) {
         boolean removedAll = true;
         for (DHTValue value : values) {
             if (!remove(value)) {
@@ -160,12 +177,13 @@ public class DatabaseImpl implements Database {
             }
         }
         return removedAll;
-    }
+    }*/
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#remove(com.limegroup.mojito.db.DHTValue)
+     */
     public synchronized boolean remove(DHTValue value) {
-        if (!canRemoveValue(database, value)) {
-            return false;
-        }
         
         KUID valueId = value.getValueID();
         DHTValueBag bag = database.get(valueId);
@@ -182,28 +200,53 @@ public class DatabaseImpl implements Database {
         return false;
     }
     
-    protected boolean canRemoveValue(Map<KUID, ? extends DHTValueBag> database, DHTValue value) {
-        return true;
+    /**
+     * 
+     */
+    private boolean allowStore(DHTValue value) {
+        DatabaseSecurityConstraint dbsc = securityConstraint;
+        if (dbsc == null) {
+            return true;
+        }
+        
+        DHTValueBag bag = database.get(value.getValueID());
+        return dbsc.allowStore(this, bag, value);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#get(com.limegroup.mojito.KUID)
+     */
     public synchronized DHTValueBag get(KUID valueId) {
         return database.get(valueId);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#contains(com.limegroup.mojito.db.DHTValue)
+     */
     public synchronized boolean contains(DHTValue value) {
         DHTValueBag bag = get(value.getValueID()); 
         
-        if(bag != null) {
+        if (bag != null) {
             return bag.containsKey(value.getOriginatorID());
         } 
         
         return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#keySet()
+     */
     public synchronized Set<KUID> keySet() {
         return Collections.unmodifiableSet(new HashSet<KUID>(database.keySet()));
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#values()
+     */
     public synchronized Collection<DHTValue> values() {
         List<DHTValue> values = new ArrayList<DHTValue>();
         for (DHTValueBag bag : database.values()) {

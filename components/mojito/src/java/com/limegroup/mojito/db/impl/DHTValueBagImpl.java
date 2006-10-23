@@ -52,6 +52,10 @@ class DHTValueBagImpl implements DHTValueBag {
         valuesMap = new HashMap<KUID, DHTValue>();
     }
     
+    public KUID getValueId() {
+        return valueId;
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#add(com.limegroup.mojito.db.DHTValue)
      */
@@ -60,21 +64,18 @@ class DHTValueBagImpl implements DHTValueBag {
             throw new IllegalArgumentException("Value ID must be " + valueId);
         }
         
-        KUID key = value.getOriginatorID();
-        if ((value.isDirect() && putDirectDHTValue(key, value)) 
-                || (!value.isDirect() && putIndirectDHTValue(key, value))) {
-            
-            valuesMap.put(key, value);
-            return true;
-        }
-        
-        return false;
+        valuesMap.put(value.getOriginatorID(), value);
+        return true;
     }
     
-    public KUID getValueId() {
-        return valueId;
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#get(com.limegroup.mojito.KUID)
+     */
+    public DHTValue get(KUID nodeId) {
+        return valuesMap.get(nodeId);
     }
-
+    
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValuesMap()
      */
@@ -136,56 +137,7 @@ class DHTValueBagImpl implements DHTValueBag {
      * @see com.limegroup.mojito.db.impl.DHTValueBag#remove(java.lang.Object)
      */
     public boolean remove(DHTValue value) {
-        if(!value.isLocalValue()) {
-            
-            if(!value.isDirect()) {
-                return false;
-            }
-            
-            KUID originatorId = value.getOriginatorID();
-            DHTValue current = valuesMap.get(originatorId);
-            if (current == null || current.isLocalValue()) {
-                return false;
-            }
-        }
-        
         return (valuesMap.remove(value.getOriginatorID()) != null);
-    }
-    
-    /**
-     * Returns whether or not the given (direct) DHTValue can
-     * be added to the bag
-     */
-    private boolean putDirectDHTValue(KUID key, DHTValue value) {
-        assert (value.isDirect());
-        
-        // Do not replace local with non-local values
-        DHTValue current = valuesMap.get(key);
-        if (current != null 
-                && current.isLocalValue() 
-                && !value.isLocalValue()) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Returns whether or not the given (indirect) DHTValue can
-     * be added to the bag
-     */
-    private boolean putIndirectDHTValue(KUID key, DHTValue value) {
-        assert (!value.isDirect());
-        assert (!value.isLocalValue()); // cannot be a local value
-        
-        // Do not overwrite an directly stored value
-        DHTValue current = valuesMap.get(key);
-        if (current != null 
-                && current.isDirect()) {
-            return false;
-        }
-        
-        return true;
     }
     
     /* (non-Javadoc)
