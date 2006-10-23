@@ -17,12 +17,12 @@ import com.limegroup.mojito.settings.DatabaseSettings;
  * to <tt>DHTValue</tt>s
  * 
  */
-class DHTValueBagImpl implements DHTValueBag{
+class DHTValueBagImpl implements DHTValueBag {
     
     private static final long serialVersionUID = 3677203930910637434L;
     
-    private static final float SMOOTHING_FACTOR = 
-        DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.getValue();
+    private static final float SMOOTHING_FACTOR 
+        = DatabaseSettings.VALUE_LOAD_SMOOTHING_FACTOR.getValue();
     
     /**
      * The key if this value
@@ -32,7 +32,7 @@ class DHTValueBagImpl implements DHTValueBag{
     /**
      * The request load associated with this DHT value bag
      */
-    private float requestLoad = 0;
+    private float requestLoad = 0f;
     
     /**
      * The time the request load was last updated
@@ -75,14 +75,14 @@ class DHTValueBagImpl implements DHTValueBag{
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValuesMap()
      */
-    public Map<KUID, DHTValue> getValuesMap(){
+    public Map<KUID, DHTValue> getValuesMap() {
         return Collections.unmodifiableMap(valuesMap);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValues()
      */
-    public Collection<DHTValue> getAllValues(){
+    public Collection<DHTValue> getAllValues() {
         return valuesMap.values();
     }
     
@@ -104,15 +104,15 @@ class DHTValueBagImpl implements DHTValueBag{
         
         long now = System.currentTimeMillis();
         
-        if(lastRequestTime == 0) {
+        if(lastRequestTime == 0L) {
             lastRequestTime = now;
-            return 0;
+            return 0f;
         }
         
-        float delay = (now - lastRequestTime)/1000F; //in sec
+        float delay = (now - lastRequestTime)/1000f; //in sec
         
-        if(delay <= 0) {
-            requestLoad = 0; //we can't trust the value anymore
+        if (delay <= 0f) {
+            requestLoad = 0f; //we can't trust the value anymore
             return requestLoad;
         }
         
@@ -122,7 +122,7 @@ class DHTValueBagImpl implements DHTValueBag{
         //Which is equal to:
         //newValue = previousValue + SF * (newLoad - previousValue)
         requestLoad = requestLoad 
-            + SMOOTHING_FACTOR*((1/delay) - requestLoad);
+            + SMOOTHING_FACTOR*((1f/delay) - requestLoad);
         lastRequestTime = now;
         
         return requestLoad;
@@ -201,15 +201,15 @@ class DHTValueBagImpl implements DHTValueBag{
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#containsKey(com.limegroup.mojito.KUID)
      */
-    public boolean containsKey(KUID key){
+    public boolean containsKey(KUID key) {
         return valuesMap.containsKey(key);
     }
 
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Bag: "+getValueId()).append("\n");
-        buffer.append("Load: "+getRequestLoad());
+        buffer.append("Bag: ").append(getValueId()).append("\n");
+        buffer.append("Load: ").append(getRequestLoad()).append("\n");
         buffer.append("Values:").append("\n");
         
         for(DHTValue value : getAllValues()) {    
