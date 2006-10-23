@@ -455,6 +455,8 @@ public class VerifyingFile {
         
     }
     /**
+     * While iterating over the result a lock to the verifying file should
+     * be held to ensure the interval lists are not modified elsewhere.
      * @return all downloaded blocks as list
      */
     public synchronized Iterable<Interval> getBlocks() {
