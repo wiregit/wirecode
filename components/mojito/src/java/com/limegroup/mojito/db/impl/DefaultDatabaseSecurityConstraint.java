@@ -44,10 +44,12 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         int maxDatabaseSize = impl.maxDatabaseSize;
         int maxValuesPerKey = impl.maxValuesPerKey;
         
+        // Limit the number of keys
         if (bag == null) {
             return (maxDatabaseSize < 0 || database.getKeyCount() < maxDatabaseSize);
         }
         
+        // Limit the number of values per key
         DHTValue existing = bag.get(value.getOriginatorID());
         if (existing == null) {
             return (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey);
