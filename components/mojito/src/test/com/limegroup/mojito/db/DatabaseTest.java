@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 
-import junit.framework.TestSuite;
+import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
@@ -34,11 +34,15 @@ import com.limegroup.mojito.routing.ContactFactory;
 
 public class DatabaseTest extends BaseTestCase {
     
+    /*static {
+        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+    }*/
+    
     public DatabaseTest(String name) {
         super(name);
     }
 
-    public static TestSuite suite() {
+    public static Test suite() {
         return buildTestSuite(DatabaseTest.class);
     }
 
@@ -89,7 +93,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getValueID())
-                    .get(value1.getOriginatorID()).getData()));
+                    .getValuesMap().get(value1.getOriginatorID()).getData()));
         
         // Neither direct...
         DHTValue value2 = createDirectDHTValue(value1.getOriginatorID(), 
@@ -99,7 +103,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value2.getValueID())
-                    .get(value2.getOriginatorID()).getData()));
+                    .getValuesMap().get(value2.getOriginatorID()).getData()));
         
         // ...nor indirect values can replace a local value
         DHTValue value3 = createIndirectDHTValue(value1.getOriginatorID(), 
@@ -109,7 +113,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value3.getValueID())
-                    .get(value3.getOriginatorID()).getData()));
+                    .getValuesMap().get(value3.getOriginatorID()).getData()));
         
         // Only local values can replace local values
         DHTValue value4 = createLocalDHTValue(value1.getOriginatorID(), 
@@ -119,7 +123,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value4.getValueID())
-                    .get(value4.getOriginatorID()).getData()));
+                    .getValuesMap().get(value4.getOriginatorID()).getData()));
         
         // Add a new direct value
         DHTValue value5 = createDirectDHTValue("Mojito".getBytes());
@@ -128,7 +132,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value5.getValueID())
-                    .get(value5.getOriginatorID()).getData()));
+                    .getValuesMap().get(value5.getOriginatorID()).getData()));
         
         // local values replace direct values
         DHTValue value6 = createLocalDHTValue(value5.getOriginatorID(), 
@@ -138,7 +142,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
                 database.get(value6.getValueID())
-                    .get(value6.getOriginatorID()).getData()));
+                    .getValuesMap().get(value6.getOriginatorID()).getData()));
         
         // Add an indirect value
         DHTValue value7 = createDirectDHTValue("Bloody".getBytes());
@@ -147,7 +151,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Bloody".getBytes(), 
                 database.get(value7.getValueID())
-                    .get(value7.getOriginatorID()).getData()));
+                    .getValuesMap().get(value7.getOriginatorID()).getData()));
         
         // local values replace indirect values
         DHTValue value8 = createLocalDHTValue(value7.getOriginatorID(), 
@@ -157,7 +161,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Lime".getBytes(), 
                 database.get(value8.getValueID())
-                    .get(value8.getOriginatorID()).getData()));
+                    .getValuesMap().get(value8.getOriginatorID()).getData()));
 
     }
     
@@ -171,7 +175,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getValueID())
-                    .get(value1.getOriginatorID()).getData()));
+                    .getValuesMap().get(value1.getOriginatorID()).getData()));
         
         // Shouldn't change
         database.store(value1);
@@ -186,7 +190,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value2.getValueID())
-                    .get(value2.getOriginatorID()).getData()));
+                    .getValuesMap().get(value2.getOriginatorID()).getData()));
         
         // A directly stored value cannot be replaced by
         // an indirect value
@@ -197,7 +201,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value3.getValueID())
-                    .get(value3.getOriginatorID()).getData()));
+                    .getValuesMap().get(value3.getOriginatorID()).getData()));
     }
     
     public void testIndirectAdd() throws Exception {
@@ -210,7 +214,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getValueID())
-                    .get(value1.getOriginatorID()).getData()));
+                    .getValuesMap().get(value1.getOriginatorID()).getData()));
         
         // Indirect replaces indirect
         DHTValue value2 = createIndirectDHTValue(value1.getOriginatorID(), 
@@ -220,7 +224,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value2.getValueID())
-                    .get(value2.getOriginatorID()).getData()));
+                    .getValuesMap().get(value2.getOriginatorID()).getData()));
         
         // Direct replaces indirect
         DHTValue value3 = createDirectDHTValue(value2.getOriginatorID(), 
@@ -230,7 +234,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value3.getValueID())
-                    .get(value3.getOriginatorID()).getData()));
+                    .getValuesMap().get(value3.getOriginatorID()).getData()));
         
         // Indirect shouldn't replace direct
         DHTValue value4 = createIndirectDHTValue(value3.getOriginatorID(), 
@@ -240,7 +244,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value4.getValueID())
-                    .get(value4.getOriginatorID()).getData()));
+                    .getValuesMap().get(value4.getOriginatorID()).getData()));
     }
     
     public void testMultipleValues() throws Exception {
@@ -253,7 +257,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getValueID())
-                    .get(value1.getOriginatorID()).getData()));
+                    .getValuesMap().get(value1.getOriginatorID()).getData()));
         
         // Same Key but different originator/sender
         DHTValue value2 = createIndirectDHTValue(KUID.createRandomID(), 
@@ -263,7 +267,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value2.getValueID())
-                    .get(value2.getOriginatorID()).getData()));
+                    .getValuesMap().get(value2.getOriginatorID()).getData()));
         
         // Same Key but a different originator
         DHTValue value3 = createDirectDHTValue(KUID.createRandomID(),
@@ -273,7 +277,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
                 database.get(value3.getValueID())
-                    .get(value3.getOriginatorID()).getData()));
+                    .getValuesMap().get(value3.getOriginatorID()).getData()));
         
         // Different Key
         DHTValue value4 = createDirectDHTValue("Olga".getBytes());
@@ -282,7 +286,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(4, database.getValueCount());
         assertTrue(Arrays.equals("Olga".getBytes(), 
                 database.get(value4.getValueID())
-                    .get(value4.getOriginatorID()).getData()));
+                    .getValuesMap().get(value4.getOriginatorID()).getData()));
     }
     
     public void testRemove() throws Exception {
@@ -295,7 +299,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getValueID())
-                    .get(value1.getOriginatorID()).getData()));
+                    .getValuesMap().get(value1.getOriginatorID()).getData()));
         
         // It's not possible to remove a value indirectly
         DHTValue value2 = createIndirectDHTValue(value1.getOriginatorID(), 
@@ -305,7 +309,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value2.getValueID())
-                    .get(value2.getOriginatorID()).getData()));
+                    .getValuesMap().get(value2.getOriginatorID()).getData()));
         
         // But we can remove values directly
         DHTValue value3 = createDirectDHTValue(value1.getOriginatorID(), 
@@ -321,7 +325,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value4.getValueID())
-                    .get(value4.getOriginatorID()).getData()));
+                    .getValuesMap().get(value4.getOriginatorID()).getData()));
         
         // A local value cannot be removed
         DHTValue value5 = createDirectDHTValue(value4.getOriginatorID(), 
@@ -331,7 +335,7 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value5.getValueID())
-                    .get(value5.getOriginatorID()).getData()));
+                    .getValuesMap().get(value5.getOriginatorID()).getData()));
         
         // But a local value can remove a local value
         DHTValue value6 = createLocalDHTValue(value4.getOriginatorID(), 

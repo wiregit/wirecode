@@ -50,7 +50,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueFactory;
-import com.limegroup.mojito.db.DHTValuePublisher;
+import com.limegroup.mojito.db.DHTValueManager;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
@@ -106,7 +106,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
-    private DHTValuePublisher publisher;
+    private DHTValueManager dhtValueManager;
     private RandomBucketRefresher bucketRefresher;
     
     private PingManager pingManager;
@@ -180,7 +180,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         messageDispatcher = new MessageDispatcherImpl(this);
         messageHelper = new MessageHelper(this);
-        publisher = new DHTValuePublisher(this);
+        dhtValueManager = new DHTValueManager(this);
 
         bucketRefresher = new RandomBucketRefresher(this);
         
@@ -742,7 +742,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         estimator = new DHTSizeEstimator();
         messageDispatcher.start();
         bucketRefresher.start();
-        publisher.start();
+        dhtValueManager.start();
     }
     
     /*
@@ -795,7 +795,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         running = false;
         
         bucketRefresher.stop();
-        publisher.stop();
+        dhtValueManager.stop();
         
         scheduledExecutor.shutdownNow();
         contextExecutor.shutdownNow();

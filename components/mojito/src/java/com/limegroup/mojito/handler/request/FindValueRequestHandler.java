@@ -32,12 +32,12 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
-import com.limegroup.mojito.util.CollectionUtils;
 
 /**
  * The FindNodeRequestHandler handles incoming FIND_VALUE requests
@@ -65,20 +65,39 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         KUID lookup = request.getLookupID();
         
         Database database = context.getDatabase();
-        Map<KUID, DHTValue> map = database.get(lookup);
+        DHTValueBag bag = database.get(lookup);
+
+        if(bag == null) {
+            //OK, send Contacts instead!
+            findNodeDelegate.handleRequest(message);
+            return;
+        }
         
+        Map<KUID, DHTValue> map = bag.getValuesMap();
+        
+        //TODO: should never be empty?
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + " = {" + CollectionUtils.toString(map.values()) + "}");
+                LOG.trace("Hit! " + lookup + "\n"+bag.toString());
             }
             
             Set<KUID> keys = Collections.emptySet();
             Collection<DHTValue> values = Collections.emptyList();
             
             Collection<KUID> nodeIds = request.getKeys();
+            
+            // Nothing specific requested?
             if (nodeIds.isEmpty()) {
-                // Nothing requested? Send just the keys back!
-                keys = map.keySet();
+                // If there's only one value for this key then send 
+                // just the DHTValue
+                if (map.size() == 1) {
+                    values = map.values();
+                    
+                // Otherwise send the keys and the remote Node must
+                // figure out what it's looking for
+                } else {
+                    keys = map.keySet();
+                }
             } else {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
@@ -90,9 +109,11 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                     }
                 }
             }
+            
+            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
            
             FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, keys, values);
+                        .createFindValueResponse(request, keys, values, bag.incrementRequestLoad());
             context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send Contacts instead!

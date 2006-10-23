@@ -86,7 +86,7 @@ public interface MessageFactory {
      * Creates and returns a FindValueResponse Message
      */
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values);
+            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad);
 
     /**
      * Creates and returns a StoreRequest Message

@@ -113,7 +113,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
                 }
             }*/
             
-            if (database.add(value)) {
+            if (database.store(value)) {
                 networkStats.STORE_REQUESTS_OK.incrementStat();
                 status.add(new EntryImpl(valueId, Status.SUCCEEDED));
             } else {

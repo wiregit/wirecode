@@ -21,7 +21,6 @@ package com.limegroup.mojito.db;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.mojito.KUID;
@@ -36,21 +35,12 @@ public interface Database extends Serializable {
     
     /**
      * Adds or removes the given DHTValue depending on
-     * whether or not it's empty. This is the preferred
-     * method.
+     * whether or not it's empty. 
      * 
      * @param value DHTValue to store (add or remove)
      * @return Whether or not the given DHTValue was added or removed
      */
     public boolean store(DHTValue value);
-    
-    /**
-     * Adds the given DHTValue to the Database
-     * 
-     * @param DHTValueImpl to add
-     * @return Whether or not the given DHTValue was added
-     */
-    public boolean add(DHTValue value);
     
     /**
      * Removes the given DHTValue from the Database
@@ -61,16 +51,11 @@ public interface Database extends Serializable {
     public boolean remove(DHTValue value);
     
     /**
-     * Removes the given DHTValue(s) from the Database.
-     * Returns true if all values were removed.
+     * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
+     * 
+     * @param valueId The KUID of the value to lookup in the database
      */
-    //public boolean removeAll(Collection<? extends DHTValue> values);
-    
-    /**
-     * Returns a Map of NodeID -> DHTValue for the given ValueID.
-     * The returned Map is unmodifyable!
-     */
-    public Map<KUID, DHTValue> get(KUID valueId);
+    public DHTValueBag get(KUID valueId);
     
     /**
      * Returns whether or not the given DHTValue is stored in our

@@ -68,6 +68,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
     /** The hashCode */
     private int hashCode;
     
+    
     /**
      * Creates an instance of DHTValueImpl
      * 

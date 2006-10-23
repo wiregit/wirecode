@@ -16,31 +16,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages;
 
-import java.util.Collection;
+package com.limegroup.mojito.db;
 
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import java.io.Serializable;
 
 /**
- * An interface for FindValueResponse implementations
+ * An interface that controls the Database store policy 
  */
-public interface FindValueResponse extends LookupResponse {
+public interface DatabaseSecurityConstraint extends Serializable {
     
     /**
-     * Returns a Collection of KUIDs that a Node has to offer
+     * Returns true if it's OK to store the given DHTValue in the 
+     * Database and DHTValueBag respectively.
      */
-    public Collection<KUID> getKeys();
-    
-    /**
-     * Returns a Collection of DHTValue(s)
-     */
-    public Collection<DHTValue> getValues();
-    
-    /**
-     * Returns the request load for this key
-     */
-    public float getRequestLoad();
+    public boolean allowStore(Database database, DHTValueBag bag, DHTValue value);
 }
