@@ -284,19 +284,21 @@ abstract class AbstractDHTController implements DHTController {
             running = true;
         }
         
-        public void addDHTNode(SocketAddress address) {
-            synchronized(dhtNodes) {
-                dhtNodes.add(address);
-            }
+        public synchronized void addDHTNode(SocketAddress address) {
+            dhtNodes.add(address);
         }
         
         public void run() {
-            if(!running) {
-                return;
-            }
             
-            synchronized(dhtNodes) {
-                for(SocketAddress addr : dhtNodes) {
+            synchronized(dht) {
+                
+                if(!running) {
+                    return;
+                }
+                
+                List<SocketAddress> nodesList = new ArrayList<SocketAddress>(dhtNodes);
+                
+                for(SocketAddress addr : nodesList) {
                     
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("RandomNodeAdder pinging: "+ addr);

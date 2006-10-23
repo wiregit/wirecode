@@ -102,7 +102,7 @@ public class DatabaseImpl implements Database {
     
     public synchronized boolean store(DHTValue value) {
         if (value.isEmpty()) {
-            return remove(value, true);
+            return remove(value);
         } else {
             return add(value);
         }
@@ -152,10 +152,6 @@ public class DatabaseImpl implements Database {
         return value.isDirect() && bag.containsKey(nodeId);
     }
     
-    public synchronized boolean remove(DHTValue value) {
-        return remove(value, false);
-    }
-    
     public synchronized boolean removeAll(Collection<? extends DHTValue> values) {
         boolean removedAll = true;
         for (DHTValue value : values) {
@@ -166,15 +162,7 @@ public class DatabaseImpl implements Database {
         return removedAll;
     }
     
-    /**
-     * Remove a value from the database. 
-
-     * @param value The DHTValue to remove
-     * @param isRemoteRemove Whether or not the value is 
-     * removed by executing a store with empty data
-     * 
-     */
-    private synchronized boolean remove(DHTValue value, boolean isRemoteRemove) {
+    public synchronized boolean remove(DHTValue value) {
         if (!canRemoveValue(database, value)) {
             return false;
         }
@@ -182,17 +170,14 @@ public class DatabaseImpl implements Database {
         KUID valueId = value.getValueID();
         DHTValueBag bag = database.get(valueId);
         if (bag != null) {
-            int size = bag.size();
-            
-            ((DHTValueBagImpl)bag).remove(value, isRemoteRemove);
+
+            boolean removed = bag.remove(value);
             
             if (bag.isEmpty()) {
                 database.remove(valueId);
             }
             
-            if (bag.size() != size) {
-                return true;
-            }
+            return removed;
         }
         return false;
     }

@@ -71,14 +71,6 @@ class DHTValueBagImpl implements DHTValueBag {
         return false;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.DHTValueBag#remove(com.limegroup.mojito.db.DHTValue)
-     */
-    public boolean remove(DHTValue value) {
-        return remove(value, false) != null;
-    }
-    
     public KUID getValueId() {
         return valueId;
     }
@@ -143,21 +135,21 @@ class DHTValueBagImpl implements DHTValueBag {
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#remove(java.lang.Object)
      */
-    public DHTValue remove(DHTValue value, boolean isRemoteRemove) {
-        if(isRemoteRemove) {
-            if(!value.isDirect() && !value.isLocalValue()) {
-                return null;
+    public boolean remove(DHTValue value) {
+        if(!value.isLocalValue()) {
+            
+            if(!value.isDirect()) {
+                return false;
             }
             
             KUID originatorId = value.getOriginatorID();
             DHTValue current = valuesMap.get(originatorId);
-            if (current == null 
-                    || (current.isLocalValue() && !value.isLocalValue())) {
-                return null;
+            if (current == null || current.isLocalValue()) {
+                return false;
             }
         }
         
-        return valuesMap.remove(value.getOriginatorID());
+        return (valuesMap.remove(value.getOriginatorID()) != null);
     }
     
     /**
