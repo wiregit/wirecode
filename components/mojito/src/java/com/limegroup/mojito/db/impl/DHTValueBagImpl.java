@@ -71,6 +71,14 @@ class DHTValueBagImpl implements DHTValueBag {
         return false;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#remove(com.limegroup.mojito.db.DHTValue)
+     */
+    public boolean remove(DHTValue value) {
+        return remove(value, false) != null;
+    }
+    
     public KUID getValueId() {
         return valueId;
     }

@@ -21,6 +21,13 @@ public interface DHTValueBag extends Serializable {
     public boolean add(DHTValue value);
     
     /**
+     * Removes a <tt>DHTValue</tt> from this value bag.
+     * 
+     * @return true if the value was removed, false otherwise
+     */
+    public boolean remove(DHTValue value);
+    
+    /**
      * Return's this Bag's value ID.
      * 
      */
@@ -68,5 +75,4 @@ public interface DHTValueBag extends Serializable {
      * @param key The value's originator KUID
      */
     public boolean containsKey(KUID key);
-
 }
