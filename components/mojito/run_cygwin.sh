@@ -1,10 +1,17 @@
 #!/bin/sh
 
 CLASSPATH=\
-".;lib/commons-logging.jar;lib/log4j.jar;lib/core.jar;"
+".;src/java;src/misc;../core;"
+
+for JAR in $(find ../lib/jars -name *.jar); do 
+   CLASSPATH="${CLASSPATH};${JAR}"
+done
+for JAR in $(find lib/misc -name *.jar); do 
+   CLASSPATH="${CLASSPATH};${JAR}"
+done
 
 export CLASSPATH
 
 ulimit -n 1024
 
-java com.limegroup.mojito.Main $1 $2 $3
+java -ea com.limegroup.mojito.Main $1 $2 $3

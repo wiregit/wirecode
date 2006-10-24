@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.LifecycleEvent.LifeEvent;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -244,6 +246,12 @@ public class ConnectionManager implements ConnectionAcceptor {
      * The current measured downstream bandwidth in kbytes/sec.
      */
     private volatile float _measuredDownstreamBandwidth = 0.f;
+    
+    /**
+     * List of event listeners for LifeCycleEvents.
+     */
+    private CopyOnWriteArrayList<LifecycleListener> lifeCycleListeners = 
+        new CopyOnWriteArrayList<LifecycleListener>();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using
@@ -377,8 +385,8 @@ public class ConnectionManager implements ConnectionAcceptor {
     }
     
     /** Return true if we are not a private address, have been ultrapeer capable
-     *  in the past, and are not being shielded by anybody, AND we don't have UP
-     *  mode disabled.
+     *  in the past, and are not being shielded by anybody, we don't have UP
+     *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
         return !NetworkUtils.isPrivate() &&
@@ -1388,8 +1396,10 @@ public class ConnectionManager implements ConnectionAcceptor {
     /**
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
+     * 
+     * @param willTryToReconnect Whether or not this is only a temporary disconnection
      */
-    public synchronized void disconnect() {
+    public synchronized void disconnect(boolean willTryToReconnect) {
         if(_disconnectTime == 0) {
             long averageUptime = getCurrentAverageUptime();
             int totalConnections = Math.max(1, ApplicationSettings.TOTAL_CONNECTIONS.getValue() + 1);
@@ -1413,6 +1423,11 @@ public class ConnectionManager implements ConnectionAcceptor {
                 _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
                                           c.getPort()), true, c.getLocalePref());
             }
+        }
+        
+        if(!willTryToReconnect) {
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifecycleEvent.LifeEvent.DISCONNECTED, null));
         }
     }
     
@@ -1559,7 +1574,9 @@ public class ConnectionManager implements ConnectionAcceptor {
         RouterService.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
-        RouterService.getCallback().connectionClosed(c);
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this, 
+                LifeEvent.CONNECTION_CLOSED,
+                c));
 
         // 5) Clean up Unicaster
         QueryUnicaster.instance().purgeQuery(c);
@@ -1687,6 +1704,11 @@ public class ConnectionManager implements ConnectionAcceptor {
                 need--;
             }
             _fetchers.addAll(fetchers);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifeEvent.CONNECTING, null));
+        } else if (need == 0) {
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifeEvent.CONNECTED, null));
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1777,7 +1799,9 @@ public class ConnectionManager implements ConnectionAcceptor {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        RouterService.getCallback().connectionInitializing(mc);
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                LifeEvent.CONNECTION_INITIALIZING,
+                mc));
      
         try {
             mc.initialize(fetcher);
@@ -1869,7 +1893,7 @@ public class ConnectionManager implements ConnectionAcceptor {
 
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() || isActiveSupernode())
             return false;
-        else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < _demotionLimit)
+        else if(NodeAssigner.isTooGoodUltrapeerToPassUp() && _leafTries < _demotionLimit)
 			return false;
         else
 		    return true;
@@ -1888,7 +1912,7 @@ public class ConnectionManager implements ConnectionAcceptor {
 		if(isSupernode()) return;
 		_demotionLimit = demotionLimit;
 		_leafTries = 0;
-		disconnect();
+		disconnect(true);
 		connect();
 	}
 
@@ -1943,7 +1967,9 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifeEvent.CONNECTION_INITIALIZING,
+                    c));
         }
 
         try {
@@ -1995,7 +2021,9 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                    LifeEvent.CONNECTION_INITIALIZING,
+                    c));
         }
 
         return completeConnectionInitialization(c, false);
@@ -2021,7 +2049,9 @@ public class ConnectionManager implements ConnectionAcceptor {
             // announce its initialization
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
-                RouterService.getCallback().connectionInitialized(mc);
+                dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                        LifeEvent.CONNECTION_INITIALIZED,
+                        mc));
                 setPreferredConnections();
             }
             return connectionOpen;
@@ -2301,7 +2331,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         
         // Notify the user that they have no internet connection and that
         // we will automatically retry
-        RouterService.getCallback().disconnected();
+        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
+                LifeEvent.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
@@ -2310,7 +2341,7 @@ public class ConnectionManager implements ConnectionAcceptor {
         }
 
         // Kill all of the ConnectionFetchers.
-        disconnect();
+        disconnect(false);
         
         // Try to reconnect in 10 seconds, and then every minute after
         // that.
@@ -2363,5 +2394,59 @@ public class ConnectionManager implements ConnectionAcceptor {
                 ApplicationSettings.DEFAULT_LOCALE.getValue();
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
     }
+    
+    /**
+     * registers a listener for LifeCycleEvents
+     */
+    public void registerLifecycleListener(LifecycleListener listener) {
+        lifeCycleListeners.addIfAbsent(listener);
+    }
+    
+    /**
+     * unregisters a listener for LifeCycleEvents
+     */
+    public void unregisterLifecycleListener(LifecycleListener listener) {
+        lifeCycleListeners.remove(listener);
+    }
+    
+    /**
+     * dispatches a LifecycleEvent to any registered listeners 
+     */
+    public void dispatchLifecycleEvent(LifecycleEvent evt) {
+        for(LifecycleListener listener : lifeCycleListeners) {
+            listener.handleLifecycleEvent(evt);
+        }
+    }
+    
+    /**
+     * Count how many connections have already received N messages
+     */
+    public int countConnectionsWithNMessages(int messageThreshold) {
+        int count = 0;
+        int msgs; 
 
+        // Count the messages on initialized connections
+        for(ManagedConnection c : getInitializedConnections()) {
+            msgs = c.getNumMessagesSent();
+            msgs += c.getNumMessagesReceived();
+            if ( msgs > messageThreshold )
+                count++;
+        }
+        return count;
+    }
+    
+    /**
+     * Count up all the messages on active connections
+     */
+    public int getActiveConnectionMessages() {
+        int count = 0;
+
+        // Count the messages on initialized connections
+        for(ManagedConnection c : getInitializedConnections()) {
+            count += c.getNumMessagesSent();
+            count += c.getNumMessagesReceived();
+        }
+        return count;
+    }
+    
 }

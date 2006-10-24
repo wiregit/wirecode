@@ -42,15 +42,17 @@ public class UDPCrawlerPing extends VendorMessage {
 	public static final byte USER_AGENT = 0x1 << 3;
     public static final byte NODE_UPTIME = 0x1 << 4;
     public static final byte REPLIES = 0x1 << 5;
+    public static final byte DHT_STATUS = 0x1 << 6;
 	
 	//all features OR'd.
-    public static final byte FEATURE_MASK = 
-    	CONNECTION_TIME |
-    	LOCALE_INFO |
-    	NEW_ONLY |
-    	USER_AGENT |
-    	NODE_UPTIME |
-    	REPLIES; 
+    public static final byte FEATURE_MASK 
+        = CONNECTION_TIME
+    	| LOCALE_INFO
+    	| NEW_ONLY
+    	| USER_AGENT
+    	| NODE_UPTIME
+    	| REPLIES
+        | DHT_STATUS; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
@@ -66,9 +68,7 @@ public class UDPCrawlerPing extends VendorMessage {
 	      _numberLeaves = numberLeaves;
 	      _format = (byte) (features & FEATURE_MASK);
 	}
-	
-	
-	
+    
 	/**
 	 * constructs a new ultrapeer request message, asking for
 	 * all ultrapeers and leafs of the other guy.
@@ -152,6 +152,15 @@ public class UDPCrawlerPing extends VendorMessage {
     public boolean hasNodeUptime() {
         return (byte)(NODE_UPTIME & _format) == NODE_UPTIME;
     }
+    
+    /**
+     * 
+     * @return whether the ping is requesting this node DHT status.
+     */
+    public boolean hasDHTStatus() {
+        return (byte)(DHT_STATUS & _format) == DHT_STATUS;
+    }
+    
     
     /**
      * 

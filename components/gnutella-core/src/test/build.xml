@@ -4,6 +4,8 @@
   <property name="builddir"        value="build"/>
   <property name="guidir"          value="../gui"/>
   <property name="coredir"         value="../core"/>
+  <property name="mojitodir"         value="../mojito/src/java"/>
+  <property name="mojitotestdir"         value="../mojito/src/test"/>
   <property name="libdir"          value="../lib"/>
   <property name="jars"            value="${libdir}/jars"/>
   <property name="messagebundles"  value="${libdir}/messagebundles"/>
@@ -135,7 +137,7 @@
  <!-- builds all files, including tests, in the project to the specified directory-->
  <target name="build" depends="prepare">
    <javac debug="on" optimize="off" deprecation="off"
-	      srcdir="${coredir}:${guidir}:${basedir}"
+	      srcdir="${coredir}:${guidir}:${mojitodir}:${mojitotestdir}:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
 		  excludes="macosx/**, windows/**"
 		  fork="true" memoryMaximumSize="100m"
@@ -182,6 +184,22 @@
  <target name="test" if="class">
     <antcall target="batchunit" inheritRefs="true">
         <param name="unit" value="com/limegroup/${module}/${class}.class"/>
+        <param name="haltonfailure" value="yes"/>
+        <param name="haltonerror" value="yes"/>
+    </antcall>
+    <antcall target="html"/>
+    <antcall target="clean testData"/>
+ </target>
+	
+ <!-- Runs a specific class, passing the output to the shell & XML file-->
+ <!-- class name specified by class passed by 'class' -->
+ <!-- For example, to run UltrapeerRoutingTest, you would type: -->
+ <!-- ant -D"class=UltrapeerRoutingTest" test -->
+ <!-- To test, say, DownloadTest, you would type: -->
+ <!-- ant -D"class=downloader/DownloadTest" test -->
+ <target name="testmojito" if="class">
+    <antcall target="batchunit" inheritRefs="true">
+        <param name="unit" value="com/limegroup/mojito/${class}.class"/>
         <param name="haltonfailure" value="yes"/>
         <param name="haltonerror" value="yes"/>
     </antcall>

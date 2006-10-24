@@ -25,7 +25,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -297,7 +297,7 @@ public class UDPService implements ReadWriteObserver {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
+                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Message.N_UDP);
                     if (message == null)
                         continue;
 
@@ -328,7 +328,7 @@ public class UDPService implements ReadWriteObserver {
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
         updateState(message, addr);
-        MessageDispatcher.instance().dispatchUDP(message, addr);
+        RouterService.getMessageDispatcher().dispatchUDP(message, addr);
     }
 	
 	/** Updates internal state of the UDP Service. */
@@ -443,7 +443,7 @@ public class UDPService implements ReadWriteObserver {
                                             ", position: " + buffer.position() +
                                             ", limit: " + buffer.limit());
 
-        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(buffer);
+        ByteBufferOutputStream baos = new ByteBufferOutputStream(buffer);
         try {
             msg.writeQuickly(baos);
         } catch(IOException e) {

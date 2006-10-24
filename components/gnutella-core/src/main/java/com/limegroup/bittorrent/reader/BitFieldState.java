@@ -13,7 +13,7 @@ import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * State that parses the Bitfield message. 
@@ -28,7 +28,7 @@ class BitFieldState extends BTReadMessageState {
 	 * not pre-allocated even though we know how large it will 
 	 * eventually get.
 	 */
-	private BufferByteArrayOutputStream bbaos;
+	private ByteBufferOutputStream bbaos;
 	private WritableByteChannel bbaosChan;
 
 	/**
@@ -46,7 +46,7 @@ class BitFieldState extends BTReadMessageState {
 		BTDataSource buf = readerState.getDataSource();
 
 		if (bbaos == null) {
-			bbaos = new BufferByteArrayOutputStream();
+			bbaos = new ByteBufferOutputStream();
 			bbaosChan = Channels.newChannel(bbaos);
 		}
 		

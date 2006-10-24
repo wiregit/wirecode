@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -41,6 +42,16 @@ public final class CapabilitiesVM extends VendorMessage {
      * The bytes for the LMUP message.
      */
     private static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    
+    /**
+     * The bytes for the Mojito DHT active node message.
+     */
+    private static final byte[] LIME_ACTIVE_DHT_NODE = { 'A', 'D', 'H', 'T' };
+    
+    /**
+     * The bytes for the Mojito DHT passive node message.
+     */
+    private static final byte[] LIME_PASSIVE_DHT_NODE = { 'P', 'D', 'H', 'T' };
     
     /**
      * The current version of this message.
@@ -124,6 +135,18 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
                                         UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
+        
+        if(RouterService.isMemberOfDHT()) {
+            if(RouterService.isActiveDHTNode()) {
+                smp = new SupportedMessageBlock(LIME_ACTIVE_DHT_NODE,
+                        RouterService.getDHTManager().getVersion());
+            } else {
+                smp = new SupportedMessageBlock(LIME_PASSIVE_DHT_NODE,
+                        RouterService.getDHTManager().getVersion());
+            }
+            hashSet.add(smp);
+        }
+        
     }
 
 
@@ -179,6 +202,20 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public int supportsUpdate() {
         return supportsCapability(LIME_UPDATE_BYTES);
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int isActiveDHTNode() {
+        return supportsCapability(LIME_ACTIVE_DHT_NODE);
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int isPassiveDHTNode() {
+        return supportsCapability(LIME_PASSIVE_DHT_NODE);
     }
 
     // override super

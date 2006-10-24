@@ -10,7 +10,7 @@ public final class StringSetting extends Setting {
     String value;
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * Creates a new <tt>StringSetting</tt> instance with the specified
 	 * key and defualt value.
 	 *
 	 * @param key the constant key to use for the setting

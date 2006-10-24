@@ -151,7 +151,7 @@ public class MessageFactory {
      * Reads a message using the specified buffer & network and the default soft
      * max.
      */
-    public static Message read(InputStream in, int network, byte[] buf)
+    public static Message read(InputStream in, byte[] buf, int network)
             throws BadPacketException, IOException {
         return MessageFactory.read(in, buf, network, SOFT_MAX);
     }
@@ -229,13 +229,11 @@ public class MessageFactory {
      * byte[].
      */
     public static Message createMessage(byte[] header, byte[] payload,
-            byte softMax, int network) throws BadPacketException {
-        if (header.length < 19)
+            byte softMax, int network) throws BadPacketException, IOException {
+        if (header.length < 19) {
             throw new IllegalArgumentException("header must be >= 19 bytes.");
-
-        // 4. Check values. These are based on the recommendations from the
-        // GnutellaDev page. This also catches those TTLs and hops whose
-        // high bit is set to 0.
+        }
+        
         byte func = header[16];
         
         // Get Parser based on opcode.
@@ -245,50 +243,70 @@ public class MessageFactory {
             throw new BadPacketException("Unrecognized function code: " + func);
         }
         
-        byte ttl = header[17];
-        byte hops = header[18];
-
-        byte hardMax = (byte) 14;
-        if (hops < 0) {
-            ReceivedErrorStat.INVALID_HOPS.incrementStat();
-            throw new BadPacketException("Negative (or very large) hops");
-        } else if (ttl < 0) {
-            ReceivedErrorStat.INVALID_TTL.incrementStat();
-            throw new BadPacketException("Negative (or very large) TTL");
-        } else if ((hops > softMax) && (func != Message.F_QUERY_REPLY)
-                && (func != Message.F_PING_REPLY)) {
-            ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
-            throw new BadPacketException("func: " + func + ", ttl: " + ttl
-                    + ", hops: " + hops);
-        } else if (ttl + hops > hardMax) {
-            ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
-            throw new BadPacketException(
-                    "TTL+hops exceeds hard max; probably spam");
-        } else if ((ttl + hops > softMax) && (func != Message.F_QUERY_REPLY)
-                && (func != Message.F_PING_REPLY)) {
-            ttl = (byte) (softMax - hops); // overzealous client;
-            // readjust accordingly
-            Assert.that(ttl >= 0); // should hold since hops<=softMax ==>
-            // new ttl>=0
-        }
-
-        // Delayed GUID allocation
-        byte[] guid = new byte[16];
-        System.arraycopy(header, 0, guid, 0, guid.length /* 16 */);
-        
-        return parser.parse(guid, ttl, hops, payload, network);
+        return parser.parse(header, payload, softMax, network);
     }
     
     /**
      * The interface for custom MessageParser(s)
      */
     public static interface MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+        public Message parse(byte[] header, byte[] payload,
+                byte softMax, int network) throws BadPacketException, IOException;
+    }
+    
+    /**
+     * An abstract class for Gnutella Message parsers
+     */
+    public static abstract class GnutellaMessageParser implements MessageParser {
+        
+        public Message parse(byte[] header, byte[] payload,
+                byte softMax, int network) throws BadPacketException, IOException {
+            
+            // 4. Check values. These are based on the recommendations from the
+            // GnutellaDev page. This also catches those TTLs and hops whose
+            // high bit is set to 0.
+            
+            byte func = header[16];
+            byte ttl = header[17];
+            byte hops = header[18];
+
+            byte hardMax = (byte) 14;
+            if (hops < 0) {
+                ReceivedErrorStat.INVALID_HOPS.incrementStat();
+                throw new BadPacketException("Negative (or very large) hops");
+            } else if (ttl < 0) {
+                ReceivedErrorStat.INVALID_TTL.incrementStat();
+                throw new BadPacketException("Negative (or very large) TTL");
+            } else if ((hops > softMax) && (func != Message.F_QUERY_REPLY)
+                    && (func != Message.F_PING_REPLY)) {
+                ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
+                throw new BadPacketException("func: " + func + ", ttl: " + ttl
+                        + ", hops: " + hops);
+            } else if (ttl + hops > hardMax) {
+                ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
+                throw new BadPacketException(
+                        "TTL+hops exceeds hard max; probably spam");
+            } else if ((ttl + hops > softMax) && (func != Message.F_QUERY_REPLY)
+                    && (func != Message.F_PING_REPLY)) {
+                ttl = (byte) (softMax - hops); // overzealous client;
+                // readjust accordingly
+                Assert.that(ttl >= 0); // should hold since hops<=softMax ==>
+                // new ttl>=0
+            }
+
+            // Delayed GUID allocation
+            byte[] guid = new byte[16];
+            System.arraycopy(header, 0, guid, 0, guid.length /* 16 */);
+            
+            return parse(guid, ttl, hops, payload, network);
+        }
+        
+        protected abstract Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException;
     }
     
-    private static class PingRequestParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class PingRequestParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             if (payload.length > 0) { // Big ping
                 return new PingRequest(guid, ttl, hops, payload);
@@ -298,15 +316,15 @@ public class MessageFactory {
         }
     }
     
-    private static class PingReplyParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class PingReplyParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return PingReply.createFromNetwork(guid, ttl, hops, payload);
         }
     }
     
-    private static class QueryRequestParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class QueryRequestParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             if (payload.length < 3) {
                 throw new BadPacketException("Query request too short: " + payload.length);
@@ -316,8 +334,8 @@ public class MessageFactory {
         }
     }
     
-    private static class QueryReplyParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class QueryReplyParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             if (payload.length < 26) {
                 throw new BadPacketException("Query reply too short: " + payload.length);
@@ -327,15 +345,15 @@ public class MessageFactory {
         }
     }
     
-    private static class PushRequestParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class PushRequestParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return new PushRequest(guid, ttl, hops, payload, network);
         }
     }
     
-    private static class RouteTableUpdateParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class RouteTableUpdateParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             // The exact subclass of RouteTableMessage returned depends on
             // the variant stored within the payload. So leave it to the
@@ -345,22 +363,22 @@ public class MessageFactory {
         }
     }
     
-    private static class VendorMessageParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class VendorMessageParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
-    private static class VendorMessageStableParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class VendorMessageStableParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
         }
     }
     
-    private static class UDPConnectionParser implements MessageParser {
-        public Message parse(byte[] guid, byte ttl, byte hops, 
+    private static class UDPConnectionParser extends GnutellaMessageParser {
+        protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return UDPConnectionMessage.createMessage(guid, ttl, hops, payload);
         }

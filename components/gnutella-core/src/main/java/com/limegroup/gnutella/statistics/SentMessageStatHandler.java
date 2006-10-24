@@ -298,7 +298,10 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   LimeSentMessageStat.UDP_REPLY_NUMBER,
 								   LimeSentMessageStatBytes.UDP_REPLY_NUMBER);
 
-
-
+    public static final SentMessageStatHandler UDP_DHT_MSG = 
+        new SentMessageStatHandler(SentMessageStat.UDP_DHT_MSG,
+                                   SentMessageStatBytes.UDP_DHT_MSG,
+                                   LimeSentMessageStat.UDP_DHT_MSG,
+                                   LimeSentMessageStatBytes.UDP_DHT_MSG);
 
 }
