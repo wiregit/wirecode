@@ -165,7 +165,7 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // Make sure the previous QK is still valid
         assertTrue(qk1.isFor(address1));
         
-        // Create a yet another new KeyCreator
+        // Create a yet another new QueryKey
         lastQueryKeyChange.set(null, System.currentTimeMillis() 
                 - SecuritySettings.CHANGE_QK_EVERY.getValue() 
                 - 100L);
