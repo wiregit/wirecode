@@ -270,12 +270,16 @@ abstract class AbstractDHTController implements DHTController {
      */
     private class RandomNodeAdder implements Runnable {
         
+        private static final int MAX_SIZE = 30;
+        
+        private Object dhtNodesLock = new Object();
+        
         private Set<SocketAddress> dhtNodes;
         
         private boolean running;
         
         public RandomNodeAdder() {
-            dhtNodes = new FixedSizeLIFOSet<SocketAddress>(30);
+            dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
             RouterService.schedule(this, delay, delay);
         }
@@ -284,11 +288,19 @@ abstract class AbstractDHTController implements DHTController {
             running = true;
         }
         
-        public synchronized void addDHTNode(SocketAddress address) {
-            dhtNodes.add(address);
+        public void addDHTNode(SocketAddress address) {
+            synchronized (dhtNodesLock) {
+                dhtNodes.add(address);
+            }
         }
         
         public void run() {
+            
+            Set<SocketAddress> nodes = null;
+            synchronized (dhtNodesLock) {
+                nodes = dhtNodes;
+                dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
+            }
             
             synchronized(dht) {
                 
@@ -296,7 +308,7 @@ abstract class AbstractDHTController implements DHTController {
                     return;
                 }
                 
-                for(SocketAddress addr : dhtNodes) {
+                for(SocketAddress addr : nodes) {
                     
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("RandomNodeAdder pinging: "+ addr);
@@ -304,7 +316,6 @@ abstract class AbstractDHTController implements DHTController {
                     
                     dht.ping(addr);
                 }
-                dhtNodes.clear();
             }
         }
         
