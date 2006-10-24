@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.browser;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EncodingUtils;
@@ -144,5 +148,4 @@ public class MagnetOptionsTest extends BaseTestCase {
 		magnet = MagnetOptions.createMagnet(null, null, null, null);
 		assertNotNull(magnet.getFileNameForSaving());
 	}
-
 }

@@ -163,16 +163,23 @@ public class QuestionsHandler extends AbstractSettings {
         FACTORY.createBooleanSetting("TORRENT_DOWNLOAD_FAILURE ", false);
     
     /**
-     * Setting for whether ot not to display a message that cancelling a 
+     * Setting for whether or not to display a message that cancelling a 
      * torrent upload will kill its corresponding download
      */
     public static final IntSetting TORRENT_STOP_UPLOAD =
     	FACTORY.createIntSetting("TORRENT_STOP_UPLOAD", 0);
     
     /**
-     * Setting for whether ot not to display a message that the user
+     * Setting for whether or not to display a message that the user
      * should let a seeding torrent reach 1:1 ratio.
      */
     public static final IntSetting TORRENT_SEED_MORE =
     	FACTORY.createIntSetting("TORRENT_SEED_MORE", 0);
+	
+	/**
+	 * Setting for whether or to display a message when the user dropped files
+	 * on limewire to share them, did not select any but still clicked OK.
+	 */
+    public static final BooleanSetting HIDE_EMPTY_DROPPED_SHARE_DIALOG =
+    	FACTORY.createBooleanSetting("HIDE_EMPTY_DROPPED_SHARE_DIALOG", false);
 }

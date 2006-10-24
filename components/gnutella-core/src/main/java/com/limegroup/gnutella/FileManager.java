@@ -764,6 +764,9 @@ public abstract class FileManager {
             return;
         }
         
+        if(!directory.exists())
+            return;
+        
         // STEP 0:
 		// Do not share certain the incomplete directory, directories on the
 		// do not share list, or sensitive directories.

@@ -1597,7 +1597,7 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     public boolean isLaunchable() {
-    	return getAmountRead() > 0;
+    	return state == COMPLETE || amountForPreview() > 0;
     }
     
     /**
@@ -1834,7 +1834,7 @@ public class ManagedDownloader extends AbstractDownloader
         //a) Special case for saved corrupt fragments.  We don't worry about
         //removing holes.
         if (state==CORRUPT_FILE) 
-            return corruptFile; //may be null
+            return corruptFile; //m	ay be null
         //b) If the file is being downloaded, create *copy* of first
         //block of incomplete file.  The copy is needed because some
         //programs, notably Windows Media Player, attempt to grab
@@ -1870,7 +1870,7 @@ public class ManagedDownloader extends AbstractDownloader
         if (commonOutFile == null)
             return 0; // trying to preview before incomplete file created
         synchronized (commonOutFile) {
-            for(Interval interval : commonOutFile.getBlocksAsList()) {
+            for(Interval interval : commonOutFile.getBlocks()) {
                 if (interval.low==0)
                     return interval.high;
             }
