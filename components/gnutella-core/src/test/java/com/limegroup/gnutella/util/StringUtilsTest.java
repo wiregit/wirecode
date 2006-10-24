@@ -376,5 +376,23 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("c.d", StringUtils.ripExtension("c.d."));
         assertEquals("e.f.g", StringUtils.ripExtension("e.f.g.h"));
     }
+    
+    public void testExplode() {
+    	String[] in = new String[] {"a" , "b", " c "}; 
+    	assertEquals("a/b/ c ", StringUtils.explode(in, "/"));
+
+        in = new String[] {}; 
+        assertEquals("", StringUtils.explode(in, "/"));
+
+        in = new String[] {}; 
+        assertEquals("", StringUtils.explode(in, ""));
+
+        in = new String[] {"a", "b"}; 
+        assertEquals("a  b", StringUtils.explode(in, "  "));
+
+        in = new String[] {"a", "b"}; 
+        assertEquals("ab", StringUtils.explode(in, ""));
+    }
+    
 }
 

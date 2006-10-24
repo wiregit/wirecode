@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.settings.URLHandlerSettings;
@@ -141,28 +140,34 @@ public final class Launcher {
 	}
 
 	/**
-	 * Launches the file whose abstract path is specified in the 
-	 * <tt>File</tt> parameter.  This method will not launch any file
-	 * with .exe, .vbs, .lnk, .bat, .sys, or .com extensions, diplaying 
-	 * an error if one of the file is of one of these types.
-	 *
-	 * @param path  The path of the file to launch
-	 *
-	 * @return  An int indicating the success of the browser launch
-	 *
-	 * @throws IOException if the file cannot be launched do to an IO problem
+	 * Launches the file whose abstract path is specified in the <tt>File</tt>
+	 * parameter. This method will not launch any file with .exe, .vbs, .lnk,
+	 * .bat, .sys, or .com extensions, diplaying an error if one of the file is
+	 * of one of these types.
+	 * 
+	 * @param path
+	 *            The path of the file to launch
+	 * @return an object for accessing the launch process; null, if the process
+	 *         can be represented (e.g. the file was launched through a native
+	 *         call)
+	 * @throws IOException
+	 *             if the file cannot be launched
+	 * @throws SecurityException
+	 *             if the file has an extension that is not allowed
 	 */
-	public static int launchFile(File file) throws IOException, SecurityException {
+	public static LimeProcess launchFile(File file) throws IOException, SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase();
 
-        // Expand pmf files before display
-        if ( extCheckString.endsWith(".pmf") ) {
+        // expand pmf files before display
+        if (extCheckString.endsWith(".pmf")) {
             file = PackagedMediaFileUtils.preparePMFFile(file.toString());
-            // Don't launch an invalid file
-            if ( file == null )
-                return -1; 
-            path           = file.getCanonicalPath();
+            // don't launch an invalid file
+            if (file == null) {
+            	throw new IOException("Invalid file");
+            }
+
+            path = file.getCanonicalPath();
             extCheckString = path.toLowerCase();
         }
 
@@ -173,20 +178,19 @@ public final class Launcher {
 		   !extCheckString.endsWith(".sys") &&
 		   !extCheckString.endsWith(".com")) {
 			if(CommonUtils.isWindows()) {
-				return launchFileWindows(path);
+				launchFileWindows(path);
+				return null;
 			}
 			else if(CommonUtils.isMacOSX()) {
-				launchFileMacOSX(path);
+				return launchFileMacOSX(path);
 			}
 			else {
 			    // Other OS, use helper apps
-				launchFileOther(path);
+				return launchFileOther(path);
 			}
-		}
-		else {
+		} else {
 			throw new SecurityException();
-		}
-		return -1;		
+		}	
 	}
 
     /**
@@ -237,11 +241,12 @@ public final class Launcher {
 	 *
 	 * @param file the <tt>File</tt> instance denoting the abstract pathname
 	 *  of the file to launch
+	 * @return 
 	 * @throws IOException if an I/O error occurs in making the runtime.exec()
 	 *  call or in getting the canonical path of the file
 	 */
-	private static void launchFileMacOSX(final String file) throws IOException {
-	    Runtime.getRuntime().exec(new String[]{"open", file});
+	private static LimeProcess launchFileMacOSX(final String file) throws IOException {
+	    return LimeProcess.exec(new String[]{"open", file});
 	}
 
 	/** 
@@ -269,13 +274,12 @@ public final class Launcher {
     
 	/**
 	 * Attempts to launch the given file.
-	 * NOTE: WE COULD DO THIS ONE BETTER!!
 	 *
 	 * @throws IOException  if the call to Runtime.exec throws an IOException
 	 *                      or if the Process created by the Runtime.exec call
 	 *                      throws an InterruptedException
 	 */
-	private static void launchFileOther(String path) throws IOException {
+	private static LimeProcess launchFileOther(String path) throws IOException {
 	    String handler;
 	    if (MediaType.getAudioMediaType().matches(path)) {
 	    	handler = URLHandlerSettings.AUDIO_PLAYER.getValue();
@@ -287,25 +291,12 @@ public final class Launcher {
 	    	handler = URLHandlerSettings.BROWSER.getValue();
 	    }
 
-		
-        if (handler.indexOf("$URL$") != -1) {
-			System.out.println("starting " + handler);
-			StringTokenizer tok = new StringTokenizer (handler);
-			String[] strs = new String[tok.countTokens()];
-			for (int i = 0; tok.hasMoreTokens(); i++) {
-				strs[i] = StringUtils.replace(tok.nextToken(), "$URL$", path);
-				
-				System.out.print(" "+strs[i]);
-			}
-			try {
-				Runtime.getRuntime().exec(strs);
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("starting " + handler);
-            String[] strs = {handler, path};
-            Runtime.getRuntime().exec(strs);
-        }
+	    QuotedStringTokenizer tok = new QuotedStringTokenizer(handler);
+	    String[] strs = new String[tok.countTokens()];
+	    for (int i = 0; i < strs.length; i++) {
+	    	strs[i] = StringUtils.replace(tok.nextToken(), "$URL$", path);
+	    }
+
+	    return LimeProcess.exec(strs);
     }
 }

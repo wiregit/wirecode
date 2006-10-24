@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.UnsupportedEncodingException;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -212,13 +213,13 @@ public class StringUtils {
     public static String[] split(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
         StringTokenizer tokenizer = new StringTokenizer(s, delimiters);
-        Vector<String> buf = new Vector<String>();        
+        List<String> buf = new ArrayList<String>();        
         while (tokenizer.hasMoreTokens())
             buf.add(tokenizer.nextToken());
 
         //Copy from buffer to array.
         String[] ret = new String[buf.size()];
-        for(int i=0; i<buf.size(); i++)
+        for (int i = 0; i < ret.length; i++)
             ret[i] = buf.get(i);
 
         return ret;
@@ -579,6 +580,27 @@ public class StringUtils {
     		ErrorService.error(impossible);
     		return null;
     	}
+    }
+    
+    /**
+	 * Returns the tokens of array concanated to a delimited by the given
+	 * delimiter, without Examples:
+	 * 
+	 * <pre>
+	 *     explode({ "a", "b" }, " ") == "a b"
+	 *     explode({ "a", "b" }, "") == "ab"
+	 * </pre>
+	 */
+    public static String explode(String[] array, String delimeter) {
+		StringBuilder sb = new StringBuilder();
+		if (array.length > 0) {
+			sb.append(array[0]);
+			for (int i = 1; i < array.length; i++) {
+				sb.append(delimeter);
+				sb.append(array[i]);
+			}
+		}
+		return sb.toString();
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
