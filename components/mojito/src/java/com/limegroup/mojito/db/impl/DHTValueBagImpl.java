@@ -113,7 +113,8 @@ class DHTValueBagImpl implements DHTValueBag {
             return 0f;
         }
         
-        float delay = (now - lastRequestTime)/1000f; //in sec
+        //we don't want to skew the results with delays that are too small!
+        float delay = Math.max((now - lastRequestTime)/1000f, 0.01f); //in sec
         
         if (delay <= 0f || delay > LOAD_NULLING_DELAY) {
             lastRequestTime = now;

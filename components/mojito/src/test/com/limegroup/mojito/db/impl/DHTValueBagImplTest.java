@@ -62,16 +62,22 @@ public class DHTValueBagImplTest extends BaseTestCase {
         load = bag.incrementRequestLoad();
         //load should never get < 0
         assertGreaterThanOrEquals(0f, load);
-        Thread.sleep(200);
+        //now try a very very small delay
         bag.incrementRequestLoad();
-        Thread.sleep(200);
+        Thread.sleep(10);
         bag.incrementRequestLoad();
-        Thread.sleep(200);
+        Thread.sleep(10);
         bag.incrementRequestLoad();
-        Thread.sleep(200);
+        Thread.sleep(10);
+        load = bag.incrementRequestLoad();
+        Thread.sleep(10);
+        load = bag.incrementRequestLoad();
+        Thread.sleep(10);
         load = bag.incrementRequestLoad();
         //should now have increased (a lot!)
         assertGreaterThan(1f, load);
+        //but never be larger than 1/0.01
+        assertLessThan(1f/0.01f, load);
     }
     
     public void testAddInvalid() throws Exception {
