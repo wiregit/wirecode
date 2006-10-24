@@ -27,6 +27,7 @@ extern "C" {
 	JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring path);
 	JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(JNIEnv *e, jclass c);
 	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon);
+	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowTopMostNative(JNIEnv *e, jclass c, jobject frame, jstring bin);
 
 #ifdef __cplusplus
 }

@@ -144,6 +144,7 @@ DWORD GetIdleTime() {
 JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
 	return MakeJavaString(e, SetWindowIcon(e, c, frame, GetJavaString(e, bin), GetJavaString(e, icon)));
 }
+
 CString SetWindowIcon(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, LPCTSTR icon) {
 
 	// Get the Window handle from Java
@@ -185,4 +186,11 @@ void GetIcons(LPCTSTR icon) {
 		Handle.Icon      = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 		Handle.SmallIcon = (HICON)LoadImage(NULL, icon, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
 	}
+}
+
+// Sets the window to be topmost.
+JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowTopMostNative(JNIEnv *e, jclass c, jobject frame, jstring bin) {
+	CString message;
+	SetWindowTopMost(e, c, frame,  GetJavaString(e, bin), &message);
+	return MakeJavaString(e, message);
 }

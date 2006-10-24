@@ -97,8 +97,10 @@ public class SystemUtils {
     public static final String getRunningPath() {
     	if (CommonUtils.isWindows() && isLoaded) {
     		String path = getRunningPathNative();
-    		if (path.equals("")) return null;
-    		else return path;
+    		if (path.equals(""))
+                return null;
+    		else
+                return path;
     	}
     	return null;
     }
@@ -124,8 +126,10 @@ public class SystemUtils {
     public static final String getSpecialPath(String name) {
     	if (CommonUtils.isWindows() && isLoaded) {
     		String path = getSpecialPathNative(name);
-    		if (path.equals("")) return null;
-    		else return path;
+    		if (path.equals(""))
+                return null;
+    		else
+                return path;
     	}
     	return null;
     }    
@@ -141,14 +145,23 @@ public class SystemUtils {
      */
     public static final boolean setWindowIcon(Component frame, File icon) {
     	if (CommonUtils.isWindows() && isLoaded) {
-    		try {
-    			String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
-    			return result.equals(""); // Returns blank on success, or information about an error
-    		} catch (UnsatisfiedLinkError e) { // Java loaded the library, but can't find the function call
-    			LOG.debug("UnsatisfiedLinkError calling setWindowIconNative()", e);
-    		} 
+    		String result = setWindowIconNative(frame, System.getProperty("sun.boot.library.path"), icon.getPath());
+    	    return result.equals(""); // Returns blank on success, or information about an error
     	}
+        
     	return false;
+    }
+    
+    /**
+     * Sets a Component to be topmost.
+     */
+    public static final boolean setWindowTopMost(Component frame) {
+        if(isLoaded && CommonUtils.isWindows()) {
+            String result = setWindowTopMostNative(frame, System.getProperty("sun.boot.library.path"));
+            return result.equals("");
+        }
+        
+        return false;
     }
 
     /**
@@ -396,6 +409,7 @@ public class SystemUtils {
     private static final native int setFileWriteable(String path);
     private static final native long idleTime();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
+    private static final native String setWindowTopMostNative(Component frame, String bin);
 
     private static final native int registryReadNumberNative(String root, String path, String name) throws IOException ;
     private static final native String registryReadTextNative(String root, String path, String name) throws IOException;

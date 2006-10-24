@@ -120,6 +120,69 @@ HWND GetJavaWindowHandle(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, CStrin
 	return window;
 }
 
+void SetWindowTopMost(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, CString *message) {
+	*message = "Start of method";
+
+	// Make a JAWT structure that will tell Java we're using Java 1.4
+	JAWT awt;
+	awt.version = JAWT_VERSION_1_4;
+	
+	// Make sure the path isn't blank
+	if (bin == CString("")) { *message = "Blank path"; return; }
+
+	// Load jawt.dll into our process space
+	CString path = CString(bin) + CString("\\jawt.dll"); // Compose the complete path to the DLL, like "C:\Program Files\Java\jre1.5.0_05\bin\jawt.dll"
+	HMODULE module = LoadLibrary(path); // If the DLL is already in our process space, LoadLibrary() will just get its handle
+	if (module) {
+		*message = "Got module";
+
+		// Get a function pointer to JAWT_GetAWT() in the DLL
+		JawtGetAwtSignature JawtGetAwt = (JawtGetAwtSignature)GetProcAddress(module, "_JAWT_GetAWT@8");
+		if (JawtGetAwt) {
+			*message = "Got signature";
+
+			// Access Java's Active Widget Toolkit
+			jboolean result = JawtGetAwt(e, &awt);
+			if (result != JNI_FALSE) {
+				*message = "Got AWT";
+
+				// Get the drawing surface
+				JAWT_DrawingSurface *surface = awt.GetDrawingSurface(e, frame);
+				if (surface) {
+					*message = "Got surface";
+
+					// Lock the drawing surface
+					jint lock = surface->Lock(surface);
+					if ((lock & JAWT_LOCK_ERROR) == 0) { // If the error bit is not set, keep going
+						*message = "Locked surface";
+
+						// Get the drawing surface information
+						JAWT_DrawingSurfaceInfo *info = surface->GetDrawingSurfaceInfo(surface);
+						if (info) {
+							*message = "Got surface information";
+
+							// Get the Windows-specific drawing surface information
+							JAWT_Win32DrawingSurfaceInfo *win = (JAWT_Win32DrawingSurfaceInfo*)info->platformInfo;
+							if (win) {
+								SetWindowPos(win->hwnd, HWND_TOPMOST, 3, 3, 0, 0, SWP_NOSIZE);
+								*message = "";
+							}
+						}
+
+						// Unlock the drawing surface
+						surface->Unlock(surface);
+					}
+
+					// Free the drawing surface
+					awt.FreeDrawingSurface(surface);
+				}
+			}
+		}
+	}
+
+	return;
+}
+
 // Takes the JNI environment and a text message
 // Throws an IOException in the Java code that called into native
 void ThrowIOException(JNIEnv *e, LPCTSTR t) {
