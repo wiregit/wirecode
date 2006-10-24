@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
@@ -234,6 +232,13 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     /**
+     * Returns the RandomNodeAdder instance. For testing only!
+     */
+    RandomNodeAdder getRandomNodeAdder() {
+        return dhtNodeAdder;
+    }
+    
+    /**
      * A helper class to easily go back and forth 
      * from the DHT's RemoteContact to Gnutella's IpPort
      */
@@ -244,6 +249,11 @@ abstract class AbstractDHTController implements DHTController {
         private final int port;
         
         public IpPortRemoteContact(Contact node) {
+            
+            if(!(node instanceof InetSocketAddress)) {
+                throw new IllegalArgumentException("Contact not instance of InetSocketAddress");
+            }
+            
             InetSocketAddress addr = (InetSocketAddress) node.getContactAddress();
             this.nodeAddress = addr.getAddress();
             this.port = addr.getPort();
@@ -268,7 +278,7 @@ abstract class AbstractDHTController implements DHTController {
      * network. It is effectively randomly adding them to the DHT routing table.
      * 
      */
-    private class RandomNodeAdder implements Runnable {
+    class RandomNodeAdder implements Runnable {
         
         private static final int MAX_SIZE = 30;
         
@@ -284,11 +294,11 @@ abstract class AbstractDHTController implements DHTController {
             RouterService.schedule(this, delay, delay);
         }
         
-        public void start() {
+        void start() {
             running = true;
         }
         
-        public void addDHTNode(SocketAddress address) {
+        void addDHTNode(SocketAddress address) {
             synchronized (dhtNodesLock) {
                 dhtNodes.add(address);
             }
@@ -319,12 +329,16 @@ abstract class AbstractDHTController implements DHTController {
             }
         }
         
-        public boolean isRunning() {
+        boolean isRunning() {
             return running;
         }
         
+        Set<SocketAddress> getNodesSet(){
+            return dhtNodes;
+        }
+        
         //TODO: Use zlati's cancellable timer task when merging back
-        public void stop() {
+        void stop() {
             running = false;
         }
     }
