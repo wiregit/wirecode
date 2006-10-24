@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.gui.LaunchException;
 
 /**
  * Thin wrapper class to execute a command. Stores the command, the arguments
