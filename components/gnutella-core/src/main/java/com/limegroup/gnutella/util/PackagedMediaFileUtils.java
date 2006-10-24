@@ -16,8 +16,6 @@ public class PackagedMediaFileUtils {
      *  Ensure that the PMF File is properly expanded and return the index file.
      */
     public static File preparePMFFile(String fname) {
-        File lfile = null;
-
         // Ensure there is a temp dir
         String home  = System.getProperty("user.home");
         String temp  = home + File.separator + ".temp";
@@ -27,13 +25,14 @@ public class PackagedMediaFileUtils {
         // Ensure the file exists
         File   ffname = new File(fname);
         if ( !ffname.exists() )
-            return lfile;
+            return null;
 
         // Ensure there is a file specific unpack dir
         String file  = temp + File.separator + getUnpackDirectory(ffname);
         File   ffile = new File(file);
         ffile.mkdir();
 
+        File lfile = null;
         try {
             // If the file is already unpacked then don't bother unpacking
             lfile = createIndexFileHandle(ffile);
