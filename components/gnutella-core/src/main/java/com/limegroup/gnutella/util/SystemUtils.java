@@ -184,7 +184,7 @@ public class SystemUtils {
      * @param root The name of the root registry key, like "HKEY_LOCAL_MACHINE"
      * @param path The path to the registry key with backslashes as separators, like "Software\\Microsoft\\Windows"
      * @param name The name of the variable within that key, or blank to access the key's default value
-     * @return     The text value stored there, or blank on error
+     * @return     The text value stored there or blank on error
      */
     public static final String registryReadText(String root, String path, String name) throws IOException {
     	if (CommonUtils.isWindows() && isLoaded)
@@ -392,6 +392,50 @@ public class SystemUtils {
     	} else {
     		return false;
     	}
+    }
+    
+    /**
+     * @return the default String that the shell will execute to open
+     * a file with the provided extention.
+     * Only supported on windows.
+     */
+    public static String getDefaultExtentionHandler(String extention) {
+    	if (!CommonUtils.isWindows() || !isLoaded)
+    		return null;
+
+    	if (!extention.startsWith("."))
+    		extention = "."+extention;
+    	try {
+    		String progId = registryReadText("HKEY_CLASSES_ROOT", extention,"");
+    		if ("".equals(progId))
+    			return "";
+    		return registryReadText("HKEY_CLASSES_ROOT",
+    				progId+"\\shell\\open\\command","");
+    	} catch (IOException iox) {
+    		return null;
+    	}
+    }
+    
+    /**
+     * @return the default String that the shell will execute to open
+     * content with the provided mime type.
+     * Only supported on windows.
+     */
+    public static String getDefaultMimeHandler(String mimeType) {
+    	if (!CommonUtils.isWindows() || !isLoaded)
+    		return null;
+    	String extention = "";
+    	try {
+    		extention = registryReadText("HKEY_CLASSES_ROOT", 
+    				"MIME\\Database\\Content Type\\"+mimeType, 
+    				"extention");
+    	} catch (IOException iox) {
+    		return null;
+    	}
+    	
+    	if ("".equals(extention))
+    		return "";
+    	return getDefaultExtentionHandler(extention);
     }
 
     /*
