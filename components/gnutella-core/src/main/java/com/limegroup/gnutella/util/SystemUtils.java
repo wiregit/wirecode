@@ -440,7 +440,7 @@ public class SystemUtils {
     	try {
     		extention = registryReadText("HKEY_CLASSES_ROOT", 
     				"MIME\\Database\\Content Type\\"+mimeType, 
-    				"extention");
+    				"Extension");
     	} catch (IOException iox) {
     		return null;
     	}
