@@ -201,46 +201,7 @@ JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_flushIco
 }
 
 bool FlushIconCache(JNIEnv *e) {
-	// read in the current size, increment it by one.
-	CString read = RegistryReadText(e, HKEY_CURRENT_USER, "Control Panel\\Desktop\\WindowMetrics", "Shell Icon Size");
-	if(read == "")
-		return false;
-	int size = atoi(read);
-	if(size == 0)
-		return false;
-	size--;
-
-	// write a bigger size out to the registry & send a message it changed.
-	char buf[256];
-	_itoa_s(size, buf, 256, 10);
-	if(!RegistryWriteText(HKEY_CURRENT_USER, "Control Panel\\Desktop\\WindowMetrics", "Shell Icon Size", buf))
-		return false;
-	SendMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETNONCLIENTMETRICS, 0);
-
-	// write the original size back to registry & send another message it changed.
-	if(!RegistryWriteText(HKEY_CURRENT_USER, "Control Panel\\Desktop\\WindowMetrics", "Shell Icon Size", read))
-		return false;
-	SendMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETNONCLIENTMETRICS, 0);
-
+	// Forces the icon cache to be remade.
+	SHChangeNotify(SHCNE_ASSOCCHANGED, 0, NULL, NULL);
 	return true;
-}
-
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_cacheIconNative(JNIEnv *e, jclass c, jstring path, jint index) {
-	return CacheIcon(GetJavaString(e, path), index) != -1;
-}
-
-int CacheIcon(LPCSTR iconPath, int iconIndex) {
-	// Only available in W2K+...
-	HMODULE module = LoadLibrary("shell32.dll"); // If the DLL is already in our process space, LoadLibrary() will just get its handle
-	//printf("module %i\n", (int)module);
-	if (!module) return 0;
-	Shell_GetCachedImageIndexSignature call = (Shell_GetCachedImageIndexSignature)GetProcAddress(module, "Shell_GetCachedImageIndex");
-	//printf("call: %i\n", (int)call);
-	if (!call) return 0;
-
-	LPCWSTR iconPathW = CA2W(iconPath);
-	int idx = call(iconPathW, iconIndex, GIL_DONTCACHE);
-	//SendMessage(HWND_BROADCAST, WM_SETTINGCHANGE, SPI_SETNONCLIENTMETRICS, 0);
-	//printf("iconPath: %s, iconIdx: %i, ret: %i\n", iconPath, iconIndex, idx);
-	return idx;
 }
