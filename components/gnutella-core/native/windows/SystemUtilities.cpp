@@ -164,7 +164,7 @@ void SetWindowTopMost(JNIEnv *e, jclass c, jobject frame, LPCTSTR bin, CString *
 							// Get the Windows-specific drawing surface information
 							JAWT_Win32DrawingSurfaceInfo *win = (JAWT_Win32DrawingSurfaceInfo*)info->platformInfo;
 							if (win) {
-								SetWindowPos(win->hwnd, HWND_TOPMOST, 3, 3, 0, 0, SWP_NOSIZE);
+								SetWindowPos(win->hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 								*message = "";
 							}
 						}

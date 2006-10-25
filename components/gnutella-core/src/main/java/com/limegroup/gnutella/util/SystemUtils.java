@@ -163,6 +163,29 @@ public class SystemUtils {
         
         return false;
     }
+    
+    /**
+     * Flushes the icon cache on the OS, forcing any icons to be redrawn
+     * with the current-most icon.
+     */
+    public static final boolean flushIconCache() {
+        if(isLoaded && CommonUtils.isWindows()) {
+            return flushIconCacheNative();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Enforces that the icon is in the cache as the native-most icon.
+     */
+    public static final boolean cacheIcon(String iconPath, int iconIdx) {
+        if(isLoaded && CommonUtils.isWindows()) {
+            return cacheIconNative(iconPath, iconIdx);
+        }
+        
+        return false;
+    }
 
     /**
      * Reads a numerical value stored in the Windows Registry.
@@ -454,6 +477,8 @@ public class SystemUtils {
     private static final native long idleTime();
     private static final native String setWindowIconNative(Component frame, String bin, String icon);
     private static final native String setWindowTopMostNative(Component frame, String bin);
+    private static final native boolean flushIconCacheNative();
+    private static final native boolean cacheIconNative(String path, int index);
 
     private static final native int registryReadNumberNative(String root, String path, String name) throws IOException ;
     private static final native String registryReadTextNative(String root, String path, String name) throws IOException;
