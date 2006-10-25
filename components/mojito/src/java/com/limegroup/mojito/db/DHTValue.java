@@ -166,7 +166,7 @@ public interface DHTValue {
     public Contact getCreator();
     
     /**
-     * Returns the Node ID of the originator
+     * Returns the Node ID of the value creator
      */
     public KUID getCreatorID();
     
