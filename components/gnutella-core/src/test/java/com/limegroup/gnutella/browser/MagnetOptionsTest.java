@@ -1,9 +1,5 @@
 package com.limegroup.gnutella.browser;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EncodingUtils;
