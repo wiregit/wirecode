@@ -50,7 +50,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         }
         
         // Limit the number of values per key
-        DHTValue existing = bag.get(value.getOriginatorID());
+        DHTValue existing = bag.get(value.getCreatorID());
         if (existing == null) {
             return (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey);
         }

@@ -64,7 +64,7 @@ class DHTValueBagImpl implements DHTValueBag {
             throw new IllegalArgumentException("Value ID must be " + valueId);
         }
         
-        valuesMap.put(value.getOriginatorID(), value);
+        valuesMap.put(value.getCreatorID(), value);
         return true;
     }
     
@@ -138,7 +138,7 @@ class DHTValueBagImpl implements DHTValueBag {
      * @see com.limegroup.mojito.db.impl.DHTValueBag#remove(java.lang.Object)
      */
     public boolean remove(DHTValue value) {
-        return (valuesMap.remove(value.getOriginatorID()) != null);
+        return (valuesMap.remove(value.getCreatorID()) != null);
     }
     
     /* (non-Javadoc)

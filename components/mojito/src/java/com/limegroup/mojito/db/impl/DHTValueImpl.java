@@ -163,7 +163,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValue#getOriginator()
      */
-    public Contact getOriginator() {
+    public Contact getCreator() {
         return originator;
     }
     
@@ -171,7 +171,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValue#getOriginatorID()
      */
-    public KUID getOriginatorID() {
+    public KUID getCreatorID() {
         return originator.getNodeID();
     }
     
@@ -275,12 +275,12 @@ public class DHTValueImpl implements DHTValue, Serializable {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         if (isEmpty()) {
-            buffer.append(valueId).append(", originator=")
-                .append(getOriginator()).append(" (REMOVE)");
+            buffer.append(valueId).append(", creator=")
+                .append(getCreator()).append(" (REMOVE)");
         } else {
             buffer.append(valueId).append("\n")
                 .append("Type: ").append(getValueType()).append("\n")
-                .append("Originator: ").append(getOriginator()).append("\n")
+                .append("Creator: ").append(getCreator()).append("\n")
                 .append("Sender: ").append(getSender()).append("\n")
                 //.append("Hex: ").append(ArrayUtils.toHexString(data, 80));
                 .append("Data: ").append(new String(data));

@@ -120,7 +120,7 @@ public class CacheForwardTest extends BaseTestCase {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
-        MojitoDHT originator = null;
+        MojitoDHT creator = null;
         try {
             for (int i = 0; i < 3*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
@@ -130,18 +130,18 @@ public class CacheForwardTest extends BaseTestCase {
                 if (i > 0) {
                     dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
                 } else {
-                    originator = dht;
+                    creator = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            originator.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
+            creator.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
             Thread.sleep(250);
             
             // Store the value
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
             KUID valueId = KUID.createRandomID();
             byte[] value = "Hello World".getBytes();
-            StoreEvent evt = originator.put(valueId, null, value).get();
+            StoreEvent evt = creator.put(valueId, null, value).get();
             assertEquals(k, evt.getNodes().size());
             
             // And check the initial state
@@ -154,8 +154,8 @@ public class CacheForwardTest extends BaseTestCase {
                 for (DHTValue dhtValue : dht.getValues()) {
                     assertEquals(valueId, dhtValue.getValueID());
                     assertEquals(value, dhtValue.getData());
-                    assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
-                    assertEquals(originator.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
                 }
                 
                 if (closest == null) {
@@ -189,8 +189,8 @@ public class CacheForwardTest extends BaseTestCase {
                     for (DHTValue dhtValue : dht.getValues()) {
                         assertEquals(valueId, dhtValue.getValueID());
                         assertEquals(value, dhtValue.getData());
-                        assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
-                        assertEquals(originator.getLocalNodeID(), dhtValue.getSender().getNodeID());
+                        assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+                        assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
                     }
                 }
             }
@@ -202,7 +202,7 @@ public class CacheForwardTest extends BaseTestCase {
             for (DHTValue dhtValue : nearest.getValues()) {
                 assertEquals(valueId, dhtValue.getValueID());
                 assertEquals(value, dhtValue.getData());
-                assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
                 
                 // The closest Node send us the value!
                 assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -231,7 +231,7 @@ public class CacheForwardTest extends BaseTestCase {
             for (DHTValue dhtValue : nearest.getValues()) {
                 assertEquals(valueId, dhtValue.getValueID());
                 assertEquals(value, dhtValue.getData());
-                assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
                 
                 // The closest Node send us the value!
                 assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -270,7 +270,7 @@ public class CacheForwardTest extends BaseTestCase {
             for (DHTValue dhtValue : middle.getValues()) {
                 assertEquals(valueId, dhtValue.getValueID());
                 assertEquals(value, dhtValue.getData());
-                assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
                 
                 // The nearest Node send us the value
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -325,7 +325,7 @@ public class CacheForwardTest extends BaseTestCase {
             for (DHTValue dhtValue : furthest.getValues()) {
                 assertEquals(valueId, dhtValue.getValueID());
                 assertEquals(value, dhtValue.getData());
-                assertEquals(originator.getLocalNodeID(), dhtValue.getOriginatorID());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
                 
                 // The nearest Node send us the value
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -346,7 +346,7 @@ public class CacheForwardTest extends BaseTestCase {
             // not member of the k-closest Nodes to the given value!
             boolean contains = false;
             for (Contact node : evt.getNodes()) {
-                if (node.getNodeID().equals(originator.getLocalNodeID())) {
+                if (node.getNodeID().equals(creator.getLocalNodeID())) {
                     contains = true;
                     break;
                 }

@@ -161,14 +161,14 @@ public interface DHTValue {
     public boolean isEmpty();
     
     /** 
-     * Returns the originator of the value 
+     * Returns the creator of the value 
      */
-    public Contact getOriginator();
+    public Contact getCreator();
     
     /**
      * Returns the Node ID of the originator
      */
-    public KUID getOriginatorID();
+    public KUID getCreatorID();
     
     /** 
      * Returns the sender of the value 

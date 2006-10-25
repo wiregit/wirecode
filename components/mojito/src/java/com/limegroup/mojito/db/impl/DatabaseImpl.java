@@ -229,7 +229,7 @@ public class DatabaseImpl implements Database {
         DHTValueBag bag = get(value.getValueID()); 
         
         if (bag != null) {
-            return bag.containsKey(value.getOriginatorID());
+            return bag.containsKey(value.getCreatorID());
         } 
         
         return false;

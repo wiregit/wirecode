@@ -87,7 +87,7 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the given DHTValue to the OutputStream
      */
     public void writeDHTValue(DHTValue value) throws IOException {
-        writeContact(value.getOriginator());
+        writeContact(value.getCreator());
         value.getValueID().write(this);
         
         ValueType type = value.getValueType();
