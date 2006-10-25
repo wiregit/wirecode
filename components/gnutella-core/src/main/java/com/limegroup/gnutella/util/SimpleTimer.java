@@ -16,7 +16,7 @@ import com.limegroup.gnutella.ErrorService;
  *
  * This does not expose the methods for scheduling at fixed rates.
  */
-public class SimpleTimer implements SchedulingThreadPool {
+public class SimpleTimer implements RepeatableSchedulingThreadPool{
     
     /** Timer to be shared. */
     private static final SimpleTimer sharedTimer = new SimpleTimer(true);
@@ -95,6 +95,12 @@ public class SimpleTimer implements SchedulingThreadPool {
     	MyTimerTask tt = (MyTimerTask)schedule(r, delay, 0);
     	return new TTFuture(tt);
     }
+    
+    public Future invokeLater(Runnable r, long delay, long period) {
+        MyTimerTask tt = (MyTimerTask)schedule(r, delay, period);
+        return new TTFuture(tt);
+    }
+    
     /**
      * Cancels this.  No more tasks can be scheduled or executed.
      */ 

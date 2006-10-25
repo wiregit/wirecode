@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +20,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -123,6 +125,7 @@ abstract class AbstractDHTController implements DHTController {
         
         if (dhtNodeAdder != null) {
             dhtNodeAdder.stop();
+            dhtNodeAdder = null;
         }
         
         if (dht != null) {
@@ -148,7 +151,6 @@ abstract class AbstractDHTController implements DHTController {
                 dhtNodeAdder = new RandomNodeAdder();
             }
             
-            dhtNodeAdder.start();
             dhtNodeAdder.addDHTNode(hostAddress);
         }
     }
@@ -286,16 +288,12 @@ abstract class AbstractDHTController implements DHTController {
         
         private Set<SocketAddress> dhtNodes;
         
-        private boolean running;
+        private Future future;
         
         public RandomNodeAdder() {
             dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
-            RouterService.schedule(this, delay, delay);
-        }
-        
-        void start() {
-            running = true;
+            future = SimpleTimer.sharedTimer().invokeLater(this, delay, delay);
         }
         
         void addDHTNode(SocketAddress address) {
@@ -312,34 +310,27 @@ abstract class AbstractDHTController implements DHTController {
                 dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
             }
             
-            synchronized(dht) {
                 
-                if(!running) {
-                    return;
+            for(SocketAddress addr : nodes) {
+                
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("RandomNodeAdder pinging: "+ addr);
                 }
                 
-                for(SocketAddress addr : nodes) {
-                    
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("RandomNodeAdder pinging: "+ addr);
-                    }
-                    
-                    dht.ping(addr);
-                }
+                dht.ping(addr);
             }
         }
         
         boolean isRunning() {
-            return running;
+            return !future.isCancelled();
         }
         
         Set<SocketAddress> getNodesSet(){
             return dhtNodes;
         }
         
-        //TODO: Use zlati's cancellable timer task when merging back
         void stop() {
-            running = false;
+            future.cancel(true);
         }
     }
 }

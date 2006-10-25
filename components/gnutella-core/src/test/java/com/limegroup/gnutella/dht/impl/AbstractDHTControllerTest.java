@@ -65,16 +65,17 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     
     public void testRandomNodeAdder() throws Exception {
         DHTSettings.PERSIST_DHT.setValue(false);
+        DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         AbstractDHTController controller = new ActiveDHTNodeController(1, 1);
         controller.start();
         MojitoDHTStub dht = new MojitoDHTStub();
         PrivilegedAccessor.setValue(controller, "dht", dht);
         
-        DHTSettings.DHT_NODE_ADDER_DELAY.setValue(100);
+        DHTSettings.DHT_NODE_ADDER_DELAY.setValue(50);
         for(int i = 0; i < 20; i++) {
             controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
         }
-        Thread.sleep(200);
+        Thread.sleep(500);
         //should have started the Random node adder
         RandomNodeAdder nodeAdder = controller.getRandomNodeAdder();
         assertNotNull(nodeAdder);
@@ -87,17 +88,19 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         Set<SocketAddress> nodesList = nodeAdder.getNodesSet();
         assertTrue(nodesList.isEmpty());
         
-        //try the fixed size lifo set
-        nodeAdder.stop();
+        //try cancelling node adder and starting it again
+        controller.stop();
         assertFalse("Node adder should not be running", nodeAdder.isRunning());
+        controller.start();
+        PrivilegedAccessor.setValue(controller, "dht", dht);
         for(int i = 0; i < 100; i++) {
             controller.addActiveDHTNode(new InetSocketAddress("localhost", 2100+i));
         }
+        nodeAdder = controller.getRandomNodeAdder();
         nodesList = nodeAdder.getNodesSet();
         assertEquals(30, nodesList.size());
         assertEquals(new InetSocketAddress("localhost", 2199), nodesList.iterator().next());
         //try starting the node adder
-        nodeAdder.start();
         Thread.sleep(500);
         assertEquals(50, dht.getPingedNodesList().size());
         assertEquals(new InetSocketAddress("localhost", 2170), dht.getPingedNodesList().get(49));
