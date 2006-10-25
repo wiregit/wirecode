@@ -121,65 +121,61 @@ public class BrowseHostHandler {
      */
     public void browseHost(String host, int port, Set<? extends IpPort> proxies,
                            boolean canDoFWTransfer) {
-        if(!NetworkUtils.isValidPort(port) || 
-                                         !NetworkUtils.isValidAddress(host)) {
+        if(!NetworkUtils.isValidPort(port)  
+        		|| !NetworkUtils.isValidAddress(host)) {
             failed();
             return;
         }
-        LOG.trace("starting browse protocol.");
+        
+        LOG.trace("Starting browse protocol");
         setState(STARTED);
+        
         // flow of operation:
         // 1. check if you need to push.
         //   a. if so, just send a Push out.
         //   b. if not, try direct connect.  If it doesn't work, send a push.
-        int shouldPush = needsPush(host);
         
-        LOG.trace("push needed? " + shouldPush);
-        boolean shouldTryPush = false;
-        switch (shouldPush) {
-        case 0: // false
+        if (!needsPush(host, port)) {
             try {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
                 LOG.trace("Attempting direct connection");
                 Socket socket = Sockets.connect(host, port,
                                                 DIRECT_CONNECT_TIME);
-                LOG.trace("direct connect successful");
+                LOG.trace("Direct connect successful");
                 browseExchange(socket);
-            } catch (IOException ioe) {
-                LOG.debug("error while direct transfer", ioe);
-                // try pushing for fun.... (if we have the guid of the servent)
-                shouldTryPush = true;
-            }
-            if (!shouldTryPush) 
-                break;
-        case 1: // true
-            LOG.debug("Attempting push connection");
-            // if we're trying to push & we don't have a servent guid, it fails
-            if ( _serventID == null ) {
-                LOG.debug("No serventID, failing");
-                failed();
-            } else {
-                RemoteFileDesc fakeRFD = 
-                    new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
-                                       _serventID.bytes(), 0, false, 0, false,
-                                       null, null,false,true,"", proxies,
-                                       -1, canDoFWTransfer ? UDPConnection.VERSION : 0);
-                // register with the map so i get notified about a response to my
-                // Push.
-                synchronized (_pushedHosts) {
-                    _pushedHosts.put(_serventID, new PushRequestDetails(this));
-                }
                 
-                LOG.trace("trying push.");
-                setState(PUSHING);
-
-                // send the Push after registering in case you get a response 
-                // really quickly.  reuse code in DM cuz that works well
-                RouterService.getDownloadManager().sendPush(fakeRFD);
-                 
+                // browse was successful
+                return;
+            } catch (IOException ioe) {
+                LOG.debug("Error during direct transfer", ioe);
+                // try pushing for fun.... (if we have the guid of the servent)
             }
-            break;
+        }
+        
+        LOG.debug("Attempting push connection");
+
+        if ( _serventID == null ) {
+        	LOG.debug("No serventID, failing");
+        	failed();
+        } else {
+        	RemoteFileDesc fakeRFD = 
+        		new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
+        				_serventID.bytes(), 0, false, 0, false,
+        				null, null,false,true,"", proxies,
+        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0);
+        	// register with the map so i get notified about a response to my
+        	// Push.
+        	synchronized (_pushedHosts) {
+        		_pushedHosts.put(_serventID, new PushRequestDetails(this));
+        	}
+
+        	LOG.trace("Sending push request");
+        	setState(PUSHING);
+
+        	// send the Push after registering in case you get a response 
+        	// really quickly.  reuse code in DM cuz that works well
+        	RouterService.getDownloadManager().sendPush(fakeRFD);
         }
     }
 
@@ -371,17 +367,15 @@ public class BrowseHostHandler {
     }
 
 
-    /** Returns 1 iff rfd should be attempted by push download, either 
-     *  because it is a private address or was unreachable in the past. 
-     *  Returns 0 otherwise....
-     */
-    private static int needsPush(String host) {
-        //Return true if rfd is private or unreachable
-        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-          NetworkUtils.isPrivateAddress(host))
-            return 1;
-        else
-            return 0;
+    /**
+	 * Returns true, if browse should be attempted by push download, either
+	 * because it is a private address or was unreachable in the past. Returns
+	 * false, otherwise or if <tt>host</tt> is the local address. 
+	 */
+    private static boolean needsPush(String host, int port) {
+        return (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() 
+        		&& NetworkUtils.isPrivateAddress(host)
+        		&& !NetworkUtils.isMe(host, port));
     }
 
 
