@@ -79,6 +79,10 @@ public interface DHTValue {
             return type;
         }
         
+        public boolean isUnknownType() {
+            return Arrays.binarySearch(TYPES, this) >= 0;
+        }
+
         public int compareTo(ValueType o) {
             return type - o.type;
         }
