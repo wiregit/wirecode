@@ -198,29 +198,28 @@ public final class Launcher {
      * Mac OS X: Launches the Finder and opens the file if it is
      *  a directory or its parent if it is a file
      * 
-     * @param file
-     * @return true on success
-     * @throws IOException
+     * @param file the file to show in explorer
+     * @return null, if not supported by platform; the launched process otherwise
+     * @see #launchFile(File)
      */
-    public static boolean launchExplorer(File file) throws IOException, SecurityException {
+    public static LimeProcess launchExplorer(File file) throws IOException, SecurityException {
         if (CommonUtils.isWindows()) {
             String explorePath = file.getPath(); 
             try { 
                 explorePath = file.getCanonicalPath(); 
-            } catch(IOException ioe) { } 
+            } catch (IOException ignored) {
+            } 
             
-            //launches explorer and highlights the file
-            Runtime.getRuntime().exec(new String[] {"explorer","/select,", explorePath });
-            return true;
+            // launches explorer and highlights the file
+            return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
         } else if (CommonUtils.isMacOSX()) {
-            if(file.isFile()) {
-                launchFile(file.getParentFile());
+            if (file.isFile()) {
+                return launchFile(file.getParentFile());
             } else {
-                launchFile(file);
+                return launchFile(file);
             }
-            return true;
         }
-        return false;
+        return null;
     }
     
 	/**
