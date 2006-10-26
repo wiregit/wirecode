@@ -527,12 +527,12 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * The default KeyAnalyer for KUIDs
+     * The default KeyAnalyzer for KUIDs
      */
     public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyAnalyzer();
     
     /**
-     * A PATRICIA Trie KeyCreator for KUIDs
+     * A PATRICIA Trie KeyAnalyzer for KUIDs
      */
     private static class KUIDKeyAnalyzer implements KeyAnalyzer<KUID> {
         
