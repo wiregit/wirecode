@@ -182,4 +182,10 @@ public class QuestionsHandler extends AbstractSettings {
 	 */
     public static final BooleanSetting HIDE_EMPTY_DROPPED_SHARE_DIALOG =
     	FACTORY.createBooleanSetting("HIDE_EMPTY_DROPPED_SHARE_DIALOG", false);
+    
+    /** Setting for whether or not LimeWire should display a warning if the user
+     * chooses to use custom settings for Bittorrent.
+     */
+    public static final BooleanSetting BITTORRENT_CUSTOM_SETTINGS =
+        FACTORY.createBooleanSetting("BITTORRENT_CUSTOM_SETTINGS", false);
 }
