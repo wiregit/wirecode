@@ -182,7 +182,7 @@ class Tracker {
 		HttpClient client = HttpClientManager.getNewClient(
 				HTTP_TRACKER_TIMEOUT, HTTP_TRACKER_TIMEOUT);
 		try {
-			client.executeMethod(get);
+			HttpClientManager.executeMethodRedirecting(client, get);
 
 			// response too long
 			if (get.getResponseContentLength() > 32768)
