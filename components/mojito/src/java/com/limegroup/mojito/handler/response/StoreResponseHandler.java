@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -41,8 +40,8 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTBackendException;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -122,7 +121,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                 }
                 
                 if (!valueId.equals(value.getValueID())) {
-                    throw new IllegalArgumentException("All DHTValues must have the same ID");
+                    throw new IllegalArgumentException("All DHTValues must have the same Value ID");
                 }
             }
         }
@@ -322,22 +321,10 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
                     LOG.info("Skipping local Node");
                 }
                 
-                this.it = new Iterator<DHTValue>() {
-                    public boolean hasNext() {
-                        return false;
-                    }
-                    
-                    public DHTValue next() {
-                        throw new NoSuchElementException();
-                    }
-                    
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            } else {
-                this.it = (Iterator<DHTValue>)values.iterator();
+                values = Collections.emptyList();
             }
+            
+            this.it = (Iterator<DHTValue>)values.iterator();
         }
         
         /**
