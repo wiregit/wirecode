@@ -34,6 +34,15 @@ import com.limegroup.mojito.KUID;
 public interface Database extends Serializable {
     
     /**
+     * Sets the DatabaseSecurityConstraint. Use null to reset 
+     * the default constraint.
+     * 
+     * @param securityConstraint The security constraint 
+     */
+    public void setDatabaseSecurityConstraint(
+            DatabaseSecurityConstraint securityConstraint);
+    
+    /**
      * Adds or removes the given DHTValue depending on
      * whether or not it's empty. 
      * 

@@ -77,7 +77,7 @@ public class DatabaseImpl implements Database {
     final int maxValuesPerKey;
     
     /**
-     * 
+     * The DatabaseSecurityConstraint handle
      */
     private DatabaseSecurityConstraint securityConstraint 
         = new DefaultDatabaseSecurityConstraint();
@@ -91,6 +91,10 @@ public class DatabaseImpl implements Database {
         this.maxValuesPerKey = maxValuesPerKey;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#setDatabaseSecurityConstraint(com.limegroup.mojito.db.DatabaseSecurityConstraint)
+     */
     public void setDatabaseSecurityConstraint(
             DatabaseSecurityConstraint securityConstraint) {
         
@@ -146,7 +150,8 @@ public class DatabaseImpl implements Database {
     }
     
     /**
-     * 
+     * Adds the given DHTValue to the Database. Returns
+     * true if the operation succeeded.
      */
     private synchronized boolean add(DHTValue value) {
         if (value.isEmpty()) {
@@ -168,16 +173,6 @@ public class DatabaseImpl implements Database {
         }
         return false;
     }
-    
-    /*public synchronized boolean removeAll(Collection<? extends DHTValue> values) {
-        boolean removedAll = true;
-        for (DHTValue value : values) {
-            if (!remove(value)) {
-                removedAll = false;
-            }
-        }
-        return removedAll;
-    }*/
     
     /*
      * (non-Javadoc)
@@ -201,7 +196,8 @@ public class DatabaseImpl implements Database {
     }
     
     /**
-     * 
+     * An internal helper method that delegates calls to
+     * the DatabaseSecurityConstraint instance if possible
      */
     private boolean allowStore(DHTValue value) {
         DatabaseSecurityConstraint dbsc = securityConstraint;
