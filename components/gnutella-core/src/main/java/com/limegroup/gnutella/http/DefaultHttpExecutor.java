@@ -31,7 +31,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
 				HttpClient client = HttpClientManager.getNewClient(
 						timeout, timeout);
 				try {
-					client.executeMethod(method);
+					HttpClientManager.executeMethodRedirecting(client, method);
 				} catch (IOException failed) {
 					listener.requestFailed(method, failed);
 					return;
