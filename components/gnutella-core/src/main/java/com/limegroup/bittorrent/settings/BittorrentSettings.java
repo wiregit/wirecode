@@ -43,16 +43,4 @@ public class BittorrentSettings extends LimeProps {
 	 */
 	public static IntSetting TORRENT_MIN_UPLOADS = FACTORY.createIntSetting(
 			"TORRENT_MIN_UPLOADS", 4);
-
-	/**
-	 * max connections per torrent
-	 */
-	public static IntSetting TORRENT_MAX_CONNECTIONS = FACTORY
-			.createIntSetting("TORRENT_MAX_CONNECTIONS", 150);
-	
-	/**
-	 * max active torrents
-	 */
-	public static IntSetting MAX_ACTIVE_TORRENTS = 
-		FACTORY.createIntSetting("MAX_TORRENTS", 0);
 }

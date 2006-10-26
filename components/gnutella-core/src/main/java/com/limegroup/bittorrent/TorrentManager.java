@@ -12,7 +12,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
-import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
@@ -89,23 +88,17 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	 * @return number of allowed torrents for this speed.. this should
 	 * probably be a setting
 	 */
-	private static int getMaxActiveTorrents() {
-		if (!BittorrentSettings.AUTOMATIC_SETTINGS.getValue())
-			return BittorrentSettings.MAX_ACTIVE_TORRENTS.getValue(); 
+	private static int getMaxActiveTorrents() { 
 		
 		// windows 98 has very small connection limit, allow a single torrent only
-		if (CommonUtils.isWindows() && !CommonUtils.isWindowsNTor2000orXP())
+		if (!CommonUtils.isGoodWindows())
 			return 1;
 		
 		int speed = ConnectionSettings.CONNECTION_SPEED.getValue();
-		if (speed <= SpeedConstants.MODEM_SPEED_INT)
-			return 1;
-		else if (speed <= SpeedConstants.CABLE_SPEED_INT)
-			return 2;
-		else if (speed <= SpeedConstants.T1_SPEED_INT)
-			return 3;
-		else
-			return 5;
+		if (speed <= SpeedConstants.MODEM_SPEED_INT) return 1;
+		else if (speed <= SpeedConstants.CABLE_SPEED_INT) return 3;
+		else if (speed <= SpeedConstants.T1_SPEED_INT) return 3;
+		else return 5;
 	}
 	
 	/**
@@ -113,17 +106,15 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	 * This is somewhat arbitrary
 	 */
 	public static int getMaxTorrentConnections() {
-		if (!BittorrentSettings.AUTOMATIC_SETTINGS.getValue())
-			return BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
 		
 		// windows 98 50 connection limit
-		if (CommonUtils.isWindows() && !CommonUtils.isWindowsNTor2000orXP())
+		if (!CommonUtils.isGoodWindows())
 			return 30;
 		
 		if (ConnectionSettings.CONNECTION_SPEED.getValue() <= 
 			SpeedConstants.MODEM_SPEED_INT)
 			return 40;
-		return BittorrentSettings.TORRENT_MAX_CONNECTIONS.getValue();
+		return 150;
 	}
 	
 	public void addEventListener(TorrentEventListener listener) {

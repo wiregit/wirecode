@@ -461,6 +461,14 @@ public final class CommonUtils {
 	public static boolean isUltrapeerOS() {
 	    return !(_isWindows98 || _isWindows95 || _isWindowsMe || _isWindowsNT);
 	}
+	
+	/**
+	 * @return true if this is a well-supported version of windows.
+	 * (not 95, 98, nt or me)
+	 */
+	public static boolean isGoodWindows() {
+		return isWindows() && isUltrapeerOS();
+	}
 
 	/**
 	 * Returns whether or not the OS is some version of Windows.
