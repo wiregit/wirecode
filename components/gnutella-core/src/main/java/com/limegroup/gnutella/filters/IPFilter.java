@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import com.limegroup.gnutella.messages.Message;
@@ -16,6 +18,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.mojito.messages.DHTMessage;
 
 /**
  * Blocks messages and hosts based on IP address.  
@@ -183,8 +186,17 @@ public final class IPFilter extends SpamFilter {
         } else if (m instanceof PushRequest) {
             PushRequest push=(PushRequest)m;
             return allow(push.getIP());
-        } else // we dont want to block other kinds of messages
+        } else if (m instanceof DHTMessage){
+            DHTMessage message = (DHTMessage)m;
+            SocketAddress addr = message.getContact().getContactAddress();
+            if(!(addr instanceof InetSocketAddress)) {
+                return false;
+            }
+            return allow(((InetSocketAddress)addr).getAddress());
+        } else {
+            // we dont want to block other kinds of messages
             return true;
+        }
     }
     
     public static interface IPFilterCallback {
