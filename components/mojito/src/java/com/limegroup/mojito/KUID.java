@@ -83,7 +83,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     /** The id */
     private byte[] id;
     
-    /** Lazyly initialized hashCode */
+    /** The hashCode of this Object */
     private int hashCode;
     
     protected KUID(byte[] id) {
