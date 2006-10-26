@@ -24,8 +24,8 @@ public class LimeXMLProperties
 {
 
     /**
-     * The default index for responses when there is no there no file and 
-     * hecne to no download. The value is set to 2^32 -1
+     * The default index for responses when there is no file and 
+     * hence none to download. The value is set to 2^32 -1
      */
     public static final long DEFAULT_NONFILE_INDEX = 0x00000000FFFFFFFFl;
     
