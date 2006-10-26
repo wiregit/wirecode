@@ -92,12 +92,12 @@ public class DHTValueBagImplTest extends BaseTestCase {
         
         try {
         	bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-        			ValueType.BINARY, KUID.createRandomID(), "test".getBytes()));
+        			ValueType.TEST, KUID.createRandomID(), "test".getBytes()));
         	assertTrue("Should have thrown an exception: wrong KUID", false);
         } catch(IllegalArgumentException ex) {}
         
         bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-    			ValueType.BINARY, valueId, "test".getBytes()));
+    			ValueType.TEST, valueId, "test".getBytes()));
         assertEquals(1, bag.size());
         assertFalse(bag.isEmpty());
     }

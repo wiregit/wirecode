@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.BootstrapListener;
 import com.limegroup.mojito.event.FindValueEvent;
@@ -247,7 +248,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreEvent evt = dht.put(null, key, value).get();
+            StoreEvent evt = dht.put(ValueType.TEST, key, value).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
