@@ -39,7 +39,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
     private static final long serialVersionUID = -5172585009004184680L;
 
     /** The originator of the DHTValue */
-    private Contact originator;
+    private Contact creator;
     
     /** The sender who sent the DHTValue to us (store forward) */
     private Contact sender;
@@ -72,17 +72,17 @@ public class DHTValueImpl implements DHTValue, Serializable {
     /**
      * Creates an instance of DHTValueImpl
      * 
-     * @param originator The originator of the DHTValue
+     * @param creator The originator of the DHTValue
      * @param sender The sender of the DHTValue
-     * @param valueId The KUID of the DHTValue
      * @param type The type of the DHTValue
+     * @param valueId The KUID of the DHTValue
      * @param data The actual DHTValue
      * @param isLocalValue Whether or not it's a local DHTValue
      */
-    public DHTValueImpl(Contact originator, Contact sender, 
-            KUID valueId, ValueType type, byte[] data, boolean isLocalValue) {
+    public DHTValueImpl(Contact creator, Contact sender, 
+            ValueType type, KUID valueId, byte[] data, boolean isLocalValue) {
         
-        this.originator = originator;
+        this.creator = creator;
         this.sender = sender;
         this.valueId = valueId;
         
@@ -153,10 +153,10 @@ public class DHTValueImpl implements DHTValue, Serializable {
     }
     
     /** 
-     * Sets the originator, meant for internal use only! 
+     * Sets the creator, meant for internal use only! 
      */
-    public void setOriginator(Contact originator) {
-        this.originator = originator;
+    public void setCreator(Contact creator) {
+        this.creator = creator;
     }
     
     /*
@@ -164,7 +164,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * @see com.limegroup.mojito.db.DHTValue#getOriginator()
      */
     public Contact getCreator() {
-        return originator;
+        return creator;
     }
     
     /*
@@ -172,7 +172,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * @see com.limegroup.mojito.db.DHTValue#getOriginatorID()
      */
     public KUID getCreatorID() {
-        return originator.getNodeID();
+        return creator.getNodeID();
     }
     
     /*
@@ -204,7 +204,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * @see com.limegroup.mojito.db.DHTValue#isDirect()
      */
     public boolean isDirect() {
-        return originator.getNodeID().equals(sender.getNodeID());
+        return creator.getNodeID().equals(sender.getNodeID());
     }
     
     /*

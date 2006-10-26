@@ -88,11 +88,11 @@ public class MessageOutputStream extends DataOutputStream {
      */
     public void writeDHTValue(DHTValue value) throws IOException {
         writeContact(value.getCreator());
-        value.getValueID().write(this);
         
         ValueType type = value.getValueType();
         writeInt(type.toInt());
         
+        value.getValueID().write(this);
         byte[] data = value.getData();
         writeShort(data.length);
         write(data, 0, data.length);

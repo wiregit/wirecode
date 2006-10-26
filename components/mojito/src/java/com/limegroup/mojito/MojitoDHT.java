@@ -224,7 +224,7 @@ public interface MojitoDHT {
     /**
      * Stores the given key, value pair
      */
-    public DHTFuture<StoreEvent> put(KUID key, ValueType type, byte[] value);
+    public DHTFuture<StoreEvent> put(ValueType type, KUID key, byte[] value);
     
     /**
      * Removes the value for the given key

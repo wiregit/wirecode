@@ -36,23 +36,27 @@ public class DHTValueFactory {
     /** 
      * Creates and returns a local DHTValue 
      */
-    public static DHTValue createLocalValue(Contact originator, 
-            KUID valueId, ValueType type, byte[] data) {
-        return new DHTValueImpl(originator, originator, valueId, type, data, true);
+    public static DHTValue createLocalValue(Contact creator, 
+            ValueType type, KUID valueId, byte[] data) {
+        return new DHTValueImpl(creator, creator, type, valueId, data, true);
     }
     
     /** 
      * Creates and returns a remote DHTValue 
      */
-    public static DHTValue createRemoteValue(Contact originator, Contact sender, 
-            KUID valueId, ValueType type, byte[] data) {
-        return new DHTValueImpl(originator, sender, valueId, type, data, false);
+    public static DHTValue createRemoteValue(Contact creator, Contact sender, 
+            ValueType type, KUID valueId, byte[] data) {
+        return new DHTValueImpl(creator, sender, type, valueId, data, false);
     }
     
     /**
-     * A helper method to set the originator 
+     * A helper method to set the creator of the DHTValue 
      */
-    public static void setOriginator(DHTValue value, Contact originator) {
-        ((DHTValueImpl)value).setOriginator(originator);
+    public static void setCreator(DHTValue value, Contact creator) {
+        if (!value.isLocalValue()) {
+            throw new IllegalArgumentException(value + " is not a local value!");
+        }
+        
+        ((DHTValueImpl)value).setCreator(creator);
     }
 }

@@ -247,7 +247,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreEvent evt = dht.put(key, null, value).get();
+            StoreEvent evt = dht.put(null, key, value).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());

@@ -53,7 +53,7 @@ public class DatabaseUtilsTest extends BaseTestCase {
         Contact originator = routeTable.getLocalNode();
         KUID valueId = originator.getNodeID().invert();
         DHTValue value = DHTValueFactory.createRemoteValue(
-                originator, originator, valueId, ValueType.BINARY, "Hello World".getBytes());
+                originator, originator, ValueType.BINARY, valueId, "Hello World".getBytes());
         
         long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));

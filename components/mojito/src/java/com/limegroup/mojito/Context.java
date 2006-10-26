@@ -485,7 +485,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
                 if (value.isLocalValue()) {
                     // Make sure all local DHTValues have the
                     // local Node as the originator
-                    DHTValueFactory.setOriginator(value, localNode);
+                    DHTValueFactory.setCreator(value, localNode);
                 } else {
                     
                     // Remove all non local DHTValues. We're assuming
@@ -934,12 +934,12 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, byte[])
      */
-    public DHTFuture<StoreEvent> put(KUID key, ValueType type, byte[] value) {
+    public DHTFuture<StoreEvent> put(ValueType type, KUID key, byte[] value) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "put()");
         }
         
-        DHTValue dhtValue = DHTValueFactory.createLocalValue(getLocalNode(), key, type, value);
+        DHTValue dhtValue = DHTValueFactory.createLocalValue(getLocalNode(), type, key, value);
         database.store(dhtValue);
         return store(dhtValue);
     }
@@ -954,7 +954,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
         
         // To remove a KeyValue you just store an empty value!
-        return put(key, ValueType.BINARY, DHTValue.EMPTY_DATA);
+        return put(ValueType.BINARY, key, DHTValue.EMPTY_DATA);
     }
     
     /** 

@@ -98,10 +98,10 @@ public class MessageInputStream extends DataInputStream {
      * @param sender The Contact that send us the DHTValue
      */
     public DHTValue readDHTValue(Contact sender) throws IOException {
-        Contact originator = readContact();
-        KUID valueId = readKUID();
+        Contact creator = readContact();
         ValueType type = readValueType();
         
+        KUID valueId = readKUID();
         byte[] data = null;
         int length = readUnsignedShort();
         if (length > 0) {
@@ -109,7 +109,7 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return DHTValueFactory.createRemoteValue(originator, sender, valueId, type, data);
+        return DHTValueFactory.createRemoteValue(creator, sender, type, valueId, data);
     }
     
     /**

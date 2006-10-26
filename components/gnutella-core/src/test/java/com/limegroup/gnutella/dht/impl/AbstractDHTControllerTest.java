@@ -196,7 +196,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public DHTFuture<StoreEvent> put(KUID key, ValueType type, byte[] value) {
+        public DHTFuture<StoreEvent> put(ValueType type, KUID key, byte[] value) {
             return null;
         }
 

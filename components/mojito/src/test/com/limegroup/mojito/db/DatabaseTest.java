@@ -57,7 +57,7 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         Contact node = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
-        return DHTValueFactory.createLocalValue(node, valueId, ValueType.BINARY, value);
+        return DHTValueFactory.createLocalValue(node, ValueType.BINARY, valueId, value);
     }
     
     private static DHTValue createDirectDHTValue(byte[] value) {
@@ -68,7 +68,7 @@ public class DatabaseTest extends BaseTestCase {
     private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
         Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG);
-        return DHTValueFactory.createRemoteValue(node, node, valueId, ValueType.BINARY, value);
+        return DHTValueFactory.createRemoteValue(node, node, ValueType.BINARY, valueId, value);
     }
     
     private static DHTValue createIndirectDHTValue(byte[] value) {
@@ -80,7 +80,7 @@ public class DatabaseTest extends BaseTestCase {
         SocketAddress addr = new InetSocketAddress(6666);
         Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, Contact.DEFAULT_FLAG);
         Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);   
-        return DHTValueFactory.createRemoteValue(orig, sender, valueId, ValueType.BINARY, value);
+        return DHTValueFactory.createRemoteValue(orig, sender, ValueType.BINARY, valueId, value);
     }
     
     public void testLocalAdd() throws Exception {
