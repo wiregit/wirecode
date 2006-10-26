@@ -7,10 +7,12 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Future;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
@@ -20,7 +22,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -288,12 +289,15 @@ abstract class AbstractDHTController implements DHTController {
         
         private Set<SocketAddress> dhtNodes;
         
-        private Future future;
+        private TimerTask timerTask;
+        
+        private volatile boolean isRunning;
         
         public RandomNodeAdder() {
             dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
-            future = SimpleTimer.sharedTimer().invokeLater(this, delay, delay);
+            timerTask = RouterService.schedule(this, delay, delay);
+            isRunning = true;
         }
         
         void addDHTNode(SocketAddress address) {
@@ -310,19 +314,21 @@ abstract class AbstractDHTController implements DHTController {
                 dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
             }
             
-                
-            for(SocketAddress addr : nodes) {
-                
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("RandomNodeAdder pinging: "+ addr);
+            synchronized(dht) {
+                for(SocketAddress addr : nodes) {
+                    
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("RandomNodeAdder pinging: "+ addr);
+                    }
+                    
+                    dht.ping(addr);
                 }
-                
-                dht.ping(addr);
             }
+                
         }
         
         boolean isRunning() {
-            return !future.isCancelled();
+            return isRunning;
         }
         
         Set<SocketAddress> getNodesSet(){
@@ -330,7 +336,8 @@ abstract class AbstractDHTController implements DHTController {
         }
         
         void stop() {
-            future.cancel(true);
+            timerTask.cancel();
+            isRunning = false;
         }
     }
 }
