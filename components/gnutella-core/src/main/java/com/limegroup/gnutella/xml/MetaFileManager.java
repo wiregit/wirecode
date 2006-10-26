@@ -13,12 +13,14 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
@@ -52,12 +54,20 @@ public class MetaFileManager extends FileManager {
                 if (metas != null) // valid query & responses.
                     result = union(result, metas, doc);
             }
+            else {
+            	// no xml query, look if any xml field of the matching mediatype
+            	// starts with the keywords of the request
+            	Response[] metas = queryXML(request);
+            	if (metas != null)
+                    result = union(result, metas, doc);
+            }
         }
-        
         return result;
     }
     
-    /**
+    
+
+	/**
      * Determines if this file has a valid XML match.
      */
     protected boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
@@ -415,53 +425,65 @@ public class MetaFileManager extends FileManager {
             return null;
 
         List<LimeXMLDocument> matchingReplies = replyCol.getMatchingReplies(queryDoc);
-        //matchingReplies = a List of LimeXMLDocuments that match the query
-        int s = matchingReplies.size();
-        if( s == 0 ) // no matching replies.
-            return null; 
-        
-        Response[] retResponses = new Response[s];
-        int z = 0;
-        for(LimeXMLDocument currDoc : matchingReplies) {
-            File file = currDoc.getIdentifier();//returns null if none
-            Response res = null;
-            if (file == null) { //pure metadata (no file)
-                res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
-            } else { //meta-data about a specific file
-                FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
-                if( fd == null) {
-                    // if fd is null, MetaFileManager is out of synch with
-                    // FileManager -- this is bad.
-                    continue;
-                } else { //we found a file with the right name
-					res = new Response(fd);
-					fd.incrementHitCount();
-                    RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
-                }
-            }
-            
-            // Note that if any response was invalid,
-            // the array will be too small, and we'll
-            // have to resize it.
-            res.setDocument(currDoc);
-            retResponses[z] = res;
-            z++;
-        }
-        
-        if( z == 0 )
-            return null; // no responses
 
-        // need to ensure that no nulls are returned in my response[]
-        // z is a count of responses constructed, see just above...
-        // s == retResponses.length        
-        if (z < s) {
-            Response[] temp = new Response[z];
-            System.arraycopy(retResponses, 0, temp, 0, z);
-            retResponses = temp;
-        }
-
-        return retResponses;
+        return matchingReplies.isEmpty() ? new Response[0] : createResponses(matchingReplies);        
     }
+    
+    private Response[] createResponses(Collection<LimeXMLDocument> documents) { 
+    	List<Response> responses = new ArrayList<Response>(documents.size());
+    	final FileManager fileManager = RouterService.getFileManager();
+    	final ActivityCallback callback = RouterService.getCallback(); 
+    	
+    	for (LimeXMLDocument currDoc : documents) {
+    		File file = currDoc.getIdentifier();//returns null if none
+    		Response res = null;
+    		if (file == null) { //pure metadata (no file)
+    			res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
+    		} else { //meta-data about a specific file
+    			FileDesc fd = fileManager.getFileDescForFile(file);
+    			if( fd == null) {
+    				// if fd is null, MetaFileManager is out of synch with
+    				// FileManager -- this is bad.
+    				continue;
+    			} else { //we found a file with the right name
+    				res = new Response(fd);
+    				fd.incrementHitCount();
+    				callback.handleSharedFileUpdate(file);
+    			}
+    		}
+    		res.setDocument(currDoc);
+    		responses.add(res);
+    	}
+    	return responses.toArray(new Response[responses.size()]);
+    }
+
+    private Response[] queryXML(QueryRequest request) {
+    	Collection<LimeXMLReplyCollection> schemas = getReplyCollections(request);
+    	// TODO fberger do I have to normalize
+    	String queryString = request.getQuery();
+    	List<LimeXMLDocument> documents = new ArrayList<LimeXMLDocument>();
+    	for (LimeXMLReplyCollection schemaCol : schemas) { 
+    		documents.addAll(schemaCol.getMatchingReplies(queryString));
+    	}
+    	return createResponses(documents);
+	}
+    
+    private Collection<LimeXMLReplyCollection> getReplyCollections(QueryRequest request) {
+    	final MediaType.Aggregator filter = MediaType.getAggregator(request);
+    	final SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
+    	if (filter == null) { 
+    		return mapper.getCollections();
+    	}
+    	Collection mediaTypes = filter.getMediaTypes();
+    	List<LimeXMLReplyCollection> collections = new ArrayList<LimeXMLReplyCollection>(mediaTypes.size());
+    	for (MediaType mt : filter.getMediaTypes()) { 
+    		LimeXMLReplyCollection col = mapper.getReplyCollection(mt.getMimeType());
+    		Assert.that(col != null);
+    		collections.add(col);
+    	}
+    	return collections;
+    }
+    
     
     private class Saver implements Runnable {
         public void run() {

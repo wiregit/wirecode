@@ -2048,10 +2048,10 @@ public abstract class FileManager {
 
 
     /**
-     * Returns a set of indices of files matching q, or null if there are no
-     * matches.  Subclasses may override to provide different notions of
-     * matching.  The caller of this method must not mutate the returned
-     * value.
+     * Returns a set of indices of files matching <code>query</code>, or null 
+     * if there are no matches.  Subclasses may override to provide different
+     * notions of matching.  The caller of this method must not mutate the
+     * returned value.
      */
     protected IntSet search(String query, IntSet priors) {
         //As an optimization, we lazily allocate all sets in case there are no

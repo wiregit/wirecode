@@ -396,6 +396,13 @@ public class MediaType implements Serializable {
             _filters.add(filter);
         }
 
+        /**
+         * Returns immutable list of mediatypes of aggregator.
+         */
+        public List<MediaType> getMediaTypes() {
+        	return Collections.unmodifiableList(_filters);
+        }
+        
         /** @return true if the Response falls within one of the MediaTypes
          *  this aggregates.
          */

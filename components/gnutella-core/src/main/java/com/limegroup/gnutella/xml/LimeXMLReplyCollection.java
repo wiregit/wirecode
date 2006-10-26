@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -469,6 +470,35 @@ public class LimeXMLReplyCollection {
             return Collections.emptyList();
 
         return actualMatches;
+    }
+    
+    public Collection<LimeXMLDocument> getMatchingReplies(String query) {
+    	 Set<LimeXMLDocument> matching = null;
+         synchronized(mainMap) {
+        	 for (StringTrie<List<LimeXMLDocument>> trie: trieMap.values()) {
+                 Iterator<List<LimeXMLDocument>> iter = trie.getPrefixedBy(query);
+                 // If some matches and 'matching' not allocated yet,
+                 // allocate a new Set for storing matches
+                 if(iter.hasNext()) {
+                     if (matching == null)
+                         matching = new HashSet<LimeXMLDocument>();
+                     // Iterate through each set of matches the Trie found
+                     // and add those matching-lists to our set of matches.
+                     // Note that the trie.getPrefixedBy returned
+                     // an Iterator of Lists -- this is because the Trie
+                     // does prefix matching, so there are many Lists of XML
+                     // docs that could match.
+                     while(iter.hasNext())
+                         matching.addAll(iter.next());
+                 }
+             }
+         }
+         if (matching != null) {
+        	 return matching;
+         }
+         else { 
+        	 return Collections.emptyList();
+         }
     }
     
     /**
