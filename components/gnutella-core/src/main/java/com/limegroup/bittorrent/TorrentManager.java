@@ -91,7 +91,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private static int getMaxActiveTorrents() { 
 		
 		// windows 98 has very small connection limit, allow a single torrent only
-		if (!CommonUtils.isGoodWindows())
+		if (CommonUtils.isWindows() && !CommonUtils.isGoodWindows())
 			return 1;
 		
 		int speed = ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -108,7 +108,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	public static int getMaxTorrentConnections() {
 		
 		// windows 98 50 connection limit
-		if (!CommonUtils.isGoodWindows())
+		if (CommonUtils.isWindows() && !CommonUtils.isGoodWindows())
 			return 30;
 		
 		if (ConnectionSettings.CONNECTION_SPEED.getValue() <= 
