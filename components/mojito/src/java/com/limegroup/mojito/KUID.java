@@ -84,7 +84,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     private byte[] id;
     
     /** Lazyly initialized hashCode */
-    private volatile int hashCode = -1;
+    private int hashCode;
     
     protected KUID(byte[] id) {
         if (id == null) {
@@ -96,6 +96,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         }
         
         this.id = id;
+        this.hashCode = Arrays.hashCode(id);
     }
     
     /**
@@ -279,12 +280,6 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     public int hashCode() {
-        if (hashCode == -1) {
-            hashCode = Arrays.hashCode(id);
-            if (hashCode == -1) {
-                hashCode = 0;
-            }
-        }
         return hashCode;
     }
     
