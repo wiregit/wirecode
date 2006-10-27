@@ -215,6 +215,20 @@ public class Main {
                 err.printStackTrace();
             }
         }
+        
+        if (dhts.size() > 1) {
+            BootstrapEvent evt = dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
+            time += evt.getTotalTime();
+            
+            if (evt.getEventType().equals(EventType.BOOTSTRAP_SUCCEEDED)) {    
+                System.out.println("Node #0 finished bootstrapping from " 
+                        + dhts.get(1).getContactAddress() + " in " + evt.getTotalTime() + "ms");
+            } else {
+                System.out.println("Node #0 failed to bootstrap from " 
+                        + dhts.get(1).getContactAddress() + "\n" + evt);
+            }
+        }
+        
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
         
         /*future.addDHTEventListener(new BootstrapListener() {
