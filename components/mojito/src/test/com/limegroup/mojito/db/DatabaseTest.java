@@ -31,6 +31,7 @@ import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
+import com.limegroup.mojito.settings.DatabaseSettings;
 
 public class DatabaseTest extends BaseTestCase {
     
@@ -343,6 +344,51 @@ public class DatabaseTest extends BaseTestCase {
         database.store(value6);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
+    }
+    
+    public void testFloodDatabase() {
+        Database db = new DatabaseImpl();
+        
+        //this should accept
+        Contact badHost = ContactFactory.createLiveContact(
+                new InetSocketAddress("169.0.1.1", 1111), 0, 0, KUID.createRandomID()
+                , new InetSocketAddress("169.0.1.1", 1111), 1, 0);
+        
+        Contact goodHost = ContactFactory.createLiveContact(
+                new InetSocketAddress("169.0.1.2", 1111), 0, 0, KUID.createRandomID()
+                , new InetSocketAddress("169.0.1.2", 1111), 1, 0);
+
+        DHTValue value = null;
+        //should allow x direct values
+        for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
+            value = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
+                    KUID.createRandomID(), "test".getBytes());
+            assertTrue(db.store(value));
+        }
+        //and reject after that
+        DHTValue newValue = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
+                KUID.createRandomID(), "test".getBytes());
+        assertFalse(db.store(newValue));
+        
+        //should also reject an indirect one coming from the bad host
+        newValue = DHTValueFactory.createRemoteValue(badHost, goodHost, ValueType.BINARY, 
+                KUID.createRandomID(), "test".getBytes());
+        assertFalse(db.store(newValue));
+        
+        //should not allow more, even if it is coming indirectly        
+        newValue = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
+                KUID.createRandomID(), "test".getBytes());
+        assertFalse(db.store(newValue));
+        
+        //but should allow one created by a good host
+        DHTValue goodValue = DHTValueFactory.createRemoteValue(goodHost, goodHost, ValueType.BINARY, 
+                KUID.createRandomID(), "test".getBytes());
+        assertTrue(db.store(goodValue));
+
+        //should make some space for a new one
+        db.remove(value);
+        assertTrue(db.store(value));
+        
     }
     
     /*public void testRemoveAll() {

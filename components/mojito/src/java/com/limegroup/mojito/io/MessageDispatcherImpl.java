@@ -204,6 +204,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
 
     @Override
     protected boolean allow(DHTMessage message) {
+        //TODO: IP filter: MOJITO-92
         return true;
     }
     

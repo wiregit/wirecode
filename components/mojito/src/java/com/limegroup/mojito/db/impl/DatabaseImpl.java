@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.db.impl;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,11 +29,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DatabaseSecurityConstraint;
+import com.limegroup.mojito.routing.Contact;
+import com.limegroup.mojito.settings.DatabaseSettings;
 
 /*
  * Multiple values per key and one value per nodeId under a certain key
@@ -81,6 +85,12 @@ public class DatabaseImpl implements Database {
      */
     private DatabaseSecurityConstraint securityConstraint 
         = new DefaultDatabaseSecurityConstraint();
+    
+    /**
+     * A Map of raw IP address -> number of keys stored in this DB.
+     */
+    private Map<Integer, Integer> hostValuesMap;
+
     
     public DatabaseImpl() {
         this(-1, -1);
@@ -182,32 +192,83 @@ public class DatabaseImpl implements Database {
         
         KUID valueId = value.getValueID();
         DHTValueBag bag = database.get(valueId);
-        if (bag != null) {
+        if (bag != null && bag.remove(value)) {
 
-            boolean removed = bag.remove(value);
-            
             if (bag.isEmpty()) {
                 database.remove(valueId);
             }
+            int iaddr = ByteOrder.beb2int(((InetSocketAddress) value.getCreator().getContactAddress())
+                .getAddress().getAddress(), 0);
             
-            return removed;
+            if(hostValuesMap.containsKey(iaddr)) {
+                int count = hostValuesMap.get(iaddr);
+                if(count <= 1) {
+                    hostValuesMap.remove(iaddr);
+                } else {
+                    hostValuesMap.put(iaddr, --count);
+                }
+            }
+            
+            return true;
         }
         return false;
     }
     
     /**
-     * An internal helper method that delegates calls to
-     * the DatabaseSecurityConstraint instance if possible
+     * An internal helper method that checks for possible flooding 
+     * and then delegates calls to the DatabaseSecurityConstraint instance 
+     * if possible
      */
     private boolean allowStore(DHTValue value) {
+        
+        DHTValueBag bag = database.get(value.getValueID());
+        
+        //TODO: exclude signed valso
+        if(bag == null) {
+            //first check if the node is flooding us with keys:
+            //We can only check for flooding by the value creator, not by the originator, 
+            //because that could be misused to prevent us from storing real values
+            int maxKeyPerIP = DatabaseSettings.MAX_KEY_PER_IP.getValue();
+
+            int numKeys = 0;
+            Contact creator = value.getCreator();
+            byte[] addr = ((InetSocketAddress) creator.getContactAddress())
+                .getAddress().getAddress();
+            int iaddr = ByteOrder.beb2int(addr, 0);
+            
+            if(hostValuesMap == null) {
+                hostValuesMap = new HashMap<Integer, Integer>();
+                
+            } else if(hostValuesMap.containsKey(iaddr)) {
+                numKeys = hostValuesMap.get(iaddr);
+                if(numKeys > maxKeyPerIP) {
+                    //TODO: if > banLimit:
+                    //banContact(creator);
+                    return false;
+                }
+            }
+            hostValuesMap.put(iaddr, ++numKeys);
+        }
+        
+        //check with the security constraint now
         DatabaseSecurityConstraint dbsc = securityConstraint;
         if (dbsc == null) {
             return true;
         }
         
-        DHTValueBag bag = database.get(value.getValueID());
         return dbsc.allowStore(this, bag, value);
     }
+    /*
+    private void banContact(Contact contact) {
+        //remove all values by this contact
+        for(DHTValue value: values()) {
+            if(value.getCreator().equals(contact)) {
+                remove(value);
+            }
+        }
+        
+        //TODO: add contact to IP filter: MOJITO-92
+    }*/
     
     /*
      * (non-Javadoc)

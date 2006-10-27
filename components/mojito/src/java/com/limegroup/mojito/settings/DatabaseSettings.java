@@ -46,6 +46,27 @@ public final class DatabaseSettings extends MojitoProps {
                 "max_values_per_key", 1, 10);
     
     /**
+     * The maximum number of keys a single IP can store in the DHT.
+     * (assuming random distribution of keys)
+     * 
+     * v = total number of values for one IP
+     * n = DHT size
+     * k = replication param (default 20)
+     * 
+     * x = number of key stored per DHT node per IP
+     * 
+     * x = (v*k)/n  ==> x = (v*100000)/20 = (1/5000)*v
+     * 
+     * --> with x = 5, v = 25'000
+     * 
+     * Considering even NAT'd addresses, this should be enough
+     * 
+     */
+    public static final IntSetting MAX_KEY_PER_IP
+        = FACTORY.createSettableIntSetting("MAX_KEY_PER_IP", 5, 
+                "max_key_per_ip", 1, Integer.MAX_VALUE - 1);
+    
+    /**
      * The time after a non-local value expires
      */
     public static final LongSetting VALUE_EXPIRATION_TIME

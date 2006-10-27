@@ -114,6 +114,7 @@ public interface Contact extends Serializable {
      * as read from the IP packet. Depending on the
      * network configuration of the remote Host it's
      * maybe not an valid address to respond to. 
+     * Note: The source address may be null
      */
     public SocketAddress getSourceAddress();
     

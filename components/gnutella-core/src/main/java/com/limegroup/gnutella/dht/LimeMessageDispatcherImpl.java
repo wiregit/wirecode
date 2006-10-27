@@ -100,6 +100,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     @Override
     protected boolean allow(DHTMessage message) {
+        //blocking is already done in NIODispatcher
         return true;
     }
 
