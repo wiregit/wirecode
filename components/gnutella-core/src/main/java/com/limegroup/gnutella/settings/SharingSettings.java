@@ -155,12 +155,14 @@ public class SharingSettings extends LimeProps {
     	if (extension == null) {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
-        MediaType type = MediaType.getMediaTypeForExtension(extension);
-        FileSetting fs = getFileSettingForMediaType(type);
-        if (fs.isDefault()) {
-        return DIRECTORY_FOR_SAVING_FILES.getValue();
-    }
-        return fs.getValue();
+    	MediaType type = MediaType.getMediaTypeForExtension(extension);
+    	if (type == null)
+    		return DIRECTORY_FOR_SAVING_FILES.getValue();	
+    	FileSetting fs = getFileSettingForMediaType(type);
+    	if (fs.isDefault()) {
+    		return DIRECTORY_FOR_SAVING_FILES.getValue();
+    	}
+    	return fs.getValue();
     }
 
     public static final File getSaveDirectory() { 
