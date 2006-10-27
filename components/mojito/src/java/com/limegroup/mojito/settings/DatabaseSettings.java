@@ -67,6 +67,14 @@ public final class DatabaseSettings extends MojitoProps {
                 "max_key_per_ip", 1, Integer.MAX_VALUE - 1);
     
     /**
+     * The limit after which the host gets banned. 
+     * @see MAX_KEY_PER_IP
+     */
+    public static final IntSetting MAX_KEY_PER_IP_BAN_LIMIT
+    = FACTORY.createSettableIntSetting("MAX_KEY_PER_IP_BAN_LIMIT", 50, 
+            "max_key_per_ip_ban_limit", 1, Integer.MAX_VALUE - 1);
+    
+    /**
      * The time after a non-local value expires
      */
     public static final LongSetting VALUE_EXPIRATION_TIME

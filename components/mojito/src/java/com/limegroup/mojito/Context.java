@@ -90,6 +90,7 @@ import com.limegroup.mojito.statistics.RoutingStatisticContainer;
 import com.limegroup.mojito.util.CryptoUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
 import com.limegroup.mojito.util.DatabaseUtils;
+import com.limegroup.mojito.util.HostFilter;
 
 /**
  * The Context is the heart of Mojito where everything comes 
@@ -445,7 +446,12 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             purgeDatabase(true);
         }
     }
-    
+
+    public void setHostFilter(HostFilter hostFilter) {
+        database.setHostFilter(hostFilter);
+        messageDispatcher.setHostFilter(hostFilter);
+    }
+
     /**
      * Returns the RouteTable
      */

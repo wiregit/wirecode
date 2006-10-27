@@ -194,7 +194,6 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         Message m;
         PingRequest ping;
         for(int i=0; i < UDP_ACCESS.length; i++) {
-            System.out.println("test");
           datagramBytes = new byte[1000];
           pack = new DatagramPacket(datagramBytes, 1000);
           UDP_ACCESS[i].receive(pack);

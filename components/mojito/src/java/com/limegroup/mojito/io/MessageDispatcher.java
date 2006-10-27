@@ -67,6 +67,7 @@ import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.FixedSizeHashMap;
+import com.limegroup.mojito.util.HostFilter;
 import com.limegroup.mojito.util.MessageUtils;
 
 /**
@@ -99,6 +100,11 @@ public abstract class MessageDispatcher {
     /** A lock for the ReceiptMap */
     private Object receiptMapLock = new Object();
     
+    /**
+     * A lock for the filter
+     */
+    private Object hostFilterLock = new Object();
+    
     /** 
      * The CleanupTask goes periodically through the ReceiptMap 
      * and prunes out ResponseHandlers that have timed-out.
@@ -117,6 +123,8 @@ public abstract class MessageDispatcher {
     private ByteBuffer inputBuffer;
     
     private List<MessageDispatcherListener> listeners;
+    
+    private volatile HostFilter hostFilter;
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -166,6 +174,12 @@ public abstract class MessageDispatcher {
         
         if (listeners != null) {
             listeners.remove(l);
+        }
+    }
+    
+    public synchronized void setHostFilter(HostFilter filter) {
+        synchronized(hostFilterLock) {
+            this.hostFilter = filter;
         }
     }
     
@@ -674,9 +688,16 @@ public abstract class MessageDispatcher {
     
     /** 
      * This method is called to determinate whether or not the
-     * DHTMessage should be processed.
+     * DHTMessage should be processed. 
      */
     protected boolean allow(DHTMessage message) {
+        
+        synchronized(hostFilterLock) {
+            if(hostFilter != null) {
+                return hostFilter.allow(message.getContact().getContactAddress());
+            }    
+        }
+
         return true;
     }
     

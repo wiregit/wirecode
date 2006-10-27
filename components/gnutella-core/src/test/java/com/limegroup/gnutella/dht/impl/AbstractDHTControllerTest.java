@@ -35,6 +35,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
+import com.limegroup.mojito.util.HostFilter;
 
 import junit.framework.Test;
 
@@ -244,6 +245,9 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
         
+        public void setHostFilter(HostFilter hostFilter) {
+        }
+
         public List<SocketAddress> getPingedNodesList(){
             return pingedList;
         }

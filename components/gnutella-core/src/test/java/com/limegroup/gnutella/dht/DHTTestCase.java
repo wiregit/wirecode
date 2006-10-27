@@ -19,6 +19,7 @@ import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.Contact.State;
 import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
+import com.limegroup.mojito.settings.KademliaSettings;
 
 public abstract class DHTTestCase extends BaseTestCase {
     
@@ -65,6 +66,7 @@ public abstract class DHTTestCase extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         //dht settings:
         DHTSettings.PERSIST_DHT.setValue(false);
+        KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
     }
     
     public static void globalTearDown() throws Exception {

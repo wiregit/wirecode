@@ -45,6 +45,7 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
+import com.limegroup.mojito.util.HostFilter;
 
 /**
  * The public interface of the Mojito DHT
@@ -185,6 +186,11 @@ public interface MojitoDHT {
      * <tt>RouteTable</tt>
      */
     public void setRouteTable(RouteTable routeTable);
+    
+    /**
+     * Sets the Host Filter
+     */
+    public void setHostFilter(HostFilter hostFilter);
     
     /**
      * Sets the Database

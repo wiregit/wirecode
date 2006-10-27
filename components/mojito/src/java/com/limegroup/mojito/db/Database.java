@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.util.HostFilter;
 
 /**
  * An interface to implement Databases. Mojito ships
@@ -41,6 +42,8 @@ public interface Database extends Serializable {
      */
     public void setDatabaseSecurityConstraint(
             DatabaseSecurityConstraint securityConstraint);
+    
+    public void setHostFilter(HostFilter filter);
     
     /**
      * Adds or removes the given DHTValue depending on

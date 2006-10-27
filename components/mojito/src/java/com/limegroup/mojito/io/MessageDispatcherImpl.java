@@ -39,7 +39,6 @@ import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.util.CryptoUtils;
 
 /**
@@ -202,12 +201,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         return running;
     }
 
-    @Override
-    protected boolean allow(DHTMessage message) {
-        //TODO: IP filter: MOJITO-92
-        return true;
-    }
-    
     @Override
     protected void process(Runnable runnable) {
         synchronized (channelLock) {

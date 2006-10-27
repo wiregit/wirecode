@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -15,6 +16,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ProcessingQueue;
@@ -170,6 +172,36 @@ public final class IPFilter extends SpamFilter {
         }
         return goodHosts.contains(ip) || !badHosts.contains(ip);
     }
+    
+    public boolean allow(SocketAddress addr) {
+        if(!(addr instanceof InetSocketAddress)) {
+            return false;
+        }
+        return allow(((InetSocketAddress)addr).getAddress());
+    }
+
+    public void ban(SocketAddress addr) {
+        if(!(addr instanceof InetSocketAddress)) {
+            return;
+        }
+        banIP(((InetSocketAddress)addr).getAddress().getHostAddress());
+    }
+    
+    private void banIP(String ip) {
+        String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        Arrays.sort(bannedIPs, Comparators.stringComparator());
+        if ( Arrays.binarySearch(bannedIPs, ip, 
+                                 Comparators.stringComparator()) >= 0 ) {
+            return;
+        }
+        
+        String[] more_banned = new String[bannedIPs.length+1];
+        System.arraycopy(bannedIPs, 0, more_banned, 0, 
+                         bannedIPs.length);
+        more_banned[bannedIPs.length] = ip;
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
+    }
+    
 
     /** 
      * Checks if a given Message's host is banned.
@@ -188,11 +220,7 @@ public final class IPFilter extends SpamFilter {
             return allow(push.getIP());
         } else if (m instanceof DHTMessage){
             DHTMessage message = (DHTMessage)m;
-            SocketAddress addr = message.getContact().getContactAddress();
-            if(!(addr instanceof InetSocketAddress)) {
-                return false;
-            }
-            return allow(((InetSocketAddress)addr).getAddress());
+            return allow(message.getContact().getContactAddress());
         } else {
             // we dont want to block other kinds of messages
             return true;

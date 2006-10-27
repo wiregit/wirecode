@@ -37,6 +37,7 @@ import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DatabaseSecurityConstraint;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.util.HostFilter;
 
 /*
  * Multiple values per key and one value per nodeId under a certain key
@@ -90,6 +91,11 @@ public class DatabaseImpl implements Database {
      * A Map of raw IP address -> number of keys stored in this DB.
      */
     private Map<Integer, Integer> hostValuesMap;
+    
+    /**
+     * The Host filter. Used to ban hosts when database flooding is detected.
+     */
+    private transient HostFilter filter;
 
     
     public DatabaseImpl() {
@@ -115,6 +121,10 @@ public class DatabaseImpl implements Database {
         this.securityConstraint = securityConstraint;
     }
     
+    public void setHostFilter(HostFilter filter) {
+        this.filter = filter;
+    }
+
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#getKeyCount()
@@ -204,6 +214,13 @@ public class DatabaseImpl implements Database {
                 int count = hostValuesMap.get(iaddr);
                 if(count <= 1) {
                     hostValuesMap.remove(iaddr);
+                } else if(count > DatabaseSettings.MAX_KEY_PER_IP.getValue()){
+                    //The host went over the limit, thus either he is trying
+                    //to legitimately remove a value, in which case we give him a chance
+                    //or this method is called from the ban() method, in which case the 
+                    //host should be filtered out by the HostFilter anyways
+                    hostValuesMap.put(iaddr, 
+                            DatabaseSettings.MAX_KEY_PER_IP.getValue());
                 } else {
                     hostValuesMap.put(iaddr, --count);
                 }
@@ -228,7 +245,6 @@ public class DatabaseImpl implements Database {
             //first check if the node is flooding us with keys:
             //We can only check for flooding by the value creator, not by the originator, 
             //because that could be misused to prevent us from storing real values
-            int maxKeyPerIP = DatabaseSettings.MAX_KEY_PER_IP.getValue();
 
             int numKeys = 0;
             Contact creator = value.getCreator();
@@ -241,9 +257,15 @@ public class DatabaseImpl implements Database {
                 
             } else if(hostValuesMap.containsKey(iaddr)) {
                 numKeys = hostValuesMap.get(iaddr);
-                if(numKeys > maxKeyPerIP) {
-                    //TODO: if > banLimit:
-                    //banContact(creator);
+                if(numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+
+                    hostValuesMap.put(iaddr, ++numKeys);
+                    
+                    if(numKeys > DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                        //banning will also remove the host from the Map
+                        banContact(creator);
+                    }
+                    
                     return false;
                 }
             }
@@ -258,7 +280,7 @@ public class DatabaseImpl implements Database {
         
         return dbsc.allowStore(this, bag, value);
     }
-    /*
+    
     private void banContact(Contact contact) {
         //remove all values by this contact
         for(DHTValue value: values()) {
@@ -267,8 +289,8 @@ public class DatabaseImpl implements Database {
             }
         }
         
-        //TODO: add contact to IP filter: MOJITO-92
-    }*/
+        filter.ban(contact.getContactAddress());
+    }
     
     /*
      * (non-Javadoc)

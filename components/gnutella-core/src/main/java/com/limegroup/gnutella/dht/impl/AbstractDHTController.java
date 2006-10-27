@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTFilterDelegate;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -212,6 +213,7 @@ abstract class AbstractDHTController implements DHTController {
                 return new ManagedThread(runnable);
             }
         });
+        dht.setHostFilter(new DHTFilterDelegate());
         
         this.dht = dht;
     }
@@ -253,7 +255,7 @@ abstract class AbstractDHTController implements DHTController {
         
         public IpPortRemoteContact(Contact node) {
             
-            if(!(node instanceof InetSocketAddress)) {
+            if(!(node.getContactAddress() instanceof InetSocketAddress)) {
                 throw new IllegalArgumentException("Contact not instance of InetSocketAddress");
             }
             

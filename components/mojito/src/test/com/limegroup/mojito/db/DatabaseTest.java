@@ -22,6 +22,8 @@ package com.limegroup.mojito.db;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -32,6 +34,7 @@ import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.DatabaseSettings;
+import com.limegroup.mojito.util.HostFilter;
 
 public class DatabaseTest extends BaseTestCase {
     
@@ -348,6 +351,8 @@ public class DatabaseTest extends BaseTestCase {
     
     public void testFloodDatabase() {
         Database db = new DatabaseImpl();
+        HostFilterStub filter = new HostFilterStub();
+        db.setHostFilter(filter);
         
         //this should accept
         Contact badHost = ContactFactory.createLiveContact(
@@ -370,6 +375,10 @@ public class DatabaseTest extends BaseTestCase {
                 KUID.createRandomID(), "test".getBytes());
         assertFalse(db.store(newValue));
         
+        //should make some space for a new one
+        db.remove(value);
+        assertTrue(db.store(value));
+        
         //should also reject an indirect one coming from the bad host
         newValue = DHTValueFactory.createRemoteValue(badHost, goodHost, ValueType.BINARY, 
                 KUID.createRandomID(), "test".getBytes());
@@ -385,10 +394,18 @@ public class DatabaseTest extends BaseTestCase {
                 KUID.createRandomID(), "test".getBytes());
         assertTrue(db.store(goodValue));
 
-        //should make some space for a new one
-        db.remove(value);
-        assertTrue(db.store(value));
+        //test banning now
+        badHost = ContactFactory.createLiveContact(
+                new InetSocketAddress("169.0.1.3", 1111), 0, 0, KUID.createRandomID()
+                , new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
+        for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
+            value = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
+                    KUID.createRandomID(), "test".getBytes());
+            db.store(value);
+        }
+        //should have banned the host
+        assertContains(filter.getBannedHosts(), badHost.getContactAddress());
     }
     
     /*public void testRemoveAll() {
@@ -415,4 +432,22 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
     }*/
+    
+    private class HostFilterStub implements HostFilter{
+        
+        private Set<SocketAddress> bannedHosts = new HashSet<SocketAddress>();
+        
+        public boolean allow(SocketAddress addr) {
+            return true;
+        }
+
+        public void ban(SocketAddress addr) {
+            bannedHosts.add(addr);
+        }
+
+        public Set<SocketAddress> getBannedHosts() {
+            return bannedHosts;
+        }
+        
+    }
 }
