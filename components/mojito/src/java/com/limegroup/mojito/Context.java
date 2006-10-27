@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -178,7 +179,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         
         initStats();
         
-        messageDispatcher = new MessageDispatcherImpl(this);
+        setMessageDispatcher(null);
+        
         messageHelper = new MessageHelper(this);
         dhtValueManager = new DHTValueManager(this);
 
@@ -392,9 +394,23 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             Constructor<? extends MessageDispatcher> c = clazz.getConstructor(Context.class);
             c.setAccessible(true);
             messageDispatcher = c.newInstance(this);
+            
+            messageDispatcher.addMessageDispatcherListener(
+                    new NetworkStatisticContainer.Listener(networkStats));
+            
             return messageDispatcher;
-        } catch (Exception err) {
-            throw new RuntimeException(err);
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
     }
     

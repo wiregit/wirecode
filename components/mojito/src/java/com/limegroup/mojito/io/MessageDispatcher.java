@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,6 +45,7 @@ import com.limegroup.mojito.handler.request.FindValueRequestHandler;
 import com.limegroup.mojito.handler.request.PingRequestHandler;
 import com.limegroup.mojito.handler.request.StatsRequestHandler;
 import com.limegroup.mojito.handler.request.StoreRequestHandler;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import com.limegroup.mojito.io.Tag.Receipt;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.DHTSecureMessage;
@@ -63,7 +65,6 @@ import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
-import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
 import com.limegroup.mojito.util.FixedSizeHashMap;
 import com.limegroup.mojito.util.MessageUtils;
@@ -104,8 +105,6 @@ public abstract class MessageDispatcher {
      */
     private CleanupTask cleanupTask;
     
-    private NetworkStatisticContainer networkStats;
-    
     protected final Context context;
     
     private DefaultMessageHandler defaultHandler;
@@ -117,12 +116,10 @@ public abstract class MessageDispatcher {
     
     private ByteBuffer inputBuffer;
     
-    private MessageDispatcherCallback callback;
+    private List<MessageDispatcherListener> listeners;
     
     public MessageDispatcher(Context context) {
         this.context = context;
-        
-        networkStats = context.getNetworkStats();
         
         defaultHandler = new DefaultMessageHandler(context);
         pingHandler = new PingRequestHandler(context);
@@ -132,6 +129,44 @@ public abstract class MessageDispatcher {
         statsHandler = new StatsRequestHandler(context);
         
         inputBuffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
+    }
+    
+    /**
+     * Adds a MessageDispatcherListener.
+     * 
+     * Implementation Note: The listener(s) is not called from a 
+     * seperate event Thread! That means processor intensive tasks
+     * that are performed straight in the listener(s) can slowdown 
+     * the processing throughput significantly. Offload intensive
+     * tasks to seperate Threads in necessary!
+     * 
+     * @param l The MessageDispatcherListener instance to add
+     */
+    public synchronized void addMessageDispatcherListener(MessageDispatcherListener l) {
+        if (l == null) {
+            throw new NullPointerException("MessageDispatcherListener is null");
+        }
+        
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<MessageDispatcherListener>();
+        }
+        
+        listeners.add(l);
+    }
+    
+    /**
+     * Removes a MessageDispatcherListener
+     * 
+     * @param l The MessageDispatcherListener instance to remove
+     */
+    public synchronized void removeMessageDispatcherListener(MessageDispatcherListener l) {
+        if (l == null) {
+            throw new NullPointerException("MessageDispatcherListener is null");
+        }
+        
+        if (listeners != null) {
+            listeners.remove(l);
+        }
     }
     
     /**
@@ -439,15 +474,16 @@ public abstract class MessageDispatcher {
             return;
         }
         
+        fireMessageReceived(message);
+        
         if (!accept(message)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping message from " + node);
             }
+            
+            fireMessageFiltered(message);
             return;
         }
-        
-        networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
-        //networkStats.RECEIVED_MESSAGES_SIZE.addData(message.getSize());
         
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
@@ -506,9 +542,7 @@ public abstract class MessageDispatcher {
         }
         
         
-        if (callback != null) {
-            callback.receive(message);
-        }
+        fireMessageReceived(message);
     }
     
     /**
@@ -612,12 +646,7 @@ public abstract class MessageDispatcher {
             }
         }
         
-        networkStats.SENT_MESSAGES_COUNT.incrementStat();
-        networkStats.SENT_MESSAGES_SIZE.addData(tag.getSize());
-        
-        if (callback != null) {
-            callback.send(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
-        }
+        fireMessageSend(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
     }
     
     /** Called to indicate an interest in reading */
@@ -674,18 +703,46 @@ public abstract class MessageDispatcher {
         }
     }
     
-    /**
-     * Sets the MessageDispatcherCallback. Use null as an argument to
-     * unset it.
-     * 
-     * NOTE: This method is not Thread safe and it's not intended to be.
-     * That means setting and unsetting the callback at runtime can
-     * cause problems like NullPointerExceptions.
-     * 
-     * @param callback The MessageDispatcherCallback instance
-     */
-    public void setMessageDispatcherCallback(MessageDispatcherCallback callback) {
-        this.callback = callback;
+    protected void fireMessageSend(KUID nodeId, SocketAddress dst, DHTMessage message) {
+        fireMessageDispatcherEvent(nodeId, dst, message, EventType.MESSAGE_SEND);
+    }
+    
+    protected void fireMessageReceived(DHTMessage message) {
+        fireMessageDispatcherEvent(null, null, message, EventType.MESSAGE_RECEIVED);
+    }
+    
+    protected void fireMessageFiltered(DHTMessage message) {
+        fireMessageDispatcherEvent(null, null, message, EventType.MESSAGE_FILTERED);
+    }
+    
+    protected void fireLateResponse(DHTMessage message) {
+        fireMessageDispatcherEvent(null, null, message, EventType.LATE_RESPONSE);
+    }
+    
+    protected void fireReceiptTimeout(Receipt receipt) {
+        fireMessageDispatcherEvent(receipt.getNodeID(), receipt.getSocketAddress(), 
+                receipt.getRequestMessage(), EventType.RECEIPT_TIMEOUT);
+    }
+    
+    protected void fireReceiptEvicted(Receipt receipt) {
+        fireMessageDispatcherEvent(receipt.getNodeID(), receipt.getSocketAddress(), 
+                receipt.getRequestMessage(), EventType.RECEIPT_EVICTED);
+    }
+    
+    protected void fireMessageDispatcherEvent(KUID nodeId, SocketAddress dst, 
+            DHTMessage message, EventType type) {
+        
+        List<MessageDispatcherListener> list = listeners;
+        if (list != null) {
+            Iterator<MessageDispatcherListener> it = list.iterator();
+            if (it.hasNext()) {
+                MessageDispatcherEvent evt 
+                    = new MessageDispatcherEvent(this, nodeId, dst, message, type);
+                while(it.hasNext()) {
+                    it.next().handleMessageDispatcherEvent(evt);
+                }
+            }
+        }
     }
     
     /**
@@ -717,8 +774,8 @@ public abstract class MessageDispatcher {
                 } else if (receipt.timeout()) {
                     receipt.received();
                     it.remove();
-                    networkStats.RECEIPTS_TIMEOUT.incrementStat();
                     
+                    fireReceiptTimeout(receipt);
                     process(new TimeoutProcessor(receipt));
                 } else {
                     process(new TickProcessor(receipt));
@@ -734,9 +791,9 @@ public abstract class MessageDispatcher {
                 receipt.received();
                 
                 if(timeout) {
-                    networkStats.RECEIPTS_TIMEOUT.incrementStat();
+                    fireReceiptTimeout(receipt);
                 } else {
-                    networkStats.RECEIPTS_EVICTED.incrementStat();
+                    fireReceiptEvicted(receipt);
                 }
                 
                 process(new TimeoutProcessor(receipt));
@@ -870,7 +927,7 @@ public abstract class MessageDispatcher {
                 }
             }
             
-            networkStats.LATE_MESSAGES_COUNT.incrementStat();
+            fireLateResponse(response);
             
             if (!node.isFirewalled()) {
                 context.getRouteTable().add(node); // update
@@ -904,7 +961,8 @@ public abstract class MessageDispatcher {
                 if (LOG.isTraceEnabled()) {
                     LOG.trace(request.getContact() + " refused");
                 }
-                networkStats.FILTERED_MESSAGES.incrementStat();
+                
+                fireMessageFiltered(request);
                 return;
             }
             
@@ -998,31 +1056,81 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * The MessageDispatcherCallback is called for every 
-     * send or received Message. The receive() method is
-     * called from the MessageDispatcher Thread and the
-     * send() method from various Threads.
-     * 
-     * It's meant for internal use only and we assume 
-     * implementations don't throw any exceptions and 
-     * are non-blocking and super fast!
+     * The MessageDispatcherListener is called for every send or 
+     * received Message.
      */
-    public static interface MessageDispatcherCallback {
+    public static interface MessageDispatcherListener {
         
         /**
-         * The send() method is called for every message we're sending
+         * Invoked when an event occurs
          * 
-         * @param nodeId The remote Node's Node ID (can be null)
-         * @param dst The remote Node's address
-         * @param message The message we're sending
+         * @param evt The event that occured
          */
-        public void send(KUID nodeId, SocketAddress dst, DHTMessage message);
+        public void handleMessageDispatcherEvent(MessageDispatcherEvent evt);
+    }
+    
+    /**
+     * MessageDispatcherEvent are created and fired for various MessageDispatcher events.
+     */
+    public static class MessageDispatcherEvent {
         
-        /**
-         * The receive() method is called for every message we're receiving
-         * 
-         * @param message The Message we received
-         */
-        public void receive(DHTMessage message);
+        public static enum EventType {
+            
+            /** Fired if a DHTMessage was send */
+            MESSAGE_SEND,
+            
+            /** Fired if a DHTMessage was received */
+            MESSAGE_RECEIVED,
+            
+            /** Fired if a DHTMessage filtered */
+            MESSAGE_FILTERED,
+            
+            /** Fired if a request timed out */
+            RECEIPT_TIMEOUT,
+            
+            /** Fired if a request was evicted */
+            RECEIPT_EVICTED,
+            
+            /** Fired if a late response was received */
+            LATE_RESPONSE;
+        }
+        
+        private MessageDispatcher messageDispatcher;
+        
+        private KUID nodeId;
+        
+        private SocketAddress dst;
+        
+        private DHTMessage message;
+        
+        private EventType type;
+        
+        public MessageDispatcherEvent(MessageDispatcher messageDispatcher, 
+                KUID nodeId, SocketAddress dst, DHTMessage message, EventType type) {
+            this.nodeId = nodeId;
+            this.dst = dst;
+            this.message = message;
+            this.type = type;
+        }
+        
+        public MessageDispatcher getMessageDispatcher() {
+            return messageDispatcher;
+        }
+        
+        public KUID getNodeID() {
+            return nodeId;
+        }
+        
+        public SocketAddress getSocketAddress() {
+            return dst;
+        }
+        
+        public DHTMessage getMessage() {
+            return message;
+        }
+        
+        public EventType getEventType() {
+            return type;
+        }
     }
 }

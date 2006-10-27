@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.net.SocketAddress;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -12,11 +11,13 @@ import javax.swing.SwingUtilities;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherCallback;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherListener;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 import com.limegroup.mojito.messages.DHTMessage;
 
 @SuppressWarnings("serial")
-public class TilesVisualizer extends JPanel implements MessageDispatcherCallback {
+public class TilesVisualizer extends JPanel implements MessageDispatcherListener {
     
     private static final long SLEEP = 100L;
     
@@ -47,7 +48,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
                     public void windowActivated(WindowEvent e) {}
                     public void windowClosed(WindowEvent e) {}
                     public void windowClosing(WindowEvent e) {
-                        context.getMessageDispatcher().setMessageDispatcherCallback(null);
+                        context.getMessageDispatcher().removeMessageDispatcherListener(tiles);
                     }
                     public void windowDeactivated(WindowEvent e) {}
                     public void windowDeiconified(WindowEvent e) {}
@@ -57,7 +58,8 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
                 frame.setVisible(true);
             }
         });
-        context.getMessageDispatcher().setMessageDispatcherCallback(tiles);
+        
+        context.getMessageDispatcher().addMessageDispatcherListener(tiles);
         return tiles;
     }
     
@@ -107,16 +109,17 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherCallback
         }
     }
 
-    public void send(KUID nodeId, SocketAddress dst, DHTMessage message) {
-        if (nodeId == null) {
-            return;
+    public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
+        EventType type = evt.getEventType();
+        if (type.equals(EventType.MESSAGE_SEND)) {
+            KUID nodeId = evt.getNodeID();
+            if (nodeId != null) {
+                paintTile(nodeId, true);
+            }
+        } else if (type.equals(EventType.MESSAGE_SEND)) {
+            DHTMessage message = evt.getMessage();
+            paintTile(message.getContact().getNodeID(), false);
         }
-        
-        paintTile(nodeId, true);
-    }
-    
-    public void receive(DHTMessage message) {
-        paintTile(message.getContact().getNodeID(), false);
     }
     
     public void paintTile(KUID nodeId, boolean send) {

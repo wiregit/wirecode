@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.Writer;
 
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherListener;
+import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
 
 public class NetworkStatisticContainer extends StatisticContainer {
 
@@ -166,6 +169,33 @@ public class NetworkStatisticContainer extends StatisticContainer {
         public void addData(int data) {
             super.addData(data);
             super.storeCurrentStat();
+        }
+    }
+    
+    public static class Listener implements MessageDispatcherListener {
+
+        private NetworkStatisticContainer networkStats;
+        
+        public Listener(NetworkStatisticContainer networkStats) {
+            this.networkStats = networkStats;
+        }
+        
+        public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
+            
+            EventType type = evt.getEventType();
+            if (type.equals(EventType.MESSAGE_SEND)) {
+                networkStats.SENT_MESSAGES_COUNT.incrementStat();
+            } else if (type.equals(EventType.MESSAGE_RECEIVED)) {
+                networkStats.RECEIVED_MESSAGES_COUNT.incrementStat();
+            } else if (type.equals(EventType.LATE_RESPONSE)) {
+                networkStats.LATE_MESSAGES_COUNT.incrementStat();
+            } else if (type.equals(EventType.MESSAGE_FILTERED)) {
+                networkStats.FILTERED_MESSAGES.incrementStat();
+            } else if (type.equals(EventType.RECEIPT_TIMEOUT)) {
+                networkStats.RECEIPTS_TIMEOUT.incrementStat();
+            } else if (type.equals(EventType.RECEIPT_EVICTED)) {
+                networkStats.RECEIPTS_EVICTED.incrementStat();
+            }
         }
     }
 }

@@ -149,9 +149,15 @@ public class RouteTableImpl implements RouteTable {
     }
 
     /**
-     * Adds a RouteTableCallback
+     * Adds a RouteTableListener.
      * 
-     * @param routeTableCallback The RouteTableCallback instance to add
+     * Implementation Note: The listener(s) is not called from a 
+     * seperate event Thread! That means processor intensive tasks
+     * that are performed straight in the listener(s) can slowdown 
+     * the processing throughput significantly. Offload intensive
+     * tasks to seperate Threads in necessary!
+     * 
+     * @param l The RouteTableListener instance to add
      */
     public synchronized void addRouteTableListener(RouteTableListener l) {
         if (l == null) {
@@ -166,9 +172,9 @@ public class RouteTableImpl implements RouteTable {
     }
     
     /**
-     * Removes a RouteTableCallback
+     * Removes a RouteTableListener
      * 
-     * @param routeTableCallback The RouteTableCallback instance to remove
+     * @param l The RouteTableListener instance to remove
      */
     public synchronized void removeRouteTableListener(RouteTableListener l) {
         if (l == null) {
@@ -967,39 +973,39 @@ public class RouteTableImpl implements RouteTable {
         }
     }
     
-    private void fireActiveContactAdded(Bucket bucket, Contact node) {
+    protected void fireActiveContactAdded(Bucket bucket, Contact node) {
         fireRouteTableEvent(bucket, null, null, null, node, EventType.ADD_ACTIVE_CONTACT);
     }
     
-    private void fireCachedContactAdded(Bucket bucket, Contact existing, Contact node) {
+    protected void fireCachedContactAdded(Bucket bucket, Contact existing, Contact node) {
         fireRouteTableEvent(bucket, null, null, existing, node, EventType.ADD_CACHED_CONTACT);
     }
     
-    private void fireContactUpdate(Bucket bucket, Contact existing, Contact node) {
+    protected void fireContactUpdate(Bucket bucket, Contact existing, Contact node) {
         fireRouteTableEvent(bucket, null, null, existing, node, EventType.UPDATE_CONTACT);
     }
     
-    private void fireReplaceContact(Bucket bucket, Contact existing, Contact node) {
+    protected void fireReplaceContact(Bucket bucket, Contact existing, Contact node) {
         fireRouteTableEvent(bucket, null, null, existing, node, EventType.REPLACE_CONTACT);
     }
     
-    private void fireRemoveContact(Bucket bucket, Contact node) {
+    protected void fireRemoveContact(Bucket bucket, Contact node) {
         fireRouteTableEvent(bucket, null, null, null, node, EventType.REMOVE_CONTACT);
     }
     
-    private void fireContactCheck(Bucket bucket, Contact existing, Contact node) {
+    protected void fireContactCheck(Bucket bucket, Contact existing, Contact node) {
         fireRouteTableEvent(bucket, null, null, existing, node, EventType.CONTACT_CHECK);
     }
     
-    private void fireSplitBucket(Bucket bucket, Bucket left, Bucket right) {
+    protected void fireSplitBucket(Bucket bucket, Bucket left, Bucket right) {
         fireRouteTableEvent(bucket, left, right, null, null, EventType.SPLIT_BUCKET);
     }
     
-    private void fireClear() {
+    protected void fireClear() {
         fireRouteTableEvent(null, null, null, null, null, EventType.CLEAR);
     }
     
-    private void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
+    protected void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
             Contact existing, Contact node, EventType type) {
         
         // To keep the overhead low we're waiting till last
