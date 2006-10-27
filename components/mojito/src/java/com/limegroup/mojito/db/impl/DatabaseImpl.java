@@ -121,7 +121,7 @@ public class DatabaseImpl implements Database {
         this.securityConstraint = securityConstraint;
     }
     
-    public void setHostFilter(HostFilter filter) {
+    public synchronized void setHostFilter(HostFilter filter) {
         this.filter = filter;
     }
 
@@ -289,7 +289,9 @@ public class DatabaseImpl implements Database {
             }
         }
         
-        filter.ban(contact.getContactAddress());
+        if(filter != null) {
+            filter.ban(contact.getContactAddress());
+        }
     }
     
     /*
