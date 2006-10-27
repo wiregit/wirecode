@@ -113,9 +113,17 @@ public interface Contact extends Serializable {
      * Returns the source address. The is the address
      * as read from the IP packet. Depending on the
      * network configuration of the remote Host it's
-     * maybe not an valid address to respond to. 
-     * Note: The source address may be null
+     * maybe not a valid address to respond to. 
+     * 
+     * Note: The source address can be null if the
+     * Contact object hasn't been fully initialized
+     * yet. The reason for this are different 
+     * initialization paths. To be more preceicely 
+     * the source address is in certain cases not 
+     * available at construction time if the Contact
+     * object is created in LimeWire space for example.
      */
+    // See LimeMessageDispatcherImpl.handleMessage(...)
     public SocketAddress getSourceAddress();
     
     /**
