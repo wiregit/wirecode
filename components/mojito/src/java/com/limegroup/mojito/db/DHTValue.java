@@ -85,7 +85,7 @@ public interface DHTValue {
                 Class<?> type = field.getType();
                 
                 // Make sure it's a static field and of type ValueType
-                if ((modifiers & Modifier.STATIC) == Modifier.STATIC 
+                if ((modifiers & Modifier.STATIC) != 0 
                         && type.isAssignableFrom(ValueType.class)) {
                     
                     try {
