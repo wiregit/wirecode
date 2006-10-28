@@ -118,7 +118,7 @@ public abstract class MessageDispatcher {
     
     private List<MessageDispatcherListener> listeners;
     
-    private volatile Filter filter;
+    private Filter filter;
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -172,7 +172,7 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * 
+     * Sets the DHTMessage filter. Use null to unset the filter.
      */
     public void setFilter(Filter filter) {
         this.filter = filter;
