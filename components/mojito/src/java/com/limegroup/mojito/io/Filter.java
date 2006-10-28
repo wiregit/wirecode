@@ -17,20 +17,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.util;
+package com.limegroup.mojito.io;
 
-import java.net.SocketAddress;
-
-import com.limegroup.mojito.io.Filter;
+import com.limegroup.mojito.messages.DHTMessage;
 
 /**
- * The HostFilter interface extends Filter by a
- * banning functionality
+ * An interface to filter DHTMessages
  */
-public interface HostFilter extends Filter {
+public interface Filter {
     
     /**
-     * Bans the given SocketAddress
+     * The allow method is called for each DHTMessage
+     * we're receiving. Return true to allow further
+     * processing of the received DHTMessage and false
+     * to discard the message.
      */
-    public void ban(SocketAddress addr);
+    public boolean allow(DHTMessage message);
 }

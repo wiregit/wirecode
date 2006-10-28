@@ -31,6 +31,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
+import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -437,7 +438,7 @@ public class DatabaseTest extends BaseTestCase {
         
         private Set<SocketAddress> bannedHosts = new HashSet<SocketAddress>();
         
-        public boolean allow(SocketAddress addr) {
+        public boolean allow(DHTMessage message) {
             return true;
         }
 

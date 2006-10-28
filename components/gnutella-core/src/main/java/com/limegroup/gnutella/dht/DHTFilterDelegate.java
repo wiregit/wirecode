@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dht;
 import java.net.SocketAddress;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.util.HostFilter;
 
 /**
@@ -11,7 +12,8 @@ import com.limegroup.mojito.util.HostFilter;
  */
 public class DHTFilterDelegate implements HostFilter {
 
-    public boolean allow(SocketAddress addr) {
+    public boolean allow(DHTMessage message) {
+        SocketAddress addr = message.getContact().getContactAddress();
         return RouterService.getIpFilter().allow(addr);
     }
 

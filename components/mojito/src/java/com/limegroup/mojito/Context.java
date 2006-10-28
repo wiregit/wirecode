@@ -449,7 +449,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
 
     public void setHostFilter(HostFilter hostFilter) {
         database.setHostFilter(hostFilter);
-        messageDispatcher.setHostFilter(hostFilter);
+        messageDispatcher.setFilter(hostFilter);
     }
 
     /**
