@@ -37,10 +37,12 @@ class BTLinkManager implements Shutdownable {
 	}
 	
 	public void shutdown() {
-		for (Iterator<BTLink> iter = _connections.iterator();iter.hasNext();){
-			BTLink toShut = iter.next();
-			iter.remove();
-			toShut.shutdown();
+		synchronized(_connections) {
+			for (Iterator<BTLink> iter = _connections.iterator();iter.hasNext();){
+				BTLink toShut = iter.next();
+				iter.remove();
+				toShut.shutdown();
+			}
 		}
 	}
 	
