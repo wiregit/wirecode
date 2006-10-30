@@ -307,9 +307,6 @@ public class DatabaseImpl implements Database {
      * has ever stored in our Database
      */
     private void banContact(Contact contact) {
-        // TODO: We're calling this over and over again if
-        // a host is banned. We have to do this only once!
-        
         // Remove all values by this contact
         for(DHTValue value: values()) {
             if(value.getCreator().equals(contact)) {
@@ -317,6 +314,7 @@ public class DatabaseImpl implements Database {
             }
         }
         
+        // Ban the Host if possible
         HostFilter f = filter;
         if (f != null) {
             f.ban(contact.getContactAddress());
