@@ -43,4 +43,10 @@ public class BittorrentSettings extends LimeProps {
 	 */
 	public static IntSetting TORRENT_MIN_UPLOADS = FACTORY.createIntSetting(
 			"TORRENT_MIN_UPLOADS", 4);
+	
+	/**
+	 * Whether to flush written blocks to disk before verifying them
+	 */
+	public static BooleanSetting TORRENT_FLUSH_VERIRY = 
+		FACTORY.createBooleanSetting("TORRENT_FLUSH_VERIFY", true);
 }

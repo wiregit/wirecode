@@ -24,6 +24,7 @@ import com.limegroup.bittorrent.PieceReadListener;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
+import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
@@ -301,7 +302,8 @@ class VerifyingFolder implements TorrentDiskManager {
 		long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
 		while (read < pieceSize) {
 			
-			int readNow = diskController.read(offset, buf, 0, buf.length, true);
+			int readNow = diskController.read(offset, buf, 0, buf.length, 
+					BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue());
 			if (readNow == 0)
 				return false;
 			
