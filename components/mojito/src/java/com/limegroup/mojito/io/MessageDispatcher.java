@@ -337,11 +337,6 @@ public abstract class MessageDispatcher {
         ByteBuffer data = serialize(dst, message);
         int size = data.remaining();
         if (size >= MAX_MESSAGE_SIZE) {
-            /*IOException iox = new IOException("Message (" + message.getClass().getName()  + ") is too large: " 
-                    + size + " >= " + MAX_MESSAGE_SIZE);
-            tag.handleError(iox);
-            return false;*/
-            
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Message (" + message.getClass().getName()  + ") is too large: " 
                     + size + " >= " + MAX_MESSAGE_SIZE);
