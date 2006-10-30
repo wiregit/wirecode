@@ -256,7 +256,7 @@ public class DatabaseImpl implements Database {
         
         DHTValueBag bag = database.get(value.getValueID());
         
-        // TODO: exclude signed valso
+        // TODO: exclude signed value also
         if (bag == null) {
             // First check if the node is flooding us with keys:
             // We can only check for flooding by the value creator, not by the sender, 
@@ -282,14 +282,17 @@ public class DatabaseImpl implements Database {
                     numKeys = hostValuesMap.get(iaddr);
                 }
                 
-                if (numKeys >= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
-                    // Banning will also remove the host from the Map
-                    banContact(creator);
-                    return false;
-                }
-                
                 numKeys++;
                 hostValuesMap.put(iaddr, numKeys);
+                
+                if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                    
+                    if(numKeys > DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                        // Banning will also remove the host from the Map
+                        banContact(creator);
+                    }
+                    return false;
+                }
             }
         }
         

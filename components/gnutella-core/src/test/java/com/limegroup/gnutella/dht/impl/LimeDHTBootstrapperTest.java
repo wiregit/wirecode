@@ -82,6 +82,9 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         }
         assertFalse(bootstrapper.isWaitingForNodes());
         assertFalse(future.isCancelled());
+        //finish bootstrap
+        future.get();
+        assertTrue(dhtContext.isBootstrapped());
     }
     
     public void testNotCancelBootstrap() throws Exception {
