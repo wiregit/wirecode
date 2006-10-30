@@ -19,6 +19,8 @@
 
 package com.limegroup.mojito.db.impl;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -253,28 +255,34 @@ public class DatabaseImpl implements Database {
             // because that could be misused to prevent us from storing real values
 
             Contact creator = value.getCreator();
-            byte[] addr = ((InetSocketAddress)creator
-                    .getContactAddress()).getAddress().getAddress();
+            InetAddress addr = ((InetSocketAddress)creator
+                                    .getContactAddress()).getAddress();
             
-            // TODO: This is not IPv6 compatible!!!
-            Integer iaddr = new Integer(ByteOrder.beb2int(addr, 0));
+            // TODO: There's currently no real urge to have this for IPv6 addresses
+            // in which case we'd have to use BigIntegers instead of Integers or 
+            // some other type of wrapper for the address bytes... We could also use 
+            // the InetAddress object as key but it has too much memory overhead...
             
-            int numKeys = 0;
-            if (hostValuesMap == null) {
-                hostValuesMap = new HashMap<Integer, Integer>();
+            if (addr instanceof Inet4Address) {
+                Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
                 
-            } else if (hostValuesMap.containsKey(iaddr)) {
-                numKeys = hostValuesMap.get(iaddr);
+                int numKeys = 0;
+                if (hostValuesMap == null) {
+                    hostValuesMap = new HashMap<Integer, Integer>();
+                    
+                } else if (hostValuesMap.containsKey(iaddr)) {
+                    numKeys = hostValuesMap.get(iaddr);
+                }
+                
+                if (numKeys >= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                    // Banning will also remove the host from the Map
+                    banContact(creator);
+                    return false;
+                }
+                
+                numKeys++;
+                hostValuesMap.put(iaddr, numKeys);
             }
-            
-            if (numKeys >= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
-                // Banning will also remove the host from the Map
-                banContact(creator);
-                return false;
-            }
-            
-            numKeys++;
-            hostValuesMap.put(iaddr, numKeys);
         }
         
         return true;
