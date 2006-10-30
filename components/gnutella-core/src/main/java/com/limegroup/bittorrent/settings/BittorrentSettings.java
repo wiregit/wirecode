@@ -49,4 +49,10 @@ public class BittorrentSettings extends LimeProps {
 	 */
 	public static BooleanSetting TORRENT_FLUSH_VERIRY = 
 		FACTORY.createBooleanSetting("TORRENT_FLUSH_VERIFY", true);
+	
+	/**
+	 * Whether to use memory mapped files for disk access.
+	 */
+	public static BooleanSetting TORRENT_USE_MMAP =
+		FACTORY.createBooleanSetting("TORRENT_USE_MMAP", false);
 }

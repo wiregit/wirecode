@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
+import com.limegroup.bittorrent.settings.BittorrentSettings;
 
 public class DiskManagerFactory {
 	private static DiskManagerFactory instance;
@@ -21,6 +22,8 @@ public class DiskManagerFactory {
 		return new VerifyingFolder(context, 
 				complete,
 				serializedData, 
-				new RAFDiskController<TorrentFile>());
+				BittorrentSettings.TORRENT_USE_MMAP.getValue() ?
+						new MMDiskController<TorrentFile>() :
+							new RAFDiskController<TorrentFile>());
 	}
 }

@@ -26,13 +26,13 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	/*
 	 * The files of this torrent as an array
 	 */
-	private List<F> _files;
+	protected List<F> _files;
 
 	/**
 	 * The instances RandomAccessFile for all files contained in this torrent
 	 * LOCKING: this reference as well as the elements of the array 
 	 */
-	private RandomAccessFile[] _fos = null;
+	protected RandomAccessFile[] _fos = null;
 	
 	/**
 	 * a marker that the current file is currently opening.
@@ -54,16 +54,21 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 						throw new IOException("file closed");
 					currentFile = _fos[i];
 				}
-				currentFile.seek(startOffset);
 				int toWrite = (int) Math.min(current.length()- startOffset,
 						data.length - written);
-				
-				currentFile.write(data, written, toWrite);
+
+				writeImpl(currentFile, startOffset, data, written, toWrite);
 				startOffset += toWrite;
 				written += toWrite;
 			} 
 			startOffset -= current.length();
 		}
+	}
+	
+	protected void  writeImpl(RandomAccessFile f, long fileOffset, byte [] data, int offset, int length) 
+	throws IOException {
+		f.seek(fileOffset);
+		f.write(data, offset, length);
 	}
 	
 	/* (non-Javadoc)
@@ -177,8 +182,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 				rf = _fos[index];
 				_fos[index] = null;
 			}
-			rf.close();
-			rf = new RandomAccessFile(completed.getPath(), "r");
+			setReadOnly(rf, completed.getPath());
 			synchronized(this) {
 				if(!isOpen())
 					return;
@@ -187,6 +191,11 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 		} catch (FileNotFoundException bs) {
 			ErrorService.error(bs);
 		} catch (IOException ignored){}
+	}
+	
+	protected void setReadOnly(RandomAccessFile f, String path) throws IOException {
+		f.close();
+		f = new RandomAccessFile(path, "r");
 	}
 	
 	/* (non-Javadoc)
@@ -221,8 +230,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 					return read;
 				int toRead = (int) Math.min(currentLength - position, length
 						- read);
-				currentFile.seek(position);
-				int t_read = currentFile.read(buf, read + offset, toRead);
+				int t_read = readImpl(currentFile, position, buf, read + offset, toRead);
 				if (t_read == -1)
 					throw new IOException();
 				position += t_read;
@@ -231,5 +239,11 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 			position -= f.length();
 		}
 		return read;
+	}
+	
+	protected int readImpl(RandomAccessFile raf, long fileOffset, byte [] dst, int offset, int length) 
+	throws IOException {
+		raf.seek(fileOffset);
+		return raf.read(dst, offset, length);
 	}
 }
