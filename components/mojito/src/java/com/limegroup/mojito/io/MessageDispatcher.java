@@ -549,9 +549,6 @@ public abstract class MessageDispatcher {
         } else if (LOG.isFatalEnabled()) {
             LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
         }
-        
-        
-        fireMessageReceived(message);
     }
     
     /**
