@@ -209,22 +209,32 @@ public class DatabaseImpl implements Database {
             if (bag.isEmpty()) {
                 database.remove(valueId);
             }
-            int iaddr = ByteOrder.beb2int(((InetSocketAddress) value.getCreator().getContactAddress())
-                .getAddress().getAddress(), 0);
             
-            if(hostValuesMap.containsKey(iaddr)) {
-                int count = hostValuesMap.get(iaddr);
-                if(count <= 1) {
-                    hostValuesMap.remove(iaddr);
-                } else if(count > DatabaseSettings.MAX_KEY_PER_IP.getValue()){
-                    //The host went over the limit, thus either he is trying
-                    //to legitimately remove a value, in which case we give him a chance
-                    //or this method is called from the ban() method, in which case the 
-                    //host should be filtered out by the HostFilter anyways
-                    hostValuesMap.put(iaddr, 
-                            DatabaseSettings.MAX_KEY_PER_IP.getValue());
-                } else {
-                    hostValuesMap.put(iaddr, --count);
+            if (hostValuesMap != null) {
+                
+                InetAddress addr = ((InetSocketAddress) 
+                        value.getCreator().getContactAddress()).getAddress();
+                
+                Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
+                
+                if (hostValuesMap.containsKey(iaddr)) {
+                    int numKeys = hostValuesMap.get(iaddr);
+                    
+                    if (numKeys <= 1) {
+                        hostValuesMap.remove(iaddr);
+                        
+                    } else if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                        // The host went over the limit, thus either he is trying
+                        // to legitimately remove a value, in which case we give him a chance
+                        // or this method is called from the ban() method, in which case the 
+                        // host should be filtered out by the HostFilter anyways
+                        hostValuesMap.put(iaddr, 
+                                DatabaseSettings.MAX_KEY_PER_IP.getValue());
+                    } else {
+                        
+                        numKeys--;
+                        hostValuesMap.put(iaddr, numKeys);
+                    }
                 }
             }
             
@@ -241,12 +251,6 @@ public class DatabaseImpl implements Database {
     private boolean allowStore(DHTValue value) {
         
         DHTValueBag bag = database.get(value.getValueID());
-        
-        //check with the security constraint now
-        DatabaseSecurityConstraint dbsc = securityConstraint;
-        if (dbsc != null && !dbsc.allowStore(this, bag, value)) {
-            return false;
-        }
         
         // TODO: exclude signed valso
         if (bag == null) {
@@ -285,6 +289,12 @@ public class DatabaseImpl implements Database {
             }
         }
         
+        // Check with the security constraint now
+        DatabaseSecurityConstraint dbsc = securityConstraint;
+        if (dbsc != null) {
+            return dbsc.allowStore(this, bag, value);
+        }
+        
         return true;
     }
     
@@ -293,6 +303,9 @@ public class DatabaseImpl implements Database {
      * has ever stored in our Database
      */
     private void banContact(Contact contact) {
+        // TODO: We're calling this over and over again if
+        // a host is banned. We have to do this only once!
+        
         // Remove all values by this contact
         for(DHTValue value: values()) {
             if(value.getCreator().equals(contact)) {
