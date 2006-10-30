@@ -49,125 +49,123 @@ HAS_TIPS_OF_THE_DAY=false
 # Key/value pairs for general strings that can be used in any components
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
-#? GENERAL_OK_BUTTON_LABEL=
+GENERAL_OK_BUTTON_LABEL=हुन्छ
 #### GENERAL_OK_BUTTON_TIP=Apply Operation
-#? GENERAL_OK_BUTTON_TIP=
+GENERAL_OK_BUTTON_TIP=प्रक्रिया लागु गर
 #### GENERAL_CANCEL_BUTTON_LABEL=Cancel
-#? GENERAL_CANCEL_BUTTON_LABEL=
+GENERAL_CANCEL_BUTTON_LABEL=रद्द गर
 #### GENERAL_CANCEL_BUTTON_TIP=Cancel Operation
-#? GENERAL_CANCEL_BUTTON_TIP=
+GENERAL_CANCEL_BUTTON_TIP=प्रक्रिया रद्द गर
 #### GENERAL_APPLY_BUTTON_LABEL=Apply
-#? GENERAL_APPLY_BUTTON_LABEL=
+GENERAL_APPLY_BUTTON_LABEL=लागु गर
 #### GENERAL_APPLY_BUTTON_TIP=Apply Operation
-#? GENERAL_APPLY_BUTTON_TIP=
+GENERAL_APPLY_BUTTON_TIP=प्रक्रिया लागु गर
 #### GENERAL_CLOSE_BUTTON_LABEL=Close
-#? GENERAL_CLOSE_BUTTON_LABEL=
+GENERAL_CLOSE_BUTTON_LABEL=बन्द गर
 #### GENERAL_CLOSE_BUTTON_TIP=Close the Window
-#? GENERAL_CLOSE_BUTTON_TIP=
+GENERAL_CLOSE_BUTTON_TIP=विन्दो बन्द गर
 #### GENERAL_BACK_BUTTON_LABEL=<< Back
-#? GENERAL_BACK_BUTTON_LABEL=
+GENERAL_BACK_BUTTON_LABEL=पछाडी जाऊ
 #### GENERAL_NEXT_BUTTON_LABEL=Next >>
-#? GENERAL_NEXT_BUTTON_LABEL=
+GENERAL_NEXT_BUTTON_LABEL=अगाडी जाऊ
 #### GENERAL_FINISH_BUTTON_LABEL=Finish
-#? GENERAL_FINISH_BUTTON_LABEL=
+GENERAL_FINISH_BUTTON_LABEL=सकियो
 #### GENERAL_DEFAULT_BUTTON_LABEL=Use Default
-#? GENERAL_DEFAULT_BUTTON_LABEL=
+GENERAL_DEFAULT_BUTTON_LABEL=डिफल्ट राख
 #### GENERAL_BROWSE_BUTTON_LABEL=Browse...
-#? GENERAL_BROWSE_BUTTON_LABEL=
+GENERAL_BROWSE_BUTTON_LABEL=ब्राउज गर...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
-#? GENERAL_BROWSE_HOST_LABEL=
+GENERAL_BROWSE_HOST_LABEL=होस्त ब्राउज गर
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
-#? GENERAL_BROWSE_HOST_TIP=
-#### GENERAL_LICENSE_SUB_MENU=License
-#? GENERAL_LICENSE_SUB_MENU=
+GENERAL_BROWSE_HOST_TIP=चुनेको कम्प्युटरमा भएको सबै फाइल हेर्ने
 #### GENERAL_ADVANCED_SUB_MENU=Advanced
 #? GENERAL_ADVANCED_SUB_MENU=
 #### GENERAL_CLEAR_BUTTON_LABEL=Clear
-#? GENERAL_CLEAR_BUTTON_LABEL=
+GENERAL_CLEAR_BUTTON_LABEL=हताउ
 
 ################################################################################
 # Key/value pairs for right-click context menus.
 ################################################################################
 #### CONTEXT_MENU_UNDO=Undo
-#? CONTEXT_MENU_UNDO=
+CONTEXT_MENU_UNDO=उल्ताऊ
 #### CONTEXT_MENU_CUT=Cut
-#? CONTEXT_MENU_CUT=
+CONTEXT_MENU_CUT=कात
 #### CONTEXT_MENU_COPY=Copy
-#? CONTEXT_MENU_COPY=
+CONTEXT_MENU_COPY=सार
 #### CONTEXT_MENU_PASTE=Paste
-#? CONTEXT_MENU_PASTE=
+CONTEXT_MENU_PASTE=तास
 #### CONTEXT_MENU_DELETE=Delete
-#? CONTEXT_MENU_DELETE=
+CONTEXT_MENU_DELETE=मेत
 #### CONTEXT_MENU_SELECT_ALL=Select All
-#? CONTEXT_MENU_SELECT_ALL=
+CONTEXT_MENU_SELECT_ALL=सबै चुन
 
 #Options
 #### OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
-#? OPTIONS_RESTART_REQUIRED=
+OPTIONS_RESTART_REQUIRED=एक या बढि रोजाइहरू अर्को पटक लाइमवाइर फेरि शुरु गर्दा लागु हुन्छ
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT=
+OPTIONS_BUTTON_REVERT_TO_DEFAULT=डिफल्ट लागु गर
 #### OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert All Settings to the Factory Defaults
-#? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=
+OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=सबै सेटिन्गहरु फ्याक्तोरी डिफल्टमा उल्ताऊ
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
-#? OPTIONS_LEARN_MORE_LABEL=
+OPTIONS_LEARN_MORE_LABEL=यस विकल्प बारे अझ जान...
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
 ################################################################################
 #### YES=Yes
-#? YES=
+YES=हुन्छ
 #### NO=No
-#? NO=
+NO=हुदैन
 
 ################################################################################
 # Key/value pairs for general informative terms
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
-#? GENERAL_AVERAGE_BANDWIDTH=
+GENERAL_AVERAGE_BANDWIDTH=औषत व्यान्डवीथ
 #### GENERAL_ALTERNATE_LOCATIONS=Valid Alternate Locations
-#? GENERAL_ALTERNATE_LOCATIONS=
+GENERAL_ALTERNATE_LOCATIONS=मान्य बैकल्पिक ठाऊँहरु
 #### GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid Alternate Locations
-#? GENERAL_INVALID_ALTERNATE_LOCATIONS=
+GENERAL_INVALID_ALTERNATE_LOCATIONS=अमान्य बैकल्पिक ठाऊँहरु
 #### GENERAL_STARTED_ON=Started On
-#? GENERAL_STARTED_ON=
+GENERAL_STARTED_ON=शुरु भएको
 #### GENERAL_FINISHED_ON=Finished On
-#? GENERAL_FINISHED_ON=
+GENERAL_FINISHED_ON=सकिएको
 #### GENERAL_TIME_SPENT=Time Spent
-#? GENERAL_TIME_SPENT=
+GENERAL_TIME_SPENT=समय बिताएको
 #### GENERAL_REVERT_TO_DEFAULT=Revert To Default
-#? GENERAL_REVERT_TO_DEFAULT=
+GENERAL_REVERT_TO_DEFAULT=डिफल्टमा उल्ताऊ
 #### GENERAL_MORE_OPTIONS=More Options
-#? GENERAL_MORE_OPTIONS=
+GENERAL_MORE_OPTIONS=अरु विकल्प
 
 # StatusLine, Statistics and GUIUtils
 #### GENERAL_UNIT_TERABYTES=TB
-#? GENERAL_UNIT_TERABYTES=
+GENERAL_UNIT_TERABYTES=TB
 #### GENERAL_UNIT_GIGABYTES=GB
-#? GENERAL_UNIT_GIGABYTES=
+GENERAL_UNIT_GIGABYTES=GB
 #### GENERAL_UNIT_MEGABYTES=MB
-#? GENERAL_UNIT_MEGABYTES=
+GENERAL_UNIT_MEGABYTES=MB
 #### GENERAL_UNIT_KILOBYTES=KB
-#? GENERAL_UNIT_KILOBYTES=
+GENERAL_UNIT_KILOBYTES=KB
 #### GENERAL_UNIT_KBPSEC=KB/s
-#? GENERAL_UNIT_KBPSEC=
+GENERAL_UNIT_KBPSEC=KB प्रति सेकंड
 
 ################################################################################
 # Key/value pair for the main application title
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
-#? APP_TITLE=
+APP_TITLE=लाइमवाइर: खुला सूचना आदान प्रदान गर्ने कार्य सक्षम पार्दै
 
 ################################################################################
 # Key/Value pairs for the about window, accessed through the help menu
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
-#? ABOUT_TITLE=
+ABOUT_TITLE=लाइमवाइर बारे
 #### ABOUT_LABEL_START=LimeWire
-#? ABOUT_LABEL_START=
+ABOUT_LABEL_START=लाइमवाइर
 #### ABOUT_SCROLL_CHECK_BOX_LABEL=Automatically Scroll
-#? ABOUT_SCROLL_CHECK_BOX_LABEL=
+ABOUT_SCROLL_CHECK_BOX_LABEL=आफै स्क्रोल गर
 #### ABOUT_BUTTON_TIP=Close This Window
-#? ABOUT_BUTTON_TIP=
+ABOUT_BUTTON_TIP=यस विन्डो बन्द गर
 #### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 #? ABOUT_INTRODUCTION=
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
@@ -188,77 +186,76 @@ HAS_TIPS_OF_THE_DAY=false
 #? ABOUT_COMMUNITY_BLURB=
 #### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 #? ABOUT_CONCLUSION=
-#### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
-#? ABOUT_BT_NOTICE=
+
 ###################################################################
 # Key/value pairs for the tip of the day window (not the tips themselves)
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
-#? TOTD_TITLE=
+TOTD_TITLE=आजको टिप
 #### TOTD_INTRODUCTION=Did You Know...
-#? TOTD_INTRODUCTION=
+TOTD_INTRODUCTION=के तपाइलाई थाहा छ...
 #### TOTD_SHOW_AT_STARTUP=Show Tips At Startup
-#? TOTD_SHOW_AT_STARTUP=
+TOTD_SHOW_AT_STARTUP=शुरुवातमा टिप देखाउनु
 #### TOTD_NEXT=Next Tip
-#? TOTD_NEXT=
+TOTD_NEXT=अर्को टिप
 #### TOTD_PREVIOUS=Previous Tip
-#? TOTD_PREVIOUS=
+TOTD_PREVIOUS=अघिल्लो टिप
 #### TOTD_CLOSE=Close
-#? TOTD_CLOSE=
+TOTD_CLOSE=बन्द गर
 #### TOTD_LOADING_TIPS=Loading tips...
-#? TOTD_LOADING_TIPS=
+TOTD_LOADING_TIPS=टिप भर्दैछ...
 
 ###################################################################
 # Key/value pairs for the Getting Started image
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
-#? GETTING_STARTED_TITLE=
+GETTING_STARTED_TITLE=शुरु हुदैछ
 #### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
-#? GETTING_STARTED_CONTENTS=
+GETTING_STARTED_CONTENTS=लाइमवाइर चलाउन सुरु गर्न, बाँया तिर रहेको टेक्स्ट बाकसमा तपाइले खोजेको कुरा लेखनुस र "खोज" बटन थिच्नुस । यदि तपाइ कुनै एक प्रकारको कुरा (संगीत, भिडियो, आदि ...) मात्र खोज्न चाहानु हुनछ भने टेक्स्ट बाकसको माथि रहेको बटनहरु प्रयोग गर्न सक्नु हुन्छ ।
 
 ###################################################################
 # Key/value pairs for the Going Pro image.
 ###################################################################
 #### GOING_PRO_TITLE=The Most Advanced File Sharing Program on the Planet!
-#? GOING_PRO_TITLE=
+GOING_PRO_TITLE=पृथ्वीको सबैभन्दा विकसित फाइल आदान प्रदान गर्ने प्रोग्राम !
 #### GOING_PRO_DESCRIPTION=Better search results\nTurbo-Charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
-#? GOING_PRO_DESCRIPTION=
+GOING_PRO_DESCRIPTION=उत्क्रिस्त खोज परिणाम\nTurbo-Charged डाउनलोड गति\nबढी स्रोत सित सम्पर्क\nव्यक्तिगत प्रविधि सहायता\n६ महिना सम्म निशुल्क अपडेत
 
 ###################################################################
 # Key/value pairs for the Windows system tray
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
-#? TRAY_TOOLTIP=
+TRAY_TOOLTIP=लाइमवाइर
 #### TRAY_RESTORE_LABEL=Restore
-#? TRAY_RESTORE_LABEL=
+TRAY_RESTORE_LABEL=फेरि खोल
 #### TRAY_ABOUT_LABEL=About
-#? TRAY_ABOUT_LABEL=
+TRAY_ABOUT_LABEL=बारे
 #### TRAY_EXIT_LATER_LABEL=Exit after Transfers
-#? TRAY_EXIT_LATER_LABEL=
+TRAY_EXIT_LATER_LABEL=सार्न सकिए पछि बन्द गर
 #### TRAY_EXIT_LABEL=Exit
-#? TRAY_EXIT_LABEL=
+TRAY_EXIT_LABEL=बन्द गर
 
 ################################################################################
 # Key/value pairs for the titles of the main windows
 ################################################################################
 #### SEARCH_TITLE=Search
-#? SEARCH_TITLE=
+SEARCH_TITLE=खोज
 #### MONITOR_TITLE=Monitor
-#? MONITOR_TITLE=
+MONITOR_TITLE=रेखदेख
 #### CONNECTIONS_TITLE=Connections
-#? CONNECTIONS_TITLE=
+CONNECTIONS_TITLE=सम्पर्क
 #### LIBRARY_TITLE=Library
-#? LIBRARY_TITLE=
+LIBRARY_TITLE=गोदाम
 #### OPTIONS_TITLE=Options
-#? OPTIONS_TITLE=
+OPTIONS_TITLE=रोजाइ
 #### STATS_TITLE=Statistics
-#? STATS_TITLE=
+STATS_TITLE=तथ्याङ्क
 #### DOWNLOAD_TITLE=Downloads
-#? DOWNLOAD_TITLE=
+DOWNLOAD_TITLE=डाउनलोडहरु
 #### UPLOAD_TITLE=Uploads
-#? UPLOAD_TITLE=
+UPLOAD_TITLE=अपलोडहरु
 #### CONSOLE_TITLE=Console
-#? CONSOLE_TITLE=
+CONSOLE_TITLE=कन्सोल
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows
@@ -899,16 +896,6 @@ HAS_TIPS_OF_THE_DAY=false
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 #? LIBRARY_SHARED_FILES_CONFIGURE_MENU=
 
-################################################################################
-# Key/value pairs for the Library Search
-################################################################################
-#### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
-#? LIBRARY_SEARCH_PANEL_LABEL=
-#### LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=Search Results
-#? LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=
-#### LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=Holds the Results of the Last Search
-#? LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=
-
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 #? PLAYLIST_LOAD_BUTTON_LABEL=
 #### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
@@ -1493,8 +1480,6 @@ HAS_TIPS_OF_THE_DAY=false
 #? LIBRARY_TABLE_NUMALTLOC=
 #### LIBRARY_TABLE_LICENSE=License
 #? LIBRARY_TABLE_LICENSE=
-#### LIBRARY_TABLE_MODIFICATION_TIME=Last Modified
-#? LIBRARY_TABLE_MODIFICATION_TIME=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 #? LIBRARY_TABLE_UPLOAD_COUNT=
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
@@ -1955,10 +1940,8 @@ HAS_TIPS_OF_THE_DAY=false
 #? CC_PUBLISHER_WARNING_CREATE=
 #### CC_PUBLISHER_WARNING_MODIFY=This file already has a license. If you want to modify it, click the checkbox to attest that you either own its copyrights or are authorized to publish them under a Creative Commons license.
 #? CC_PUBLISHER_WARNING_MODIFY=
-#### CC_PUBLISHER_MODIFY_LICENSE=Modify the license of this file
-#? CC_PUBLISHER_MODIFY_LICENSE=
-#### CC_PUBLISHER_REMOVE_LICENSE=Permanently remove the license from this file
-#? CC_PUBLISHER_REMOVE_LICENSE=
+#### CC_PUBLISHER_REMOVE_LICENSE_LABEL=Click here to permanently remove the license from this file
+#? CC_PUBLISHER_REMOVE_LICENSE_LABEL=
 #### CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=Copyright Holder:
 #? CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=
 #### CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=Copyright Year:
@@ -1981,8 +1964,6 @@ HAS_TIPS_OF_THE_DAY=false
 #? CC_PUBLISHER_LICENSE_VERIFICATION_SELF=
 #### CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=I want to use the Internet Archive to host the file.
 #? CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=
-#### CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=The verification file is hosted at the following URL:
-#? CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=
 #### CC_PUBLISHER_RDF_OUTPUT=In order to publish your file, please insert the following code in your verification page at:
 #? CC_PUBLISHER_RDF_OUTPUT=
 #### CC_PUBLISHER_COPY_BUTTON=Copy to Clipboard
@@ -1997,6 +1978,8 @@ HAS_TIPS_OF_THE_DAY=false
 #? CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=
 #### CC_RDFOUTPUT_TITLE=License RDF Output
 #? CC_RDFOUTPUT_TITLE=
+#### CC_RDF_FINISH_LABEL=Finish
+#? CC_RDF_FINISH_LABEL=
 
 #### INTERNETARCHIVE_UPLOADER_TITLE=Upload
 #? INTERNETARCHIVE_UPLOADER_TITLE=
@@ -2210,24 +2193,6 @@ HAS_TIPS_OF_THE_DAY=false
 #? UPDATE_RESTART_TITLE=
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
-################################################################################
-#### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
-#? SHARED_FILES_DROP_DIALOG_TITLE=
-#### SHARED_FILES_DROP_DIALOG_MESSAGE=You dropped the following files/folders on LimeWire, please select the ones you would like to share.
-#? SHARED_FILES_DROP_DIALOG_MESSAGE=
-#### SHARED_FILES_DROP_DIALOG_WARNING=All folders you select will also have their subfolders shared.
-#? SHARED_FILES_DROP_DIALOG_WARNING=
-#### SHARED_FILES_DROP_DIALOG_OPTION_YES=Yes, Try Again
-#? SHARED_FILES_DROP_DIALOG_OPTION_YES=
-#### SHARED_FILES_DROP_DIALOG_OPTION_NO=No, Share Nothing
-#? SHARED_FILES_DROP_DIALOG_OPTION_NO=
-#### SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=Do not show this message again.
-#? SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=
-#### SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=You clicked OK but did not select any files to be shared. Would you like to try again?
-#? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
-
-################################################################################
 # Key/Value pairs for other messages displayed to the user
 ################################################################################
 #### MESSAGE_CAPTION=Message
@@ -2242,14 +2207,12 @@ HAS_TIPS_OF_THE_DAY=false
 #? MESSAGE_CANNOT_UNSHARE_DIRECTORY=
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
 #? MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=
-#### MESSAGE_FILE_LAUNCHING_FAILED=LimeWire could not launch the specified file.
-#? MESSAGE_FILE_LAUNCHING_FAILED=
-#### MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=LimeWire could not launch the specified file.\n\nExecuted command: {0}.
-#? MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
 #? MESSAGE_CONFIRM_FILE_DELETE=
-#### MESSAGE_UNABLE_TO_DELETE_FILES=The following files could not be deleted. They may be in use by another application or are currently being downloaded to.
-#? MESSAGE_UNABLE_TO_DELETE_FILES=
+#### MESSAGE_UNABLE_TO_DELETE_FILE_START=Unable to delete the file
+#? MESSAGE_UNABLE_TO_DELETE_FILE_START=
+#### MESSAGE_UNABLE_TO_DELETE_FILE_END=. It may be in use by another application.
+#? MESSAGE_UNABLE_TO_DELETE_FILE_END=
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
 #? MESSAGE_UNABLE_TO_RENAME_FILE_START=
 #### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
@@ -2431,6 +2394,8 @@ HAS_TIPS_OF_THE_DAY=false
 #? ERROR_THEME_OUT_OF_DATE_LATER=
 #### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
 #? ERROR_BAD_MAGNET_LINK=
+#### ERROR_BAD_TORRENT_URL=Invalid torrent URL
+#? ERROR_BAD_TORRENT_URL=
 #### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 #? ERROR_INVALID_URLS_IN_MAGNET=
 #### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
@@ -2439,8 +2404,6 @@ HAS_TIPS_OF_THE_DAY=false
 #? ERROR_SEARCH_TOO_LARGE=
 #### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 #? ERROR_XML_SEARCH_TOO_LARGE=
-#### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copright year and title.
-#? ERROR_CCPUBLISHER_MISSING_DETAIL=
 #### ERROR_CCPUBLISHER_MISSING_TITLE=Please enter the title of the file you want to publish.
 #? ERROR_CCPUBLISHER_MISSING_TITLE=
 #### ERROR_CCPUBLISHER_MISSING_YEAR=Please enter the year of the file you want to publish.
@@ -2480,12 +2443,8 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 #? LICENSE_VIEW_LICENSE=
-#### LICENSE_EDIT_LICENSE=Edit License...
-#? LICENSE_EDIT_LICENSE=
 #### LICENSE_VERIFY=Verify
 #? LICENSE_VERIFY=
-#### LICENSE_SAVE_DETAILS_TO_FILE=Save details to file
-#? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
 # Messages for Creative Commons Licensing
@@ -2854,12 +2813,14 @@ HAS_TIPS_OF_THE_DAY=false
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=Settings for the BitTorrent Protocol.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
-#? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
+#### OPTIONS_BITTORRENT_MAX_TORRENTS=Maximum Active Torrents
+#? OPTIONS_BITTORRENT_MAX_TORRENTS=
+#### OPTIONS_BITTORRENT_MAX_CONNECTIONS=Maximum connections per torrent
+#? OPTIONS_BITTORRENT_MAX_CONNECTIONS=
 #### OPTIONS_BITTORRENT_MAX_UPLOADS=Maximum uploads per torrent
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
