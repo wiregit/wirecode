@@ -3,8 +3,12 @@ package com.limegroup.bittorrent.disk;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -101,12 +105,18 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 			bufs.addAll(bufMap.values());
 			bufMap.clear();
 		}
+		boolean allCleaned = false;
 		try {
-			for (MappedByteBuffer mbb : bufs)
+			boolean cleaned = true;
+			for (MappedByteBuffer mbb : bufs) {
 				safeForce(mbb);
+				cleaned = cleaned && clean(mbb);
+			}
+			allCleaned = cleaned;
 		} finally {
 			bufs.clear();
-			System.gc(); 
+			if (!allCleaned)
+				System.gc(); 
 		}
 		super.close();
 	}
@@ -120,8 +130,10 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		try {
 			safeForce(buf);
 		} finally {
-			buf = null;
-			System.gc();
+			if (!clean(buf)) {
+				buf = null;
+				System.gc();
+			}
 		}
 		super.setReadOnly(raf, path);
 		buf = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.length());
@@ -136,7 +148,46 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		} catch (Exception iox) {
 			if (iox instanceof IOException) 
 				return; // BugID 5074836
-			else throw new RuntimeException(iox);
+			RuntimeException r;
+			if (iox instanceof RuntimeException) 
+				r = (RuntimeException)iox;
+			else
+				r = new RuntimeException(iox);
+			throw r;
 		}
 	}
+	
+	public static boolean clean(final Object buffer) {
+
+		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+
+			public Boolean run() {
+ 				try {
+
+					Method getCleanerMethod = buffer.getClass().getMethod("cleaner",new Class[0]);
+					if (getCleanerMethod == null)
+						return false;
+
+					getCleanerMethod.setAccessible(true);
+
+					sun.misc.Cleaner cleaner =
+						(sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
+
+					if (cleaner == null)
+						return false;
+					cleaner.clean();
+					return true;
+
+				} catch(SecurityException e) {}
+				catch (InvocationTargetException e){}
+				catch (NoSuchMethodException e){}
+				catch (IllegalAccessException e){}
+				return false;
+			}
+
+		});
+
+	}
+
 }
+
