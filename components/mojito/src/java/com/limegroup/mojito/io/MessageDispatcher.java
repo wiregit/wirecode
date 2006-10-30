@@ -462,7 +462,7 @@ public abstract class MessageDispatcher {
         
         if (!NetworkUtils.isValidSocketAddress(src)) {
             if (LOG.isErrorEnabled()) {
-                LOG.error(node + " has an invalid IP/Port");
+                LOG.error(node + " has an invalid IP:Port");
             }
             return;
         }
