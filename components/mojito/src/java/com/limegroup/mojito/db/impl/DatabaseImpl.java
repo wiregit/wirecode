@@ -215,25 +215,29 @@ public class DatabaseImpl implements Database {
                 InetAddress addr = ((InetSocketAddress) 
                         value.getCreator().getContactAddress()).getAddress();
                 
-                Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
-                
-                if (hostValuesMap.containsKey(iaddr)) {
-                    int numKeys = hostValuesMap.get(iaddr);
+                // TODO: Handle only IPv4 addresses for now. 
+                // See allowStore(DHTValue) for more information!
+                if (addr instanceof Inet4Address) {
+                    Integer iaddr = new Integer(ByteOrder.beb2int(addr.getAddress(), 0));
                     
-                    if (numKeys <= 1) {
-                        hostValuesMap.remove(iaddr);
+                    if (hostValuesMap.containsKey(iaddr)) {
+                        int numKeys = hostValuesMap.get(iaddr);
                         
-                    } else if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
-                        // The host went over the limit, thus either he is trying
-                        // to legitimately remove a value, in which case we give him a chance
-                        // or this method is called from the ban() method, in which case the 
-                        // host should be filtered out by the HostFilter anyways
-                        hostValuesMap.put(iaddr, 
-                                DatabaseSettings.MAX_KEY_PER_IP.getValue());
-                    } else {
-                        
-                        numKeys--;
-                        hostValuesMap.put(iaddr, numKeys);
+                        if (numKeys <= 1) {
+                            hostValuesMap.remove(iaddr);
+                            
+                        } else if (numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
+                            // The host went over the limit, thus either he is trying
+                            // to legitimately remove a value, in which case we give him a chance
+                            // or this method is called from the ban() method, in which case the 
+                            // host should be filtered out by the HostFilter anyways
+                            hostValuesMap.put(iaddr, 
+                                    DatabaseSettings.MAX_KEY_PER_IP.getValue());
+                        } else {
+                            
+                            numKeys--;
+                            hostValuesMap.put(iaddr, numKeys);
+                        }
                     }
                 }
             }
