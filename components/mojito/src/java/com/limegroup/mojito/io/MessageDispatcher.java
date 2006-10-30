@@ -387,14 +387,14 @@ public abstract class MessageDispatcher {
     /**
      * A helper method to serialize DHTMessage(s)
      */
-    protected final ByteBuffer serialize(SocketAddress dst, DHTMessage message) throws IOException {
+    protected ByteBuffer serialize(SocketAddress dst, DHTMessage message) throws IOException {
         return context.getMessageFactory().writeMessage(dst, message);
     }
     
     /**
      * A helper method to deserialize DHTMessage(s)
      */
-    protected final DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
+    protected DHTMessage deserialize(SocketAddress src, ByteBuffer data) 
             throws MessageFormatException, IOException {
         return context.getMessageFactory().createMessage(src, data);
     }
