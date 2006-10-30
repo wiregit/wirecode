@@ -240,49 +240,52 @@ public class DatabaseImpl implements Database {
         
         DHTValueBag bag = database.get(value.getValueID());
         
-        //TODO: exclude signed valso
-        if(bag == null) {
-            //first check if the node is flooding us with keys:
-            //We can only check for flooding by the value creator, not by the originator, 
-            //because that could be misused to prevent us from storing real values
-
-            int numKeys = 0;
-            Contact creator = value.getCreator();
-            byte[] addr = ((InetSocketAddress) creator.getContactAddress())
-                .getAddress().getAddress();
-            int iaddr = ByteOrder.beb2int(addr, 0);
-            
-            if(hostValuesMap == null) {
-                hostValuesMap = new HashMap<Integer, Integer>();
-                
-            } else if(hostValuesMap.containsKey(iaddr)) {
-                numKeys = hostValuesMap.get(iaddr);
-                if(numKeys > DatabaseSettings.MAX_KEY_PER_IP.getValue()) {
-
-                    hostValuesMap.put(iaddr, ++numKeys);
-                    
-                    if(numKeys > DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
-                        //banning will also remove the host from the Map
-                        banContact(creator);
-                    }
-                    
-                    return false;
-                }
-            }
-            hostValuesMap.put(iaddr, ++numKeys);
-        }
-        
         //check with the security constraint now
         DatabaseSecurityConstraint dbsc = securityConstraint;
-        if (dbsc == null) {
-            return true;
+        if (dbsc != null && !dbsc.allowStore(this, bag, value)) {
+            return false;
         }
         
-        return dbsc.allowStore(this, bag, value);
+        // TODO: exclude signed valso
+        if (bag == null) {
+            // First check if the node is flooding us with keys:
+            // We can only check for flooding by the value creator, not by the sender, 
+            // because that could be misused to prevent us from storing real values
+
+            Contact creator = value.getCreator();
+            byte[] addr = ((InetSocketAddress)creator
+                    .getContactAddress()).getAddress().getAddress();
+            
+            // TODO: This is not IPv6 compatible!!!
+            Integer iaddr = new Integer(ByteOrder.beb2int(addr, 0));
+            
+            int numKeys = 0;
+            if (hostValuesMap == null) {
+                hostValuesMap = new HashMap<Integer, Integer>();
+                
+            } else if (hostValuesMap.containsKey(iaddr)) {
+                numKeys = hostValuesMap.get(iaddr);
+            }
+            
+            if (numKeys >= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue()) {
+                // Banning will also remove the host from the Map
+                banContact(creator);
+                return false;
+            }
+            
+            numKeys++;
+            hostValuesMap.put(iaddr, numKeys);
+        }
+        
+        return true;
     }
     
+    /**
+     * Bans the given Contact and removes all values the Contact
+     * has ever stored in our Database
+     */
     private void banContact(Contact contact) {
-        //remove all values by this contact
+        // Remove all values by this contact
         for(DHTValue value: values()) {
             if(value.getCreator().equals(contact)) {
                 remove(value);
