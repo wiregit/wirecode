@@ -122,7 +122,7 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 	}
 
 	@Override
-	public void setReadOnly(RandomAccessFile raf, String path) throws IOException {
+	public RandomAccessFile setReadOnly(RandomAccessFile raf, String path) throws IOException {
 		MappedByteBuffer buf;
 		synchronized(this) {
 			buf = bufMap.remove(raf);
@@ -135,11 +135,12 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 				System.gc();
 			}
 		}
-		super.setReadOnly(raf, path);
+		raf = super.setReadOnly(raf, path);
 		buf = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.length());
 		synchronized(this) {
 			bufMap.put(raf, buf);
 		}
+		return raf;
 	}
 	
 	private void safeForce(MappedByteBuffer buf) {

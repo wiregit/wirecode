@@ -182,7 +182,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 				rf = _fos[index];
 				_fos[index] = null;
 			}
-			setReadOnly(rf, completed.getPath());
+			rf = setReadOnly(rf, completed.getPath());
 			synchronized(this) {
 				if(!isOpen())
 					return;
@@ -193,9 +193,9 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 		} catch (IOException ignored){}
 	}
 	
-	protected void setReadOnly(RandomAccessFile f, String path) throws IOException {
+	protected RandomAccessFile setReadOnly(RandomAccessFile f, String path) throws IOException {
 		f.close();
-		f = new RandomAccessFile(path, "r");
+		return new RandomAccessFile(path, "r");
 	}
 	
 	/* (non-Javadoc)
