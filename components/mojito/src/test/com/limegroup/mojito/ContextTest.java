@@ -79,7 +79,7 @@ public class ContextTest extends BaseTestCase {
                     }
                 }
             }
-            
+            Thread.sleep(200);
             assertEquals(expected, count);
         } finally {
             for (MojitoDHT dht : dhts) {
