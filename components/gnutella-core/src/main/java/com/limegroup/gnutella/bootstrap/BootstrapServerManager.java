@@ -287,7 +287,7 @@ public class BootstrapServerManager {
     /**
      * Adds default bootstrap servers to this if this needs more entries.
      */
-    private void addDefaultsIfNeeded() {
+    private synchronized void addDefaultsIfNeeded() {
         if (SERVERS.size()>0)
             return;
         DefaultBootstrapServers.addDefaults(this);
@@ -370,7 +370,7 @@ public class BootstrapServerManager {
          */
         protected BootstrapServer nextServer() {
             BootstrapServer e = null;
-            synchronized (this) {
+            synchronized (BootstrapServerManager.this) {
                 if(_lastIndex >= SERVERS.size()) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Used up all servers, last: " + _lastIndex);
@@ -418,10 +418,12 @@ public class BootstrapServerManager {
         }
         
         protected BootstrapServer nextServer() {
-            if(SERVERS.size() == 0)
-                return null;
-            else
-                return SERVERS.get(randomServer());
+            synchronized(BootstrapServerManager.this) {
+                if(SERVERS.size() == 0)
+                    return null;
+                else
+                    return SERVERS.get(randomServer());
+            }
         }
         
         public String toString() {
@@ -476,10 +478,12 @@ public class BootstrapServerManager {
             return !gotResponse;
         }
         protected BootstrapServer nextServer() {
-            if(SERVERS.size() == 0)
-                return null;
-            else
-                return SERVERS.get(randomServer());
+            synchronized(BootstrapServerManager.this) {
+                if(SERVERS.size() == 0)
+                    return null;
+                else
+                    return SERVERS.get(randomServer());
+            }
         }
         
         public String toString() {
@@ -628,7 +632,7 @@ public class BootstrapServerManager {
     
      /** Returns an random valid index of SERVERS.  Protected so we can override
       *  in test cases.  PRECONDITION: SERVERS.size>0. */
-    protected int randomServer() {
+    protected synchronized int randomServer() {
         return _rand.nextInt(SERVERS.size());
     }
     
