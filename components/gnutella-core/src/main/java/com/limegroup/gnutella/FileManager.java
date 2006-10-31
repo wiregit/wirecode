@@ -836,8 +836,11 @@ public abstract class FileManager {
         
         // Do not share subdirectories of the forcibly shared dir.
         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
-        for(int i = 0; i < dir_list.length && _revision == revision; i++)
-            updateSharedDirectories(dir_list[i], directory, revision);
+        if(dir_list != null) {
+            for(int i = 0; i < dir_list.length && _revision == revision; i++)
+                updateSharedDirectories(dir_list[i], directory, revision);
+        }
+            
     }
 
 
