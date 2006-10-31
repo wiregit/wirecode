@@ -63,9 +63,9 @@ public class UploadSlotManager implements BandwidthTracker {
 	private int numMeasures;
 	
 	public UploadSlotManager() {
-		active = new ArrayList<UploadSlotRequest>(UploadSettings.HARD_MAX_UPLOADS.getValue());
-		queued = new ArrayList<HTTPSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-		queuedResumable = new ArrayList<BTSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		active = new ArrayList<UploadSlotRequest>();
+		queued = new ArrayList<HTTPSlotRequest>();
+		queuedResumable = new ArrayList<BTSlotRequest>();
 		allRequests = new MultiIterable<UploadSlotRequest>(active, queued, queuedResumable);
 	}
 
