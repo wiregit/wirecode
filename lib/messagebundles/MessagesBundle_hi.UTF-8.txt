@@ -657,7 +657,7 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=फाइल का मैगनेट वि
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=खोज दुहराना
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 #? SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=होस्ट को रोको
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=नतीजा
@@ -719,7 +719,7 @@ SEARCH_SELECT_TYPE=वर्ग चुनोः
 SEARCH_FILTER_RESULTS=फिल्टर नतीजा
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=खोज मे वापस
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=क्या आप होस्ट से खोज परिणामों को ब्लॉक करना चाहते है
 
 ################################################################################
@@ -2864,6 +2864,10 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=प्ररस्भ होने �
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
 #? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
 ################################################################################
 # Key/Value pairs for shutdown options

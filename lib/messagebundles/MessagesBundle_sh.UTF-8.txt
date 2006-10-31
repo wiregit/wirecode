@@ -657,7 +657,7 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet detalji za datoteku
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Ponovi pretragu
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Pogledaj jo� rezultata
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=Onemogu�i pristup udaljenom ra�unaru
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Rezultati
@@ -719,7 +719,7 @@ SEARCH_MEDIA_IMAGES_TOOLTIP=Tra�i slike, uklju�uju�i jpg, gif, png i drugo
 SEARCH_FILTER_RESULTS=Filtriraj rezultat:
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=Povratak na pretragu
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=Da li �elite ukloniti rezultate pretrage sa ra�unara na adresi 
 
 ################################################################################
@@ -2864,6 +2864,10 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Priklju�i se prilikom pokretanja:
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
 #? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
 ################################################################################
 # Key/Value pairs for shutdown options

@@ -659,7 +659,7 @@ SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Vyhľadať súbor pomocou Bitzi
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=Zopakovať hľadanie
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Získať viac výsledkov
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=Blokovať server
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=Výsledky
@@ -721,7 +721,7 @@ SEARCH_MEDIA_IMAGES_TOOLTIP=Hľadať obrázky, vrátane jpg, gif, png a ďalšie
 SEARCH_FILTER_RESULTS=Filtrovať výsledky
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=Späť k hľadaniu
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=Chcete zakázať vyhľadávanie zo servera
 
 ################################################################################
@@ -2866,6 +2866,10 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Pripojiť pri štarte programu:
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
 #? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
 ################################################################################
 # Key/Value pairs for shutdown options

@@ -657,7 +657,7 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=ਮੈਗਨੇਟ ਬਾਰੇ ਹੋਰ ਜ
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=ਖੋਜ ਦੁਹਰਾਓ
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=ਹੋਰ ਰਿਜ਼ਲਟ ਪਾਓ
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=ਹੋਸਟ ਨੂੰ ਬਲੌਕ ਕਿਤਾ ਜਾਏ
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=ਨਤੀੱਜੇ
@@ -719,7 +719,7 @@ SEARCH_MEDIA_IMAGES_TOOLTIP=ਚਿੱਤਰ ਫ਼ਾਇਲਾਂ ਲਭੋ, ਜਿ
 SEARCH_FILTER_RESULTS=ਨਤੀਜੇ ਫ਼ਿਲਟਰ ਕਰਆਓ
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=ਫੇਰ ਕੁੱਛ ਲੱਭੋ
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=ਤੁਸੀਂ ਇਸ ਹੋਸਟ ਦੇ ਨਤੀਜੇ ਹਟਾਣਾ ਚਾੰਦੇ ਹੋ
 
 ################################################################################
@@ -2864,6 +2864,10 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
 #? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
 ################################################################################
 # Key/Value pairs for shutdown options

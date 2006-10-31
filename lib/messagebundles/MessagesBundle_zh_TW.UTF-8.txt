@@ -797,7 +797,7 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=檔案的 Magnet 訊息
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=重新搜尋
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=更多結果
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 ###$ SEARCH_PUBLIC_BLOCK_STRING=屏蔽 对方
 SEARCH_PUBLIC_BLOCK_STRING=封鎖主機
 #### SEARCH_RESULT_TABLE_LABEL=Results
@@ -866,7 +866,7 @@ SEARCH_MEDIA_IMAGES_TOOLTIP=搜尋圖片檔案，包括 jpg, gif, png 及更多
 SEARCH_FILTER_RESULTS=過濾結果:
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=返回搜尋結果
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=您是否要封鎖來自這個主機的搜尋結果
 
 ################################################################################
@@ -3385,6 +3385,10 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=啟動時連線:
 #? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
 #? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
 ################################################################################
 # Key/Value pairs for shutdown options
