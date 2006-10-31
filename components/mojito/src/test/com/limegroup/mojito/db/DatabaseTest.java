@@ -351,6 +351,7 @@ public class DatabaseTest extends BaseTestCase {
     }
     
     public void testFloodDatabase() {
+        DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.setValue(10);
         Database db = new DatabaseImpl();
         HostFilterStub filter = new HostFilterStub();
         db.setHostFilter(filter);
@@ -366,7 +367,7 @@ public class DatabaseTest extends BaseTestCase {
 
         DHTValue value = null;
         //should allow x direct values
-        for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
+        for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
             value = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
                     KUID.createRandomID(), "test".getBytes());
             assertTrue(db.store(value));
