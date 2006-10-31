@@ -42,18 +42,18 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * INVARIANT: sorted by priority and contains only 
 	 * requests of the highest priority or non-preemptible requests
 	 */
-	private final List  <UploadSlotRequest>  active;
+	private final List <UploadSlotRequest> active;
 	
 	/**
 	 * The list of queued non-resumable requests
 	 */
-	private final List  <HTTPSlotRequest>  queued;
+	private final List <HTTPSlotRequest> queued;
 	
 	/**
 	 * The list of queued resumable requests
 	 * (currently only Seeding BT Uploaders)
 	 */
-	private final List  <BTSlotRequest>  queuedResumable;
+	private final List<BTSlotRequest> queuedResumable;
 	
 	private final MultiIterable<UploadSlotRequest> allRequests;
 	
