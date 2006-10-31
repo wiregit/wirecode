@@ -63,35 +63,33 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
 	    File f1 = createNewNamedTestFile(10, "meaningless");
 	    LimeXMLDocument d1 = new LimeXMLDocument(buildAudioXMLString(
 	        "artist=\"Sammy B\" album=\"Jazz in G\""));
-	    List l1 = new ArrayList(); l1.add(d1);
+	    List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+	    l1.add(d1);
 	    FileManagerEvent result = addIfShared(f1, l1);
 	    assertTrue(result.toString(), result.isAddEvent());
 	    assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 	    
 	    Response[] r1 = fman.query(QueryRequest.createQuery("sam",
 	                                buildAudioXMLString("artist=\"sam\"")));
-        assertNotNull(r1);
-        assertEquals(1, r1.length);
+	    assertEquals(1, r1.length);
         assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
         
         // test a match where 50% matches -- should get no matches.
         Response[] r2 = fman.query(QueryRequest.createQuery("sam jazz in c",
                                    buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
-        if(r2 != null)
-            assertEquals(0, r2.length);
+        
+        assertEquals(0, r2.length);
             
             
         // test where the keyword matches only.
         Response[] r3 = fman.query(QueryRequest.createQuery("meaningles"));
-        assertNotNull(r3);
         assertEquals(1, r3.length);
         assertEquals(d1.getXMLString(), r3[0].getDocument().getXMLString());
                                   
         // test where keyword matches, but xml doesn't.
         Response[] r4 = fman.query(QueryRequest.createQuery("meaningles",
                                    buildAudioXMLString("artist=\"bob\"")));
-        if(r4 != null)
-            assertEquals(0, r4.length);
+        assertEquals(0, r4.length);
             
         // more ambiguous tests -- a pure keyword search for "jazz in d"
         // will work, but a keyword search that included XML will fail for
@@ -106,18 +104,14 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         
         // pure keyword.
         Response[] r5 = fman.query(QueryRequest.createQuery("jazz in d"));
-        assertNotNull(r5);
         assertEquals(1, r5.length);
         assertEquals(d2.getXMLString(), r5[0].getDocument().getXMLString());
         
         // keyword, but has XML to check more efficiently.
         Response[] r6 = fman.query(QueryRequest.createQuery("jazz in d",
                                    buildAudioXMLString("album=\"jazz in d\"")));
-        if(r6 != null)
-            assertEquals(0, r6.length);
-                            
         
-                                   
+        assertEquals(0, r6.length);
     }
 	
 
@@ -224,6 +218,76 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         fman.removeFileIfShared(f3);
         res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
+    }
+    
+    public void testXMLResultsForNonXMLQuery() throws Exception {
+    	waitForLoad();
+	    // test a query where the filename is meaningless but XML matches.
+	    File f1 = createNewNamedTestFile(10, "meaningless");
+	    LimeXMLDocument d1 = new LimeXMLDocument(buildAudioXMLString(
+	        "artist=\"Sammy B\" album=\"Jazz in A minor\""));
+	    List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+	    l1.add(d1);
+	    FileManagerEvent result = addIfShared(f1, l1);
+	    assertTrue(result.toString(), result.isAddEvent());
+	    assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+	    
+	    // exact match of keywords in xml
+	    Response[] responses = fman.query(QueryRequest.createQuery("Sammy B"));
+	    
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    // test on album
+	    responses = fman.query(QueryRequest.createQuery("Jazz in A minor"));
+	    
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    // prefixes
+	    responses = fman.query(QueryRequest.createQuery("Sam"));
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    responses = fman.query(QueryRequest.createQuery("Ja"));
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    // prefix & different case
+	    responses = fman.query(QueryRequest.createQuery("sAm"));
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    responses = fman.query(QueryRequest.createQuery("jaZZ In"));
+	    assertEquals(1, responses.length);
+	    assertEquals(d1.getXMLString(), responses[0].getDocument().getXMLString());
+	    
+	    // not matching: prefix
+	    responses = fman.query(QueryRequest.createQuery("sammm"));
+	    assertEquals(0, responses.length);
+	    
+	    // not matching: correct part but in string
+	    responses = fman.query(QueryRequest.createQuery("in"));
+	    assertEquals(0, responses.length);
+	    
+	    responses = fman.query(QueryRequest.createQuery("minor"));
+	    assertEquals(0, responses.length);
+	    
+	    // remove file
+	    fman.removeFileIfShared(f1);
+	    
+	    // no more matches
+	    responses = fman.query(QueryRequest.createQuery("Sammy B"));
+	    assertEquals(0, responses.length);
+	    	    
+	    // test on album
+	    responses = fman.query(QueryRequest.createQuery("Jazz in A minor"));
+	    
+	    assertEquals(0, responses.length);
+	    
+	    // prefixes
+	    responses = fman.query(QueryRequest.createQuery("Sam"));
+	    assertEquals(0, responses.length);
     }
 
     private QueryRequest get_qr(File f) {

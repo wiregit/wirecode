@@ -459,7 +459,7 @@ public class MetaFileManager extends FileManager {
 
     private Response[] queryXML(QueryRequest request) {
     	Collection<LimeXMLReplyCollection> schemas = getReplyCollections(request);
-    	// TODO fberger do I have to normalize
+    	// TODO fberger do I have to normalize?
     	String queryString = request.getQuery();
     	List<LimeXMLDocument> documents = new ArrayList<LimeXMLDocument>();
     	for (LimeXMLReplyCollection schemaCol : schemas) { 
