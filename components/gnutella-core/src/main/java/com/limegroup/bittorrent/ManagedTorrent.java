@@ -347,12 +347,16 @@ BTLinkListener {
 	 */
 	public boolean resume() {
 		synchronized(state.getLock()) {
-			if (state.get() != TorrentState.PAUSED && state.get() != TorrentState.STOPPED)
-				throw new IllegalStateException("torrent not resumable");
-			
-			state.set(TorrentState.QUEUED);
+			switch(state.get()) {
+			case PAUSED :
+			case TRACKER_FAILURE:
+			case STOPPED:
+				state.set(TorrentState.QUEUED);
+				return true;
+			default:
+				throw new IllegalStateException("torrent not resumable "+state);
+			}
 		}
-		return true;
 	}
 
 	/**

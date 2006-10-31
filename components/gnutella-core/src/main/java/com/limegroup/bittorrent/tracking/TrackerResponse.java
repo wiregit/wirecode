@@ -257,4 +257,10 @@ class TrackerResponse {
 			LOG.debug("got peer " + to);
 		return to;
 	}
+	
+	public String toString() {
+		return "tracker response: min interval "+INTERVAL+
+		","+DONE_PEERS+"/"+NUM_PEERS+ (FAILURE_REASON != null ? FAILURE_REASON :"")+
+		", num peers: "+PEERS.size();
+	}
 }

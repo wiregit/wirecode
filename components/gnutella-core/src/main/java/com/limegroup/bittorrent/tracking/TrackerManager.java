@@ -163,7 +163,7 @@ public class TrackerManager {
 	 * This method handles the response from a tracker
 	 */
 	private void handleTrackerResponse(TrackerResponse response, Tracker t) {
-		LOG.debug("handling tracker response " + t.toString());
+		LOG.debug("handling tracker response "+response+" from " + t);
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
 				.getValue() * 1000;
