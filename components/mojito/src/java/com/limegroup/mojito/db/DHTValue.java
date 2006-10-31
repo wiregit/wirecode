@@ -278,4 +278,9 @@ public interface DHTValue {
      */
     public int getLocationCount();
     
+    /**
+     * Returns the version of this DHT value
+     */
+    public int getVersion();
+    
 }

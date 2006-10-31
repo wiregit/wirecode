@@ -34,19 +34,35 @@ public class DHTValueFactory {
     }
     
     /** 
-     * Creates and returns a local DHTValue 
+     * Creates and returns a local DHTValue with a default version of 0. 
      */
     public static DHTValue createLocalValue(Contact creator, 
             ValueType type, KUID valueId, byte[] data) {
-        return new DHTValueImpl(creator, creator, type, valueId, data, true);
+        return createLocalValue(creator, type, valueId, data, 0);
+    }
+    
+    /**
+     * Creates and returns a local DHTValue.
+     */
+    public static DHTValue createLocalValue(Contact creator, 
+            ValueType type, KUID valueId, byte[] data, int version) {
+        return new DHTValueImpl(creator, creator, type, valueId, data, version, true);
     }
     
     /** 
-     * Creates and returns a remote DHTValue 
+     * Creates and returns a remote DHTValue with a default version of 0.
      */
     public static DHTValue createRemoteValue(Contact creator, Contact sender, 
             ValueType type, KUID valueId, byte[] data) {
-        return new DHTValueImpl(creator, sender, type, valueId, data, false);
+        return createRemoteValue(creator, sender, type, valueId, data, 0);
+    }
+    
+    /** 
+     * Creates and returns a remote DHTValue.
+     */
+    public static DHTValue createRemoteValue(Contact creator, Contact sender, 
+            ValueType type, KUID valueId, byte[] data, int version) {
+        return new DHTValueImpl(creator, sender, type, valueId, data, version, false);
     }
     
     /**

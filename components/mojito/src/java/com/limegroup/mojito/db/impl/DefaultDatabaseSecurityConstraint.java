@@ -80,6 +80,12 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
             return false;
         }
         
+        //it's not possible to replace an indirect value with an older
+        //version indirect version
+        if(!value.isDirect() && value.getVersion() < existing.getVersion()) {
+            return false;
+        }
+        
         // TODO signed values cannot be replaced?
         
         return true;

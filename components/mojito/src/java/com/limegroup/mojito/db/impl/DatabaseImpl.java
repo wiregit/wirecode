@@ -232,7 +232,7 @@ public class DatabaseImpl implements Database {
                             // or this method is called from the ban() method, in which case the 
                             // host should be filtered out by the HostFilter anyways
                             hostValuesMap.put(iaddr, 
-                                    DatabaseSettings.MAX_KEY_PER_IP.getValue());
+                                    DatabaseSettings.MAX_KEY_PER_IP.getValue()-1);
                         } else {
                             
                             numKeys--;

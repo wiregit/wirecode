@@ -50,6 +50,9 @@ public class DHTValueImpl implements DHTValue, Serializable {
     /** The Value type */
     private ValueType type;
     
+    /** The version of this DHT value */
+    private int version;
+    
     /** The Value */
     private byte[] data;
     
@@ -77,14 +80,16 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * @param type The type of the DHTValue
      * @param valueId The KUID of the DHTValue
      * @param data The actual DHTValue
+     * @param version The version of the DHTValue
      * @param isLocalValue Whether or not it's a local DHTValue
      */
     public DHTValueImpl(Contact creator, Contact sender, 
-            ValueType type, KUID valueId, byte[] data, boolean isLocalValue) {
+            ValueType type, KUID valueId, byte[] data, int version, boolean isLocalValue) {
         
         this.creator = creator;
         this.sender = sender;
         this.valueId = valueId;
+        this.version = version;
         
         if (type == null) {
             type = ValueType.BINARY;
@@ -215,6 +220,10 @@ public class DHTValueImpl implements DHTValue, Serializable {
         return isLocalValue;
     }
     
+    public int getVersion() {
+        return version;
+    }
+
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValue#isRepublishingRequired()
