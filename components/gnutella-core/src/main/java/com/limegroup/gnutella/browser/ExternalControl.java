@@ -63,7 +63,8 @@ public class ExternalControl {
 	}
 
 	public static void checkForActiveLimeWire(String arg) {
-	    if(  CommonUtils.isWindows() && testForLimeWire(arg) ) {
+	    if( (CommonUtils.isWindows() || CommonUtils.isUnix())
+			&& testForLimeWire(arg) ) {
 		    System.exit(0);	
 		}
 	}
