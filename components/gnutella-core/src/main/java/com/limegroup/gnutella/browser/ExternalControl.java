@@ -96,8 +96,14 @@ public class ExternalControl {
 		if (arg == null) 
 			return false;
 		arg = arg.trim().toLowerCase();
-		// magnets pointing to .torrent files are just magnets for now
-		return arg.endsWith(".torrent") && !arg.startsWith("magnet:");
+		if (!arg.endsWith(".torrent"))
+			return false;
+		int colon = arg.indexOf(":");
+		if (colon != -1) {
+			arg = arg.substring(0, colon);
+			return arg.equals("http"); 
+		}
+		return false;
 	}
 	
 	//refactored the download logic into a separate method
