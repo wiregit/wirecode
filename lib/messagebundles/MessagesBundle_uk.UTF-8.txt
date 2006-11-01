@@ -3314,14 +3314,15 @@ OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=Показувати непотріб вни�
 OPTIONS_SEARCH_JUNK_HIDE_SPAM=Не показувати непотріб
 #### OPTIONS_SEARCH_JUNK_DISPLAY=Display:
 OPTIONS_SEARCH_JUNK_DISPLAY=Показувати:
-#### OPTIONS_SEARCH_JUNK_THRESHOLD=Sensitivity:
-OPTIONS_SEARCH_JUNK_THRESHOLD=Чутливість:
+
+#### OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=Sensivity
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=
+#### OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=Adjust the sensitivity of LimeWire's junk filter
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=Relaxed
 OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=М’який
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Strict
 OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Суворий
-#### OPTIONS_SEARCH_JUNK_THRESHOLD_TOOLTIP=Adjust the sensitivity of LimeWire's junk filter
-OPTIONS_SEARCH_JUNK_THRESHOLD_TOOLTIP=Налаштувати чутливість фільтру непотрібу LimeWire 
 #### OPTIONS_SEARCH_JUNK_RESET_LABEL=Forget Training Data
 OPTIONS_SEARCH_JUNK_RESET_LABEL=Забути данні тренування
 
