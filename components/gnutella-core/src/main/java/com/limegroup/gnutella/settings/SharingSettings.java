@@ -155,6 +155,7 @@ public class SharingSettings extends LimeProps {
     	if (extension == null) {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
+        //TODO Mark: extension is .torrent => different dir
     	MediaType type = MediaType.getMediaTypeForExtension(extension);
     	if (type == null)
     		return DIRECTORY_FOR_SAVING_FILES.getValue();	
@@ -209,6 +210,12 @@ public class SharingSettings extends LimeProps {
      */
 	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
 		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
+    
+    /**
+     * Whether or not to auto-share .torrent files.
+     */
+    public static final BooleanSetting SHARE_TORRENT_META_FILES =
+        FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES", true);
 	
     /**
 	 * File extensions that are shared.
