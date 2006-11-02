@@ -37,7 +37,7 @@ interface DiskController<F extends File> {
 	/**
 	 * close the given file and reopen it for reading
 	 */
-	public void setReadOnly(F completed);
+	public void setReadOnly(F completed) throws IOException;
 
 	/**
 	 * 

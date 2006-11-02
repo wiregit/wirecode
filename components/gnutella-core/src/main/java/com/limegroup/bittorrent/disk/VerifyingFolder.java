@@ -333,7 +333,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * performs various tasks after a block has been verified
 	 * such as notifying any listeners or closing files.
 	 */
-	private void handleVerified(int pieceNum) {
+	private void handleVerified(int pieceNum) throws IOException {
 		closeAnyCompletedFiles(pieceNum);
 		notifyOfChunkCompletion(pieceNum);
 	}
@@ -344,7 +344,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			t.chunkVerified(pieceNum);
 	}
 	
-	private void closeAnyCompletedFiles(int pieceNum) {
+	private void closeAnyCompletedFiles(int pieceNum) throws IOException {
 		List<TorrentFile> possiblyCompleted = null;
 		for (TorrentFile t : _files) {
 			if (t.getBegin() > pieceNum)

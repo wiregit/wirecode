@@ -170,7 +170,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskController#setReadOnly(com.limegroup.bittorrent.TorrentFile)
 	 */
-	public void setReadOnly(F completed) {
+	public void setReadOnly(F completed) throws IOException {
 		// TODO: decide if files should be moved to the save
 		// location as they are completed.. cool but not trivial
 		try {
@@ -190,7 +190,7 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 			}
 		} catch (FileNotFoundException bs) {
 			ErrorService.error(bs);
-		} catch (IOException ignored){}
+		}
 	}
 	
 	protected RandomAccessFile setReadOnly(RandomAccessFile f, String path) throws IOException {
