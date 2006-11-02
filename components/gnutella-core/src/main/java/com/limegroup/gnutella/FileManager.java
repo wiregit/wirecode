@@ -61,6 +61,9 @@ public abstract class FileManager {
     /** Subdirectory that also is always shared. */
     public static final File PREFERENCE_SHARE;
     
+    /** Always share torrent meta data directory. */
+    public static final File TORRENT_META_DATA_SHARE;
+    
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
@@ -73,6 +76,14 @@ public abstract class FileManager {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
+        
+        File torrentMetaShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".torrentMetaData").getAbsoluteFile();
+        torrentMetaShare.mkdir();
+        try {
+            torrentMetaShare = FileUtils.getCanonicalFile(torrentMetaShare);
+        } catch(IOException ignored) {}
+        TORRENT_META_DATA_SHARE = torrentMetaShare;
     }
 
     /** A type-safe empty LimeXMLDocument list. */
@@ -705,6 +716,7 @@ public abstract class FileManager {
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(PROGRAM_SHARE, null, revision);
         updateSharedDirectories(PREFERENCE_SHARE, null, revision);
+        updateSharedDirectories(TORRENT_META_DATA_SHARE, null, revision);
             
         //Load the shared directories and add their files.
         _isUpdating = true;
@@ -798,7 +810,8 @@ public abstract class FileManager {
 
         // STEP 1:
         // Add directory
-        boolean isForcedShare = isForcedShareDirectory(directory);
+        boolean isForcedShare = isForcedShareDirectory(directory) 
+            || isTorrentMetaDataShareDirectory(directory);
         synchronized (this) {
             // if it was already added, ignore.
             if (_completelySharedDirectories.contains(directory))
@@ -945,6 +958,19 @@ public abstract class FileManager {
         updateSharedDirectories(folder, null, _revision);
         _isUpdating = false;
     }
+    
+    public void addTorrentMetaDataFile(File file) {
+        File shareMetaFile = file;
+        if(!isTorrentMetaDataShare(file)) {
+            shareMetaFile = new File(TORRENT_META_DATA_SHARE, file.getName());
+            try {
+                FileUtils.copyFile(file, shareMetaFile);
+            } catch (IOException ioex) {
+                ErrorService.error(ioex);
+            }
+        }
+        addFileIfShared(shareMetaFile);
+    }
 	
 	/**
 	 * Always shares the given file.
@@ -1011,7 +1037,7 @@ public abstract class FileManager {
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list, FileEventListener callback) {
         addFileIfShared(file, list, true, _revision, callback);
     }
-	
+    
     /**
      * The actual implementation of addFileIfShared(File)
      * @param file the file to add
@@ -1679,6 +1705,9 @@ public abstract class FileManager {
 			return true;
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
+        if (isTorrentMetaDataShare(file)) {
+            return true;
+        }
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
 				return true;
@@ -1692,8 +1721,7 @@ public abstract class FileManager {
 	
     /**
      * Returns true if this file is not too large, not too small,
-     * not null, is a directory, can be read, is not hidden.  Returns
-     * true if file is a specially shared file or starts with "LimeWire".
+     * not null, is a directory, can be read, is not hidden.  
      * Returns false otherwise.
      * @see isFileShareable(File) 
      */
@@ -2157,10 +2185,22 @@ public abstract class FileManager {
     }
     
     /**
+     * Determines if this File is a torrent meta data share.
+     */
+    public static boolean isTorrentMetaDataShare(File file) {
+        File parent = file.getParentFile();
+        return parent != null && isTorrentMetaDataShareDirectory(parent);
+    }
+    
+    /**
      * Determines if this File is a network shared directory.
      */
     public static boolean isForcedShareDirectory(File f) {
         return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
+    }
+    
+    public static boolean isTorrentMetaDataShareDirectory(File f) {
+        return f.equals(TORRENT_META_DATA_SHARE);
     }
     
     /**

@@ -7,17 +7,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -92,6 +93,32 @@ public class FileUtils {
                 return f.getAbsolutePath();
             else
                 throw ioe;
+        }
+    }
+    
+    public static void copyFile(File src, File dst) throws IOException{
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = new FileInputStream(src);
+            out = new FileOutputStream(dst);
+   
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } catch (IOException ioe) {
+            throw ioe;
+        } finally {
+            try {
+                if(in != null) {
+                    in.close();
+                }
+                if(out != null) {
+                    out.close();
+                }
+            } catch(IOException ignored) {}
         }
     }
     

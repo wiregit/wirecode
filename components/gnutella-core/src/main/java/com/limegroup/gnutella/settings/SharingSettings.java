@@ -28,7 +28,7 @@ public class SharingSettings extends LimeProps {
     
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
-
+    
     /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
@@ -105,7 +105,7 @@ public class SharingSettings extends LimeProps {
 		if(!saveDir.isDirectory()) {
 			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
 		}
-
+        
 		String parentDir = saveDir.getParent();
 		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
@@ -155,8 +155,7 @@ public class SharingSettings extends LimeProps {
     	if (extension == null) {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
-        //TODO Mark: extension is .torrent => different dir
-    	MediaType type = MediaType.getMediaTypeForExtension(extension);
+        MediaType type = MediaType.getMediaTypeForExtension(extension);
     	if (type == null)
     		return DIRECTORY_FOR_SAVING_FILES.getValue();	
     	FileSetting fs = getFileSettingForMediaType(type);
@@ -197,7 +196,7 @@ public class SharingSettings extends LimeProps {
 		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;idx;bz2;sea;pf;arc;arj;"+
 		"bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
 		"ogm;shn;flac;fla;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
-		"pyo;pyz";
+		"pyo;pyz;torrent";
     
     /**
 	 * The shared directories. 
@@ -216,6 +215,12 @@ public class SharingSettings extends LimeProps {
      */
     public static final BooleanSetting SHARE_TORRENT_META_FILES =
         FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES", true);
+    
+    /**
+     * Whether or not to show .torrent directory in Library.
+     */
+    public static final BooleanSetting SHOW_TORRENT_META_FILES =
+        FACTORY.createBooleanSetting("SHOW_TORRENT_META_FILES", false);
 	
     /**
 	 * File extensions that are shared.
