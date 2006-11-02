@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -767,13 +766,6 @@ BTLinkListener {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.Torrent#getConnections()
-	 */
-	public List<BTLink> getConnections() {
-		return linkManager.getConnections();
-	}
-	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#getNumConnections()
 	 */

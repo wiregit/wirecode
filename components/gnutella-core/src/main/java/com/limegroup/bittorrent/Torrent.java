@@ -48,8 +48,6 @@ interface Torrent {
 	
 	public long getNextTrackerRequestTime();
 
-	public List<BTLink> getConnections();
-
 	public int getNumConnections();
 	
 	public int getTriedHostCount();
