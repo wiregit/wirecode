@@ -555,6 +555,7 @@ BTLinkListener {
 			case SCRAPING :
 			case WAITING_FOR_TRACKER :
 				state.set(TorrentState.DOWNLOADING);
+                dispatchEvent(TorrentEvent.Type.DOWNLOADING);
 			case DOWNLOADING :
 			case SEEDING:
 				shouldAdd = true;

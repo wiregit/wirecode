@@ -111,14 +111,8 @@ public class FileUtils {
         } catch (IOException ioe) {
             throw ioe;
         } finally {
-            try {
-                if(in != null) {
-                    in.close();
-                }
-                if(out != null) {
-                    out.close();
-                }
-            } catch(IOException ignored) {}
+            IOUtils.close(in);
+            IOUtils.close(out);
         }
     }
     
