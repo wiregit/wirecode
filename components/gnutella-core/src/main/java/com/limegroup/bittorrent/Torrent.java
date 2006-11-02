@@ -1,7 +1,5 @@
 package com.limegroup.bittorrent;
 
-import java.util.List;
-
 interface Torrent {
 
 	/**
