@@ -1,12 +1,12 @@
 package com.limegroup.bittorrent;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 class BTLinkManagerFactory {
@@ -23,7 +23,8 @@ class BTLinkManagerFactory {
 	}
 }
 
-class BTLinkManager implements Shutdownable {
+class BTLinkManager implements Shutdownable, 
+NECallable<List<? extends Chokable>> {
 	/**
 	 * The list of BTConnections that this torrent has.
 	 * LOCKING: this
@@ -43,13 +44,21 @@ class BTLinkManager implements Shutdownable {
 		endpoints = new StrictIpPortSet<TorrentLocation>();
 	}
 	
-	public synchronized void shutdown() {
-		endpoints.clear();
-		for (Iterator<BTLink> iter = _connections.iterator();iter.hasNext();){
-			BTLink toShut = iter.next();
-			iter.remove();
-			toShut.shutdown();
+	public void shutdown() {
+		List<BTLink> copy;
+		
+		synchronized(this) {
+			endpoints.clear();
+			copy = new ArrayList<BTLink>(_connections);
+			_connections.clear();
 		}
+		
+		for (BTLink toClose : copy)
+			toClose.shutdown();
+	}
+	
+	public synchronized List<? extends Chokable> call() {
+		return new ArrayList<Chokable>(_connections);
 	}
 	
 	public synchronized void sendHave(BTHave have) {

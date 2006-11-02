@@ -11,6 +11,7 @@ import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 public abstract class Choker implements Runnable, Shutdownable {
@@ -21,16 +22,24 @@ public abstract class Choker implements Runnable, Shutdownable {
 	 */
 	private static final int RECHOKE_TIMEOUT = 10 * 1000;
 	
+	/**
+	 * The invoker on which to perform network-related tasks
+	 */
 	protected final SchedulingThreadPool invoker;
-	protected final List<? extends Chokable> chokables;
+	
+	/**
+	 * The source of the chokables.  The list it provides must be
+	 * modifyable from.
+	 */
+	protected final NECallable<List<? extends Chokable>> chokablesSource;
 	protected int round;
 	
 	private volatile Future periodic;
 	private final Runnable immediateChoker = new ImmediateChoker();
 	
-	Choker(List<? extends Chokable>chokables, SchedulingThreadPool invoker) {
+	Choker(NECallable<List<? extends Chokable>>chokables, SchedulingThreadPool invoker) {
 		this.invoker = invoker;
-		this.chokables = chokables;
+		this.chokablesSource = chokables;
 	}
 	
 	/**
