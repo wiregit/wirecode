@@ -2252,7 +2252,7 @@ public abstract class MessageRouter {
      * performed in the push route table, because the message will always
      * be broadcast to everyone.
      */
-    public void sendMulticastPushRequest(PushRequest push) {
+    protected void sendMulticastPushRequest(PushRequest push) {
         if(push == null) {
             throw new NullPointerException("null push");
         }

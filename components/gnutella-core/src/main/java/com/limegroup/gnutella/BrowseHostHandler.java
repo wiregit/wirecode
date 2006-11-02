@@ -175,7 +175,7 @@ public class BrowseHostHandler {
 
         	// send the Push after registering in case you get a response 
         	// really quickly.  reuse code in DM cuz that works well
-        	RouterService.getDownloadManager().getPushManager().sendPush(fakeRFD);
+        	RouterService.getDownloadManager().sendPush(fakeRFD);
         }
     }
 

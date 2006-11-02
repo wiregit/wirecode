@@ -257,10 +257,6 @@ public class DownloadWorker {
         establishConnection();
     }
     
-    HTTPDownloader createDownloader(Socket s) {
-    	return new HTTPDownloader(s, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
-    }
-    
     /**
      * Initializes the HTTPDownloader with whatever AltLocs we have discovered so far.
      * These will be cleared out after the first write.  From then on, only newly successful
@@ -687,14 +683,14 @@ public class DownloadWorker {
         if (_rfd.isReplyToMulticast()) {
             // Start with a push connect, fallback to a direct connect, and do
             // not forget the RFD upon push failure.
-            connectWithPush(new PushConnector(this, _manager, false, true));
+            connectWithPush(new PushConnector(false, true));
         } else if (!needsPush) {
             // Start with a direct connect, fallback to a push connect.
             connectDirectly(new DirectConnector(true));
         } else {
             // Start with a push connect, do not fallback to a direct connect, and do
             // forgot the RFD upon push failure.
-            connectWithPush(new PushConnector(this, _manager, true, false));
+            connectWithPush(new PushConnector(true, false));
         }
     }
 
@@ -703,7 +699,7 @@ public class DownloadWorker {
      * if no downloader could be created, and stop the downloader if we were interrupted. Returns true if the download
      * should proceed, false otherwise.
      */
-    boolean finishConnect() {
+    private boolean finishConnect() {
         // if we didn't connect at all, tell the rest about this rfd
         if (_downloader == null) {
             _manager.informMesh(_rfd, false);
@@ -722,7 +718,7 @@ public class DownloadWorker {
      * This will return immediately and the given observer will be notified
      * of success or failure.
      */
-    void connectDirectly(DirectConnector observer) {
+    private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
             if(LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
@@ -755,7 +751,7 @@ public class DownloadWorker {
             final PushDetails details = new PushDetails(_rfd.getClientGUID(), _rfd.getHost());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
-            RouterService.getDownloadManager().getPushManager().sendPush(_rfd, observer);
+            RouterService.getDownloadManager().sendPush(_rfd, observer);
             RouterService.schedule(new Runnable() {
                 public void run() {
                     _manager.unregisterPushObserver(details, true);
@@ -1433,7 +1429,7 @@ public class DownloadWorker {
     }
     
     /** Ensures this worker is finished and doesn't start again. */
-    void finishWorker() {
+    private void finishWorker() {
         _interrupted = true;
         _manager.workerFinished(this);
     }
@@ -1442,7 +1438,7 @@ public class DownloadWorker {
      * Starts a new thread that will perform the download.
      * @param dl
      */
-    void startDownload(HTTPDownloader dl) {
+    private void startDownload(HTTPDownloader dl) {
         _downloader = dl;
         
         // If we should continue, then start the download.
@@ -1493,9 +1489,82 @@ public class DownloadWorker {
     }
     
     /**
+     * A ConnectObserver for starting the download via a push connect.
+     */
+    private class PushConnector extends HTTPConnectObserver {
+        private boolean forgetOnFailure;
+        private boolean directConnectOnFailure;
+        private PushDetails pushDetails;
+        
+        /**
+         * Creates a new PushConnector.  If forgetOnFailure is true,
+         * this will call _manager.forgetRFD(_rfd) if the push fails.
+         * If directConnectOnFailure is true, this will attempt a direct
+         * connection if the push fails.
+         * Upon success, this will always start the download.
+         * 
+         * @param forgetOnFailure
+         * @param directConnectOnFailure
+         */
+        PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
+            this.forgetOnFailure = forgetOnFailure;
+            this.directConnectOnFailure = directConnectOnFailure;
+        }
+
+        /**
+         * Notification that the push succeeded.  Starts the download if the connection still exists.
+         */
+        public void handleConnect(Socket socket) {
+            //LOG.debug(_rfd + " -- Handling connect from PushConnector");
+            HTTPDownloader dl = new HTTPDownloader(socket, _rfd, _commonOutFile, _manager instanceof InNetworkDownloader);
+            try {
+               dl.connectTCP(0);
+               DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
+            } catch(IOException iox) {
+                //LOG.debug(_rfd + " -- IOX after starting connected from PushConnector.");
+                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
+                failed();
+                return;
+            }
+            
+            startDownload(dl);
+        }
+
+        /** Notification that the push failed. */
+        public void shutdown() {
+            //LOG.debug(_rfd + " -- Handling shutdown from PushConnector");            
+            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
+            failed();
+        }
+        
+        /** Sets the details that will be used to unregister the push observer. */
+        void setPushDetails(PushDetails details) {
+            this.pushDetails = details;
+        }
+        
+        /**
+         * Possibly tells the manager to forget this RFD, cleans up various things,
+         * and tells the manager to forget this worker.
+         */
+        private void failed() {            
+            _manager.unregisterPushObserver(pushDetails, false);
+            
+            if(!directConnectOnFailure) {
+                if(forgetOnFailure) {
+                    _manager.forgetRFD(_rfd);
+                }
+                finishConnect();
+                finishWorker();
+            } else {
+                connectDirectly(new DirectConnector(false));
+            }
+        }
+    }
+    
+    /**
      * A ConnectObserver for starting the download via a direct connect.
      */
-    class DirectConnector extends HTTPConnectObserver {
+    private class DirectConnector extends HTTPConnectObserver {
         private long createTime = System.currentTimeMillis();
         private boolean pushConnectOnFailure;
         private Socket connectingSocket;
@@ -1543,7 +1612,7 @@ public class DownloadWorker {
             //LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
             DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
             if(pushConnectOnFailure) {
-                connectWithPush(new PushConnector(DownloadWorker.this, _manager, false, false));
+                connectWithPush(new PushConnector(false, false));
             } else {
                 finishConnect();
                 finishWorker();

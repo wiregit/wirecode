@@ -28,7 +28,16 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		
 		Runnable r = new Runnable() {
 			public void run() {
-				performRequest(method, listener, timeout);		
+				HttpClient client = HttpClientManager.getNewClient(
+						timeout, timeout);
+				try {
+					HttpClientManager.executeMethodRedirecting(client, method);
+				} catch (IOException failed) {
+					listener.requestFailed(method, failed);
+					return;
+				} 
+				
+				listener.requestComplete(method);
 			}
 		};
 		executor.invokeLater(r);
@@ -48,61 +57,6 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	
 	public void releaseResources(HttpMethod method) {
 		method.releaseConnection();
-	}
-
-	public Shutdownable executeAny(final HTTPClientListener listener, 
-			final int timeout, ThreadPool executor, 
-			final Iterable<? extends HttpMethod> methods) {
-		MultiRequestor r = new MultiRequestor(listener, timeout, methods);
-		executor.invokeLater(r);
-		return r;
-	}
-	
-	
-	private boolean performRequest(HttpMethod method, HTTPClientListener listener, int timeout) {
-		HttpClient client = HttpClientManager.getNewClient(
-				timeout, timeout);
-		try {
-			HttpClientManager.executeMethodRedirecting(client, method);
-		} catch (IOException failed) {
-			listener.requestFailed(method, failed);
-			return false;
-		} 
-		
-		listener.requestComplete(method);
-		return true;
-	}
-	
-	private class MultiRequestor implements Runnable, Shutdownable {
-		private volatile boolean shutdown;
-		private volatile HttpMethod currentMethod;
-		private final Iterable<? extends HttpMethod> methods;
-		private final HTTPClientListener listener;
-		private final int timeout;
-		
-		MultiRequestor(HTTPClientListener listener, int timeout, 
-				Iterable<? extends HttpMethod> methods) {
-			this.methods = methods;
-			this.timeout = timeout;
-			this.listener = listener;
-		}
-		
-		public void run() {
-			for (HttpMethod m : methods) {
-				if (shutdown)
-					return;
-				currentMethod = m;
-				if (performRequest(m, listener, timeout))
-					return;
-			}
-		}
-		
-		public void shutdown() {
-			shutdown = true;
-			HttpMethod m = currentMethod;
-			if (m != null)
-				m.abort();
-		}
 	}
 
 }

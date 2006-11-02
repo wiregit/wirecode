@@ -26,14 +26,6 @@ public interface HttpExecutor {
 			ThreadPool executor);
 	
 	/**
-	 * Tries to execute the provided HTTPMethods until one succeeds.
-	 */
-	public Shutdownable executeAny(HTTPClientListener listener,
-			int timeout,
-			ThreadPool executor,
-			Iterable<? extends HttpMethod> methods);
-	
-	/**
 	 * Release any resources held by the provided method.
 	 * The users of this class must call this method once they're done
 	 * processing their HttpMethod object.
