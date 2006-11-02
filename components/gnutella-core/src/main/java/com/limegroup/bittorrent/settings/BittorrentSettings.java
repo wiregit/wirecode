@@ -55,4 +55,11 @@ public class BittorrentSettings extends LimeProps {
 	 */
 	public static BooleanSetting TORRENT_USE_MMAP =
 		FACTORY.createBooleanSetting("TORRENT_USE_MMAP", false);
+	
+	/**
+	 * Whether to automatically start torrents for .torrent files
+	 * downloaded through LimeWire.
+	 */
+	public static BooleanSetting TORRENT_AUTO_START =
+		FACTORY.createBooleanSetting("TORRENT_AUTO_START", true);
 }
