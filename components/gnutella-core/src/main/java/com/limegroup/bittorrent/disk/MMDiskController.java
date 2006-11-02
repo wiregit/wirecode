@@ -120,6 +120,18 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		}
 		super.close();
 	}
+	
+	public void flush() throws IOException {
+		Collection<MappedByteBuffer> bufs = new ArrayList<MappedByteBuffer>();
+		synchronized(this) {
+			if (bufMap == null)
+				return;
+			bufs.addAll(bufMap.values());
+		}
+		for (MappedByteBuffer buf : bufs)
+			buf.force(); // do not use safeForce, its ok if an iox throws.
+		super.flush();
+	}
 
 	@Override
 	public RandomAccessFile setReadOnly(RandomAccessFile raf, String path) throws IOException {

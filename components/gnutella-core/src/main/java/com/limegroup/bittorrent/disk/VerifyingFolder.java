@@ -302,8 +302,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		long offset = (long)pieceNum * context.getMetaInfo().getPieceLength();
 		while (read < pieceSize) {
 			
-			int readNow = diskController.read(offset, buf, 0, buf.length, 
-					BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue());
+			int readNow = diskController.read(offset, buf, 0, buf.length);
 			if (readNow == 0)
 				return false;
 			
@@ -501,8 +500,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			boolean success = false;
 			try {
 				do {
-					offset += diskController.read(position + offset, buf, offset, length
-							- offset, false);
+					offset += diskController.read(position + offset, buf, offset, length - offset);
 				} while (offset < length);
 				success = true;
 			} catch (IOException bad) {
@@ -830,10 +828,22 @@ class VerifyingFolder implements TorrentDiskManager {
 		return _corruptedBytes;
 	}
 	
-	public synchronized Serializable getSerializableObject() {
-        return new SerialData((BitSet)verifiedBlocks.clone(), 
+	public Serializable getSerializableObject() {
+        Serializable ret;
+        synchronized(this) {
+        	ret = new SerialData((BitSet)verifiedBlocks.clone(), 
         		partialBlocks.clone(), 
         		isVerifying);
+        }
+        if (BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue()) {
+        	try {
+        		diskController.flush();
+        	} catch (IOException iox) {
+        		// don't abort the serialization, but mark the file corrupt
+        		storedException = iox; 
+        	}
+        }
+        return ret;
     }
     
 	/* (non-Javadoc)

@@ -199,10 +199,10 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.DiskController#read(long, byte[], int, int, boolean)
+	 * @see com.limegroup.bittorrent.DiskController#read(long, byte[], int, int)
 	 */
 	public int read(long position, byte[] buf, int offset,
-			int length, boolean flush) throws IOException {
+			int length) throws IOException {
 		
 		if (position < 0)
 			throw new IllegalArgumentException("cannot seek negative position "+position);
@@ -221,9 +221,6 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 					currentFile = _fos[i];
 				}
 				Assert.that(currentFile != null, "file being read & verified at the same time");
-				
-				if (flush)
-					currentFile.getChannel().force(false);
 				
 				long currentLength = currentFile.length();
 				if (currentLength < f.length() && position >= currentLength)
@@ -245,5 +242,21 @@ class RAFDiskController<F extends File> implements DiskController<F> {
 	throws IOException {
 		raf.seek(fileOffset);
 		return raf.read(dst, offset, length);
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.limegroup.bittorrent.DiskController#flush()
+	 */
+	public void flush() throws IOException {
+		LOG.debug("flushing");
+		List<RandomAccessFile> l = new ArrayList<RandomAccessFile>();
+		synchronized(this) {
+			if (!isOpen())
+				return;
+			for (RandomAccessFile f : _fos)
+				l.add(f);
+		}
+		for (RandomAccessFile f : l)
+			f.getChannel().force(false);
 	}
 }
