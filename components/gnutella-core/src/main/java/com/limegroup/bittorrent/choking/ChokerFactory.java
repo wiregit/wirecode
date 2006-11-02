@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.choking;
 import java.util.List;
 
 import com.limegroup.bittorrent.Chokable;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 public class ChokerFactory {
@@ -15,7 +16,7 @@ public class ChokerFactory {
 	
 	protected ChokerFactory() {}
 	
-	public Choker getChoker(List<? extends Chokable> chokables,
+	public Choker getChoker(NECallable<List<? extends Chokable>> chokables,
 			SchedulingThreadPool invoker,
 			boolean seed) {
 		return seed ? new SeedChoker(chokables, invoker) : new LeechChoker(chokables, invoker);
