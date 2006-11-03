@@ -3390,6 +3390,17 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=啟動時連線:
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
+
+###############################################################################
+# Key/Value pairs for the auto start bittorrents pane item
+###############################################################################
+#### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
+#? OPTIONS_BITTORRENT_AUTO_START_TITLE=
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#? OPTIONS_BITTORRENT_AUTO_START_LABEL=
+#### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
+#? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
+
 ################################################################################
 # Key/Value pairs for shutdown options
 ################################################################################
