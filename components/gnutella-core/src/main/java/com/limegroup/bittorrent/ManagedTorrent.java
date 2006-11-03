@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -20,6 +21,8 @@ import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -200,9 +203,33 @@ BTLinkListener {
 				if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING) 
 					return;
 				
+				validateTorrent();
+				if (state.get() == TorrentState.INVALID)
+					return;
 				startConnecting();
 			}
 		});
+	}
+	
+	private void validateTorrent() {
+		ContentResponseObserver observer = new ContentResponseObserver() {
+			 public void handleResponse(URN urn, ContentResponseData response) {
+                 if(response != null && !response.isOK() &&
+                		 urn.equals(context.getMetaInfo().getURN())) {
+                	 
+                     boolean wasActive;
+                	 synchronized(state.getLock()) {
+                		 wasActive = isActive();
+                		 state.set(TorrentState.INVALID);
+                	 }
+                	 
+                	 if (wasActive)
+                		 stopImpl();
+                 }
+             }
+		};
+		RouterService.getContentManager().request(context.getMetaInfo().getURN(),
+				observer, 5000);
 	}
 	
 	/**
@@ -322,6 +349,7 @@ BTLinkListener {
 			case STOPPED:
 			case DISK_PROBLEM:
 			case TRACKER_FAILURE:
+			case INVALID:
 				return true;
 		}
 		return false;

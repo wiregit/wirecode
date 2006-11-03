@@ -18,7 +18,8 @@ interface Torrent {
 	STOPPED,
 	DISK_PROBLEM,
 	TRACKER_FAILURE,
-	SCRAPING //scraping == requesting from tracker
+	SCRAPING, //scraping == requesting from tracker
+	INVALID
 	};
 	
 	/**
