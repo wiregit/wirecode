@@ -286,7 +286,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     
     
     /**
-     * Returns the expected shared .torrent meta data file. Can be null.
+     * Returns the expected shared .torrent meta data file. 
+     * Can be null.
      */
     public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");

@@ -264,7 +264,7 @@ public class BTMetaInfo implements Serializable {
     
     // keys used between read/write object.
     private static enum SerialKeys {
-        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA, TORRENT_METAFILE;
+        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA;
     }
 	
 	/**

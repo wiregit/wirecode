@@ -61,7 +61,7 @@ public abstract class FileManager {
     /** Subdirectory that also is always shared. */
     public static final File PREFERENCE_SHARE;
     
-    /** Always share torrent meta data directory. */
+    /** .torrent meta data directory. */
     public static final File TORRENT_META_DATA_SHARE;
     
     static {
@@ -976,7 +976,7 @@ public abstract class FileManager {
             try {
                 FileUtils.copyFile(file, shareMetaFile);
             } catch (IOException ioex) {
-                ErrorService.error(ioex);
+                return;
             }
         }
         addFileAlways(shareMetaFile);
@@ -2180,9 +2180,12 @@ public abstract class FileManager {
     }
     
     /**
-     * Determines if this File is a torrent meta data share.
+     * Determines if this File is a .torrent meta data share.
      */
     public static boolean isTorrentMetaDataShare(File file) {
+        if(!FileUtils.getFileExtension(file).equals("torrent")) {
+            return false;
+        }
         File parent = file.getParentFile();
         return parent != null && isTorrentMetaDataShareDirectory(parent);
     }
