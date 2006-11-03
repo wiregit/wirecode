@@ -3,10 +3,8 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -23,6 +21,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -69,10 +68,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private List <TorrentEventListener> listeners = 
 		new CopyOnWriteArrayList<TorrentEventListener>();
 
-    /** A map of torrent meta info to .torrent files. Instantiated lazily **/
-    private Map<BTMetaInfo, File> sharedTorrentMetaFileMap = 
-        new HashMap<BTMetaInfo, File>();
-    
     /** The File Manager */
     private FileManager fileManager;
     
@@ -259,17 +254,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
     
     /**
-     * Maps the specified meta info to a file on disk
-     */
-    public synchronized void addSharedTorrent(BTMetaInfo metaInfo, File metaFile) {
-        sharedTorrentMetaFileMap.put(metaInfo, metaFile);
-    }
-    
-    /**
      * Shares the torrent by adding it to the FileManager
      */
     private synchronized void shareTorrent(ManagedTorrent t) {
-        File f = sharedTorrentMetaFileMap.get(t.getMetaInfo());
+        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue()) {
+            return;
+        }
+        
+        File f = t.getMetaInfo().getTorrentMetaDataFile();
         if(f == null) {
             return;
         }
@@ -283,11 +275,10 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * Can be null. 
      */
     private synchronized FileDesc unshareTorrent(ManagedTorrent t) {
-        File f = sharedTorrentMetaFileMap.get(t.getMetaInfo());
+        File f = t.getMetaInfo().getTorrentMetaDataFile();
         if(f == null) {
             return null;
         }
-        sharedTorrentMetaFileMap.remove(t.getMetaInfo());
         FileDesc fd = fileManager.removeFileIfShared(f);
         return fd;
     }

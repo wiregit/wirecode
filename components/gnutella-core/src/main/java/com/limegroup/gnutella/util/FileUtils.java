@@ -131,6 +131,22 @@ public class FileUtils {
     }
     
     /**
+     * Returns true if this file is not too large, not too small,
+     * not null, is a directory, can be read, is not hidden.  
+     * Returns false otherwise.
+     */
+    public static boolean isFilePhysicallyShareable(File file) {
+        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+            return false;
+                
+        long fileLength = file.length();
+        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+            return false;
+        
+        return true;
+    }
+    
+    /**
      * Determines if file 'a' is an ancestor of file 'b'.
      */
     public static final boolean isAncestor(File a, File b) {

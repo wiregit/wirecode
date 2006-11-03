@@ -24,6 +24,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.GenericsUtils;
 
 /**
@@ -42,7 +43,7 @@ public class BTMetaInfo implements Serializable {
 	/** a list the hashes for this file */
 	private List<byte []> _hashes;
 
-	/* the length of one piece */
+	/** the length of one piece */
 	private int _pieceLength;
 
 	/**
@@ -50,7 +51,7 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private TorrentFileSystem fileSystem;
 	
-	/*
+	/**
 	 * the sha1-hash of te beencoded _infoMap Object
 	 */
 	private byte[] _infoHash;
@@ -60,14 +61,14 @@ public class BTMetaInfo implements Serializable {
 	 */
 	private URN _infoHashURN;
 
-	/*
+	/**
 	 * an array of URL[] containing any trackers. This field is non-final
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
 	private URI[] _trackers;
 
-	/*
+	/**
 	 * FileDesc for the GUI
 	 */
 	private FileDesc _desc = null;
@@ -97,6 +98,11 @@ public class BTMetaInfo implements Serializable {
 	 * The ratio from previous sessions
 	 */
 	private float historicRatio;
+    
+    /**
+     * A handle to the .torrent file on disk 
+     */
+    private File torrentMetaDataFile;
 	
 	/**
 	 * @return piece length for this torrent
@@ -118,6 +124,10 @@ public class BTMetaInfo implements Serializable {
 			initRatio(context);
 		this.context = context;
 	}
+    
+    public void setTorrentMetaDataFile(File f) {
+        this.torrentMetaDataFile = f;
+    }
 	
 	private void initRatio(TorrentContext context) {
 		if (historicRatio == 0) 
@@ -214,6 +224,13 @@ public class BTMetaInfo implements Serializable {
 	public MessageDigest getMessageDigest() {
 		return new SHA1();
 	}
+    
+    /**
+     * Returns the .torrent meta data file. Can be null.
+     */
+    public File getTorrentMetaDataFile() {
+        return torrentMetaDataFile;
+    }
 
 	/**
 	 * Reads a BTMetaInfo from byte []
@@ -264,7 +281,7 @@ public class BTMetaInfo implements Serializable {
     
     // keys used between read/write object.
     private static enum SerialKeys {
-        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA;
+        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA, TORRENT_METAFILE;
     }
 	
 	/**
@@ -281,6 +298,15 @@ public class BTMetaInfo implements Serializable {
 		toWrite.put(SerialKeys.TRACKERS,_trackers);
 		toWrite.put(SerialKeys.RATIO, getRatio());		
 		toWrite.put(SerialKeys.FOLDER_DATA,context.getDiskManager().getSerializableObject());
+        
+        if(torrentMetaDataFile != null) {
+            String filePath = torrentMetaDataFile.getAbsolutePath();
+            try {
+                filePath = FileUtils.getCanonicalPath(torrentMetaDataFile.getAbsoluteFile());
+            } catch (IOException ignore) {}
+           
+            toWrite.put(SerialKeys.TORRENT_METAFILE, filePath);
+        }
 		
 		out.writeObject(toWrite);
 	}
@@ -309,6 +335,14 @@ public class BTMetaInfo implements Serializable {
 				 _infoHash == null || _trackers == null ||
                  diskManagerData == null || ratio == null)
 			throw new IOException("cannot read BTMetaInfo");
+        
+        String filePath = (String)toRead.get(SerialKeys.TORRENT_METAFILE);
+        if(filePath != null) {
+            torrentMetaDataFile = new File(filePath);
+            if (!FileUtils.isFilePhysicallyShareable(torrentMetaDataFile)) {
+                torrentMetaDataFile = null;
+            }
+        }
 		
 		historicRatio = ratio.floatValue();
 		_pieceLength = pieceLength.intValue();
