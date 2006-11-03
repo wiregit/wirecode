@@ -100,8 +100,8 @@ public class FileUtils {
         InputStream in = null;
         OutputStream out = null;
         try {
-            in = new FileInputStream(src);
-            out = new FileOutputStream(dst);
+            in = new BufferedInputStream(new FileInputStream(src));
+            out = new BufferedOutputStream(new FileOutputStream(dst));
    
             byte[] buf = new byte[1024];
             int len;

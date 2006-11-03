@@ -71,19 +71,20 @@ public abstract class FileManager {
         } catch(IOException ignored) {}
         PROGRAM_SHARE = forceShare;
         
-        forceShare = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
         
-        File torrentMetaShare = 
-            new File(CommonUtils.getUserSettingsDir(), ".torrentMetaData").getAbsoluteFile();
-        torrentMetaShare.mkdir();
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".TorrentMetaData").getAbsoluteFile();
+        forceShare.mkdir();
         try {
-            torrentMetaShare = FileUtils.getCanonicalFile(torrentMetaShare);
+            forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
-        TORRENT_META_DATA_SHARE = torrentMetaShare;
+        TORRENT_META_DATA_SHARE = forceShare;
     }
 
     /** A type-safe empty LimeXMLDocument list. */
@@ -278,6 +279,15 @@ public abstract class FileManager {
             return isFileShareable(f);
         }
     };    
+    
+    /**
+     * The filter object to use to discern .torrent files.
+     */
+    private final FileFilter TORRENT_METADATA_FILE_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return FileUtils.getFileExtension(f).equals("torrent");
+        }
+    };
         
     /**
      * The filter object to use to determine directories.
@@ -368,6 +378,7 @@ public abstract class FileManager {
     public void start() {
         _data.clean();
         cleanIndividualFiles();
+        purgeExpiredTorrentMetaFiles();
 		loadSettings();
     }
     
@@ -2207,6 +2218,23 @@ public abstract class FileManager {
     public void dispatchFileEvent(FileManagerEvent evt) {
         for(FileEventListener listener : eventListeners) {
             listener.handleFileEvent(evt);
+        }
+    }
+    
+    private void purgeExpiredTorrentMetaFiles() {
+        File[] file_list = TORRENT_META_DATA_SHARE.listFiles(TORRENT_METADATA_FILE_FILTER);
+        if(file_list == null) {
+            return;
+        }
+        long purgeLimit = System.currentTimeMillis() 
+            - SharingSettings.TORRENT_METADATA_PURGE_TIME.getValue()*24L*60L*60L*1000L;
+        File tFile;
+        for(int i = 0; i < file_list.length; i++) {
+            tFile = file_list[i];
+            if(tFile.lastModified() < purgeLimit) {
+                stopSharingFile(tFile);
+                tFile.delete();
+            }
         }
     }
 }

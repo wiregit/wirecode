@@ -262,7 +262,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
             return;
         }
         
-        File f = getTorrentMetaDataFile(t.getMetaInfo());
+        File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
         if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
             return;
         }
@@ -276,7 +276,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * Can be null. 
      */
     private synchronized FileDesc unshareTorrent(ManagedTorrent t) {
-        File f = getTorrentMetaDataFile(t.getMetaInfo());
+        File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
         if(f == null) {
             return null;
         }
@@ -285,7 +285,10 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     }
     
     
-    public static File getTorrentMetaDataFile(BTMetaInfo info) {
+    /**
+     * Returns the expected shared .torrent meta data file. Can be null.
+     */
+    public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");
         File f = new File(FileManager.TORRENT_META_DATA_SHARE, fileName);
         return f;

@@ -72,6 +72,12 @@ public class SharingSettings extends LimeProps {
         FACTORY.createIntSetting("INCOMPLETE_PURGE_TIME", 7);
     
     /**
+     * The time, in days, after which .torrent meta data files are deleted.
+     */
+    public static final IntSetting TORRENT_METADATA_PURGE_TIME = 
+        FACTORY.createIntSetting("TORRENT_METADATA_PURGE_TIME", 7);
+    
+    /**
      * Specifies whether or not completed downloads
      * should automatically be cleared from the download window.
      */    
@@ -111,7 +117,7 @@ public class SharingSettings extends LimeProps {
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
-		
+        
         FileUtils.setWriteable(saveDir);
         FileUtils.setWriteable(incDir);
 
