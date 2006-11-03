@@ -19,6 +19,7 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.ValueException;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Class parsing the response from a tracker
@@ -63,10 +64,13 @@ class TrackerResponse {
 			throw new ValueException("bad tracker response");
 		Map response = (Map) t_response;
 
-		if (response.containsKey("failure reason"))
-			FAILURE_REASON = 
-				new String((byte [])response.get("failure reason")) ;
-		else
+		if (response.containsKey("failure reason")) {
+			byte [] failureBytes = (byte [])response.get("failure reason");
+			String reason = StringUtils.getASCIIString(failureBytes);
+			if (reason.length() > 256) 
+				reason = reason.substring(0, 255);
+			FAILURE_REASON = reason;
+		} else
 			FAILURE_REASON = null;
 
 		if (response.containsKey("peers")) {

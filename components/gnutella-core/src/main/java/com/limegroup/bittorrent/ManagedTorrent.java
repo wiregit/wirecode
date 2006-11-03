@@ -271,7 +271,9 @@ BTLinkListener {
 		_folder.close();
 		
 		// fire off an announcement to the tracker
-		trackerManager.announceStop();
+		// unless we're stopping because of a tracker failure
+		if (state.get() != TorrentState.TRACKER_FAILURE)
+			trackerManager.announceStop();
 		
 		// write the snapshot if not complete
 		if (!_folder.isComplete()) {
