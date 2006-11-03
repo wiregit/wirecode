@@ -24,6 +24,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Class which manages active torrents and dispatching of 
@@ -261,8 +262,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
             return;
         }
         
-        File f = t.getMetaInfo().getTorrentMetaDataFile();
-        if(f == null) {
+        File f = getTorrentMetaDataFile(t.getMetaInfo());
+        if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
             return;
         }
         
@@ -275,11 +276,18 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * Can be null. 
      */
     private synchronized FileDesc unshareTorrent(ManagedTorrent t) {
-        File f = t.getMetaInfo().getTorrentMetaDataFile();
+        File f = getTorrentMetaDataFile(t.getMetaInfo());
         if(f == null) {
             return null;
         }
-        FileDesc fd = fileManager.removeFileIfShared(f);
+        FileDesc fd = fileManager.stopSharingFile(f);
         return fd;
+    }
+    
+    
+    public static File getTorrentMetaDataFile(BTMetaInfo info) {
+        String fileName = info.getFileSystem().getName().concat(".torrent");
+        File f = new File(FileManager.TORRENT_META_DATA_SHARE, fileName);
+        return f;
     }
 }	

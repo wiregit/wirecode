@@ -134,7 +134,7 @@ public class TorrentFileSystem implements Serializable {
 	}
 
 	/**
-	 * @return the name of this torrent
+	 * @return the file system name of this torrent (i.e. normalized name).
 	 */
 	public String getName() {
 		return _name;
@@ -155,7 +155,7 @@ public class TorrentFileSystem implements Serializable {
 	public List<TorrentFile> getFiles() {
 		return _files;
 	}
-	
+    
 	/**
 	 * @return view of the files and folders that will be created when
 	 * the torrent download completes

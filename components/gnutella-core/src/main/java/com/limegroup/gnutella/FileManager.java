@@ -716,7 +716,6 @@ public abstract class FileManager {
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(PROGRAM_SHARE, null, revision);
         updateSharedDirectories(PREFERENCE_SHARE, null, revision);
-        updateSharedDirectories(TORRENT_META_DATA_SHARE, null, revision);
             
         //Load the shared directories and add their files.
         _isUpdating = true;
@@ -969,7 +968,7 @@ public abstract class FileManager {
                 ErrorService.error(ioex);
             }
         }
-        addFileIfShared(shareMetaFile);
+        addFileAlways(shareMetaFile);
     }
 	
 	/**
@@ -1244,12 +1243,14 @@ public abstract class FileManager {
 	/**
 	 * Removes the file if it is being shared, and then removes the file from
 	 * the special lists as necessary.
+     * @return The FileDesc associated with this file, or null if the file was
+     * not shared. 
 	 */
-	public synchronized void stopSharingFile(File file) {
+	public synchronized FileDesc stopSharingFile(File file) {
 		try {
 			file = FileUtils.getCanonicalFile(file);
 		} catch (IOException e) {
-			return;
+			return null;
 		}
 		
 		// remove file already here to heed against race conditions
@@ -1264,6 +1265,7 @@ public abstract class FileManager {
 			if (!removed)
 				_data.FILES_NOT_TO_SHARE.add(file);
 		}
+        return fd;
 	}
 	
 	/**
@@ -1629,7 +1631,9 @@ public abstract class FileManager {
      * Determines if a given file is shared while not in a completely shared directory.
      */
     public boolean isIndividualShare(File f) {
-    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) && FileUtils.isFilePhysicallyShareable(f);
+    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) 
+            && FileUtils.isFilePhysicallyShareable(f)
+            && !isTorrentMetaDataShare(f);
     }
     
     /**
@@ -1705,9 +1709,6 @@ public abstract class FileManager {
 			return true;
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
-        if (isTorrentMetaDataShare(file)) {
-            return true;
-        }
 		if (isFileInCompletelySharedDirectory(file)) {
 	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
 				return true;
