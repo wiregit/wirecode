@@ -289,12 +289,17 @@ public class BTMetaInfo implements Serializable {
 	 * Overrides serialization method to initialize the VerifyingFolder
 	 */
 	private synchronized void readObject(ObjectInputStream in)
-			throws IOException, ClassNotFoundException {
+	throws IOException, ClassNotFoundException {
 		Object read = in.readObject();
-		Map<SerialKeys, Serializable> toRead = 
-			GenericsUtils.scanForMap(read, 
-                    SerialKeys.class, Serializable.class, 
-					GenericsUtils.ScanMode.EXCEPTION);
+		Map<SerialKeys, Serializable> toRead;
+		try { 
+			toRead = 
+				GenericsUtils.scanForMap(read, 
+						SerialKeys.class, Serializable.class, 
+						GenericsUtils.ScanMode.EXCEPTION);
+		} catch (Throwable bad) {
+			throw new IOException(bad.getMessage());
+		}
 		
 		_hashes = (List<byte[]>) toRead.get(SerialKeys.HASHES);
 		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
