@@ -703,11 +703,13 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	private int getPieceSize(int pieceNum) {
 		BTMetaInfo info = context.getMetaInfo();
-		if (pieceNum == info.getNumBlocks() - 1)
-			return (int)(context.getFileSystem().getTotalSize() % 
+		if (pieceNum == info.getNumBlocks() - 1) {
+			int ret =(int)(context.getFileSystem().getTotalSize() % 
 					info.getPieceLength());
-		else
-			return info.getPieceLength();
+			if (ret != 0)
+				return ret;
+		} 
+		return info.getPieceLength();
 	}
 	
 	/**
