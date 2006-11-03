@@ -292,16 +292,13 @@ public class BTMetaInfo implements Serializable {
 	throws IOException, ClassNotFoundException {
 		Object read = in.readObject();
 		Map<SerialKeys, Serializable> toRead;
-		try { 
-			toRead = 
-				GenericsUtils.scanForMap(read, 
+		toRead = GenericsUtils.scanForMap(read, 
 						SerialKeys.class, Serializable.class, 
 						GenericsUtils.ScanMode.EXCEPTION);
-		} catch (Throwable bad) {
-			throw new IOException(bad.getMessage());
-		}
 		
-		_hashes = (List<byte[]>) toRead.get(SerialKeys.HASHES);
+		_hashes =  GenericsUtils.scanForList(toRead.get(SerialKeys.HASHES),
+                                             byte[].class,
+                                             GenericsUtils.ScanMode.EXCEPTION);
 		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
 		fileSystem = (TorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
 		_infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
