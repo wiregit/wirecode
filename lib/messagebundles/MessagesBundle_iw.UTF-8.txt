@@ -1283,7 +1283,7 @@ DOWNLOAD_COULD_NOT_READ_SNAPSHOT=סליחה, LimeWire לא הצליחה לשחז
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=LimeWire's tracker request failed:
+#### TORRENTS_TRACKER_FAILURE=LimeWire cannot download this torrent.  The tracker responded :
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################

@@ -1514,7 +1514,7 @@ DOWNLOAD_SERACH_ORGINAL_TIP=進行之前找到這個檔案時的搜尋。
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=LimeWire's tracker request failed:
+#### TORRENTS_TRACKER_FAILURE=LimeWire cannot download this torrent.  The tracker responded :
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
