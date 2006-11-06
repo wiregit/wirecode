@@ -43,7 +43,7 @@ public class ContentManagerTest extends BaseTestCase {
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        mgr = new ContentManager();
+        mgr = new DefaultContentManager();
         crOne = new ContentResponse(URN_1, true);
         crTwo = new ContentResponse(URN_2, false);
         one = new Observer();

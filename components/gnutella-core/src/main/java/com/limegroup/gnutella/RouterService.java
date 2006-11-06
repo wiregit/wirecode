@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.DefaultContentManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
@@ -61,8 +62,8 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -201,7 +202,7 @@ public class RouterService {
     private static SecureMessageVerifier secureMessageVerifier = new SecureMessageVerifier();    
     
     /** The content manager */
-    private static ContentManager contentManager = new ContentManager();
+    private static ContentManager contentManager = new DefaultContentManager();
     
     /** The IP Filter to use. */
     private static IPFilter ipFilter = new IPFilter(false);
