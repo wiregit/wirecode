@@ -308,11 +308,18 @@ public abstract class MessageRouter {
     }
     
     /** Sets a new handler to the given handlerMap, for the given class. */
-    private void setHandler(ConcurrentMap<Class<? extends Message>, MessageHandler> handlerMap,
+    private boolean setHandler(ConcurrentMap<Class<? extends Message>, MessageHandler> handlerMap,
                             Class<? extends Message> clazz, MessageHandler handler) {
-        MessageHandler old = handlerMap.put(clazz, handler);
-        if(old != null)
-            LOG.warn("Ejecting old handler: " + old + " for clazz: " + clazz);
+        
+        if (handler != null) {
+            MessageHandler old = handlerMap.put(clazz, handler);
+            if(old != null) {
+                LOG.warn("Ejecting old handler: " + old + " for clazz: " + clazz);
+            }
+            return true;
+        } else {
+            return handlerMap.remove(clazz) != null;
+        }
     }
     
     /** 
