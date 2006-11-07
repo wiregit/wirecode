@@ -163,7 +163,7 @@ public class TrackerManager {
 	 * This method handles the response from a tracker
 	 */
 	private void handleTrackerResponse(TrackerResponse response, Tracker t) {
-		LOG.debug("handling tracker response " + t.toString());
+		LOG.debug("handling tracker response "+response+" from " + t);
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
 				.getValue() * 1000;
@@ -178,10 +178,12 @@ public class TrackerManager {
 					t.recordFailure();
 					// if we have only one tracker and it gave a reason,
 					// inform the user on first failure.
-					if (trackers.size() == 1 && t.getFailures() == 0) {
+					if (trackers.size() == 1) {
 						MessageService.showError("TORRENTS_TRACKER_FAILURE", 
 								torrent.getMetaInfo().getName() + "\n" +
 								response.FAILURE_REASON);
+						torrent.stopVoluntarily();
+						return;
 					}
 				} else
 					t.recordSuccess();

@@ -185,6 +185,8 @@ public class BTDownloader extends AbstractDownloader
 			return WAITING_FOR_USER; // let the user trigger a scrape
 		case SCRAPING:
 			return ITERATIVE_GUESSING; // bad name but practically the same
+		case INVALID:
+			return INVALID;
 		}
 		throw new IllegalStateException("unknown torrent state");
 	}

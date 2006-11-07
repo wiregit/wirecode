@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.io.ConnectObserver;
+import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
@@ -265,15 +266,21 @@ class ProxyUtils {
                         return;
                     }
                     
-                    try {
-                        delegate.handleConnect(s);
-                    } catch(IOException iox) {
-                        LOG.warn("Delegate IOX", iox);
-                        IOUtils.close(s);
-                        // do not call shutdown, because then the delegate
-                        // would get both handleConnect & shutdown, which
-                        // is confusing.
-                    }
+                    // the handleConnect() notification is expected on the NIODispatcher thread.
+                    Runnable r = new Runnable() {
+                    	public void run() {
+                    		try {
+                    			delegate.handleConnect(s);
+                    		} catch(IOException iox) {
+                    			LOG.warn("Delegate IOX", iox);
+                    			IOUtils.close(s);
+                    			// do not call shutdown, because then the delegate
+                    			// would get both handleConnect & shutdown, which
+                    			// is confusing.
+                    		}
+                    	}
+                    };
+                    NIODispatcher.instance().invokeLater(r);
                 }
             }, "ProxyConnector");
         }

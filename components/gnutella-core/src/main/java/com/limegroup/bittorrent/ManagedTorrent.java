@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -21,6 +21,8 @@ import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.auth.ContentResponseData;
+import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -201,9 +203,33 @@ BTLinkListener {
 				if (s == TorrentState.SEEDING || s == TorrentState.VERIFYING) 
 					return;
 				
+				validateTorrent();
+				if (state.get() == TorrentState.INVALID)
+					return;
 				startConnecting();
 			}
 		});
+	}
+	
+	private void validateTorrent() {
+		ContentResponseObserver observer = new ContentResponseObserver() {
+			 public void handleResponse(URN urn, ContentResponseData response) {
+                 if(response != null && !response.isOK() &&
+                		 urn.equals(context.getMetaInfo().getURN())) {
+                	 
+                     boolean wasActive;
+                	 synchronized(state.getLock()) {
+                		 wasActive = isActive();
+                		 state.set(TorrentState.INVALID);
+                	 }
+                	 
+                	 if (wasActive)
+                		 stopImpl();
+                 }
+             }
+		};
+		RouterService.getContentManager().request(context.getMetaInfo().getURN(),
+				observer, 5000);
 	}
 	
 	/**
@@ -272,7 +298,9 @@ BTLinkListener {
 		_folder.close();
 		
 		// fire off an announcement to the tracker
-		trackerManager.announceStop();
+		// unless we're stopping because of a tracker failure
+		if (state.get() != TorrentState.TRACKER_FAILURE)
+			trackerManager.announceStop();
 		
 		// write the snapshot if not complete
 		if (!_folder.isComplete()) {
@@ -321,6 +349,7 @@ BTLinkListener {
 			case STOPPED:
 			case DISK_PROBLEM:
 			case TRACKER_FAILURE:
+			case INVALID:
 				return true;
 		}
 		return false;
@@ -347,12 +376,16 @@ BTLinkListener {
 	 */
 	public boolean resume() {
 		synchronized(state.getLock()) {
-			if (state.get() != TorrentState.PAUSED && state.get() != TorrentState.STOPPED)
-				throw new IllegalStateException("torrent not resumable");
-			
-			state.set(TorrentState.QUEUED);
+			switch(state.get()) {
+			case PAUSED :
+			case TRACKER_FAILURE:
+			case STOPPED:
+				state.set(TorrentState.QUEUED);
+				return true;
+			default:
+				throw new IllegalStateException("torrent not resumable "+state);
+			}
 		}
-		return true;
 	}
 
 	/**
@@ -390,7 +423,7 @@ BTLinkListener {
 	 */
 	private void initializeTorrent() {
 		_peers = Collections.synchronizedSet(new StrictIpPortSet<TorrentLocation>());
-		choker = ChokerFactory.instance().getChoker(linkManager.getConnections(), 
+		choker = ChokerFactory.instance().getChoker(linkManager, 
 				networkInvoker, false);
 		_connectionFetcher = 
 			BTConnectionFetcherFactory.instance().getBTConnectionFetcher(this, networkInvoker);
@@ -617,8 +650,8 @@ BTLinkListener {
 		
 		// switch the choker logic and resume uploads
 		choker.shutdown();
-		choker = ChokerFactory.instance().getChoker(
-				linkManager.getConnections(),networkInvoker, true);
+		choker = ChokerFactory.instance().getChoker(linkManager,
+				networkInvoker, true);
 		choker.start();
 		choker.rechoke();
 		
@@ -763,13 +796,6 @@ BTLinkListener {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.limegroup.bittorrent.Torrent#getConnections()
-	 */
-	public List<BTLink> getConnections() {
-		return linkManager.getConnections();
-	}
-	
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.Torrent#getNumConnections()
 	 */

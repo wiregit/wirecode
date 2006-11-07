@@ -766,12 +766,8 @@ public class DownloadManager implements BandwidthTracker, ConnectionAcceptor {
     	BTMetaInfo info = null;
     	try {
     		Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
-    		if (!(infoObj instanceof BTMetaInfo))
-    			throw new IOException();
     		info = (BTMetaInfo)infoObj;
-    	} catch (ClassNotFoundException bad) {
-    		throw new CantResumeException(name);
-    	} catch (IOException iox) {
+    	} catch (Throwable bad) {
     		throw new CantResumeException(name);
     	}
     	

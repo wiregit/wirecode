@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
@@ -22,12 +23,13 @@ class LeechChoker extends Choker {
 	private static final Comparator<Chokable> DOWNLOAD_SPEED_COMPARATOR = 
 		new SpeedComparator(true);
 	
-	LeechChoker(List<? extends Chokable> chokables, SchedulingThreadPool invoker) {
+	LeechChoker(NECallable<List<? extends Chokable>> chokables, SchedulingThreadPool invoker) {
 		super(chokables, invoker);
 	}
 
 	@Override
 	protected void rechokeImpl(boolean force) {
+		List<? extends Chokable> chokables = chokablesSource.call();
 		List<Chokable> fastest = new ArrayList<Chokable>(chokables.size());
 		for (Chokable con : chokables) {
 			if (con.isInterested() && con.shouldBeInterested() &&
@@ -44,9 +46,7 @@ class LeechChoker extends Choker {
 		int optimistic = Math.max(1,
 				BittorrentSettings.TORRENT_MIN_UPLOADS.getValue() - fastest.size());
 		
-		synchronized(chokables) {
-			Collections.shuffle(chokables);
-		}
+		Collections.shuffle(chokables);
 		
 		for (Chokable con : chokables) {
 			if (fastest.remove(con)) 

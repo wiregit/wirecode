@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.limegroup.bittorrent.Chokable;
+import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
@@ -27,13 +28,13 @@ class SeedChoker extends Choker {
 	 */
 	private int unchokesSinceLast;
 	
-	SeedChoker(List<? extends Chokable> chokables,
+	SeedChoker(NECallable<List<? extends Chokable>> chokables,
 			SchedulingThreadPool invoker) {
 		super(chokables, invoker);
 		round = Integer.MIN_VALUE;
 	}
 
-	private void initRound() {
+	private void initRound(List<? extends Chokable> chokables) {
 		if (round >= 0)
 			return;
 		int maxRound = 0;
@@ -44,7 +45,8 @@ class SeedChoker extends Choker {
 	
 	@Override
 	protected void rechokeImpl(boolean forceUnchokes) {
-		initRound();
+		List<? extends Chokable> chokables = chokablesSource.call();
+		initRound(chokables);
 		int numForceUnchokes = 0;
 		if (forceUnchokes) {
 			int x = (getNumUploads() + 2) / 3;

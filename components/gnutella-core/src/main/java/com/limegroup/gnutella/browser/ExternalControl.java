@@ -91,10 +91,13 @@ public class ExternalControl {
 	
 	/**
 	 * @return true if this is a torrent request.  
-	 * TODO: make this work with magnet links pointing to torrent files.
 	 */
 	private static boolean isTorrentRequest(String arg) {
-		return arg != null && arg.trim().toLowerCase().endsWith(".torrent");
+		if (arg == null) 
+			return false;
+		arg = arg.trim().toLowerCase();
+		// magnets pointing to .torrent files are just magnets for now
+		return arg.endsWith(".torrent") && !arg.startsWith("magnet:");
 	}
 	
 	//refactored the download logic into a separate method

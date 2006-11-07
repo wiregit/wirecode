@@ -123,6 +123,7 @@ public final class ChatManager implements ConnectionAcceptor {
 								 bannedIPs.length);
 				more_banned[bannedIPs.length] = host;
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
+                RouterService.reloadIPFilter();
 			}
 		}
 	}
@@ -131,9 +132,11 @@ public final class ChatManager implements ConnectionAcceptor {
 		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
 		List<String> bannedList = Arrays.asList(bannedIPs);
 		synchronized (this) {
-			if (bannedList.remove(host) )
+			if (bannedList.remove(host) ) {
                 FilterSettings.BLACK_LISTED_IP_ADDRESSES.
                     setValue((String[])bannedList.toArray());
+				RouterService.reloadIPFilter();
+			}
 		}
 	}
 

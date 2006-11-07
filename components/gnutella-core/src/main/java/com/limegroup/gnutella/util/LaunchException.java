@@ -13,7 +13,7 @@ public class LaunchException extends IOException {
 	 * @param cause the exception that occurred during execution of command
 	 * @param command the executed command
 	 */
-	public LaunchException(IOException cause, String[] command) {
+	public LaunchException(IOException cause, String... command) {
 		this.command = command;
 		
 		initCause(cause);
@@ -22,7 +22,7 @@ public class LaunchException extends IOException {
 	/**
 	 * @param command the executed command
 	 */
-	public LaunchException(String[] command) {
+	public LaunchException(String... command) {
 		this.command = command;
 	}
 
