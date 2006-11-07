@@ -229,4 +229,7 @@ class Tracker {
 		return buf;
 	}
 
+	public String toString() {
+		return "Tracker " + uri +" failures "+failures;
+	}
 }

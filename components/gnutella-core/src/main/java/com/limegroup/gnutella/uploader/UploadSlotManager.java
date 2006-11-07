@@ -42,18 +42,18 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * INVARIANT: sorted by priority and contains only 
 	 * requests of the highest priority or non-preemptible requests
 	 */
-	private final List  <UploadSlotRequest>  active;
+	private final List <UploadSlotRequest> active;
 	
 	/**
 	 * The list of queued non-resumable requests
 	 */
-	private final List  <HTTPSlotRequest>  queued;
+	private final List <HTTPSlotRequest> queued;
 	
 	/**
 	 * The list of queued resumable requests
 	 * (currently only Seeding BT Uploaders)
 	 */
-	private final List  <BTSlotRequest>  queuedResumable;
+	private final List<BTSlotRequest> queuedResumable;
 	
 	private final MultiIterable<UploadSlotRequest> allRequests;
 	
@@ -63,9 +63,9 @@ public class UploadSlotManager implements BandwidthTracker {
 	private int numMeasures;
 	
 	public UploadSlotManager() {
-		active = new ArrayList<UploadSlotRequest>(UploadSettings.HARD_MAX_UPLOADS.getValue());
-		queued = new ArrayList<HTTPSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
-		queuedResumable = new ArrayList<BTSlotRequest>(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		active = new ArrayList<UploadSlotRequest>();
+		queued = new ArrayList<HTTPSlotRequest>();
+		queuedResumable = new ArrayList<BTSlotRequest>();
 		allRequests = new MultiIterable<UploadSlotRequest>(active, queued, queuedResumable);
 	}
 

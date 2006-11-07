@@ -1,7 +1,5 @@
 package com.limegroup.bittorrent;
 
-import java.util.List;
-
 interface Torrent {
 
 	/**
@@ -20,7 +18,8 @@ interface Torrent {
 	STOPPED,
 	DISK_PROBLEM,
 	TRACKER_FAILURE,
-	SCRAPING //scraping == requesting from tracker
+	SCRAPING, //scraping == requesting from tracker
+	INVALID
 	};
 	
 	/**
@@ -47,8 +46,6 @@ interface Torrent {
 	public TorrentState getState();
 	
 	public long getNextTrackerRequestTime();
-
-	public List<BTLink> getConnections();
 
 	public int getNumConnections();
 	

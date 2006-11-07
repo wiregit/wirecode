@@ -289,14 +289,16 @@ public class BTMetaInfo implements Serializable {
 	 * Overrides serialization method to initialize the VerifyingFolder
 	 */
 	private synchronized void readObject(ObjectInputStream in)
-			throws IOException, ClassNotFoundException {
+	throws IOException, ClassNotFoundException {
 		Object read = in.readObject();
-		Map<SerialKeys, Serializable> toRead = 
-			GenericsUtils.scanForMap(read, 
-                    SerialKeys.class, Serializable.class, 
-					GenericsUtils.ScanMode.EXCEPTION);
+		Map<SerialKeys, Serializable> toRead;
+		toRead = GenericsUtils.scanForMap(read, 
+						SerialKeys.class, Serializable.class, 
+						GenericsUtils.ScanMode.EXCEPTION);
 		
-		_hashes = (List<byte[]>) toRead.get(SerialKeys.HASHES);
+		_hashes =  GenericsUtils.scanForList(toRead.get(SerialKeys.HASHES),
+                                             byte[].class,
+                                             GenericsUtils.ScanMode.EXCEPTION);
 		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
 		fileSystem = (TorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
 		_infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);

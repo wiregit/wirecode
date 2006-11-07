@@ -37,7 +37,7 @@ interface DiskController<F extends File> {
 	/**
 	 * close the given file and reopen it for reading
 	 */
-	public void setReadOnly(F completed);
+	public void setReadOnly(F completed) throws IOException;
 
 	/**
 	 * 
@@ -49,12 +49,15 @@ interface DiskController<F extends File> {
 	 *            the offset in the array where to start storing the bytes read
 	 * @param length
 	 *            the number of bytes to read to the array
-	 * @param flush 
-	 *            whether to flush any changes before reading
 	 * @return
 	 * @throws IOException
 	 */
-	public int read(long position, byte[] buf, int offset, int length,
-			boolean flush) throws IOException;
+	public int read(long position, byte[] buf, int offset, int length) throws IOException;
+	
+	/**
+	 * Flushes any changes to disk.
+	 * @throws IOException if flushing fails.
+	 */
+	public void flush() throws IOException;
 
 }

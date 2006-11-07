@@ -248,7 +248,8 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     }
 
     public boolean isOpen() {
-        return readSink.isOpen() && writeSink.isOpen();
+        return readSink != null && readSink.isOpen() &&
+               writeSink != null && writeSink.isOpen();
     }
 
     public void close() throws IOException {

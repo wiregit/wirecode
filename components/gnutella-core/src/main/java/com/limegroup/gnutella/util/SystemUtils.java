@@ -345,15 +345,13 @@ public class SystemUtils {
      * @param url The Web address to open, like "http://www.limewire.com/"
      * @return    0, in place of the process exit code
      */
-    public static int openURL(String url) {
-    	openURLNative(url);
-
-    	/*
-    	 * The program is probably still running, but calling code wants a return code.
-    	 * Return 0, the default success code.
-    	 */
-
-    	return 0;
+    public static int openURL(String url) throws IOException {
+        if(CommonUtils.isWindows() && isLoaded) {
+            openURLNative(url);
+            return 0; // program's still running, no way of getting an exit code.
+        }
+        
+        throw new IOException("native code not linked");
     }
 
     /**
@@ -369,15 +367,13 @@ public class SystemUtils {
      * @param path The complete path to run, like "C:\folder\file.ext"
      * @return     0, in place of the process exit code
      */
-    public static int openFile(String path) {
-    	openFileNative(path);
-
-    	/*
-    	 * The program is probably still running, but calling code wants a return code.
-    	 * Return 0, the default success code.
-    	 */
-
-    	return 0;
+    public static int openFile(String path) throws IOException {
+        if(CommonUtils.isWindows() && isLoaded) {
+            openFileNative(path);
+            return 0; // program's running, no way to get exit code.
+        }
+        
+        throw new IOException("native code not linked");
     }
 
     /**

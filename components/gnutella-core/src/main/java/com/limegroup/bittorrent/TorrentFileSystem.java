@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.bitzi.util.Base32;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -255,10 +256,16 @@ public class TorrentFileSystem implements Serializable {
 	}
 	
 	void addToLibrary() {
-		if (_completeFile.isFile())
-			RouterService.getFileManager().addFileIfShared(_completeFile);
-		else if (_completeFile.isDirectory())
-			RouterService.getFileManager().addSharedFolder(_completeFile);
+		FileManager fm = RouterService.getFileManager();
+		boolean force = SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue();
+		if (_completeFile.isFile()) {
+			if (force)
+				fm.addFileAlways(_completeFile);
+			else
+				fm.addFileIfShared(_completeFile);
+		} else if (_completeFile.isDirectory() &&
+				(force || fm.isFileInCompletelySharedDirectory(_completeFile)))
+			fm.addSharedFolder(_completeFile);
 	}
 	
 	private static long calculateTotalSize(List<TorrentFile> files) {

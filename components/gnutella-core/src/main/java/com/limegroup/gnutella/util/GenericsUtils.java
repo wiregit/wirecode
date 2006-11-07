@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public class GenericsUtils {
      */
     public static <K, V> Map<K, V> scanForMap(Object o, Class<K> k, Class<V> v, ScanMode mode) {
         if(mode == ScanMode.NEW_COPY_REMOVED)
-            throw new NullPointerException("must use scanForMap(Object, Class, Class, ScanMode, Class");
+            throw new IllegalArgumentException("must use scanForMap(Object, Class, Class, ScanMode, Class");
         else
             return scanForMap(o, k, v, mode, null);
     }
@@ -58,7 +59,16 @@ public class GenericsUtils {
                    !v.isAssignableFrom(value.getClass())) {
                     switch(mode) {
                     case EXCEPTION:
-                        throw new ClassCastException();
+                    	StringBuilder errorReport = new StringBuilder();
+                    	if (key == null)
+                    		errorReport.append("key is null ");
+                    	else if (!k.isAssignableFrom(key.getClass()))
+                    			errorReport.append("key class not assignable "+key.getClass()+" to "+k);
+                    	if (value == null)
+                    		errorReport.append("value is null for key "+key);
+                    	else if (!v.isAssignableFrom(value.getClass()))
+                    		errorReport.append("value class not assignable "+value.getClass()+" to "+v);
+                        throw new ClassCastException(errorReport.toString());
                     case REMOVE:
                         i.remove();
                         break;
@@ -87,7 +97,7 @@ public class GenericsUtils {
      */
     public static <V> Collection<V> scanForCollection(Object o, Class<V> v, ScanMode mode) {
         if(mode == ScanMode.NEW_COPY_REMOVED)
-            throw new NullPointerException("must use scanForCollection(Object, Class, ScanMode, Class");
+            throw new IllegalArgumentException("must use scanForCollection(Object, Class, ScanMode, Class");
         else
             return scanForCollection(o, v, mode, null);
     }
@@ -146,7 +156,7 @@ public class GenericsUtils {
      */
     public static <V> Set<V> scanForSet(Object o, Class<V> v, ScanMode mode) {
         if(mode == ScanMode.NEW_COPY_REMOVED)
-            throw new NullPointerException("must use scanForSet(Object, Class, ScanMode, Class");
+            throw new IllegalArgumentException("must use scanForSet(Object, Class, ScanMode, Class");
         else
             return scanForSet(o, v, mode, null);
     }
@@ -171,6 +181,39 @@ public class GenericsUtils {
             throw new ClassCastException();
         }
     }
+    
+    /**
+     * Utility method for calling scanForList(o, v, mode, null).
+     * If NEW_COPY_REMOVED is the ScanMode, this will throw a NullPointerException.
+     */
+    public static <V> List<V> scanForList(Object o, Class<V> v, ScanMode mode) {
+        if(mode == ScanMode.NEW_COPY_REMOVED)
+            throw new IllegalArgumentException("must use scanForList(Object, Class, ScanMode, Class");
+        else
+            return scanForList(o, v, mode, null);
+    }
+    
+    /**
+     * Scans the object 'o' to make sure that it is a List,
+     * and all values are type V.
+     * If o is not a List, a ClassCastException is thrown.
+     * 
+     * The given ScanMode is used while scanning.  If the ScanMode
+     * is NEW_COPY_REMOVED, then a Class must be given to create the copy
+     * with bad elements removed, if necessary.
+     * 
+     * @param o
+     * @param remove
+     * @return
+     */
+    public static <V> List<V> scanForList(Object o, Class<V> v, ScanMode mode, Class<? extends List> createFromThis) {
+        if(o instanceof List) {
+            return (List<V>)scanForCollection(o, v, mode, createFromThis);
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
     
     /** Constructs a new class from this. */
     private static <T> T newInstance(Class<? extends T> creator) {
