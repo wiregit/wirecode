@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -93,26 +92,6 @@ public class FileUtils {
                 return f.getAbsolutePath();
             else
                 throw ioe;
-        }
-    }
-    
-    public static void copyFile(File src, File dst) throws IOException{
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-            in = new BufferedInputStream(new FileInputStream(src));
-            out = new BufferedOutputStream(new FileOutputStream(dst));
-   
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-        } catch (IOException ioe) {
-            throw ioe;
-        } finally {
-            IOUtils.close(in);
-            IOUtils.close(out);
         }
     }
     

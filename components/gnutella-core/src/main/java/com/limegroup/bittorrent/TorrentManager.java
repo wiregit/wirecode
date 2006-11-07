@@ -15,9 +15,9 @@ import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ConnectionAcceptor;
+import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -25,6 +25,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.ThreadPool;
 
 /**
  * Class which manages active torrents and dispatching of 
@@ -72,10 +73,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     /** The File Manager */
     private FileManager fileManager;
     
+    private ThreadPool threadPool;
+    
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
-	public void initialize() {
+	public void initialize(FileManager fileManager
+            , ConnectionDispatcher dispatcher
+            , ThreadPool threadPool) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
@@ -83,13 +88,13 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         StringBuilder word = new StringBuilder();
 		word.append((char)19);
 		word.append("BitTorrent");
-		RouterService.getConnectionDispatcher().addConnectionAcceptor(
+		dispatcher.addConnectionAcceptor(
 				this,
 				new String[]{word.toString()},
 				false,false);
 		
-        fileManager = RouterService.getFileManager();
-        
+        this.fileManager = fileManager;
+        this.threadPool = threadPool;
 		// we are a torrent event listener too.
 		listeners.add(this);
 	}
@@ -212,13 +217,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private synchronized void torrentStopped(ManagedTorrent t) {
 		_active.remove(t);
 		_seeding.remove(t);
-        
-		FileDesc fd = unshareTorrent(t);
-        
-        //if the tracker failed: delete torrent
-        if(fd != null && t.getState().equals(TorrentState.TRACKER_FAILURE)){
-            fd.getFile().delete();
-        }
+		unshareTorrent(t);
 	}
 	
 	public synchronized boolean allowNewTorrent() {
@@ -262,26 +261,40 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
             return;
         }
         
-        File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
+        final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
         if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
             return;
         }
         
-        fileManager.addTorrentMetaDataFile(f);
+        Runnable r = new Runnable() {
+            public void run() {
+                fileManager.addTorrentMetaDataFile(f);
+            }
+        };
+        threadPool.invokeLater(r);
     }
     
     /**
      * Unshares the torrent from the FileManager.
+     * If the tracker failed, this method deletes the corresponding .torrent
      * @return The FileDesc of the object removed from the FileManager. 
      * Can be null. 
      */
-    private synchronized FileDesc unshareTorrent(ManagedTorrent t) {
-        File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
+    private synchronized void unshareTorrent(final ManagedTorrent t) {
+        final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
         if(f == null) {
-            return null;
+            return;
         }
-        FileDesc fd = fileManager.stopSharingFile(f);
-        return fd;
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                FileDesc fd = fileManager.stopSharingFile(f);          
+                if(fd != null && t.getState().equals(TorrentState.TRACKER_FAILURE)){
+                    FileUtils.delete(fd.getFile());
+                }
+            }
+        };
+        threadPool.invokeLater(r);
     }
     
     

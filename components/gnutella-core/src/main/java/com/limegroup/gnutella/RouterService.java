@@ -461,7 +461,7 @@ public class RouterService {
             LOG.trace("STOP FileManager");
     
             LOG.trace("START TorrentManager");
-			torrentManager.initialize();
+			torrentManager.initialize(fileManager, dispatcher, SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
             
             LOG.trace("START ControlRequestAcceptor");

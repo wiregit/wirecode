@@ -33,8 +33,8 @@ import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.StringTrie;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -970,16 +970,8 @@ public abstract class FileManager {
     }
     
     public void addTorrentMetaDataFile(File file) {
-        File shareMetaFile = file;
-        if(!isTorrentMetaDataShare(file)) {
-            shareMetaFile = new File(TORRENT_META_DATA_SHARE, file.getName());
-            try {
-                FileUtils.copyFile(file, shareMetaFile);
-            } catch (IOException ioex) {
-                return;
-            }
-        }
-        addFileAlways(shareMetaFile);
+        //@TODO: add per session sharing
+        addFileAlways(file);
     }
 	
 	/**
@@ -2234,7 +2226,8 @@ public abstract class FileManager {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(tFile.lastModified() < purgeLimit) {
+            if(!_data.SPECIAL_FILES_TO_SHARE.contains(tFile)
+                    && (tFile.lastModified() < purgeLimit)) {
                 stopSharingFile(tFile);
                 tFile.delete();
             }
