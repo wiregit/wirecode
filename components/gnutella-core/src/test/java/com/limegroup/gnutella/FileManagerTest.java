@@ -6,8 +6,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -45,7 +47,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private File f6 = null;
     //changed to protected so that MetaFileManagerTest can
     //use these variables as well.
-    protected FileManager fman = null;
+    protected volatile FileManager fman = null;
     protected Object loaded = new Object();
     private Response[] responses;
     private FileDesc[] files;
@@ -676,20 +678,41 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         //  create "shared" and "notShared" out of shared directory
         File shared    = createNewNamedTestFile(10, "shared", _sharedDir.getParentFile());
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
+        File sessionShared = createNewNamedTestFile(10, "sessionShared", _sharedDir.getParentFile());
         getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
         waitForLoad();
 
+        // add the session-shared file
+        fman.addFileForSession(sessionShared);
+        Thread.sleep(200);
+        
         //  assert that "shared" and "notShared" are not in a shared directory
         assertFalse(fman.isFileInCompletelySharedDirectory(shared));
         assertFalse(fman.isFileInCompletelySharedDirectory(notShared));
+        assertFalse(fman.isFileInCompletelySharedDirectory(sessionShared));
+        
+        //  assert that "shared" and "sessionShared" are shared
+        assertEquals(2,fman.getNumFiles());
+        assertTrue(fman.isFileShared(shared));
+        assertTrue(fman.isFileShared(sessionShared));
+        assertFalse(fman.isFileShared(notShared));
+        assertNotNull(fman.getFileDescForFile(shared));
+        assertNotNull(fman.getFileDescForFile(sessionShared));
+        assertNull(fman.getFileDescForFile(notShared));
+        
+        // simulate restart
+        fman = new SimpleFileManager();
+        waitForLoad();
         
         //  assert that "shared" is shared
-        FileDesc[] sharedFiles = fman.getAllSharedFileDescriptors();
-        assertNotNull("no shared files, even though just added a specially shared file", sharedFiles);
-        assertEquals(1, sharedFiles.length);
-        assertEquals(shared, sharedFiles[0].getFile());
-        assertEquals(sharedFiles[0], fman.getFileDescForFile(shared));
+        assertEquals(1,fman.getNumFiles());
+        assertTrue(fman.isFileShared(shared));
+        assertNotNull(fman.getFileDescForFile(shared));
         
+        // but sessionShared is no more.
+        assertFalse(fman.isFileShared(sessionShared));
+        assertFalse(fman.isFileShared(notShared));
+        assertNull(fman.getFileDescForFile(notShared));
         assertNull(fman.getFileDescForFile(notShared));
     }
 	

@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
+import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.StringTrie;
@@ -229,6 +231,18 @@ public abstract class FileManager {
     private Set<URN> _requestingValidation = Collections.synchronizedSet(new HashSet<URN>());
     
     /**
+     * Files that are shared only for this LW session.
+     * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
+     * at the same time
+     */
+    private Set<File> _transientSharedFiles = new HashSet<File>();
+    
+    /**
+     * Individual files that are not in a shared folder.
+     */
+    private Collection<File> _individualSharedFiles; 
+    
+    /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
      * is incremented.
      */
@@ -348,6 +362,9 @@ public abstract class FileManager {
 		_completelySharedDirectories = new HashSet<File>();
         _incompletesShared = new IntSet();
         _fileToFileDescMap = new HashMap<File, FileDesc>();
+        // the transient files and the special files.
+        _individualSharedFiles = Collections.synchronizedCollection(
+        		new MultiCollection<File>(_transientSharedFiles, _data.SPECIAL_FILES_TO_SHARE));
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this's
@@ -912,7 +929,7 @@ public abstract class FileManager {
                     File f = subs[i];
                     if(f.isDirectory())
                         removeFolderIfShared(f, folder);
-                    else if(f.isFile() && !_data.SPECIAL_FILES_TO_SHARE.contains(f)) {
+                    else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfShared(f) == null)
                             UrnCache.instance().clearPendingHashesFor(f, this);
                     }
@@ -982,6 +999,17 @@ public abstract class FileManager {
 			
 		addFileIfShared(file, list, true, _revision, callback);
 	}
+	 
+	 /**
+	  * adds a file that will be shared during this session of limewire
+	  * only.
+	  */
+	 public void addFileForSession(File file) {
+		 _data.FILES_NOT_TO_SHARE.remove(file);
+		 if (!isFileShareable(file))
+			 _transientSharedFiles.add(file);
+		 addFileIfShared(file, EMPTY_DOCUMENTS, false, _revision, null);
+	 }
 	
     /**
      * Adds the given file if it's shared.
@@ -1020,12 +1048,12 @@ public abstract class FileManager {
      */
     protected void addFileIfShared(File file, List<? extends LimeXMLDocument> metadata, boolean notify,
                                    int revision, FileEventListener callback) {
-//        if(LOG.isDebugEnabled())
-//            LOG.debug("Attempting to share file: " + file);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Attempting to share file: " + file);
         if(callback == null)
             callback = EMPTY_CALLBACK;
 
-        if(revision != _revision) {
+        if(revision != _revision) {LOG.info("revision wrong");
             callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
         }
@@ -1033,25 +1061,25 @@ public abstract class FileManager {
         // Make sure capitals are resolved properly, etc.
         try {
             file = FileUtils.getCanonicalFile(file);
-        } catch (IOException e) {
+        } catch (IOException e) {LOG.info("coulnd't share",e);
             callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
 	    }
 	    
         synchronized(this) {
-		    if (revision != _revision) { 
+		    if (revision != _revision) {LOG.info("revision wrong 2"); 
 		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
             }
 			// if file is not shareable, also remove it from special files
 			// to share since in that case it's not physically shareable then
-		    if (!isFileShareable(file)) {
-		    	_data.SPECIAL_FILES_TO_SHARE.remove(file);
+		    if (!isFileShareable(file)) {LOG.info("not shareable");
+		    	_individualSharedFiles.remove(file);
 		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
 		    }
         
-            if(isFileShared(file)) {
+            if(isFileShared(file)) {LOG.info("already shared");
                 callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
                 return;
             }
@@ -1061,7 +1089,7 @@ public abstract class FileManager {
             // while we're still adding files
             _pendingFinished = -1;
         }
-
+LOG.info("launched urn cacher");
 		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
@@ -1132,8 +1160,8 @@ public abstract class FileManager {
      *  added, otherwise <tt>null</tt>
      */
     private synchronized FileDesc addFile(File file, Set<? extends URN> urns) {
-   //     if(LOG.isDebugEnabled())
-   //         LOG.debug("Sharing file: " + file);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Sharing file: " + file);
         
 
         int fileIndex = _files.size();
@@ -1228,7 +1256,7 @@ public abstract class FileManager {
 		
 		// remove file already here to heed against race conditions
 		// wrt to filemanager events being handled on other threads
-		boolean removed = _data.SPECIAL_FILES_TO_SHARE.remove(file); 
+		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfShared(file);
 		if (fd == null) {
 		    UrnCache.instance().clearPendingHashesFor(file, this);
@@ -1676,7 +1704,7 @@ public abstract class FileManager {
 	private boolean isFileShareable(File file) {
 		if (!isFilePhysicallyShareable(file))
 			return false;
-		if (_data.SPECIAL_FILES_TO_SHARE.contains(file))
+		if (_individualSharedFiles.contains(file))
 			return true;
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
