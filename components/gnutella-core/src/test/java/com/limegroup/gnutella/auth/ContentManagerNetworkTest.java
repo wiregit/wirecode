@@ -56,7 +56,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
-        mgr = new DefaultContentManager();
+        mgr = new ContentManager();
         crOne = new ContentResponse(URN_1, true);
         one = new Observer();
         assertNull(mgr.getResponse(URN_1));
@@ -103,7 +103,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         final IpPort authority = new IpPortImpl("127.0.0.1", socket.getLocalPort());
         
         mgr.shutdown();
-        mgr = new DefaultContentManager() {
+        mgr = new ContentManager() {
             protected ContentAuthority getDefaultContentAuthority() {
                 return new IpPortContentAuthority(authority);
             }

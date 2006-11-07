@@ -13,7 +13,6 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.auth.DefaultContentManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -76,7 +75,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    fman = new SimpleFileManager();
 		
         // ensure each test gets a brand new content manager.
-        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new DefaultContentManager());
+        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
 	}
 	

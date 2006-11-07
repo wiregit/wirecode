@@ -12,7 +12,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.auth.DefaultContentManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -50,7 +50,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         	    
 	    cleanFiles(_sharedDir, false);
         fman = new MetaFileManager();
-        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new DefaultContentManager());
+        PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
         PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
         PrivilegedAccessor.setValue(RouterService.class,  "fileManager", fman);
 	    
