@@ -106,6 +106,52 @@ public class MessageService {
     }
     
     /**
+     * Shows a locale-specific formatted message to the user using the specified key to
+     * look up the message in the resource bundles.
+     * 
+     * @param messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public static void showFormattedMessage(String messageKey, String... args) {
+        _callback.showFormattedMessage(messageKey, args);
+    }
+    
+    /**
+     * Shows a locale-specific formatted message to the user using the specified key to
+     * look up the message in the resource bundles if the BooleanSetting
+     * indicates to do so.
+     * 
+     * @param messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public static void showFormattedMessage(String messageKey, BooleanSetting ignore, String... args) {
+        _callback.showFormattedMessage(messageKey, ignore, args);
+    }
+    
+    /**
+     * Shows a locale-specific formatted error to the user using the specified key to
+     * look up the message in the resource bundles.
+     * 
+     * @param messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public static void showFormattedError(String errorKey, String... args) {
+        _callback.showFormattedError(errorKey, args);
+    }    
+    
+    /**
+     * Shows a locale-specific formatted error to the user using the specified key to
+     * look up the message in the resource bundles if the BooleanSetting
+     * indicates to do so.
+     * 
+     * @param messageKey the key for looking up the message to display in the
+     *  resource bundles
+     */
+    public static void showFormattedError(String errorKey, BooleanSetting ignore, String... args) {
+        _callback.showFormattedError(errorKey, ignore, args);
+    }
+    
+    /**
      * Default messaging class that simply displays messages in the console.
      */
     private static final class ShellMessageService implements MessageCallback {
@@ -117,31 +163,57 @@ public class MessageService {
 
         // Inherit doc domment.        
         public void showError(String messageKey, BooleanSetting ignore) {
-            System.out.println("error key: "+messageKey);
+            showError(messageKey);
         }
 
         // Inherit doc comment.
         public void showError(String messageKey, String message) {
-            System.out.println("error key: "+messageKey+" extra message: "+
-                message);
+            System.out.println("error key: " + messageKey + " extra message: " + message);
         }
 
         // Inherit doc comment.
         public void showError(String messageKey,
                               String message,
                               BooleanSetting ignore) {
-            System.out.println("error key: "+messageKey+" extra message: "+
-                message);
+            showError(messageKey, message);
         }
 
         // Inherit doc comment.
         public void showMessage(String messageKey) {
-            System.out.println("message key: "+messageKey); 
+            System.out.println("message key: " + messageKey); 
         }
 
         // Inherit doc comment.
         public void showMessage(String messageKey, BooleanSetting ignore) {
-            System.out.println("message key: "+messageKey); 
+            showMessage(messageKey); 
+        }
+
+        public void showFormattedMessage(String messageKey, String... args) {
+            StringBuilder sb = new StringBuilder("message key: " + messageKey + " ");
+            for(int i = 0; i < args.length; i++) {
+                sb.append("arg[" + i + "]: " + args[i]);
+                if(i < args.length - 1)
+                    sb.append(", ");
+            }
+            System.out.println(sb);
+        }
+
+        public void showFormattedMessage(String messageKey, BooleanSetting ignore, String... args) {
+            showFormattedMessage(messageKey, args);
+        }
+
+        public void showFormattedError(String errorKey, String... args) {
+            StringBuilder sb = new StringBuilder("error key: " + errorKey + " ");
+            for(int i = 0; i < args.length; i++) {
+                sb.append("arg[" + i + "]: " + args[i]);
+                if(i < args.length - 1)
+                    sb.append(", ");
+            }
+            System.out.println(sb); 
+        }
+
+        public void showFormattedError(String errorKey, BooleanSetting ignore, String... args) {
+            showFormattedError(errorKey, args);
         }
         
     }

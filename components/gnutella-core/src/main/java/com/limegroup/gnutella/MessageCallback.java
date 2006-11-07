@@ -54,6 +54,21 @@ public interface MessageCallback {
     void showError(String messageKey, String message, BooleanSetting ignore);
     
     /**
+     * Shows a locale-specific error message to the user, using the
+     * given message key & the arguments for that key.
+     */
+    void showFormattedError(String errorKey, String... args);
+    
+    /**
+     * Shows a locale-specific formatted error to the user, using the
+     * given message key & the arguments for that key. 
+     * The message is only displayed if the BooleanSetting indicates
+     * the user had chosen to display the message.
+     */
+    void showFormattedError(String errorKey, BooleanSetting ignore, String... args);
+    
+    
+    /**
      * Shows a locale-specific message to the user using the given message key.
      * 
      * @param messageKey the key for looking up the locale-specific message
@@ -64,10 +79,24 @@ public interface MessageCallback {
     /**
      * Shows a locale-specific message to the user using the given message key.
      * The message is only displayed if the BooleanSetting indicates the user
-     * has chosen to dispaly the message.
+     * has chosen to display the message.
      * 
      * @param messageKey the key for looking up the locale-specific message
      *  in the resource bundles
      */
     void showMessage(String messageKey, BooleanSetting ignore);
+    
+    /**
+     * Shows a locale-specific formatted message to the user, using the
+     * given message key & the arguments for that key.
+     */
+    void showFormattedMessage(String messageKey, String... args);
+    
+    /**
+     * Shows a locale-specific formatted message to the user, using the
+     * given message key & the arguments for that key. 
+     * The message is only displayed if the BooleanSetting indicates
+     * the user had chosen to display the message.
+     */
+    void showFormattedMessage(String messageKey, BooleanSetting ignore, String... args);
 }

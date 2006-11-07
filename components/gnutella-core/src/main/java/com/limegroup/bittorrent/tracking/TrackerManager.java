@@ -179,9 +179,8 @@ public class TrackerManager {
 					// if we have only one tracker and it gave a reason,
 					// inform the user on first failure.
 					if (trackers.size() == 1) {
-						MessageService.showError("TORRENTS_TRACKER_FAILURE", 
-								torrent.getMetaInfo().getName() + "\n" +
-								response.FAILURE_REASON);
+                        MessageService.showFormattedError("TORRENTS_TRACKER_FAILURE",
+                                torrent.getMetaInfo().getName(), response.FAILURE_REASON);
 						torrent.stopVoluntarily();
 						return;
 					}
