@@ -1053,7 +1053,7 @@ public abstract class FileManager {
         if(callback == null)
             callback = EMPTY_CALLBACK;
 
-        if(revision != _revision) {LOG.info("revision wrong");
+        if(revision != _revision) {
             callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
         }
@@ -1061,25 +1061,25 @@ public abstract class FileManager {
         // Make sure capitals are resolved properly, etc.
         try {
             file = FileUtils.getCanonicalFile(file);
-        } catch (IOException e) {LOG.info("coulnd't share",e);
+        } catch (IOException e) {
             callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
             return;
 	    }
 	    
         synchronized(this) {
-		    if (revision != _revision) {LOG.info("revision wrong 2"); 
+		    if (revision != _revision) {
 		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
             }
 			// if file is not shareable, also remove it from special files
 			// to share since in that case it's not physically shareable then
-		    if (!isFileShareable(file)) {LOG.info("not shareable");
+		    if (!isFileShareable(file)) {
 		    	_individualSharedFiles.remove(file);
 		    	callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.FAILED, file));
                 return;
 		    }
         
-            if(isFileShared(file)) {LOG.info("already shared");
+            if(isFileShared(file)) {
                 callback.handleFileEvent(new FileManagerEvent(this, FileManagerEvent.ALREADY_SHARED, file));
                 return;
             }
@@ -1089,7 +1089,7 @@ public abstract class FileManager {
             // while we're still adding files
             _pendingFinished = -1;
         }
-LOG.info("launched urn cacher");
+        
 		UrnCache.instance().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback));
     }
     
