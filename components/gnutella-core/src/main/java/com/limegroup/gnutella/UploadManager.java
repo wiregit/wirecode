@@ -954,7 +954,8 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         }
         
         int queued = slotManager.pollForSlot(session, 
-        		session.getUploader().supportsQueueing());
+        		session.getUploader().supportsQueueing(),
+        		session.getUploader().isPriorityShare());
         
         if (LOG.isDebugEnabled())
         	LOG.debug("queued at "+queued);

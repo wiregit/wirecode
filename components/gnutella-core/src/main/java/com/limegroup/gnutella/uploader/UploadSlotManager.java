@@ -30,6 +30,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	private static final int BT_SEED = 0; // low priority
 	private static final int HTTP = 1; // medium periority
 	private static final int BT_DOWNLOAD = 2; // high priority
+	private static final int BT_META = 3; // metafile
 	
     /** 
      * The desired minimum quality of service to provide for uploads, in
@@ -77,10 +78,10 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * @return the position in the queue if queued, -1 if rejected,
 	 * 0 if it can proceed immediately
 	 */
-	public int pollForSlot(UploadSlotUser user, boolean queue) {
+	public int pollForSlot(UploadSlotUser user, boolean queue, boolean highPriority) {
 		if (LOG.isDebugEnabled())
 			LOG.debug(user+" polling for slot, queuable "+queue);
-		return requestSlot(new HTTPSlotRequest(user, queue));
+		return requestSlot(new HTTPSlotRequest(user, queue, highPriority));
 	}
 	
 	/**
@@ -447,8 +448,8 @@ public class UploadSlotManager implements BandwidthTracker {
 		
 		private final boolean queuable;
 		
-		HTTPSlotRequest (UploadSlotUser user, boolean queuable) {
-			super(user, false, HTTP);
+		HTTPSlotRequest (UploadSlotUser user, boolean queuable, boolean highPriority) {
+			super(user, false, highPriority ? BT_META : HTTP);
 			this.queuable = queuable;
 		}
 		
