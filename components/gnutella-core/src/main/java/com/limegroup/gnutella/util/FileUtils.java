@@ -271,6 +271,7 @@ public class FileUtils {
     
     /**
      * Touches a file, to ensure it exists.
+     * Note: unlike the unix touch this does not change the modification time.
      */
     public static void touch(File f) throws IOException {
         if(f.exists())
