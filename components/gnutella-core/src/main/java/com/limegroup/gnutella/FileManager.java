@@ -1031,7 +1031,7 @@ public abstract class FileManager {
 		 _data.FILES_NOT_TO_SHARE.remove(file);
 		 if (!isFileShareable(file))
 			 _transientSharedFiles.add(file);
-		 addFileIfShared(file, EMPTY_DOCUMENTS, false, _revision, null);
+		 addFileIfShared(file, EMPTY_DOCUMENTS, true, _revision, null);
 	 }
 	
     /**
