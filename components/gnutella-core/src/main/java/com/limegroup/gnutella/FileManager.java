@@ -986,11 +986,6 @@ public abstract class FileManager {
         _isUpdating = false;
     }
     
-    public void addTorrentMetaDataFile(File file) {
-        //@TODO: add per session sharing
-        addFileAlways(file);
-    }
-	
 	/**
 	 * Always shares the given file.
 	 */

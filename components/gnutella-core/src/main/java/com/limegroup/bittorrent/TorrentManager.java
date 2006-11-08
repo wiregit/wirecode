@@ -216,8 +216,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 
 	private synchronized void torrentStopped(ManagedTorrent t) {
 		_active.remove(t);
-		_seeding.remove(t);
-		unshareTorrent(t);
+		unshareTorrent(t, _seeding.remove(t));
 	}
 	
 	public synchronized boolean allowNewTorrent() {
@@ -257,18 +256,15 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * Shares the torrent by adding it to the FileManager
      */
     private synchronized void shareTorrent(ManagedTorrent t) {
-        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue()) {
+        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue()) 
             return;
-        }
         
         final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
-        if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
-            return;
-        }
         
         Runnable r = new Runnable() {
             public void run() {
-                fileManager.addTorrentMetaDataFile(f);
+            	if (FileUtils.isFilePhysicallyShareable(f))
+            		fileManager.addFileForSession(f);
             }
         };
         threadPool.invokeLater(r);
@@ -280,16 +276,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      * @return The FileDesc of the object removed from the FileManager. 
      * Can be null. 
      */
-    private synchronized void unshareTorrent(final ManagedTorrent t) {
+    private synchronized void unshareTorrent(final ManagedTorrent t, boolean delete) {
         final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
-        if(f == null) {
-            return;
-        }
         
+        final boolean fdelete = delete || t.getState().equals(TorrentState.TRACKER_FAILURE); 
         Runnable r = new Runnable() {
             public void run() {
                 FileDesc fd = fileManager.stopSharingFile(f);          
-                if(fd != null && t.getState().equals(TorrentState.TRACKER_FAILURE)){
+                if(fd != null && fdelete){
                     FileUtils.delete(fd.getFile());
                 }
             }
