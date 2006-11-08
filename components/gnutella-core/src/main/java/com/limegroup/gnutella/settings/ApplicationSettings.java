@@ -182,6 +182,12 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createBooleanSetting("CONSOLE_VIEW_ENABLED", false);
     
     /**
+	 * Sets whether or not Browser Tab should be enabled.
+	 */
+    public static final BooleanSetting BROWSER_VIEW_ENABLED =
+    	FACTORY.createBooleanSetting("BROWSER_VIEW_ENABLED", true);
+    
+    /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.
 	 */
