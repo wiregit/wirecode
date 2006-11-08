@@ -61,8 +61,8 @@ import com.limegroup.gnutella.udpconnect.UDPMultiplexor;
 import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -461,10 +461,10 @@ public class RouterService {
             LOG.trace("STOP FileManager");
     
             LOG.trace("START TorrentManager");
-			torrentManager.initialize();
+			torrentManager.initialize(fileManager, dispatcher, SimpleTimer.sharedTimer());
 			LOG.trace("STOP TorrentManager");
-			
-			LOG.trace("START ControlRequestAcceptor");
+            
+            LOG.trace("START ControlRequestAcceptor");
 			(new ControlRequestAcceptor()).register(getConnectionDispatcher());
 			LOG.trace("STOP ControlRequestAcceptor");
 			
@@ -627,7 +627,7 @@ public class RouterService {
     public static TorrentManager getTorrentManager() {
     	return torrentManager;
     }
-
+    
     public static AltLocManager getAltlocManager() {
         return altManager;
     }

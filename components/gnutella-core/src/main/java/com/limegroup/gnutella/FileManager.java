@@ -35,8 +35,8 @@ import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.StringTrie;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -63,6 +63,9 @@ public abstract class FileManager {
     /** Subdirectory that also is always shared. */
     public static final File PREFERENCE_SHARE;
     
+    /** .torrent meta data directory. */
+    public static final File TORRENT_META_DATA_SHARE;
+    
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
@@ -70,11 +73,20 @@ public abstract class FileManager {
         } catch(IOException ignored) {}
         PROGRAM_SHARE = forceShare;
         
-        forceShare = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
+        
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".TorrentMetaData").getAbsoluteFile();
+        forceShare.mkdir();
+        try {
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        TORRENT_META_DATA_SHARE = forceShare;
     }
 
     /** A type-safe empty LimeXMLDocument list. */
@@ -281,6 +293,15 @@ public abstract class FileManager {
             return isFileShareable(f);
         }
     };    
+    
+    /**
+     * The filter object to use to discern .torrent files.
+     */
+    private final FileFilter TORRENT_METADATA_FILE_FILTER = new FileFilter() {
+        public boolean accept(File f) {
+            return FileUtils.getFileExtension(f).equals("torrent");
+        }
+    };
         
     /**
      * The filter object to use to determine directories.
@@ -374,6 +395,7 @@ public abstract class FileManager {
     public void start() {
         _data.clean();
         cleanIndividualFiles();
+        purgeExpiredTorrentMetaFiles();
 		loadSettings();
     }
     
@@ -815,7 +837,8 @@ public abstract class FileManager {
 
         // STEP 1:
         // Add directory
-        boolean isForcedShare = isForcedShareDirectory(directory);
+        boolean isForcedShare = isForcedShareDirectory(directory) 
+            || isTorrentMetaDataShareDirectory(directory);
         synchronized (this) {
             // if it was already added, ignore.
             if (_completelySharedDirectories.contains(directory))
@@ -962,6 +985,11 @@ public abstract class FileManager {
         updateSharedDirectories(folder, null, _revision);
         _isUpdating = false;
     }
+    
+    public void addTorrentMetaDataFile(File file) {
+        //@TODO: add per session sharing
+        addFileAlways(file);
+    }
 	
 	/**
 	 * Always shares the given file.
@@ -1039,7 +1067,7 @@ public abstract class FileManager {
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list, FileEventListener callback) {
         addFileIfShared(file, list, true, _revision, callback);
     }
-	
+    
     /**
      * The actual implementation of addFileIfShared(File)
      * @param file the file to add
@@ -1246,12 +1274,14 @@ public abstract class FileManager {
 	/**
 	 * Removes the file if it is being shared, and then removes the file from
 	 * the special lists as necessary.
+     * @return The FileDesc associated with this file, or null if the file was
+     * not shared. 
 	 */
-	public synchronized void stopSharingFile(File file) {
+	public synchronized FileDesc stopSharingFile(File file) {
 		try {
 			file = FileUtils.getCanonicalFile(file);
 		} catch (IOException e) {
-			return;
+			return null;
 		}
 		
 		// remove file already here to heed against race conditions
@@ -1266,6 +1296,7 @@ public abstract class FileManager {
 			if (!removed)
 				_data.FILES_NOT_TO_SHARE.add(file);
 		}
+        return fd;
 	}
 	
 	/**
@@ -1631,7 +1662,9 @@ public abstract class FileManager {
      * Determines if a given file is shared while not in a completely shared directory.
      */
     public boolean isIndividualShare(File f) {
-    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
+    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) 
+            && FileUtils.isFilePhysicallyShareable(f)
+            && !isTorrentMetaDataShare(f);
     }
     
     /**
@@ -1642,7 +1675,7 @@ public abstract class FileManager {
         synchronized(files) {
             for(Iterator<File> i = files.iterator(); i.hasNext(); ) {
                 File f = i.next();
-                if(!(isFilePhysicallyShareable(f)))
+                if(!(FileUtils.isFilePhysicallyShareable(f)))
                     i.remove();
             }
         }
@@ -1702,7 +1735,7 @@ public abstract class FileManager {
 	 * or if it is specially shared.
 	 */
 	private boolean isFileShareable(File file) {
-		if (!isFilePhysicallyShareable(file))
+		if (!FileUtils.isFilePhysicallyShareable(file))
 			return false;
 		if (_individualSharedFiles.contains(file))
 			return true;
@@ -1719,24 +1752,6 @@ public abstract class FileManager {
 		return false;
 	}
 	
-    /**
-     * Returns true if this file is not too large, not too small,
-     * not null, is a directory, can be read, is not hidden.  Returns
-     * true if file is a specially shared file or starts with "LimeWire".
-     * Returns false otherwise.
-     * @see isFileShareable(File) 
-     */
-    public static boolean isFilePhysicallyShareable(File file) {
-		if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
-            return false;
-                
-		long fileLength = file.length();
-		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
-        	return false;
-        
-		return true;
-    }
-    
     /**
      * Returns true iff <tt>file</tt> is a sensitive directory.
      */
@@ -2186,10 +2201,25 @@ public abstract class FileManager {
     }
     
     /**
+     * Determines if this File is a .torrent meta data share.
+     */
+    public static boolean isTorrentMetaDataShare(File file) {
+        if(!FileUtils.getFileExtension(file).equals("torrent")) {
+            return false;
+        }
+        File parent = file.getParentFile();
+        return parent != null && isTorrentMetaDataShareDirectory(parent);
+    }
+    
+    /**
      * Determines if this File is a network shared directory.
      */
     public static boolean isForcedShareDirectory(File f) {
         return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
+    }
+    
+    public static boolean isTorrentMetaDataShareDirectory(File f) {
+        return f.equals(TORRENT_META_DATA_SHARE);
     }
     
     /**
@@ -2212,6 +2242,24 @@ public abstract class FileManager {
     public void dispatchFileEvent(FileManagerEvent evt) {
         for(FileEventListener listener : eventListeners) {
             listener.handleFileEvent(evt);
+        }
+    }
+    
+    private void purgeExpiredTorrentMetaFiles() {
+        File[] file_list = TORRENT_META_DATA_SHARE.listFiles(TORRENT_METADATA_FILE_FILTER);
+        if(file_list == null) {
+            return;
+        }
+        long purgeLimit = System.currentTimeMillis() 
+            - SharingSettings.TORRENT_METADATA_PURGE_TIME.getValue()*24L*60L*60L*1000L;
+        File tFile;
+        for(int i = 0; i < file_list.length; i++) {
+            tFile = file_list[i];
+            if(!_data.SPECIAL_FILES_TO_SHARE.contains(tFile)
+                    && (tFile.lastModified() < purgeLimit)) {
+                stopSharingFile(tFile);
+                tFile.delete();
+            }
         }
     }
 }

@@ -930,6 +930,24 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
+    public void testPurgeExpiredTorrents() throws Exception {
+        SharingSettings.TORRENT_METADATA_PURGE_TIME.setValue(10);
+        int numFiles = FileManager.TORRENT_META_DATA_SHARE.listFiles().length;
+        File f = new File(FileManager.TORRENT_META_DATA_SHARE, "1.torrent");
+        f.createNewFile();
+        f = new File(FileManager.TORRENT_META_DATA_SHARE, "2.torrent");
+        f.createNewFile();
+        assertEquals(numFiles + 2, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
+        fman.stop();
+        fman.start();
+        assertEquals(numFiles + 2, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
+        SharingSettings.TORRENT_METADATA_PURGE_TIME.setValue(0);
+        fman.stop();
+        fman.start();
+        //should have expired files
+        assertEquals(numFiles, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
+    }
+    
     /**
      * Helper function to set the operating system so that multiple OSs can be partially-checked
      * by testing on one platform.

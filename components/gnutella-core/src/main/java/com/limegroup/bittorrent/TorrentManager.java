@@ -11,15 +11,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ConnectionAcceptor;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ConnectionDispatcher;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.ThreadPool;
 
 /**
  * Class which manages active torrents and dispatching of 
@@ -64,10 +70,17 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private List <TorrentEventListener> listeners = 
 		new CopyOnWriteArrayList<TorrentEventListener>();
 
-	/**
+    /** The File Manager */
+    private FileManager fileManager;
+    
+    private ThreadPool threadPool;
+    
+    /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
-	public void initialize() {
+	public void initialize(FileManager fileManager
+            , ConnectionDispatcher dispatcher
+            , ThreadPool threadPool) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
@@ -75,11 +88,13 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         StringBuilder word = new StringBuilder();
 		word.append((char)19);
 		word.append("BitTorrent");
-		RouterService.getConnectionDispatcher().addConnectionAcceptor(
+		dispatcher.addConnectionAcceptor(
 				this,
 				new String[]{word.toString()},
 				false,false);
 		
+        this.fileManager = fileManager;
+        this.threadPool = threadPool;
 		// we are a torrent event listener too.
 		listeners.add(this);
 	}
@@ -139,6 +154,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		switch(evt.getType()) {
 		case STARTING: torrentStarting(t); break;
 		case STARTED: torrentStarted(t); break;
+        case DOWNLOADING: shareTorrent(t); break;
 		case STOPPED: torrentStopped(t); break;
 		case COMPLETE: torrentComplete(t); break;
         
@@ -201,6 +217,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private synchronized void torrentStopped(ManagedTorrent t) {
 		_active.remove(t);
 		_seeding.remove(t);
+		unshareTorrent(t);
 	}
 	
 	public synchronized boolean allowNewTorrent() {
@@ -235,4 +252,59 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 		} else 
 			return false;
 	}
+    
+    /**
+     * Shares the torrent by adding it to the FileManager
+     */
+    private synchronized void shareTorrent(ManagedTorrent t) {
+        if(!SharingSettings.SHARE_TORRENT_META_FILES.getValue()) {
+            return;
+        }
+        
+        final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
+        if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
+            return;
+        }
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                fileManager.addTorrentMetaDataFile(f);
+            }
+        };
+        threadPool.invokeLater(r);
+    }
+    
+    /**
+     * Unshares the torrent from the FileManager.
+     * If the tracker failed, this method deletes the corresponding .torrent
+     * @return The FileDesc of the object removed from the FileManager. 
+     * Can be null. 
+     */
+    private synchronized void unshareTorrent(final ManagedTorrent t) {
+        final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
+        if(f == null) {
+            return;
+        }
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                FileDesc fd = fileManager.stopSharingFile(f);          
+                if(fd != null && t.getState().equals(TorrentState.TRACKER_FAILURE)){
+                    FileUtils.delete(fd.getFile());
+                }
+            }
+        };
+        threadPool.invokeLater(r);
+    }
+    
+    
+    /**
+     * Returns the expected shared .torrent meta data file. 
+     * Can be null.
+     */
+    public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
+        String fileName = info.getFileSystem().getName().concat(".torrent");
+        File f = new File(FileManager.TORRENT_META_DATA_SHARE, fileName);
+        return f;
+    }
 }	

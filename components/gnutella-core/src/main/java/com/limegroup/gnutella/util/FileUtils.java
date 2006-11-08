@@ -12,12 +12,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -107,6 +107,22 @@ public class FileUtils {
             else
                 throw ioe;
         }
+    }
+    
+    /**
+     * Returns true if this file is not too large, not too small,
+     * not null, is a directory, can be read, is not hidden.  
+     * Returns false otherwise.
+     */
+    public static boolean isFilePhysicallyShareable(File file) {
+        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+            return false;
+                
+        long fileLength = file.length();
+        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+            return false;
+        
+        return true;
     }
     
     /**
