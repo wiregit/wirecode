@@ -29,8 +29,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	 */
 	private static final int BT_SEED = 0; // low priority
 	private static final int HTTP = 1; // medium periority
-	private static final int BT_DOWNLOAD = 2; // high priority
-	private static final int BT_META = 3; // metafile
+	private static final int HIGH = 2; // torrent downloads and metafiles.
 	
     /** 
      * The desired minimum quality of service to provide for uploads, in
@@ -164,7 +163,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * @return if there are any active users with higher priority
 	 */
 	private boolean existActiveHigherPriority(int priority) {
-		if (priority == BT_DOWNLOAD)
+		if (priority == HIGH) 
 			return false;
 		
 		if (!active.isEmpty()) {
@@ -212,9 +211,6 @@ public class UploadSlotManager implements BandwidthTracker {
 	 * @return whether there would be a free slot for an HTTP uploader.
 	 */
 	public synchronized boolean isServiceable(int current) {
-		if (existActiveHigherPriority(HTTP))
-			return false;
-		
 		// This ignores currently active BT_SEED uploaders since they 
 		// can be preempted.
 		return hasFreeSlot(current);
@@ -449,7 +445,7 @@ public class UploadSlotManager implements BandwidthTracker {
 		private final boolean queuable;
 		
 		HTTPSlotRequest (UploadSlotUser user, boolean queuable, boolean highPriority) {
-			super(user, false, highPriority ? BT_META : HTTP);
+			super(user, false, highPriority ? HIGH : HTTP);
 			this.queuable = queuable;
 		}
 		
@@ -463,7 +459,7 @@ public class UploadSlotManager implements BandwidthTracker {
 	 */
 	private class BTSlotRequest extends UploadSlotRequest {
 		BTSlotRequest(UploadSlotListener listener, boolean highPriority) {
-			super(listener, !highPriority, highPriority ? BT_DOWNLOAD : BT_SEED);
+			super(listener, !highPriority, highPriority ? HIGH : BT_SEED);
 		}
 		
 		UploadSlotListener getListener() {

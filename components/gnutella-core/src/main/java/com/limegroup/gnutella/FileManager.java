@@ -2250,8 +2250,8 @@ public abstract class FileManager {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(!_data.SPECIAL_FILES_TO_SHARE.contains(tFile)
-                    && (tFile.lastModified() < purgeLimit) && !isFileShared(tFile)) {
+            if(!isFileShared(tFile) &&
+                    tFile.lastModified() < purgeLimit) {
             	tFile.delete();
             }
         }

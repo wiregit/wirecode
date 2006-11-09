@@ -1,0 +1,243 @@
+package com.limegroup.gnutella.uploader;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+
+public class UploadSlotManagerTest extends BaseTestCase {
+	public UploadSlotManagerTest(String name){
+		super(name);
+	}
+
+	public static Test suite() {
+        return buildTestSuite(UploadSlotManagerTest.class);
+    }
+	
+	private UploadSlotManager manager;
+	
+	public void setUp() {
+		UploadSettings.SOFT_MAX_UPLOADS.revertToDefault();
+		UploadSettings.HARD_MAX_UPLOADS.revertToDefault();
+		UploadSettings.UPLOAD_QUEUE_SIZE.revertToDefault();
+		manager = new UploadSlotManager();
+	}
+	
+	/**
+	 * Tests case where poll requests with equal priority 
+	 * are processed in a fifo manner until the queue fills up, 
+	 * after that are rejected.
+	 * Also tests cancelling of poll requests.
+	 */
+	public void testEqualPriorityPolling() throws Exception {
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(1);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
+		UploadSlotUser queued = new UploadSlotUserAdapter();
+		UploadSlotUser granted = new UploadSlotUserAdapter();
+		// free slot
+		assertEquals(0, manager.pollForSlot(granted, true, false));
+		// queued
+		assertEquals(1, manager.pollForSlot(queued, true, false));
+		assertEquals(1, manager.getNumQueued());
+		// reject
+		assertEquals(-1, manager.pollForSlot(new UploadSlotUserAdapter(), true, false));
+		// another reject
+		assertEquals(-1, manager.pollForSlot(new UploadSlotUserAdapter(), true, false));
+		// was already in queue, stays there.
+		assertEquals(1, manager.pollForSlot(queued, true, false));
+		assertEquals(1, manager.getNumQueued());
+		// the one that used the slot is done, the queued one is granted.
+		manager.requestDone(granted);
+		assertEquals(0, manager.pollForSlot(queued, true, false));
+		assertEquals(0, manager.getNumQueued());
+		
+		// there are no slots - try a non-queuable poll which gets rejected
+		assertEquals(-1, manager.pollForSlot(new UploadSlotUserAdapter(), false, false));
+		assertEquals(0, manager.getNumQueued());
+		
+		// there is room in the queue - try to queue someone else - they get queued
+		UploadSlotUser queued2 = new UploadSlotUserAdapter();
+		assertEquals(1, manager.pollForSlot(queued2, true, false));
+		assertEquals(1, manager.getNumQueued());
+		
+		// cancel the queued one, try to queue another one - queued
+		manager.cancelRequest(queued2);
+		assertEquals(0, manager.getNumQueued());
+		assertEquals(1, manager.pollForSlot(new UploadSlotUserAdapter(), true, false));
+		assertEquals(1, manager.getNumQueued());
+	}
+	
+	/**
+	 * Tests that listeners with equal priority get processed/queued/rejected in
+	 * fifo manner and notified when a slot becomes available. 
+	 */
+	public void testEqualPriorityListeners() throws Exception {
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(1);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+		UploadSlotListenerAdapter granted = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter queued = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter queued2 = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter rejected = new UploadSlotListenerAdapter();
+		
+		// first is granted
+		assertEquals(0, manager.requestSlot(granted, false));
+		assertFalse(granted.notified);
+		// second and third are queued
+		assertEquals(1, manager.requestSlot(queued, false));
+		assertEquals(2, manager.requestSlot(queued2, false));
+		// last one rejected
+		assertEquals(-1, manager.requestSlot(rejected, false));
+		assertEquals(2, manager.getNumQueuedResumable());
+		
+		// when the one using the slot is done, the first queued one gets notified
+		// and becomes active
+		manager.requestDone(granted);
+		assertEquals(1, manager.getNumQueuedResumable());
+		assertTrue(queued.notified);
+		assertFalse(queued2.notified);
+		granted = queued;
+		
+		// queue a third one - there is room in the queue now
+		UploadSlotListenerAdapter queued3 = new UploadSlotListenerAdapter();
+		assertEquals(2, manager.requestSlot(queued3, false));
+		
+		// if the first queued one gives up their spot, the one behind
+		// him will not get notified
+		manager.cancelRequest(queued2);
+		assertEquals(1, manager.getNumQueuedResumable());
+		assertFalse(queued3.notified);
+		
+		// but if the one that was using the slot finishes,
+		// the next in the queue gets notification.
+		manager.cancelRequest(granted);
+		assertEquals(0, manager.getNumQueuedResumable());
+		assertTrue(queued3.notified);
+	}
+	
+	/**
+	 * tests that listeners with low priority get preempted should
+	 * there be pollers with high priority.
+	 */
+	public void testPollerPreemptsLowPriorityListeners() throws Exception {
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(3);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
+		
+		UploadSlotUserAdapter poller = new UploadSlotUserAdapter();
+		UploadSlotListenerAdapter lowPriority = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter lowPriority2 = new UploadSlotListenerAdapter();
+		
+		
+		// start off with two active low priority listeners
+		assertEquals(0, manager.requestSlot(lowPriority, false));
+		assertEquals(0, manager.requestSlot(lowPriority2, false));
+		
+		// add a poller
+		assertEquals(0, manager.pollForSlot(poller, true, false));
+		// the listeners should have been preempted
+		assertTrue(lowPriority.releaseSlot);
+		assertTrue(lowPriority2.releaseSlot);
+		// nothing on the queue
+		assertEquals(0,manager.getNumQueuedResumable());
+	}
+	
+	/**
+	 * tests that listeners with low priority get preempted should
+	 * there be a listener with high priority.
+	 */	
+	public void testListenerPreemptsLowPriorityListeners() throws Exception {
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(3);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
+		
+		UploadSlotListenerAdapter lowPriority = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter lowPriority2 = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter highPriority = new UploadSlotListenerAdapter();
+		
+		
+		// start off with two active low priority listeners
+		assertEquals(0, manager.requestSlot(lowPriority, false));
+		assertEquals(0, manager.requestSlot(lowPriority2, false));
+		
+		// add a high-priority listener
+		assertEquals(0, manager.requestSlot(highPriority, true));
+		// the other listeners should have been preempted
+		assertTrue(lowPriority.releaseSlot);
+		assertTrue(lowPriority2.releaseSlot);
+		// nothing on the queue
+		assertEquals(0,manager.getNumQueuedResumable());
+	}
+	
+	/**
+	 * Tests that requests with low priority get queued if there are
+	 * active requests with higher priority
+	 */
+	public void testLowerPriorityQueuableQueued() throws Exception {
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(3);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(4);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(20);
+		
+		UploadSlotListenerAdapter lowListener = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter highListener = new UploadSlotListenerAdapter();
+		
+		UploadSlotUserAdapter lowPoller = new UploadSlotUserAdapter();
+		UploadSlotUserAdapter highPoller = new UploadSlotUserAdapter();
+		
+		// if there is a high priority poller, everyone else gets queued
+		// except the high priority listener
+		assertEquals(0, manager.pollForSlot(highPoller, true, true));
+		assertGreaterThan(0, manager.pollForSlot(lowPoller, true, false));
+		assertEquals(0, manager.requestSlot(highListener, true));
+		assertGreaterThan(0, manager.requestSlot(lowListener, false));
+		manager = new UploadSlotManager();
+		
+		// if there is a high priority listener, everyone but the high
+		// priority poller gets queued.  The latter gets in but does not
+		// preempt the listener
+		assertEquals(0, manager.requestSlot(highListener, true));
+		assertGreaterThan(0, manager.requestSlot(lowListener, false));
+		assertGreaterThan(0, manager.pollForSlot(lowPoller, true, false));
+		assertEquals(0, manager.pollForSlot(highPoller, false, true));
+		manager = new UploadSlotManager();
+		
+		// low priority pollers force low priority listeners to get queued
+		// the rest go through and do not preempt it
+		assertEquals(0, manager.pollForSlot(lowPoller, true, false));
+		assertGreaterThan(0, manager.requestSlot(lowListener, false));
+		assertEquals(0, manager.requestSlot(highListener, true));
+		assertEquals(0, manager.pollForSlot(highPoller, true, true));
+		assertFalse(lowPoller.releaseSlot);
+	}
+	
+	private static class UploadSlotUserAdapter implements UploadSlotUser {
+		
+		boolean releaseSlot;
+		public String getHost() {
+			return null;
+		}
+		
+		public void releaseSlot() {
+			releaseSlot = true;
+		}
+		
+		public float getAverageBandwidth() {
+			return 0;
+		}
+		
+		public float getMeasuredBandwidth() throws InsufficientDataException {
+			return 0;
+		}
+		
+		public void measureBandwidth() {}
+	}
+	
+	private static class UploadSlotListenerAdapter 
+	extends UploadSlotUserAdapter implements UploadSlotListener {
+		boolean notified;
+		public void slotAvailable() {notified = true;}
+
+	}
+}
