@@ -138,7 +138,7 @@
 	      srcdir="${coredir}:${guidir}:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
 		  excludes="macosx/**, windows/**"
-		  fork="true" memoryMaximumSize="100m"
+		  fork="true" memoryMaximumSize="200m"
 		source="1.5" target="1.5">
 
      <classpath refid="default.classpath" />
