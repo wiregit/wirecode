@@ -57,7 +57,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
         mgr = new ContentManager();
-        crOne = new ContentResponse(URN_1, true);
+        crOne = new ContentResponse(URN_1, true, "True");
         one = new Observer();
         assertNull(mgr.getResponse(URN_1));
         assertNull(one.urn);

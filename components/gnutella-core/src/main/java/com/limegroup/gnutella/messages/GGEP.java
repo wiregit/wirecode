@@ -57,6 +57,16 @@ public class GGEP {
     public static final String GGEP_HEADER_SHA1 = "S1";
     /** The extension header (key) to determine if a SHA1 is valid. */
     public static final String GGEP_HEADER_SHA1_VALID = "SV";
+    /** The extension header (key) for file names */
+    public static final String GGEP_HEADER_FILENAME = "FN";
+    /** The extension header (key) for meta data (title) */
+    public static final String GGEP_HEADER_METADATA = "MD";
+    /** The extension header (key) for file size */
+    public static final String GGEP_HEADER_FILESIZE = "FS";
+    /** The extension header (key) for run length */
+    public static final String GGEP_HEADER_RUNLENGTH = "RL";
+    /** The extension header (key) content messages */
+    public static final String GGEP_HEADER_CONTENT_MESSAGE = "CM";
     
     /**
      * The extension header (key) for a feature query.

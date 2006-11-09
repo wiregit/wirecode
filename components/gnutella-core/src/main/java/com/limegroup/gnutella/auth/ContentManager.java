@@ -13,11 +13,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * Keeps track of content requests & responses.
@@ -102,6 +108,38 @@ public class ContentManager {
                CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
     
+    public void request(FileDesc fd, ContentResponseObserver observer, long timeout) {
+        URN urn = fd.getSHA1Urn();
+        String filename = fd.getFileName();
+        String metaData = null;
+        long size = fd.getFileSize();
+        int length = 0;
+        
+        String len = null;
+        if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
+            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.AUDIO_SCHEMA);
+            len = doc.getValue(LimeXMLNames.AUDIO_SECONDS);
+            metaData = doc.getValue(LimeXMLNames.AUDIO_TITLE);
+            
+        } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
+            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.VIDEO_SCHEMA);
+            len = doc.getValue(LimeXMLNames.VIDEO_LENGTH);
+            metaData = doc.getValue(LimeXMLNames.VIDEO_TITLE);
+        }
+        
+        if (len != null) {
+            try {
+                length = Integer.parseInt(len);
+            } catch (NumberFormatException e) {}
+        }
+        
+        request(urn, filename, metaData, size, length, observer, timeout);
+    }
+    
+    public void request(URN urn, ContentResponseObserver observer, long timeout) {
+        request(urn, null, null, 0L, 0, observer, timeout);
+    }
+    
     /**
      * Determines if the given URN is valid.
      * 
@@ -109,7 +147,9 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    public void request(URN urn, ContentResponseObserver observer, long timeout) {
+    public void request(URN urn, String filename, String metaData, long size, int length, 
+            ContentResponseObserver observer, long timeout) {
+        
         ContentResponseData response = CACHE.getResponse(urn);
         if(response != null || !ContentSettings.isManagementActive()) {
             if(LOG.isDebugEnabled())
@@ -118,17 +158,21 @@ public class ContentManager {
         } else {
             if(LOG.isDebugEnabled())
                 LOG.debug("Scheduling request for URN: " + urn);
-            scheduleRequest(urn, observer, timeout);
+            scheduleRequest(urn, filename, metaData, size, length, observer, timeout);
         }
+    }
+    
+    public ContentResponseData request(URN urn, long timeout) {
+        return request(urn, null, null, 0L, 0, timeout);
     }
     
     /**
      * Does a request, blocking until a response is given or the request times out.
      */
-    public ContentResponseData request(URN urn, long timeout) {
+    public ContentResponseData request(URN urn, String filename, String metaData, long size, int length, long timeout) {
         Validator validator = new Validator();
         synchronized(validator) {
-            request(urn, validator, timeout);
+            request(urn, filename, metaData, size, length, validator, timeout);
             if (validator.hasResponse()) {
                 return validator.getResponse();
             } else {
@@ -156,17 +200,21 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    protected void scheduleRequest(URN urn, ContentResponseObserver observer, long timeout) {
+    protected void scheduleRequest(URN urn, String filename, String metaData, long size, int length, ContentResponseObserver observer, long timeout) {
         long now = System.currentTimeMillis();
-        addResponder(new Responder(now, timeout, observer, urn));
+        addResponder(new Responder(now, timeout, observer, urn, filename, metaData, size, length));
 
         // only send if we haven't already requested.
         if (REQUESTED.add(urn) && authority != null) {
-            if(LOG.isDebugEnabled())
+            if(LOG.isDebugEnabled()) {
                 LOG.debug("Sending request for URN: " + urn + " to authority: " + authority);
-            authority.send(new ContentRequest(urn));
-        } else if(LOG.isDebugEnabled())
-            LOG.debug("Not sending request.  No authority or already requested.");
+            }
+            
+            authority.send(new ContentRequest(urn, filename, metaData, size, length));
+            
+        } else if(LOG.isDebugEnabled()) {
+            LOG.debug("Not sending request. No authority or already requested.");
+        }
     }
     
     /**
@@ -346,10 +394,43 @@ public class ContentManager {
                     setContentAuthority(auth);
                 }
                 
+                FileManager fileManager = RouterService.getFileManager();
+                
                 for(URN urn : alreadyReq) {
-                    if(LOG.isDebugEnabled())
+                    if(LOG.isDebugEnabled()) {
                         LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
-                    auth.send(new ContentRequest(urn));
+                    }
+                    
+                    String filename = null;
+                    String metaData = null;
+                    long size = 0L;
+                    int length = 0;
+                    
+                    FileDesc fd = fileManager.getFileDescForUrn(urn);
+                    if (fd != null) {
+                        filename = fd.getFileName();
+                        size = fd.getFileSize();
+                        
+                        String len = null;
+                        if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
+                            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.AUDIO_SCHEMA);
+                            len = doc.getValue(LimeXMLNames.AUDIO_SECONDS);
+                            metaData = doc.getValue(LimeXMLNames.AUDIO_TITLE);
+                            
+                        } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
+                            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.VIDEO_SCHEMA);
+                            len = doc.getValue(LimeXMLNames.VIDEO_LENGTH);
+                            metaData = doc.getValue(LimeXMLNames.VIDEO_TITLE);
+                        }
+                        
+                        if (len != null) {
+                            try {
+                                length = Integer.parseInt(len);
+                            } catch (NumberFormatException e) {}
+                        }
+                    }
+                    
+                    auth.send(new ContentRequest(urn, filename, metaData, size, length));
                 }
             }
         }
@@ -361,15 +442,29 @@ public class ContentManager {
     private static class Responder implements Comparable<Responder> {
         private final long dead;
         private final ContentResponseObserver observer;
-        private final URN urn;
         
-        Responder(long now, long timeout, ContentResponseObserver observer, URN urn) {
-            if(timeout != 0)
+        private final URN urn;
+        private final String filename;
+        private final String metaData;
+        private final long size;
+        private final int length;
+        
+        Responder(long now, long timeout, ContentResponseObserver observer, 
+                URN urn, String filename, String metaData, long size, int length) {
+            
+            if (timeout != 0) {
                 this.dead = now + timeout;
-            else
+            } else {
                 this.dead = 0;
+            }
+            
             this.observer = observer;
+            
             this.urn = urn;
+            this.filename = filename;
+            this.metaData = metaData;
+            this.size = size;
+            this.length = length;
         }
 
         public int compareTo(Responder o) {

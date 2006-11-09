@@ -69,6 +69,8 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLNames;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating
@@ -2044,14 +2046,54 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                RouterService.getContentManager().request(downloadSHA1, new ContentResponseObserver() {
+                ContentResponseObserver observer = new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
                             stop();
+                            
+                            System.out.println(response.getMessage());
                         }
                     }
-                }, 5000);           
+                };
+                
+                String filename = getSaveFile().getName();
+                String metaData = null;
+                long size = getContentLength();
+                int length = 0;
+                
+                String titleKey = null;
+                String lengthKey = null;
+                
+                if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
+                    titleKey = LimeXMLNames.AUDIO_TITLE;
+                    lengthKey = LimeXMLNames.AUDIO_SECONDS;
+                } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
+                    titleKey = LimeXMLNames.VIDEO_TITLE;
+                    lengthKey = LimeXMLNames.VIDEO_LENGTH;
+                }
+                
+                if (titleKey != null && lengthKey != null) {
+                    for (RemoteFileDesc rfd : cachedRFDs) {
+                        LimeXMLDocument doc = rfd.getXMLDocument();
+                        if (doc != null) {
+                            metaData = doc.getValue(titleKey);
+                            String len = doc.getValue(lengthKey);
+                            if (len != null) {
+                                try {
+                                    length = Integer.parseInt(len);
+                                } catch (NumberFormatException e) {}
+                            }
+                        }
+                        
+                        if (metaData != null && length > 0) {
+                            break;
+                        }
+                    }
+                }
+                
+                RouterService.getContentManager().request(
+                        downloadSHA1, filename, metaData, size, length, observer, 5000);           
             }
         }
     }

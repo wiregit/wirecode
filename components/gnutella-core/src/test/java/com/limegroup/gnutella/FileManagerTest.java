@@ -117,9 +117,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         ContentManager cm = RouterService.getContentManager();
         cm.initialize();
+        
         // request the urn so we can use the response.
         cm.request(u1, new StubContentResponseObserver(), 1000);
-        cm.handleContentResponse(new ContentResponse(u1, false));
+        cm.handleContentResponse(new ContentResponse(u1, false, "False"));
         
         waitForLoad();
         assertEquals("unexpected # of shared files", 3, fman.getNumFiles());
@@ -135,14 +136,14 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // test invalid content response.
         fman.validate(fd2);
-        cm.handleContentResponse(new ContentResponse(u2, false));
+        cm.handleContentResponse(new ContentResponse(u2, false, "False"));
         assertFalse("shouldn't be shared anymore", fman.isFileShared(f2));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());
         assertEquals("wrong shared file size", 34, fman.getSize());
         
         // test valid content response.
         fman.validate(fd3);
-        cm.handleContentResponse(new ContentResponse(u3, true));
+        cm.handleContentResponse(new ContentResponse(u3, true, "True"));
         assertTrue("should still be shared", fman.isFileShared(f3));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());
         assertEquals("wrong shared file size", 34, fman.getSize());

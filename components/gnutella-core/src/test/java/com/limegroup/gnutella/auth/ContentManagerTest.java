@@ -44,8 +44,8 @@ public class ContentManagerTest extends BaseTestCase {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
         mgr = new ContentManager();
-        crOne = new ContentResponse(URN_1, true);
-        crTwo = new ContentResponse(URN_2, false);
+        crOne = new ContentResponse(URN_1, true, "True");
+        crTwo = new ContentResponse(URN_2, false, "False");
         one = new Observer();
         two = new Observer();
         three = new Observer();
@@ -153,13 +153,13 @@ public class ContentManagerTest extends BaseTestCase {
         assertFalse(mgr.isVerified(URN_2));
         mgr.request(URN_2, two, 2000);
         assertFalse(mgr.isVerified(URN_2));
-        mgr.handleContentResponse(new ContentResponse(URN_2, true));
+        mgr.handleContentResponse(new ContentResponse(URN_2, true, "True"));
         assertTrue(mgr.isVerified(URN_2)); // verified by true response
         
         assertFalse(mgr.isVerified(URN_3));
         mgr.request(URN_3, one, 2000);
         assertFalse(mgr.isVerified(URN_3));        
-        mgr.handleContentResponse(new ContentResponse(URN_3, false));
+        mgr.handleContentResponse(new ContentResponse(URN_3, false, "False"));
         assertTrue(mgr.isVerified(URN_3)); // verified by false response.
     }
     
