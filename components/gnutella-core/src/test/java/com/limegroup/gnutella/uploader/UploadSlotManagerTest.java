@@ -38,9 +38,11 @@ public class UploadSlotManagerTest extends BaseTestCase {
 		UploadSlotUser granted = new UploadSlotUserAdapter();
 		// free slot
 		assertEquals(0, manager.pollForSlot(granted, true, false));
+		assertEquals(-1, manager.positionInQueue(granted));
 		// queued
 		assertEquals(1, manager.pollForSlot(queued, true, false));
 		assertEquals(1, manager.getNumQueued());
+		assertEquals(0, manager.positionInQueue(queued)); // queue starts at pos 0
 		// reject
 		assertEquals(-1, manager.pollForSlot(new UploadSlotUserAdapter(), true, false));
 		// another reject
@@ -48,6 +50,7 @@ public class UploadSlotManagerTest extends BaseTestCase {
 		// was already in queue, stays there.
 		assertEquals(1, manager.pollForSlot(queued, true, false));
 		assertEquals(1, manager.getNumQueued());
+		assertEquals(0, manager.positionInQueue(queued));
 		// the one that used the slot is done, the queued one is granted.
 		manager.requestDone(granted);
 		assertEquals(0, manager.pollForSlot(queued, true, false));
@@ -210,6 +213,50 @@ public class UploadSlotManagerTest extends BaseTestCase {
 		assertEquals(0, manager.requestSlot(highListener, true));
 		assertEquals(0, manager.pollForSlot(highPoller, true, true));
 		assertFalse(lowPoller.releaseSlot);
+	}
+	
+	/**
+	 * tests that listeners get notified for available slot
+	 * if there are no other users with high priority
+	 */
+	public void testListenersNotified() throws Exception {
+		final int SLOTS = 3;
+		UploadSettings.SOFT_MAX_UPLOADS.setValue(SLOTS);
+		UploadSettings.HARD_MAX_UPLOADS.setValue(4);
+		UploadSettings.UPLOAD_QUEUE_SIZE.setValue(20);
+		UploadSlotListenerAdapter[] lowListener = new UploadSlotListenerAdapter[5];
+		for (int i = 0; i < 5; i++)
+			lowListener[i] = new UploadSlotListenerAdapter();
+		
+		UploadSlotListenerAdapter highListener = new UploadSlotListenerAdapter();
+		UploadSlotListenerAdapter highListener2 = new UploadSlotListenerAdapter();
+		
+		// add two high listeners, all low listeners should get queued
+		assertEquals(0, manager.requestSlot(highListener, true));
+		assertEquals(0, manager.requestSlot(highListener2, true));
+		for (int i = 0; i < lowListener.length; i++) {
+			assertEquals(i+1, manager.requestSlot(lowListener[i], false));
+			assertEquals(i, manager.positionInQueue(lowListener[i]));
+		}
+		assertEquals(lowListener.length, manager.getNumQueuedResumable());
+		
+		// kill one of the high listeners - none of the lower should not be notified
+		manager.cancelRequest(highListener);
+		for (UploadSlotListenerAdapter l : lowListener)
+			assertFalse(l.notified);
+		
+		// kill the second high listeners - enough low listeners should be notified
+		// to fill the slots.
+		manager.cancelRequest(highListener2);
+		assertTrue(lowListener[0].notified);
+		assertTrue(lowListener[1].notified);
+		assertTrue(lowListener[2].notified);
+		// the rest should not be notified, but should move forward in the queue.
+		for (int i = SLOTS; i < lowListener.length; i++) {
+			assertFalse(lowListener[i].notified);
+			assertEquals(i - SLOTS, manager.positionInQueue(lowListener[i]));
+		}
+		assertEquals(lowListener.length - SLOTS, manager.getNumQueuedResumable());
 	}
 	
 	private static class UploadSlotUserAdapter implements UploadSlotUser {
