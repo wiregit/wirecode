@@ -65,8 +65,10 @@ public class GGEP {
     public static final String GGEP_HEADER_FILESIZE = "FS";
     /** The extension header (key) for run length */
     public static final String GGEP_HEADER_RUNLENGTH = "RL";
-    /** The extension header (key) content messages */
+    /** The extension header (key) for content messages */
     public static final String GGEP_HEADER_CONTENT_MESSAGE = "CM";
+    /** The extension header (key) for time stamps */
+    public static final String GGEP_HEADER_TIMESTAMP = "TS";
     
     /**
      * The extension header (key) for a feature query.

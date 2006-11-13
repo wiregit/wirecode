@@ -22,6 +22,13 @@ public class ContentSettings extends LimeProps {
         FACTORY.createBooleanSetting("CONTENT_USER_MANAGEMENT_ACTIVE", false);
     
     /**
+     * Whether or not we're only accepting ContentResponses that
+     * are properly signed.
+     */
+    public static final BooleanSetting ONLY_SECURE_CONTENT_RESPONSES
+        = FACTORY.createBooleanSetting("ONLY_SECURE_CONTENT_RESPONSES", true);
+    
+    /**
      * Returns true if content management is active.
      * 
      * @return

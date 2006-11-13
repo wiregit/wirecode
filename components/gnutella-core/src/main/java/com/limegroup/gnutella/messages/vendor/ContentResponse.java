@@ -3,31 +3,44 @@
  */
 package com.limegroup.gnutella.messages.vendor;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.Signature;
+import java.security.SignatureException;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPParser;
+import com.limegroup.gnutella.messages.SecureMessage;
 
 /**
  * A response of content.
  */
-public class ContentResponse extends VendorMessage {
+public class ContentResponse extends VendorMessage implements SecureMessage {
 
+    private static final long ONE_WEEK = 1000L*60L*60L*24L*7L;
+    
     public static final int VERSION = 1;
     
-    private URN sha1;
+    /* default */ static ContentResponseSigner SIGNER;
+    
+    private URN urn;
     
     private boolean okay;
     
     private String message;
+    
+    private long timeStamp;
+    
+    private byte[] signature;
+    
+    private int secureStatus = SecureMessage.INSECURE;
     
     /**
      * Constructs a new ContentRequest with data from the network.
@@ -36,57 +49,89 @@ public class ContentResponse extends VendorMessage {
       throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CONTENT_RESP, version, payload);
         
-        if (getPayload().length < 1) {
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " + getPayload().length);
+        if (payload.length < 1) {
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " + payload.length);
+        }
+        
+        GGEPParser parser = new GGEPParser();
+        parser.scanForGGEPs(payload, 0);
+        
+        GGEP ggep = parser.getNormalGGEP();
+        if (ggep == null) {
+            throw new BadPacketException("GGEP field missing");
+        }
+            
+        try {
+            urn = URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
+        } catch (IOException e) {
+        } catch (BadGGEPPropertyException e) {
         }
         
         try {
-            GGEP ggep = new GGEP(getPayload(), 0);
-            
+            okay = ggep.getInt(GGEP.GGEP_HEADER_SHA1_VALID) != 0;
+        } catch (BadGGEPPropertyException e) {
+        }
+        
+        if (ggep.hasKey(GGEP.GGEP_HEADER_CONTENT_MESSAGE)) {
             try {
-                sha1 = URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
-            } catch (IOException e) {
+                message = ggep.getString(GGEP.GGEP_HEADER_CONTENT_MESSAGE);
             } catch (BadGGEPPropertyException e) {
             }
-            
+        }
+        
+        if (ggep.hasKey(GGEP.GGEP_HEADER_TIMESTAMP)) {
             try {
-                okay = ggep.getInt(GGEP.GGEP_HEADER_SHA1_VALID) != 0;
+                timeStamp = ggep.getLong(GGEP.GGEP_HEADER_TIMESTAMP);
             } catch (BadGGEPPropertyException e) {
             }
-            
-            if (ggep.hasKey(GGEP.GGEP_HEADER_CONTENT_MESSAGE)) {
+        }
+        
+        GGEP secure = parser.getSecureGGEP();
+        if (secure != null) {
+            if (secure.hasKey(GGEP.GGEP_HEADER_SIGNATURE)) {
                 try {
-                    message = ggep.getString(GGEP.GGEP_HEADER_CONTENT_MESSAGE);
+                    signature = secure.getBytes(GGEP.GGEP_HEADER_SIGNATURE);
                 } catch (BadGGEPPropertyException e) {
                 }
             }
-        } catch(BadGGEPBlockException bgbe) {
-            throw new BadPacketException(bgbe);
         }
     }
     
     /**
      * Constructs a new ContentRequest for the given SHA1 URN.
      */
-    public ContentResponse(URN sha1, boolean okay, String message) {
-        super(F_LIME_VENDOR_ID, F_CONTENT_RESP, VERSION, derivePayload(sha1, okay, message));
+    public ContentResponse(URN urn, boolean okay, String message) {
+        this(urn, okay, message, System.currentTimeMillis());
+    }
+    
+    /**
+     * 
+     */
+    private ContentResponse(URN urn, boolean okay, String message, long timeStamp) {
+        super(F_LIME_VENDOR_ID, F_CONTENT_RESP, VERSION, 
+                derivePayload(urn, okay, message, timeStamp));
         
-        this.sha1 = sha1;
+        this.urn = urn;
         this.okay = okay;
         this.message = message;
+        this.timeStamp = timeStamp;
     }
 
     /**
      * Constructs the payload from given SHA1 Urn & okay flag.
      */
-    private static byte[] derivePayload(URN sha1, boolean okay, String message) {
-        if (sha1 == null) {
-            throw new NullPointerException("null sha1");
+    private static byte[] derivePayload(URN urn, boolean okay, String message, long timeStamp) {
+        if (urn == null) {
+            throw new NullPointerException("URN is null");
+        }
+        
+        if (!urn.isSHA1()) {
+            throw new IllegalArgumentException("URN must be a SHA1");
         }
         
         GGEP ggep =  new GGEP(true);
         
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());
+        ggep.put(GGEP.GGEP_HEADER_SHA1, urn.getBytes());
         ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);
         
         if (message != null && message.length() > 0) {
@@ -97,12 +142,22 @@ public class ContentResponse extends VendorMessage {
             }
         }
         
+        if (timeStamp > 0L) {
+            ggep.put(GGEP.GGEP_HEADER_TIMESTAMP, timeStamp);
+        }
+        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ggep.write(out);
         } catch(IOException iox) {
             ErrorService.error(iox); // impossible.
         }
+        
+        ContentResponseSigner signer = ContentResponse.SIGNER;
+        if (signer != null) {
+            signer.sign(out, out.toByteArray());
+        }
+        
         return out.toByteArray();
     }
     
@@ -110,20 +165,87 @@ public class ContentResponse extends VendorMessage {
      * Gets the URN this msg is for.
      */
     public URN getURN() {
-        return sha1;
+        return urn;
     }
     
     /**
      * Gets the 'ok' flag for the URN.
      */
-    public boolean getOK() {
+    public boolean isOK() {
         return okay;
+    }
+    
+    /**
+     * Returns the reason why content was blocked or
+     * null if no reason is provided
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Returns the time stamp when the ContentResponse object
+     * was created
+     */
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+    
+    /**
+     * Returns true if this ContentResponse object is expired
+     */
+    public boolean isExpired() {
+        return (System.currentTimeMillis() - timeStamp) >= ONE_WEEK;
+    }
+
+    public int getSecureStatus() {
+        return secureStatus;
+    }
+
+    public synchronized void setSecureStatus(int secureStatus) {
+        this.secureStatus = secureStatus;
+    }
+
+    public synchronized boolean isSecure() {
+        return (secureStatus & SecureMessage.SECURE) != 0;
+    }
+    
+    public byte[] getSecureSignature() {
+        return signature;
+    }
+    
+    public boolean hasSecureSignature() {
+        return signature != null;
+    }
+    
+    public synchronized void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
+        byte[] payload = getPayload();
+        
+        GGEPParser parser = new GGEPParser();
+        parser.scanForGGEPs(payload, 0);
+        
+        int start = parser.getSecureStartIndex();
+        signature.update(payload, 0, start);
+        
+        int end = parser.getSecureEndIndex();
+        signature.update(payload, end, payload.length-end);
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("URN: ").append(getURN()).append("\n");
+        buffer.append("OK: ").append(isOK()).append("\n");
+        buffer.append("Message: ").append(getMessage()).append("\n");
+        buffer.append("TimeStamp: ").append(getTimeStamp()).append("\n");
+        buffer.append("Signature: ").append((getSecureSignature() != null ? getSecureSignature().length : "null")).append("\n");
+        buffer.append("Length: ").append(getPayload().length).append("\n");
+        return buffer.toString();
     }
     
     /**
      * 
      */
-    public String getMessage() {
-        return message;
+    static interface ContentResponseSigner {
+        public void sign(OutputStream out, byte[] data);
     }
 }

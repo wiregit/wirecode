@@ -2051,8 +2051,6 @@ public class ManagedDownloader extends AbstractDownloader
                         if(response != null && !response.isOK()) {
                             invalidated = true;
                             stop();
-                            
-                            System.out.println(response.getMessage());
                         }
                     }
                 };

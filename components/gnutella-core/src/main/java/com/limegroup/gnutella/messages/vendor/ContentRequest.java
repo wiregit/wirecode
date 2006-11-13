@@ -75,17 +75,13 @@ public class ContentRequest extends VendorMessage {
         }
     }
     
-    public ContentRequest(URN sha1) {
-        this(sha1, null, null, 0L, 0);
-    }
-    
     /**
      * Constructs a new ContentRequest for the given SHA1 URN.
      */
-    public ContentRequest(URN sha1, String filename, String metaData, long size, int length) {
-        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, derivePayload(sha1, filename, metaData, size, length));
+    public ContentRequest(URN urn, String filename, String metaData, long size, int length) {
+        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, derivePayload(urn, filename, metaData, size, length));
         
-        this.sha1 = sha1.getBytes();
+        this.sha1 = urn.getBytes();
         
         if (filename != null && filename.length() > 0) {
             try {
@@ -108,13 +104,17 @@ public class ContentRequest extends VendorMessage {
     /**
      * Constructs the payload from given SHA1 Urn.
      */
-    private static byte[] derivePayload(URN sha1, String filename, String metaData, long size, int length) {
-        if(sha1 == null) {
-            throw new NullPointerException("null sha1");
+    private static byte[] derivePayload(URN urn, String filename, String metaData, long size, int length) {
+        if(urn == null) {
+            throw new NullPointerException("URN is null");
+        }
+        
+        if (!urn.isSHA1()) {
+            throw new IllegalArgumentException("URN must be a SHA1");
         }
         
         GGEP ggep =  new GGEP(true);
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());
+        ggep.put(GGEP.GGEP_HEADER_SHA1, urn.getBytes());
         
         if (filename != null && filename.length() > 0) {
             try {

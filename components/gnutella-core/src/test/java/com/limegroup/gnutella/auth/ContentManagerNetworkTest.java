@@ -34,7 +34,6 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     private static final int LISTEN_PORT = 9172;
     private static final int SEND_PORT = 9876;
     
-    
     public ContentManagerNetworkTest(String name) {
         super(name);
     }
@@ -81,7 +80,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.receive(packet);
         byte[] read = packet.getData();
         
-        ContentRequest expectSentMsg = new ContentRequest(URN_1);
+        ContentRequest expectSentMsg = new ContentRequest(URN_1, null, null, 0, 0);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         expectSentMsg.write(out);
         byte[] expectSentBytes = out.toByteArray();
@@ -115,7 +114,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.receive(packet);
         byte[] read = packet.getData();
         
-        ContentRequest expectSentMsg = new ContentRequest(URN_1);
+        ContentRequest expectSentMsg = new ContentRequest(URN_1, null, null, 0, 0);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         expectSentMsg.write(out);
         byte[] expectSentBytes = out.toByteArray();
@@ -130,6 +129,8 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     }
     
     public void testResponseReceived() throws Exception {        
+        ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.setValue(false);
+        
         mgr.shutdown();
         mgr = RouterService.getContentManager();
         mgr.request(URN_1, one, 4000);
@@ -142,7 +143,6 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         assertEquals(one.response, mgr.getResponse(URN_1));
     }
     
-    
     private static class Observer implements ContentResponseObserver {
         private URN urn;
         private ContentResponseData response;
@@ -152,5 +152,4 @@ public class ContentManagerNetworkTest extends BaseTestCase {
             this.response = response;
         }
     }
-    
 }

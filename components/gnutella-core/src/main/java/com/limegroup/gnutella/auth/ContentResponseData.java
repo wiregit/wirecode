@@ -16,7 +16,7 @@ public class ContentResponseData implements Serializable {
     
     /** Constructs a new ContentResponseData with data from the given ContentResponse */
     public ContentResponseData(ContentResponse msg) {
-        this(System.currentTimeMillis(), msg.getOK(), msg.getMessage());
+        this(System.currentTimeMillis(), msg.isOK(), msg.getMessage());
     }
     
     /** Hook for tests to create Responses at different times. */
@@ -38,5 +38,12 @@ public class ContentResponseData implements Serializable {
     /** Returns the time this ContentResponseData was created. */
     public long getCreationTime() {
         return created;
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("OK: ").append(isOK()).append("\n");
+        buffer.append("Message: ").append(getMessage()).append("\n");
+        return buffer.toString();
     }
 }

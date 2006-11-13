@@ -36,6 +36,8 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.SecureMessage;
+import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
@@ -66,6 +68,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -2132,8 +2135,22 @@ public abstract class MessageRouter {
     }
     
     /** Handles a ContentResponse msg -- passing it to the ContentManager. */
-    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
-        RouterService.getContentManager().handleContentResponse(msg);
+    private void handleContentResponse(final ContentResponse msg, ReplyHandler handler) {
+        if (ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.getValue()) {
+            if (msg.hasSecureSignature()) {
+                SecureMessageCallback callback = new SecureMessageCallback() {
+                    public void handleSecureMessage(SecureMessage sm, boolean passed) {
+                        if (passed) {
+                            RouterService.getContentManager().handleContentResponse(msg);
+                        }
+                    }
+                };
+                
+                RouterService.getSecureMessageVerifier().verify(msg, callback);
+            }
+        } else {
+            RouterService.getContentManager().handleContentResponse(msg);
+        }
     }
 
     /**
@@ -3151,7 +3168,7 @@ public abstract class MessageRouter {
      *                  MULTICAST HANDLER
      * ===================================================
      */
-    public class MulticastQueryRequestHandler implements MessageHandler {
+    private class MulticastQueryRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr,
                 ReplyHandler handler) {
             if (!handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler)) {
@@ -3162,7 +3179,7 @@ public abstract class MessageRouter {
         }
     }
     
-    public class MulticastQueryReplyHandler implements MessageHandler {
+    private class MulticastQueryReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
             ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
@@ -3170,7 +3187,7 @@ public abstract class MessageRouter {
         }
     }
     
-    public class MulticastPingRequestHandler implements MessageHandler {
+    private class MulticastPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
             ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
@@ -3178,7 +3195,7 @@ public abstract class MessageRouter {
         }
     }
     
-    public class MulticastPingReplyHandler implements MessageHandler {
+    private class MulticastPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
             ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
@@ -3186,7 +3203,7 @@ public abstract class MessageRouter {
         }
     }
     
-    public class MulticastPushRequestHandler implements MessageHandler {
+    private class MulticastPushRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
