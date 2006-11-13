@@ -189,7 +189,7 @@ public class ContentRequest extends VendorMessage {
     }
     
     /**
-     * 
+     * The runlength metadata
      */
     public int getLength() {
         return length;
