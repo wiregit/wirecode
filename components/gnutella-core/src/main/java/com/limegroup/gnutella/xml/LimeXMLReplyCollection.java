@@ -366,6 +366,8 @@ public class LimeXMLReplyCollection {
      * FileDesc knows about.
      */
     public void addReply(FileDesc fd, LimeXMLDocument replyDoc) {
+    	assert getSchemaURI().equals(replyDoc.getSchemaURI());
+    	
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
             dirty = true;
@@ -476,6 +478,8 @@ public class LimeXMLReplyCollection {
      * @return the older document, which is being replaced. Can be null.
      */
     public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc) {
+    	assert getSchemaURI().equals(newDoc.getSchemaURI());
+    	
         if(LOG.isTraceEnabled())
             LOG.trace("Replacing doc in FD (" + fd + ") with new doc (" + newDoc + ")");
         
@@ -490,7 +494,9 @@ public class LimeXMLReplyCollection {
             addKeywords(newDoc);
         }
        
-        fd.replaceLimeXMLDocument(oldDoc, newDoc);
+        boolean replaced = fd.replaceLimeXMLDocument(oldDoc, newDoc);
+        assert replaced;
+        
         return oldDoc;
     }
 
