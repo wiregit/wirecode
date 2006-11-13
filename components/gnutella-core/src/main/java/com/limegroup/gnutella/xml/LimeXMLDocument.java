@@ -496,8 +496,6 @@ public class LimeXMLDocument implements Serializable {
 		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
 		return ((schemaUri == null ? xmlDoc.schemaUri == null :
 				 schemaUri.equals(xmlDoc.schemaUri)) &&
-				(fileId == null ? xmlDoc.fileId == null :
-				 fileId.equals(xmlDoc.fileId)) &&
 				(action == null ? xmlDoc.action == null :
 				 action.equals(xmlDoc.action)) &&
 				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
@@ -517,8 +515,6 @@ public class LimeXMLDocument implements Serializable {
 				result = 37*result + fieldToValue.hashCode();
 			if(schemaUri != null)
 				result = 37*result + schemaUri.hashCode();
-			if(fileId != null)
-				result = 37*result + fileId.hashCode();
 			if(action != null)
 				result = 37*result + action.hashCode();
 			hashCode = result;
