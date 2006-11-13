@@ -38,7 +38,7 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * the only class that intializes it.  See setListeningPort() for more
  * info.
  */
-public class Acceptor implements ConnectionAcceptor {
+public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
 
@@ -527,20 +527,21 @@ public class Acceptor implements ConnectionAcceptor {
         }
         
         public void handleAccept(Socket client) {
-            accept(client);
+            processSocket(client);
         }
     }
     
-    /** Accepts the given socket. */
-    public void accept(Socket client) {
-        accept(client, null);
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.SocketProcessor#processSocket(java.net.Socket)
+	 */
+    public void processSocket(Socket client) {
+        processSocket(client, null);
     }
     
-    /**
-     * Accepts the given incoming socket, allowing only the given protocol.
-     * If allowedProtocol is null, all are allowed.
-     */
-    public void accept(Socket client, String allowedProtocol) {
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.SocketProcessor#processSocket(java.net.Socket, java.lang.String)
+	 */
+    public void processSocket(Socket client, String allowedProtocol) {
         if (!_started) {
             IOUtils.close(client);
             return;

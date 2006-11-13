@@ -27,6 +27,7 @@ import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.DownloadAcceptor;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -68,7 +69,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * serialized.  
  */
 @SuppressWarnings("unchecked")
-public class DownloadManager implements BandwidthTracker {
+public class DownloadManager implements BandwidthTracker, DownloadAcceptor {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -146,7 +147,7 @@ public class DownloadManager implements BandwidthTracker {
      */
     private Runnable _waitingPump;
     
-    private final PushDownloadManager pushManager = new PushDownloadManager();
+    private PushDownloadManager pushManager;
 
     //////////////////////// Creation and Saving /////////////////////////
 
@@ -175,7 +176,12 @@ public class DownloadManager implements BandwidthTracker {
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
-        pushManager.initialize();
+        pushManager = new PushDownloadManager(this, 
+        		router,
+        		RouterService.getHttpExecutor(),
+        		RouterService.getSchedulingThreadPool(),
+        		RouterService.getAcceptor());
+        pushManager.initialize(RouterService.getConnectionDispatcher());
     }
 
     /**
@@ -266,6 +272,9 @@ public class DownloadManager implements BandwidthTracker {
     	return pushManager;
     }
     
+    /* (non-Javadoc)
+	 * @see com.limegroup.gnutella.DownloadAcceptor#acceptDownload(java.lang.String, int, byte[], java.net.Socket)
+	 */
     public synchronized void acceptDownload(String file, 
     		int index, byte [] clientGUID, Socket socket) {
     	 if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))

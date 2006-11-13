@@ -19,13 +19,16 @@ import org.apache.commons.logging.LogFactory;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.ConnectionAcceptor;
+import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPClientListener;
+import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ConnectObserver;
@@ -41,6 +44,7 @@ import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -69,12 +73,31 @@ public class PushDownloadManager implements ConnectionAcceptor {
 
     private MessageRouter router;
     
-    public void initialize() {
-        RouterService.getConnectionDispatcher().
-        addConnectionAcceptor(this,
-        		new String[]{"GIV"},
-        		false,
-        		true);
+    private final DownloadAcceptor downloadAcceptor;
+    
+    private final HttpExecutor executor;
+    
+    private final SchedulingThreadPool scheduler;
+    
+    private final SocketProcessor processor;
+    
+    public PushDownloadManager(DownloadAcceptor downloadAcceptor, 
+    		MessageRouter router,
+    		HttpExecutor executor,
+    		SchedulingThreadPool scheduler,
+    		SocketProcessor processor) {
+    	this.downloadAcceptor = downloadAcceptor;
+    	this.router = router;
+    	this.executor = executor;
+    	this.scheduler = scheduler;
+    	this.processor = processor;
+    }
+    
+    public void initialize(ConnectionDispatcher dispatcher) {
+    	dispatcher.addConnectionAcceptor(this,
+    			new String[]{"GIV"},
+    			false,
+    			true);
     }
     
     /**
@@ -224,7 +247,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         
         HTTPClientListener l = new PushHttpClientListener(methodsCopy, shouldDoFWTransfer, file, sender);
         
-        Shutdownable s = RouterService.getHttpExecutor().executeAny(
+        Shutdownable s = executor.executeAny(
         		l,5000, PUSH_THREAD_POOL, methods);
         observer.updateCancellable(s);
     }
@@ -246,7 +269,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	
     	public void requestFailed(HttpMethod method, IOException exc) {
     		LOG.warn("PushProxy request exception", exc);
-    		RouterService.getHttpExecutor().releaseResources(method);
+    		executor.releaseResources(method);
     		methods.remove(method);
     		if (methods.isEmpty()) // all failed 
     			sender.sendPushMessage();
@@ -255,7 +278,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	public void requestComplete(HttpMethod method) {
     		methods.remove(method);
     		int statusCode = method.getStatusCode();
-    		RouterService.getHttpExecutor().releaseResources(method);
+    		executor.releaseResources(method);
     		if (statusCode == 202) {
     			
     			if(LOG.isInfoEnabled())
@@ -263,7 +286,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
     			
     			if (shouldDoFWTransfer) {
     				UDPConnection socket = new UDPConnection();
-    				socket.connect(file.getSocketAddress(), 20000, new FWTConnectObserver());
+    				socket.connect(file.getSocketAddress(), 20000, new FWTConnectObserver(processor));
     				
     				// update the PushConnector cancellable delegate with the socket
     				Shutdownable otherMethods = sender.observer.updateCancellable(socket);
@@ -355,7 +378,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
         
-        RouterService.getDownloadManager().acceptDownload(file, index, clientGUID, socket);
+        downloadAcceptor.acceptDownload(file, index, clientGUID, socket);
 
     }
 
@@ -414,8 +437,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
             // schedule the failover tcp pusher, which will run
             // if we don't get a response from the UDP push
             // within the UDP_PUSH_FAILTIME timeframe
-            RouterService.schedule(new PushFailoverRequestor(file, guid, observer),
-            		UDP_PUSH_FAILTIME, 0);
+            scheduler.invokeLater(new PushFailoverRequestor(file, guid, observer),
+            		UDP_PUSH_FAILTIME);
         }
 
         sendPushUDP(file,guid);
@@ -584,11 +607,17 @@ public class PushDownloadManager implements ConnectionAcceptor {
     /** Simple ConnectObserver for FWT connections. */
     private static class FWTConnectObserver implements ConnectObserver {
 
+    	private final SocketProcessor processor;
+    	
+    	FWTConnectObserver(SocketProcessor processor) {
+    		this.processor = processor;
+    	}
+    	
         public void handleIOException(IOException iox) {}
 
         public void handleConnect(Socket socket) throws IOException {
             DownloadStat.FW_FW_SUCCESS.incrementStat();
-            RouterService.getAcceptor().accept(socket, "GIV");
+            processor.processSocket(socket, "GIV");
         }
 
         public void shutdown() {
