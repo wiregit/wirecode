@@ -734,7 +734,7 @@ public abstract class FileManager {
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(PROGRAM_SHARE, null, revision);
         updateSharedDirectories(PREFERENCE_SHARE, null, revision);
-            
+        
         //Load the shared directories and add their files.
         _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
@@ -742,7 +742,7 @@ public abstract class FileManager {
             
 
         // Add specially shared files
-        Set<File> specialFiles = _data.SPECIAL_FILES_TO_SHARE;
+        Collection<File> specialFiles = _individualSharedFiles;
         ArrayList<File> list;
         synchronized(specialFiles) {
         	// iterate over a copied list, since addFileIfShared might call
@@ -797,11 +797,15 @@ public abstract class FileManager {
             return;
         
         // STEP 0:
-		// Do not share certain the incomplete directory, directories on the
+		// Do not share certain directories, directories on the
 		// do not share list, or sensitive directories.
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return;
-
+        
+        if (isApplicationSpecialShareDirectory(directory)) {
+            return;
+        }
+        
 		// Do not share directories on the do not share list
 		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
 			return;
@@ -2259,8 +2263,8 @@ public abstract class FileManager {
         return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
     }
     
-    public static boolean isApplicationSpecialShareDirectory(File f) {
-        return f.equals(APPLICATION_SPECIAL_SHARE);
+    public static boolean isApplicationSpecialShareDirectory(File directory) {
+        return directory.equals(APPLICATION_SPECIAL_SHARE);
     }
     
     /**

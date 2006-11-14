@@ -720,13 +720,21 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         File specialShare = createNewNamedTestFile(10, "shared", FileManager.APPLICATION_SPECIAL_SHARE);
         MultiListener listener = new MultiListener();
         fman.registerFileManagerEventListener(listener);
-        FileManagerEvent evt = addFileForSession(specialShare);
-        assertTrue(evt.isAddEvent());
-        Thread.sleep(500);
+        waitForLoad();
         //should not have dipatched an event for the folder
         for(FileManagerEvent fevt: listener.getFileManagerEventList()) {
-            assertFalse(fevt.isAddFolderEvent());
+            if(fevt.isAddFolderEvent()) {
+                File[] files = fevt.getFiles();
+                for(int i = 0 ; i < files.length; i++) {
+                    if(files[i] != null) {
+                        assertFalse(files[i].getParent().equals(FileManager.APPLICATION_SPECIAL_SHARE));
+                    }
+                }
+            }
         }
+        specialShare = createNewNamedTestFile(10, "shared2", FileManager.APPLICATION_SPECIAL_SHARE);
+        FileManagerEvent evt = addFileForSession(specialShare);
+        assertTrue(evt.isAddEvent());
         //should have shared file
         assertTrue(fman.isFileShared(specialShare));
         //should not be an individual share

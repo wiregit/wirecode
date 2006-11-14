@@ -223,12 +223,6 @@ public class SharingSettings extends LimeProps {
         FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES", true);
     
     /**
-     * Whether or not to show .torrent directory in Library.
-     */
-    public static final BooleanSetting SHOW_TORRENT_META_FILES =
-        FACTORY.createBooleanSetting("SHOW_TORRENT_META_FILES", false);
-	
-    /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
