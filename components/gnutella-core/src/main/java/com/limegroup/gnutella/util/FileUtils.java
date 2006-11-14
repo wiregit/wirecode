@@ -56,18 +56,6 @@ public class FileUtils {
     }
     
     /**
-     * Renames the specified file to the specified backup file. If renaming
-     * fails, this method tries copying. 
-     */
-    public static void backupFile(File file, File backup) {
-        if(file.renameTo(backup)) {
-            return;
-        }
-        
-        CommonUtils.copy(file, backup);
-    }
-    
-    /**
      * Reads the map stored, in serialized object form, 
      * in the passed file and returns it. from the file where it is stored
      * @param filename The file from where to read the Map

@@ -302,7 +302,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
      */
     public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");
-        File f = new File(FileManager.TORRENT_META_DATA_SHARE, fileName);
+        File f = new File(FileManager.APPLICATION_SPECIAL_SHARE, fileName);
         return f;
     }
 }	

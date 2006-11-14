@@ -6,10 +6,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -928,24 +926,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             //  revert the os.name system property back to normal 
             setOSName(realOS);
         }
-    }
-    
-    public void testPurgeExpiredTorrents() throws Exception {
-        SharingSettings.TORRENT_METADATA_PURGE_TIME.setValue(10);
-        int numFiles = FileManager.TORRENT_META_DATA_SHARE.listFiles().length;
-        File f = new File(FileManager.TORRENT_META_DATA_SHARE, "1.torrent");
-        f.createNewFile();
-        f = new File(FileManager.TORRENT_META_DATA_SHARE, "2.torrent");
-        f.createNewFile();
-        assertEquals(numFiles + 2, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
-        fman.stop();
-        fman.start();
-        assertEquals(numFiles + 2, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
-        SharingSettings.TORRENT_METADATA_PURGE_TIME.setValue(0);
-        fman.stop();
-        fman.start();
-        //should have expired files
-        assertEquals(numFiles, FileManager.TORRENT_META_DATA_SHARE.listFiles().length);
     }
     
     /**

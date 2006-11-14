@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -62,6 +63,7 @@ import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -1012,6 +1014,8 @@ public class RouterService {
             
             cleanupPreviewFiles();
             
+            cleanupTorrentMetadataFiles();
+            
             downloadManager.writeSnapshot();
             
            // torrentManager.writeSnapshot();
@@ -1061,6 +1065,33 @@ public class RouterService {
             String name = files[i].getName();
             if (name.startsWith(IncompleteFileManager.PREVIEW_PREFIX))
                 files[i].delete();  //May or may not work; ignore return code.
+        }
+    }
+    
+    private static void cleanupTorrentMetadataFiles() {
+        if(!fileManager.isLoadFinished()) {
+            return;
+        }
+        
+        FileFilter filter = new FileFilter() {
+            public boolean accept(File f) {
+                return FileUtils.getFileExtension(f).equals("torrent");
+            }
+        };
+        
+        File[] file_list = FileManager.APPLICATION_SPECIAL_SHARE.listFiles(filter);
+        if(file_list == null) {
+            return;
+        }
+        long purgeLimit = System.currentTimeMillis() 
+            - SharingSettings.TORRENT_METADATA_PURGE_TIME.getValue()*24L*60L*60L*1000L;
+        File tFile;
+        for(int i = 0; i < file_list.length; i++) {
+            tFile = file_list[i];
+            if(!fileManager.isFileShared(tFile) &&
+                    tFile.lastModified() < purgeLimit) {
+                tFile.delete();
+            }
         }
     }
     
