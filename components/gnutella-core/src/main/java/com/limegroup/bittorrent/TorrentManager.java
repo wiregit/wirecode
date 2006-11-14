@@ -73,6 +73,9 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     /** The File Manager */
     private FileManager fileManager;
     
+    /** Thread pool used to dispatch file manager events. These involve disk IO 
+     *  and acquiring locks in the FileManager and should therefore not be executed
+     *  on the NIODispatcher thread */
     private ThreadPool threadPool;
     
     /**
