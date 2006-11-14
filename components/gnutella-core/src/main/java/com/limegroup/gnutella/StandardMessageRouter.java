@@ -244,7 +244,8 @@ public class StandardMessageRouter extends MessageRouter {
         	if (filtered.isEmpty()) // nothing to send..
         		return false;
         	
-        	responses = filtered.toArray(responses);
+        	if (filtered.size() != responses.length)
+        		responses = filtered.toArray(new Response[filtered.size()]);
         }
         
         // Here we can do a couple of things - if the query wants
