@@ -6,8 +6,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -713,6 +715,23 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNull(fman.getFileDescForFile(notShared));
         assertNull(fman.getFileDescForFile(notShared));
     }
+    
+    public void testSpecialApplicationShare() throws Exception{
+        File specialShare = createNewNamedTestFile(10, "shared", FileManager.APPLICATION_SPECIAL_SHARE);
+        MultiListener listener = new MultiListener();
+        fman.registerFileManagerEventListener(listener);
+        FileManagerEvent evt = addFileForSession(specialShare);
+        assertTrue(evt.isAddEvent());
+        Thread.sleep(500);
+        //should not have dipatched an event for the folder
+        for(FileManagerEvent fevt: listener.getFileManagerEventList()) {
+            assertFalse(fevt.isAddFolderEvent());
+        }
+        //should have shared file
+        assertTrue(fman.isFileShared(specialShare));
+        //should not be an individual share
+        assertFalse(fman.isIndividualShare(specialShare));
+    }
 	
 	/**
 	 * Tests {@link FileManager#addFileAlways(File)}.
@@ -1072,6 +1091,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
+    private static class MultiListener implements FileEventListener {
+        private List<FileManagerEvent> evtList = new ArrayList<FileManagerEvent>();
+        public synchronized void handleFileEvent(FileManagerEvent fme) {
+            evtList.add(fme);
+        }
+
+        public synchronized List<FileManagerEvent> getFileManagerEventList() {
+            return evtList;
+        }
+    }
+    
     protected FileManagerEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
         synchronized(fel) {
@@ -1094,6 +1124,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         Listener fel = new Listener();
         synchronized(fel) {
             fman.renameFileIfShared(f1, f2, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
+    
+    protected FileManagerEvent addFileForSession(File f1) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.addFileForSession(f1, fel);
             fel.wait(5000);
         }
         return fel.evt;

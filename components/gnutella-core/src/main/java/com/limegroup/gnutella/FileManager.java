@@ -827,8 +827,8 @@ public abstract class FileManager {
 
         // STEP 1:
         // Add directory
-        boolean isForcedShare = isForcedShareDirectory(directory) 
-        || isApplicationSpecialShare(directory);
+        boolean isForcedShare = isForcedShareDirectory(directory);
+        
         synchronized (this) {
             // if it was already added, ignore.
             if (_completelySharedDirectories.contains(directory))
@@ -1018,11 +1018,21 @@ public abstract class FileManager {
 	  * only.
 	  */
 	 public void addFileForSession(File file) {
-		 _data.FILES_NOT_TO_SHARE.remove(file);
-		 if (!isFileShareable(file))
-			 _transientSharedFiles.add(file);
-		 addFileIfShared(file, EMPTY_DOCUMENTS, true, _revision, null);
+		 addFileForSession(file, null);
 	 }
+     
+     /**
+      * adds a file that will be shared during this session of limewire
+      * only.
+      * 
+      * The listener is notified if this file could or couldn't be shared.
+      */
+     public void addFileForSession(File file, FileEventListener callback) {
+         _data.FILES_NOT_TO_SHARE.remove(file);
+         if (!isFileShareable(file))
+             _transientSharedFiles.add(file);
+         addFileIfShared(file, EMPTY_DOCUMENTS, true, _revision, callback);
+     }
 	
     /**
      * Adds the given file if it's shared.
@@ -2233,13 +2243,13 @@ public abstract class FileManager {
      * provided name.
      */
     public boolean isFileApplicationShared(String name) {
-    	File test = new File(APPLICATION_SPECIAL_SHARE, name);
+    	File file = new File(APPLICATION_SPECIAL_SHARE, name);
     	try {
-    		test = FileUtils.getCanonicalFile(test);
+    		file = FileUtils.getCanonicalFile(file);
     	} catch (IOException bad) {
     		return false;
     	}
-    	return isFileShared(test);
+    	return isFileShared(file);
     }
     
     /**
