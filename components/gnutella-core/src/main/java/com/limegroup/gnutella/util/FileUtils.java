@@ -56,6 +56,18 @@ public class FileUtils {
     }
     
     /**
+     * Renames the specified file to the specified backup file. If renaming
+     * fails, this method tries copying. 
+     */
+    public static void backupFile(File file, File backup) {
+        if(file.renameTo(backup)) {
+            return;
+        }
+        
+        CommonUtils.copy(file, backup);
+    }
+    
+    /**
      * Reads the map stored, in serialized object form, 
      * in the passed file and returns it. from the file where it is stored
      * @param filename The file from where to read the Map
@@ -107,22 +119,6 @@ public class FileUtils {
             else
                 throw ioe;
         }
-    }
-    
-    /**
-     * Returns true if this file is not too large, not too small,
-     * not null, is a directory, can be read, is not hidden.  
-     * Returns false otherwise.
-     */
-    public static boolean isFilePhysicallyShareable(File file) {
-        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
-            return false;
-                
-        long fileLength = file.length();
-        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
-            return false;
-        
-        return true;
     }
     
     /**

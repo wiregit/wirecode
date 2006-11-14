@@ -262,7 +262,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         }
         
         final File f = getSharedTorrentMetaDataFile(t.getMetaInfo());
-        if(f == null || !FileUtils.isFilePhysicallyShareable(f)) {
+        if(f == null || !FileManager.isFilePhysicallyShareable(f)) {
             return;
         }
         

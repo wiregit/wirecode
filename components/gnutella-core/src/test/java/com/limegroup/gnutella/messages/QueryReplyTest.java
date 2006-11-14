@@ -38,7 +38,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -1171,7 +1170,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                 // use files with a $ because they'll generally
                 // trigger a single-response return, which is
                 // easier to check
-                return FileUtils.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
+                return FileManager.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
             }
         });
 
