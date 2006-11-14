@@ -262,7 +262,7 @@ public final class HTTPUploader implements Uploader {
         }
         _fis = _fileDesc.createInputStream();
         _isForcedShare = FileManager.isForcedShare(_fileDesc);
-        priorityShare = _fileDesc.getFile().getName().endsWith(".torrent");
+        priorityShare = FileManager.isApplicationSpecialShare(_fileDesc.getFile());
 	}
 
 	/**

@@ -1625,6 +1625,25 @@ public abstract class FileManager {
     }
     
     /**
+     * @return true if currently we have any files that are 
+     * shared by the application.
+     */
+    public boolean hasApplicationSharedFiles() {
+    	File [] files = APPLICATION_SPECIAL_SHARE.listFiles();
+    	if (files == null)
+    		return false;
+    	
+    	// if at least one of the files in the application special
+    	// share are currently shared, return true.
+    	for (File f: files) {
+    		if (isFileShared(f))
+    			return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
      * Returns all files that are shared while not in shared directories.
      */
     public File[] getIndividualFiles() {
@@ -2207,6 +2226,20 @@ public abstract class FileManager {
     public static boolean isApplicationSpecialShare(File file) {
         File parent = file.getParentFile();
         return parent != null && isApplicationSpecialShareDirectory(parent);
+    }
+    
+    /**
+     * @return true if there exists an application-shared file with the
+     * provided name.
+     */
+    public boolean isFileApplicationShared(String name) {
+    	File test = new File(APPLICATION_SPECIAL_SHARE, name);
+    	try {
+    		test = FileUtils.getCanonicalFile(test);
+    	} catch (IOException bad) {
+    		return false;
+    	}
+    	return isFileShared(test);
     }
     
     /**

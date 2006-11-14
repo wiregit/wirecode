@@ -35,7 +35,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static void doSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT);
-    	File torrentFile = new File(_sharedDir,TORRENT);
+    	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT);
     	sharedFiles.add(TEXT);
     	sharedFiles.add(TORRENT);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);

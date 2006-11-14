@@ -232,12 +232,13 @@ public class StandardMessageRouter extends MessageRouter {
             return false;
 
         // if we cannot service a regular query, only send back results for
-        // metafiles, if any.
+        // application-shared metafiles, if any.
         if (!RouterService.getUploadManager().isServiceable()) {
         	
         	List<Response> filtered = new ArrayList<Response>(responses.length);
         	for(Response r : responses) {
-        		if (r.isMetaFile())
+        		if (r.isMetaFile() && 
+        				RouterService.getFileManager().isFileApplicationShared(r.getName()))
         			filtered.add(r);
         	}
         	

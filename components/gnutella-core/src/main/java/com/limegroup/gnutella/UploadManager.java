@@ -861,7 +861,9 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
      * @return true if an incoming query (not actual upload request) may be serviceable.  
      */
     public synchronized boolean mayBeServiceable() {
-    	return slotManager.hasHTTPSlotForMeta(uploadsInProgress() + getNumQueuedUploads());
+    	if (RouterService.getFileManager().hasApplicationSharedFiles())
+    		return slotManager.hasHTTPSlotForMeta(uploadsInProgress() + getNumQueuedUploads());
+    	return isServiceable();
     }
 
 	public synchronized int uploadsInProgress() {
