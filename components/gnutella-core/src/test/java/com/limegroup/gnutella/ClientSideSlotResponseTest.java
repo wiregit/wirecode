@@ -28,33 +28,39 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         return buildTestSuite(ClientSideSlotResponseTest.class);
     }    
     
-    private static Set<String> sharedFiles = new HashSet<String>(2);
+    private static Set<String> someFileMatches = new HashSet<String>(2);
     
-    private static final String TEXT = "somefile.txt";
-    private static final String TORRENT = "somefile.torrent";
-    private static final String USER_TORRENT = "somefile2.torrent";
-    private static final String APP_TXT = "somefile2.txt";
+    private static final String SOME_FILE = "somefile";
+    private static final String TEXT_FILE = SOME_FILE+".txt";
+    private static final String TORRENT_FILE = SOME_FILE+".torrent";
+    private static final String USER_TORRENT = SOME_FILE+"2.torrent";
+    private static final String APP_TXT = SOME_FILE+"2.txt";
+    private static final String OTHER_TORRENT = "other.torrent";
+    
     
     private static void doSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
-    	File textFile = new File(_sharedDir,TEXT);
-    	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT);
+    	File textFile = new File(_sharedDir,TEXT_FILE);
+    	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
     	File userTorrentFile = new File(_sharedDir,USER_TORRENT);
     	File appTextFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,APP_TXT);
-    	sharedFiles.add(TEXT);
-    	sharedFiles.add(TORRENT);
-    	sharedFiles.add(USER_TORRENT);
-    	sharedFiles.add(APP_TXT);
+    	File appTorrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
+    	someFileMatches.add(TEXT_FILE);
+    	someFileMatches.add(TORRENT_FILE);
+    	someFileMatches.add(USER_TORRENT);
+    	someFileMatches.add(APP_TXT);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
+    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestSuite.java"), appTorrentFile);
     	rs.getFileManager().addFileAlways(textFile);
     	rs.getFileManager().addFileAlways(torrentFile);
     	rs.getFileManager().addFileAlways(userTorrentFile);
     	rs.getFileManager().addFileAlways(appTextFile);
+    	rs.getFileManager().addFileAlways(appTorrentFile);
     	Thread.sleep(500);
-    	assertEquals(4, rs.getFileManager().getNumFiles());
+    	assertEquals(5, rs.getFileManager().getNumFiles());
     }
     
     public static Integer numUPs() {
@@ -101,16 +107,16 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testResponsesSent() throws Exception {
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery("somefile");
+    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
     	QueryReply reply = getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
-    	assertEquals(sharedFiles.size(), responses.size());
+    	assertEquals(someFileMatches.size(), responses.size());
     	for(Response r: responses)
-    		assertTrue(sharedFiles.contains(r.getName()));
+    		assertTrue(someFileMatches.contains(r.getName()));
     }
     
     /**
@@ -118,12 +124,45 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
      */
     public void testNothingSent() throws Exception {
     	uStub.mayBeServiceable = false;
-    	QueryRequest query = QueryRequest.createQuery("somefile");
+    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
     	Thread.sleep(1000);
     	assertNull(getFirstQueryReply(testUP[0]));
+    }
+    
+    /**
+     * Tests that if only metafiles can be serviced but
+     * there are no metafile results, nothing gets returned.
+     */
+    public void testAllFiltered() throws Exception {
+    	uStub.mayBeServiceable = true;
+    	uStub.isServiceable = false;
+    	QueryRequest query = QueryRequest.createQuery(TEXT_FILE);
+    	drain(testUP[0]);
+    	testUP[0].send(query);
+    	testUP[0].flush();
+    	Thread.sleep(1000);
+    	assertNull(getFirstQueryReply(testUP[0]));
+    }
+    
+    /**
+     * tests that if only metafiles can be serviced and
+     * all results are for metafiled, nothing gets filetered
+     */
+    public void testNoneFiltered() throws Exception {
+    	uStub.mayBeServiceable = true;
+    	uStub.isServiceable = false;
+    	QueryRequest query = QueryRequest.createQuery(OTHER_TORRENT);
+    	drain(testUP[0]);
+    	testUP[0].send(query);
+    	testUP[0].flush();
+    	Thread.sleep(1000);
+    	QueryReply reply = getFirstQueryReply(testUP[0]);
+    	List<Response> responses = reply.getResultsAsList();
+    	assertEquals(1, responses.size());
+    	assertEquals(OTHER_TORRENT, responses.get(0).getName());
     }
     
     /**
@@ -133,7 +172,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public void testMetaFilesSent() throws Exception {
     	uStub.isServiceable = false;
     	uStub.mayBeServiceable = true;
-    	QueryRequest query = QueryRequest.createQuery("somefile");
+    	QueryRequest query = QueryRequest.createQuery(SOME_FILE);
     	drain(testUP[0]);
     	testUP[0].send(query);
     	testUP[0].flush();
@@ -141,7 +180,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	QueryReply reply = getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(1, responses.size());
-    	assertEquals(TORRENT, responses.get(0).getName());
+    	assertEquals(TORRENT_FILE, responses.get(0).getName());
     }
 }
 

@@ -2370,7 +2370,9 @@ public abstract class MessageRouter {
             numResponses-= arraySize;
 
 			// see if there are any open slots
-			boolean busy = !um.isServiceable();
+            // Note: if we are busy, non-metafile results would be filtered.
+            // by this point.
+			boolean busy = !um.mayBeServiceable();
             boolean uploaded = um.hadSuccesfulUpload();
 			
             // We only want to return a "reply to multicast query" QueryReply
