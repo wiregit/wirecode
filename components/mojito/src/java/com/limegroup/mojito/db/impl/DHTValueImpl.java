@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -48,7 +49,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
     private KUID valueId;
     
     /** The Value type */
-    private ValueType type;
+    private DHTValueType type;
     
     /** The version of this DHT value */
     private int version;
@@ -77,31 +78,29 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * 
      * @param creator The originator of the DHTValue
      * @param sender The sender of the DHTValue
-     * @param type The type of the DHTValue
      * @param valueId The KUID of the DHTValue
-     * @param data The actual DHTValue
+     * @param type The type of the DHTValue
      * @param version The version of the DHTValue
+     * @param data The actual DHTValue
      * @param isLocalValue Whether or not it's a local DHTValue
      */
     public DHTValueImpl(Contact creator, Contact sender, 
-            ValueType type, KUID valueId, byte[] data, int version, boolean isLocalValue) {
+            KUID valueId, DHTValueType type, int version, byte[] data, boolean isLocalValue) {
+        
+        if (type == null) {
+            type = DHTValueType.BINARY;
+        }
+        
+        if (data == null || data.length == 0) {
+            this.data = EMPTY_DATA;
+        }
         
         this.creator = creator;
         this.sender = sender;
         this.valueId = valueId;
+        this.type = type;
         this.version = version;
-        
-        if (type == null) {
-            type = ValueType.BINARY;
-        }
-        
-        if (data == null) {
-            this.type = ValueType.BINARY;
-            this.data = EMPTY_DATA;
-        } else {
-            this.type = type;
-            this.data = data;
-        }
+        this.data = data;
         
         this.isLocalValue = isLocalValue;
         
@@ -129,7 +128,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValue#getValueType()
      */
-    public ValueType getValueType() {
+    public DHTValueType getValueType() {
         return type;
     }
     

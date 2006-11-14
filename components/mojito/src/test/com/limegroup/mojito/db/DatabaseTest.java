@@ -29,7 +29,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue.ValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.routing.Contact;
@@ -62,7 +61,7 @@ public class DatabaseTest extends BaseTestCase {
     
     private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         Contact node = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
-        return DHTValueFactory.createLocalValue(node, ValueType.TEST, valueId, value);
+        return DHTValueFactory.createLocalValue(node, valueId, DHTValueType.TEST, 0, value);
     }
     
     private static DHTValue createDirectDHTValue(byte[] value) {
@@ -73,7 +72,7 @@ public class DatabaseTest extends BaseTestCase {
     private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
         Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG);
-        return DHTValueFactory.createRemoteValue(node, node, ValueType.TEST, valueId, value);
+        return DHTValueFactory.createRemoteValue(node, node, valueId, DHTValueType.TEST, 0, value);
     }
     
     private static DHTValue createIndirectDHTValue(byte[] value) {
@@ -85,7 +84,7 @@ public class DatabaseTest extends BaseTestCase {
         SocketAddress addr = new InetSocketAddress(6666);
         Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, Contact.DEFAULT_FLAG);
         Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);   
-        return DHTValueFactory.createRemoteValue(orig, sender, ValueType.TEST, valueId, value);
+        return DHTValueFactory.createRemoteValue(orig, sender, valueId, DHTValueType.TEST, 0, value);
     }
     
     public void testLocalAdd() throws Exception {
@@ -368,13 +367,13 @@ public class DatabaseTest extends BaseTestCase {
         DHTValue value = null;
         //should allow x direct values
         for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
-            value = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
-                    KUID.createRandomID(), "test".getBytes());
+            value = DHTValueFactory.createRemoteValue(badHost, badHost, 
+                    KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
             assertTrue(db.store(value));
         }
         //and reject after that
-        DHTValue newValue = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
-                KUID.createRandomID(), "test".getBytes());
+        DHTValue newValue = DHTValueFactory.createRemoteValue(badHost, badHost,
+                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
         assertFalse(db.store(newValue));
         
         //should make some space for a new one
@@ -382,18 +381,18 @@ public class DatabaseTest extends BaseTestCase {
         assertTrue(db.store(value));
         
         //should also reject an indirect one coming from the bad host
-        newValue = DHTValueFactory.createRemoteValue(badHost, goodHost, ValueType.BINARY, 
-                KUID.createRandomID(), "test".getBytes());
+        newValue = DHTValueFactory.createRemoteValue(badHost, goodHost,  
+                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
         assertFalse(db.store(newValue));
         
         //should not allow more, even if it is coming indirectly        
-        newValue = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
-                KUID.createRandomID(), "test".getBytes());
+        newValue = DHTValueFactory.createRemoteValue(badHost, badHost, 
+                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
         assertFalse(db.store(newValue));
         
         //but should allow one created by a good host
-        DHTValue goodValue = DHTValueFactory.createRemoteValue(goodHost, goodHost, ValueType.BINARY, 
-                KUID.createRandomID(), "test".getBytes());
+        DHTValue goodValue = DHTValueFactory.createRemoteValue(goodHost, goodHost, 
+                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
         assertTrue(db.store(goodValue));
 
         //test banning now
@@ -402,8 +401,8 @@ public class DatabaseTest extends BaseTestCase {
                 , new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
         for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
-            value = DHTValueFactory.createRemoteValue(badHost, badHost, ValueType.BINARY, 
-                    KUID.createRandomID(), "test".getBytes());
+            value = DHTValueFactory.createRemoteValue(badHost, badHost, 
+                    KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
             db.store(value);
         }
         //should have banned the host

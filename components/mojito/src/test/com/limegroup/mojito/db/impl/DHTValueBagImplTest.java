@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValueFactory;
-import com.limegroup.mojito.db.DHTValue.ValueType;
+import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -92,12 +92,12 @@ public class DHTValueBagImplTest extends BaseTestCase {
         
         try {
         	bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-        			ValueType.TEST, KUID.createRandomID(), "test".getBytes()));
+        			KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes()));
         	assertTrue("Should have thrown an exception: wrong KUID", false);
         } catch(IllegalArgumentException ex) {}
         
         bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-    			ValueType.TEST, valueId, "test".getBytes()));
+    			valueId, DHTValueType.TEST, 0, "test".getBytes()));
         assertEquals(1, bag.size());
         assertFalse(bag.isEmpty());
     }

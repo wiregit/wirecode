@@ -19,14 +19,6 @@
 
 package com.limegroup.mojito.db;
 
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.Contact;
 
@@ -43,162 +35,6 @@ public interface DHTValue {
      */
     public static final byte[] EMPTY_DATA = new byte[0];
     
-    /**
-     * ValueType specifies the type of a DHTValue
-     */
-    public static final class ValueType implements Comparable<ValueType>, Serializable {
-        
-        private static final long serialVersionUID = -3662336008253896020L;
-        
-        // NOTE: We cannot use enums for the ValueType! The simple
-        // reason is that it's not possible to create new enums at
-        // runtime which is a problem if somebody sends us a DHTValue
-        // we don't understand. It'd be impossible to wrap the type
-        // code into an enum Object.
-        
-        // --- BEGIN VALUETYPE DECLARATION BLOCK ---
-        
-        /**
-         * An arbitrary type of value
-         */
-        public static final ValueType BINARY = new ValueType("BINARY", 0x00000000);
-        //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
-        
-        /**
-         * A value that is used for testing purposes
-         */
-        public static final ValueType TEST = new ValueType("TEST");
-        
-        // --- END VALUETYPE DECLARATION BLOCK ---
-        
-        /**
-         * An arry of ValueTypes. It's initialized in the static
-         * initializer.
-         */
-        private static final ValueType[] TYPES;
-        
-        static {
-            List<ValueType> types = new ArrayList<ValueType>();
-            Field[] fields = ValueType.class.getDeclaredFields();
-            for (Field field : fields) {
-                int modifiers = field.getModifiers();
-                Class<?> type = field.getType();
-                
-                // Make sure it's a static field and of type ValueType
-                if ((modifiers & Modifier.STATIC) != 0 
-                        && type.isAssignableFrom(ValueType.class)) {
-                    
-                    try {
-                        ValueType valueType = (ValueType)field.get(null);
-                        if (valueType == null) {
-                            throw new NullPointerException(
-                                    "The static ValueType field " + field.getName() 
-                                    + " is either really null or is declared after the"
-                                    + " static-initializer block");
-                        }
-                        
-                        types.add(valueType);
-                    } catch (IllegalAccessException err) {
-                        // This should never happen!
-                        throw new RuntimeException(err);
-                    }
-                }
-            }
-            
-            TYPES = types.toArray(new ValueType[0]);
-            
-            // Sort the types by their type code so that we
-            // can perform binary searches on the array
-            Arrays.sort(TYPES, new Comparator<ValueType>() {
-                public int compare(ValueType o1, ValueType o2) {
-                    int diff = o1.compareTo(o2);
-                    if (diff == 0) {
-                        throw new IllegalArgumentException("The type code of " 
-                                + o1 + " and " + o2 + " collide!");
-                    }
-                    return diff;
-                }
-            });
-        }
-        
-        /** The Name of the value type */
-        private String name;
-        
-        /** The type code of the value */
-        private int type;
-        
-        private ValueType(String name) {
-            this(name, parse(name));
-        }
-        
-        private ValueType(String name, int type) {
-            this.name = name;
-            this.type = type;
-        }
-
-        public String getName() {
-            return name;
-        }
-        
-        public int toInt() {
-            return type;
-        }
-        
-        public boolean isUnknownType() {
-            return Arrays.binarySearch(TYPES, this) >= 0;
-        }
-
-        public int compareTo(ValueType o) {
-            return type - o.type;
-        }
-
-        public int hashCode() {
-            return type & Integer.MAX_VALUE;
-        }
-        
-        public boolean equals(Object o) {
-            if (!(o instanceof ValueType)) {
-                return false;
-            }
-            
-            ValueType other = (ValueType)o;
-            return compareTo(other)==0 && name.equals(other.name);
-        }
-        
-        public String toString() {
-            return name + " (0x" + Long.toHexString((type & 0xFFFFFFFFL)) + ")";
-        }
-        
-        public static ValueType[] values() {
-            ValueType[] copy = new ValueType[TYPES.length];
-            System.arraycopy(TYPES, 0, copy, 0, copy.length);
-            return copy;
-        }
-        
-        public static ValueType valueOf(int type) {
-            ValueType unknown = new ValueType("UNKNOWN", type);
-            int index = Arrays.binarySearch(TYPES, unknown);
-            if (index < 0) {
-                return unknown;
-            } else {
-                return TYPES[index];
-            }
-        }
-        
-        private static int parse(String type) {
-            char[] chars = type.toCharArray();
-            if (chars.length != 4) {
-                throw new IllegalArgumentException();
-            }
-            
-            int id = 0;
-            for(char c : chars) {
-                id = (id << 8) | (int)(c & 0xFF);
-            }
-            return id;
-        }
-    }
-
     /** 
      * Returns the ValueID
      */
@@ -207,7 +43,7 @@ public interface DHTValue {
     /**
      * Returns the Type of the Value
      */
-    public ValueType getValueType();
+    public DHTValueType getValueType();
     
     /** 
      * Returns the Value. Beware: The returned byte array is 

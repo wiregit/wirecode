@@ -16,6 +16,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.impl.AbstractDHTController.RandomNodeAdder;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -25,7 +27,7 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.DHTValue.ValueType;
+import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingEvent;
@@ -36,8 +38,6 @@ import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
 import com.limegroup.mojito.util.HostFilter;
-
-import junit.framework.Test;
 
 public class AbstractDHTControllerTest extends DHTTestCase {
 
@@ -197,7 +197,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public DHTFuture<StoreEvent> put(ValueType type, KUID key, byte[] value) {
+        public DHTFuture<StoreEvent> put(DHTValueType type, KUID key, byte[] value) {
             return null;
         }
 

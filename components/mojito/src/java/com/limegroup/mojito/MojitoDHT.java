@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.db.DHTValue.ValueType;
+import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.event.BootstrapEvent;
 import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.event.PingEvent;
@@ -230,7 +230,7 @@ public interface MojitoDHT {
     /**
      * Stores the given key, value pair
      */
-    public DHTFuture<StoreEvent> put(ValueType type, KUID key, byte[] value);
+    public DHTFuture<StoreEvent> put(DHTValueType type, KUID key, byte[] value);
     
     /**
      * Removes the value for the given key

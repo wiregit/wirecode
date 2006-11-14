@@ -37,7 +37,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueFactory;
-import com.limegroup.mojito.db.DHTValue.ValueType;
+import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.StatisticType;
@@ -99,9 +99,11 @@ public class MessageInputStream extends DataInputStream {
      */
     public DHTValue readDHTValue(Contact sender) throws IOException {
         Contact creator = readContact();
-        ValueType type = readValueType();
         
         KUID valueId = readKUID();
+        DHTValueType type = readValueType();
+        int version = readUnsignedShort();
+        
         byte[] data = null;
         int length = readUnsignedShort();
         if (length > 0) {
@@ -109,7 +111,7 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return DHTValueFactory.createRemoteValue(creator, sender, type, valueId, data);
+        return DHTValueFactory.createRemoteValue(creator, sender, valueId, type, version, data);
     }
     
     /**
@@ -290,7 +292,7 @@ public class MessageInputStream extends DataInputStream {
     /***
      * 
      */
-    public ValueType readValueType() throws IOException {
-        return ValueType.valueOf(readInt());
+    public DHTValueType readValueType() throws IOException {
+        return DHTValueType.valueOf(readInt());
     }
 }
