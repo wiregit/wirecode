@@ -94,6 +94,12 @@ public class Response {
      * The container for extra GGEP data.
      */
     private final GGEPContainer ggepData;
+    
+    /**
+     * If this is a response for a metafile, i.e. a file
+     * that itself triggers another download.
+     */
+    private final boolean isMetaFile;
 
 	/**
 	 * Constant for the KBPS string to avoid constructing it too many
@@ -175,8 +181,10 @@ public class Response {
         
 		if (name == null)
 			this.name = "";
-		else
+		else 
 			this.name = name;
+		
+		isMetaFile = name.toLowerCase().endsWith(".torrent");
 
         byte[] temp = null;
         try {
@@ -556,6 +564,10 @@ public class Response {
     public long getCreateTime() {
         return ggepData.createTime;
     }    
+    
+    public boolean isMetaFile() {
+    	return isMetaFile;
+    }
     
     byte[] getExtBytes() {
         return extBytes;

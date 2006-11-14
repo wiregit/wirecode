@@ -208,11 +208,22 @@ public class UploadSlotManager implements BandwidthTracker {
 	}
 
 	/**
-	 * @return whether there would be a free slot for an HTTP uploader.
+	 * @return whether there is a free slot for an HTTP uploader.
 	 */
-	public synchronized boolean isServiceable(int current) {
+	public synchronized boolean hasHTTPSlot(int current) {
 		// This ignores currently active BT_SEED uploaders since they 
 		// can be preempted.
+		if (existActiveHigherPriority(HTTP))
+			return false;
+		
+		return hasFreeSlot(current);
+	}
+	
+	/**
+	 * @return true if there may be a free slot for an HTTP uploader.
+	 */
+	public synchronized boolean hasHTTPSlotForMeta(int current) {
+		
 		return hasFreeSlot(current);
 	}
 	

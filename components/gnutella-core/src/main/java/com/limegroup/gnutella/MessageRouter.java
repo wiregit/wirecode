@@ -2859,7 +2859,7 @@ public abstract class MessageRouter {
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value
-            boolean isBusy = !RouterService.getUploadManager().isServiceable();
+            boolean isBusy = !RouterService.getUploadManager().mayBeServiceable();
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.

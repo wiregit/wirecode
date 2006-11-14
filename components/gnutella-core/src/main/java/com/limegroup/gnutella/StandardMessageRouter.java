@@ -197,7 +197,7 @@ public class StandardMessageRouter extends MessageRouter {
         // slots are full.  This allows some spillover into our queue that
         // is necessary because we're always returning more total hits than
         // we have slots available.
-        if(!RouterService.getUploadManager().isServiceable() )  {
+        if(!RouterService.getUploadManager().mayBeServiceable() )  {
             return false;
         }
                                                 
@@ -223,8 +223,7 @@ public class StandardMessageRouter extends MessageRouter {
         
     }
 
-    //This method needs to be public because the Peer-Server code uses it.
-    public boolean sendResponses(Response[] responses, QueryRequest query,
+    private boolean sendResponses(Response[] responses, QueryRequest query,
                                  ReplyHandler handler) {
         // if either there are no responses or, the
         // response array came back null for some reason,
@@ -232,6 +231,21 @@ public class StandardMessageRouter extends MessageRouter {
         if ( (responses == null) || ((responses.length < 1)) )
             return false;
 
+        // if we cannot service a regular query, only send back results for
+        // metafiles, if any.
+        if (!RouterService.getUploadManager().isServiceable()) {
+        	
+        	List<Response> filtered = new ArrayList<Response>(responses.length);
+        	for(Response r : responses) {
+        		if (r.isMetaFile())
+        			filtered.add(r);
+        	}
+        	
+        	if (filtered.isEmpty()) // nothing to send..
+        		return false;
+        	
+        	responses = filtered.toArray(responses);
+        }
         
         // Here we can do a couple of things - if the query wants
         // out-of-band replies we should do things differently.  else just
@@ -241,7 +255,6 @@ public class StandardMessageRouter extends MessageRouter {
         if (query.desiresOutOfBandReplies() &&
             !isConnectedTo(query, handler) && 
 			RouterService.canReceiveSolicited() &&
-            RouterService.getUploadManager().isServiceable() &&
             NetworkUtils.isValidAddressAndPort(query.getReplyAddress(), query.getReplyPort())) {
             
             // send the replies out-of-band - we need to
