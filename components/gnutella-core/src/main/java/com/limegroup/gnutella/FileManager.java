@@ -1658,7 +1658,7 @@ public abstract class FileManager {
      */
     public boolean isIndividualShare(File f) {
     	return _data.SPECIAL_FILES_TO_SHARE.contains(f) 
-            && FileUtils.isFilePhysicallyShareable(f)
+            && isFilePhysicallyShareable(f)
             && !isTorrentMetaDataShare(f);
     }
     
@@ -1670,7 +1670,7 @@ public abstract class FileManager {
         synchronized(files) {
             for(Iterator<File> i = files.iterator(); i.hasNext(); ) {
                 File f = i.next();
-                if(!(FileUtils.isFilePhysicallyShareable(f)))
+                if(!(isFilePhysicallyShareable(f)))
                     i.remove();
             }
         }
@@ -1730,7 +1730,7 @@ public abstract class FileManager {
 	 * or if it is specially shared.
 	 */
 	private boolean isFileShareable(File file) {
-		if (!FileUtils.isFilePhysicallyShareable(file))
+		if (!isFilePhysicallyShareable(file))
 			return false;
 		if (_individualSharedFiles.contains(file))
 			return true;
@@ -1746,6 +1746,22 @@ public abstract class FileManager {
 			
 		return false;
 	}
+    
+    /**
+     * Returns true if this file is not too large, not too small,
+     * not null, is a directory, can be read, is not hidden.  
+     * Returns false otherwise.
+     */
+    public static boolean isFilePhysicallyShareable(File file) {
+        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+            return false;
+                
+        long fileLength = file.length();
+        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+            return false;
+        
+        return true;
+    }
 	
     /**
      * Returns true iff <tt>file</tt> is a sensitive directory.
