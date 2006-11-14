@@ -32,18 +32,29 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     
     private static final String TEXT = "somefile.txt";
     private static final String TORRENT = "somefile.torrent";
+    private static final String USER_TORRENT = "somefile2.torrent";
+    private static final String APP_TXT = "somefile2.txt";
+    
     private static void doSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT);
     	File torrentFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,TORRENT);
+    	File userTorrentFile = new File(_sharedDir,USER_TORRENT);
+    	File appTextFile = new File(FileManager.APPLICATION_SPECIAL_SHARE,APP_TXT);
     	sharedFiles.add(TEXT);
     	sharedFiles.add(TORRENT);
+    	sharedFiles.add(USER_TORRENT);
+    	sharedFiles.add(APP_TXT);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
+    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
+    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	rs.getFileManager().addFileAlways(textFile);
     	rs.getFileManager().addFileAlways(torrentFile);
+    	rs.getFileManager().addFileAlways(userTorrentFile);
+    	rs.getFileManager().addFileAlways(appTextFile);
     	Thread.sleep(500);
-    	assertEquals(2, rs.getFileManager().getNumFiles());
+    	assertEquals(4, rs.getFileManager().getNumFiles());
     }
     
     public static Integer numUPs() {
@@ -97,7 +108,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	Thread.sleep(1000);
     	QueryReply reply = getFirstQueryReply(testUP[0]);
     	List<Response> responses = reply.getResultsAsList();
-    	assertEquals(2, responses.size());
+    	assertEquals(sharedFiles.size(), responses.size());
     	for(Response r: responses)
     		assertTrue(sharedFiles.contains(r.getName()));
     }
@@ -117,7 +128,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     
     /**
      * Tests that if only metafiles can be serviced 
-     * only results about metafiles are returned. 
+     * only results about application-shared metafiles are returned. 
      */
     public void testMetaFilesSent() throws Exception {
     	uStub.isServiceable = false;
