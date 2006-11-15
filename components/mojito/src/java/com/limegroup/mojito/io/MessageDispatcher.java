@@ -815,7 +815,7 @@ public abstract class MessageDispatcher {
     private class CleanupTask implements Runnable {
     	
     	private Thread thread = null;
-    	private boolean running = true;
+    	private volatile boolean running = true;
     	
         public void run() {
             long sleep = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
