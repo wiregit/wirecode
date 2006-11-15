@@ -81,22 +81,24 @@ public class ContentRequest extends VendorMessage {
      */
     public ContentRequest(URN urn, String filename, String metaData, long size, int length) {
         super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, 
-                derivePayload(urn, filename, metaData, size, length));
+                derivePayload(urn, 
+                        filename=toLowerCase(filename), 
+                        metaData=toLowerCase(metaData), 
+                        size, 
+                        length));
         
         this.sha1 = urn.getBytes();
         
         if (filename != null && filename.length() > 0) {
             try {
-                this.filename = filename.toLowerCase(Locale.US)
-                                    .getBytes(Constants.UTF_8_ENCODING);
+                this.filename = filename.getBytes(Constants.UTF_8_ENCODING);
             } catch (UnsupportedEncodingException e) {
             }
         }
         
         if (metaData != null && metaData.length() > 0) {
             try {
-                this.metaData = metaData.toLowerCase(Locale.US)
-                                    .getBytes(Constants.UTF_8_ENCODING);
+                this.metaData = metaData.getBytes(Constants.UTF_8_ENCODING);
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -123,8 +125,7 @@ public class ContentRequest extends VendorMessage {
         if (filename != null && filename.length() > 0) {
             try {
                 ggep.put(GGEP.GGEP_HEADER_FILENAME, 
-                        filename.toLowerCase(Locale.US)
-                            .getBytes(Constants.UTF_8_ENCODING));
+                        filename.getBytes(Constants.UTF_8_ENCODING));
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -132,8 +133,7 @@ public class ContentRequest extends VendorMessage {
         if (metaData != null && metaData.length() > 0) {
             try {
                 ggep.put(GGEP.GGEP_HEADER_METADATA, 
-                        metaData.toLowerCase(Locale.US)
-                            .getBytes(Constants.UTF_8_ENCODING));
+                        metaData.getBytes(Constants.UTF_8_ENCODING));
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -153,6 +153,13 @@ public class ContentRequest extends VendorMessage {
             ErrorService.error(iox); // impossible.
         }
         return out.toByteArray();
+    }
+    
+    private static String toLowerCase(String str) {
+        if (str != null) {
+            str = str.toLowerCase(Locale.US);
+        }
+        return str;
     }
     
     /**
