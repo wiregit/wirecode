@@ -4,6 +4,8 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -65,10 +67,10 @@ public class SettingsBasedContentAuthorityTest extends BaseTestCase {
         StubContentAuthority two  = new StubContentAuthority();
         auth.setAuthorities(new ContentAuthority[] { zero, one, two } );
 
-        Message[] ms = new Message[randoms.length];
+        FileDetails[] ms = new FileDetails[randoms.length];
         for(int i = 0; i < randoms.length; i++) {
-            ms[i] = new PingRequest((byte)1);
-            auth.send(ms[i]);
+            ms[i] = new ContentManagerNetworkTest.URNFileDetails(URN.INVALID);
+            auth.sendAuthorizationRequest(ms[i], 1000);
         }
         
         assertSame(zero.getSent().get(0), ms[0]);

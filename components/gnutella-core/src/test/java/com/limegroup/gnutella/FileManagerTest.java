@@ -5,11 +5,11 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -52,6 +52,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private Response[] responses;
     private FileDesc[] files;
 
+    private InetSocketAddress addr;
+    
     public FileManagerTest(String name) {
         super(name);
     }
@@ -79,6 +81,12 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         // ensure each test gets a brand new content manager.
         PrivilegedAccessor.setValue(RouterService.class, "contentManager", new ContentManager());
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
+	    StandardMessageRouter router = new StandardMessageRouter();
+	    PrivilegedAccessor.setValue(RouterService.class, "router", router);
+	    router.initialize();
+	    
+	    InetAddress address = InetAddress.getByName("64.61.25.171");
+    	addr = new InetSocketAddress(address, 10000);
 	}
 	
 	public void tearDown() {
@@ -109,9 +117,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f3 = createNewTestFile(11);
         f4 = createNewTestFile(23);
         
-        URN u1 = getURN(f1);
-        URN u2 = getURN(f2);
-        URN u3 = getURN(f3);
+        FileDesc u1 = getFileDesc(f1);
+        FileDesc u2 = getFileDesc(f2);
+        FileDesc u3 = getFileDesc(f3);
         
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
@@ -120,7 +128,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // request the urn so we can use the response.
         cm.request(u1, new StubContentResponseObserver(), 1000);
-        cm.handleContentResponse(new ContentResponse(u1, false, "False"));
+
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u1.getSHA1Urn(), false, "False"), addr);
         
         waitForLoad();
         assertEquals("unexpected # of shared files", 3, fman.getNumFiles());
@@ -136,14 +145,18 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // test invalid content response.
         fman.validate(fd2);
-        cm.handleContentResponse(new ContentResponse(u2, false, "False"));
+
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u2.getSHA1Urn(), false, "False"), addr);
+
         assertFalse("shouldn't be shared anymore", fman.isFileShared(f2));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());
         assertEquals("wrong shared file size", 34, fman.getSize());
         
         // test valid content response.
         fman.validate(fd3);
-        cm.handleContentResponse(new ContentResponse(u3, true, "True"));
+
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u3.getSHA1Urn(), true, "True"), addr);
+
         assertTrue("should still be shared", fman.isFileShared(f3));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());
         assertEquals("wrong shared file size", 34, fman.getSize());
@@ -1003,6 +1016,11 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     
     protected URN getURN(File f) throws Exception {
         return URN.createSHA1Urn(f);
+    }
+    
+    protected FileDesc getFileDesc(File f) throws Exception {
+    	URN urn = getURN(f);
+    	return new FileDesc(f, Collections.singleton(urn), 15);
     }
 
     /**

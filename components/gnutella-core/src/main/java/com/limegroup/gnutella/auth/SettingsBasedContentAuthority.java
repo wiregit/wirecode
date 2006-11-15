@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.IpPortImpl;
 
@@ -17,7 +19,7 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
     
     /** RNG. */
     private Random RNG = newRandom();
-
+    
     /**
      * Initializes this with the proper IpPortContentAuthorities.
      */
@@ -31,7 +33,16 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
         }
         
         authorities = dns.toArray(new ContentAuthority[dns.size()]);
+        
         return !dns.isEmpty();
+    }
+    
+    public void shutdown() {
+    	for (ContentAuthority auth : authorities) {
+    		auth.shutdown();
+    	}
+    	authorities = null;
+    	RouterService.getMessageRouter().setUDPMessageHandler(ContentResponse.class, null);
     }
     
     public ContentAuthority[] getAuthorities() {
@@ -42,15 +53,19 @@ public class SettingsBasedContentAuthority implements ContentAuthority {
         this.authorities = authorities;
     }
 
-    /** Sends the message to a random one of the content authorities. */
-    public void send(Message m) {
-        int idx = RNG.nextInt(authorities.length);
-        authorities[idx].send(m);
-    }
-    
     /** Hook for tests. */
     protected Random newRandom() {
         return new Random();
     }
 
+	public void sendAuthorizationRequest(FileDetails details, long timeout) {
+	    int idx = RNG.nextInt(authorities.length);
+		authorities[idx].sendAuthorizationRequest(details, timeout);	
+	}
+
+	public void setContentResponseObserver(ContentResponseObserver observer) {
+		if (observer != null) { 
+			RouterService.getMessageRouter().setUDPMessageHandler(ContentResponse.class, new ContentResponseHandler(observer));
+		}
+	}
 }

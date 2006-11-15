@@ -36,10 +36,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.SecureMessage;
-import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.StaticMessages;
-import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
@@ -68,7 +65,6 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -499,7 +495,6 @@ public abstract class MessageRouter {
         setUDPMessageHandler(UDPCrawlerPing.class, new UDPCrawlerPingHandler());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
-        setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
@@ -2134,25 +2129,6 @@ public abstract class MessageRouter {
         }
     }
     
-    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
-    private void handleContentResponse(final ContentResponse msg, ReplyHandler handler) {
-        if (ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.getValue()) {
-            if (msg.hasSecureSignature()) {
-                SecureMessageCallback callback = new SecureMessageCallback() {
-                    public void handleSecureMessage(SecureMessage sm, boolean passed) {
-                        if (passed) {
-                            RouterService.getContentManager().handleContentResponse(msg);
-                        }
-                    }
-                };
-                
-                RouterService.getSecureMessageVerifier().verify(msg, callback);
-            }
-        } else {
-            RouterService.getContentManager().handleContentResponse(msg);
-        }
-    }
-
     /**
      * Passes the request onto the update manager.
      */
@@ -3154,12 +3130,6 @@ public abstract class MessageRouter {
     private class UDPUpdateRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleUpdateRequest((UpdateRequest)msg, handler);
-        }
-    }
-    
-    private class UDPContentResponseHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleContentResponse((ContentResponse)msg, handler);
         }
     }
     

@@ -14,10 +14,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -40,7 +38,7 @@ public class ContentManager {
     private final List<Responder> RESPONDERS = new ArrayList<Responder>();
     
     /** Set or URNs that we've already requested. */
-    private final Set<URN> REQUESTED = Collections.synchronizedSet(new HashSet<URN>());
+    private final Map<URN, FileDetails> REQUESTED = Collections.synchronizedMap(new HashMap<URN, FileDetails>());
     
     /** Set of URNs that have failed requesting. */
     private final Set<URN> TIMEOUTS = Collections.synchronizedSet(new HashSet<URN>());
@@ -73,6 +71,8 @@ public class ContentManager {
     /** Wehther or not we're shutting down. */
     private volatile boolean shutdown = false;
     
+    private ContentResponseObserver responseObserver = new ContentResponseHandler();
+    
     /**
      * Initializes this content manager.
      */
@@ -96,7 +96,16 @@ public class ContentManager {
     
     /** Sets the content authority. */
     public void setContentAuthority(ContentAuthority authority) {
+    	ContentAuthority old = this.authority;
+    	if (old != null) {
+    		old.setContentResponseObserver(null);
+    		old.shutdown();
+    	}
         this.authority = authority;
+        if (authority != null) { 
+        	authority.setContentResponseObserver(responseObserver);
+        	// TODO fberger also initialize here?
+        }
     }    
     
     /**
@@ -108,71 +117,34 @@ public class ContentManager {
                CACHE.hasResponseFor(urn) || TIMEOUTS.contains(urn);
     }
     
-    public void request(FileDesc fd, ContentResponseObserver observer, long timeout) {
-        URN urn = fd.getSHA1Urn();
-        String filename = fd.getFileName();
-        String metaData = null;
-        long size = fd.getFileSize();
-        int length = 0;
-        
-        String len = null;
-        if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
-            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.AUDIO_SCHEMA);
-            len = doc.getValue(LimeXMLNames.AUDIO_SECONDS);
-            metaData = doc.getValue(LimeXMLNames.AUDIO_TITLE);
-            
-        } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
-            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.VIDEO_SCHEMA);
-            len = doc.getValue(LimeXMLNames.VIDEO_LENGTH);
-            metaData = doc.getValue(LimeXMLNames.VIDEO_TITLE);
-        }
-        
-        if (len != null) {
-            try {
-                length = Integer.parseInt(len);
-            } catch (NumberFormatException e) {}
-        }
-        
-        request(urn, filename, metaData, size, length, observer, timeout);
-    }
-    
-    public void request(URN urn, ContentResponseObserver observer, long timeout) {
-        request(urn, null, null, 0L, 0, observer, timeout);
-    }
     
     /**
-     * Determines if the given URN is valid.
+     * Determines if the given FileDetails is valid.
      * 
-     * @param urn
+     * @param details
      * @param observer
      * @param timeout
      */
-    public void request(URN urn, String filename, String metaData, long size, int length, 
-            ContentResponseObserver observer, long timeout) {
-        
-        ContentResponseData response = CACHE.getResponse(urn);
+    public void request(FileDetails details, ContentResponseObserver observer, long timeout) {
+        ContentResponseData response = getResponse(details);
         if(response != null || !ContentSettings.isManagementActive()) {
             if(LOG.isDebugEnabled())
-                LOG.debug("Immediate response for URN: " + urn);
-            observer.handleResponse(urn, response);
+                LOG.debug("Immediate response for URN: " + details.getSHA1Urn());
+            observer.handleResponse(details.getSHA1Urn(), response);
         } else {
             if(LOG.isDebugEnabled())
-                LOG.debug("Scheduling request for URN: " + urn);
-            scheduleRequest(urn, filename, metaData, size, length, observer, timeout);
+            	LOG.debug("Scheduling request for URN: " + details.getSHA1Urn());
+            scheduleRequest(details, observer, timeout);
         }
-    }
-    
-    public ContentResponseData request(URN urn, long timeout) {
-        return request(urn, null, null, 0L, 0, timeout);
     }
     
     /**
      * Does a request, blocking until a response is given or the request times out.
      */
-    public ContentResponseData request(URN urn, String filename, String metaData, long size, int length, long timeout) {
+    public ContentResponseData request(FileDetails details, long timeout) {
         Validator validator = new Validator();
         synchronized(validator) {
-            request(urn, filename, metaData, size, length, validator, timeout);
+            request(details, validator, timeout);
             if (validator.hasResponse()) {
                 return validator.getResponse();
             } else {
@@ -193,6 +165,11 @@ public class ContentManager {
         return CACHE.getResponse(urn);
     }
     
+    public ContentResponseData getResponse(FileDetails details) {
+    	URN sha1 = details.getSHA1Urn();
+    	return sha1 != null ? getResponse(sha1) : null;
+    }
+    
     /**
      * Schedules a request for the given URN, timing out in the given timeout.
      * 
@@ -200,21 +177,19 @@ public class ContentManager {
      * @param observer
      * @param timeout
      */
-    protected void scheduleRequest(URN urn, String filename, String metaData, long size, int length, ContentResponseObserver observer, long timeout) {
+    protected void scheduleRequest(FileDetails details, ContentResponseObserver observer, long timeout) {
         long now = System.currentTimeMillis();
-        addResponder(new Responder(now, timeout, observer, urn, filename, metaData, size, length));
+        URN urn = details.getSHA1Urn();
+        addResponder(new Responder(now, timeout, observer, urn));
 
-        // only send if we haven't already requested.
-        if (REQUESTED.add(urn) && authority != null) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Sending request for URN: " + urn + " to authority: " + authority);
-            }
-            
-            authority.send(new ContentRequest(urn, filename, metaData, size, length));
-            
-        } else if(LOG.isDebugEnabled()) {
-            LOG.debug("Not sending request. No authority or already requested.");
-        }
+        // only send if we haven't already requested, check authority
+        // afterwards so request is stored in any case
+        if (REQUESTED.put(urn, details) == null && authority != null) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Sending request for URN: " + details.getSHA1Urn() + " to authority: " + authority);
+            authority.sendAuthorizationRequest(details, timeout);
+        } else if(LOG.isDebugEnabled())
+            LOG.debug("Not sending request. Already requested or no authority.");
     }
     
     /**
@@ -224,7 +199,7 @@ public class ContentManager {
         URN urn = responseMsg.getURN();
         // Only process if we requested this msg.
         // (Don't allow arbitrary responses to be processed)
-        if(urn != null && REQUESTED.remove(urn)) {
+        if (REQUESTED.remove(urn) != null) {
             ContentResponseData response = new ContentResponseData(responseMsg);
             CACHE.addResponse(urn, response);
             if(LOG.isDebugEnabled())
@@ -277,11 +252,12 @@ public class ContentManager {
      */
     protected void addResponder(Responder responder) {
         synchronized(OBSERVERS) {
-            Collection<Responder> observers = OBSERVERS.get(responder.urn);
+        	URN urn = responder.urn;
+            Collection<Responder> observers = OBSERVERS.get(urn);
             if(observers == null)
                 observers = new HashSet<Responder>();
             observers.add(responder);
-            OBSERVERS.put(responder.urn, observers);
+            OBSERVERS.put(urn, observers);
             
             if(responder.dead != 0)
                 addForTimeout(responder);
@@ -387,51 +363,20 @@ public class ContentManager {
             // set the authority (so newly requested ones will immediately send to it),
             // and then send off those requested.
             // note that the timeouts on processing older requests will be lagging slightly.
-            if (auth != null) {
-                Set<URN> alreadyReq = new HashSet<URN>();
-                synchronized(REQUESTED) {
-                    alreadyReq.addAll(REQUESTED);
-                    setContentAuthority(auth);
-                }
-                
-                FileManager fileManager = RouterService.getFileManager();
-                
-                for(URN urn : alreadyReq) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Sending delayed request for URN: " + urn + " to: " + auth);
-                    }
-                    
-                    String filename = null;
-                    String metaData = null;
-                    long size = 0L;
-                    int length = 0;
-                    
-                    FileDesc fd = fileManager.getFileDescForUrn(urn);
-                    if (fd != null) {
-                        filename = fd.getFileName();
-                        size = fd.getFileSize();
-                        
-                        String len = null;
-                        if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
-                            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.AUDIO_SCHEMA);
-                            len = doc.getValue(LimeXMLNames.AUDIO_SECONDS);
-                            metaData = doc.getValue(LimeXMLNames.AUDIO_TITLE);
-                            
-                        } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
-                            LimeXMLDocument doc = fd.getXMLDocument(LimeXMLNames.VIDEO_SCHEMA);
-                            len = doc.getValue(LimeXMLNames.VIDEO_LENGTH);
-                            metaData = doc.getValue(LimeXMLNames.VIDEO_TITLE);
-                        }
-                        
-                        if (len != null) {
-                            try {
-                                length = Integer.parseInt(len);
-                            } catch (NumberFormatException e) {}
-                        }
-                    }
-                    
-                    auth.send(new ContentRequest(urn, filename, metaData, size, length));
-                }
+        	if (!REQUESTED.isEmpty()) {
+        		List<FileDetails> alreadyReq = new ArrayList<FileDetails>(REQUESTED.size());
+        		synchronized(REQUESTED) {
+        			alreadyReq.addAll(REQUESTED.values());
+        			setContentAuthority(auth);
+        		}
+
+        		// process outside of lock
+        		for (FileDetails details : alreadyReq) {
+        			if(LOG.isDebugEnabled())
+        				LOG.debug("Sending delayed request for URN: " + details + " to: " + auth);
+        			// TODO fberger timeout... check
+        			auth.sendAuthorizationRequest(details, 0);
+        		}
             }
         }
     }
@@ -444,13 +389,9 @@ public class ContentManager {
         private final ContentResponseObserver observer;
         
         private final URN urn;
-        private final String filename;
-        private final String metaData;
-        private final long size;
-        private final int length;
-        
+                
         Responder(long now, long timeout, ContentResponseObserver observer, 
-                URN urn, String filename, String metaData, long size, int length) {
+                URN urn) {
             
             if (timeout != 0) {
                 this.dead = now + timeout;
@@ -459,12 +400,7 @@ public class ContentManager {
             }
             
             this.observer = observer;
-            
             this.urn = urn;
-            this.filename = filename;
-            this.metaData = metaData;
-            this.size = size;
-            this.length = length;
         }
 
         public int compareTo(Responder o) {
@@ -492,6 +428,34 @@ public class ContentManager {
         public ContentResponseData getResponse() {
             return response;
         }
+		
     }
-    
+
+    private class ContentResponseHandler implements ContentResponseObserver {
+
+		public void handleResponse(URN urn, ContentResponseData response) {
+	        // Only process if we requested this msg.
+	        // (Don't allow arbitrary responses to be processed)
+	        if(REQUESTED.remove(urn) != null) {
+	        	CACHE.addResponse(urn, response);
+	        	if(LOG.isDebugEnabled())
+	        		LOG.debug("Adding response (" + response + ") for URN: " + urn);
+	    
+	            Collection<Responder> responders = OBSERVERS.remove(urn);
+	            if(responders != null) {
+	                removeResponders(responders);
+	                for(Responder next : responders)
+	                    next.observer.handleResponse(next.urn, response);
+	            }
+	        } else if(LOG.isWarnEnabled()) {
+	        	// TODO fberger update warnings
+	            if(urn == null) {
+	                LOG.debug("No URN in response: " + response);
+	            } else {
+	                LOG.debug("Didn't request URN: " + urn + ", msg: " + response);
+	            }
+	        }
+		}
+    	
+    }
 }

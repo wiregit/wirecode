@@ -158,7 +158,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
         connectDloader(d1,true,rfd1,true);
         assertEquals(1, auth.getSent().size());
-        assertEquals(urn1, ((ContentRequest)auth.getSent().get(0)).getURN());
+        assertEquals(urn1, auth.getSent().get(0).getSHA1Urn());
 
         kill(d1);
         

@@ -182,17 +182,22 @@ public class FileUtils {
      *   could not be extracted
      */
     public static String getFileExtension(String name) {
-        int index = name.lastIndexOf(".");
-        if(index == -1) return null;
-        
-        // the file must have a name other than the extension
-        if(index == 0) return null;
-        
-        // if the last character of the string is the ".", then there's
-        // no extension
-        if(index == (name.length()-1)) return null;
-        
-        return name.substring(index+1);
+        int index = indexOfExtension(name);        
+        return index != -1 ? name.substring(index) : null;
+    }
+    
+    /**
+     * Returns the starting index of the filename's extension. 
+     * @param name
+     * @return -1 if first or last character is dot or <code>name</code> does
+     * not contain any dot
+     */
+    public static int indexOfExtension(String name) {
+    	int index = name.lastIndexOf(".");
+    	if (index <= 0 || index == name.length() - 1) {
+    		return -1;
+    	}
+    	return index + 1;
     }
     
     /**

@@ -228,7 +228,7 @@ BTLinkListener {
                  }
              }
 		};
-		RouterService.getContentManager().request(context.getMetaInfo().getURN(),
+		RouterService.getContentManager().request(context.getMetaInfo().getFileDesc(),
 				observer, 5000);
 	}
 	

@@ -2,41 +2,45 @@ package com.limegroup.gnutella.auth;
 
 import java.net.UnknownHostException;
 
+import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.ContentRequest;
+import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
 
 /** A ContentAuthority that sends to a single IpPort. */
-public class IpPortContentAuthority implements ContentAuthority {
+// TODO fberger doc
+class IpPortContentAuthority implements ContentAuthority {
     
     private IpPort authority;
     
     /** host/port to store which'll be used when initializing, if necessary */
     private String host;
     private int port;
-
+    
+    private final boolean handleResponses;
+    
     /** Constructs the authority with the given IpPort. */
-    public IpPortContentAuthority(IpPort host) {
-        this.authority = host;
-        this.host = host.getAddress();
-        this.port = host.getPort();
+    public IpPortContentAuthority(IpPort host, boolean handleResponses) {
+    	this(host.getAddress(), host.getPort(), handleResponses);
+    	this.authority = host;
     }
     
+    public IpPortContentAuthority(IpPort host) {
+    	this(host, false);
+    }
     /**
      * Constructs the authority with the given host/port.
      * You must call initialize prior to sending a message.
      */
-    public IpPortContentAuthority(String host, int port) {
+    public IpPortContentAuthority(String host, int port, boolean handleResponses) {
         this.host = host;
         this.port = port;
+        this.handleResponses = handleResponses;
     }
-
-    /** Sends a message to the authority. */
-    public void send(Message m) {
-        UDPService.instance().send(m, authority);
-    }
-
+    
     /** Constructs the authority from the host/port if necessary */
     public boolean initialize() {
         if (authority == null) {
@@ -47,7 +51,7 @@ public class IpPortContentAuthority implements ContentAuthority {
                 // ignored.
             }
         }
-        
+            
         return true;
     }
     
@@ -55,4 +59,16 @@ public class IpPortContentAuthority implements ContentAuthority {
         return authority;
     }
 
+	public void shutdown() {
+	}
+
+	public void sendAuthorizationRequest(FileDetails details, long timeout) {
+		UDPService.instance().send(new ContentRequest(details), authority);			
+	}
+
+	public void setContentResponseObserver(ContentResponseObserver observer) {
+		if (handleResponses && observer != null) {
+			RouterService.getMessageRouter().setUDPMessageHandler(ContentResponse.class, new ContentResponseHandler(observer));
+		}
+	}
 }

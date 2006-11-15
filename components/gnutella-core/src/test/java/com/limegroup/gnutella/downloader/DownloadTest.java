@@ -9,8 +9,10 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -140,6 +142,8 @@ public class DownloadTest extends BaseTestCase {
     private static Set validAlts = null;
     private static Set invalidAlts = null;
     
+    private InetSocketAddress addr;
+    
     public static void globalSetUp() throws Exception {
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
@@ -187,7 +191,7 @@ public class DownloadTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
         DOWNLOADER = null;
         
         dm.clearAllDownloads();
@@ -221,6 +225,9 @@ public class DownloadTest extends BaseTestCase {
         callback.delCorrupt = false;
         callback.corruptChecked = false;
         TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        InetAddress address = InetAddress.getByName("64.61.25.171");
+    	addr = new InetSocketAddress(address, 10000);
     }    
 
     public void tearDown() {
@@ -2258,7 +2265,7 @@ public class DownloadTest extends BaseTestCase {
         RouterService.download(rfds,false,null);
         Thread.sleep(1000);
         synchronized(COMPLETE_LOCK) {
-        	RouterService.getContentManager().handleContentResponse(new ContentResponse(TestFile.hash(), false, "False"));
+        	RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(TestFile.hash(), false, "False"), addr);
         	waitForInvalid();       
         }
     }

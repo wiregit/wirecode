@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -2046,52 +2048,16 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                String filename = getSaveFile().getName();
-                String metaData = null;
-                long size = getContentLength();
-                int length = 0;
-                
-                String titleKey = null;
-                String lengthKey = null;
-                
-                if (LimeXMLUtils.isSupportedAudioFormat(filename)) {
-                    titleKey = LimeXMLNames.AUDIO_TITLE;
-                    lengthKey = LimeXMLNames.AUDIO_SECONDS;
-                } else if (LimeXMLUtils.isSupportedVideoFormat(filename)) {
-                    titleKey = LimeXMLNames.VIDEO_TITLE;
-                    lengthKey = LimeXMLNames.VIDEO_LENGTH;
-                }
-                
-                if (titleKey != null && lengthKey != null) {
-                    for (RemoteFileDesc rfd : cachedRFDs) {
-                        LimeXMLDocument doc = rfd.getXMLDocument();
-                        if (doc != null) {
-                            metaData = doc.getValue(titleKey);
-                            String len = doc.getValue(lengthKey);
-                            if (len != null) {
-                                try {
-                                    length = Integer.parseInt(len);
-                                } catch (NumberFormatException e) {}
-                            }
-                        }
-                        
-                        if (metaData != null && length > 0) {
-                            break;
-                        }
-                    }
-                }
-                
-                ContentResponseObserver observer = new ContentResponseObserver() {
+
+                RouterService.getContentManager().request(getDetails(), new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
-                        if(response != null && !response.isOK()) {
+                        if (response != null && !response.isOK()) {
                             invalidated = true;
                             stop();
                         }
                     }
-                };
-                
-                RouterService.getContentManager().request(
-                        downloadSHA1, filename, metaData, size, length, observer, 5000);           
+                    // TODO fberger remove hardcoded timeout
+                }, 5000);
             }
         }
     }
@@ -3033,4 +2999,46 @@ public class ManagedDownloader extends AbstractDownloader
 	public String getCustomIconDescriptor() {
 		return null; // always use the file icon
 	}
+	
+	private FileDetails getDetails() {
+		if (!cachedRFDs.isEmpty()) {
+			return cachedRFDs.iterator().next();
+		}
+		return new FileDetails() {
+
+			public File getFile() {
+				return null;
+			}
+
+			public String getFileName() {
+				return (String)propertiesMap.get(DEFAULT_FILENAME);
+			}
+
+			public long getFileSize() {
+				return (Long)propertiesMap.get(FILE_SIZE);
+			}
+
+			public URN getSHA1Urn() {
+				return downloadSHA1;
+			}
+
+			public InetSocketAddress getSocketAddress() {
+				return null;
+			}
+
+			public Set<URN> getUrns() {
+				return null;
+			}
+
+			public LimeXMLDocument getXMLDocument() {
+				return null;
+			}
+
+			public boolean isFirewalled() {
+				return false;
+			}
+			
+		};
+	}
+
 }

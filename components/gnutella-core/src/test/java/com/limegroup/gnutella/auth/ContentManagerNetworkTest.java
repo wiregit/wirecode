@@ -1,14 +1,19 @@
 package com.limegroup.gnutella.auth;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.UDPService;
@@ -20,12 +25,14 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
  
 public class ContentManagerNetworkTest extends BaseTestCase {
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     
     private static URN URN_1;
+    private static FileDetails details_1;
     
     private ContentManager mgr;
     private ContentResponse crOne;
@@ -50,6 +57,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         UDPService.instance().start();
         
         URN_1 = URN.createSHA1Urn(S_URN_1);
+        details_1 = new URNFileDetails(URN_1);
     }
     
     public void setUp() throws Exception {
@@ -73,14 +81,15 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
-        mgr.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort())));
-        mgr.request(URN_1, one, 2000);
+        mgr.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort()), true));
+        mgr.request(details_1, one, 2000);
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         socket.receive(packet);
         byte[] read = packet.getData();
         
-        ContentRequest expectSentMsg = new ContentRequest(URN_1, null, null, 0, 0);
+        ContentRequest expectSentMsg = new ContentRequest(details_1);
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         expectSentMsg.write(out);
         byte[] expectSentBytes = out.toByteArray();
@@ -94,6 +103,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.close();
     }
     
+    // TODO fberger
     public void testDelayedRequestSent() throws Exception {
         InetSocketAddress addr = new InetSocketAddress(SEND_PORT);
         final DatagramSocket socket = new DatagramSocket(addr);
@@ -104,17 +114,19 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         mgr.shutdown();
         mgr = new ContentManager() {
             protected ContentAuthority getDefaultContentAuthority() {
-                return new IpPortContentAuthority(authority);
+                return new IpPortContentAuthority(authority, true);
             }
         };
-        mgr.request(URN_1, one, 2000);
+        mgr.request(details_1, one, 2000);
         mgr.initialize();
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         socket.receive(packet);
         byte[] read = packet.getData();
         
-        ContentRequest expectSentMsg = new ContentRequest(URN_1, null, null, 0, 0);
+
+        ContentRequest expectSentMsg = new ContentRequest(details_1);
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         expectSentMsg.write(out);
         byte[] expectSentBytes = out.toByteArray();
@@ -133,7 +145,10 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         
         mgr.shutdown();
         mgr = RouterService.getContentManager();
-        mgr.request(URN_1, one, 4000);
+        mgr.initialize();
+//        Thread.yield();
+        Thread.sleep(1000);
+        mgr.request(details_1, one, 4000);
         UDPService.instance().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
         Thread.sleep(1000); // let the message process.
         assertNotNull(mgr.getResponse(URN_1));
@@ -151,5 +166,53 @@ public class ContentManagerNetworkTest extends BaseTestCase {
             this.urn = urn;
             this.response = response;
         }
+    }
+    
+    public static class URNFileDetails implements FileDetails {
+
+    	private final URN urn;
+    	
+    	public URNFileDetails(URN urn) {
+    		this.urn = urn;
+    	}
+    	
+		public File getFile() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String getFileName() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public long getFileSize() {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		public URN getSHA1Urn() {
+			return urn;
+		}
+
+		public InetSocketAddress getSocketAddress() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public Set<URN> getUrns() {
+			return new TreeSet<URN>(Arrays.asList(urn)); 
+		}
+
+		public LimeXMLDocument getXMLDocument() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public boolean isFirewalled() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+    	
     }
 }

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.auth;
 
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.messages.Message;
 
 /** 
@@ -19,7 +20,11 @@ public interface ContentAuthority {
      */
     public boolean initialize();
     
+    public void shutdown();
+    
+    public void setContentResponseObserver(ContentResponseObserver observer);
+    
     /** Sends a message through this authority. This should not block. */
-    public void send(Message m);
+    public void sendAuthorizationRequest(FileDetails details, long timeout);
     
 }

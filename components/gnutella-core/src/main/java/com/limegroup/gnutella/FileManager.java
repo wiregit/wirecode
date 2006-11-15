@@ -1446,15 +1446,13 @@ public abstract class FileManager {
     public void validate(final FileDesc fd) {
         ContentManager cm = RouterService.getContentManager();
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            ContentResponseObserver observer = new ContentResponseObserver() {
-                public void handleResponse(URN urn, ContentResponseData r) {
-                    _requestingValidation.remove(fd.getSHA1Urn());
-                    if(r != null && !r.isOK())
-                        removeFileIfShared(fd.getFile());
-                }
-            };
-            
-            cm.request(fd, observer, 5000);
+            cm.request(fd, new ContentResponseObserver() {
+               public void handleResponse(URN urn, ContentResponseData r) {
+                   _requestingValidation.remove(fd.getSHA1Urn());
+                   if(r != null && !r.isOK())
+                       removeFileIfShared(fd.getFile());
+               }
+            }, 5000);
         }
     }
 

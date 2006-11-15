@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
@@ -46,5 +47,9 @@ public interface FileDetails {
 	 * @return
 	 */	
 	boolean isFirewalled();
-	
+	/**
+	 * Returns <code>null</code> if the details are not backed by an
+	 * actual file on the file system. 
+	 */
+	File getFile();
 }

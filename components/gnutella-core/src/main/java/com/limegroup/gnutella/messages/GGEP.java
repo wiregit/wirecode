@@ -70,6 +70,13 @@ public class GGEP {
     /** The extension header (key) for time stamps */
     public static final String GGEP_HEADER_TIMESTAMP = "TS";
     
+    // TODO fberger document
+    public static final String GGEP_HEADER_FILE_NAME = "FN";
+    // TODO fberger document
+    public static final String GGEP_HEADER_FILE_SIZE = "FS";
+    // TODO fberger document
+    public static final String GGEP_HEADER_FILE_EXTENSION_INDEX = "FEI";
+    
     /**
      * The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.

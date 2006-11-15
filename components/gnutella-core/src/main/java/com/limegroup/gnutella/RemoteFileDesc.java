@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -982,4 +983,8 @@ public class RemoteFileDesc implements IpPort, Serializable, FileDetails {
     public void setSecureStatus(int secureStatus) {
         this._secureStatus = secureStatus;
     }
+
+	public File getFile() {
+		return null;
+	}
 }
