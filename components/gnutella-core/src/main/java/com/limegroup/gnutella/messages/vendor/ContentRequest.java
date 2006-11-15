@@ -7,15 +7,11 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-
-import java.net.InetSocketAddress;
-import java.util.Set;
-
-import org.cybergarage.util.FileUtil;
-
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.util.Collections;
 import java.util.Locale;
-
+import java.util.Set;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -29,7 +25,6 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 /**
  * A request for content.
@@ -42,7 +37,7 @@ public class ContentRequest extends VendorMessage {
     
     private byte[] filename;
     
-    private byte[] title;
+    private byte[] metaData;
     
     private long size;
     
@@ -68,8 +63,16 @@ public class ContentRequest extends VendorMessage {
                 filename = ggep.get(GGEP.GGEP_HEADER_FILENAME);
             }
             
+            // TODO implement
+            /*if (ggep.hasKey(GGEP.GGEP_HEADER_FILE_EXTENSION_INDEX)) {
+                try {
+                    index = ggep.getInt(GGEP.GGEP_HEADER_FILE_EXTENSION_INDEX);
+                } catch (BadGGEPPropertyException e) {
+                }
+            }*/
+            
             if (ggep.hasKey(GGEP.GGEP_HEADER_METADATA)) {
-                title = ggep.get(GGEP.GGEP_HEADER_METADATA);
+                metaData = ggep.get(GGEP.GGEP_HEADER_METADATA);
             }
             
             if (ggep.hasKey(GGEP.GGEP_HEADER_FILESIZE)) {
@@ -140,11 +143,12 @@ public class ContentRequest extends VendorMessage {
         	try { 
         		ggep.put(GGEP.GGEP_HEADER_FILE_NAME,
         				toLowerCase(fileName).getBytes(Constants.UTF_8_ENCODING));
+        	} catch (UnsupportedEncodingException uee) {
         	}
-        	catch (UnsupportedEncodingException uee) {
-        	}
+            
         	int index = FileUtils.indexOfExtension(fileName);
-        	if (index != -1) {
+        	if (index >= 0) {
+                // TODO use only an unsigned byte?
         		ggep.put(GGEP.GGEP_HEADER_FILE_EXTENSION_INDEX, index);
         	}
         }
@@ -154,18 +158,18 @@ public class ContentRequest extends VendorMessage {
         	ggep.put(GGEP.GGEP_HEADER_FILE_SIZE, fileSize);
         }
         
-        String title = null;
+        String metaData = null;
         String length = null;
+        
         if (LimeXMLUtils.isSupportedAudioFormat(fileName)) {
             LimeXMLDocument doc = details.getXMLDocument();
             length = doc.getValue(LimeXMLNames.AUDIO_SECONDS);
-            title = doc.getValue(LimeXMLNames.AUDIO_TITLE);
+            metaData = doc.getValue(LimeXMLNames.AUDIO_TITLE);
             
-        } 
-        else if (LimeXMLUtils.isSupportedVideoFormat(fileName)) {
+        } else if (LimeXMLUtils.isSupportedVideoFormat(fileName)) {
             LimeXMLDocument doc = details.getXMLDocument();
             length = doc.getValue(LimeXMLNames.VIDEO_LENGTH);
-            title = doc.getValue(LimeXMLNames.VIDEO_TITLE);
+            metaData = doc.getValue(LimeXMLNames.VIDEO_TITLE);
         }
 
         if (length != null) {
@@ -176,10 +180,11 @@ public class ContentRequest extends VendorMessage {
                 }
             } catch (NumberFormatException e) {}
         }
-        if (title != null && title.length() > 0) {
+        
+        if (metaData != null && metaData.length() > 0) {
         	try {
         		ggep.put(GGEP.GGEP_HEADER_METADATA, 
-        				title.getBytes(Constants.UTF_8_ENCODING));
+        				toLowerCase(metaData).getBytes(Constants.UTF_8_ENCODING));
             } catch (UnsupportedEncodingException e) {
           	}
         }
@@ -241,7 +246,7 @@ public class ContentRequest extends VendorMessage {
      * Returns the meta data
      */
     public byte[] getMetaData() {
-        return title;
+        return metaData;
     }
     
     /**
@@ -282,7 +287,7 @@ public class ContentRequest extends VendorMessage {
     	private final GGEP ggep;
     	private URN urn;
     	private String fileName;
-    	private long fileSize = -1;
+    	private long fileSize = -1L;
     	
 		public ContentRequestFileDetails(GGEP ggep) {
 			this.ggep = ggep;
@@ -293,35 +298,32 @@ public class ContentRequest extends VendorMessage {
 		}
 
 		public String getFileName() {
-			if (fileName == null) {
-				try {
-					fileName = ggep.getString(GGEP.GGEP_HEADER_FILE_NAME);
-				}
-				catch (BadGGEPPropertyException e) {
-				}
+			if (fileName == null && ggep.hasKey(GGEP.GGEP_HEADER_FILE_NAME)) {
+                try {
+                    byte[] b = ggep.get(GGEP.GGEP_HEADER_FILE_NAME);
+                    fileName = new String(b, Constants.UTF_8_ENCODING);
+                } catch (UnsupportedEncodingException e) {
+                }
 			}
 			return fileName;
 		}
 
 		public long getFileSize() {
-			if (fileSize == -1) {
+			if (fileSize == -1L && ggep.hasKey(GGEP.GGEP_HEADER_FILE_SIZE)) {
 				try {
 					fileSize = ggep.getLong(GGEP.GGEP_HEADER_FILE_SIZE);
-				}
-				catch (BadGGEPPropertyException e) {
+				} catch (BadGGEPPropertyException e) {
 				}
 			}
 			return fileSize;
 		}
 
 		public URN getSHA1Urn() {
-			if (urn == null) {
+			if (urn == null && ggep.hasKey(GGEP.GGEP_HEADER_SHA1)) {
 				try { 
 					urn = URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
-				}
-				catch (BadGGEPPropertyException e) {
-				}
-				catch (IOException e) {
+				} catch (BadGGEPPropertyException e) {
+				} catch (IOException e) {
 				}
 			}
 			return urn;
@@ -332,7 +334,11 @@ public class ContentRequest extends VendorMessage {
 		}
 
 		public Set<URN> getUrns() {
-			return null;
+            URN urn = this.urn;
+            if (urn != null) {
+                return Collections.singleton(urn);
+            }
+            return Collections.emptySet();
 		}
 
 		public LimeXMLDocument getXMLDocument() {
@@ -342,6 +348,5 @@ public class ContentRequest extends VendorMessage {
 		public boolean isFirewalled() {
 			return false;
 		}
-    	
     }
 }
