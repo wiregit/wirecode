@@ -2046,15 +2046,6 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-                ContentResponseObserver observer = new ContentResponseObserver() {
-                    public void handleResponse(URN urn, ContentResponseData response) {
-                        if(response != null && !response.isOK()) {
-                            invalidated = true;
-                            stop();
-                        }
-                    }
-                };
-                
                 String filename = getSaveFile().getName();
                 String metaData = null;
                 long size = getContentLength();
@@ -2089,6 +2080,15 @@ public class ManagedDownloader extends AbstractDownloader
                         }
                     }
                 }
+                
+                ContentResponseObserver observer = new ContentResponseObserver() {
+                    public void handleResponse(URN urn, ContentResponseData response) {
+                        if(response != null && !response.isOK()) {
+                            invalidated = true;
+                            stop();
+                        }
+                    }
+                };
                 
                 RouterService.getContentManager().request(
                         downloadSHA1, filename, metaData, size, length, observer, 5000);           
