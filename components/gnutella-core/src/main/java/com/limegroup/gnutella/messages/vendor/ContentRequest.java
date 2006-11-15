@@ -7,6 +7,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
@@ -40,12 +41,12 @@ public class ContentRequest extends VendorMessage {
       throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_CONTENT_REQ, version, payload);
         
-        if (getPayload().length < 1) {
+        if (payload.length < 1) {
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " + getPayload().length);
         }
         
         try {
-            GGEP ggep = new GGEP(getPayload(), 0);
+            GGEP ggep = new GGEP(payload, 0);
             
             sha1 = ggep.get(GGEP.GGEP_HEADER_SHA1);
             
@@ -79,20 +80,23 @@ public class ContentRequest extends VendorMessage {
      * Constructs a new ContentRequest for the given SHA1 URN.
      */
     public ContentRequest(URN urn, String filename, String metaData, long size, int length) {
-        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, derivePayload(urn, filename, metaData, size, length));
+        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, 
+                derivePayload(urn, filename, metaData, size, length));
         
         this.sha1 = urn.getBytes();
         
         if (filename != null && filename.length() > 0) {
             try {
-                this.filename = filename.getBytes(Constants.UTF_8_ENCODING);
+                this.filename = filename.toLowerCase(Locale.US)
+                                    .getBytes(Constants.UTF_8_ENCODING);
             } catch (UnsupportedEncodingException e) {
             }
         }
         
         if (metaData != null && metaData.length() > 0) {
             try {
-                this.metaData = metaData.getBytes(Constants.UTF_8_ENCODING);
+                this.metaData = metaData.toLowerCase(Locale.US)
+                                    .getBytes(Constants.UTF_8_ENCODING);
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -109,7 +113,7 @@ public class ContentRequest extends VendorMessage {
             throw new NullPointerException("URN is null");
         }
         
-        if (!urn.isSHA1()) {
+        if(!urn.isSHA1()) {
             throw new IllegalArgumentException("URN must be a SHA1");
         }
         
@@ -119,7 +123,8 @@ public class ContentRequest extends VendorMessage {
         if (filename != null && filename.length() > 0) {
             try {
                 ggep.put(GGEP.GGEP_HEADER_FILENAME, 
-                        filename.getBytes(Constants.UTF_8_ENCODING));
+                        filename.toLowerCase(Locale.US)
+                            .getBytes(Constants.UTF_8_ENCODING));
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -127,7 +132,8 @@ public class ContentRequest extends VendorMessage {
         if (metaData != null && metaData.length() > 0) {
             try {
                 ggep.put(GGEP.GGEP_HEADER_METADATA, 
-                        metaData.getBytes(Constants.UTF_8_ENCODING));
+                        metaData.toLowerCase(Locale.US)
+                            .getBytes(Constants.UTF_8_ENCODING));
             } catch (UnsupportedEncodingException e) {
             }
         }
@@ -150,7 +156,7 @@ public class ContentRequest extends VendorMessage {
     }
     
     /**
-     * 
+     * Returns the URN of the SHA1
      */
     public URN getURN() {
         try {
@@ -161,35 +167,35 @@ public class ContentRequest extends VendorMessage {
     }
     
     /**
-     * 
+     * Returns the SHA1
      */
     public byte[] getSHA1() {
         return sha1;
     }
     
     /**
-     * 
+     * Returns the file name
      */
     public byte[] getFilename() {
         return filename;
     }
     
     /**
-     * 
+     * Returns the meta data
      */
     public byte[] getMetaData() {
         return metaData;
     }
     
     /**
-     * 
+     * Returns the file size
      */
     public long getSize() {
         return size;
     }
     
     /**
-     * The runlength metadata
+     * The run length
      */
     public int getLength() {
         return length;
