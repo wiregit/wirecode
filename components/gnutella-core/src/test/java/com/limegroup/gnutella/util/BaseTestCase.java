@@ -63,6 +63,16 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
     protected TimerTask _testKiller;
     protected long _startTimeForTest;
 
+    /**
+     * bug 6435126
+     */
+    private static final Thread INTERRUPT_FIXER = new Thread() {
+    	public void run() {
+    		try {
+    			Thread.sleep(Integer.MAX_VALUE);
+    		} catch (InterruptedException ignore){}
+    	}
+    };
 	/**
 	 * Unassigned port for tests to use.
 	 */
@@ -314,6 +324,8 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      * Called statically before any settings.
      */
     public static void beforeAllTestsSetUp() throws Throwable {
+    	INTERRUPT_FIXER.setDaemon(true);
+    	INTERRUPT_FIXER.start();
         // SystemUtils must pretend to not be loaded, so the idle
         // time isn't counted.
         // For tests that are testing SystemUtils specifically, they can
@@ -341,6 +353,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
     public static void afterAllTestsTearDown() throws Throwable {
         cleanFiles(_baseDir, true);
         shutdownBackends();
+        INTERRUPT_FIXER.interrupt();
     }
     
     /**
