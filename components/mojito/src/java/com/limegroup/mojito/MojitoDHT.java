@@ -229,8 +229,9 @@ public interface MojitoDHT {
     
     /**
      * Stores the given key, value pair
+     * @param version TODO
      */
-    public DHTFuture<StoreEvent> put(DHTValueType type, KUID key, byte[] value);
+    public DHTFuture<StoreEvent> put(KUID key, DHTValueType type, int version, byte[] value);
     
     /**
      * Removes the value for the given key

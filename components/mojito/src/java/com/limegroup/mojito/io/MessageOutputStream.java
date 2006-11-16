@@ -32,7 +32,6 @@ import java.util.Map.Entry;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.StatisticType;
@@ -90,8 +89,7 @@ public class MessageOutputStream extends DataOutputStream {
         writeContact(value.getCreator());
         
         value.getValueID().write(this);
-        DHTValueType type = value.getValueType();
-        writeInt(type.toInt());
+        writeInt(value.getValueType().toInt());
         writeShort(value.getVersion());
         
         byte[] data = value.getData();
