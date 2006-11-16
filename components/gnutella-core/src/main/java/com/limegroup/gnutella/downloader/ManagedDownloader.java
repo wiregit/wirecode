@@ -2048,16 +2048,18 @@ public class ManagedDownloader extends AbstractDownloader
     private void validateDownload() {
         if(shouldValidate(deserializedFromDisk)) {
             if(downloadSHA1 != null) {
-
-                RouterService.getContentManager().request(getDetails(), new ContentResponseObserver() {
+                
+                ContentResponseObserver observer = new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if (response != null && !response.isOK()) {
                             invalidated = true;
                             stop();
                         }
                     }
-                    // TODO fberger remove hardcoded timeout
-                }, 5000);
+                };
+                
+                // TODO fberger remove hardcoded timeout
+                RouterService.getContentManager().request(getDetails(), observer, 5000);
             }
         }
     }

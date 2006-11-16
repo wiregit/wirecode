@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.IpPortImpl;
 
 /** A ContentAuthority that sends to a single IpPort. */
 // TODO fberger doc
-class IpPortContentAuthority implements ContentAuthority {
+public class IpPortContentAuthority implements ContentAuthority {
     
     private IpPort authority;
     
@@ -22,15 +22,16 @@ class IpPortContentAuthority implements ContentAuthority {
     
     private final boolean handleResponses;
     
+    public IpPortContentAuthority(IpPort host) {
+        this(host, false);
+    }
+    
     /** Constructs the authority with the given IpPort. */
     public IpPortContentAuthority(IpPort host, boolean handleResponses) {
     	this(host.getAddress(), host.getPort(), handleResponses);
     	this.authority = host;
     }
-    
-    public IpPortContentAuthority(IpPort host) {
-    	this(host, false);
-    }
+
     /**
      * Constructs the authority with the given host/port.
      * You must call initialize prior to sending a message.
