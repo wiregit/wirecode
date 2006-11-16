@@ -19,7 +19,7 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
- * A request of content.
+ * A request for content.
  */
 public class ContentRequest extends VendorMessage {
 
