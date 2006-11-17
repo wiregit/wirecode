@@ -702,7 +702,7 @@ public class DownloadWorker {
      * if no downloader could be created, and stop the downloader if we were interrupted. Returns true if the download
      * should proceed, false otherwise.
      */
-    boolean finishConnect() {
+    private boolean finishConnect() {
         // if we didn't connect at all, tell the rest about this rfd
         if (_downloader == null) {
             _manager.informMesh(_rfd, false);
@@ -721,7 +721,7 @@ public class DownloadWorker {
      * This will return immediately and the given observer will be notified
      * of success or failure.
      */
-    void connectDirectly(DirectConnector observer) {
+    private void connectDirectly(DirectConnector observer) {
         if (!_interrupted) {
             if(LOG.isTraceEnabled())
                 LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
@@ -1432,7 +1432,7 @@ public class DownloadWorker {
     }
     
     /** Ensures this worker is finished and doesn't start again. */
-    void finishWorker() {
+    private void finishWorker() {
         _interrupted = true;
         _manager.workerFinished(this);
     }
@@ -1441,7 +1441,7 @@ public class DownloadWorker {
      * Starts a new thread that will perform the download.
      * @param dl
      */
-    void startDownload(HTTPDownloader dl) {
+    private void startDownload(HTTPDownloader dl) {
         _downloader = dl;
         
         // If we should continue, then start the download.
@@ -1513,7 +1513,6 @@ public class DownloadWorker {
          * 
          * @param forgetOnFailure
          * @param directConnectOnFailure
-         * @param worker TODO
          */
         PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
             this.forgetOnFailure = forgetOnFailure;
