@@ -95,14 +95,26 @@ public class ContentRequest extends VendorMessage {
      * Constructs a new ContentRequest for the given file details.
      */
     public ContentRequest(FileDetails fileDetails) {
-        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, derivePayload(fileDetails));
+        this(fileDetails.getSHA1Urn(), 
+                fileDetails.getFileName(), 
+                getMetaData(fileDetails), 
+                fileDetails.getFileSize(), 
+                getLength(fileDetails));
+    }
+    
+    /**
+     * Constructs a new ContentRequest for the given file details.
+     */
+    public ContentRequest(URN urn, String fileName, String metaData, long fileSize, int length) {
+        super(F_LIME_VENDOR_ID, F_CONTENT_REQ, VERSION, 
+                derivePayload(urn, fileName, metaData, fileSize, length));
         
-        this.sha1 = fileDetails.getSHA1Urn().getBytes();
-        this.fileName = getBytes(fileDetails.getFileName());
-        this.extension = FileUtils.indexOfExtension(fileDetails.getFileName());
-        this.metaData = getBytes(getMetaData(fileDetails));
-        this.fileSize = fileDetails.getFileSize();
-        this.length = getLength(fileDetails);
+        this.sha1 = urn.getBytes();
+        this.fileName = getBytes(fileName);
+        this.extension = FileUtils.indexOfExtension(fileName);
+        this.metaData = getBytes(metaData);
+        this.fileSize = fileSize;
+        this.length = length;
     }
     
     /**
@@ -206,8 +218,7 @@ public class ContentRequest extends VendorMessage {
     /**
      * Constructs the payload from given file details.
      */
-    private static byte[] derivePayload(FileDetails fileDetails) {
-        URN urn = fileDetails.getSHA1Urn();
+    private static byte[] derivePayload(URN urn, String fileName, String metaData, long fileSize, int length) {
         if (urn == null) {
             throw new NullPointerException("URN must not be null");
         }
@@ -219,7 +230,6 @@ public class ContentRequest extends VendorMessage {
         GGEP ggep =  new GGEP(true);
         ggep.put(GGEP.GGEP_HEADER_SHA1, urn.getBytes());
 
-        String fileName = fileDetails.getFileName();
         if (fileName != null && fileName.length() > 0) {
             try { 
                 ggep.put(GGEP.GGEP_HEADER_FILE_NAME,
@@ -234,7 +244,6 @@ public class ContentRequest extends VendorMessage {
             }
         }
         
-        String metaData = getMetaData(fileDetails);
         if (metaData != null && metaData.length() > 0) {
             try {
                 ggep.put(GGEP.GGEP_HEADER_METADATA, 
@@ -243,12 +252,10 @@ public class ContentRequest extends VendorMessage {
             }
         }
         
-        long fileSize = fileDetails.getFileSize();
         if (fileSize > 0L) {
             ggep.put(GGEP.GGEP_HEADER_FILE_SIZE, fileSize);
         }
         
-        int length = getLength(fileDetails);
         if (length > 0) {
             ggep.put(GGEP.GGEP_HEADER_RUNLENGTH, length);
         }
