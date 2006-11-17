@@ -99,6 +99,11 @@ public final class HTTPUploader implements Uploader {
     private boolean _isForcedShare = false;
     
     /**
+     * True if this is an uploader with high priority.
+     */
+    private boolean priorityShare = false;
+    
+    /**
      * whether the remote side indicated they want to receive
      * firewalled altlocs.
      */
@@ -257,6 +262,7 @@ public final class HTTPUploader implements Uploader {
         }
         _fis = _fileDesc.createInputStream();
         _isForcedShare = FileManager.isForcedShare(_fileDesc);
+        priorityShare = FileManager.isApplicationSpecialShare(_fileDesc.getFile());
 	}
 
 	/**
@@ -562,6 +568,9 @@ public final class HTTPUploader implements Uploader {
 	
 	// is a forced network share?
 	public boolean isForcedShare() { return _isForcedShare; }
+	
+	// uploader with high priority?
+	public boolean isPriorityShare() { return priorityShare; }
 
     public boolean supportsQueueing() {
         return _supportsQueueing && isValidQueueingAgent();

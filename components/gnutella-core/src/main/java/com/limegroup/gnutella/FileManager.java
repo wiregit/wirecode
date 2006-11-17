@@ -35,8 +35,8 @@ import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.StringTrie;
+import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -63,6 +63,9 @@ public abstract class FileManager {
     /** Subdirectory that also is always shared. */
     public static final File PREFERENCE_SHARE;
     
+    /** Subdirectory used to share special application files */
+    public static final File APPLICATION_SPECIAL_SHARE;
+    
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
         try {
@@ -70,11 +73,20 @@ public abstract class FileManager {
         } catch(IOException ignored) {}
         PROGRAM_SHARE = forceShare;
         
-        forceShare = new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
+        
+        forceShare = 
+            new File(CommonUtils.getUserSettingsDir(), ".AppSpecialShare").getAbsoluteFile();
+        forceShare.mkdir();
+        try {
+            forceShare = FileUtils.getCanonicalFile(forceShare);
+        } catch(IOException ignored) {}
+        APPLICATION_SPECIAL_SHARE = forceShare;
     }
 
     /** A type-safe empty LimeXMLDocument list. */
@@ -281,7 +293,7 @@ public abstract class FileManager {
             return isFileShareable(f);
         }
     };    
-        
+    
     /**
      * The filter object to use to determine directories.
      */
@@ -722,7 +734,7 @@ public abstract class FileManager {
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(PROGRAM_SHARE, null, revision);
         updateSharedDirectories(PREFERENCE_SHARE, null, revision);
-            
+        
         //Load the shared directories and add their files.
         _isUpdating = true;
         for(int i = 0; i < directories.length && _revision == revision; i++)
@@ -730,7 +742,7 @@ public abstract class FileManager {
             
 
         // Add specially shared files
-        Set<File> specialFiles = _data.SPECIAL_FILES_TO_SHARE;
+        Collection<File> specialFiles = _individualSharedFiles;
         ArrayList<File> list;
         synchronized(specialFiles) {
         	// iterate over a copied list, since addFileIfShared might call
@@ -785,11 +797,15 @@ public abstract class FileManager {
             return;
         
         // STEP 0:
-		// Do not share certain the incomplete directory, directories on the
+		// Do not share certain directories, directories on the
 		// do not share list, or sensitive directories.
         if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
             return;
-
+        
+        if (isApplicationSpecialShareDirectory(directory)) {
+            return;
+        }
+        
 		// Do not share directories on the do not share list
 		if (_data.DIRECTORIES_NOT_TO_SHARE.contains(directory))
 			return;
@@ -816,6 +832,7 @@ public abstract class FileManager {
         // STEP 1:
         // Add directory
         boolean isForcedShare = isForcedShareDirectory(directory);
+        
         synchronized (this) {
             // if it was already added, ignore.
             if (_completelySharedDirectories.contains(directory))
@@ -962,7 +979,7 @@ public abstract class FileManager {
         updateSharedDirectories(folder, null, _revision);
         _isUpdating = false;
     }
-	
+    
 	/**
 	 * Always shares the given file.
 	 */
@@ -1005,11 +1022,21 @@ public abstract class FileManager {
 	  * only.
 	  */
 	 public void addFileForSession(File file) {
-		 _data.FILES_NOT_TO_SHARE.remove(file);
-		 if (!isFileShareable(file))
-			 _transientSharedFiles.add(file);
-		 addFileIfShared(file, EMPTY_DOCUMENTS, false, _revision, null);
+		 addFileForSession(file, null);
 	 }
+     
+     /**
+      * adds a file that will be shared during this session of limewire
+      * only.
+      * 
+      * The listener is notified if this file could or couldn't be shared.
+      */
+     public void addFileForSession(File file, FileEventListener callback) {
+         _data.FILES_NOT_TO_SHARE.remove(file);
+         if (!isFileShareable(file))
+             _transientSharedFiles.add(file);
+         addFileIfShared(file, EMPTY_DOCUMENTS, true, _revision, callback);
+     }
 	
     /**
      * Adds the given file if it's shared.
@@ -1039,7 +1066,7 @@ public abstract class FileManager {
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list, FileEventListener callback) {
         addFileIfShared(file, list, true, _revision, callback);
     }
-	
+    
     /**
      * The actual implementation of addFileIfShared(File)
      * @param file the file to add
@@ -1246,12 +1273,14 @@ public abstract class FileManager {
 	/**
 	 * Removes the file if it is being shared, and then removes the file from
 	 * the special lists as necessary.
+     * @return The FileDesc associated with this file, or null if the file was
+     * not shared. 
 	 */
-	public synchronized void stopSharingFile(File file) {
+	public synchronized FileDesc stopSharingFile(File file) {
 		try {
 			file = FileUtils.getCanonicalFile(file);
 		} catch (IOException e) {
-			return;
+			return null;
 		}
 		
 		// remove file already here to heed against race conditions
@@ -1266,6 +1295,7 @@ public abstract class FileManager {
 			if (!removed)
 				_data.FILES_NOT_TO_SHARE.add(file);
 		}
+        return fd;
 	}
 	
 	/**
@@ -1609,6 +1639,25 @@ public abstract class FileManager {
     }
     
     /**
+     * @return true if currently we have any files that are 
+     * shared by the application.
+     */
+    public boolean hasApplicationSharedFiles() {
+    	File [] files = APPLICATION_SPECIAL_SHARE.listFiles();
+    	if (files == null)
+    		return false;
+    	
+    	// if at least one of the files in the application special
+    	// share are currently shared, return true.
+    	for (File f: files) {
+    		if (isFileShared(f))
+    			return true;
+    	}
+    	
+    	return false;
+    }
+    
+    /**
      * Returns all files that are shared while not in shared directories.
      */
     public File[] getIndividualFiles() {
@@ -1631,7 +1680,9 @@ public abstract class FileManager {
      * Determines if a given file is shared while not in a completely shared directory.
      */
     public boolean isIndividualShare(File f) {
-    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) && isFilePhysicallyShareable(f);
+    	return _data.SPECIAL_FILES_TO_SHARE.contains(f) 
+            && isFilePhysicallyShareable(f)
+            && !isApplicationSpecialShare(f);
     }
     
     /**
@@ -1718,25 +1769,23 @@ public abstract class FileManager {
 			
 		return false;
 	}
-	
+    
     /**
      * Returns true if this file is not too large, not too small,
-     * not null, is a directory, can be read, is not hidden.  Returns
-     * true if file is a specially shared file or starts with "LimeWire".
+     * not null, is a directory, can be read, is not hidden.  
      * Returns false otherwise.
-     * @see isFileShareable(File) 
      */
     public static boolean isFilePhysicallyShareable(File file) {
-		if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
             return false;
                 
-		long fileLength = file.length();
-		if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
-        	return false;
+        long fileLength = file.length();
+        if (fileLength > Integer.MAX_VALUE || fileLength <= 0) 
+            return false;
         
-		return true;
+        return true;
     }
-    
+	
     /**
      * Returns true iff <tt>file</tt> is a sensitive directory.
      */
@@ -2186,10 +2235,36 @@ public abstract class FileManager {
     }
     
     /**
+     * Determines if this File is an application special share.
+     */
+    public static boolean isApplicationSpecialShare(File file) {
+        File parent = file.getParentFile();
+        return parent != null && isApplicationSpecialShareDirectory(parent);
+    }
+    
+    /**
+     * @return true if there exists an application-shared file with the
+     * provided name.
+     */
+    public boolean isFileApplicationShared(String name) {
+    	File file = new File(APPLICATION_SPECIAL_SHARE, name);
+    	try {
+    		file = FileUtils.getCanonicalFile(file);
+    	} catch (IOException bad) {
+    		return false;
+    	}
+    	return isFileShared(file);
+    }
+    
+    /**
      * Determines if this File is a network shared directory.
      */
     public static boolean isForcedShareDirectory(File f) {
         return f.equals(PROGRAM_SHARE) || f.equals(PREFERENCE_SHARE);
+    }
+    
+    public static boolean isApplicationSpecialShareDirectory(File directory) {
+        return directory.equals(APPLICATION_SPECIAL_SHARE);
     }
     
     /**

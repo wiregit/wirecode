@@ -854,7 +854,16 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
      * uploads this will return true. 
      */
     public synchronized boolean isServiceable() {
-    	return slotManager.isServiceable(uploadsInProgress() + getNumQueuedUploads());
+    	return slotManager.hasHTTPSlot(uploadsInProgress() + getNumQueuedUploads());
+    }
+    
+    /**
+     * @return true if an incoming query (not actual upload request) may be serviceable.  
+     */
+    public synchronized boolean mayBeServiceable() {
+    	if (RouterService.getFileManager().hasApplicationSharedFiles())
+    		return slotManager.hasHTTPSlotForMeta(uploadsInProgress() + getNumQueuedUploads());
+    	return isServiceable();
     }
 
 	public synchronized int uploadsInProgress() {
@@ -954,7 +963,8 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         }
         
         int queued = slotManager.pollForSlot(session, 
-        		session.getUploader().supportsQueueing());
+        		session.getUploader().supportsQueueing(),
+        		session.getUploader().isPriorityShare());
         
         if (LOG.isDebugEnabled())
         	LOG.debug("queued at "+queued);

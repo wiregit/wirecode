@@ -28,7 +28,7 @@ public class SharingSettings extends LimeProps {
     
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
-
+    
     /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
@@ -72,6 +72,12 @@ public class SharingSettings extends LimeProps {
         FACTORY.createIntSetting("INCOMPLETE_PURGE_TIME", 7);
     
     /**
+     * The time, in days, after which .torrent meta data files are deleted.
+     */
+    public static final IntSetting TORRENT_METADATA_PURGE_TIME = 
+        FACTORY.createIntSetting("TORRENT_METADATA_PURGE_TIME", 7);
+    
+    /**
      * Specifies whether or not completed downloads
      * should automatically be cleared from the download window.
      */    
@@ -105,13 +111,13 @@ public class SharingSettings extends LimeProps {
 		if(!saveDir.isDirectory()) {
 			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
 		}
-
+        
 		String parentDir = saveDir.getParent();
 		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
-		
+        
         FileUtils.setWriteable(saveDir);
         FileUtils.setWriteable(incDir);
 
@@ -155,7 +161,7 @@ public class SharingSettings extends LimeProps {
     	if (extension == null) {
     		return DIRECTORY_FOR_SAVING_FILES.getValue();
     	}
-    	MediaType type = MediaType.getMediaTypeForExtension(extension);
+        MediaType type = MediaType.getMediaTypeForExtension(extension);
     	if (type == null)
     		return DIRECTORY_FOR_SAVING_FILES.getValue();	
     	FileSetting fs = getFileSettingForMediaType(type);
@@ -209,7 +215,19 @@ public class SharingSettings extends LimeProps {
      */
 	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
 		FACTORY.createBooleanSetting("SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES", true);
-	
+    
+    /**
+     * Whether or not to auto-share .torrent files.
+     */
+    public static final BooleanSetting SHARE_TORRENT_META_FILES =
+        FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES", true);
+    
+    /**
+     * Whether or not to show .torrent directory in Library.
+     */
+    public static final BooleanSetting SHOW_TORRENT_META_FILES =
+        FACTORY.createBooleanSetting("SHOW_TORRENT_META_FILES", false); 
+    
     /**
 	 * File extensions that are shared.
 	 */

@@ -12,12 +12,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
@@ -255,6 +255,7 @@ public class FileUtils {
     
     /**
      * Touches a file, to ensure it exists.
+     * Note: unlike the unix touch this does not change the modification time.
      */
     public static void touch(File f) throws IOException {
         if(f.exists())
