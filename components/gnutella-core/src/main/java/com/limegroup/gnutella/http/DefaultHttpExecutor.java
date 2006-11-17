@@ -6,12 +6,12 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
 
 /**
- * Default implementation of <tt>HttpExecutor</tt>, uses internal
- * <tt>DefaultThreadPool</tt>
+ * Default implementation of <tt>HttpExecutor</tt>.
  */
 public class DefaultHttpExecutor implements HttpExecutor {
 
@@ -50,45 +50,52 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		method.releaseConnection();
 	}
 
-	public Shutdownable executeAny(final HttpClientListener listener, 
-			final int timeout, ThreadPool executor, 
-			final Iterable<? extends HttpMethod> methods) {
-		MultiRequestor r = new MultiRequestor(listener, timeout, methods);
+	public Shutdownable executeAny(HttpClientListener listener, 
+                        		   int timeout,
+                                   ThreadPool executor, 
+                        		   Iterable<? extends HttpMethod> methods,
+                                   Cancellable canceller) {
+		MultiRequestor r = new MultiRequestor(listener, timeout, methods, canceller);
 		executor.invokeLater(r);
 		return r;
 	}
 	
-	
+	/**
+     * Performs a single request.
+     * Returns true if no more requests should be processed,
+     * false if another request should be processed.
+     */
 	private boolean performRequest(HttpMethod method, HttpClientListener listener, int timeout) {
 		HttpClient client = HttpClientManager.getNewClient(timeout, timeout);
 		try {
 			HttpClientManager.executeMethodRedirecting(client, method);
 		} catch (IOException failed) {
-			listener.requestFailed(method, failed);
-			return false;
+			return !listener.requestFailed(method, failed);
 		} 
 		
-		listener.requestComplete(method);
-		return true;
+		return !listener.requestComplete(method);
 	}
 	
+    /** Runs all requests until the listener told it to not do anymore. */
 	private class MultiRequestor implements Runnable, Shutdownable {
 		private volatile boolean shutdown;
 		private volatile HttpMethod currentMethod;
 		private final Iterable<? extends HttpMethod> methods;
 		private final HttpClientListener listener;
 		private final int timeout;
+        private final Cancellable canceller;
 		
 		MultiRequestor(HttpClientListener listener, int timeout, 
-				Iterable<? extends HttpMethod> methods) {
+				Iterable<? extends HttpMethod> methods, Cancellable canceller) {
 			this.methods = methods;
 			this.timeout = timeout;
 			this.listener = listener;
+            this.canceller = canceller;
 		}
 		
 		public void run() {
 			for (HttpMethod m : methods) {
-				if (shutdown)
+				if (shutdown || canceller.isCancelled())
 					return;
 				currentMethod = m;
 				if (performRequest(m, listener, timeout))

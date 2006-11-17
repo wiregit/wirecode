@@ -43,6 +43,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
@@ -135,7 +136,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * Sends a push for the given file.
      */
     public void sendPush(RemoteFileDesc file) {
-        sendPush(file, new NullPushConnector());
+        sendPush(file, new NullMultiShutdownable());
     }
 
     /**
@@ -147,7 +148,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * @return <tt>true</tt> if the push was successfully sent, otherwise
      *  <tt>false</tt>
      */
-    public void sendPush(final RemoteFileDesc file, final PushConnector observer) {
+    public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = RouterService.getAddress();
@@ -271,7 +272,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * This method will always return immediately,
      * and the PushConnector will be notified or success or failure.
      */
-    private void sendPushTCP(RemoteFileDesc file, final byte[] guid, PushConnector observer) {
+    private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
                          UDPService.instance().canDoFWT() &&
@@ -298,18 +299,18 @@ public class PushDownloadManager implements ConnectionAcceptor {
      */
     private void sendPushThroughNetwork(PushData data) {
         // at this stage, there is no additional shutdownable to notify.
-        data.getObserver().updateCancellable(null);
+        data.getMultiShutdownable().addShutdownable(null);
 
         // if push proxies failed, but we need a fw-fw transfer, give up.
         if (data.isFWTransfer() && !RouterService.acceptedIncomingConnection()) {
-            data.getObserver().shutdown();
+            data.getMultiShutdownable().shutdown();
             return;
         }
 
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
         if (!NetworkUtils.isValidAddressAndPort(addr, port)) {
-            data.getObserver().shutdown();
+            data.getMultiShutdownable().shutdown();
             return;
         }
 
@@ -327,7 +328,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             router.sendPushRequest(pr);
         } catch (IOException e) {
             // this will happen if we have no push route.
-            data.getObserver().shutdown();
+            data.getMultiShutdownable().shutdown();
         }
     }
     
@@ -341,7 +342,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
         if (data.isFWTransfer() && !NetworkUtils.isValidAddress(externalAddr)) {
-        	data.getObserver().shutdown();
+        	data.getMultiShutdownable().shutdown();
             return;
         }
 
@@ -378,8 +379,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
         }        
         
         HttpClientListener l = new PushHttpClientListener(methods, data);
-        Shutdownable s = executor.executeAny(l, 5000, PUSH_THREAD_POOL, methods);
-        data.getObserver().updateCancellable(s);
+        Shutdownable s = executor.executeAny(l, 5000, PUSH_THREAD_POOL, methods, data.getMultiShutdownable());
+        data.getMultiShutdownable().addShutdownable(s);
     }
     
     /**
@@ -398,39 +399,40 @@ public class PushDownloadManager implements ConnectionAcceptor {
     		this.data = data;
     	}
     	
-    	public void requestFailed(HttpMethod method, IOException exc) {
+    	public boolean requestFailed(HttpMethod method, IOException exc) {
     		LOG.warn("PushProxy request exception", exc);
     		executor.releaseResources(method);
     		methods.remove(method);
     		if (methods.isEmpty()) // all failed
                 sendPushThroughNetwork(data);
+            return true;
     	}
     	
-    	public void requestComplete(HttpMethod method) {
+    	public boolean requestComplete(HttpMethod method) {
     		methods.remove(method);
     		int statusCode = method.getStatusCode();
     		executor.releaseResources(method);
     		if (statusCode == 202) {
-    			
     			if(LOG.isInfoEnabled())
     				LOG.info("Succesful push proxy: " + method);
     			
     			if (data.isFWTransfer()) {
     				UDPConnection socket = new UDPConnection();
+                    data.getMultiShutdownable().addShutdownable(socket);
     				socket.connect(data.getFile().getSocketAddress(), 20000, new FWTConnectObserver(processor));
-    				
-    				// update the PushConnector cancellable delegate with the socket
-    				Shutdownable otherMethods = data.getObserver().updateCancellable(socket);
-    				if (otherMethods != null)
-    					otherMethods.shutdown(); // shutdown any remaining methods
-    			}
-    		} else {
-    			if(LOG.isWarnEnabled())
-    				LOG.warn("Invalid push proxy: " + method +
-    						", response: " + method.getStatusCode());
-    			if (methods.isEmpty()) // all failed 
-    				sendPushThroughNetwork(data);
+                }
+                
+                return false; // don't need to process any more methods.
     		}
+            
+            
+    		if(LOG.isWarnEnabled())
+    		    LOG.warn("Invalid push proxy: " + method + ", response: " + method.getStatusCode());
+
+    		if (methods.isEmpty()) // all failed 
+    		    sendPushThroughNetwork(data);
+            
+            return true; // try more.
     	}
     }
      
@@ -482,12 +484,12 @@ public class PushDownloadManager implements ConnectionAcceptor {
     
     /** A struct-like container storing push information. */
     private class PushData {
-        private final PushConnector observer;
+        private final MultiShutdownable observer;
         private final RemoteFileDesc file;
         private final byte [] guid;
         private final boolean shouldDoFWTransfer;
         
-        PushData(PushConnector observer,
+        PushData(MultiShutdownable observer,
                  RemoteFileDesc file,
                  byte [] guid,
                  boolean shouldDoFWTransfer) {
@@ -505,7 +507,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
             return guid;
         }
 
-        public PushConnector getObserver() {
+        public MultiShutdownable getMultiShutdownable() {
             return observer;
         }
 
@@ -522,11 +524,11 @@ public class PushDownloadManager implements ConnectionAcceptor {
 
     	final RemoteFileDesc _file;
     	final byte [] _guid;
-    	final PushConnector connector;
+    	final MultiShutdownable connector;
 
     	public PushFailoverRequestor(RemoteFileDesc file,
     			byte[] guid,
-    			PushConnector connector) {
+                MultiShutdownable connector) {
     		_file = file;
     		_guid = guid;
     		this.connector = connector;
@@ -664,24 +666,15 @@ public class PushDownloadManager implements ConnectionAcceptor {
         }
     }
     
-    /** A PushConnector that does nothing. */
-    private static class NullPushConnector extends PushConnector {
-    	NullPushConnector() {
-    		super(null,false,false);
-    	}
-
-		@Override
-		public void handleConnect(Socket socket) {}
-
-		@Override
-		void setPushDetails(PushDetails details) {}
-
-		@Override
+    /** Shutdownable that does nothing, because it's not possible for it to be shutdown. */
+    private static class NullMultiShutdownable implements MultiShutdownable {
 		public void shutdown() {}
-
-		@Override
-		public Shutdownable updateCancellable(Shutdownable newCancel) {
-			return this;
-		}
+        
+		public void addShutdownable(Shutdownable newCancel) {}
+        
+        /** Returns true iff cancelled. */
+        public boolean isCancelled() {
+            return false;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.http;
 import org.apache.commons.httpclient.HttpMethod;
 
 import com.limegroup.gnutella.io.Shutdownable;
+import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.ThreadPool;
 
 /**
@@ -11,14 +12,20 @@ import com.limegroup.gnutella.util.ThreadPool;
 public interface HttpExecutor {
 	/**
 	 * Execute the provided <tt>HttpMethod</tt> and notifies the
-	 * provided <tt>HTTPClientListener</tt> using a default
+	 * provided <tt>HttpClientListener</tt> using a default
 	 * <tt>ThreadPool</tt>
+     *
+     * This returns a Shutdownable that can be used to shutdown the execution
+     * of requesting all methods, to stop the current processing.
 	 */
 	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout);
 	
 	/**
 	 * Execute the provided <tt>HttpMethod</tt> using the provided <tt>ThreadPool</tt>
-	 * and notifies the provided <tt>HTTPClientListener</tt> on the same thread.
+	 * and notifies the provided <tt>HttpClientListener</tt> on the same thread.
+     *
+     * This returns a Shutdownable that can be used to shutdown the execution
+     * of requesting all methods, to stop the current processing.
 	 */
 	public Shutdownable execute(HttpMethod method, 
 			HttpClientListener listener,
@@ -26,12 +33,18 @@ public interface HttpExecutor {
 			ThreadPool executor);
 	
 	/**
-	 * Tries to execute the provided HTTPMethods until one succeeds.
+	 * Tries to execute any of the methods until the HttpClientListener
+     * instructs the executor to stop processing more, or the Cancellable
+     * returns true for isCancelled.
+     * 
+     * This returns a Shutdownable that can be used to shutdown the execution
+     * of requesting all methods, to stop the current processing.
 	 */
 	public Shutdownable executeAny(HttpClientListener listener,
 			int timeout,
 			ThreadPool executor,
-			Iterable<? extends HttpMethod> methods);
+			Iterable<? extends HttpMethod> methods,
+            Cancellable canceller);
 	
 	/**
 	 * Release any resources held by the provided method.
