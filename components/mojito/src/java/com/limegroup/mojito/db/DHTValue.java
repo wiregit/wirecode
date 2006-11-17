@@ -45,6 +45,11 @@ public interface DHTValue {
      */
     public DHTValueType getValueType();
     
+    /**
+     * Returns the version of this DHT value
+     */
+    public int getVersion();
+    
     /** 
      * Returns the Value. Beware: The returned byte array is 
      * <b>NOT</b> a copy!
@@ -113,10 +118,4 @@ public interface DHTValue {
      * Returns the number of locations where this DHTValue was stored
      */
     public int getLocationCount();
-    
-    /**
-     * Returns the version of this DHT value
-     */
-    public int getVersion();
-    
 }
