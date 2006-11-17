@@ -27,7 +27,7 @@ import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.DownloadAcceptor;
+import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -69,7 +69,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * serialized.  
  */
 @SuppressWarnings("unchecked")
-public class DownloadManager implements BandwidthTracker, DownloadAcceptor {
+public class DownloadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(DownloadManager.class);
     
@@ -147,6 +147,11 @@ public class DownloadManager implements BandwidthTracker, DownloadAcceptor {
      */
     private Runnable _waitingPump;
     
+    /**
+     * The controller for push downloads.  This will handle sending
+     * out pushes (using proxies, UDP, etc..) and handle incoming GIVs.
+     * Only valid pushes will be sent back here.
+     */
     private PushDownloadManager pushManager;
 
     //////////////////////// Creation and Saving /////////////////////////
@@ -176,11 +181,14 @@ public class DownloadManager implements BandwidthTracker, DownloadAcceptor {
         this.router = router;
         this.fileManager = fileManager;
         scheduleWaitingPump();
-        pushManager = new PushDownloadManager(this, 
-        		router,
-        		RouterService.getHttpExecutor(),
-        		RouterService.getSchedulingThreadPool(),
-        		RouterService.getAcceptor());
+        pushManager = new PushDownloadManager(new PushedSocketHandler() {
+            public void acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
+                handleIncomingPush(file, index, clientGUID, socket);
+            }}, 
+    		router,
+    		RouterService.getHttpExecutor(),
+    		RouterService.getSchedulingThreadPool(),
+    		RouterService.getAcceptor());
         pushManager.initialize(RouterService.getConnectionDispatcher());
     }
 
@@ -271,12 +279,19 @@ public class DownloadManager implements BandwidthTracker, DownloadAcceptor {
     public PushDownloadManager getPushManager() {
     	return pushManager;
     }
-    
-    /* (non-Javadoc)
-	 * @see com.limegroup.gnutella.DownloadAcceptor#acceptDownload(java.lang.String, int, byte[], java.net.Socket)
-	 */
-    public synchronized void acceptDownload(String file, 
-    		int index, byte [] clientGUID, Socket socket) {
+
+    /**
+     * Delegates the incoming socket out to BrowseHostHandler & then attempts to assign it
+     * to any ManagedDownloader.
+     * 
+     * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders wanted it.
+     * 
+     * @param file
+     * @param index
+     * @param clientGUID
+     * @param socket
+     */
+    private synchronized void handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
     	 if (BrowseHostHandler.handlePush(index, new GUID(clientGUID), socket))
              return;
          for (AbstractDownloader md : activeAndWaiting) {

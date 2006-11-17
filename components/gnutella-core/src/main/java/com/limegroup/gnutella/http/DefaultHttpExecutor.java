@@ -18,11 +18,11 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	private static final DefaultThreadPool POOL = 
 		new DefaultThreadPool("HttpClient pool", true);
 	
-	public Shutdownable execute(HttpMethod method, HTTPClientListener listener, int timeout) {
+	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout) {
 		return execute(method, listener, timeout, POOL);
 	}
 
-	public Shutdownable execute(final HttpMethod method, final HTTPClientListener listener,
+	public Shutdownable execute(final HttpMethod method, final HttpClientListener listener,
 			final int timeout,
 			ThreadPool executor) {
 		
@@ -50,7 +50,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		method.releaseConnection();
 	}
 
-	public Shutdownable executeAny(final HTTPClientListener listener, 
+	public Shutdownable executeAny(final HttpClientListener listener, 
 			final int timeout, ThreadPool executor, 
 			final Iterable<? extends HttpMethod> methods) {
 		MultiRequestor r = new MultiRequestor(listener, timeout, methods);
@@ -59,9 +59,8 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	}
 	
 	
-	private boolean performRequest(HttpMethod method, HTTPClientListener listener, int timeout) {
-		HttpClient client = HttpClientManager.getNewClient(
-				timeout, timeout);
+	private boolean performRequest(HttpMethod method, HttpClientListener listener, int timeout) {
+		HttpClient client = HttpClientManager.getNewClient(timeout, timeout);
 		try {
 			HttpClientManager.executeMethodRedirecting(client, method);
 		} catch (IOException failed) {
@@ -77,10 +76,10 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		private volatile boolean shutdown;
 		private volatile HttpMethod currentMethod;
 		private final Iterable<? extends HttpMethod> methods;
-		private final HTTPClientListener listener;
+		private final HttpClientListener listener;
 		private final int timeout;
 		
-		MultiRequestor(HTTPClientListener listener, int timeout, 
+		MultiRequestor(HttpClientListener listener, int timeout, 
 				Iterable<? extends HttpMethod> methods) {
 			this.methods = methods;
 			this.timeout = timeout;

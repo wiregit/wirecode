@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.http.HTTPClientListener;
+import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.BufferUtils;
@@ -48,15 +48,22 @@ import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.URLDecoder;
 
+/**
+ * Handles sending out pushes and awaiting incoming GIVs.
+ */
 public class PushDownloadManager implements ConnectionAcceptor {
 
-	 private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
-	 
+    private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
+   
     /**
-     * Threadpool on which to execute push requests
+     * how long we think should take a host that receives an udp push
+     * to connect back to us.
      */
-    private static final ThreadPool PUSH_THREAD_POOL = 
-    	new DefaultThreadPool("push request pool",10);
+    private static long UDP_PUSH_FAILTIME = 5000;
+    
+    /** Pool on which blocking HTTP PushProxy requests are handled */
+    private final ThreadPool PUSH_THREAD_POOL =
+        new DefaultThreadPool("PushProxy Requests", 10);
     
     /**
      * number of files that we have sent a udp push for and are waiting a connection.
@@ -65,23 +72,30 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private final Map<byte[], IntWrapper>  
         UDP_FAILOVER = new TreeMap<byte[], IntWrapper>(new GUID.GUIDByteComparator());
     
-    /**
-     * how long we think should take a host that receives an udp push
-     * to connect back to us.
-     */
-    private static long UDP_PUSH_FAILTIME=5000;
-
+    /** router to send push messages through */
     private MessageRouter router;
     
-    private final DownloadAcceptor downloadAcceptor;
-    
-    private final HttpExecutor executor;
-    
-    private final SchedulingThreadPool scheduler;
-    
+    /**
+     * Handler to offload accepted pushes.
+     * See 'processor' for details on how this differs.
+     */
+    private final PushedSocketHandler downloadAcceptor;
+
+    /**
+     * The processor to send brand-new incoming sockets to.
+     * This is different than PushedSocketHandler in that the PushedSocketHandler
+     * is used after we have read the GIV off the socket (and process the rest of
+     * the request), whereas this is used to read and ensure it was a GIV.
+     */
     private final SocketProcessor processor;
     
-    public PushDownloadManager(DownloadAcceptor downloadAcceptor, 
+    /** executor to execute http-client requests. */
+    private final HttpExecutor executor;
+    
+    /** executor to run delayed tasks on. */
+    private final SchedulingThreadPool scheduler;
+  
+    public PushDownloadManager(PushedSocketHandler downloadAcceptor, 
     		MessageRouter router,
     		HttpExecutor executor,
     		SchedulingThreadPool scheduler,
@@ -93,12 +107,91 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	this.processor = processor;
     }
     
+    /** Informs the ConnectionDispatcher that this will be handling GIV requests. */
     public void initialize(ConnectionDispatcher dispatcher) {
     	dispatcher.addConnectionAcceptor(this,
     			new String[]{"GIV"},
     			false,
     			true);
     }
+    
+    /**
+     * Accepts the given socket for a push download to this host.
+     * If the GIV is for a file that was never requested or
+     * has already been downloaded, this will deal with it appropriately.
+     * In any case this eventually closes the socket.
+     * 
+     * Non-blocking.
+     * 
+     * @modifies this
+     * @requires "GIV " is already read from the socket
+     */
+    public void acceptConnection(String word, Socket socket) {
+        HTTPStat.GIV_REQUESTS.incrementStat();
+        ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
+    }
+    
+    /**
+     * Sends a push for the given file.
+     */
+    public void sendPush(RemoteFileDesc file) {
+        sendPush(file, new NullPushConnector());
+    }
+
+    /**
+     * Sends a push request for the given file.
+     *
+     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
+     *  hit, containing data about the host we're pushing to
+     * @param observer The ConnectObserver to notify of success or failure
+     * @return <tt>true</tt> if the push was successfully sent, otherwise
+     *  <tt>false</tt>
+     */
+    public void sendPush(final RemoteFileDesc file, final PushConnector observer) {
+        //Make sure we know our correct address/port.
+        // If we don't, we can't send pushes yet.
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
+            if(observer != null)
+                observer.shutdown();
+            return;
+        }
+        
+        final byte[] guid = GUID.makeGuid();
+        
+        // If multicast worked, try nothing else.
+        if (sendPushMulticast(file,guid))
+            return;
+        
+        // if we can't accept incoming connections, we can only try
+        // using the TCP push proxy, which will do fw-fw transfers.
+        if (!RouterService.acceptedIncomingConnection()) {
+            // if we can do FWT, offload a TCP pusher.
+            if (UDPService.instance().canDoFWT())
+                sendPushTCP(file, guid, observer);
+            else if (observer != null)
+                observer.shutdown();
+
+            return;
+        }
+        
+        // remember that we are waiting a push from this host 
+        // for the specific file.
+        // do not send tcp pushes to results from alternate locations.
+        if (!file.isFromAlternateLocation()) {
+            addUDPFailover(file);
+            
+            // schedule the failover tcp pusher, which will run
+            // if we don't get a response from the UDP push
+            // within the UDP_PUSH_FAILTIME timeframe
+            scheduler.invokeLater(
+                new PushFailoverRequestor(file, guid, observer), UDP_PUSH_FAILTIME);
+        }
+
+        sendPushUDP(file,guid);
+    }
+    
     
     /**
      * Sends a push through multicast.
@@ -162,9 +255,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     
         IPFilter filter = RouterService.getIpFilter();
         //make sure we send it to the proxies, if any
-        Set proxies = file.getPushProxies();
-        for (Iterator iter = proxies.iterator();iter.hasNext();) {
-            IpPort ppi = (IpPort)iter.next();
+        Set<IpPort> proxies = file.getPushProxies();
+        for(IpPort ppi : proxies) {
             if (filter.allow(ppi.getAddress())) {
                 udpService.send(pr,ppi.getInetAddress(),ppi.getPort());
             }
@@ -176,62 +268,104 @@ public class PushDownloadManager implements ConnectionAcceptor {
     /**
      * Sends a push through TCP.
      *
-     * Returns true if we have a valid push route, or if a push proxy
-     * gave us a succesful sending notice.
+     * This method will always return immediately,
+     * and the PushConnector will be notified or success or failure.
      */
-    private void sendPushTCP(final RemoteFileDesc file, final byte[] guid, PushConnector observer) {
+    private void sendPushTCP(RemoteFileDesc file, final byte[] guid, PushConnector observer) {
         // if this is a FW to FW transfer, we must consider special stuff
         final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
                          UDPService.instance().canDoFWT() &&
                         !RouterService.acceptedIncomingConnection();
 
-
-    	PushMessageSender sender = new PushMessageSender(observer,file,guid, shouldDoFWTransfer);
+    	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);
 
     	// if there are no proxies, send through the network
-        Set proxies = file.getPushProxies();
+        Set<IpPort> proxies = file.getPushProxies();
         if(proxies.isEmpty()) {
-            sender.sendPushMessage();
+            sendPushThroughNetwork(data);
             return;
         }
-            
+        
+        // Try and send the push through proxies -- if none of the proxies work,
+        // the PushMessageSender will send it through the network.
+        sendPushThroughProxies(data, proxies);
+    }
+    
+    /**
+     * Sends a push through the network.  The observer is notified upon failure.
+     * 
+     * @param data
+     */
+    private void sendPushThroughNetwork(PushData data) {
+        // at this stage, there is no additional shutdownable to notify.
+        data.getObserver().updateCancellable(null);
+
+        // if push proxies failed, but we need a fw-fw transfer, give up.
+        if (data.isFWTransfer() && !RouterService.acceptedIncomingConnection()) {
+            data.getObserver().shutdown();
+            return;
+        }
+
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if (!NetworkUtils.isValidAddressAndPort(addr, port)) {
+            data.getObserver().shutdown();
+            return;
+        }
+
+        PushRequest pr = new PushRequest(data.getGuid(), 
+                                         ConnectionSettings.TTL.getValue(),
+                                         data.getFile().getClientGUID(),
+                                         data.getFile().getIndex(),
+                                         addr,
+                                         port);
+        
+        if (LOG.isInfoEnabled())
+            LOG.info("Sending push request through Gnutella: " + pr);
+        
+        try {
+            router.sendPushRequest(pr);
+        } catch (IOException e) {
+            // this will happen if we have no push route.
+            data.getObserver().shutdown();
+        }
+    }
+    
+    /**
+     * Attempts to send a push through the given proxies.  If any succeed,
+     * the observer will be notified immediately.  If all fail, the PushMessageSender
+     * is told to send the push through the network.
+     */
+    private void sendPushThroughProxies(PushData data, Set<IpPort> proxies) {
         byte[] externalAddr = RouterService.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
-        if (shouldDoFWTransfer && !NetworkUtils.isValidAddress(externalAddr)) {
-        	observer.shutdown();
+        if (data.isFWTransfer() && !NetworkUtils.isValidAddress(externalAddr)) {
+        	data.getObserver().shutdown();
             return;
         }
 
         byte[] addr = RouterService.getAddress();
         int port = RouterService.getPort();
 
-        //TODO: investigate not sending a HTTP request to a proxy
-        //you are directly connected to.  How much of a problem is this?
-        //Probably not much of one at all.  Classic example of code
-        //complexity versus efficiency.  It may be hard to actually
-        //distinguish a PushProxy from one of your UP connections if the
-        //connection was incoming since the port on the socket is ephemeral 
-        //and not necessarily the proxies listening port
-        // we have proxy info - give them a try
+        //TODO: send push msg directly to a proxy if you're connected to it.
 
         // set up the request string --
         // if a fw-fw transfer is required, add the extra "file" parameter.
         final String request = "/gnutella/push-proxy?ServerID=" + 
-                               Base32.encode(file.getClientGUID()) +
-          (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
+                               Base32.encode(data.getFile().getClientGUID()) +
+          (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "");
             
         final String nodeString = "X-Node";
         final String nodeValue =
-            NetworkUtils.ip2string(shouldDoFWTransfer ? externalAddr : addr) +
+            NetworkUtils.ip2string(data.isFWTransfer() ? externalAddr : addr) +
             ":" + port;
 
         // the methods to execute
-        List<HeadMethod> methods = new ArrayList<HeadMethod>();
+        final List<HeadMethod> methods = new ArrayList<HeadMethod>();
         IPFilter filter = RouterService.getIpFilter();
         // try to contact each proxy
-        for(Iterator iter = proxies.iterator(); iter.hasNext(); ) {
-            IpPort ppi = (IpPort)iter.next();
+        for(IpPort ppi : proxies) {
             if (!filter.allow(ppi.getAddress()))
                 continue;
             final String ppIp = ppi.getAddress();
@@ -241,38 +375,35 @@ public class PushDownloadManager implements ConnectionAcceptor {
             head.addRequestHeader(nodeString, nodeValue);
             head.addRequestHeader("Cache-Control", "no-cache");
             methods.add(head);
-        }
-        final List<HeadMethod> methodsCopy = new ArrayList<HeadMethod>(methods);
+        }        
         
-        
-        HTTPClientListener l = new PushHttpClientListener(methodsCopy, shouldDoFWTransfer, file, sender);
-        
-        Shutdownable s = executor.executeAny(
-        		l,5000, PUSH_THREAD_POOL, methods);
-        observer.updateCancellable(s);
+        HttpClientListener l = new PushHttpClientListener(methods, data);
+        Shutdownable s = executor.executeAny(l, 5000, PUSH_THREAD_POOL, methods);
+        data.getObserver().updateCancellable(s);
     }
     
-    private class PushHttpClientListener implements HTTPClientListener {
-    	private final Collection<? extends HttpMethod> methods;
-    	private final boolean shouldDoFWTransfer;
-    	private final RemoteFileDesc file;
-    	private final PushMessageSender sender;
-    	PushHttpClientListener(Collection <? extends HttpMethod> methods,
-    			boolean shouldDoFWTransfer,
-    			RemoteFileDesc file,
-    			PushMessageSender sender) {
-    		this.methods = methods;
-    		this.shouldDoFWTransfer = shouldDoFWTransfer;
-    		this.file = file;
-    		this.sender = sender;
+    /**
+     * Listener for callbacks from http requests succeeding or failing.
+     * This will ensure that only enough proxies are contacted as necessary,
+     * and send through the network if necessary.
+     */
+    private class PushHttpClientListener implements HttpClientListener {
+        /** The HttpMethods that are being executed. */
+    	private final Collection<HttpMethod> methods;
+        /** Information about the push. */
+        private final PushData data;
+        
+    	PushHttpClientListener(Collection <? extends HttpMethod> methods, PushData data) {
+    		this.methods = new LinkedList<HttpMethod>(methods);
+    		this.data = data;
     	}
     	
     	public void requestFailed(HttpMethod method, IOException exc) {
     		LOG.warn("PushProxy request exception", exc);
     		executor.releaseResources(method);
     		methods.remove(method);
-    		if (methods.isEmpty()) // all failed 
-    			sender.sendPushMessage();
+    		if (methods.isEmpty()) // all failed
+                sendPushThroughNetwork(data);
     	}
     	
     	public void requestComplete(HttpMethod method) {
@@ -284,12 +415,12 @@ public class PushDownloadManager implements ConnectionAcceptor {
     			if(LOG.isInfoEnabled())
     				LOG.info("Succesful push proxy: " + method);
     			
-    			if (shouldDoFWTransfer) {
+    			if (data.isFWTransfer()) {
     				UDPConnection socket = new UDPConnection();
-    				socket.connect(file.getSocketAddress(), 20000, new FWTConnectObserver(processor));
+    				socket.connect(data.getFile().getSocketAddress(), 20000, new FWTConnectObserver(processor));
     				
     				// update the PushConnector cancellable delegate with the socket
-    				Shutdownable otherMethods = sender.observer.updateCancellable(socket);
+    				Shutdownable otherMethods = data.getObserver().updateCancellable(socket);
     				if (otherMethods != null)
     					otherMethods.shutdown(); // shutdown any remaining methods
     			}
@@ -298,150 +429,21 @@ public class PushDownloadManager implements ConnectionAcceptor {
     				LOG.warn("Invalid push proxy: " + method +
     						", response: " + method.getStatusCode());
     			if (methods.isEmpty()) // all failed 
-    				sender.sendPushMessage();
+    				sendPushThroughNetwork(data);
     		}
     	}
     }
-    
-    private class PushMessageSender {
-    	private final PushConnector observer;
-    	private final RemoteFileDesc file;
-    	private final byte [] guid;
-    	private final boolean shouldDoFWTransfer;
-    	PushMessageSender(PushConnector observer,
-    			RemoteFileDesc file,
-    			byte [] guid,
-    			boolean shouldDoFWTransfer) {
-    		this.observer = observer;
-    		this.file = file;
-    		this.guid = guid;
-    		this.shouldDoFWTransfer = shouldDoFWTransfer;
-    	}
-    	
-    	void sendPushMessage() {
-    		// at this stage, there is no additional shutdownable to notify.
-    		observer.updateCancellable(null);
-    		
-    		// if push proxies failed, but we need a fw-fw transfer, give up.
-            if(shouldDoFWTransfer && !RouterService.acceptedIncomingConnection())
-                observer.shutdown();
-                
-            byte[] addr = RouterService.getAddress();
-            int port = RouterService.getPort();
-            if(!NetworkUtils.isValidAddressAndPort(addr, port))
-                observer.shutdown();
-
-            PushRequest pr = 
-                new PushRequest(guid,
-                                ConnectionSettings.TTL.getValue(),
-                                file.getClientGUID(),
-                                file.getIndex(),
-                                addr, port);
-            if(LOG.isInfoEnabled())
-                LOG.info("Sending push request through Gnutella: " + pr);
-            try {
-                router.sendPushRequest(pr);
-            } catch (IOException e) {
-                // this will happen if we have no push route.
-                observer.shutdown();
-            }
-    	}
-    }
-    
-    void pushThroughProxiesFailed(final RemoteFileDesc file, final byte[] guid, ConnectObserver observer) {
-    	
-    }
-    
-    /**
-     * Accepts the given socket for a push download to this host.
-     * If the GIV is for a file that was never requested or has already
-     * been downloaded, this will deal with it appropriately.  In any case
-     * this eventually closes the socket.  Non-blocking.
-     *     @modifies this
-     *     @requires "GIV " was just read from s
-     */
-    public void acceptDownload(Socket socket) {
-        ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
-    }
-    
-    public void acceptConnection(String word, Socket sock) {
-    	HTTPStat.GIV_REQUESTS.incrementStat();
-    	acceptDownload(sock);
-    }
-    
+     
+    /** Accepts a socket that has had a GIV read off it already. */
     private void handleGIV(Socket socket, GIVLine line) {
         String file = line.file;
         int index = 0;
         byte[] clientGUID = line.clientGUID;
         
-        
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
         
-        downloadAcceptor.acceptDownload(file, index, clientGUID, socket);
-
-    }
-
-    
-    /**
-     * Sends a push for the given file.
-     */
-    public void sendPush(RemoteFileDesc file) {
-        sendPush(file, new NullPushConnector());
-    }
-
-    /**
-     * Sends a push request for the given file.
-     *
-     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
-     *  hit, containing data about the host we're pushing to
-     * @param observer The ConnectObserver to notify of success or failure
-     * @return <tt>true</tt> if the push was successfully sent, otherwise
-     *  <tt>false</tt>
-     */
-    public void sendPush(final RemoteFileDesc file, final PushConnector observer) {
-        //Make sure we know our correct address/port.
-        // If we don't, we can't send pushes yet.
-        byte[] addr = RouterService.getAddress();
-        int port = RouterService.getPort();
-        if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
-            if(observer != null)
-                observer.shutdown();
-            return;
-        }
-        
-        final byte[] guid = GUID.makeGuid();
-        
-        // If multicast worked, try nothing else.
-        if (sendPushMulticast(file,guid))
-            return;
-        
-        // if we can't accept incoming connections, we can only try
-        // using the TCP push proxy, which will do fw-fw transfers.
-        if(!RouterService.acceptedIncomingConnection()) {
-            // if we can do FWT, offload a TCP pusher.
-        	if(UDPService.instance().canDoFWT())  
-        		sendPushTCP(file, guid, observer);
-        	else if(observer != null)
-        			observer.shutdown();
-        	
-            return;
-        }
-        
-        // remember that we are waiting a push from this host 
-        // for the specific file.
-        // do not send tcp pushes to results from alternate locations.
-        if (!file.isFromAlternateLocation()) {
-            addUDPFailover(file);
-            
-            // schedule the failover tcp pusher, which will run
-            // if we don't get a response from the UDP push
-            // within the UDP_PUSH_FAILTIME timeframe
-            scheduler.invokeLater(new PushFailoverRequestor(file, guid, observer),
-            		UDP_PUSH_FAILTIME);
-        }
-
-        sendPushUDP(file,guid);
+        downloadAcceptor.acceptPushedSocket(file, index, clientGUID, socket);
     }
     
     /**
@@ -476,6 +478,41 @@ public class PushDownloadManager implements ConnectionAcceptor {
                     UDP_FAILOVER.remove(key);
             }
         }
+    }
+    
+    /** A struct-like container storing push information. */
+    private class PushData {
+        private final PushConnector observer;
+        private final RemoteFileDesc file;
+        private final byte [] guid;
+        private final boolean shouldDoFWTransfer;
+        
+        PushData(PushConnector observer,
+                 RemoteFileDesc file,
+                 byte [] guid,
+                 boolean shouldDoFWTransfer) {
+            this.observer = observer;
+            this.file = file;
+            this.guid = guid;
+            this.shouldDoFWTransfer = shouldDoFWTransfer;
+        }
+
+        public RemoteFileDesc getFile() {
+            return file;
+        }
+
+        public byte[] getGuid() {
+            return guid;
+        }
+
+        public PushConnector getObserver() {
+            return observer;
+        }
+
+        public boolean isFWTransfer() {
+            return shouldDoFWTransfer;
+        }
+        
     }
     
     /**
@@ -517,6 +554,10 @@ public class PushDownloadManager implements ConnectionAcceptor {
     	}
    }
     
+    /**
+     * Non-blocking read-channel to parse the rest of a GIV request
+     * and hand it off to handleGIV.
+     */
     private class GivParser extends AbstractChannelInterestRead {
         private final Socket socket;
         private final StringBuilder givSB   = new StringBuilder();
@@ -590,8 +631,6 @@ public class PushDownloadManager implements ConnectionAcceptor {
         }
     }
     
-    // ///////////////// Internal Method to Parse GIV String ///////////////////
-
     private static final class GIVLine {
         final String file;
         final int index;
@@ -625,6 +664,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
         }
     }
     
+    /** A PushConnector that does nothing. */
     private static class NullPushConnector extends PushConnector {
     	NullPushConnector() {
     		super(null,false,false);

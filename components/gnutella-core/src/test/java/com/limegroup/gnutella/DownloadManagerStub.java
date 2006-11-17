@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.net.Socket;
 
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -38,16 +37,12 @@ public class DownloadManagerStub extends DownloadManager {
     
     @Override
     public void handleQueryReply(QueryReply qr) { }
-    @Override
-    public void acceptDownload(Socket socket) { }
     //public void remove(ManagedDownloader downloader, boolean success) { }
     @Override
     public boolean sendQuery(ManagedDownloader requerier, QueryRequest query) { 
 
 		return !GUID.isLimeRequeryGUID(query.getGUID());
     }
-    @Override
-    public void sendPush(RemoteFileDesc file) {}
     @Override
     public synchronized void measureBandwidth() { }
     @Override

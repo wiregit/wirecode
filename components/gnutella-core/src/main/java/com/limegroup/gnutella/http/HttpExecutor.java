@@ -14,21 +14,21 @@ public interface HttpExecutor {
 	 * provided <tt>HTTPClientListener</tt> using a default
 	 * <tt>ThreadPool</tt>
 	 */
-	public Shutdownable execute(HttpMethod method, HTTPClientListener listener, int timeout);
+	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout);
 	
 	/**
 	 * Execute the provided <tt>HttpMethod</tt> using the provided <tt>ThreadPool</tt>
 	 * and notifies the provided <tt>HTTPClientListener</tt> on the same thread.
 	 */
 	public Shutdownable execute(HttpMethod method, 
-			HTTPClientListener listener,
+			HttpClientListener listener,
 			int timeout,
 			ThreadPool executor);
 	
 	/**
 	 * Tries to execute the provided HTTPMethods until one succeeds.
 	 */
-	public Shutdownable executeAny(HTTPClientListener listener,
+	public Shutdownable executeAny(HttpClientListener listener,
 			int timeout,
 			ThreadPool executor,
 			Iterable<? extends HttpMethod> methods);

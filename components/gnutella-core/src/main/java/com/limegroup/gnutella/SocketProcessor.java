@@ -2,6 +2,12 @@ package com.limegroup.gnutella;
 
 import java.net.Socket;
 
+/**
+ * A processor that handles new incoming connections.
+ * A SocketProcessor can be handed a socket and told to process it,
+ * or handed a socket and told to only process it if the protocol
+ * the socket requests is a specific protocol.
+ */
 public interface SocketProcessor {
 
 	/** Accepts the given socket. */

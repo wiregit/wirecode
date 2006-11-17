@@ -235,7 +235,7 @@ public class MulticastTest extends BaseTestCase {
         U_HANDLER.unicasted.clear();        
         
         // Finally, we have the RFD we want to push.
-        RouterService.getDownloadManager().sendPush(rfd);
+        RouterService.getDownloadManager().getPushManager().sendPush(rfd);
         
         
         // sleep to make sure the push goes through.

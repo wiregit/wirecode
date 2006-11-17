@@ -80,7 +80,7 @@ public class UDPPushTest extends BaseTestCase {
 	
 	public void setUp() throws Exception {
 		Map map = (Map) PrivilegedAccessor.getValue(
-                RouterService.getDownloadManager(), "UDP_FAILOVER");
+                RouterService.getDownloadManager().getPushManager(), "UDP_FAILOVER");
         map.clear();
 		
 		long now = System.currentTimeMillis();
@@ -218,8 +218,7 @@ public class UDPPushTest extends BaseTestCase {
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
 		
-		
-		RouterService.getDownloadManager().acceptDownload(socket);
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		other.close();
 		
@@ -268,7 +267,7 @@ public class UDPPushTest extends BaseTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-		RouterService.getDownloadManager().acceptDownload(socket);
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -276,7 +275,7 @@ public class UDPPushTest extends BaseTestCase {
 		other = serversocket.accept();
 		socket.setSoTimeout(1000);
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
-		RouterService.getDownloadManager().acceptDownload(socket);
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		Thread.sleep(5200);
@@ -316,7 +315,7 @@ public class UDPPushTest extends BaseTestCase {
 		Socket other = serversocket.accept();
 		
 		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
-		RouterService.getDownloadManager().acceptDownload(socket);
+        RouterService.getConnectionDispatcher().dispatch("GIV", socket, false);
         Thread.sleep(1000);
 		socket.close();
 		
@@ -331,7 +330,7 @@ public class UDPPushTest extends BaseTestCase {
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{
 		Thread t = new ManagedThread() {
 			public void managedRun() {
-				RouterService.getDownloadManager().sendPush(rfd);
+				RouterService.getDownloadManager().getPushManager().sendPush(rfd);
 			}
 		};
 		t.start();
