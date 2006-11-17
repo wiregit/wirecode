@@ -28,14 +28,14 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 
 /**
  * The StoreManager class manages 
  */
-public class StoreManager extends AbstractManager<StoreEvent> {
+public class StoreManager extends AbstractManager<StoreResult> {
     
     public StoreManager(Context context) {
         super(context);
@@ -44,7 +44,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     /**
      * Stores a single DHTValue on the DHT
      */
-    public DHTFuture<StoreEvent> store(DHTValue value) {
+    public DHTFuture<StoreResult> store(DHTValue value) {
         return store(Collections.singletonList(value));
     }
     
@@ -52,7 +52,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
      * Stores a collection of DHTValues on the DHT. All DHTValues
      * must have the same valueId!
      */
-    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValue> values) {
         StoreResponseHandler handler = new StoreResponseHandler(context, values);
         StoreFuture future = new StoreFuture(handler);
         
@@ -63,7 +63,7 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     /**
      * Stores a collection of DHTValues at the given Contact.
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
+    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
             Collection<? extends DHTValue> values) {
         
         StoreResponseHandler handler 
@@ -76,9 +76,9 @@ public class StoreManager extends AbstractManager<StoreEvent> {
     /**
      * A store specific implementation of DHTFuture
      */
-    private class StoreFuture extends AbstractDHTFuture<StoreEvent> {
+    private class StoreFuture extends AbstractDHTFuture<StoreResult> {
         
-        public StoreFuture(Callable<StoreEvent> callable) {
+        public StoreFuture(Callable<StoreResult> callable) {
             super(callable);
         }
     }

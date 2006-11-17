@@ -29,10 +29,10 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
@@ -41,7 +41,7 @@ import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
  * The FindNodeResponseHandler class implements FIND_NODE specific features.
  */
 public class FindNodeResponseHandler 
-        extends LookupResponseHandler<FindNodeEvent> {
+        extends LookupResponseHandler<FindNodeResult> {
 
     //private static final Log LOG = LogFactory.getLog(FindNodeResponseHandler.class);
     
@@ -133,7 +133,7 @@ public class FindNodeResponseHandler
             }
         });
         
-        FindNodeEvent evt = new FindNodeEvent(getLookupID(), nearest, 
+        FindNodeResult evt = new FindNodeResult(getLookupID(), nearest, 
                 collisions, time, hop, routeTableFailures);
         
         // TODO We can use the result from a Node lookup to estimate the DHT size

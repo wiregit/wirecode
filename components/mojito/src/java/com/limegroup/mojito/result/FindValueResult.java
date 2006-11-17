@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -39,11 +39,11 @@ import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.routing.Contact;
 
 /**
- * The FindNodeEvent is fired when a FIND_VALUE lookup finishes
+ * The FindValueResult is fired when a FIND_VALUE lookup finishes
  */
-public class FindValueEvent implements Iterable<Future<DHTValue>> {
+public class FindValueResult implements Iterable<Future<DHTValue>> {
     
-    private static final Log LOG = LogFactory.getLog(FindValueEvent.class);
+    private static final Log LOG = LogFactory.getLog(FindValueResult.class);
     
     private Context context;
     
@@ -56,7 +56,7 @@ public class FindValueEvent implements Iterable<Future<DHTValue>> {
     private int hop;
     
     @SuppressWarnings("unchecked")
-    public FindValueEvent(Context context, 
+    public FindValueResult(Context context, 
     		KUID lookupId, 
             List<? extends FindValueResponse> values, 
             long time, int hop) {

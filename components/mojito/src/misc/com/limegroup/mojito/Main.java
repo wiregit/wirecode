@@ -51,8 +51,8 @@ import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapEvent.EventType;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.BootstrapResult.ResultType;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 public class Main {
@@ -150,7 +150,7 @@ public class Main {
     
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
-        DHTFuture<BootstrapEvent> future = null;
+        DHTFuture<BootstrapResult> future = null;
         
         Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
         
@@ -198,12 +198,12 @@ public class Main {
                 
                 future = dht.bootstrap(bootstrapHostSet);
                 
-                BootstrapEvent evt = future.get();
+                BootstrapResult evt = future.get();
                 //bootstrapHostSet.add(dht.getContactAddress());
                 
                 time += evt.getTotalTime();
                 
-                if (evt.getEventType().equals(EventType.BOOTSTRAP_SUCCEEDED)) {    
+                if (evt.getEventType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                     System.out.println("Node #" + i + " finished bootstrapping from " 
                             + bootstrapHostSet + " in " + evt.getTotalTime() + "ms");
                 } else {
@@ -217,10 +217,10 @@ public class Main {
         }
         
         if (dhts.size() > 1) {
-            BootstrapEvent evt = dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
+            BootstrapResult evt = dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
             time += evt.getTotalTime();
             
-            if (evt.getEventType().equals(EventType.BOOTSTRAP_SUCCEEDED)) {    
+            if (evt.getEventType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                 System.out.println("Node #0 finished bootstrapping from " 
                         + dhts.get(1).getContactAddress() + " in " + evt.getTotalTime() + "ms");
             } else {

@@ -17,11 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 /**
  * The interface for reciving Store events.
  */
-public interface StoreListener extends DHTEventListener<StoreEvent> {
+public interface StoreListener extends DHTResultListener<StoreResult> {
     
 }

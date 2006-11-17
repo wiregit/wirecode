@@ -17,26 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 /**
- * The listener interface for receiving DHT notifications.
+ * The interface for reciving FindNode events.
  */
-public interface DHTEventListener<T> {
-    
-    /**
-     * Invoked when a process finished without throwing
-     * an Exception.
-     * 
-     * @param result The result of the asynchronous computation
-     */
-    public void handleResult(T result);
-    
-    /**
-     * Invoked when a process finisheded with throwing
-     * an Exception
-     * 
-     * @param ex The Exception that occured
-     */
-    public void handleThrowable(Throwable ex);
+public interface FindNodeListener extends DHTResultListener<FindNodeResult> {
+
 }

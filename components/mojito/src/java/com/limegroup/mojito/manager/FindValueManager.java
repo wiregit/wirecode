@@ -21,14 +21,14 @@ package com.limegroup.mojito.manager;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.FindValueEvent;
 import com.limegroup.mojito.handler.response.FindValueResponseHandler;
 import com.limegroup.mojito.handler.response.LookupResponseHandler;
+import com.limegroup.mojito.result.FindValueResult;
 
 /**
  * FindValueManager manages lookups for values
  */
-public class FindValueManager extends AbstractLookupManager<FindValueEvent> {
+public class FindValueManager extends AbstractLookupManager<FindValueResult> {
     
     public FindValueManager(Context context) {
         super(context);
@@ -38,7 +38,7 @@ public class FindValueManager extends AbstractLookupManager<FindValueEvent> {
      * Creates and returns a FindValueResponseHandler
      */
     @Override
-    protected LookupResponseHandler<FindValueEvent> createLookupHandler(
+    protected LookupResponseHandler<FindValueResult> createLookupHandler(
             KUID lookupId, int count) {
         return new FindValueResponseHandler(context, lookupId);
     }

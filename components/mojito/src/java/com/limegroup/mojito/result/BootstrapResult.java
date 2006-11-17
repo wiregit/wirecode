@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -26,15 +26,15 @@ import java.util.List;
 import com.limegroup.mojito.util.CollectionUtils;
 
 /**
- * BootstrapEvents are fired during bootstrapping and after
+ * BootstrapResults are fired during bootstrapping and after
  * bootstrapping has finished
  */
-public class BootstrapEvent {
+public class BootstrapResult {
     
     /**
      * Various types of Bootstrap Events
      */
-    public static enum EventType {
+    public static enum ResultType {
         
         /**
          * Fired when the initial bootstrap ping succeded.
@@ -64,43 +64,43 @@ public class BootstrapEvent {
     private long phaseTwoTime = -1L;
     private boolean foundNewContacts = false;
     
-    private EventType eventType;
+    private ResultType eventType;
     
     /**
      * Factory method to create BOOTSTRAP_PING_SUCCEEDED BootstrapEvents
      */
     @SuppressWarnings("unchecked")
-    public static BootstrapEvent createBootstrapPingSucceededEvent() {
+    public static BootstrapResult createBootstrapPingSucceededResult() {
         
-        return new BootstrapEvent(Collections.EMPTY_LIST, -1L, 
-                -1L, -1L, false, EventType.BOOTSTRAP_PING_SUCCEEDED);
+        return new BootstrapResult(Collections.EMPTY_LIST, -1L, 
+                -1L, -1L, false, ResultType.BOOTSTRAP_PING_SUCCEEDED);
     }
     
     /**
      * Factory method to create BOOTSTRAP_FAILED BootstrapEvents
      */
-    public static BootstrapEvent createBootstrappingFailedEvent(
+    public static BootstrapResult createBootstrappingFailedResult(
             List<? extends SocketAddress> failedHosts, long phaseZero) {
         
-        return new BootstrapEvent(failedHosts, phaseZero, 
-                -1L, -1L, false, EventType.BOOTSTRAP_FAILED);
+        return new BootstrapResult(failedHosts, phaseZero, 
+                -1L, -1L, false, ResultType.BOOTSTRAP_FAILED);
     }
     
     /**
      * Factory method to create BOOTSTRAP_SUCCEEDED BootstrapEvents
      */
-    public static BootstrapEvent createBootstrappingSucceededEvent(
+    public static BootstrapResult createBootstrappingSucceededResult(
             List<? extends SocketAddress> failedHosts, long phaseZero, 
             long phaseOne, long phaseTwo, boolean foundsNewContacts) {
         
-        return new BootstrapEvent(failedHosts, phaseZero, phaseOne, 
-                phaseTwo, foundsNewContacts, EventType.BOOTSTRAP_SUCCEEDED);
+        return new BootstrapResult(failedHosts, phaseZero, phaseOne, 
+                phaseTwo, foundsNewContacts, ResultType.BOOTSTRAP_SUCCEEDED);
     }
     
     @SuppressWarnings("unchecked")
-    private BootstrapEvent(List<? extends SocketAddress> failedHosts, 
+    private BootstrapResult(List<? extends SocketAddress> failedHosts, 
             long phaseZeroTime, long phaseOneTime, long phaseTwoTime, 
-            boolean foundNewContacts, EventType eventType) {
+            boolean foundNewContacts, ResultType eventType) {
         
         this.failedHosts = (List<SocketAddress>)failedHosts;
         this.phaseZeroTime = phaseZeroTime;
@@ -113,7 +113,7 @@ public class BootstrapEvent {
     /**
      * Returns the EventType
      */
-    public EventType getEventType() {
+    public ResultType getEventType() {
         return eventType;
     }
     

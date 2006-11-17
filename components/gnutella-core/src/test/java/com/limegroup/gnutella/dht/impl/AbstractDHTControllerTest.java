@@ -28,12 +28,12 @@ import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.FindValueResult;
+import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -118,17 +118,17 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void bind(SocketAddress address) throws IOException {}
 
-        public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
+        public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList) {
             return null;
         }
 
-        public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
+        public DHTFuture<BootstrapResult> bootstrap(SocketAddress address) {
             return null;
         }
 
         public void execute(Runnable command) {}
 
-        public DHTFuture<FindValueEvent> get(KUID key) {
+        public DHTFuture<FindValueResult> get(KUID key) {
             return null;
         }
 
@@ -192,16 +192,16 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public DHTFuture<PingEvent> ping(SocketAddress dst) {
+        public DHTFuture<PingResult> ping(SocketAddress dst) {
             pingedList.add(dst);
             return null;
         }
 
-        public DHTFuture<StoreEvent> put(KUID key, DHTValueType type, int version, byte[] value) {
+        public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value) {
             return null;
         }
 
-        public DHTFuture<StoreEvent> remove(KUID key) {
+        public DHTFuture<StoreResult> remove(KUID key) {
             return null;
         }
 

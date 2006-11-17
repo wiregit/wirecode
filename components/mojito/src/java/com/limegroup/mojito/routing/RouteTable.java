@@ -26,7 +26,7 @@ import java.util.List;
 
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.result.PingResult;
 
 /**
  * RouteTable interface that all RouteTable implementations
@@ -165,7 +165,7 @@ public interface RouteTable extends Serializable {
     public static interface PingCallback {
         
         /** Sends a PING to the given Node */
-        public DHTFuture<PingEvent> ping(Contact node);
+        public DHTFuture<PingResult> ping(Contact node);
     }
     
     /**

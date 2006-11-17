@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,9 +28,9 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.routing.Contact;
 
 /**
- * The StoreEvent is fired when a STORE request finished
+ * The StoreResult is fired when a STORE request has finished
  */
-public class StoreEvent {
+public class StoreResult {
     
     private Collection<Contact> nodes;
     
@@ -39,7 +39,7 @@ public class StoreEvent {
     private Collection<DHTValue> failed;
     
     @SuppressWarnings("unchecked")
-    public StoreEvent(List<? extends Contact> nodes, 
+    public StoreResult(List<? extends Contact> nodes, 
             Collection<? extends DHTValue> values, 
             Collection<? extends DHTValue> failed) {
         

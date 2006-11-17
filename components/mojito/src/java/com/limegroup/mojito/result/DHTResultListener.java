@@ -16,12 +16,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.event;
+
+package com.limegroup.mojito.result;
 
 /**
- * The interface for reciving Bootstrap events.
+ * The listener interface for receiving DHT notifications.
  */
-public interface BootstrapListener extends DHTEventListener<BootstrapEvent> {
+public interface DHTResultListener<T> {
     
+    /**
+     * Invoked when a process finished without throwing
+     * an Exception.
+     * 
+     * @param result The result of the asynchronous computation
+     */
+    public void handleResult(T result);
+    
+    /**
+     * Invoked when a process finisheded with throwing
+     * an Exception
+     * 
+     * @param ex The Exception that occured
+     */
+    public void handleThrowable(Throwable ex);
 }

@@ -37,15 +37,15 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.handler.response.BootstrapPingResponseHandler;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.FindNodeResult;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
@@ -53,7 +53,7 @@ import com.limegroup.mojito.util.BucketUtils;
 /**
  * The BootstrapManager manages the entire bootstrap process.
  */
-public class BootstrapManager extends AbstractManager<BootstrapEvent> {
+public class BootstrapManager extends AbstractManager<BootstrapResult> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
     
@@ -102,14 +102,14 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      * Re-Bootstrap from the internal RouteTable
      */
     @SuppressWarnings("unchecked")
-    public DHTFuture<BootstrapEvent> bootstrap() {
+    public DHTFuture<BootstrapResult> bootstrap() {
         return bootstrap(Collections.EMPTY_SET);
     }
     
     /**
      * Bootstrap from the given Set of Hosts
      */
-    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostSet) {
+    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostSet) {
         synchronized (getBootstrapLock()) {
             // Copy the hostSet but preserve the order of the Set
             Set<SocketAddress> copy = new LinkedHashSet<SocketAddress>();
@@ -165,7 +165,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
      * +---4) Prune RouteTable and restart if too many errors in #3
      *     5) Done
      */
-    private class BootstrapProcess implements Callable<BootstrapEvent> {
+    private class BootstrapProcess implements Callable<BootstrapResult> {
     	
         private Set<SocketAddress> hostSet = null;
         
@@ -183,7 +183,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             this.hostSet = (Set<SocketAddress>)hostSet;
         }
         
-        public BootstrapEvent call() throws InterruptedException, DHTException {
+        public BootstrapResult call() throws InterruptedException, DHTException {
             start = System.currentTimeMillis();
             Contact node = null;
             if (hostSet != null && !hostSet.isEmpty()) {
@@ -194,7 +194,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             if (node == null) {
                 LOG.debug("Bootstrap failed: no bootstrap host");
-                return BootstrapEvent.createBootstrappingFailedEvent(
+                return BootstrapResult.createBootstrappingFailedResult(
                         failedHosts, System.currentTimeMillis()-start);
             }
             
@@ -202,7 +202,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
                 LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
-            future.fireResult(BootstrapEvent.createBootstrapPingSucceededEvent());
+            future.fireResult(BootstrapResult.createBootstrapPingSucceededResult());
             phaseOneStart = System.currentTimeMillis();
 
             boolean foundNewContacts = startBootstrapLookups(node);
@@ -217,7 +217,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             	if(LOG.isDebugEnabled()) {
                     LOG.debug("Bootstrap failed at phase 1 or phase 2");
                 }
-                return BootstrapEvent.createBootstrappingFailedEvent(
+                return BootstrapResult.createBootstrappingFailedResult(
                         failedHosts, phaseOneTime+phaseTwoTime+phaseZeroTime);
             }
             
@@ -231,7 +231,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             System.out.println(buffer.toString());*/
             
             bootstrapped = true;
-            return BootstrapEvent.createBootstrappingSucceededEvent(
+            return BootstrapResult.createBootstrappingSucceededResult(
                     failedHosts, phaseZeroTime, phaseOneTime, phaseTwoTime, foundNewContacts);
         }
         
@@ -248,7 +248,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             
             while(true) {
                 try {
-                    FindNodeEvent findNode = phaseOne(node);
+                    FindNodeResult findNode = phaseOne(node);
                     if(findNode.getNodes().isEmpty()) {
                         failedHosts.add(node.getContactAddress());
                         return false;
@@ -321,19 +321,19 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
         /**
          * Do a lookup for myself (Phase one)
          */
-        private FindNodeEvent phaseOne(Contact node) 
+        private FindNodeResult phaseOne(Contact node) 
                 throws InterruptedException, DHTException {
             
             FindNodeResponseHandler handler 
                 = new FindNodeResponseHandler(context, node, context.getLocalNodeID());
-            FindNodeEvent evt = handler.call();
+            FindNodeResult evt = handler.call();
             
             // Ping all Contacts that have our Node ID. If any
             // of them responds then change our Node ID and
             // try again!
             for (Contact c : evt.getCollisions()) {
                 try {
-                    PingEvent result = context.collisionPing(c).get();
+                    PingResult result = context.collisionPing(c).get();
                     Contact collidesWith = result.getContact();
                     throw new CollisionException(collidesWith, 
                         context.getLocalNode() + " collides with " + collidesWith); 
@@ -384,7 +384,7 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
             for (KUID nodeId : randomId) {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
-                FindNodeEvent evt = handler.call();
+                FindNodeResult evt = handler.call();
             	failures += evt.getFailures();
                 	
             	if(failures >= KademliaSettings.MAX_BOOTSTRAP_FAILURES.getValue()) {
@@ -413,9 +413,9 @@ public class BootstrapManager extends AbstractManager<BootstrapEvent> {
     /**
      * A bootstrap specific implementation of DHTFuture
      */
-    private class BootstrapFuture extends AbstractDHTFuture<BootstrapEvent> {
+    private class BootstrapFuture extends AbstractDHTFuture<BootstrapResult> {
         
-        public BootstrapFuture(Callable<BootstrapEvent> task) {
+        public BootstrapFuture(Callable<BootstrapResult> task) {
             super(task);
         }
         

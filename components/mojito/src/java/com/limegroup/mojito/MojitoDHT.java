@@ -36,12 +36,12 @@ import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.FindValueResult;
+import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStats;
@@ -200,17 +200,17 @@ public interface MojitoDHT {
     /**
      * Tries to bootstrap from the given SocketAddress
      */
-    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address);
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress address);
     
     /**
      * Tries to bootstrap from one of the items in the hostList
      */
-    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList);
+    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList);
     
     /**
      * Tries to ping the given address
      */
-    public DHTFuture<PingEvent> ping(SocketAddress dst);
+    public DHTFuture<PingResult> ping(SocketAddress dst);
     
     /**
      * Returns a Set of all keys in the Database
@@ -225,18 +225,18 @@ public interface MojitoDHT {
     /**
      * Tries to find the value for the given key
      */
-    public DHTFuture<FindValueEvent> get(KUID key);
+    public DHTFuture<FindValueResult> get(KUID key);
     
     /**
      * Stores the given key, value pair
      * @param version TODO
      */
-    public DHTFuture<StoreEvent> put(KUID key, DHTValueType type, int version, byte[] value);
+    public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value);
     
     /**
      * Removes the value for the given key
      */
-    public DHTFuture<StoreEvent> remove(KUID key);
+    public DHTFuture<StoreResult> remove(KUID key);
     
     /**
      * Creates and executes a periodic action that becomes enabled first

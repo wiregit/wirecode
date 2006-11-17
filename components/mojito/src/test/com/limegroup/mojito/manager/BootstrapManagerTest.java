@@ -15,7 +15,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.event.BootstrapEvent;
+import com.limegroup.mojito.result.BootstrapResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
@@ -71,8 +71,8 @@ public class BootstrapManagerTest extends BaseTestCase {
         BOOTSTRAP_DHT.stop();
         HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
         bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
-        BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_FAILED);
+        BootstrapResult evt = TEST_DHT.bootstrap(bootstrapSet).get();
+        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_FAILED);
         assertEquals(BOOTSTRAP_DHT.getContactAddress(), evt.getFailedHosts().get(0));
     }
 
@@ -86,8 +86,8 @@ public class BootstrapManagerTest extends BaseTestCase {
         }
         //add good host
         bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
-        BootstrapEvent evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
+        BootstrapResult evt = TEST_DHT.bootstrap(bootstrapSet).get();
+        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
         assertNotContains(evt.getFailedHosts(), BOOTSTRAP_DHT.getContactAddress());
     }
     
@@ -108,8 +108,8 @@ public class BootstrapManagerTest extends BaseTestCase {
                 BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
         //now try bootstrapping from RT
-        BootstrapEvent evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
+        BootstrapResult evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();
+        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
     }
     
     public void testBootstrapPoorRatio() throws Exception{
@@ -125,8 +125,8 @@ public class BootstrapManagerTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);
 
-        BootstrapEvent evt = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getContactAddress()).get();
-        assertEquals(evt.getEventType(), BootstrapEvent.EventType.BOOTSTRAP_SUCCEEDED);
+        BootstrapResult evt = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getContactAddress()).get();
+        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
         //see if RT was purged
         assertNotContains(rt.getActiveContacts(), node);
     }

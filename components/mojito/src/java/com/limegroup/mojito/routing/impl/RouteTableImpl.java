@@ -38,10 +38,10 @@ import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.DHTEventListener;
-import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.PingListener;
 import com.limegroup.mojito.exceptions.DHTTimeoutException;
+import com.limegroup.mojito.result.DHTResultListener;
+import com.limegroup.mojito.result.PingListener;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -328,7 +328,7 @@ public class RouteTableImpl implements RouteTable {
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         PingListener listener = new PingListener() {
-            public void handleResult(PingEvent result) {
+            public void handleResult(PingResult result) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to spoof " + result);
                 }
@@ -833,8 +833,8 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null
      */
-    DHTFuture<PingEvent> ping(Contact node, DHTEventListener<PingEvent> listener) {
-        DHTFuture<PingEvent> future = null;
+    DHTFuture<PingResult> ping(Contact node, DHTResultListener<PingResult> listener) {
+        DHTFuture<PingResult> future = null;
         
         if (pingCallback != null) {
             future = pingCallback.ping(node);
@@ -845,7 +845,7 @@ public class RouteTableImpl implements RouteTable {
         }
         
         if (listener != null) {
-            future.addDHTEventListener(listener);
+            future.addDHTResultListener(listener);
         }
         
         return future;
@@ -1083,7 +1083,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * A dummy implementation of DHTFuture that emulates a ping timeout
      */
-    private static class DefaultDHTFuture implements DHTFuture<PingEvent> {
+    private static class DefaultDHTFuture implements DHTFuture<PingResult> {
         
         private Contact node;
         
@@ -1091,7 +1091,7 @@ public class RouteTableImpl implements RouteTable {
             this.node = node;
         }
         
-        public void addDHTEventListener(DHTEventListener<PingEvent> listener) {
+        public void addDHTResultListener(DHTResultListener<PingResult> listener) {
             listener.handleThrowable(new DHTTimeoutException(
                     node.getNodeID(), node.getContactAddress(), null, 0L));
         }
@@ -1100,13 +1100,13 @@ public class RouteTableImpl implements RouteTable {
             return false;
         }
 
-        public PingEvent get() throws InterruptedException, ExecutionException {
+        public PingResult get() throws InterruptedException, ExecutionException {
             throw new ExecutionException(
                     new DHTTimeoutException(
                             node.getNodeID(), node.getContactAddress(), null, 0L));
         }
 
-        public PingEvent get(long timeout, TimeUnit unit) 
+        public PingResult get(long timeout, TimeUnit unit) 
                 throws InterruptedException, ExecutionException, TimeoutException {
             throw new ExecutionException(
                     new DHTTimeoutException(

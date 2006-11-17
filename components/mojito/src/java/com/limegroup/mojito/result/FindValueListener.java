@@ -16,14 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.event;
 
-import com.limegroup.mojito.messages.StatsResponse;
+package com.limegroup.mojito.result;
 
 /**
- * The interface for reciving Stats events.
+ * The interface for reciving FindValue events.
  */
-public interface StatsListener extends DHTEventListener<StatsResponse> {
+public interface FindValueListener extends DHTResultListener<FindValueResult> {
 
 }

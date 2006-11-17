@@ -33,12 +33,12 @@ import java.util.concurrent.Future;
 
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.StoreEvent;
-import com.limegroup.mojito.event.BootstrapEvent.EventType;
+import com.limegroup.mojito.result.BootstrapListener;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.FindValueResult;
+import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.result.StoreResult;
+import com.limegroup.mojito.result.BootstrapResult.ResultType;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -139,7 +139,7 @@ public class CommandHandler {
         out.println(buffer);
     }
     
-    public static Future<PingEvent> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static Future<PingResult> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
@@ -165,9 +165,9 @@ public class CommandHandler {
             }
         });*/
         
-        Future<PingEvent> future = dht.ping(addr);
+        Future<PingResult> future = dht.ping(addr);
         try {
-            PingEvent result = future.get();
+            PingResult result = future.get();
             out.println(result);
         } catch (Exception err) {
             err.printStackTrace(out);
@@ -189,8 +189,8 @@ public class CommandHandler {
         out.println("Bootstrapping... " + addr);
         
         BootstrapListener listener = new BootstrapListener() {
-            public void handleResult(BootstrapEvent result) {
-                if (result.getEventType() == EventType.BOOTSTRAP_SUCCEEDED) {
+            public void handleResult(BootstrapResult result) {
+                if (result.getEventType() == ResultType.BOOTSTRAP_SUCCEEDED) {
                     out.println("Bootstraping finished:\n" + result);
                     out.flush();
                 }
@@ -203,7 +203,7 @@ public class CommandHandler {
             }
         };
         
-        dht.bootstrap(addr).addDHTEventListener(listener);
+        dht.bootstrap(addr).addDHTResultListener(listener);
     }
     
     public static void put(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
@@ -248,7 +248,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreEvent evt = dht.put(key, DHTValueType.TEST, 0, value).get();
+            StoreResult evt = dht.put(key, DHTValueType.TEST, 0, value).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
@@ -286,7 +286,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreEvent evt = dht.remove(key).get();
+            StoreResult evt = dht.remove(key).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("REMOVE RESULT:\n");
             buffer.append(evt.toString());
@@ -330,7 +330,7 @@ public class CommandHandler {
                 }
             });*/
             
-            FindValueEvent evt = dht.get(key).get();
+            FindValueResult evt = dht.get(key).get();
             out.println(evt.toString());
             
         } catch (Exception e) {

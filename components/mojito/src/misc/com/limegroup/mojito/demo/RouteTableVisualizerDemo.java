@@ -11,7 +11,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
@@ -210,7 +210,7 @@ public class RouteTableVisualizerDemo {
 
     public void populateRouteTable(RouteTableImpl rt) {
         rt.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
+            public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
         });

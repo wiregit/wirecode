@@ -28,8 +28,8 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
@@ -38,7 +38,7 @@ import com.limegroup.mojito.statistics.NetworkStatisticContainer;
  * The PingManager takes care of concurrent Pings and makes sure
  * a single Node cannot be pinged multiple times in parallel.
  */
-public class PingManager extends AbstractManager<PingEvent> {
+public class PingManager extends AbstractManager<PingResult> {
     
     private Map<SocketAddress, PingFuture> futureMap 
         = new HashMap<SocketAddress, PingFuture>();
@@ -66,21 +66,21 @@ public class PingManager extends AbstractManager<PingEvent> {
     /**
      * Sends a ping to the remote Host
      */
-    public DHTFuture<PingEvent> ping(SocketAddress address) {
+    public DHTFuture<PingResult> ping(SocketAddress address) {
         return ping(null, null, address);
     }
 
     /**
      * Sends a ping to the remote Node
      */
-    public DHTFuture<PingEvent> ping(Contact node) {
+    public DHTFuture<PingResult> ping(Contact node) {
         return ping(null, node.getNodeID(), node.getContactAddress());
     }
     
     /**
      * Sends a ping to the remote Node
      */
-    public DHTFuture<PingEvent> ping(KUID nodeId, SocketAddress address) {
+    public DHTFuture<PingResult> ping(KUID nodeId, SocketAddress address) {
         return ping(null, nodeId, address);
     }
     
@@ -88,7 +88,7 @@ public class PingManager extends AbstractManager<PingEvent> {
      * Sends a special ping to the given Node to test if there
      * is a Node ID collision
      */
-    public DHTFuture<PingEvent> collisionPing(Contact node) {
+    public DHTFuture<PingResult> collisionPing(Contact node) {
         // The idea is to invert our local Node so that the
         // other Node doesn't get the impression we're trying
         // to spoof anything and we don't want that the other
@@ -112,7 +112,7 @@ public class PingManager extends AbstractManager<PingEvent> {
      * @param nodeId The remote Node's KUID (can be null)
      * @param address The remote Node's address
      */
-    private DHTFuture<PingEvent> ping(Contact sender, KUID nodeId, SocketAddress address) {
+    private DHTFuture<PingResult> ping(Contact sender, KUID nodeId, SocketAddress address) {
         synchronized (getPingLock()) {
             
             PingFuture future = futureMap.get(address);
@@ -134,11 +134,11 @@ public class PingManager extends AbstractManager<PingEvent> {
     /**
      * A ping specific implementation of DHTFuture 
      */
-    private class PingFuture extends AbstractDHTFuture<PingEvent> {
+    private class PingFuture extends AbstractDHTFuture<PingResult> {
 
         private SocketAddress address;
         
-        public PingFuture(SocketAddress address, Callable<PingEvent> handler) {
+        public PingFuture(SocketAddress address, Callable<PingResult> handler) {
             super(handler);
             this.address = address;
         }
@@ -151,7 +151,7 @@ public class PingManager extends AbstractManager<PingEvent> {
         }
 
         @Override
-        public void fireResult(PingEvent result) {
+        public void fireResult(PingResult result) {
             networkStats.PINGS_OK.incrementStat();
             super.fireResult(result);
         }

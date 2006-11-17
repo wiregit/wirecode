@@ -10,8 +10,8 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
-import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.DHTException;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.UnitTestUtils;
 
@@ -49,7 +49,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             
             // Regular Ping
             try {
-                PingEvent result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
+                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
                 assertNotNull(result);
             } catch (ExecutionException err) {
                 fail(err);
@@ -64,7 +64,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             assertTrue(context1.isBootstrapping());
             
             try {
-                PingEvent result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
+                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
                 fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
@@ -74,7 +74,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             context1.setContactAddress(new InetSocketAddress("localhost", 2000));
             Context context2 = (Context)dht2;
             try {
-                PingEvent result = context2.collisionPing(dht1.getLocalNode()).get();
+                PingResult result = context2.collisionPing(dht1.getLocalNode()).get();
                 fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
@@ -83,7 +83,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             // Set DHT-2's Node ID to DHT-1 and try again. This should work!
             UnitTestUtils.setNodeID(dht2, dht1.getLocalNodeID());
             try {
-                PingEvent result = context2.collisionPing(dht1.getLocalNode()).get();
+                PingResult result = context2.collisionPing(dht1.getLocalNode()).get();
                 assertNotNull(result);
             } catch (ExecutionException err) {
                 fail(err);

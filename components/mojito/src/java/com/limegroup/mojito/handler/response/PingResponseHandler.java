@@ -25,7 +25,6 @@ import java.net.SocketAddress;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.PingEvent;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTBadResponseException;
@@ -35,13 +34,14 @@ import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 
 /**
  * The PingResponseHandler handles ping responses from Nodes
  * that we have pinged.
  */
-public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
+public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
     //private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
     
@@ -122,7 +122,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
             if (sender == null) {
                 setException(new DHTBadResponseException(node + " is trying to spoof our Node ID"));
             } else {
-                setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
+                setReturnValue(new PingResult(node, externalAddress, estimatedSize, time));
             }
             return;
         }
@@ -130,7 +130,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingEvent> {
         context.setExternalAddress(externalAddress);
         context.addEstimatedRemoteSize(estimatedSize);
         
-        setReturnValue(new PingEvent(node, externalAddress, estimatedSize, time));
+        setReturnValue(new PingResult(node, externalAddress, estimatedSize, time));
     }
 
     @Override

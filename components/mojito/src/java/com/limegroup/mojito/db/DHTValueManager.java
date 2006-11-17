@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.event.StoreEvent;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.DatabaseUtils;
@@ -137,7 +137,7 @@ public class DHTValueManager implements Runnable {
             }
         }
         
-        StoreEvent evt = context.store(value).get();
+        StoreResult evt = context.store(value).get();
         published++;
         
         if (LOG.isTraceEnabled()) {

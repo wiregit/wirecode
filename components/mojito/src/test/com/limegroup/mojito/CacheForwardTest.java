@@ -34,9 +34,9 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueType;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -142,7 +142,7 @@ public class CacheForwardTest extends BaseTestCase {
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
             KUID valueId = KUID.createRandomID();
             byte[] value = "Hello World".getBytes();
-            StoreEvent evt = creator.put(valueId, DHTValueType.TEST, 0, value).get();
+            StoreResult evt = creator.put(valueId, DHTValueType.TEST, 0, value).get();
             assertEquals(k, evt.getNodes().size());
             
             // And check the initial state

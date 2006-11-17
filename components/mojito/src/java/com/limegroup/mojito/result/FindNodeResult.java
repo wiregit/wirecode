@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 import java.util.Collection;
 import java.util.Map;
@@ -28,10 +28,10 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.Contact;
 
 /**
- * The FindNodeEvent is fired when a FIND_NODE lookup
+ * The FindNodeResult is fired when a FIND_NODE lookup
  * finishes
  */
-public class FindNodeEvent {
+public class FindNodeResult {
     
     private KUID lookupId;
     
@@ -46,7 +46,7 @@ public class FindNodeEvent {
     private int failures;
     
     @SuppressWarnings("unchecked")
-    public FindNodeEvent(KUID lookupId, 
+    public FindNodeResult(KUID lookupId, 
             Map<? extends Contact, ? extends QueryKey> nodes, 
             Collection<? extends Contact> collisions,
             long time, int hop, int failures) {

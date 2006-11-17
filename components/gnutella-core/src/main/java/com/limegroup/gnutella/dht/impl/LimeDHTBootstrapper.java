@@ -19,9 +19,9 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.BootstrapListener;
-import com.limegroup.mojito.event.BootstrapEvent.EventType;
+import com.limegroup.mojito.result.BootstrapListener;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.BootstrapResult.ResultType;
 
 /**
  * This class bootstrapps a DHT off of the Gnutella network.
@@ -67,7 +67,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     /**
      * The bootstrap's <tt>Future</tt> object
      */
-    private DHTFuture<BootstrapEvent> bootstrapFuture;
+    private DHTFuture<BootstrapResult> bootstrapFuture;
     
     public LimeDHTBootstrapper(DHTController controller) {
         this.controller = controller;
@@ -100,7 +100,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         
         bootstrappingFromRT.set(bootstrapHosts.isEmpty());
         bootstrapFuture = dht.bootstrap(bootstrapHosts);
-        bootstrapFuture.addDHTEventListener(new InitialBootstrapListener());
+        bootstrapFuture.addDHTResultListener(new InitialBootstrapListener());
     }
     
     /**
@@ -134,7 +134,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
 
             bootstrapFuture.cancel(true);
             bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTEventListener(new WaitingBootstrapListener());
+            bootstrapFuture.addDHTResultListener(new WaitingBootstrapListener());
         }
     }
     
@@ -216,17 +216,17 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         controller.sendUpdatedCapabilities();
     }
     
-    private class InitialBootstrapListener implements BootstrapListener{
-        public void handleResult(BootstrapEvent result) {
+    private class InitialBootstrapListener implements BootstrapListener {
+        public void handleResult(BootstrapResult result) {
             
-            if(EventType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
+            if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap ping succeded");
                 
                 waiting.set(false);
                 bootstrappingFromRT.set(false);
                 return;
                 
-            } else if(EventType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
+            } else if(ResultType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap completed");
 
                 handleSuccess();
@@ -266,7 +266,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
                     //otherwise try again
                     bootstrapFuture = dht.bootstrap(bootstrapHosts);
                 }
-                bootstrapFuture.addDHTEventListener(new WaitingBootstrapListener());
+                bootstrapFuture.addDHTResultListener(new WaitingBootstrapListener());
                 return;
             }
             //we were not bootstrapping from RT. Try again!
@@ -279,7 +279,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
                 bootstrapHosts.removeAll(result.getFailedHosts());
                 bootstrappingFromRT.set(bootstrapHosts.isEmpty());
                 bootstrapFuture = dht.bootstrap(bootstrapHosts);
-                bootstrapFuture.addDHTEventListener(this);
+                bootstrapFuture.addDHTResultListener(this);
             }
         }
         
@@ -290,18 +290,18 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     }
     
     private class WaitingBootstrapListener implements BootstrapListener{
-        public void handleResult(BootstrapEvent result) {
+        public void handleResult(BootstrapResult result) {
             
             //this listener should never be called when bootstrapping from RT
             Assert.that(!bootstrappingFromRT.get());
             
-            if(EventType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
+            if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Ping succeded in waitingBootstrapListener");
                 
                 waiting.set(false); //this will also stop the node fetcher
                 return;
                 
-            } else if(EventType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
+            } else if(ResultType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Bootstrap succeded in waitingBootstrapListener");
                 
                 handleSuccess();
@@ -321,7 +321,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             
             MojitoDHT dht = controller.getMojitoDHT();
             bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTEventListener(this);
+            bootstrapFuture.addDHTResultListener(this);
         }
         
         public void handleThrowable(Throwable ex) {

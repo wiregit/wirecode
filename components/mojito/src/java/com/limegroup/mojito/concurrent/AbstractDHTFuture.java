@@ -26,15 +26,15 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import com.limegroup.mojito.event.DHTEventListener;
+import com.limegroup.mojito.result.DHTResultListener;
 
 /**
  * An abstract implementation of DHTFuture
  */
 public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTFuture<V> {
 
-    private List<DHTEventListener<V>> listeners 
-        = new ArrayList<DHTEventListener<V>>();
+    private List<DHTResultListener<V>> listeners 
+        = new ArrayList<DHTResultListener<V>>();
 
     public AbstractDHTFuture(Callable<V> callable) {
         super(callable);
@@ -51,9 +51,9 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTEventListener(com.limegroup.mojito.event.DHTEventListener)
+     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTResultListener(com.limegroup.mojito.event.DHTEventListener)
      */
-    public void addDHTEventListener(DHTEventListener<V> listener) {
+    public void addDHTResultListener(DHTResultListener<V> listener) {
         if (listener == null) {
             return;
         }
@@ -119,7 +119,7 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      */
     public void fireResult(V result) {
         synchronized(listeners) {
-            for (DHTEventListener<V> l : listeners) {
+            for (DHTResultListener<V> l : listeners) {
                 l.handleResult(result);
             }
         }
@@ -131,7 +131,7 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      */
     public void fireThrowable(Throwable ex) {
         synchronized(listeners) {
-            for (DHTEventListener<V> l : listeners) {
+            for (DHTResultListener<V> l : listeners) {
                 l.handleThrowable(ex);
             }
         }

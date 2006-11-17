@@ -9,7 +9,7 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
@@ -209,7 +209,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     public void testEstimateSize() {
     	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setPingCallback(new PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
+            public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
         });

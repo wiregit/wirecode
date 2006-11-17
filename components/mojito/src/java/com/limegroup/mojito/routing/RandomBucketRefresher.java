@@ -28,9 +28,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.event.FindNodeEvent;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
+import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
@@ -117,7 +117,7 @@ public class RandomBucketRefresher implements Runnable {
                     = new FindNodeResponseHandler(context, nodeId);
                 
                 try {
-                    FindNodeEvent event = handler.call();
+                    FindNodeResult event = handler.call();
                     
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Finished refresh ("+(i+1)+"/"+ids.size()+") with " 

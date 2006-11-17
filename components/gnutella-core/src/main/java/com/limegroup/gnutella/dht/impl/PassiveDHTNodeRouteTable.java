@@ -13,8 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.DHTEventListener;
-import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.result.DHTResultListener;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -56,9 +56,9 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
         }
         
         final InetSocketAddress addr = new InetSocketAddress(host, port);
-        DHTFuture<PingEvent> future = dht.ping(addr);
-        future.addDHTEventListener(new DHTEventListener<PingEvent>() {
-            public void handleResult(PingEvent result) {
+        DHTFuture<PingResult> future = dht.ping(addr);
+        future.addDHTResultListener(new DHTResultListener<PingResult>() {
+            public void handleResult(PingResult result) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping succeeded to: " + result);
                 }

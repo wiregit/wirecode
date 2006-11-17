@@ -39,7 +39,6 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.AbstractResponseHandler;
@@ -49,6 +48,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
@@ -57,7 +57,7 @@ import com.limegroup.mojito.util.ContactUtils;
  * The StoreResponseHandler class handles/manages storing of
  * DHTValues on remote Nodes
  */
-public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
+public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
 
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
     
@@ -278,7 +278,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreEvent> {
             }
         }
         
-        setReturnValue(new StoreEvent(nodes, values, failed));
+        setReturnValue(new StoreResult(nodes, values, failed));
     }
     
     /**

@@ -17,12 +17,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 
 /**
  * A listener to receive Ping responses
  */
-public interface PingListener extends DHTEventListener<PingEvent> {
+public interface PingListener extends DHTResultListener<PingResult> {
     
 }

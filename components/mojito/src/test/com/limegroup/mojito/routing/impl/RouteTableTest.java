@@ -18,7 +18,7 @@ import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.event.PingEvent;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -474,7 +474,7 @@ public class RouteTableTest extends BaseTestCase {
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
         routeTable.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
+            public DHTFuture<PingResult> ping(Contact node) {
                 toPing.add(node);
                 return null;
             }
@@ -664,7 +664,7 @@ public class RouteTableTest extends BaseTestCase {
     public void testSelectLiveNodes() throws Exception { 
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
+            public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
         });
@@ -717,7 +717,7 @@ public class RouteTableTest extends BaseTestCase {
     public void testPurge() {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setPingCallback(new RouteTable.PingCallback() {
-            public DHTFuture<PingEvent> ping(Contact node) {
+            public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
         });

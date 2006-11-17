@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.limegroup.mojito.event;
+package com.limegroup.mojito.result;
 
 import java.math.BigInteger;
 import java.net.SocketAddress;
@@ -25,9 +25,9 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.routing.Contact;
 
 /**
- * PingEvent(s) are fired for successful pings
+ * PingResult(s) are fired for successful pings
  */
-public class PingEvent {
+public class PingResult {
     
     /** The remote Contact */
     private Contact node;
@@ -49,7 +49,7 @@ public class PingEvent {
      * @param estimatedSize The estimated DHT size
      * @param time The Round Trip Time (RTT)
      */
-    public PingEvent(Contact node, SocketAddress externalAddress, 
+    public PingResult(Contact node, SocketAddress externalAddress, 
             BigInteger estimatedSize, long time) {
         this.node = node;
         this.externalAddress = externalAddress;

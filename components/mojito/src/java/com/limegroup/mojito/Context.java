@@ -55,11 +55,6 @@ import com.limegroup.mojito.db.DHTValueManager;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
-import com.limegroup.mojito.event.BootstrapEvent;
-import com.limegroup.mojito.event.FindNodeEvent;
-import com.limegroup.mojito.event.FindValueEvent;
-import com.limegroup.mojito.event.PingEvent;
-import com.limegroup.mojito.event.StoreEvent;
 import com.limegroup.mojito.exceptions.NotBootstrappedException;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.io.MessageDispatcherImpl;
@@ -73,6 +68,11 @@ import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.RequestMessage;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.FindNodeResult;
+import com.limegroup.mojito.result.FindValueResult;
+import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
@@ -876,28 +876,28 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * 
      * @param address The address of the remote Node
      */
-    public DHTFuture<PingEvent> ping(SocketAddress address) {
+    public DHTFuture<PingResult> ping(SocketAddress address) {
         return pingManager.ping(address);
     }
     
     /** 
      * Pings the given Node 
      */
-    public DHTFuture<PingEvent> ping(Contact node) {
+    public DHTFuture<PingResult> ping(Contact node) {
         return pingManager.ping(node);
     }
     
     /** 
      * Sends a special collision test Ping to the given Node 
      */
-    public DHTFuture<PingEvent> collisionPing(Contact node) {
+    public DHTFuture<PingResult> collisionPing(Contact node) {
         return pingManager.collisionPing(node);
     }
     
     /** 
      * Starts a value lookup for the given KUID 
      */
-    public DHTFuture<FindValueEvent> get(KUID key) {
+    public DHTFuture<FindValueResult> get(KUID key) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "get()");
         }
@@ -925,14 +925,14 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     /** 
      * Starts a Node lookup for the given KUID 
      */
-    public DHTFuture<FindNodeEvent> lookup(KUID lookupId) {
+    public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
         return findNodeManager.lookup(lookupId);
     }
     
     /**
      * Tries to bootstrap from the local Route Table.
      */
-    public DHTFuture<BootstrapEvent> bootstrap() {
+    public DHTFuture<BootstrapResult> bootstrap() {
         return bootstrapManager.bootstrap();
     }
     
@@ -940,7 +940,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bootstrap(java.net.SocketAddress)
      */
-    public DHTFuture<BootstrapEvent> bootstrap(SocketAddress address) {
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress address) {
         return bootstrap(Collections.singleton(address));
     }
     
@@ -948,7 +948,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bootstrap(java.util.Set)
      */
-    public DHTFuture<BootstrapEvent> bootstrap(Set<? extends SocketAddress> hostList) {
+    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList) {
         return bootstrapManager.bootstrap(hostList);
     }
     
@@ -956,7 +956,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, byte[])
      */
-    public DHTFuture<StoreEvent> put(KUID key, DHTValueType type, int version, byte[] value) {
+    public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "put()");
         }
@@ -971,7 +971,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#remove(com.limegroup.mojito.KUID)
      */
-    public DHTFuture<StoreEvent> remove(KUID key) {
+    public DHTFuture<StoreResult> remove(KUID key) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "remove()");
         }
@@ -983,7 +983,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     /** 
      * Stores the given DHTValue 
      */
-    public DHTFuture<StoreEvent> store(DHTValue value) {
+    public DHTFuture<StoreResult> store(DHTValue value) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "store()");
         }
@@ -995,7 +995,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Stores a Collection of DHTValue(s). All values must have the same
      * valueId!
      */
-    public DHTFuture<StoreEvent> store(Collection<? extends DHTValue> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValue> values) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "store()");
         }
@@ -1006,7 +1006,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     /** 
      * Stores the given DHTValue 
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, DHTValue value) {
+    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, DHTValue value) {
         return store(node, queryKey, Collections.singleton(value));
     }
     
@@ -1014,7 +1014,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * Stores a Collection of DHTValue(s) at the given Node. 
      * All values must have the same valueId!
      */
-    public DHTFuture<StoreEvent> store(Contact node, QueryKey queryKey, 
+    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
             Collection<? extends DHTValue> values) {
         
         return storeManager.store(node, queryKey, values);

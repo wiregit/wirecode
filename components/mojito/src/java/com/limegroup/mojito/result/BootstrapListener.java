@@ -16,12 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-package com.limegroup.mojito.event;
+ 
+package com.limegroup.mojito.result;
 
 /**
- * The interface for reciving FindNode events.
+ * The interface for reciving Bootstrap events.
  */
-public interface FindNodeListener extends DHTEventListener<FindNodeEvent> {
-
+public interface BootstrapListener extends DHTResultListener<BootstrapResult> {
+    
 }
