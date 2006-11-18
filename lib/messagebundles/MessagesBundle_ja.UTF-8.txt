@@ -1520,6 +1520,14 @@ LIBRARY_TREE_SHARED_FILES_DIRECTORY=共有ファイル
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=個別の共有ファイル
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=全ての個別共有ファイル･リスト
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=List of .torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=
+#### LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Show .torrent Files
+#? LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=
+#### LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Hide .torrent Files
+#? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
 # Key/value pairs for strings in the console window
@@ -2688,6 +2696,12 @@ OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=ダウンロード共有
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=共有されていないフォルダで、ダウンロードしたファイルを共有できる
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=新たに保存されたフォルダを共有したいですか？以下の新しいフォルダが共有される：:\n\n
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the shared extension options window item

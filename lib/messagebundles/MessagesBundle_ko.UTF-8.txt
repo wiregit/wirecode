@@ -1518,6 +1518,14 @@ LIBRARY_TREE_SHARED_FILES_DIRECTORY=공유 파일
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=개별의 공유 파일
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=모든 개별 공유 파일 리스트
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=List of .torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=
+#### LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Show .torrent Files
+#? LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=
+#### LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Hide .torrent Files
+#? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
 # Key/value pairs for strings in the console window
@@ -2686,6 +2694,12 @@ OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=다운로드 공유
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=공유되어 있지 않은 폴더로, 다운로드한 파일을 공유할 수 있다
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=새롭게 다른 이름으로 저장된 폴더를 공유하고 싶습니까? 이하의 새로운 폴더가 공유되는：:\n\n
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the shared extension options window item

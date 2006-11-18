@@ -1517,6 +1517,14 @@ LIBRARY_TREE_SHARED_FILES_DIRECTORY=Общедоступные файлы
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=Отдельные общедоступные файлы
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Список всех файлов, доступ к которым открыт индивидуально
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=List of .torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=
+#### LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Show .torrent Files
+#? LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=
+#### LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Hide .torrent Files
+#? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
 # Key/value pairs for strings in the console window
@@ -2685,6 +2693,12 @@ OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Открывать доступ к вы
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=Вы можете открыть доступ к файлам, загруженным в папки доступ к которым закрыт.
 #### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=Вы хотите открыть доступ к вашим новым папкам для сохранения? Доступ будет открыт к следующим папкам:\n\n
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
