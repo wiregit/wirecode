@@ -143,6 +143,18 @@ public class ContentRequest extends VendorMessage {
     }
     
     /**
+     * Returns the extension of the file
+     */
+    public String getExtension() {
+        if (extension < 0 || fileName == null || extension >= fileName.length) {
+            return null;
+        }
+        
+        String fileName = getFileName();
+        return fileName.substring(extension);
+    }
+    
+    /**
      * Returns the meta data
      */
     public String getMetaData() {
