@@ -27,6 +27,7 @@ import java.nio.channels.CancelledKeyException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.security.PublicKey;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -37,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.messages.SecureMessageCallback;
-import com.limegroup.gnutella.messages.SecureMessageVerifier;
+import com.limegroup.gnutella.messages.Verifier;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.util.CryptoUtils;
 
@@ -58,16 +59,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     private DatagramChannel channel;
     
-    private SecureMessageVerifier verifier;
-    
     private ExecutorService executor;
     
     private Thread thread;
     
     public MessageDispatcherImpl(Context context) {
         super(context);
-        
-        verifier = new SecureMessageVerifier(context.getName());
     }
     
     @Override
@@ -212,8 +209,36 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
-        verifier.verify(context.getMasterKey(), 
-                CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
+        // Verifying the signature is an expensive Task and should
+        // be done on a different Thread than MessageDispatcher's
+        // Executor Thread. On the other hand are the chances slim to none
+        // that a Node will ever receive a SecureMessage. It's a trade off
+        // at the end if it's really an issue or waste of ressources...
+        // NOTE: LimeDHTMessageDispatcher is using a different implementation!
+        //       This is the stand alone implementation!
+        
+        final PublicKey pubKey = context.getMasterKey();
+        if (pubKey == null) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping SecureMessage " 
+                        + secureMessage + " because PublicKey is not set");
+            }
+            return;
+        }
+        
+        Verifier verifier = new Verifier(secureMessage, smc) {
+            @Override
+            public String getAlgorithm() {
+                return CryptoUtils.SIGNATURE_ALGORITHM;
+            }
+
+            @Override
+            public PublicKey getPublicKey() {
+                return pubKey;
+            }
+        };
+        
+        process(verifier);
     }
 
     private void interest(int ops, boolean on) {

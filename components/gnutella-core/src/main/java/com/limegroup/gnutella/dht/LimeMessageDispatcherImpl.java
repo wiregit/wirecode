@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.security.PublicKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -197,8 +198,17 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
+        PublicKey pubKey = context.getMasterKey();
+        if (pubKey == null) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Dropping SecureMessage " 
+                        + secureMessage + " because PublicKey is not set");
+            }
+            return;
+        }
+        
         SecureMessageVerifier verifier = RouterService.getSecureMessageVerifier();
-        verifier.verify(context.getMasterKey(), CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
+        verifier.verify(pubKey, CryptoUtils.SIGNATURE_ALGORITHM, secureMessage, smc);
     }
 
     @Override

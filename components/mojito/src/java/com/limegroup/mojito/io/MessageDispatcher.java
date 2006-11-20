@@ -552,14 +552,7 @@ public abstract class MessageDispatcher {
     private void processResponse(Receipt receipt, ResponseMessage response) {
         ResponseProcessor processor = new ResponseProcessor(receipt, response);
         if (response instanceof DHTSecureMessage) {
-            if (context.getMasterKey() != null) {
-                verify((DHTSecureMessage)response, processor);
-            } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping secure response " 
-                            + response + " because MasterKey is not set");
-                }
-            }
+            verify((DHTSecureMessage)response, processor);
         } else {
             process(processor);
         }
@@ -571,14 +564,7 @@ public abstract class MessageDispatcher {
     private void processRequest(RequestMessage request) {
         RequestProcessor processor = new RequestProcessor(request);
         if (request instanceof DHTSecureMessage) {
-            if (context.getMasterKey() != null) {
-                verify((DHTSecureMessage)request, processor);
-            } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping secure request " 
-                            + request + " because MasterKey is not set");
-                }
-            }
+            verify((DHTSecureMessage)request, processor);
         } else {
             process(processor);
         }
@@ -878,7 +864,7 @@ public abstract class MessageDispatcher {
                 process(this);
             } else if (LOG.isErrorEnabled()) {
                 LOG.error(response.getContact() 
-                        + " send us a signed Response but the signatures do not match!");
+                        + " send us a secure response Message but the signatures do not match!");
             }
         }
         
@@ -956,7 +942,7 @@ public abstract class MessageDispatcher {
                 process(this);
             } else if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
-                        + " send us a signed Request but the signatures do not match!");
+                        + " send us a secure request Message but the signatures do not match!");
             }
         }
         

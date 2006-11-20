@@ -1,14 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.File;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -17,8 +10,6 @@ import com.limegroup.gnutella.util.ProcessingQueue;
 /** A class that verifies secure messages sequentially. */
 public class SecureMessageVerifier {
     
-    private static final Log LOG = LogFactory.getLog(SecureMessageVerifier.class);
-
     private final ProcessingQueue QUEUE;
     
     /** The public key. */
@@ -34,7 +25,7 @@ public class SecureMessageVerifier {
     
     /** Queues this SecureMessage for verification. The callback will be notified of success or failure. */
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
-        QUEUE.add(new Verifier(pubKey, "SHA1withDSA", sm, smc));
+        QUEUE.add(new VerifierImpl(pubKey, "SHA1withDSA", sm, smc));
     }
     
     /** 
@@ -51,7 +42,14 @@ public class SecureMessageVerifier {
             throw new IllegalArgumentException("PublicKey is null");
         }
         
-        QUEUE.add(new Verifier(pubKey, algorithm, sm, smc));
+        QUEUE.add(new VerifierImpl(pubKey, algorithm, sm, smc));
+    }
+    
+    /**
+     * Enqueues a custom Verifier
+     */
+    public void verify(Verifier verifier) {
+        QUEUE.add(verifier);
     }
     
     /** Initializes the public key if one isn't set. */
@@ -72,69 +70,32 @@ public class SecureMessageVerifier {
     }
 
     /** Simple runnable to insert into the ProcessingQueue. */
-    private class Verifier implements Runnable {
+    private class VerifierImpl extends Verifier {
         
         private PublicKey pubKey;
         private String algorithm;
         
-        private SecureMessage message;
-        private SecureMessageCallback callback;
-        
-        Verifier(PublicKey pubKey, String algorithm, 
+        VerifierImpl(PublicKey pubKey, String algorithm, 
                 SecureMessage message, SecureMessageCallback callback) {
+            super(message, callback);
             
             this.pubKey = pubKey;
             this.algorithm = algorithm;
-            this.message = message;
-            this.callback = callback;
         }
         
-        /** Does the verification. */
-        public void run() {
-            
-            // See verify(SecureMessage, SecureMessageCallback)
+        @Override
+        public String getAlgorithm() {
+            return algorithm;
+        }
+
+        @Override
+        public PublicKey getPublicKey() {
             if(pubKey == null) {
                 initializePublicKey();
                 pubKey = SecureMessageVerifier.this.pubKey;
             }
             
-            if(pubKey == null) {
-                LOG.warn("Cannot verify message without a public key.");
-                message.setSecureStatus(SecureMessage.INSECURE);
-                callback.handleSecureMessage(message, false);
-                return;
-            }
-            
-            byte[] signature = message.getSecureSignature();
-            if(signature == null) {
-                LOG.warn("Cannot verify message without a signature.");
-                message.setSecureStatus(SecureMessage.INSECURE);
-                callback.handleSecureMessage(message, false);
-                return;
-            }
-            
-            try {
-                Signature verifier = Signature.getInstance(algorithm);
-                verifier.initVerify(pubKey);
-                message.updateSignatureWithSecuredBytes(verifier);
-                if(verifier.verify(signature)) {
-                    message.setSecureStatus(SecureMessage.SECURE);
-                    callback.handleSecureMessage(message, true);
-                    return;
-                }
-                // fallthrough on not secure & failures to set failed.
-            } catch (NoSuchAlgorithmException nsax) {
-                LOG.error("No alg.", nsax);
-            } catch (InvalidKeyException ikx) {
-                LOG.error("Invalid key", ikx);
-            } catch (SignatureException sx) {
-                LOG.error("Bad sig", sx);
-            } catch (ClassCastException ccx) {
-                LOG.error("bad cast", ccx);
-            }
-            
-            message.setSecureStatus(SecureMessage.FAILED);
-            callback.handleSecureMessage(message, false);
+            return pubKey;
         }
     }
 }
