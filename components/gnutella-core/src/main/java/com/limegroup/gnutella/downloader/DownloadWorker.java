@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,12 +20,14 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.io.IOStateObserver;
 import com.limegroup.gnutella.io.NIODispatcher;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -751,7 +754,7 @@ public class DownloadWorker {
             final PushDetails details = new PushDetails(_rfd.getClientGUID(), _rfd.getHost());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
-            RouterService.getDownloadManager().sendPush(_rfd, observer);
+            RouterService.getDownloadManager().getPushManager().sendPush(_rfd, observer);
             RouterService.schedule(new Runnable() {
                 public void run() {
                     _manager.unregisterPushObserver(details, true);
@@ -1485,16 +1488,21 @@ public class DownloadWorker {
 
         /** Handles per-state updating. */
         protected abstract void handleState(boolean success);
-        
     }
     
     /**
      * A ConnectObserver for starting the download via a push connect.
      */
-    private class PushConnector extends HTTPConnectObserver {
+    private class PushConnector extends HTTPConnectObserver implements MultiShutdownable {
         private boolean forgetOnFailure;
         private boolean directConnectOnFailure;
         private PushDetails pushDetails;
+        
+        /** Additional Shutdownable to notify if we are shutdown */
+        private volatile Shutdownable toCancel;
+        
+        /** Determines if this is shutdown yet. */
+        private AtomicBoolean shutdown = new AtomicBoolean(false);
         
         /**
          * Creates a new PushConnector.  If forgetOnFailure is true,
@@ -1509,6 +1517,11 @@ public class DownloadWorker {
         PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
             this.forgetOnFailure = forgetOnFailure;
             this.directConnectOnFailure = directConnectOnFailure;
+        }
+        
+        /** Associates a new shutdownable that will be notified when this closes. */
+        public void addShutdownable(Shutdownable newCancel) {
+            toCancel = newCancel;
         }
 
         /**
@@ -1529,9 +1542,21 @@ public class DownloadWorker {
             
             startDownload(dl);
         }
+        
+        /** Determines if this was shutdown. */
+        public boolean isCancelled() {
+            return shutdown.get();
+        }
 
         /** Notification that the push failed. */
         public void shutdown() {
+            // if it was already shutdown, don't shutdown again.
+            if(shutdown.getAndSet(true))
+                return;
+            
+            Shutdownable canceller = toCancel;
+            if(canceller != null)
+                canceller.shutdown();
             //LOG.debug(_rfd + " -- Handling shutdown from PushConnector");            
             DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
             failed();
@@ -1560,6 +1585,7 @@ public class DownloadWorker {
             }
         }
     }
+    
     
     /**
      * A ConnectObserver for starting the download via a direct connect.
