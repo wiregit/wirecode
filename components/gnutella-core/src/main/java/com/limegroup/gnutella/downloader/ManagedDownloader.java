@@ -71,8 +71,6 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThreadFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating
