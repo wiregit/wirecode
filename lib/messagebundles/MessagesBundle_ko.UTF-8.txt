@@ -22,7 +22,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 # TO TRANSLATORS: DO NOT EDIT ANY OF THE ABOVE LINES.
 # Everything above this point is used internally by the LimeWire program and
-# should not be edited.  See below for translating.
+# should not be edited. See below for translating.
 ################################################################################
 ################################################################################
 # How to translate:
@@ -170,25 +170,25 @@ ABOUT_LABEL_START=LimeWire 클라이언트
 ABOUT_SCROLL_CHECK_BOX_LABEL=자동 스크롤
 #### ABOUT_BUTTON_TIP=Close This Window
 ABOUT_BUTTON_TIP=현재 창 닫기
-#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a>  involving programmers and researchers from all over the world.  The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant.  The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
+#### ABOUT_INTRODUCTION=Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a collaborative <a href="http://www.limewire.org/">open source effort</a> involving programmers and researchers from all over the world. The collaborative nature of Gnutella is also reflected in the Gnutella Developers Forum (GDF), of which LimeWire is a participant. The members of the GDF work in the trenches every day to make Gnutella a truly innovative collection of protocols that is constantly improving -- a testament to the power of open protocols and open standards.
 ABOUT_INTRODUCTION=LimeWire의 소유자인 마크, 고톤이 LimeWire 프로젝트를 공동 제작의<a href="http://www.limewire.org/">open source 효과</a>로 전세계의 프로그래머와 연구자를 모으고 있습니다. 이 공동 제작형의 그누테라는, LimeWire가 참가하는 그누테라 개발 포럼(GDF)에도 반영되고 있습니다. GDF 사업의 면면은 매일 전선에 서, 그누테라가 항상 개량되어 실로 혁신적인 프로토콜의 집합으로 하고 있습니다. 오픈 프로토콜과 오픈 기본적인 기술을 도입한 것입니다.
 #### ABOUT_DEV_BLURB=LimeWire is also, of course, the result of the countless hours of work by LimeWire's developers:
 ABOUT_DEV_BLURB=LimeWire는 또 당연한 일이면서, LimeWire 개발자가 장기에 걸치는 일의 결과에서도 있습니다.
 #### ABOUT_BIZDEV_BLURB=Behind the scenes business strategy and day-to-day affairs are handled by LimeWire's business developers:
 ABOUT_BIZDEV_BLURB=비지니스 전략과 일상적인 업무는, LimeWire의 비지니스 개발자가 관리하고 있습니다.
-#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a>  and LimeWire graphic design are the hard work of LimeWire's web team:
+#### ABOUT_WEBDEV_BLURB=The LimeWire <a href="http://www.limewire.com/">web site</a> and LimeWire graphic design are the hard work of LimeWire's web team:
 ABOUT_WEBDEV_BLURB=또, LimeWire의<a href="http://www.limewire.com/">웹 사이트</a>와 LimeWire의 그래픽 디자인은 LimeWire의 웹 팀의 노력의 산물입니다.
 #### ABOUT_SUPPORT_BLURB=LimeWire PRO questions are dutifully answered by LimeWire technical support:
 ABOUT_SUPPORT_BLURB=LimeWire Pro에 관한 요청은 LimeWire의 기술 서포트가 담당합니다：
 #### ABOUT_PREVIOUS_DEV_BLURB=In addition, the following individuals have worked on the LimeWire team in the past but have since moved on to other projects:
 ABOUT_PREVIOUS_DEV_BLURB=과거에 LimeWire 팀에서 일한 개발자들은 그 외 프로젝트에서 작업하고 있습니다.
-#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc.  to the project as well.  Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
+#### ABOUT_CONTRIBUTORS_BLURB=LimeWire open source contributors have provided significant code and many bug fixes, ideas, research, etc. to the project as well. Those listed below have either written code that is distributed with every version of LimeWire, have identified serious bugs in the code, or both:
 ABOUT_CONTRIBUTORS_BLURB=LimeWire open source에 공헌한 사람들은 현 프로젝트에 중요한 코드, 많은 버그 수정, 아이디어, 연구, 그 이상으로 도움을 주셨습니다. 아래는 LimeWire의 각 버전에 기입된 코드, 코드상의 중대한 버그로서 확인된 것, 혹은 둘다 해당됩니다.
 #### ABOUT_I18N_BLURB=LimeWire would also like to thank the many contributors to the internationalization project, both for the application itself and for the LimeWire web site.
 ABOUT_I18N_BLURB=LimeWire는 또, 어플리케이션 자체와 LimeWire 웹 사이트에대해 많은 국제적 프로젝트 공헌자에게 감사드립니다.
-#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks.  These include:
+#### ABOUT_COMMUNITY_BLURB=Several colleagues in the Gnutella community merit special thanks. These include:
 ABOUT_COMMUNITY_BLURB=그누테라 커뮤니티의 모든 동료분들께 감사의 말씀 올립니다. 참조：
-#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project.  Without LimeWire users, the LimeWire network would not exist.
+#### ABOUT_CONCLUSION=Finally, LimeWire would like to extend its sincere thanks to these developers, users, and all others who have contributed their ideas to the project. Without LimeWire users, the LimeWire network would not exist.
 ABOUT_CONCLUSION=마지막으로, LimeWire는 프로젝트에 아이디어를 준 개발자, 유저, 한국어 번역을 담당해주신 <a href="http://cafe.daum.net/onlymyU">라임와이어 코리아</a> 여태한님, 그 외 공헌자에게 깊게 감사의 말씀을 드립니다. LimeWire의 네트워크는 LimeWire 사용자없이는 존재할 수 없습니다.
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 ABOUT_BT_NOTICE=BitTorrent, the BitTorrent 로고, 그리고 Torrent는 BitTorrent Inc.의 대표 브랜드입니다.
@@ -215,7 +215,7 @@ TOTD_LOADING_TIPS=팁을 읽어오고 있습니다.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=처음
-#### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button.  If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
+#### GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "Search" button. If you are looking for only one type of content (music, video, etc...), you can narrow your search results by using the buttons above the text field.
 GETTING_STARTED_CONTENTS=LimeWire 사용을 시작하려면, 왼쪽의 텍스트 필드에 무엇인가 찾고 싶은 단어를 입력한 후, "검색" 버튼을 클릭하세요. 한 종류만의 컨텐츠(음악, 동영상 등)를 찾고 싶을 때는, 텍스트 필드아래에 있는 검색종류 버튼을 사용해 결과 내용을 분류할 수 있습니다.
 
 ###################################################################
@@ -301,19 +301,19 @@ MENU_FILE_DISCONNECT=접속끊기 (I)
 MENU_FILE_DISCONNECT_MNEMONIC=I
 #### MENU_FILE_DISCONNECT_ACCESSIBLE=Disconnect from the Network
 MENU_FILE_DISCONNECT_ACCESSIBLE=네트워크에서 접속끊기
-#### MENU_FILE_OPEN_TORRENT=Open . torrent
+#### MENU_FILE_OPEN_TORRENT=Open .torrent
 MENU_FILE_OPEN_TORRENT=torrent열기
 #### MENU_FILE_OPEN_TORRENT_MNEMONIC=T
 MENU_FILE_OPEN_TORRENT_MNEMONIC=T
-#### MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Opens a . torrent file from your hard drive
+#### MENU_FILE_OPEN_TORRENT_ACCESSIBLE=Opens a .torrent file from your hard drive
 MENU_FILE_OPEN_TORRENT_ACCESSIBLE=당신의 하드 디스크 내의 torrent 파일 열기
-#### MENU_FILE_DOWNLOAD_TORRENT=Download . torrent
+#### MENU_FILE_DOWNLOAD_TORRENT=Download .torrent
 MENU_FILE_DOWNLOAD_TORRENT=torrent 다운로드
 #### MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=D
 MENU_FILE_DOWNLOAD_TORRENT_MNEMONIC=D
-#### MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Downloads a . torrent file from the WWW
+#### MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=Downloads a .torrent file from the WWW
 MENU_FILE_DOWNLOAD_TORRENT_ACCESSIBLE=WWW로 부터 torrent 파일 다운로드
-#### MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Download . torrent file from the web
+#### MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Download .torrent file from the web
 MENU_FILE_OPEN_TORRENT_URL_DIALOG_TITLE=Web으로 부터 torrent 파일 다운로드
 #### MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL
 MENU_FILE_OPEN_TORRENT_URL_DIALOG_LABEL=URL
@@ -609,9 +609,9 @@ TABLES_DISPLAY_TOOLTIPS=도구 팁 확장
 ################################################################################
 # Key/value pairs for SearchView stuff
 ################################################################################
-#### SEARCH_NOT_CONNECTED=You are not connected to the network.  To connect, select "Connect" from the "File" menu.  Your search may not return any results until you connect.
+#### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=네트워크에 접속되고 있지 않습니다. 접속하려면 "파일" 메뉴로부터 "접속" 을 선택해 주세요. 접속할 때까지는, 검색은 아무런 결과를 보여주지 않을 수 있습니다.
-#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network.  Your search may not return many results until you are fully connected to the network.
+#### SEARCH_STILL_CONNECTING=LimeWire is currently connecting to the network. Your search may not return many results until you are fully connected to the network.
 SEARCH_STILL_CONNECTING=네트워크로 접속을 하고 있습니다. 네트워크에 완벽히 연결되기전이라 검색결과가 많지 않을 수 있습니다.
 #### SEARCH_DOWNLOAD_BUTTON_LABEL=Download
 SEARCH_DOWNLOAD_BUTTON_LABEL=다운로드
@@ -659,17 +659,17 @@ SEARCH_PUBLIC_MAGNET_LOOKUP_STRING=Magnet 항목 보기
 SEARCH_PUBLIC_REPEAT_SEARCH_STRING=재검색
 #### SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=Get More Results
 SEARCH_PUBLIC_REPEAT_SEARCH_NO_CLEAR_STRING=더 많은 결과 보기
-#### SEARCH_PUBLIC_BLOCK_STRING=Block Host
+#### SEARCH_PUBLIC_BLOCK_STRING=Block Hosts
 SEARCH_PUBLIC_BLOCK_STRING=호스트 차단처리
 #### SEARCH_RESULT_TABLE_LABEL=Results
 SEARCH_RESULT_TABLE_LABEL=결과
 #### SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=Search More
 SEARCH_RESULT_MENU_SEARCH_MORE_LABEL=더깊이 검색
-#### SEARCH_RESULT_SECURE_TIP=This is a secure result.  No information in this result has been tampered.
+#### SEARCH_RESULT_SECURE_TIP=This is a secure result. No information in this result has been tampered.
 SEARCH_RESULT_SECURE_TIP=안전합니다. 이 결과에 대한 정보를 변경할 수 없습니다.
 #### SEARCH_VIRUS_MSG_ONE=One of the selected files is an executable
 SEARCH_VIRUS_MSG_ONE=선택한 파일중 하나가 바이러스를 포함하고
-#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus.  Are
+#### SEARCH_VIRUS_MSG_TWO=program and could contain a virus. Are
 SEARCH_VIRUS_MSG_TWO=있는 듯하며 또한 실행될 수 있습니다.
 #### SEARCH_VIRUS_MSG_THREE=you sure you want to download it?
 SEARCH_VIRUS_MSG_THREE=정말 다운로드하시겠습니까?
@@ -721,7 +721,7 @@ SEARCH_MEDIA_IMAGES_TOOLTIP=jpg, gif, png등의 화상 파일 검색
 SEARCH_FILTER_RESULTS=결과를 필터：
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 SEARCH_BACK_TO_SEARCH=검색으로 돌아가기
-#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=＃로 호스트로부터의 검색 결과를 차단하고 싶습니까?
 
 ################################################################################
@@ -746,8 +746,8 @@ SEARCH_ACTION_NAME={0}을 검색
 # {0} the already translated mediatype
 #### SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Search "What''s New" for: {0}
 SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME="새로운 정보"검색： {0}
-# {0} the type of the search, e.g.  Title, Album, Genre
-# {1} the keywords fo the search, e.g.  name of the album
+# {0} the type of the search, e.g. Title, Album, Genre
+# {1} the keywords fo the search, e.g. name of the album
 #### SEARCH_XML_FIELD_ACTION_NAME=Search for {0}: {1}
 SEARCH_XML_FIELD_ACTION_NAME={0}을 검색：  {1}
 
@@ -901,6 +901,16 @@ LIBRARY_SHARED_FILES_CONFIGURE=설정...
 #### LIBRARY_SHARED_FILES_CONFIGURE_MENU=Configure Sharing Options
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=공유 옵션을 설정
 
+################################################################################
+# Key/value pairs for the Library Search
+################################################################################
+#### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
+#? LIBRARY_SEARCH_PANEL_LABEL=
+#### LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=Search Results
+#? LIBRARY_SEARCH_RESULTS_FOLDER_TEXT=
+#### LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=Holds the Results of the Last Search
+#? LIBRARY_SEARCH_RESULTS_FOLDER_DESCRIPTION=
+
 #### PLAYLIST_LOAD_BUTTON_LABEL=Open...
 PLAYLIST_LOAD_BUTTON_LABEL=열기...
 #### PLAYLIST_LOAD_BUTTON_TIP=Open an Existing Playlist
@@ -913,7 +923,7 @@ PLAYLIST_SAVE_BUTTON_TIP=현재의 재생 리스트를 저장...
 PLAYLIST_DELETE_BUTTON_LABEL=제거
 #### PLAYLIST_DELETE_BUTTON_TIP=Remove Selected File from Playlist
 PLAYLIST_DELETE_BUTTON_TIP=선택한 파일을 재생 리스트로부터 제거
-#### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*. m3u)
+#### PLAYLIST_FILE_DESCRIPTION=Playlist Files (*.m3u)
 PLAYLIST_FILE_DESCRIPTION=재생 리스트 파일 (*. m3u)
 
 ################################################################################
@@ -1084,7 +1094,7 @@ STATISTICS_FILES_TOOLTIP_PENDING=파일(불러오는 중...)
 STATISTICS_SHARING_TOOLTIP=공유하고 있는 파일의 수
 #### STATISTICS_CONNECTION_DISCONNECTED=Disconnected
 STATISTICS_CONNECTION_DISCONNECTED=접속해제
-#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network.  To connect, choose Connect from the File menu.
+#### STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
 STATISTICS_CONNECTION_DISCONNECTED_TIP=네트워크로부터 접속해제 되었습니다..  접속하려면 , "파일" 메뉴에서 "접속" 을 눌러주세요.
 #### STATISTICS_CONNECTION_CONNECTING=Starting
 STATISTICS_CONNECTION_CONNECTING=접속 실행
@@ -1101,7 +1111,7 @@ STATISTICS_CONNECTION_FAIR_TIP=네트워크에의 접속이, 점차 좋아지고
 #### STATISTICS_CONNECTION_GOOD=Good
 STATISTICS_CONNECTION_GOOD=좋다
 #### STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection
-STATISTICS_CONNECTION_GOOD_TIP= 아직 네트워크에 충분히는 접속되어 있지 않지만, 좋은 접속 레벨입니다.
+STATISTICS_CONNECTION_GOOD_TIP=아직 네트워크에 충분히는 접속되어 있지 않지만, 좋은 접속 레벨입니다.
 #### STATISTICS_CONNECTION_EXCELLENT=Excellent
 STATISTICS_CONNECTION_EXCELLENT=최고상태
 #### STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong
@@ -1210,29 +1220,29 @@ DOWNLOAD_STATUS_PAUSING=일시정지중...
 DOWNLOAD_STATUS_PAUSED=일시정지
 #### DOWNLOAD_STATUS_INVALID=Content Removed
 DOWNLOAD_STATUS_INVALID=내용 제거
-#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network.  To learn more, double-click on the download (or click preview).
-#?  DOWNLOAD_INVALID_EXPLAIN=
+#### DOWNLOAD_INVALID_EXPLAIN=The owner of this content has requested that this file be removed from the network. To learn more, double-click on the download (or click preview).
+#? DOWNLOAD_INVALID_EXPLAIN=
 #### DOWNLOAD_STATUS_RESUMING=Resuming...
 DOWNLOAD_STATUS_RESUMING=재개중...
-#### DOWNLOAD_STATUS_FETCHING=Downloading . torrent file...
-DOWNLOAD_STATUS_FETCHING= . torrent 파일 다운로드 중...
+#### DOWNLOAD_STATUS_FETCHING=Downloading .torrent file...
+DOWNLOAD_STATUS_FETCHING=. torrent 파일 다운로드 중...
 #### DOWNLOAD_AWAITING_SOURCES=A more specific search may be required...
-DOWNLOAD_AWAITING_SOURCES= 좀 더 구체적인 검색이 필요...
+DOWNLOAD_AWAITING_SOURCES=좀 더 구체적인 검색이 필요...
 #### DOWNLOAD_BITTORRENT_VENDOR=BitTorrent
 DOWNLOAD_BITTORRENT_VENDOR=BitTorrent
-#### DOWNLOAD_BITTORRENT_UNSAFE_PATHS=The selected . torrent file may contain a security hazard.
-#?  DOWNLOAD_BITTORRENT_UNSAFE_PATHS=
-#### DOWNLOAD_BITTORRENT_FETCH_FAIL=LimeWire could not download a . torrent file from the provided URL.
-#?  DOWNLOAD_BITTORRENT_FETCH_FAIL=
+#### DOWNLOAD_BITTORRENT_UNSAFE_PATHS=The selected .torrent file may contain a security hazard.
+#? DOWNLOAD_BITTORRENT_UNSAFE_PATHS=
+#### DOWNLOAD_BITTORRENT_FETCH_FAIL=LimeWire could not download a .torrent file from the provided URL.
+#? DOWNLOAD_BITTORRENT_FETCH_FAIL=
 # {0} the name of the skin
 # {1} the localized name of the menu item "Refresh Skins"
 # {2} the localized name of the "View" menu
 # {3} the localized name of the "Apply Skins" menu
 #### DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=You have downloaded a skin titled "{0}", you can activate the new skin by clicking "{1}" in the "{2}"->"{3}" menu and then selecting it from the list of available skins.
-#?  DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=
+#? DOWNLOAD_EXPLAIN_HOW_TO_CHANGE_THEME=
 #### DOWNLOAD_APPLY_NEW_THEME_START=You have downloaded a new skin titled "
 DOWNLOAD_APPLY_NEW_THEME_START=타이틀 첨부된 새로운 스킨을 다운로드했습니다.
-#### DOWNLOAD_APPLY_NEW_THEME_END=. " Would you like to use this new skin?
+#### DOWNLOAD_APPLY_NEW_THEME_END=." Would you like to use this new skin?
 DOWNLOAD_APPLY_NEW_THEME_END="이 새로운 스킨을 사용하겠습니까?
 #### DOWNLOAD_POSSIBLE_HOSTS=Possible Hosts
 DOWNLOAD_POSSIBLE_HOSTS=이용 가능한 호스트 수
@@ -1249,7 +1259,7 @@ DOWNLOAD_SEARCHING=소스를 검색중...
 #### DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=유감스럽게도 이전의 다운로드를 재개할 수 없는 상태입니다.
 #### DOWNLOAD_MAGNET_DIALOG_MESSAGE=Would you like to start downloads from the following magnets?
-DOWNLOAD_MAGNET_DIALOG_MESSAGE= 마그넷으로부터 다운로드를 계속 실행하겠습니까?
+DOWNLOAD_MAGNET_DIALOG_MESSAGE=마그넷으로부터 다운로드를 계속 실행하겠습니까?
 #### DOWNLOAD_HASH_ONLY_MAGNET=LimeWire may not be able to start the download you have selected unless you start a search for it.
 DOWNLOAD_HASH_ONLY_MAGNET=LimeWire는 검색을 실행하지 않는다면 선택한 다운로드된 파일을 실행 할 수 없을 것입니다.
 #### DOWNLOAD_PRIORITY_ACTIVE=Active
@@ -1260,23 +1270,23 @@ DOWNLOAD_PRIORITY_UP_BUTTON_TIP=선택된 다운로드 닫음으로 작동하게
 DOWNLOAD_PRIORITY_DOWN_BUTTON_TIP=선택된 다운로드 촉진으로 작동하게 함
 #### DOWNLOAD_PRIORITY_PRIORITIZE=Queue
 DOWNLOAD_PRIORITY_PRIORITIZE=대기열`
-#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file.  Download anyway? \n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network.  Please respect your local copyright laws.
+#### DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire is unable to find a license for this file. Download anyway?\n\nPlease note: LimeWire cannot monitor or control the content of the Gnutella network. Please respect your local copyright laws.
 DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWire는 이 파일의 라이센스를 확인할 수 없습니다. 다운로드하시겠습니까? \n\n주의：LimeWire는 그누테라 네트워크의 내용을 감시 또는 관리할 수 없습니다. 유저는 현지의 판권에 관한 법률을 지켜야합니다.
 #### DOWNLOAD_SEARCH_MENU=Search...
 DOWNLOAD_SEARCH_MENU=검색...
 #### DOWNLOAD_SEARCH_FILENAME_LABEL=Files with this name
-#?  DOWNLOAD_SEARCH_FILENAME_LABEL=
+#? DOWNLOAD_SEARCH_FILENAME_LABEL=
 #### DOWNLOAD_SEARCH_FILENAME_TIP=Searches for files with the same file name.
-#?  DOWNLOAD_SEARCH_FILENAME_TIP=
+#? DOWNLOAD_SEARCH_FILENAME_TIP=
 #### DOWNLOAD_SERACH_ORGINAL_LABEL=Orginal query
 DOWNLOAD_SERACH_ORGINAL_LABEL=원래 쿼리
 #### DOWNLOAD_SERACH_ORGINAL_TIP=Performs the same search as the one which found this file previously.
-#?  DOWNLOAD_SERACH_ORGINAL_TIP=
+#? DOWNLOAD_SERACH_ORGINAL_TIP=
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 TORRENTS_COULD_NOT_READ_SNAPSHOT=죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다.
-#### TORRENTS_TRACKER_FAILURE=LimeWire's tracker request failed:
-TORRENTS_TRACKER_FAILURE=LimeWire의 트래커 요청 실패:
+#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -1347,10 +1357,10 @@ UPLOAD_ACTIVE=작동
 UPLOAD_QUEUED=차례 대기
 #### UPLOAD_BT_SEEDING=Seeding
 UPLOAD_BT_SEEDING=공유중
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.   Are you sure you want to do this?
-PLOAD_BT_STOP=이 업로드를 중지시키하면 torrent 다운로드도 중지될 것입니다. 중지하시겠습니까?
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.   You should let it upload some more.   Are you sure you want to stop it?
-#?  UPLOAD_BT_SEED_MORE=
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#? UPLOAD_BT_STOP=
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
 UPLOAD_BITTORRENT_HOSTNAME={0}를 위한 무리
@@ -1366,7 +1376,7 @@ MONITOR_VIEW_INCOMING_SEARCHES=소득 검색 보기
 MONITOR_VIEW_SHOW_LAST=최근 검색
 #### MONITOR_VIEW_SEARCHES=Searches
 MONITOR_VIEW_SEARCHES=검색 수
-#### MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer.  Hence you will see few or no searches in the monitor window.
+#### MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer. Hence you will see few or no searches in the monitor window.
 MONITOR_VIEW_LEAF_MESSAGE=사용의 클라이언트는 울트라 유저에 의해 보호된 Leaf node 입니다. 따라 모니터 윈도우에서는, 검색 문자를 약간인가 전혀 볼 수 없습니다.
 
 ################################################################################
@@ -1443,7 +1453,7 @@ CV_TABLE_STRING_ULTRAPEERS=울트라 유저 수
 CV_TABLE_STRING_PEER=Peer
 #### CV_TABLE_STRING_PEERS=Peers
 CV_TABLE_STRING_PEERS=Peer의 수
-#### CV_TABLE_STRING_STANDARD=0. 6
+#### CV_TABLE_STRING_STANDARD=0.6
 CV_TABLE_STRING_STANDARD=0. 6
 #### CV_TABLE_STRING_STANDARDS=Standard
 CV_TABLE_STRING_STANDARDS=표준 접속
@@ -1485,6 +1495,8 @@ LIBRARY_TABLE_HITCOUNT=히트수
 LIBRARY_TABLE_NUMALTLOC=위치
 #### LIBRARY_TABLE_LICENSE=License
 LIBRARY_TABLE_LICENSE=라이센스
+#### LIBRARY_TABLE_MODIFICATION_TIME=Last Modified
+#? LIBRARY_TABLE_MODIFICATION_TIME=
 #### LIBRARY_TABLE_UPLOAD_COUNT=Uploads
 LIBRARY_TABLE_UPLOAD_COUNT=업로드
 #### LIBRARY_TABLE_SEARCH_POPUP_MENU=Search
@@ -1507,6 +1519,14 @@ LIBRARY_TREE_SHARED_FILES_DIRECTORY=공유 파일
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY=개별의 공유 파일
 #### LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=List of All Individually Shared Files
 LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=모든 개별 공유 파일 리스트
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=.torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY=
+#### LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=List of .torrent files
+#? LIBRARY_TREE_TORRENTS_METAFILE_DIRECTORY_TOOLTIP=
+#### LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=Show .torrent Files
+#? LIBRARY_TREE_SHOW_TORRENT_METAFOLDER_LABEL=
+#### LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=Hide .torrent Files
+#? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
 # Key/value pairs for strings in the console window
@@ -1533,23 +1553,23 @@ PLAYLIST_OPTIONS_STRING=재생 옵션：
 PLAYLIST_OPTIONS_CONTINUE=연속
 #### PLAYLIST_OPTIONS_SHUFFLE=Shuffle
 PLAYLIST_OPTIONS_SHUFFLE=섞기
-#### PLAYLIST_DIALOG_OPEN_TITLE=Open Playlist (. m3u)
+#### PLAYLIST_DIALOG_OPEN_TITLE=Open Playlist (.m3u)
 PLAYLIST_DIALOG_OPEN_TITLE=재생 리스트를 선택 (. m3u)
 #### PLAYLIST_DIALOG_SAVE_TITLE=Save Playlist As
 PLAYLIST_DIALOG_SAVE_TITLE=재생 리스트를 별명으로 다른 이름으로 저장...
 #### PLAYLIST_CANNOT_PLAY_FILE=LimeWire cannot play the file
 PLAYLIST_CANNOT_PLAY_FILE=파일을 재생할 수 없다
-#### PLAYLIST_FILE_UNSUPPORTED=.  The file type is not recognized.
+#### PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
 PLAYLIST_FILE_UNSUPPORTED=파일 형식을 인식할 수 없다
-#### PLAYLIST_LINE_UNAVAILABLE=.  No line is available for output.
+#### PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
 PLAYLIST_LINE_UNAVAILABLE=출력하는 행이 없다
-#### PLAYLIST_FILE_MISSING=.  The file cannot be found.
+#### PLAYLIST_FILE_MISSING=. The file cannot be found.
 PLAYLIST_FILE_MISSING=파일을 찾을 수 없다.
-#### PLAYLIST_FILE_CORRUPT=.  The file is corrupt.
+#### PLAYLIST_FILE_CORRUPT=. The file is corrupt.
 PLAYLIST_FILE_CORRUPT=파일이 망가져 있습니다
-#### PLAYLIST_FILE_UNKNOWN=.  There is an unknown error with the audio file.
+#### PLAYLIST_FILE_UNKNOWN=. There is an unknown error with the audio file.
 PLAYLIST_FILE_UNKNOWN=음악 파일내에 불명한 에러가 있습니다
-#### PLAYLIST_FILE_PARSE_PROBLEM=.  The file cannot be parsed.
+#### PLAYLIST_FILE_PARSE_PROBLEM=. The file cannot be parsed.
 PLAYLIST_FILE_PARSE_PROBLEM=그 파일은 해석할 수 없다
 
 ################################################################################
@@ -1568,33 +1588,33 @@ SETUP_LANGUAGE_LABEL=사용하는 언어를 선택
 SETUP_MORE_INFO=이 옵션에 대해 더 배우기...
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=어서 오십시오
-#### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard.  LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
+#### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
 SETUP_WELCOME_LABEL=LimeWire 설정 위저드에 어서 오십시오. LimeWire를 쾌적하게 사용 받기 위한 조정을, 일련의 스텝을 통해 안내합니다.
-#### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard.  LimeWire has recently added new features that require your configuration.  LimeWire will guide you through a series of steps to configure these new features.
+#### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
 SETUP_WELCOME_PARTIAL_LABEL=LimeWire 설정 위저드에 어서 오십시오. LimeWire는 신기능에 대응한 설정이 필요합니다. 이러한 신기능의 설정을 일련의 스텝을 통해 안내합니다.
 #### SETUP_SAVE_TITLE=Save Folder
 SETUP_SAVE_TITLE=저장 폴더 지정하기
-#### SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded.  This folder will also be shared with other gnutella users by default.
+#### SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded. This folder will also be shared with other gnutella users by default.
 SETUP_SAVE_LABEL=다운로드한 파일을 다른 이름으로 저장하는 폴더를 선택해 주세요. 이 폴더는 초기설정으로 다른 그누테라 유저와 공유됩니다.
 #### SETUP_SPEED_TITLE=Connection Speed
 SETUP_SPEED_TITLE=접속 속도
 #### SETUP_SPEED_TITLED_BORDER=Select Speed
 SETUP_SPEED_TITLED_BORDER=속도 선택
-#### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection.  Setting this speed correctly is important for optimum network performance.  If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
+#### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
 SETUP_SPEED_LABEL=인터넷 접속 회선의 속도를 선택해 주세요. 네트워크의 퍼포먼스를 최적화하기 위해서 이 속도의 올바른 설정이 중요합니다. 만약 사용의 접속 회선이 분명히 모르는지, 리스트상에 없는 경우는 단지 어떤 것이나 적당한 1개를 선택해 주세요.
 #### SETUP_STARTUP_TITLE=System Startup
 SETUP_STARTUP_TITLE=시스템 시작시
-#### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer?  This will cause LimeWire to start faster when you use it later.
+#### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
 SETUP_STARTUP_LABEL=컴퓨터에 로그인했을 때에, LimeWire를 자동적으로 시작시킵니까? 이것에 의해 LimeWire를 시작시키는 것은 다음에보다 빠르게 할 수 있습니다.
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
 SETUP_STARTUP_CHECKBOX=자동으로 시작
 #### SETUP_FIREWALL_TITLE=Firewall Setup
 SETUP_FIREWALL_TITLE=방화벽 설정
-#### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet.  If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting.  Your firewall software may look different than the below picture.
+#### SETUP_FIREWALL_LABEL=LimeWire performs best with full access to the Internet. If firewall or security warnings appear, please unblock LimeWire and choose to remember the setting. Your firewall software may look different than the below picture.
 SETUP_FIREWALL_LABEL=LimeWire는 인터넷에 최적화된 접속을 하려고 합니다. 만약 방화벽이나 보안안내창이 나타나면, LimeWire를 막지마시고 세팅방법을 기억해두십시오. 당신이 사용하는 방화벽 프로그램이 아래의 그림과 다를 수 있습니다.
 #### SETUP_SCAN_TITLE=Scan for Files
 SETUP_SCAN_TITLE=파일정리를 위한 검색
-#### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files?  You will have the opportunity to specify which folders you would like to share when the scan is complete.
+#### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which folders you would like to share when the scan is complete.
 SETUP_SCAN_LABEL=LimeWire가 하드 디스크내에 있는 미디어 파일을 검색하도록 하겠습니까? 검색하면 공유하고 싶은 폴더를 간단하게 선택할 수 있습니다.
 #### SETUP_SCAN_TITLED_BORDER=Scan Hard Drive?
 SETUP_SCAN_TITLED_BORDER=하드 디스크를 검색합니까?
@@ -1610,39 +1630,39 @@ SETUP_WAIT_SCAN_CANCELLED_LABEL=검색 취소됨
 SETUP_WAIT_CANCEL_SCAN_ACTION_NAME=스캔 취소
 #### SETUP_CONFIRM_TITLE=Confirm Scan
 SETUP_CONFIRM_TITLE=검색 확인
-#### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share.  If you would like to share one of these folders, simply check its associated checkbox.  Subfolders of shared folders will also be shared.
+#### SETUP_CONFIRM_LABEL=We identified the folders below as ones that you might like to share. If you would like to share one of these folders, simply check its associated checkbox. Subfolders of shared folders will also be shared.
 SETUP_CONFIRM_LABEL=공유 후보의 폴더가 아래와 같이 발견되었습니다. 이 중의 하나를 공유하고 싶으면 체크 박스를 선택하시고, 이경우 선택된 폴더의 서브 폴더도 같이 공유됩니다.
 #### SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=The selected folders below (and their subfolders) will be shared.
-#?  SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
-#### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared.  To continue configuring LimeWire, click "Next".
+#? SETUP_CONFIRM_FOLDERS_WILL_BE_SHARED=
+#### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
 SETUP_CONFIRM_LABEL_NO_DIRECTORIES=공유 가능한 파일이 발견되지 않았습니다. 설정을 계속하려면 ,"다음"을 클릭해 주세요.
 #### SETUP_FILTER_TITLE=Content Filtering
 SETUP_FILTER_TITLE=내용 필터링
-#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared.  By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content.  You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
-#?  SETUP_FILTER_LABEL=
+#### SETUP_FILTER_LABEL=LimeWire can filter files that copyright owners request not be shared. By enabling filtering, you are telling LimeWire to confirm all files you download or share with a list of removed content. You can change this at any time by choosing Filters -> Configure Content Filters from the main menu.
+#? SETUP_FILTER_LABEL=
 #### SETUP_FILTER_CHECKBOX=Enable Content Filtering
-#?  SETUP_FILTER_CHECKBOX=
+#? SETUP_FILTER_CHECKBOX=
 #### SETUP_FINISH_TITLE=Finish Setup
 SETUP_FINISH_TITLE=설정 완료
-#### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed.  Please press the "Finish" button to begin using LimeWire.
+#### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
 SETUP_FINISH_LABEL=설정이 성공적으로 저장되었습니다. "완료"버튼을 눌러 LimeWire를 사용해 주세요.
 #### SETUP_ASSOCIATIONS_TITLE=File & Protocol Associations
-#?  SETUP_ASSOCIATIONS_TITLE=
+#? SETUP_ASSOCIATIONS_TITLE=
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
-#?  SETUP_ASSOCIATIONS_LABEL=
+#? SETUP_ASSOCIATIONS_LABEL=
 
 
 ################################################################################
 # Key/value pairs for miscellaneous associations 
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
-#?  ASSOCIATIONS_MANGET_DESCRIPTION=
-#### ASSOCIATIONS_TORRENT_DESCRIPTION=". torrent" files
-#?  ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.   Would you like LimeWire to fix this?
-#?  ASSOCIATIONS_UNLINKED_WARNING=
+#? ASSOCIATIONS_MANGET_DESCRIPTION=
+#### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
+#? ASSOCIATIONS_TORRENT_DESCRIPTION=
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
-#?  ASSOCIATIONS_OTHER_OPTION=
+#? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
 # Key/value pairs for the file chooser
@@ -1679,7 +1699,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=초기설정 폴더 사용
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=PRO 에 업그레이드
-#### PRO_LABEL_THANKS=For Turbo-Charged downloads, get LimeWire PRO.  We guarantee that you will love the improved performance of PRO.  Thank you for helping keep the Internet open by running LimeWire.
+#### PRO_LABEL_THANKS=For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
 PRO_LABEL_THANKS=최적화된 다운로드를 하려면 , LimeWire PRO를 구입해 주세요. 퍼포먼스의 향상을, 마음에 들어 받을 수 있는 것을 보증합니다.  LimeWire를 사용하는 것으로, 인터넷에 공헌해 주셔, 감사합니다.
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
 PRO_LABEL_QUESTION=LimeWire PRO 에 업그레이드
@@ -1699,7 +1719,7 @@ GO_PRO_LATER_TIP=LimeWire PRO 를 다음에 구입
 ################################################################################
 #### JAVA_UPGRADE_TITLE=Upgrade Your Java
 JAVA_UPGRADE_TITLE=사용하고 있는 Java를 업그레이드
-#### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java.  LimeWire looks and acts much better with newer versions of Java.  Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
+#### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java. LimeWire looks and acts much better with newer versions of Java. Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
 JAVA_UPGRADE_MESSAGE=LimeWire가 유저가 낡은 버젼의 Java를 사용하고 있는 것을 감지했습니다. LimeWire는 새로운 버젼의 Java로 보다 좋고 외관 작동합니다. 특징으로서는, 마우스의 스크롤 휠을 지지, 윈도우즈 XP의 볼품, 그 외 많은 개량점이 있습니다.
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
 JAVA_UPGRADE_QUESTION=무료로 Java의 업그레이드를 실시하고 싶습니까?
@@ -1708,7 +1728,7 @@ JAVA_UPGRADE_QUESTION=무료로 Java의 업그레이드를 실시하고 싶습�
 # Key/Value pairs for the change language window.
 ################################################################################
 #### LANGUAGE_LOADING=Loading Languages
-#?  LANGUAGE_LOADING=
+#? LANGUAGE_LOADING=
 
 ###################################################################
 # Key/value pairs for XML
@@ -1938,55 +1958,55 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #### CC_PUBLISHER_TITLE=Publish License
 CC_PUBLISHER_TITLE=출판 라이센스
 #### CC_PUBLISHER_INTRO=This tool helps you publish audio under a Creative Commons license.
-#?  CC_PUBLISHER_INTRO=
+#? CC_PUBLISHER_INTRO=
 #### CC_PUBLISHER_CC_INTRO_URL_LABEL=How does it work?
-#?  CC_PUBLISHER_CC_INTRO_URL_LABEL=
+#? CC_PUBLISHER_CC_INTRO_URL_LABEL=
 #### CC_PUBLISHER_WARNING_CREATE=I understand that to publish a file, I must either own its copyrights or be authorized to publish them under a Creative Commons license.
-#?  CC_PUBLISHER_WARNING_CREATE=
-#### CC_PUBLISHER_WARNING_MODIFY=This file already has a license.  If you want to modify it, click the checkbox to attest that you either own its copyrights or are authorized to publish them under a Creative Commons license.
-#?  CC_PUBLISHER_WARNING_MODIFY=
+#? CC_PUBLISHER_WARNING_CREATE=
+#### CC_PUBLISHER_WARNING_MODIFY=This file already has a license. If you want to modify it, click the checkbox to attest that you either own its copyrights or are authorized to publish them under a Creative Commons license.
+#? CC_PUBLISHER_WARNING_MODIFY=
 #### CC_PUBLISHER_MODIFY_LICENSE=Modify the license of this file
 CC_PUBLISHER_MODIFY_LICENSE=이 파일의 수정된 라이센스
 #### CC_PUBLISHER_REMOVE_LICENSE=Permanently remove the license from this file
-#?  CC_PUBLISHER_REMOVE_LICENSE=
+#? CC_PUBLISHER_REMOVE_LICENSE=
 #### CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=Copyright Holder:
-#?  CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=
+#? CC_PUBLISHER_COPYRIGHT_HOLDER_LABEL=
 #### CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=Copyright Year:
 CC_PUBLISHER_COPYRIGHT_YEAR_LABEL=저작 년도
 #### CC_PUBLISHER_WORK_TITLE_LABEL=Title of Work:
 CC_PUBLISHER_WORK_TITLE_LABEL=작업 타이틀
 #### CC_PUBLISHER_DESCRIPTION_LABEL=Description:
-#?  CC_PUBLISHER_DESCRIPTION_LABEL=
+#? CC_PUBLISHER_DESCRIPTION_LABEL=
 #### CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=Allow commercial use of your work?
-#?  CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=
+#? CC_PUBLISHER_LICENSE_ALLOWCOM_LABEL=
 #### CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=Allow modification of your work?
-#?  CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=
+#? CC_PUBLISHER_LICENSE_ALLOWMOD_LABEL=
 #### CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=ShareAlike
-#?  CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=
+#? CC_PUBLISHER_LICENSE_ALLOWMOD_SHAREALIKE=
 #### CC_PUBLISHER_LICENSE_VERIFICATION_URL=Where do you want to store the verification URL?
-#?  CC_PUBLISHER_LICENSE_VERIFICATION_URL=
+#? CC_PUBLISHER_LICENSE_VERIFICATION_URL=
 #### CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=What is this?
-#?  CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=
+#? CC_PUBLISHER_CC_VERIFICATION_URL_LABEL=
 #### CC_PUBLISHER_LICENSE_VERIFICATION_SELF=I want to host the verification file myself at the following URL:
-#?  CC_PUBLISHER_LICENSE_VERIFICATION_SELF=
+#? CC_PUBLISHER_LICENSE_VERIFICATION_SELF=
 #### CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=I want to use the Internet Archive to host the file.
-#?  CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=
+#? CC_PUBLISHER_LICENSE_VERIFICATION_ARCHIVE=
 #### CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=The verification file is hosted at the following URL:
-#?  CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=
+#? CC_PUBLISHER_LICENSE_VERIFICATION_SELF_LABEL=
 #### CC_PUBLISHER_RDF_OUTPUT=In order to publish your file, please insert the following code in your verification page at:
-#?  CC_PUBLISHER_RDF_OUTPUT=
+#? CC_PUBLISHER_RDF_OUTPUT=
 #### CC_PUBLISHER_COPY_BUTTON=Copy to Clipboard
-#?  CC_PUBLISHER_COPY_BUTTON=
+#? CC_PUBLISHER_COPY_BUTTON=
 #### CC_PUBLISHER_REMOVELICENSE_LABEL=Are you sure you want to permanently remove the license from your local copy of this file?
-#?  CC_PUBLISHER_REMOVELICENSE_LABEL=
+#? CC_PUBLISHER_REMOVELICENSE_LABEL=
 #### CC_PUBLISHER_LICENSEREMOVED_LABEL=Please press OK to permanently remove license.
-#?  CC_PUBLISHER_LICENSEREMOVED_LABEL=
+#? CC_PUBLISHER_LICENSEREMOVED_LABEL=
 #### CC_PUBLISHER_ARCHIVE_USERNAME_LABEL=Username:
 CC_PUBLISHER_ARCHIVE_USERNAME_LABEL=사용자 이름:
 #### CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=Password:
 CC_PUBLISHER_ARCHIVE_PASSWORD_LABEL=비밀번호:
 #### CC_RDFOUTPUT_TITLE=License RDF Output
-#?  CC_RDFOUTPUT_TITLE=
+#? CC_RDFOUTPUT_TITLE=
 
 #### INTERNETARCHIVE_UPLOADER_TITLE=Upload
 INTERNETARCHIVE_UPLOADER_TITLE=업로드
@@ -1999,17 +2019,17 @@ INTERNETARCHIVE_UPLOADER_CONNECTED=접속됨...
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=Uploading file
 INTERNETARCHIVE_UPLOADER_FILE_UPLOADING=파일 업로드중
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=of
-#?  INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
+#? INTERNETARCHIVE_UPLOADER_FILE_UPLOADING_OF=
 #### INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=Uploaded
-#?  INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
+#? INTERNETARCHIVE_UPLOADER_FILE_UPLOADED=
 #### INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=bytes of
-#?  INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
+#? INTERNETARCHIVE_UPLOADER_FILE_BYTESOF=
 #### INTERNETARCHIVE_UPLOADER_COMPLETED=Successfully uploaded files
 INTERNETARCHIVE_UPLOADER_COMPLETED=업로드 성공 파일
 #### INTERNETARCHIVE_UPLOADER_CHECKIN=Checking in...
-#?  INTERNETARCHIVE_UPLOADER_CHECKIN=
+#? INTERNETARCHIVE_UPLOADER_CHECKIN=
 #### INTERNETARCHIVE_IDRETRIEVER_TITLE=Requesting Identifier...
-#?  INTERNETARCHIVE_IDRETRIEVER_TITLE=
+#? INTERNETARCHIVE_IDRETRIEVER_TITLE=
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
@@ -2159,23 +2179,23 @@ SHUTDOWN_WAIT=LimeWire를 종료하는 동안 기다려주세요...
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For Turbo-Charged searches get LimeWire PRO.
 SUPPORT_LIMEWIRE_01=최적화된 검색에는 LimeWire Pro
-#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development.  Get PRO.
+#### SUPPORT_LIMEWIRE_02=Support LimeWire's peer-to-peer development. Get PRO.
 SUPPORT_LIMEWIRE_02=peer-to-peer의 네트워크에 관한 LimeWire 개발을 지원
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire PRO to help us make downloads faster.
 SUPPORT_LIMEWIRE_03=우리가 더빠른 다운로드를 만들 수 있도록 LimeWire Pro를 구매해주세요.
 #### SUPPORT_LIMEWIRE_04=For Turbo-Charged downloads get LimeWire PRO.
 SUPPORT_LIMEWIRE_04=최적화된 검색에는 LimeWire Pro.
-#### SUPPORT_LIMEWIRE_05=Support open networks.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_05=Support open networks. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_05=개방적인 네트워크를 지원.
-#### SUPPORT_LIMEWIRE_06=Support open source and open protocols.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_06=Support open source and open protocols. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_06=여기를 클릭해, 오픈 소스와 오픈 프로토콜을 지원
 #### SUPPORT_LIMEWIRE_07=For Turbo-Charged performance get LimeWire PRO.
 SUPPORT_LIMEWIRE_07=최적화된 퍼포먼스에는 LimeWire Pro
-#### SUPPORT_LIMEWIRE_08=Keep the Internet open.  Get LimeWire PRO.
+#### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get LimeWire PRO.
 SUPPORT_LIMEWIRE_08=인터넷을 개방적인 상태에 유지하려면, Pro를 손에 넣어 주세요.
-#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money.  Get PRO.
+#### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get PRO.
 SUPPORT_LIMEWIRE_09=LimeWire의 개발에는 비용이 들므로, Pro를 손에 넣어 주세요.
-#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content.  Get PRO.
+#### SUPPORT_LIMEWIRE_11=Support LimeWire and independent media content. Get PRO.
 SUPPORT_LIMEWIRE_11=독립한 미디어 컨텐츠의 공유를 도움 지원
 
 ################################################################################
@@ -2194,10 +2214,28 @@ UPDATE_LATER_LABEL=다음에 업데이트
 UPDATE_NOW_LABEL=지금 업데이트 
 #### UPDATE_TIP=Visit http://www.limewire.com to update!
 UPDATE_TIP=http://www.limewire.com에 접속하여 업데이트!
-#### UPDATE_RESTART=LimeWire needs to be restarted to install the update.  If you choose not to update now, LimeWire will update automatically when you close.  Would you like to update now?
+#### UPDATE_RESTART=LimeWire needs to be restarted to install the update. If you choose not to update now, LimeWire will update automatically when you close. Would you like to update now?
 UPDATE_RESTART=LimeWire는 업데이트를 설치하려면 재시작이 필요합니다. 지금 업데이트 하지 않는다면, LimeWire는 유저가 종료시킨후 자동적으로 업데이트하게 됩니다. 지금 업데이트 하시겠습니까?
 #### UPDATE_RESTART_TITLE=Update Ready
 UPDATE_RESTART_TITLE=업데이트의 준비 완료
+
+################################################################################
+# Key/Value pairs for dropped files to share dialog
+################################################################################
+#### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
+#? SHARED_FILES_DROP_DIALOG_TITLE=
+#### SHARED_FILES_DROP_DIALOG_MESSAGE=You dropped the following files/folders on LimeWire, please select the ones you would like to share.
+#? SHARED_FILES_DROP_DIALOG_MESSAGE=
+#### SHARED_FILES_DROP_DIALOG_WARNING=All folders you select will also have their subfolders shared.
+#? SHARED_FILES_DROP_DIALOG_WARNING=
+#### SHARED_FILES_DROP_DIALOG_OPTION_YES=Yes, Try Again
+#? SHARED_FILES_DROP_DIALOG_OPTION_YES=
+#### SHARED_FILES_DROP_DIALOG_OPTION_NO=No, Share Nothing
+#? SHARED_FILES_DROP_DIALOG_OPTION_NO=
+#### SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=Do not show this message again.
+#? SHARED_FILES_DROP_DIALOG_DONT_SHOW_AGAIN=
+#### SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=You clicked OK but did not select any files to be shared. Would you like to try again?
+#? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
@@ -2214,21 +2252,23 @@ MESSAGE_CONFIRM_UNSHARE_DIRECTORY=이 폴더를 공유 정지하시겠습니까?
 MESSAGE_CANNOT_UNSHARE_DIRECTORY=LimeWire는, 이 폴더를 공유할 수 없습니다.
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
 MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=보안상의 이유로, LimeWire는 지정 파일을 실행하지 않을 것입니다.
+#### MESSAGE_FILE_LAUNCHING_FAILED=LimeWire could not launch the specified file.
+#? MESSAGE_FILE_LAUNCHING_FAILED=
+#### MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=LimeWire could not launch the specified file.\n\nExecuted command: {0}.
+#? MESSAGE_FILE_LAUNCHING_COMMAND_FAILED=
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
 MESSAGE_CONFIRM_FILE_DELETE=선택한 파일을 정말로 삭제할까?
-#### MESSAGE_UNABLE_TO_DELETE_FILE_START=Unable to delete the file
-MESSAGE_UNABLE_TO_DELETE_FILE_START=파일을 삭제할 수 없습니다
-#### MESSAGE_UNABLE_TO_DELETE_FILE_END=.  It may be in use by another application.
-MESSAGE_UNABLE_TO_DELETE_FILE_END=다른 프로그램에서 사용하고 있는 것 같습니다.
+#### MESSAGE_UNABLE_TO_DELETE_FILES=The following files could not be deleted. They may be in use by another application or are currently being downloaded to.
+#? MESSAGE_UNABLE_TO_DELETE_FILES=
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
 MESSAGE_UNABLE_TO_RENAME_FILE_START=다음의 파일의 명칭 변경을 할 수 없습니다
-#### MESSAGE_UNABLE_TO_RENAME_FILE_END=.  It may be in use by another application.
+#### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
 MESSAGE_UNABLE_TO_RENAME_FILE_END=다른 어플리케이션으로, 사용되어 있을지도 모르다
 #### MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire will not allow you to
 MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire 는 유저에게
 #### MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
 MESSAGE_INCOMPLETE_DIRECTORY_END=그 폴더를 미완성 파일의 예약시키지 않았습니다.
-#### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified folder for saving files.  Please try a different folder.
+#### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified folder for saving files. Please try a different folder.
 MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire는 지정한 폴더로 파일 다른 이름으로 저장 불가합니다. 다른 폴더를 지정해주세요.
 #### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
 MESSAGE_FILE_CORRUPT=LimeWire이 파손된 파일을 감지하였습니다
@@ -2243,24 +2283,24 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=이 폴더를 공유하시겠습니까?
 # Key/value pair for the message shown when LimeWire couldn't connect to the
 # internet
 ################################################################################
-#### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet.  Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
-#?  NO_INTERNET=
+#### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
+#? NO_INTERNET=
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
 # internet and you haven't used your machine in awhile, so we'll automatically
 # keep trying.
 ################################################################################
-#### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet.  LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
-#?  NO_INTERNET_RETRYING=
+#### NO_INTERNET_RETRYING=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. LimeWire will automatically keep trying to connect you to the network unless you select "Disconnect" from the File menu.
+#? NO_INTERNET_RETRYING=
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
 ################################################################################
-#### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network.  This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346).  Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_FETCHED_TOO_MANY=Gnutella 네트워크상의 호스트에게 접속 불가. 이것은 많은 컨텐츠 필터 한 소프트웨어나 방화벽이 그누테라(Port 6346)의 접속을 차단하고 있기때문입니다. LimeWire가 그누테라의 네트워크에 접속 할 수 있도록 설정되었는지 방화벽의 옵션을 다시 확인해 주십시오. 시스템 관리 책임자나 ISP에, 그누테라가 필터되어 있지 않은지 확인해 주십시오.
-#### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network.  This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346).  Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_NO_CACHES_LEFT=그누테라의 네트워크에 있는 호스트에게 접속 불가. 이것은 많은 컨텐츠 필터 한 소프트웨어나 방화벽이 그누테라(Port 6346)의 접속을 차단하고 있기때문에. LimeWire가 그누테라의 네트워크에 접속 할 수 있도록 설정되었는지 방화벽의 옵션을 다시 확인해 주십시오. 시스템 관리 책임자나 ISP에, 그누테라가 필터되어 있지 않은지 확인해 주십시오.
 
 ################################################################################
@@ -2268,21 +2308,21 @@ GWEBCACHE_NO_CACHES_LEFT=그누테라의 네트워크에 있는 호스트에게 
 # Every kind of error MUST be implemented for all types.
 # Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
 ################################################################################
-#### ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full.  To download more files, you must free up space on your hard drive.
+#### ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
 ERROR_DISK_FULL_DOWNLOAD=하드 디스크의 빈 용량이 부족하기 때문에, 선택한 파일을 다운로드할 수 없는 상태. 더욱 파일을 다운로드하려면 , 하드 디스크의 빈 용량을 늘리는 것.
-#### ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full.  To continue using LimeWire you must free up space on your hard drive.
+#### ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
 ERROR_DISK_FULL_GENERIC=하드 디스크의 빈 용량이 부족하기 때문에, 필요한 파일을 다른 이름으로 저장할 수 없는 상태. LimeWire의 사용을 계속하려면 , 하드 디스크의 빈 용량을 증 할 것.
-#### ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file.  Please close the other program and retry the download.
+#### ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire was unable to download the selected file because another program is using the file. Please close the other program and retry the download.
 ERROR_LOCKED_BY_PROCESS_DOWNLOAD=다른 프로그램이 파일을 사용하고 있기때문에, 선택한 파일을 다운로드할 수 없는 상태. 다른 프로그램을 종료시키고 나서, 다운로드를 재개하는 것.
-#### ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file.  LimeWire may act unexpectedly until this file is released.
+#### ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
 ERROR_LOCKED_BY_PROCESS_GENERIC=필요한 파일을 다른 프로그램이 사용하고 있기때문에, LimeWire는 파일을 열지 않는 상태. LimeWire는, 이 파일이 열릴 때까지 조작을 조 돌려주는 것.
-#### ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder.  To continue using LimeWire, please choose a different Save Folder.
+#### ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder.
 ERROR_ACCESS_DENIED_DOWNLOAD=선택한 다운로드에 대해, 미완성 폴더에 접속권한이 없기 때문에, 미완성 파일을 작성 또는 기입해 불가. LimeWire를 계속 사용하려면  , 다른 다른 이름으로 저장처 폴더를 선택.
-#### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions.  Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
+#### ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or LimeWire may behave in unexpected ways.
 ERROR_ACCESS_DENIED_GENERIC=필요한 접속권한이 없기 때문에, 필요한 파일을 기입해 불가. 다음에 LimeWire 가 시작되었을 때, 선택한 환경 설정이 보관 유지되어 있지 않을 가능성 있어. 또, LimeWire가 예기치 않은 작동을 할 가능성도 생각할 수 있습니다.
 #### ERROR_INVALID_NAME_DOWNLOAD=LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system.
 ERROR_INVALID_NAME_DOWNLOAD=선택한 다운로드에 의한 파일명에, 사용의 시스템이 대응하고 있지 않는 문자가 있기때문에, 불완전한 파일을 열지 않는 상황.
-#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system.  LimeWire may behave in unexpected ways.
+#### ERROR_INVALID_NAME_GENERIC=LimeWire cannot open a necessary file because the filename contains characters which are not supported by your operating system. LimeWire may behave in unexpected ways.
 ERROR_INVALID_NAME_GENERIC=파일명에 사용의 시스템으로 대응하고 있지 않는 문자가 있기때문에, 필요한 파일을 열리지 않는 상황.
 
 ################################################################################
@@ -2290,9 +2330,9 @@ ERROR_INVALID_NAME_GENERIC=파일명에 사용의 시스템으로 대응하고 �
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=내부의 에러
-#### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error.  It is possible for LimeWire to recover and continue running normally.  To aid with debugging, please click 'Send' to notify LimeWire about the problem.  If desired, you can click 'Review' to look at the information that will be sent.  Thank you.
+#### ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
 ERROR_INTERNAL_SERVLET=LimeWire의 내부에서 에러가 일어났습니다. LimeWire는 복구되어 정상 작동됩니다. LimeWire의 버그 수정을 위해서 "송신" 버튼을 클릭하여 정보를 보내주세요. 또, 에러를 재검토하고 싶으면"재검토" 버튼을 클릭해 주세요. 감사합니다.
-#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error.  It is possible for LimeWire to recover and continue running normally.  To continue using LimeWire, click 'Discard'.  If desired, you can click 'Review' to look at the information about the error.
+#### ERROR_INTERNAL_OLD=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click 'Discard'. If desired, you can click 'Review' to look at the information about the error.
 ERROR_INTERNAL_OLD=LimeWire의 내부에서 에러 발생. LimeWire는 복구되어 정상 작동됩니다. LimeWire의 버그 수정을 위해서 "송신" 버튼을 클릭하여 정보를 발송. 또, 에러를 재검토하고 싶으면 "재검토" 버튼을 클릭하여 주세요.
 #### ERROR_INTERNAL_SEND=Send
 ERROR_INTERNAL_SEND=송신
@@ -2310,38 +2350,38 @@ ERROR_INTERNAL_ALWAYS_SEND=항상 즉시 송신
 ERROR_INTERNAL_ALWAYS_REVIEW=항상 재검토를 요구
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=항상 모든 에러를 삭제
-#### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report.  For further help and to aid with debugging, please visit www.limewire.com and click 'Support'.  Thank you.
+#### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire가 버그 서버에 접속 불가합니다. LimeWire의 버그 수정을 위해서 www.limewire.com으로 방문하셔서 'Support'를 클릭하여 정보를 보내주십시오. 감사합니다.
 
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
-#### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start.  This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine.  Please allow LimeWire access to the internet and restart LimeWire.
+#### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWire는 초기화해 시작을 할 수 없는 상태.  통상 이 문제는 방화벽 프로그램이, 인터넷 또는 로컬의 기기에 의한 루프백 접속에의, LimeWire의 접속을 차단하고 있기 때문에 일어나는 것.  LimeWire의 인터넷에의 접속을 허가한 후 LimeWire를 다시 실행하여주십시오.
-#### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access.  LimeWire can direct you to Microsoft's page with information if you want to use this feature.  Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
+#### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 ERROR_DAAP_LOOPBACK_FAILED=LimeWire는 방화벽이 액세스를 차단하고 있기 때문에, 디지털 오디오 액세스 프로토콜(iTunes로 파일 공유)을 실행 할 수 없습니다.  이 기능을 계속 사용하려면  ,「네」를 클릭해 방화벽을 변경해,‘LimeWire.exe＇로 100%의 접속을 내향과 외국용의 접속에 허가.  이 기능을 사용하지 않는 경우는,「아니오」를 클릭.
-#### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access.  To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections.  To disable this feature, click 'No'.
-#?  ERROR_DAAP_LOOPBACK_FAILED_NONXP=
-#### ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes).  This feature will be turned off.  You can turn it back on in options, under iTunes -> Sharing.
+#### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
+#? ERROR_DAAP_LOOPBACK_FAILED_NONXP=
+#### ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
 ERROR_DAAP_START_FAILED=iTunes 의 파일 공유에 사용되는 Digital Audio Access Protocol 를 실행할 수 없는 상태. 이 기능은 무효가 되지만, 이 기능은 "iTunes" ->"공유"로부터 되돌릴 수 있습니다.
-#### ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes).  This feature will be turned off.  You can turn it back on in options, under iTunes -> Sharing.
+#### ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
 ERROR_DAAP_RUN_ERROR=iTunes 의 파일 공유에 사용되는 디지털 오디오 접속 프로토콜로 에러를 검출. 이 기능은 무효가 되지만, 이 기능은"iTunes" -> "공유" 로부터 되돌릴 수 있습니다.
-#### ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections.  Some features of LimeWire may not work as expected.
+#### ERROR_NO_PORTS_AVAILABLE=LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected.
 ERROR_NO_PORTS_AVAILABLE=내향의 접속의 포트를 설정할 수 없는 상태. 몇개의 기능은 기대한 대로 들지 않을 가능성 있어.
-#### ERROR_PORT_UNAVAILABLE=Port not available.  Please select a different port.
+#### ERROR_PORT_UNAVAILABLE=Port not available. Please select a different port.
 ERROR_PORT_UNAVAILABLE=포트는 이용할 수 없기 때문에, 다른 포트를 선택.
-#### ERROR_PORT=Could not find a port to use for incoming connections. \nPlease specify a port from the configuration window.
+#### ERROR_PORT=Could not find a port to use for incoming connections.\nPlease specify a port from the configuration window.
 ERROR_PORT=내향의 접속에 사용하는 포트가 눈에 띄지 않기 때문에, \n설정 윈도우로부터 포트를 지정하는 것.
 #### ERROR_THREE_CHARACTER_SEARCH=Your search must be at least three characters to avoid congesting the network.
 ERROR_THREE_CHARACTER_SEARCH=네트워크의 혼잡을 피하기 위해서, 검색은 최저 세자 이상으로 입력해야합니다.
 
-#### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files.  Please use another folder or revert to the default.
+#### ERROR_INVALID_SAVE_DIRECTORY=Invalid folder for saving files. Please use another folder or revert to the default.
 ERROR_INVALID_SAVE_DIRECTORY=파일저장 폴더에 문제가 있습니다. 다른 폴더를 사용거나 초기설정으로 되돌리세요.
-#### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save folder is not valid.  It may have been deleted, you may not have permissions to write to it, or there may be another problem.  Please choose a different folder.
+#### ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save folder is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different folder.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=저장폴더에 문제가 있습니다. 삭제되었거나, 폴더에 쓰기 접근권한이 없거나 혹은 다른 문제가 있을 가능성이 있습니다. 다른 폴더를 선택해 주세요.
-#### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save folder is invalid.  You may not have permissions to write to the selected folder.  LimeWire will revert to your previously selected folder.
+#### ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save folder is invalid. You may not have permissions to write to the selected folder. LimeWire will revert to your previously selected folder.
 ERROR_INVALID_SAVE_DIRECTORY_SELECTION=선택한 저장폴더에 문제가 있습니다. 선택된 폴더에 쓰기 접근권한이 없을 가능성있습니다. LimeWire는 이전에 선택된 폴더로 복구될 것입니다.
-#### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files.  Please use another folder or revert to the default.
+#### ERROR_INVALID_SHARED_DIRECTORY=Invalid folder for sharing files. Please use another folder or revert to the default.
 ERROR_INVALID_SHARED_DIRECTORY=파일 공유 폴더에 문제가 있습니다. 다른 폴더를 사용하거나 초기설정으로 복구하십시오.
 #### ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 when manually forcing your port.
 ERROR_FORCE_IP_PORT_RANGE=포트를 정할경우 1에서 65535사이의 포트값을 입력하세요.
@@ -2367,19 +2407,19 @@ ERROR_OPEN_URL=아래의 웹페이지를 표시하기 위해서, LimeWire는 유
 ERROR_DEL_META_USER=미다른 이름으로 저장의 정보는 제거 불가능
 #### ERROR_DEL_META_SYSTEM=Unable to remove data.
 ERROR_DEL_META_SYSTEM=데이터를 제거 불가능
-#### ERROR_SAVE_META_DOC=Internal Document Error.  Data could not be saved.
+#### ERROR_SAVE_META_DOC=Internal Document Error. Data could not be saved.
 ERROR_SAVE_META_DOC=내부 문서 에러. 데이터는 다른 이름으로 저장 성과 (안)중
 #### ERROR_SAVE_META_ILLEGAL=Nothing to save.
 ERROR_SAVE_META_ILLEGAL=다른 이름으로 저장하는 데이터가 없다
-#### ERROR_SAVE_META_FILE=File not found or corrupt file.  Data could not be saved
+#### ERROR_SAVE_META_FILE=File not found or corrupt file. Data could not be saved
 ERROR_SAVE_META_FILE=파일이 발견되지 않는가, 또는 파손.  데이터는 다른 이름으로 저장할 수 없었다
-#### ERROR_SAVE_META_RW=Read Write Error.  Data could not be saved.
+#### ERROR_SAVE_META_RW=Read Write Error. Data could not be saved.
 ERROR_SAVE_META_RW=읽고 쓰기의 에러. 데이터는 다른 이름으로 저장할 수 없었다
-#### ERROR_SAVE_META_ID3=File Corrupt.  Data could not be saved.
+#### ERROR_SAVE_META_ID3=File Corrupt. Data could not be saved.
 ERROR_SAVE_META_ID3=파일이 파손. 데이터는 다른 이름으로 저장되지 않았다
-#### ERROR_SAVE_META_DISK=Internal Error.  Data could not be saved.
+#### ERROR_SAVE_META_DISK=Internal Error. Data could not be saved.
 ERROR_SAVE_META_DISK=내부 에러. 데이터는 다른 이름으로 저장되지 않는다
-#### ERROR_SAVE_META_BAD=Incorrect format entered.  Changes will not be saved.
+#### ERROR_SAVE_META_BAD=Incorrect format entered. Changes will not be saved.
 ERROR_SAVE_META_BAD=잘못한 형식이 입력완료.  변경은 다른 이름으로 저장되지 않는다
 #### ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
 ERROR_REMOVE_LAST_COL=모든 칼럼을 오프로 할 수  없는 상태
@@ -2387,11 +2427,11 @@ ERROR_REMOVE_LAST_COL=모든 칼럼을 오프로 할 수  없는 상태
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=다음의 호스트가 참조 불가
 #### ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
-#### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid.  LimeWire will revert to the default theme.
+#### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
 ERROR_APPLYING_INVALID_THEME_FILE=적용하려고 한 테마는 무효. 초기설정 테마로 복귀
-#### ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid.  Please choose another file, or use the default.
+#### ERROR_INVALID_THEME_FILE=The skin file you selected does not exist or is invalid. Please choose another file, or use the default.
 ERROR_INVALID_THEME_FILE=선택한 스킨 파일은 존재하고 있지 않는지, 혹은 무효. 다른 파일을 선택할까 초기설정 스킨을 사용하는 것.
-#### ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date.  Please download the latest version of the skin.
+#### ERROR_THEME_OUT_OF_DATE=The skin you selected is out of date. Please download the latest version of the skin.
 ERROR_THEME_OUT_OF_DATE=선택한 스킨의 유효기간이 지났습니다.  최신 버젼의 스킨을 다운로드하십시오.
 #### ERROR_THEME_OUT_OF_DATE_TITLE=Invalid Skin
 ERROR_THEME_OUT_OF_DATE_TITLE=쓸모없는 스킨
@@ -2401,61 +2441,61 @@ ERROR_THEME_OUT_OF_DATE_GET_MORE=새로운 스킨을 입수
 ERROR_THEME_OUT_OF_DATE_LATER=다음에
 #### ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
 ERROR_BAD_MAGNET_LINK=마그넷 링크를 실시 불가
-#### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid.  Your file may not download correctly.
+#### ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
 ERROR_INVALID_URLS_IN_MAGNET=마그넷 링크에 사용되고 있는 URL가 무효. 파일이 올바르게 다운로드할 수 없을 가능성 있어.
-#### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted.  LimeWire will use default values.
+#### ERROR_PROPS_CORRUPTED=A file used to save your preferences was corrupted. LimeWire will use default values.
 ERROR_PROPS_CORRUPTED=환경 설정을 다른 이름으로 저장하는 파일이 파손. 초기설정을 사용
-#### ERROR_SEARCH_TOO_LARGE=Your search is too long.  Please make your search smaller and try again.
+#### ERROR_SEARCH_TOO_LARGE=Your search is too long. Please make your search smaller and try again.
 ERROR_SEARCH_TOO_LARGE=검색이 너무 길므로, 검색을 소규모로 해 재시행
-#### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific.  Please make your search smaller and try again.
+#### ERROR_XML_SEARCH_TOO_LARGE=Your search is too specific. Please make your search smaller and try again.
 ERROR_XML_SEARCH_TOO_LARGE=검색이 특정화너무 되고 , 검색을 소규모로 해 재시행
 #### ERROR_CCPUBLISHER_MISSING_DETAIL=Please enter the copyright holder, copright year and title.
-#?  ERROR_CCPUBLISHER_MISSING_DETAIL=
+#? ERROR_CCPUBLISHER_MISSING_DETAIL=
 #### ERROR_CCPUBLISHER_MISSING_TITLE=Please enter the title of the file you want to publish.
-#?  ERROR_CCPUBLISHER_MISSING_TITLE=
+#? ERROR_CCPUBLISHER_MISSING_TITLE=
 #### ERROR_CCPUBLISHER_MISSING_YEAR=Please enter the year of the file you want to publish.
-#?  ERROR_CCPUBLISHER_MISSING_YEAR=
+#? ERROR_CCPUBLISHER_MISSING_YEAR=
 #### ERROR_CCPUBLISHER_MISSING_HOLDER=Please enter the copyright holder of the file you want to publish.
-#?  ERROR_CCPUBLISHER_MISSING_HOLDER=
+#? ERROR_CCPUBLISHER_MISSING_HOLDER=
 #### ERROR_CCPUBLISHER_MISSING_URL=Please enter a verification URL for the license.
-#?  ERROR_CCPUBLISHER_MISSING_URL=
-#### ERROR_CCPUBLISHER_DESCRIPTION_START=The description for this file is too short.  Please enter at least {0} words.
-#?  ERROR_CCPUBLISHER_DESCRIPTION_START=
+#? ERROR_CCPUBLISHER_MISSING_URL=
+#### ERROR_CCPUBLISHER_DESCRIPTION_START=The description for this file is too short. Please enter at least {0} words.
+#? ERROR_CCPUBLISHER_DESCRIPTION_START=
 #### ERROR_CCPUBLISHER_URL=Please enter a valid verification URL for the license.
-#?  ERROR_CCPUBLISHER_URL=
+#? ERROR_CCPUBLISHER_URL=
 #### ERROR_CCPUBLISHER_DATE=Please enter a valid year for the file you want to publish.
-#?  ERROR_CCPUBLISHER_DATE=
-#### ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=The default Internet Archive identifier for this file and username is allready taken.  Please modify it below or press cancel to return.
-#?  ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=
+#? ERROR_CCPUBLISHER_DATE=
+#### ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=The default Internet Archive identifier for this file and username is allready taken. Please modify it below or press cancel to return.
+#? ERROR_CCPUBLISHER_IDENTIFIER_UNAVAILABLE=
 #### ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=Please enter your Internet Archive username and password.
-#?  ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=
-#### ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive.  Do you want to try again?
-#?  ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=
+#? ERROR_CCPUBLISHER_MISSING_ARCHIVE_LOGIN=
+#### ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive. Do you want to try again?
+#? ERROR_CCPUBLISHER_INTERNETARCHIVE_COMMUNICATION=
 #### ERROR_INTERNETARCHIVE_CONNECTION=There was an error while connecting to the internet archive.
-#?  ERROR_INTERNETARCHIVE_CONNECTION=
-#### ERROR_INTERNETARCHIVE_LOGIN=There was an error while logging in to the Internet Archive.  Please check your username and password and try again.
-#?  ERROR_INTERNETARCHIVE_LOGIN=
+#? ERROR_INTERNETARCHIVE_CONNECTION=
+#### ERROR_INTERNETARCHIVE_LOGIN=There was an error while logging in to the Internet Archive. Please check your username and password and try again.
+#? ERROR_INTERNETARCHIVE_LOGIN=
 #### ERROR_INTERNETARCHIVE_DIRECTORY=There was an error while trying to access the upload directory.
-#?  ERROR_INTERNETARCHIVE_DIRECTORY=
-#### ERROR_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive.  Please try again later.
-#?  ERROR_INTERNETARCHIVE_COMMUNICATION=
+#? ERROR_INTERNETARCHIVE_DIRECTORY=
+#### ERROR_INTERNETARCHIVE_COMMUNICATION=There was an error communicating with the Internet Archive. Please try again later.
+#? ERROR_INTERNETARCHIVE_COMMUNICATION=
 #### ERROR_COULD_NOT_OPEN_TORRENT=LimeWire was unable to load the specified torrent file, - it may be malformed or LimeWire does not have permission to access this file.
-#?  ERROR_COULD_NOT_OPEN_TORRENT=
+#? ERROR_COULD_NOT_OPEN_TORRENT=
 #### ERROR_COULD_NOT_OPEN_TORRENT_URL=LimeWire was unable to download the torrent file from the specified URL:
-#?  ERROR_COULD_NOT_OPEN_TORRENT_URL=
-#### ERROR_BAD_TORRENT_URL=The specified URL is not valid.  Please check your input.
-#?  ERROR_BAD_TORRENT_URL=
+#? ERROR_COULD_NOT_OPEN_TORRENT_URL=
+#### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
+#? ERROR_BAD_TORRENT_URL=
 ################################################################################
 # Messages for Licensing
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=라이센스를 본다
 #### LICENSE_EDIT_LICENSE=Edit License...
-#?  LICENSE_EDIT_LICENSE=
+#? LICENSE_EDIT_LICENSE=
 #### LICENSE_VERIFY=Verify
 LICENSE_VERIFY=확인
 #### LICENSE_SAVE_DETAILS_TO_FILE=Save details to file
-#?  LICENSE_SAVE_DETAILS_TO_FILE=
+#? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
 # Messages for Creative Commons Licensing
@@ -2464,7 +2504,7 @@ LICENSE_VERIFY=확인
 LICENSE_CC_TITLE=창조적으로 일반용의 정보 상세
 #### LICENSE_CC_LOCATING=LimeWire is currently locating the details of this license.
 LICENSE_CC_LOCATING=LimeWire는 현재, 이 라이센스에 대한 상세를 확인중입니다.
-#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license. \nClick 'verify' to locate the details of this Creative Commons license.
+#### LICENSE_CC_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this Creative Commons license.
 LICENSE_CC_UNVERIFIED=LimeWire는 이 라이센스를 검증하고 있지 않는 상태. \n[검증]을 클릭해, 이 창조적으로 일반용의 라이센스의 상세한 것에 대하여 조사하는 것.
 #### LICENSE_CC_INVALID=LimeWire was unable to locate the details of this license.
 LICENSE_CC_INVALID=LimeWire 는, 이 라이센스의 상세를 확인할 수 없는 상황
@@ -2488,7 +2528,7 @@ LICENSE_CC=창조적으로 일반용
 LICENSE_WEED_TITLE=도움이 되지 않는 공유에 관한 상세
 #### LICENSE_WEED_LOCATING=LimeWire is contacting www.weedshare.com for the details of this file.
 LICENSE_WEED_LOCATING=LimeWire는 www.weedshare.com에 접속하여 이 파일의 상세내용을 확인하고 있습니다.
-#### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license. \nClick 'verify' to locate the details of this file.
+#### LICENSE_WEED_UNVERIFIED=LimeWire has not yet verified this license.\nClick 'verify' to locate the details of this file.
 LICENSE_WEED_UNVERIFIED=LimeWire는 이 라이센스를 검증하고 있지 않는 상태. \n[검증]을 클릭해, 이 파일의 상세하게 관계해 확인중.
 #### LICENSE_WEED_INVALID=LimeWire was unable to locate the details of this Weed file.
 LICENSE_WEED_INVALID=LimeWire는, 이 도움이 되지 않는 파일의 상세를 확인할 수 없는 상황
@@ -2514,16 +2554,16 @@ LICENSE_UNKNOWN_TITLE=라이센스의 상세
 LICENSE_UNKNOWN_INVALID=이 파일을 열거나 보거나 하려면 , 라이센스가 필요의 가능성 있어
 
 ################################################################################
-# Keys for the titles of the options panes.  The corresponding values represent
+# Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
 # package com.limegroup.gnutella.gui.options
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=다른 이름으로 저장
 #### OPTIONS_SAVE_BASIC_MAIN_TITLE=Basic
-#?  OPTIONS_SAVE_BASIC_MAIN_TITLE=
+#? OPTIONS_SAVE_BASIC_MAIN_TITLE=
 #### OPTIONS_SAVE_ADVANCED_MAIN_TITLE=Advanced
-#?  OPTIONS_SAVE_ADVANCED_MAIN_TITLE=
+#? OPTIONS_SAVE_ADVANCED_MAIN_TITLE=
 #### OPTIONS_SHARED_MAIN_TITLE=Sharing
 OPTIONS_SHARED_MAIN_TITLE=공유
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
@@ -2539,7 +2579,7 @@ OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=슬롯
 #### OPTIONS_CONNECTIONS_MAIN_TITLE=Connections
 OPTIONS_CONNECTIONS_MAIN_TITLE=접속
 #### OPTIONS_BITTORRENT_MAIN_TITLE=BitTorrent
-#?  OPTIONS_BITTORRENT_MAIN_TITLE=
+#? OPTIONS_BITTORRENT_MAIN_TITLE=
 #### OPTIONS_SHUTDOWN_MAIN_TITLE=System Tray
 OPTIONS_SHUTDOWN_MAIN_TITLE=종료
 #### OPTIONS_UPDATE_MAIN_TITLE=Updates
@@ -2575,7 +2615,7 @@ OPTIONS_SEARCH_QUALITY_MAIN_TITLE=접속 레벨
 #### OPTIONS_SEARCH_SPEED_MAIN_TITLE=Speed
 OPTIONS_SEARCH_SPEED_MAIN_TITLE=속도
 #### OPTIONS_SEARCH_JUNK_MAIN_TITLE=Junk
-#?  OPTIONS_SEARCH_JUNK_MAIN_TITLE=
+#? OPTIONS_SEARCH_JUNK_MAIN_TITLE=
 #### OPTIONS_FILTERS_MAIN_TITLE=Filters
 OPTIONS_FILTERS_MAIN_TITLE=필터
 #### OPTIONS_RESULTS_MAIN_TITLE=Keywords
@@ -2593,17 +2633,17 @@ OPTIONS_STARTUP_MAIN_TITLE=시스템 시작시
 #### OPTIONS_PROXY_MAIN_TITLE=Proxy
 OPTIONS_PROXY_MAIN_TITLE=프록시
 #### OPTIONS_CONTENT_FILTER_MAIN_TITLE=Content
-#?  OPTIONS_CONTENT_FILTER_MAIN_TITLE=
+#? OPTIONS_CONTENT_FILTER_MAIN_TITLE=
 #### OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Network Interface
-#?  OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
+#? OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=
 #### OPTIONS_ASSOCIATIONS_MAIN_TITLE=File Associations
-#?  OPTIONS_ASSOCIATIONS_MAIN_TITLE=
+#? OPTIONS_ASSOCIATIONS_MAIN_TITLE=
 
 ################################################################################
 # Key/value pairs for the save directory options window item
 # in the options window
 ################################################################################
-#### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings.  Would you like to save these changes?
+#### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=설정이 변경되었습니다. 변경내용을 저장하시겠습니까?
 #### OPTIONS_SAVE_DIR_TITLE=Save Folder
 OPTIONS_SAVE_DIR_TITLE=다른 이름 폴더
@@ -2620,7 +2660,7 @@ OPTIONS_SAVE_DIR_BROWSE_BUTTON_TIP=다른 폴더 선택
 #### OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=Use the Default Folder
 OPTIONS_SAVE_DIR_DEFAULT_BUTTON_TIP=초기설정 폴더 사용
 #### OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=You can specify a download location for each media type.
-OPTIONS_SAVE_MEDIATYPE_DIR_LABEL= 각 미디어의 종류에 맞추어, 다운로드 위치를 정할 수 있습니다
+OPTIONS_SAVE_MEDIATYPE_DIR_LABEL=각 미디어의 종류에 맞추어, 다운로드 위치를 정할 수 있습니다
 #### OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=Open Dialog to Select a Folder
 OPTIONS_SAVE_MEDIATYPE_BROWSE_TIP=다이얼로그를 열어 폴더를 선택
 #### OPTIONS_SAVE_RESET_BUTTON_LABEL=Reset
@@ -2645,7 +2685,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=미완성 파일을 보관 유지하�
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=공유 폴더
-#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files.  Files in these folders are displayed in the library.
+#### OPTIONS_SHARED_DIRS_LABEL=You can choose the folders for sharing files. Files in these folders are displayed in the library.
 OPTIONS_SHARED_DIRS_LABEL=공유 파일의 폴더를 선택할 수 있습니다. 이러한 폴더내의 파일이 라이브러리에 표시됩니다.
 #### OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=Share Finished Downloads:
 OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=종료한 다운로드를 공유：
@@ -2653,8 +2693,14 @@ OPTIONS_SHARED_SPECIALLY_SHARE_BOX_LABEL=종료한 다운로드를 공유：
 OPTIONS_SHARED_SHARE_SPECIALLY_TITLE=다운로드 공유
 #### OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=You can share files that you download to unshared folders.
 OPTIONS_SHARED_SHARE_SPECIALLY_LABEL=공유되어 있지 않은 폴더로, 다운로드한 파일을 공유할 수 있습니다
-#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders?  The following new folders will be shared:\n\n
+#### OPTIONS_SHARED_NEW_SAVE_FOLDERS=Would you like to share your new save folders? The following new folders will be shared:\n\n
 OPTIONS_SHARED_NEW_SAVE_FOLDERS=새롭게 다른 이름으로 저장된 폴더를 공유하고 싶습니까? 아래의 새로운 폴더가 공유되는：:\n\n
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=Torrent Sharing
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_TITLE=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=You can automatically share .torrent files.
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_LABEL=
+#### OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=Share .torrent files
+#? OPTIONS_SHARED_SHARE_TORRENTS_META_BOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
@@ -2687,7 +2733,7 @@ OPTIONS_SPEED_BOX_LABEL=속도：
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=울트라 유저 기능
-#### OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users.  You can disable this if needed.
+#### OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users. You can disable this if needed.
 OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=사용의 컴퓨터에 빠른 인터넷 접속이 있습니다면, 늦은 회선의 유저에 대해 LimeWire 는 "울트라 유저" 로서 기능. 필요하면, 이 기능을 무효로 할 수 있습니다.
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=울트라 유저 기능을 쓸모없는：
@@ -2765,7 +2811,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=완료한 업로드를 자동적으로 지�
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=업로드 처리 능력
-#### OPTIONS_UPLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to uploads.  To turn off uploads, reduce your upload slots to zero.
+#### OPTIONS_UPLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to uploads. To turn off uploads, reduce your upload slots to zero.
 OPTIONS_UPLOAD_BANDWIDTH_LABEL=업로드에 사용하는 처리 능력을 비율로 설정할 수 있습니다. 업로드를 정지하려면 업로드 슬롯을 0 으로 하면 됩니다.
 #### OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=Unlimited
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=무제한
@@ -2788,7 +2834,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=부분적 공유 허용 :
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=최고 업로드 슬롯
-#### OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads.  This value will only be reached if you have enough bandwidth.
+#### OPTIONS_UPLOAD_MAX_LABEL=Never allow more than this many uploads. This value will only be reached if you have enough bandwidth.
 OPTIONS_UPLOAD_MAX_LABEL=더 이상의 업로드수를 허가하지 않습니다. 그 때문에 충분한 처리 능력을 사용하는 경우만 이 수치에 이를 수 있습니다.
 #### OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max Upload Slots:
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=최고 업로드 슬롯：
@@ -2823,19 +2869,32 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=시작시에 접속：
 # Key/Value pairs for BitTorrent options
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
-#?  OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=Settings for the BitTorrent Protocol.
-#?  OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings.  (Recommended)
-#?  OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
-#### OPTIONS_BITTORRENT_MAX_TORRENTS=Maximum Active Torrents
-#?  OPTIONS_BITTORRENT_MAX_TORRENTS=
-#### OPTIONS_BITTORRENT_MAX_CONNECTIONS=Maximum connections per torrent
-#?  OPTIONS_BITTORRENT_MAX_CONNECTIONS=
+#? OPTIONS_BITTORRENT_SETTINGS_TITLE=
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#? OPTIONS_BITTORRENT_SETTINGS_LABEL=
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#? OPTIONS_BITTORRENT_CUSTOM_WARNING=
+#### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
+#? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
 #### OPTIONS_BITTORRENT_MAX_UPLOADS=Maximum uploads per torrent
-#?  OPTIONS_BITTORRENT_MAX_UPLOADS=
+#? OPTIONS_BITTORRENT_MAX_UPLOADS=
 #### OPTIONS_BITTORRENT_MIN_UPLOADS=Minimum uploads per torrent
-#?  OPTIONS_BITTORRENT_MIN_UPLOADS=
+#? OPTIONS_BITTORRENT_MIN_UPLOADS=
+#### OPTIONS_BITTORRENT_FLUSH_WRITE=Safe chunk verification
+#? OPTIONS_BITTORRENT_FLUSH_WRITE=
+#### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
+#? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
+
+
+###############################################################################
+# Key/Value pairs for the auto start bittorrents pane item
+###############################################################################
+#### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
+#? OPTIONS_BITTORRENT_AUTO_START_TITLE=
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#? OPTIONS_BITTORRENT_AUTO_START_LABEL=
+#### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
+#? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
 # Key/Value pairs for shutdown options
@@ -2888,28 +2947,28 @@ OPTIONS_CHAT_ACTIVE_LABEL=채팅을 작동/종료 할 수 있습니다.
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 플레이어를 사용：
 #### OPTIONS_PLAYER_PREFERENCE_TITLE=Player Options
 OPTIONS_PLAYER_PREFERENCE_TITLE=플레이어 옵션
-#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player.  The media player and playlist will appear only if this option is set.  A restart will be required when enabling or disabling the media controls.
+#### OPTIONS_PLAYER_PREFERENCE_LABEL=You can choose to play media with LimeWire or your system's default player. The media player and playlist will appear only if this option is set. A restart will be required when enabling or disabling the media controls.
 OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire 또는 시스템 초기설정의 플레이어를 사용할 수 있습니다. 또, 플레이어의 컨트롤을 작동/종료하려면 LimeWire를 재시작해야 합니다.
 
 ################################################################################
 # Key/Value pairs for the association options in the options window
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
-#?  OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
+#? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
-#?  OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.   You can also instruct LimeWire to always regain these associations if another program takes them.
-#?  OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
+#? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
-#?  OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
+#? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
 #### OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=What should LimeWire do with the selected associations on startup?
-#?  OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=
+#? OPTIONS_ASSOCIATIONS_STARTUP_PROMPT=
 #### OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=Always take the selected associations.
-#?  OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=
+#? OPTIONS_ASSOCIATIONS_GRAB_ALWAYS=
 #### OPTIONS_ASSOCIATIONS_GRAB_ASK=Ask me what to do when an association is missing.
-#?  OPTIONS_ASSOCIATIONS_GRAB_ASK=
+#? OPTIONS_ASSOCIATIONS_GRAB_ASK=
 #### OPTIONS_ASSOCIATIONS_GRAB_NEVER=Ignore all missing associations.
-#?  OPTIONS_ASSOCIATIONS_GRAB_NEVER=
+#? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
 # Key/Value pairs for the status bar options in the options window
@@ -2980,8 +3039,8 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=비밀번호：
 
 #### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Buffer Size
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=버퍼 사이즈
-#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media.  If iTunes or other media players experience frequent rebuffering, increase this value.  A higher setting may use more memory.
-#?  OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
+#### OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=You can configure the buffer size to use for streaming media. If iTunes or other media players experience frequent rebuffering, increase this value. A higher setting may use more memory.
+#? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -3016,7 +3075,7 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=오디오 플레이어
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=버그 리포트
-#### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent.  To view an example bug report, click 'View Example'.  Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error.  Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server.  Choosing 'Always Discard All Errors' will cause LimeWire to ignore all bugs (this is not recommended).
+#### OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View Example'. Choosing 'Always Send Immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always Ask for Review' will tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always Discard All Errors' will cause LimeWire to ignore all bugs (this is not recommended).
 OPTIONS_BUGS_LABEL=버그 리포트의 송신 방법 선택할 수 있습니다. "예시 보기"을 클릭하면 버그 리포트의 예를 볼 수 있습니다. 또"항상 즉시 송신"을 선택하면, 자동적으로 버그 리포트를 LimeWire의 버그 서버에 송신. 한편"항상 재검토를 요구"를 선택하면, 에러가 일어났을 때 그 에러가 표시되고 송신할지 선택할 수 있습니다. "항상 모든 에러를 삭제"를 선택하면, 에러를 삭제해 모든 버그를 무시하게 됩니다. (이 설정은 추천하지 않습니다.)
 #### OPTIONS_BUGS_VIEW_EXAMPLE=View Example
 OPTIONS_BUGS_VIEW_EXAMPLE=예시 보기
@@ -3039,15 +3098,15 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=초기설정으로 되돌림:
 # Key/value pairs for default action when trying to download existing file
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
-#?  OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=You can choose the default action that LimeWire will perform when you try to download a file that already exists on disk.
-#?  OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_LABEL=
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=Always Show the 'Save As' Dialog
-#?  OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_SAVE_AS_LABEL=
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=Always Append (#) to the Filename
-#?  OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_APPEND_LABEL=
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Always Ask What to do
-#?  OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=
+#? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
@@ -3082,7 +3141,7 @@ OPTIONS_SEARCH_MAX_NUMBER_LABEL=대검찰청색수：
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=검색 결과의 접속 레벨
-#### OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display.  Four star results indicate that the host returning the result is not firewalled and has free upload slots.
+#### OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
 OPTIONS_SEARCH_QUALITY_LABEL=표시하는 검색 결과의 접속 레벨을 선택할 수 있습니다. 또 4등 별은 방화벽이 설정되어 있지 않은 업로드 슬롯의 빈 곳이 있는 호스트를 나타냅니다.
 #### OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Show Only Four Star Results
 OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=4등 별의 결과만 표시
@@ -3128,23 +3187,23 @@ OPTIONS_IGNORE_RESULT_TYPES_TITLE=결과의 형식에 의해 파이르타화
 OPTIONS_IGNORE_RESULT_TYPES_LABEL=필터를 걸치는 검색 결과의, 일반적인 형식을 지정할 수 있습니다
 #### OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignore Adult Content
 OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=성인 컨텐츠를 무시
-#### OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignore . htm/.html Files
+#### OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=Ignore .htm/.html Files
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=.htm/.html 파일을 무시
-#### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore . vbs Files
+#### OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignore .vbs Files
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=.vbs 파일을 무시
-#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore . wmv/.asf files
-#?  OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
+#### OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignore .wmv/.asf files
+#? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for message filtering options in the options window
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=호스트를 필터화
-#### OPTIONS_IGNORE_MESSAGES_LABEL=You can disallow messages from specific hosts by adding their IP addresses (e.g.  "192.168. 0.1", "192. *. *. *", "192.168. 12.16/255. 255.255. 240" or "192.168. 12.16/28") to the banned list.
+#### OPTIONS_IGNORE_MESSAGES_LABEL=You can disallow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the banned list.
 OPTIONS_IGNORE_MESSAGES_LABEL=IP 주소를 무시 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 무시할 수 있습니다. \n예 "192.168. 0.1" "192. *. *. *" "192.168. 12.16/255. 255.255. 240" "192.168. 12.16/28"
 #### OPTIONS_ALLOW_MESSAGES_TITLE=Allow Hosts
 OPTIONS_ALLOW_MESSAGES_TITLE=호스트를 허가
-#### OPTIONS_ALLOW_MESSAGES_LABEL=You can allow messages from specific hosts by adding their IP addresses (e.g.  "192.168. 0.1", "192. *. *. *", "192.168. 12.16/255. 255.255. 240" or "192.168. 12.16/28") to the allow list.  This list is only needed to override the banned list.
+#### OPTIONS_ALLOW_MESSAGES_LABEL=You can allow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the allow list. This list is only needed to override the banned list.
 OPTIONS_ALLOW_MESSAGES_LABEL=IP주소를 허가 리스트에 입력하는 것으로, 특정의 호스트로부터의 메시지를 허가할 수 있습니다. 이 리스트는 무시 리스트에 추가하는 경우에게만 필요. \n예 "192.168. 0.1" "192. *. *. *" "192.168. 12.16/255. 255.255. 240" "192.168. 12.16/28"
 
 ################################################################################
@@ -3181,7 +3240,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=우선 설정을 사용：
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=기다리는 포트
-#### OPTIONS_PORT_LABEL=You can set the local network port that listens for incoming connections.  This port can be freely changed in case of conflict with another service on your system, or if a specific port number is required by the configuration of your firewall to direct incoming connections to your host.
+#### OPTIONS_PORT_LABEL=You can set the local network port that listens for incoming connections. This port can be freely changed in case of conflict with another service on your system, or if a specific port number is required by the configuration of your firewall to direct incoming connections to your host.
 OPTIONS_PORT_LABEL=내향의 접속을 기다리는 로컬 네트워크의 포트를 설정할 수 있습니다. 시스템상의 타서비스와 충돌 할 때 이외는, 자유롭게 포트를 변경할 수 있습니다. 혹은 내향 접속으로 호스트에 연결하려면, 방화벽의 설정으로 인하여 특정 포트 번호가 필요합니다..
 #### OPTIONS_PORT_BOX_LABEL=Listen on Port:
 OPTIONS_PORT_BOX_LABEL=다음의 포트 기다림：
@@ -3192,7 +3251,7 @@ OPTIONS_PORT_BOX_LABEL=다음의 포트 기다림：
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=라우터 구성
-#### OPTIONS_ROUTER_LABEL=LimeWire can configure itself to work from behind a firewall or router.  Using Universal Plug 'n Play (UPnP), LimeWire can automatically configure your router or firewall for optimal performance.  If your router does not support UPnP, LimeWire can be set to advertise an external port manually.  (You must also configure your router if you choose manual configuration. )
+#### OPTIONS_ROUTER_LABEL=LimeWire can configure itself to work from behind a firewall or router. Using Universal Plug 'n Play (UPnP), LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support UPnP, LimeWire can be set to advertise an external port manually. (You must also configure your router if you choose manual configuration.)
 OPTIONS_ROUTER_LABEL=LimeWire는 방화벽 또는 라우터환경에서 작동할 수 있습니다. 유니버설 플러그 인 플레이(UpnP)를 이용해, LimeWire는 자동적으로 유저의 라우터 또는 방화벽에 대해, 최고의 퍼포먼스를 구성할 수 있습니다. 만약 사용중인 라우터가 UpnP를 서포트하지 않는 경우는, LimeWire에서 외부 포트를 변경시킬 수 있습니다. (수동 구성을 선택하려면, 라우터의 구성을 설정할 필요가 있습니다. )
 #### OPTIONS_ROUTER_UPNP=Use UPnP (Recommended)
 OPTIONS_ROUTER_UPNP=UpnP를 사용(추천)
@@ -3246,25 +3305,25 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=비밀번호
 # Key/value pairs for the network interface pane item.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
-#?  OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.   Listening sockets will still listen on all available interfaces.   This is useful on multi-homed hosts.   If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
-#?  OPTIONS_NETWORK_INTERFACE_LABEL=
+#? OPTIONS_NETWORK_INTERFACE_TITLE=
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
-#?  OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.   Outgoing connections will bind to any arbitrary interface.
-#?  OPTIONS_NETWORK_INTERFACE_CANT_LIST=
+#? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
 # in the options window
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
-#?  OPTIONS_CONTENT_FILTER_TITLE=
-#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared.  By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
-#?  OPTIONS_CONTENT_FILTER_LABEL=
+#? OPTIONS_CONTENT_FILTER_TITLE=
+#### OPTIONS_CONTENT_FILTER_LABEL=You can tell LimeWire to filter files that copyright owners request not be shared. By enabling filtering, you are instructing LimeWire to confirm all files you download or share with a list of removed content.
+#? OPTIONS_CONTENT_FILTER_LABEL=
 #### OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Enable Content Filters
-#?  OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
+#? OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
@@ -3273,42 +3332,43 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=비밀번호
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 OPTIONS_SEARCH_JUNK_TITLE=정크파일
 #### OPTIONS_SEARCH_JUNK_LABEL=You can disable LimeWire's junk filter and delete all previously collected filter data here, if your junk filter is rating too many files as spam.
-#?  OPTIONS_SEARCH_JUNK_LABEL=
+#? OPTIONS_SEARCH_JUNK_LABEL=
 #### OPTIONS_SEARCH_JUNK_DISPLAY_IN_PLACE=Display junk in place
-#?  OPTIONS_SEARCH_JUNK_DISPLAY_IN_PLACE=
+#? OPTIONS_SEARCH_JUNK_DISPLAY_IN_PLACE=
 #### OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=Display junk at the bottom of search results
-#?  OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=
+#? OPTIONS_SEARCH_JUNK_MOVE_TO_BOTTOM=
 #### OPTIONS_SEARCH_JUNK_HIDE_SPAM=Do not display junk
-#?  OPTIONS_SEARCH_JUNK_HIDE_SPAM=
+#? OPTIONS_SEARCH_JUNK_HIDE_SPAM=
 #### OPTIONS_SEARCH_JUNK_DISPLAY=Display:
-#?  OPTIONS_SEARCH_JUNK_DISPLAY=
-#### OPTIONS_SEARCH_JUNK_THRESHOLD=Sensitivity:
-#?  OPTIONS_SEARCH_JUNK_THRESHOLD=
+#? OPTIONS_SEARCH_JUNK_DISPLAY=
+
+#### OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=Sensivity
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_TITLE=
+#### OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=Adjust the sensitivity of LimeWire's junk filter
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_LABEL=
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=Relaxed
-#?  OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_LAX=
 #### OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Strict
-#?  OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=
-#### OPTIONS_SEARCH_JUNK_THRESHOLD_TOOLTIP=Adjust the sensitivity of LimeWire's junk filter
-#?  OPTIONS_SEARCH_JUNK_THRESHOLD_TOOLTIP=
+#? OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=
 #### OPTIONS_SEARCH_JUNK_RESET_LABEL=Forget Training Data
-#?  OPTIONS_SEARCH_JUNK_RESET_LABEL=
+#? OPTIONS_SEARCH_JUNK_RESET_LABEL=
 
 ################################################################################
 # Key/value pairs for top-level stats panels
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=처리 능력
-#### STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream.  Click on one of the categories to see the desired statistics.
+#### STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
 STATS_BANDWIDTH_PANE_LABEL=처리 능력의 누계에는, 윗방향과 아래방향에 보내지는 모든 처리 능력 언제 있던 정보가 있습니다. 카테고리의 1개를 클릭해, 소망의 누계를 보는 것.
 
 #### STATS_NET_PANE_TITLE=Network
 STATS_NET_PANE_TITLE=네트워크
-#### STATS_NET_PANE_LABEL=Statistics on the current state of the network.  These statistics are quite inaccurate due to the dynamic, distributed nature of Gnutella and should not be taken too literally.  They can, however, give you a general idea regarding the current state of your connection.
+#### STATS_NET_PANE_LABEL=Statistics on the current state of the network. These statistics are quite inaccurate due to the dynamic, distributed nature of Gnutella and should not be taken too literally. They can, however, give you a general idea regarding the current state of your connection.
 STATS_NET_PANE_LABEL=네트워크의 현상에서의 누계이다. 이러한 누계는 그누테라의 동적인 배치에 의해 매우 불확실해, 그대로의 수치로 받아들여지지 않는 것으로 있습니다. 그러나 유저에게는, 접속의 현상에 관한 일반적인 견해를 알 수 있습니다.
 
 #### STATS_ADVANCED_PANE_TITLE=Advanced
 STATS_ADVANCED_PANE_TITLE=고급
-#### STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic.  This information can be useful for advanced users as well as for researchers working on the Gnutella network.  Advanced statistics are not displayed by default and are not recommended for most users.
+#### STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. Advanced statistics are not displayed by default and are not recommended for most users.
 STATS_ADVANCED_PANE_LABEL=고급 누계에는, 그누테라 메시지와 HTTP 트래픽에 대한 상세한 정보가 있습니다. 이 정보는 그누테라 네트워크로 작업하는 연구자 뿐만이 아니라 고급 유저에게도 도움이 됩니다.. 고급 누계는 초기설정으로 표시되지 않고, 일반 유저에게 추천하지 않습니다.
 #### STATS_ADVANCED_CHECK_BOX_LABEL=Show Advanced Statistics:
 STATS_ADVANCED_CHECK_BOX_LABEL=고급 누계 표시
@@ -4016,7 +4076,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=내부 또는 외부에서 실행된 그�
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=내향 요청
-#### STATS_TOTAL_HTTP_REQUESTS_LABEL=Total incoming requests received over time.  This includes all connection attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...).
+#### STATS_TOTAL_HTTP_REQUESTS_LABEL=Total incoming requests received over time. This includes all connection attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...).
 STATS_TOTAL_HTTP_REQUESTS_LABEL=장기에 걸쳐 수신된 내향 요청의 총수. 여기에는 모든접속 시도가 포함되어 있습니다(GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, 그 외).
 
 ################################################################################
@@ -4026,23 +4086,23 @@ STATS_TOTAL_HTTP_REQUESTS_LABEL=장기에 걸쳐 수신된 내향 요청의 총�
 DOWNLOAD_STATISTICS=다운로드
 #### STATS_DOWNLOAD_CONNECTIONS_TITLE=Connections
 STATS_DOWNLOAD_CONNECTIONS_TITLE=접속
-#### STATS_DOWNLOAD_CONNECTIONS_LABEL=Total outgoing download connections attempts over time.  This includes both direct connections and pushed requests.
+#### STATS_DOWNLOAD_CONNECTIONS_LABEL=Total outgoing download connections attempts over time. This includes both direct connections and pushed requests.
 STATS_DOWNLOAD_CONNECTIONS_LABEL=장기에 걸쳐 수신된 밖으로 향한 요청의 총수. 여기에는 다이렉트 접속과 푸쉬 요청의 쌍방이 있습니다.
 #### STATS_DOWNLOAD_RESPONSES_TITLE=Responses
 STATS_DOWNLOAD_RESPONSES_TITLE=대답
-#### STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time.  This includes Busy, File Not Found, Not Sharing, Queued, misc.  IO errors, and OK responses.
+#### STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time. This includes Busy, File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses.
 STATS_DOWNLOAD_RESPONSES_LABEL=장기에 걸쳐 다운로드로 수신된 대답의 총수. 여기에는, Busy, 파일 없음, 공유 없음, 큐 된, 그 외, IO에러, OK의 대답이 있습니다.
-#### STATS_DOWNLOAD_ALTERNATE_TITLE=Alt.  Locations
+#### STATS_DOWNLOAD_ALTERNATE_TITLE=Alt. Locations
 STATS_DOWNLOAD_ALTERNATE_TITLE=다른 위치
-#### STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time.  This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
+#### STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
 STATS_DOWNLOAD_ALTERNATE_LABEL=장기에 걸쳐 수신과 제거된 대체 위치의 총수. 여기에는 유저가 적극적으로 접속하려고 하는 위치, 유저가 무시하는 위치, 제거할 수 없는 위치, 접속의 시도를 영구적으로 제거한 위치가 있습니다.
 #### STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
 STATS_DOWNLOAD_TRANFERS_TITLE=전송
-#### STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time.  This includes both HTTP1. 1 and HTTP1. 0 transfers.  For HTTP1. 1, values are per chunk.
+#### STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
 STATS_DOWNLOAD_TRANFERS_LABEL=장기에 걸쳐 전송 된 총수
 #### STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP Connect Time
 STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP 접속 시간
-#### STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads.  This can vary, for example, when servers are experiencing high loads.
+#### STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
 STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=TCP 접속의 다운로드를 달성하기 위해서, 1,000분의 1초 단위로 시간을 기록. 예를 들면 서버가 높은 로드일 때는, 이 시간은 변화.
 
 ################################################################################
@@ -4052,19 +4112,19 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=TCP 접속의 다운로드를 달성하기
 UPLOAD_STATISTICS=업로드
 #### STATS_UPLOAD_REQUESTS_TITLE=Requests
 STATS_UPLOAD_REQUESTS_TITLE=요청
-#### STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests.  These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1. 1 transfers.
+#### STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
 STATS_UPLOAD_REQUESTS_LABEL=내향 업로드 요청의 총수. 이 수치는 요청를 구문 분석 하는 시도마다 구분되어 HHTP/1. 1의 전송에 대해 정리가 됩니다..
 #### STATS_UPLOAD_RESPONSES_TITLE=Responses
 STATS_UPLOAD_RESPONSES_TITLE=대답
-#### STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses.  These numbers are incremented before sending each response, and thus include every chunk for HTTP/1. 1 transfers.  'Normal' is the number of requests for which we have attempted to transfer a portion of a file.
+#### STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the number of requests for which we have attempted to transfer a portion of a file.
 STATS_UPLOAD_RESPONSES_LABEL=밖으로 향한 회답의 총수. 각 대답을 송신하기 전에 이 수치는 구문 분석 되어 HHTP/1. 1의 전송에 대해 정리가 됩니다.. [노멀]이란, 파일의 일부분을 전송 하려고 하는 요청수.
 #### STATS_UPLOAD_METHODS_TITLE=Request Methods
 STATS_UPLOAD_METHODS_TITLE=요청 방법
-#### STATS_UPLOAD_METHODS_LABEL=Total incoming request methods.  These numbers are incremented either for HTTP/1. 1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
+#### STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
 STATS_UPLOAD_METHODS_LABEL=내향 요청 방법의 총수. 유저가 첫회의 GIV를 송신한 후에, 첫회의 내향 접속 요청 또는 푸쉬 요청에 관계되어, 이 수치에 HHTP/1. 1의 구문 분석이 됩니다..
 #### STATS_UPLOAD_GENERAL_TITLE=General
 STATS_UPLOAD_GENERAL_TITLE=일반
-#### STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads.  These numbers are incremented per connection, not per chunk.  (Stalled uploads will also be counted as an interrupted upload. )
+#### STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads. These numbers are incremented per connection, not per chunk. (Stalled uploads will also be counted as an interrupted upload.)
 STATS_UPLOAD_GENERAL_LABEL=시행, 완료, 중단, 또는 한계 상태에 있는 업로드의 총수. 이러한 수치는 정리는 아니고, 각 접속에 대해 구문 분석 됩니다.. (한계의 업로드는, 중단된 업로드로서 센다. )
 
 ################################################################################
@@ -4273,8 +4333,8 @@ ERROR_VENDOR_INVALID_VERSION=무효한 버젼
 ERROR_VENDOR_INVALID_PAYLOAD=무효한 최대 적재 질량
 #### ERROR_VENDOR_UNRECOGNIZED=Unrecognized Vendor Message
 ERROR_VENDOR_UNRECOGNIZED=인식되지 않은 공유자 메시지
-#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed.  You may be able to fix this problem by changing LimeWire's Windows Compatibility.  Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu.  Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box.  Then click the 'OK' button at the bottom and restart LimeWire.
-#?  ERROR_STARTUP_WINDOWS_COMPATIBILITY=
+#### ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire has encountered a problem during startup and cannot proceed. You may be able to fix this problem by changing LimeWire's Windows Compatibility. Right-click on the LimeWire icon on your Desktop and select 'Properties' from the popup menu. Click the 'Compatibility' tab at the top, then click the 'Run this program in compatibility mode for' check box, and then select 'Windows 2000' in the box below the check box. Then click the 'OK' button at the bottom and restart LimeWire.
+#? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
 # Key/value pairs for general message labels
@@ -4537,9 +4597,9 @@ UPLOAD_FW_FW_SUCCESS=FW-FW접속 성공
 UPLOAD_FW_FW_FAILURE=FW-FW접속 실패
 
 # Advanced Handshaking statistics
-#### LEAF_OUTGOING_REJECT_LEAF=Out Rej.  (Leaf)
+#### LEAF_OUTGOING_REJECT_LEAF=Out Rej. (Leaf)
 LEAF_OUTGOING_REJECT_LEAF=외향 거부(Leaf)
-#### LEAF_OUTGOING_REJECT_OLD_UP=Out Rej.  (Old Ultrapeer)
+#### LEAF_OUTGOING_REJECT_OLD_UP=Out Rej. (Old Ultrapeer)
 LEAF_OUTGOING_REJECT_OLD_UP=외향 거부(오래된 울트라 유저)
 #### LEAF_OUTGOING_ACCEPT=Out Acc.
 LEAF_OUTGOING_ACCEPT=외향 수용
@@ -4547,25 +4607,25 @@ LEAF_OUTGOING_ACCEPT=외향 수용
 LEAF_INCOMING_REJECT=내향 거부
 #### LEAF_INCOMING_ACCEPT=In Acc.
 LEAF_INCOMING_ACCEPT=내향 수용
-#### UP_OUTGOING_REJECT_FULL=Out Rej.  (Full)
+#### UP_OUTGOING_REJECT_FULL=Out Rej. (Full)
 UP_OUTGOING_REJECT_FULL=외향 거부(가득참)
-#### UP_OUTGOING_GUIDANCE_FOLLOWED=Out Acc.  (Followed Guidance)
+#### UP_OUTGOING_GUIDANCE_FOLLOWED=Out Acc. (Followed Guidance)
 UP_OUTGOING_GUIDANCE_FOLLOWED=외향 받아들임(가이던스에 따랐다)
-#### UP_OUTGOING_GUIDANCE_IGNORED=Out Acc.  (Ignored Guidance)
+#### UP_OUTGOING_GUIDANCE_IGNORED=Out Acc. (Ignored Guidance)
 UP_OUTGOING_GUIDANCE_IGNORED=외향 받아들임(가이던스를 무시했습니다.)
-#### UP_OUTGOING_ACCEPT=Out Acc.  (No Guidance)
+#### UP_OUTGOING_ACCEPT=Out Acc. (No Guidance)
 UP_OUTGOING_ACCEPT=밖으로 향한 받아들임(가이던스 없음)
-#### UP_INCOMING_REJECT_LEAF=In Rej.  (Leaf)
+#### UP_INCOMING_REJECT_LEAF=In Rej. (Leaf)
 UP_INCOMING_REJECT_LEAF=내향 거부(Leaf)
-#### UP_INCOMING_ACCEPT_LEAF=In Acc.  (Leaf)
+#### UP_INCOMING_ACCEPT_LEAF=In Acc. (Leaf)
 UP_INCOMING_ACCEPT_LEAF=내향 받아들임(Leaf)
-#### UP_INCOMING_GUIDED=In Acc.  (Guiding To Leaf)
+#### UP_INCOMING_GUIDED=In Acc. (Guiding To Leaf)
 UP_INCOMING_GUIDED=내향 받아들임(Leaf를 가이드)
-#### UP_INCOMING_ACCEPT_UP=In Acc.  (Ultrapeer)
+#### UP_INCOMING_ACCEPT_UP=In Acc. (Ultrapeer)
 UP_INCOMING_ACCEPT_UP=내향 받아들임(울트라 유저)
-#### UP_INCOMING_REJECT_NO_ROOM_LEAF=In Rej.  (All Slots Taken)
+#### UP_INCOMING_REJECT_NO_ROOM_LEAF=In Rej. (All Slots Taken)
 UP_INCOMING_REJECT_NO_ROOM_LEAF=내향 거부(모든 슬롯을 놓쳤습니다)
-#### UP_INCOMING_REJECT_NO_ROOM_UP=In Rej.  (Network Needs Ultrapeer)
+#### UP_INCOMING_REJECT_NO_ROOM_UP=In Rej. (Network Needs Ultrapeer)
 UP_INCOMING_REJECT_NO_ROOM_UP=내향 거부(네트워크에 울트라 유저가 필요)
 #### OUTGOING_BAD_CONNECT=Bad Connect
 OUTGOING_BAD_CONNECT=접속 불량
