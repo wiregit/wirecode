@@ -5,15 +5,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -37,7 +36,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static final String APP_TXT = SOME_FILE+"2.txt";
     private static final String OTHER_TORRENT = "other.torrent";
     
-    
+    @SuppressWarnings("unused")
     private static void doSettings() throws Exception {
     	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT_FILE);
@@ -54,13 +53,13 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestSuite.java"), appTorrentFile);
-    	rs.getFileManager().addFileAlways(textFile);
-    	rs.getFileManager().addFileAlways(torrentFile);
-    	rs.getFileManager().addFileAlways(userTorrentFile);
-    	rs.getFileManager().addFileAlways(appTextFile);
-    	rs.getFileManager().addFileAlways(appTorrentFile);
+        RouterService.getFileManager().addFileAlways(textFile);
+        RouterService.getFileManager().addFileAlways(torrentFile);
+        RouterService.getFileManager().addFileAlways(userTorrentFile);
+        RouterService.getFileManager().addFileAlways(appTextFile);
+        RouterService.getFileManager().addFileAlways(appTorrentFile);
     	Thread.sleep(500);
-    	assertEquals(5, rs.getFileManager().getNumFiles());
+    	assertEquals(5, RouterService.getFileManager().getNumFiles());
     }
     
     public static Integer numUPs() {
@@ -97,7 +96,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	uStub.isServiceable = true;
     	uStub.mayBeServiceable = true;
     	PrivilegedAccessor.setValue(rs, "uploadManager", uStub);
-    	PrivilegedAccessor.setValue(rs.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
+    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
     }
 
     /**
