@@ -392,14 +392,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         nameVals.add(new NameValue("videos__video__director__","daswani"));
         nameVals.add(new NameValue("videos__video__title__","susheel"));
         doc = new LimeXMLDocument(nameVals, videoSchemaURI);
-        doc.setIdentifier(test2);
+        doc.initIdentifier(test2);
         doc.getXMLString();
         map.put(getHash(test2), doc);
         nameVals = new ArrayList();
         nameVals.add(new NameValue("videos__video__director__","file"));
         nameVals.add(new NameValue("videos__video__title__","null"));
         doc = new LimeXMLDocument("<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video title=\"null\" director=\"file\" ></video></videos>");
-        doc.setIdentifier(mason);
+        doc.initIdentifier(mason);
         doc.getXMLString();
         map.put(getHash(mason), doc);
         write(map, new File(marker, "video.collection"));

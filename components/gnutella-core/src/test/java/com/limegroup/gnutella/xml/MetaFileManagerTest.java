@@ -198,7 +198,7 @@ public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest 
         result = addIfShared(f3, l3);
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-
+        Thread.sleep(100);
         res = fman.query(QueryRequest.createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 

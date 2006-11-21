@@ -227,7 +227,7 @@ public class FileDesc implements FileDetails {
         
         _limeXMLDocs.add(doc);
         
-	    doc.setIdentifier(FILE);
+	    doc.initIdentifier(FILE);
 	    if(doc.isLicenseAvailable())
 	        _license = doc.getLicense();
     }
@@ -245,7 +245,7 @@ public class FileDesc implements FileDetails {
             _limeXMLDocs.set(index, newDoc);
         }
         
-        newDoc.setIdentifier(FILE);
+        newDoc.initIdentifier(FILE);
         if(newDoc.isLicenseAvailable())
             _license = newDoc.getLicense();
         else if(_license != null && oldDoc.isLicenseAvailable())

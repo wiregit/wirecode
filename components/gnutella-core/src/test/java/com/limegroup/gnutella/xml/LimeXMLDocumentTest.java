@@ -31,7 +31,7 @@ public class LimeXMLDocumentTest extends BaseTestCase {
     	assertEquals(doc1, doc2);
     	assertEquals(doc1.hashCode(), doc2.hashCode());
 
-    	doc1.setIdentifier(new File("file"));
+    	doc1.initIdentifier(new File("file"));
     	assertEquals(doc1, doc2);
     	assertEquals(doc1.hashCode(), doc2.hashCode());
     }

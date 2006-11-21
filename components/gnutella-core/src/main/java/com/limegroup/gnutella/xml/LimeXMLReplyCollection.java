@@ -32,6 +32,7 @@ import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IdentityHashSet;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.StringTrie;
 
@@ -439,7 +440,7 @@ public class LimeXMLReplyCollection {
                 // allocate a new Set for storing matches
                 if(iter.hasNext()) {
                     if (matching == null)
-                        matching = new HashSet<LimeXMLDocument>();
+                        matching = new IdentityHashSet<LimeXMLDocument>();
                     // Iterate through each set of matches the Trie found
                     // and add those matching-lists to our set of matches.
                     // Note that the trie.getPrefixedBy returned
