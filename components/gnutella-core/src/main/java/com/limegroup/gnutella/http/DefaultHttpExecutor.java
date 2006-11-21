@@ -78,8 +78,8 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	
     /** Runs all requests until the listener told it to not do anymore. */
 	private class MultiRequestor implements Runnable, Shutdownable {
-		private volatile boolean shutdown;
-		private volatile HttpMethod currentMethod;
+		private boolean shutdown;
+		private HttpMethod currentMethod;
 		private final Iterable<? extends HttpMethod> methods;
 		private final HttpClientListener listener;
 		private final int timeout;
@@ -95,17 +95,24 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		
 		public void run() {
 			for (HttpMethod m : methods) {
-				if (shutdown || canceller.isCancelled())
+				synchronized(this) {
+					if (shutdown)
+						return;
+					currentMethod = m;
+				}
+				if (canceller.isCancelled())
 					return;
-				currentMethod = m;
 				if (performRequest(m, listener, timeout))
 					return;
 			}
 		}
 		
 		public void shutdown() {
-			shutdown = true;
-			HttpMethod m = currentMethod;
+			HttpMethod m;
+			synchronized (this) {
+				shutdown = true;
+				m = currentMethod;
+			}
 			if (m != null)
 				m.abort();
 		}
