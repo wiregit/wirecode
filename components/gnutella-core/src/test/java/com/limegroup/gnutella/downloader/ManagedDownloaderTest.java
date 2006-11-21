@@ -95,6 +95,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         RouterService.getAltlocManager().purge();
         PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
         PrivilegedAccessor.setValue(RouterService.class,"router",router);
+        PrivilegedAccessor.setValue(RouterService.class,"downloadManager",manager);
     }
 
     
