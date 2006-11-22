@@ -22,7 +22,6 @@ package com.limegroup.mojito.result;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -49,7 +48,7 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
     
     private KUID lookupId;
     
-    private List<FindValueResponse> responses;
+    private Collection<FindValueResponse> responses;
     
     private long time;
     
@@ -58,12 +57,12 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
     @SuppressWarnings("unchecked")
     public FindValueResult(Context context, 
     		KUID lookupId, 
-            List<? extends FindValueResponse> values, 
+                Collection<? extends FindValueResponse> values, 
             long time, int hop) {
         
         this.context = context;
         this.lookupId = lookupId;
-        this.responses = (List<FindValueResponse>)values;
+        this.responses = (Collection<FindValueResponse>)values;
         this.time = time;
         this.hop = hop;
     }

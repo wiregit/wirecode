@@ -21,7 +21,6 @@ package com.limegroup.mojito.handler;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,7 +43,7 @@ import com.limegroup.mojito.util.OnewayExchanger;
 /**
  * An abstract base class for ResponseHandlers
  */
-public abstract class AbstractResponseHandler<V> implements ResponseHandler, Callable<V> {
+public abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     

@@ -21,20 +21,16 @@ package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.routing.Contact;
-import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
 
 /**
@@ -42,60 +38,46 @@ import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
  */
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeResult> {
-
-    //private static final Log LOG = LogFactory.getLog(FindNodeResponseHandler.class);
     
     private FindNodeLookupStatisticContainer lookupStat;
     
     public FindNodeResponseHandler(Context context, KUID lookupId) {
-        super(context, lookupId);
+        super(context, LookupType.FIND_NODE, lookupId);
         init();
     }
     
-    public FindNodeResponseHandler(Context context, Contact force, KUID lookupId) {
-        super(context, force, lookupId);
+    public FindNodeResponseHandler(Context context, Contact forcedContact, KUID lookupId) {
+        super(context, LookupType.FIND_NODE, lookupId);
+        addForcedContact(forcedContact);
         init();
     }
     
     public FindNodeResponseHandler(Context context, KUID lookupId, int resultSetSize) {
-        super(context, lookupId, resultSetSize);
+        super(context, LookupType.FIND_NODE, lookupId);
+        setResultSetSize(resultSetSize);
         init();
     }
     
     public FindNodeResponseHandler(Context context, Contact forcedContact, 
             KUID lookupId, int resultSetSize) {
-        super(context, forcedContact, lookupId, resultSetSize);
+        super(context, LookupType.FIND_NODE, lookupId);
+        addForcedContact(forcedContact);
+        setResultSetSize(resultSetSize);
         init();
     }
     
     private void init() {
-        lookupStat = new FindNodeLookupStatisticContainer(context, lookupId);
-    }
-    
-    @Override
-    protected boolean isLookupTimeout(long time) {
-        long lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
-        return lookupTimeout > 0L && time >= lookupTimeout;
+        lookupStat = new FindNodeLookupStatisticContainer(context, getLookupID());
     }
 
     @Override
-    protected int getParallelLookups() {
-        return KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
-    }
-    
-    @Override
-    protected LookupRequest createLookupRequest(SocketAddress address) {
-        return context.getMessageHelper().createFindNodeRequest(address, lookupId);
-    }
-
-    @Override
-    protected synchronized void response(ResponseMessage message, long time) throws IOException {
+    protected void response(ResponseMessage message, long time) throws IOException {
         super.response(message, time);
         lookupStat.addReply();
     }
 
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         super.timeout(nodeId, dst, message, time);
         lookupStat.addTimeout();
     }
@@ -118,25 +100,13 @@ public class FindNodeResponseHandler
         lookupStat.setHops(hop, false);
         lookupStat.setTime((int)time, false);
         
-        // Use a LinkedHashMap which preserves the insertion order...
-        final Map<Contact, QueryKey> nearest = new LinkedHashMap<Contact, QueryKey>();
-        responses.select(lookupId, new Cursor<KUID, Entry<Contact,QueryKey>>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, QueryKey>> entry) {
-                Entry<Contact, QueryKey> e = entry.getValue();
-                nearest.put(e.getKey(), e.getValue());
-                
-                if (nearest.size() < getResultSetSize()) {
-                    return SelectStatus.CONTINUE;
-                }
-                
-                return SelectStatus.EXIT;
-            }
-        });
+        Map<Contact, QueryKey> nearest = getNearestContacts();
+        Collection<Contact> collisions = getCollisions();
         
         FindNodeResult evt = new FindNodeResult(getLookupID(), nearest, 
                 collisions, time, hop, routeTableFailures);
         
-        // TODO We can use the result from a Node lookup to estimate the DHT size
+        // We can use the result from a Node lookup to estimate the DHT size
         context.updateEstimatedSize(nearest.keySet());
         
         setReturnValue(evt);

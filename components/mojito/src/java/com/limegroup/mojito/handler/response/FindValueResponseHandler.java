@@ -21,20 +21,11 @@ package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
-import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.result.FindValueResult;
@@ -47,82 +38,24 @@ import com.limegroup.mojito.statistics.FindValueLookupStatisticContainer;
  */
 public class FindValueResponseHandler extends LookupResponseHandler<FindValueResult> {
 
-    private static final Log LOG = LogFactory.getLog(FindValueResponseHandler.class);
-    
-    private List<FindValueResponse> responses = new ArrayList<FindValueResponse>();
-    
     private FindValueLookupStatisticContainer lookupStat;
     
     public FindValueResponseHandler(Context context, KUID lookupId) {
-        super(context, lookupId);
-        init();
-    }
-
-    private void init() {
+        super(context, LookupType.FIND_VALUE, lookupId);
+        setExhaustive(KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
     }
     
     @Override
-    protected int getParallelLookups() {
-        return KademliaSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
-    }
-
-    @Override
-    protected boolean isLookupTimeout(long time) {
-        long lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
-        return lookupTimeout > 0L && time >= lookupTimeout;
-    }
-
-    /**
-     * Returns true of this is an exhaustive FIND_VALUE lookup
-     */
-    private boolean isExhaustiveValueLookup() {
-        return KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
-    }
-    
-    @Override
-    protected synchronized void response(ResponseMessage message, long time) throws IOException {
-        if (message instanceof FindNodeResponse) {
-            super.response(message, time);
-            return;
-        }
-        
-        FindValueResponse response = (FindValueResponse)message;
-        
-        Contact node = response.getContact();
-        Collection<KUID> keys = response.getKeys();
-        Collection<DHTValue> values = response.getValues();
-        
-        if (keys.isEmpty() && values.isEmpty()) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(node + " returned neither keys nor values for " + lookupId);
-            }
-            
-            super.response(message, time);
-            return;
-        }
-        
-        responses.add(response);
-        
-        if (isExhaustiveValueLookup()) {
-            super.response(message, time);
-        } else {
-            finishLookup();
-        }
-        
+    protected void response(ResponseMessage message, long time) throws IOException {
+        super.response(message, time);
         lookupStat.addReply();
     }
 
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+    protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
         super.timeout(nodeId, dst, message, time);
         lookupStat.addTimeout();
-    }
-
-    @Override
-    protected LookupRequest createLookupRequest(SocketAddress address) {
-        Collection<KUID> noKeys = Collections.emptySet();
-        return context.getMessageHelper().createFindValueRequest(address, lookupId, noKeys);
     }
     
     @Override
@@ -138,6 +71,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     protected void finishLookup() {
         long time = getElapsedTime();
         int hop = getCurrentHop();
+        
+        Collection<FindValueResponse> responses = getValues();
         
         if (responses.isEmpty()) {
             lookupStat.FIND_VALUE_FAILURE.incrementStat();

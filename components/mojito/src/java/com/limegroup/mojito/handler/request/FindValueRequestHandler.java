@@ -67,8 +67,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Database database = context.getDatabase();
         DHTValueBag bag = database.get(lookup);
 
-        if(bag == null) {
-            //OK, send Contacts instead!
+        if (bag == null || bag.isEmpty()) {
+            // OK, send Contacts instead!
             findNodeDelegate.handleRequest(message);
             return;
         }
@@ -78,7 +78,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         //TODO: should never be empty?
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + "\n"+bag.toString());
+                LOG.trace("Hit! " + lookup + "\n" +bag.toString());
             }
             
             Set<KUID> keys = Collections.emptySet();
