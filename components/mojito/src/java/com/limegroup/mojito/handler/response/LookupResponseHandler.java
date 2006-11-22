@@ -151,6 +151,12 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
     /** A flag that indicates whether or not the lookup has finished */
     //private boolean finished = false;
     
+    /** 
+     * Whether or not the (k+1)-closest Contact should be removed 
+     * from the response Set 
+     */
+    private boolean deleteFurthest = true;
+    
     /** A lock to manage parallel lookups */
     private Object lock = new Object();
     
@@ -162,6 +168,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         this.furthestId = lookupId.invert();
         
         this.resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        this.deleteFurthest = KademliaSettings.DELETE_FURTHEST_CONTACT.getValue();
         
         // Don't retry on timeout - takes too long!
         setMaxErrors(0);
@@ -329,6 +336,35 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         this.selectAliveNodesOnly = selectAliveNodesOnly;
     }
     
+    /**
+     * Returns whether or not onlt alive Contacts should be
+     * selected for the first hop
+     */
+    public boolean isSelectAliveNodesOnly() {
+        return selectAliveNodesOnly;
+    }
+    
+    /**
+     * Sets whether or not the furthest of the (k+1)-closest Contacts
+     * that did respond should be deleted from the response Set.
+     * This is primarly a memory optimization as we're only intersted
+     * in the k-closest Contacts.
+     * 
+     * For caching we need the lookup path though (that means we'd set
+     * this to false).
+     */
+    public void setDeleteFurthest(boolean deleteFurthest) {
+        this.deleteFurthest = deleteFurthest;
+    }
+    
+    /**
+     * Returns whether or not the furthest of the (k+1)-closest
+     * Contacts will be removed from the response Set.
+     */
+    public boolean isDeleteFurthest() {
+        return deleteFurthest;
+    }
+    
     @Override
     protected void start() throws DHTException {
         super.start();
@@ -336,7 +372,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         // Get the closest Contacts from our RouteTable 
         // and add them to the yet-to-be queried list.
         List<Contact> nodes = null;
-        if (selectAliveNodesOnly) {
+        if (isSelectAliveNodesOnly()) {
             // Select twice as many Contacts which should guarantee that
             // we've k-closest Nodes at the end of the lookup
             nodes = context.getRouteTable().select(lookupId, 2 * getResultSetSize(), true);
@@ -823,17 +859,25 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         
         // We're only interested in the k-closest
         // Contacts so remove the worst ones
-        if (responses.size() > getResultSetSize()) {
+        if (isDeleteFurthest() && responses.size() > getResultSetSize()) {
             Contact worst = responses.select(furthestId).getKey();
             responses.remove(worst.getNodeID());
         }
         responseCount++;
     }
     
+    /**
+     * Returns the k-closest Contacts sorted by their closeness
+     * to the given lookup key
+     */
     public Map<Contact, QueryKey> getNearestContacts() {
         return getContacts(getResultSetSize());
     }
     
+    /**
+     * Returns count number of Contacts sorted by their closeness
+     * to the given lookup key
+     */
     public Map<Contact, QueryKey> getContacts(int count) {
         if (count < 0) {
             count = responses.size();

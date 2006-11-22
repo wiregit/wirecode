@@ -97,4 +97,11 @@ public class KademliaSettings extends MojitoProps {
     public static final IntSetting SHUTDOWN_MULTIPLIER
         = FACTORY.createSettableIntSetting("SHUTDOWN_MULTIPLIER", 2, 
                 "shutdown_multiplier", 0, 20);
+    
+    /**
+     * Whether or not the (k+1)-closest Contact should be
+     * removed from the response Set
+     */
+    public static final BooleanSetting DELETE_FURTHEST_CONTACT
+        = FACTORY.createBooleanSetting("DELETE_FURTHEST_CONTACT", true);
 }
