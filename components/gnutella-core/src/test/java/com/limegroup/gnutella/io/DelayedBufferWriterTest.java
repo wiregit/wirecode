@@ -52,6 +52,19 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         assertEquals(sink,delayer.getWriteChannel());
         WriteObserver observer = (WriteObserver) PrivilegedAccessor.getValue(delayer, "observer");
         assertEquals(source,observer);
+        
+        // test closing/opening
+        assertTrue(delayer.isOpen());
+        delayer.close();
+        assertFalse(delayer.isOpen());
+        
+        // closing of the sink should propagate to the delayer
+        setUp();
+        delayer = new DelayedBufferWriter(1,200, new StubScheduler());
+        setupChain(delayer);
+        assertTrue(delayer.isOpen());
+        sink.close();
+        assertFalse(delayer.isOpen());
     }
     
     /**
@@ -111,6 +124,53 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         buf = sink.getBuffer();
         assertEquals(1,buf.get());
         assertEquals(2,buf.get());
+    }
+    
+    /**
+     * Tests that excplicitly invoked flush writes as much data as it can.
+     * @throws Exception
+     */
+    public void testExplicitFlush() throws Exception {
+    	byte [] data = new byte[]{(byte)1,(byte)2};
+        ByteBuffer buf = ByteBuffer.wrap(data);
+        
+        
+        DelayedBufferWriter delayer = new DelayedBufferWriter(5,200, new StubScheduler());
+        setupChain(delayer);
+        source.setBuffer(buf);
+        sink.resize(5);
+        
+        // data should go from the source to the buffer, but not to the sink
+        delayer.handleWrite();
+        
+        assertEquals(2,source.position());
+        assertEquals(0,sink.position());
+        
+        // flushing should write out everything
+        assertTrue(delayer.flush());
+        assertEquals(2, sink.position());
+        
+        // flushing an empty buffer does nothing
+        assertTrue(delayer.flush());
+        assertEquals(2, sink.position());
+        
+        // add more data
+        buf = ByteBuffer.allocate(5);
+        source.setBuffer(buf);
+        delayer.handleWrite();
+        
+        // some should be written, not yet flushed
+        assertEquals(5, source.position());
+        assertEquals(2, sink.position());
+        
+        // a flush will not be able to write everything
+        assertFalse(delayer.flush());
+        assertEquals(5, sink.position());
+        
+        // no matter how many times we call it...
+        assertFalse(delayer.flush());
+        assertFalse(delayer.flush());
+        assertFalse(delayer.flush());
     }
     
     /**
