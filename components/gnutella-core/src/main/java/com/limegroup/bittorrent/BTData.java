@@ -85,16 +85,18 @@ public class BTData {
         // get name, prefer utf8
         tmp = infoMap.get("name.utf-8");
         name = getPreferredString(infoMap, "name");
-        if(name == null)
+        if(name == null || name.length() == 0)
             throw new ValueException("no valid name!");
         
         if(infoMap.containsKey("length") == infoMap.containsKey("files"))
             throw new ValueException("info->length & info.files can't both exist or not exist!");
         
         tmp = infoMap.get("length");
-        if(tmp instanceof Long)
+        if(tmp instanceof Long) {
             length = (Long)tmp;
-        else if(tmp != null)
+            if (length < 0)
+            	throw new ValueException("invalid length value");
+        } else if(tmp != null)
             throw new ValueException("info->length is non-null, but not a Long!");
         else
             length = null;
@@ -102,6 +104,9 @@ public class BTData {
         tmp = infoMap.get("files");        
         if(tmp instanceof List) {
             List<?> fileData = (List)tmp;
+            if (fileData.isEmpty())
+            	throw new ValueException("empty file list");
+            
             files = new ArrayList<BTFileData>(fileData.size());
             folders = new HashSet<String>();
             
@@ -114,6 +119,8 @@ public class BTData {
                 if(!(tmp instanceof Long))
                     throw new ValueException("info->files[x].length not a Long!");
                 Long ln = (Long)tmp;
+                if (ln < 0)
+                	throw new ValueException("invalid length");
                 
                 boolean doASCII = true;
                 
@@ -157,6 +164,8 @@ public class BTData {
      * UTF or ASCII.
      */
     private String parseFileList(List<?> paths, Set<String> folders, boolean utf8) throws ValueException {
+    	if (paths.isEmpty())
+    		throw new ValueException("empty paths list");
         StringBuilder sb = new StringBuilder();
         for(Iterator<?> i = paths.iterator(); i.hasNext(); ) {
             Object o = i.next();
@@ -168,6 +177,9 @@ public class BTData {
                 current = StringUtils.getUTF8String((byte[])o);
             else
                 current = StringUtils.getASCIIString((byte[])o);
+
+            if (current.length() == 0)
+            	throw new ValueException("empty path element");
             
             sb.append(File.separator);
             sb.append(CommonUtils.convertFileName(current));
