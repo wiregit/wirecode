@@ -299,9 +299,9 @@ public final class ConnectionSettings extends LimeProps {
     	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",85000l);
     
     /**
-     * How many packed IPP of hosts to send back in each pong.
+     * How many pongs to send back for each ping.
      */
-    public static final IntSetting NUM_HOSTS_PONG =
+    public static final IntSetting NUM_RETURN_PONGS =
         FACTORY.createSettableIntSetting("NUM_RETURN_PONGS",10,"pings",5,25);
     
     /**
@@ -370,11 +370,17 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createSettablePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 64,
                 "ConnectionSettings.QRTSizeInKibiEntries", 64, 256);
     
-    public static final IntSetting STABLE_PERCONNECT_MESSAGES_THRESHOLD =
-        FACTORY.createIntSetting("STABLE_MESSAGES_THRESHOLD", 5);
+    /**
+     * 
+     */
+    public static final IntSetting STABLE_PERCONNECT_MESSAGES_THRESHOLD 
+        = FACTORY.createIntSetting("STABLE_MESSAGES_THRESHOLD", 5);
     
-    public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD =
-        FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
+    /**
+     * 
+     */
+    public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD 
+        = FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
     
     
     /**

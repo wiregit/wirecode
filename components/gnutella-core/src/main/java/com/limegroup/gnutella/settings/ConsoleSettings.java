@@ -26,7 +26,7 @@ public class ConsoleSettings extends LimeProps {
         = FACTORY.createIntSetting("CONSOLE_MAX_EXCESS", 5000);
     
     /**
-     * 
+     * Whether or not to show a text input field in the Console
      */
     public static final BooleanSetting SHOW_INPUT_FIELD
         = FACTORY.createBooleanSetting("SHOW_INPUT_FIELD", true);

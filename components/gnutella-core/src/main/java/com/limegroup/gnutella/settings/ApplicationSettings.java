@@ -28,22 +28,22 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createIntSetting("TOTAL_UPTIME", 0);
     
     /**
-     * The average time this user is connected to the network per session (in ms).
+     * The average time this user is connected to the network per session (in seconds).
      */        
     public static final LongSetting AVERAGE_CONNECTION_TIME =
-        FACTORY.createLongSetting("AVG_CONNECTION_TIME", 0L);
+        FACTORY.createExpirableLongSetting("AVERAGE_CONNECTION_TIME", 0L);
     
     /**
-     * The total time this user has been connected to the network (in ms).
+     * The total time this user has been connected to the network (in seconds).
      */    
     public static final LongSetting TOTAL_CONNECTION_TIME =
-        FACTORY.createLongSetting("TTL_CONNECTION_TIME", 0L);
+        FACTORY.createLongSetting("TOTAL_CONNECTION_TIME", 0L);
     
     /**
      * The total number of times this user has connected-disconnected from the network.
      */    
     public static final IntSetting TOTAL_CONNECTIONS =
-        FACTORY.createIntSetting("TTL_CONNECTIONS", 0);
+        FACTORY.createIntSetting("TOTAL_CONNECTIONS", 0);
     
     
     /**

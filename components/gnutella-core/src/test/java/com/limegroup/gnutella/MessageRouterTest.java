@@ -617,8 +617,8 @@ public final class MessageRouterTest extends BaseTestCase {
         // and add a lot again, make sure we only get as many we reqeust.
         addFreeUltrapeerSlotHosts(20);
         requested = 15;
-        int original = ConnectionSettings.NUM_HOSTS_PONG.getValue();
-        ConnectionSettings.NUM_HOSTS_PONG.setValue(requested);
+        int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
+        ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
         hosts = RouterService.getPreferencedHosts(true, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
@@ -629,7 +629,7 @@ public final class MessageRouterTest extends BaseTestCase {
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
         assertEquals(requested, reply.getPackedIPPorts().size());
-        ConnectionSettings.NUM_HOSTS_PONG.setValue(original);
+        ConnectionSettings.NUM_RETURN_PONGS.setValue(original);
         
         // Now try again, without an SCP request, and make sure we got none.
         pr = new PingRequest((byte)1);
@@ -677,7 +677,7 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         PingReply reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
+        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
         IpPort ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
         assertEquals(3009, ipp.getPort());
         
@@ -697,7 +697,7 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), reply.getPackedDHTIPPorts().size());
+        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), reply.getPackedDHTIPPorts().size());
         assertEquals(0, reply.getPackedIPPorts().size());
         ipp = (IpPort) reply.getPackedDHTIPPorts().get(0);
         assertEquals(3009, ipp.getPort());
@@ -719,7 +719,7 @@ public final class MessageRouterTest extends BaseTestCase {
         assertEquals(1, stub.sentPongs.size());
         reply = (PingReply)stub.sentPongs.get(0);
         stub.sentPongs.clear();
-        assertEquals(ConnectionSettings.NUM_HOSTS_PONG.getValue(), 
+        assertEquals(ConnectionSettings.NUM_RETURN_PONGS.getValue(), 
                      reply.getPackedDHTIPPorts().size() + reply.getPackedIPPorts().size());
         assertEquals(4, reply.getPackedIPPorts().size());
         assertEquals(6, reply.getPackedDHTIPPorts().size());
