@@ -31,7 +31,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.AbstractRequestHandler;
-import com.limegroup.mojito.messages.FindNodeRequest;
+import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.routing.Contact;
@@ -63,7 +63,9 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
      */
     @Override
     protected void request(RequestMessage message) throws IOException {
-        FindNodeRequest request = (FindNodeRequest)message;
+        // Cast to LookupRequest because FindValueRequestHandler
+        // is delegating requests to this class!
+        LookupRequest request = (LookupRequest)message;
 
         KUID lookup = request.getLookupID();
         
