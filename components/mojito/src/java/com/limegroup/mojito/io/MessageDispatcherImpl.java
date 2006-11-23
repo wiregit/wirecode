@@ -132,8 +132,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 thread = context.getThreadFactory().newThread(this);
                 thread.setName(context.getName() + "-MessageDispatcherThread");
-                thread.setDaemon(Boolean.parseBoolean(
-                        System.getProperty("com.limegroup.mojito.io.MessageDispatcherIsDaemon", "false")));
+                thread.setDaemon(Boolean.getBoolean("com.limegroup.mojito.io.MessageDispatcherIsDaemon"));
                 thread.start();
                 
                 super.start();
