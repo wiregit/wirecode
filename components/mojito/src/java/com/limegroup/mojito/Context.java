@@ -298,7 +298,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getLocalNode()
      */
     public LocalContact getLocalNode() {
-        return (LocalContact)routeTable.getLocalNode();
+        return (LocalContact)getRouteTable().getLocalNode();
     }
     
     /**
@@ -330,6 +330,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @param localNodeID the local node's KUID
      */
     private void setLocalNodeID(KUID localNodeID) {
+        RouteTable routeTable = getRouteTable();
         synchronized (routeTable) {
             // Change the Node ID
             getLocalNode().setNodeID(localNodeID);
@@ -375,7 +376,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      * @see com.limegroup.mojito.MojitoDHT#getLocalNodeID()
      */
     public KUID getLocalNodeID() {
-        return routeTable.getLocalNode().getNodeID();
+        return getLocalNode().getNodeID();
     }
     
     /*
@@ -433,6 +434,14 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             throw new IllegalStateException("Cannot switch RouteTable while " + getName() + " is running");
         }
 
+        if (this.routeTable != null && this.routeTable == routeTable) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot set the same instance multiple times");
+            }
+            //throw new IllegalArgumentException();
+            return;
+        }
+        
         if (routeTable == null) {
             routeTable = new RouteTableImpl();
         }
@@ -447,11 +456,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         }
     }
 
-    public void setHostFilter(HostFilter hostFilter) {
-        database.setHostFilter(hostFilter);
-        messageDispatcher.setFilter(hostFilter);
-    }
-
     /**
      * Returns the RouteTable
      */
@@ -460,7 +464,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         // while Mojito is running you cannot change the RouteTable
         return routeTable;
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setDatabase(com.limegroup.mojito.db.Database)
@@ -478,6 +482,14 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private synchronized void setDatabase(Database database, boolean remove) {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch Database while " + getName() + " is running");
+        }
+        
+        if (this.database != null && this.database == database) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Cannot set the same instance multiple times");
+            }
+            //throw new IllegalArgumentException();
+            return;
         }
         
         if (database == null) {
@@ -500,7 +512,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     private void purgeDatabase(boolean remove) {
         synchronized (database) {
-            Contact localNode = routeTable.getLocalNode();
+            Contact localNode = getLocalNode();
             int oldValueCount = database.getValueCount();
             int removedCount = 0;
             for (DHTValue value : database.values()) {
@@ -600,6 +612,15 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         // Not synchronized 'cause only called when Mojito is running and 
         // while Mojito is running you cannot change the MessageHelper
         return messageHelper;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#setHostFilter(com.limegroup.mojito.util.HostFilter)
+     */
+    public void setHostFilter(HostFilter hostFilter) {
+        database.setHostFilter(hostFilter);
+        messageDispatcher.setFilter(hostFilter);
     }
     
     /*
@@ -750,6 +771,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             return;
         }
         
+        // Startup the local Node
         getLocalNode().shutdown(false);
         
         initContextTimer();
@@ -780,6 +802,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
             LOG.debug("Stopping " + name);
         }
         
+        // Shutdown the local Node
         Contact localNode = getLocalNode();
         localNode.shutdown(true);
         
@@ -794,7 +817,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
                 LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            List<Contact> nodes = routeTable.select(localNode.getNodeID(), count, true);
+            List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
             
             for (Contact node : nodes) {
                 if (!node.equals(localNode)) {
