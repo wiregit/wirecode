@@ -35,7 +35,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.handler.AbstractResponseHandler;
+import com.limegroup.mojito.handler.CallableResponseHandler;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
@@ -98,8 +98,8 @@ public class CacheForwardTest extends BaseTestCase {
             Constructor con = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
-            AbstractResponseHandler<QueryKey> handler 
-                = (AbstractResponseHandler<QueryKey>)con.newInstance(context2, context1.getLocalNode());
+            CallableResponseHandler<QueryKey> handler 
+                = (CallableResponseHandler<QueryKey>)con.newInstance(context2, context1.getLocalNode());
             
             try {
                 QueryKey queryKey = handler.call();
