@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTBackendException;
-import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StatsResponse;

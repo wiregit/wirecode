@@ -21,12 +21,12 @@ package com.limegroup.mojito.manager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.handler.response.LookupResponseHandler;
 
 /**
  * The AbstractLookupManager class manages lookups for Nodes or Values
@@ -67,14 +67,9 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
      */
     private DHTFuture<V> lookup(KUID lookupId, int count) {
         synchronized(getLookupLock()) {
-            
-            // TODO: There is an almost non-existend possibility
-            // that somebody is doing a lookup for Value and the
-            // system is trying to make the exact same lookup for
-            // a Node.
             LookupFuture future = futureMap.get(lookupId);
             if (future == null) {
-                LookupResponseHandler<V> handler = createLookupHandler(lookupId, count);
+                Callable<V> handler = createLookupHandler(lookupId, count);
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
@@ -92,7 +87,7 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
      * @param lookupId The KUID we're looking for
      * @param count The result set size (i.e. k)
      */
-    protected abstract LookupResponseHandler<V> createLookupHandler(KUID lookupId, int count);
+    protected abstract Callable<V> createLookupHandler(KUID lookupId, int count);
     
     /**
      * A lookup specific implementation of DHTFuture
@@ -101,9 +96,9 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
 
         private KUID lookupId;
         
-        private LookupResponseHandler<V> handler;
+        private Callable<V> handler;
         
-        public LookupFuture(KUID lookupId, LookupResponseHandler<V> handler) {
+        public LookupFuture(KUID lookupId, Callable<V> handler) {
             super(handler);
             this.lookupId = lookupId;
             this.handler = handler;

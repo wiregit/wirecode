@@ -33,7 +33,6 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;

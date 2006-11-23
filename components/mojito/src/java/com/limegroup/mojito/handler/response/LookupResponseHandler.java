@@ -47,7 +47,6 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
@@ -68,7 +67,7 @@ import com.limegroup.mojito.util.EntryImpl;
  * 
  * Think of the LookupResponseHandler as some kind of State-Machine.
  */
-public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
+abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
@@ -167,20 +166,10 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         this.lookupId = lookupId;
         this.furthestId = lookupId.invert();
         
-        this.resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        this.deleteFurthest = KademliaSettings.DELETE_FURTHEST_CONTACT.getValue();
-        
-        // Don't retry on timeout - takes too long!
-        setMaxErrors(0);
-        
-        switch(getLookupType()) {
-            case FIND_NODE:
-                setParallelism(KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue());
-                break;
-            case FIND_VALUE:
-                setParallelism(KademliaSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue());
-                break;
-        }
+        setMaxErrors(0); // Don't retry on timeout - takes too long!
+        setParallelism(-1); // Default number of parallel lookups
+        setResultSetSize(-1); // Default result set size
+        setDeleteFurthest(KademliaSettings.DELETE_FURTHEST_CONTACT.getValue());
     }
     
     /**
@@ -215,11 +204,13 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * Sets the result set size
      */
     public void setResultSetSize(int resultSetSize) {
-        if (resultSetSize <= 0) {
-            throw new IllegalArgumentException();
+        if (resultSetSize < 0) {
+            this.resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        } else if (resultSetSize > 0) {
+            this.resultSetSize = resultSetSize;
         }
         
-        this.resultSetSize = resultSetSize;
+        throw new IllegalArgumentException("resultSetSize=" + resultSetSize);
     }
     
     /**
@@ -234,11 +225,22 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
      * should maintain
      */
     public void setParallelism(int parellelism) {
-        if (parellelism <= 0) {
-            throw new IllegalArgumentException();
+        if (parellelism < 0) {
+            switch(getLookupType()) {
+                case FIND_NODE:
+                    this.parellelism  = KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
+                    break;
+                case FIND_VALUE:
+                    this.parellelism = KademliaSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
+                    break;
+                default:
+                    throw new IllegalStateException(toString());
+            }
+        } else if (parellelism > 0) {
+            this.parellelism = parellelism;
         }
         
-        this.parellelism = parellelism;
+        throw new IllegalArgumentException("parellelism=" + parellelism);
     }
     
     /**
@@ -320,6 +322,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
             case FIND_VALUE:
                 lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
                 break;
+            default:
+                throw new IllegalStateException(toString());
         }
         
         return lookupTimeout > 0L && time >= lookupTimeout;
@@ -736,6 +740,8 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
                 Collection<KUID> noKeys = Collections.emptySet();
                 request = messageHelper.createFindValueRequest(addr, lookupId, noKeys);
                 break;
+            default:
+                throw new IllegalStateException(toString());
         }
         
         if (LOG.isTraceEnabled()) {
@@ -932,7 +938,7 @@ public abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V
         boolean timeout = isTimeout(time);
         int activeSearches = getActiveSearches();
         
-        return "Class: " + getClass().getName() 
+        return "Type: " + getLookupType() 
             + ", lookup: " + lookupId 
             + ", time: " + time 
             + ", timeout: " + timeout 

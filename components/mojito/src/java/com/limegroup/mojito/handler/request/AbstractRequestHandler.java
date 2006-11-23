@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.handler;
+package com.limegroup.mojito.handler.request;
 
 import java.io.IOException;
 
@@ -25,12 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.handler.RequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 
 /**
  * An abstract base class for RequestHandlers
  */
-public abstract class AbstractRequestHandler implements RequestHandler {
+abstract class AbstractRequestHandler implements RequestHandler {
     
     private static final Log LOG = LogFactory.getLog(AbstractRequestHandler.class);
     

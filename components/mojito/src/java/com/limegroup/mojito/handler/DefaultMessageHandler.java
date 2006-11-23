@@ -69,7 +69,7 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
     /**
      * Hardcoded to return Long.MAX_VALUE 
      */
-    public long timeout() {
+    public long getTimeout() {
         return Long.MAX_VALUE;
     }
 

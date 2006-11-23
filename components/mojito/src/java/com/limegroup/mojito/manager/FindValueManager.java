@@ -19,10 +19,11 @@
 
 package com.limegroup.mojito.manager;
 
+import java.util.concurrent.Callable;
+
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.handler.response.FindValueResponseHandler;
-import com.limegroup.mojito.handler.response.LookupResponseHandler;
 import com.limegroup.mojito.result.FindValueResult;
 
 /**
@@ -38,7 +39,7 @@ public class FindValueManager extends AbstractLookupManager<FindValueResult> {
      * Creates and returns a FindValueResponseHandler
      */
     @Override
-    protected LookupResponseHandler<FindValueResult> createLookupHandler(
+    protected Callable<FindValueResult> createLookupHandler(
             KUID lookupId, int count) {
         return new FindValueResponseHandler(context, lookupId);
     }

@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StatsRequest;
 import com.limegroup.mojito.messages.StatsResponse;

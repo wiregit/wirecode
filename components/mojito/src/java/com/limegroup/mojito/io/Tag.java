@@ -297,7 +297,7 @@ public class Tag {
             long elapsed = elapsedTime();
             
             if(timeout < 0L) {
-                long t = responseHandler.timeout();
+                long t = responseHandler.getTimeout();
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Default timeout: " + t + "ms for " + ContactUtils.toString(nodeId, dst));
                 }

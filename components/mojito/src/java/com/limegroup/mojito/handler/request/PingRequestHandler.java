@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;

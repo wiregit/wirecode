@@ -95,11 +95,12 @@ public class CacheForwardTest extends BaseTestCase {
             
             // Get the QueryKey...
             Class clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
-            Constructor con = clazz.getDeclaredConstructor(Context.class, Contact.class);
+            Constructor<CallableResponseHandler<QueryKey>> con 
+                = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
             CallableResponseHandler<QueryKey> handler 
-                = (CallableResponseHandler<QueryKey>)con.newInstance(context2, context1.getLocalNode());
+                = con.newInstance(context2, context1.getLocalNode());
             
             try {
                 QueryKey queryKey = handler.call();

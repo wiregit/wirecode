@@ -103,12 +103,12 @@ public class FindNodeResponseHandler
         Map<Contact, QueryKey> nearest = getNearestContacts();
         Collection<Contact> collisions = getCollisions();
         
-        FindNodeResult evt = new FindNodeResult(getLookupID(), nearest, 
+        FindNodeResult result = new FindNodeResult(getLookupID(), nearest, 
                 collisions, time, hop, routeTableFailures);
         
         // We can use the result from a Node lookup to estimate the DHT size
         context.updateEstimatedSize(nearest.keySet());
         
-        setReturnValue(evt);
+        setReturnValue(result);
     }
 }

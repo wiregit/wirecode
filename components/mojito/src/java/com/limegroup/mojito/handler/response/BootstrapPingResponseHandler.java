@@ -35,7 +35,6 @@ import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTBadResponseException;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.handler.AbstractResponseHandler;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;

@@ -34,7 +34,6 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.Database;
-import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;

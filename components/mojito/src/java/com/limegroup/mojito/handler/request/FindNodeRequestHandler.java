@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.handler.AbstractRequestHandler;
 import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;

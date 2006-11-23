@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-package com.limegroup.mojito.handler;
+package com.limegroup.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -33,6 +33,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.exceptions.LockTimeoutException;
+import com.limegroup.mojito.handler.CallableResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.settings.ContextSettings;
@@ -43,7 +44,7 @@ import com.limegroup.mojito.util.OnewayExchanger;
 /**
  * An abstract base class for ResponseHandlers
  */
-public abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> {
+abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     
@@ -102,45 +103,41 @@ public abstract class AbstractResponseHandler<V> implements CallableResponseHand
     public AbstractResponseHandler(Context context, long timeout, int maxErrors) {
         this.context = context;
         
-        if (timeout < 0L) {
-            this.timeout = NetworkSettings.TIMEOUT.getValue();
-        } else {
-            this.timeout = timeout;
-        }
+        setTimeout(timeout);
         
-        if (maxErrors < 0) {
-            this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
-        } else {
-            this.maxErrors = maxErrors;
-        }
+        setMaxErrors(maxErrors);
     }
     
     /**
      * Is called by call()
-     * @throws DHTException TODO
      */
     protected void start() throws DHTException {
+        // Do something in the subclass
     }
     
     /**
      * Is called by call()
      */
     protected void finish() {
-        
+        // Do something in the subclass
     }
     
     /**
      * Sets the timeout of this handler
      */
-    protected void setTimeout(long timeout) {
-        this.timeout = timeout;
+    public void setTimeout(long timeout) {
+        if (timeout < 0L) {
+            this.timeout = NetworkSettings.TIMEOUT.getValue();
+        } else {
+            this.timeout = timeout;
+        }
     }
     
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#timeout()
      */
-    public long timeout() {
+    public long getTimeout() {
         return timeout;
     }
     
@@ -178,7 +175,11 @@ public abstract class AbstractResponseHandler<V> implements CallableResponseHand
      * we're giving up to re-send a request
      */
     public void setMaxErrors(int maxErrors) {
-        this.maxErrors = maxErrors;
+        if (maxErrors < 0) {
+            this.maxErrors = NetworkSettings.MAX_ERRORS.getValue();
+        } else {
+            this.maxErrors = maxErrors;
+        }
     }
     
     /**
@@ -194,7 +195,7 @@ public abstract class AbstractResponseHandler<V> implements CallableResponseHand
      * may overwrite this method to customize the timeout.
      */
     protected long getLockTimeout() {
-        return Math.max((long)(timeout() * 1.5f), 
+        return Math.max((long)(getTimeout() * 1.5f), 
                 ContextSettings.WAIT_ON_LOCK.getValue());
     }
     

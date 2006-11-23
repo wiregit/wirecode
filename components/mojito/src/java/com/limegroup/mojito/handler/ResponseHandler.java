@@ -34,7 +34,7 @@ public interface ResponseHandler {
     /**
      * Returns the timeout (in milliseconds) of this handler.
      */
-    public long timeout();
+    public long getTimeout();
     
     /**
      * Returns whether or not this handler has been cancelled
