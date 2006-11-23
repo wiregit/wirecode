@@ -53,8 +53,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     private volatile boolean running = false;
     
-    private Object channelLock = new Object();
-    
     private Selector selector;
     
     private DatagramChannel channel;
@@ -63,6 +61,11 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     private Thread thread;
     
+    /**
+     * The DatagramChannel lock Object
+     */
+    protected final Object channelLock = new Object();
+
     public MessageDispatcherImpl(Context context) {
         super(context);
     }
@@ -126,6 +129,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                     }
                 };
                 
+                clear();
                 running = true;
                 
                 executor = Executors.newFixedThreadPool(1, factory);
@@ -159,12 +163,24 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             clear();
             
             if (executor != null) {
-                executor.shutdown();
+                // Don't accept new tasks (we rely also on the fact that 
+                // 'running' was set to false - that means we should not
+                // see any RejectedExecutionExceptions that are related
+                // to this Executor) 
+                executor.shutdown(); 
+                
+                // Give the running tasks a bit time to finish
                 try {
                     executor.awaitTermination(10L*1000L, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     LOG.error("InterruptedException", e);
                 }
+                
+                // And if they don't then kill 'em if possible (it's a
+                // good faith effort and if it doesn't work we'll maybe
+                // see some IOExceptions related to the fact that the
+                // DatagramChannel is not open).
+                executor.shutdownNow();
                 executor = null;
             }
             
