@@ -208,9 +208,9 @@ abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
             this.resultSetSize = KademliaSettings.REPLICATION_PARAMETER.getValue();
         } else if (resultSetSize > 0) {
             this.resultSetSize = resultSetSize;
+        } else {
+            throw new IllegalArgumentException("resultSetSize=" + resultSetSize);
         }
-        
-        throw new IllegalArgumentException("resultSetSize=" + resultSetSize);
     }
     
     /**
@@ -238,9 +238,9 @@ abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
             }
         } else if (parellelism > 0) {
             this.parellelism = parellelism;
+        } else {
+            throw new IllegalArgumentException("parellelism=" + parellelism);
         }
-        
-        throw new IllegalArgumentException("parellelism=" + parellelism);
     }
     
     /**
