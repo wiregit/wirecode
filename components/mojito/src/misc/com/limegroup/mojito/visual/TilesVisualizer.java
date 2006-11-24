@@ -43,7 +43,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
         final TilesVisualizer tiles = new TilesVisualizer(context.getLocalNodeID());
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                JFrame frame = new JFrame();
+                JFrame frame = new JFrame(context.getName());
                 frame.getContentPane().add(tiles);
                 frame.setBounds(20, 30, 640, 640);
                 frame.addWindowListener(new WindowListener() {

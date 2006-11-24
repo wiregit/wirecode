@@ -51,7 +51,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         final ArcsVisualizer arcs = new ArcsVisualizer(context.getLocalNodeID());
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                JFrame frame = new JFrame();
+                JFrame frame = new JFrame(context.getName());
                 frame.getContentPane().add(arcs);
                 frame.setBounds(20, 30, 640, 640);
                 frame.addWindowListener(new WindowListener() {

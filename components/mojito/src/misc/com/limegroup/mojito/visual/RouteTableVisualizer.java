@@ -61,11 +61,11 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
     
     RouteTable routeTable;
     
-    public static RouteTableVisualizer show(Context context) {
+    public static RouteTableVisualizer show(final Context context) {
         final RouteTableVisualizer viz = new RouteTableVisualizer(context);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                final JFrame jf = new JFrame();
+                final JFrame jf = new JFrame(context.getName());
                 jf.getContentPane().add (viz.getComponent());
                 jf.pack();
                 jf.addWindowListener(new WindowListener() {
