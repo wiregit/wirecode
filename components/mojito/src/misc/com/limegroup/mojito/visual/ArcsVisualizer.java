@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -27,7 +28,9 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import com.limegroup.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
+import com.limegroup.mojito.messages.RequestMessage;
 
+@SuppressWarnings("serial")
 public class ArcsVisualizer extends JPanel implements MessageDispatcherListener {
 
     private static final int SCALE = 10;
@@ -151,6 +154,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
         EventType type = evt.getEventType();
         KUID nodeId = evt.getNodeID();
+        boolean request = (evt.getMessage() instanceof RequestMessage);
         
         if (type.equals(EventType.MESSAGE_RECEIVED)) {
             nodeId = evt.getMessage().getContact().getNodeID();
@@ -162,8 +166,12 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             return;
         }
         
+        handle(type, nodeId, request);
+    }
+    
+    private void handle(EventType type, KUID nodeId, boolean request) {
         synchronized (nodes) {
-            nodes.add(new Node(type, nodeId));
+            nodes.add(new Node(type, nodeId, request));
         }
     }
     
@@ -175,11 +183,14 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private KUID nodeId;
         
+        private boolean request;
+        
         private long timeStamp = System.currentTimeMillis();
         
-        public Node(EventType type, KUID nodeId) {
+        public Node(EventType type, KUID nodeId, boolean request) {
             this.type = type;
             this.nodeId = nodeId;
+            this.request = request;
         }
         
         private int alpha() {
@@ -211,8 +222,12 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             float start = 0f;
             float extent = 0f;
             
+            int red = 0;
+            int green = 0;
+            int blue = 0;
+            
             if (type.equals(EventType.MESSAGE_SEND)) {
-                g.setColor(new Color(255, 0, 0, alpha()));
+                red = 255;
                 if (localY < nodeY) {
                     start = 90f;
                     extent = -extent();
@@ -221,7 +236,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                     extent = extent();
                 }
             } else {
-                g.setColor(new Color(0, 255, 0, alpha()));
+                green = 255;
                 if (localY < nodeY) {
                     start = -90f;
                     extent = -extent();
@@ -232,16 +247,52 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
 
             g.setStroke(STROKE);
+            g.setColor(new Color(red, green, blue, alpha()));
             g.draw(new Arc2D.Float(arcX, arcY+DOT_SIZE/2f, bow, distance, start, extent, Arc2D.OPEN));
             
             return (System.currentTimeMillis() - timeStamp) >= DURATION;
         }
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        ArcsVisualizer arcs = new ArcsVisualizer(KUID.createRandomID());
+        
         JFrame frame = new JFrame();
-        frame.getContentPane().add(new ArcsVisualizer(KUID.createRandomID()));
+        frame.getContentPane().add(arcs);
         frame.setBounds(20, 30, 640, 480);
         frame.setVisible(true);
+        
+        Random generator = new Random();
+        
+        EventType type = null;
+        KUID nodeId = null;
+        
+        final int sleep = 1000;
+        
+        while(true) {
+            
+            // Simulate an received or sent message
+            nodeId = KUID.createRandomID();
+            if (generator.nextBoolean()) {
+                type = EventType.MESSAGE_RECEIVED;
+            } else {
+                type = EventType.MESSAGE_SEND;
+            }
+            
+            arcs.handle(type, nodeId, false);
+            
+            // Sleep a bit...
+            //Thread.sleep(sleep);
+            Thread.sleep(generator.nextInt(sleep));
+            
+            // Send every now an then a response
+            if (generator.nextBoolean()) {
+                if (type.equals(EventType.MESSAGE_SEND)) {
+                    arcs.handle(EventType.MESSAGE_RECEIVED, nodeId, false);
+                } else {
+                    arcs.handle(EventType.MESSAGE_SEND, nodeId, false);
+                }
+            }
+        }
     }
 }
