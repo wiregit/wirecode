@@ -66,23 +66,22 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Database database = context.getDatabase();
         DHTValueBag bag = database.get(lookup);
 
-        if (bag == null || bag.isEmpty()) {
-            // OK, send Contacts instead!
-            findNodeDelegate.handleRequest(message);
-            return;
+        Map<KUID, DHTValue> map = Collections.emptyMap();
+        if (bag != null) {
+            map = bag.getValuesMap();
         }
         
-        Map<KUID, DHTValue> map = bag.getValuesMap();
-        
-        //TODO: should never be empty?
+        // The Map should never be empty if it wasn't null
         if (!map.isEmpty()) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + "\n" +bag.toString());
+                LOG.trace("Hit! " + lookup + "\n" + bag);
             }
             
-            Set<KUID> keys = Collections.emptySet();
-            Collection<DHTValue> values = Collections.emptyList();
+            // The keys and values we'll return
+            Set<KUID> retKeys = Collections.emptySet();
+            Collection<DHTValue> retValues = Collections.emptyList();
             
+            // The keys the remote Node is requesting
             Collection<KUID> nodeIds = request.getKeys();
             
             // Nothing specific requested?
@@ -90,21 +89,21 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                 // If there's only one value for this key then send 
                 // just the DHTValue
                 if (map.size() == 1) {
-                    values = map.values();
+                    retValues = map.values();
                     
                 // Otherwise send the keys and the remote Node must
                 // figure out what it's looking for
                 } else {
-                    keys = map.keySet();
+                    retKeys = map.keySet();
                 }
             } else {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                values = new ArrayList<DHTValue>(nodeIds.size());
+                retValues = new ArrayList<DHTValue>(nodeIds.size());
                 for (KUID nodeId : nodeIds) {
                     DHTValue value = map.get(nodeId);
                     if (value != null) {
-                        values.add(value);
+                        retValues.add(value);
                     }
                 }
             }
@@ -112,7 +111,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
            
             FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, keys, values, bag.incrementRequestLoad());
+                        .createFindValueResponse(request, retKeys, retValues, 
+                                bag.incrementRequestLoad());
             context.getMessageDispatcher().send(request.getContact(), response);
         } else {
             // OK, send Contacts instead!

@@ -28,26 +28,23 @@ public interface DHTValueBag extends Serializable {
     public boolean remove(DHTValue value);
     
     /**
-     * Return's this Bag's value ID.
-     * 
+     * Return's this Bag's value IDs.
      */
     public KUID getValueId();
 
     /**
-     * Returns an unmodifiable map of values where the key is the originator's ID.
-     * 
+     * Returns a Map values and their keys
      */
     public Map<KUID, DHTValue> getValuesMap();
 
     /**
-     * Returns the Bag of DHT values
+     * Returns a Collection of DHTValues
      */
     public Collection<DHTValue> getAllValues();
 
     /**
      * Returns the request load associated with this value bag, i.e. the
      * approximate request popularity.
-     * 
      */
     public float getRequestLoad();
 
@@ -69,17 +66,15 @@ public interface DHTValueBag extends Serializable {
     public boolean isEmpty();
 
     /**
-     * 
-     * @param nodeId
-     * @return
+     * Returns the DHTValue for the given Node ID
      */
     public DHTValue get(KUID nodeId);
     
     /**
      * Returns true if this bag contains a value coming from the 
-     * specified originator <tt>KUID</tt>.
+     * specified creator <tt>KUID</tt>.
      * 
-     * @param nodeId The value's originator KUID
+     * @param nodeId The value's creator KUID
      */
     public boolean containsKey(KUID nodeId);
 }
