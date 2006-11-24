@@ -26,8 +26,8 @@ import java.net.SocketAddress;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTBackendException;
-import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTBadResponseException;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
@@ -42,8 +42,6 @@ import com.limegroup.mojito.routing.Contact;
  */
 public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
-    //private static final Log LOG = LogFactory.getLog(PingResponseHandler.class);
-    
     private Contact sender;
     
     private KUID nodeId;
@@ -54,12 +52,12 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         this(context, null, null, address);
     }
     
-    public PingResponseHandler(Context context, Contact contact) {
-        this(context, null, contact.getNodeID(), contact.getContactAddress());
+    public PingResponseHandler(Context context, Contact node) {
+        this(context, null, node.getNodeID(), node.getContactAddress());
     }
 
-    public PingResponseHandler(Context context, Contact sender, Contact contact) {
-        this(context, sender, contact.getNodeID(), contact.getContactAddress());
+    public PingResponseHandler(Context context, Contact sender, Contact node) {
+        this(context, sender, node.getNodeID(), node.getContactAddress());
     }
     
     public PingResponseHandler(Context context, KUID nodeId, SocketAddress address) {
@@ -83,10 +81,15 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         if (sender == null) {
             // Regular Ping
             request = context.getMessageHelper().createPingRequest(address);
+            
         } else {
             // Node ID collision test Ping
-            assert (sender.isFirewalled());
-            request = context.getMessageFactory().createPingRequest(sender, MessageID.createWithSocketAddress(address));
+            if (!sender.isFirewalled()) {
+                throw new IllegalArgumentException("Sender must be Firewalled");
+            }
+            
+            request = context.getMessageFactory().createPingRequest(
+                    sender, MessageID.createWithSocketAddress(address));
         }
         
         try {
