@@ -202,7 +202,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             float nodeY = position(nodeId, height)-DOT_SIZE/2f;
             float distance = Math.max(localY, nodeY) - Math.min(localY, nodeY);
-            float bow = width * distance/height;
+            float bow = distance;
             float nodeX = (width-bow)/2f;
             
             float arcX = nodeX;
