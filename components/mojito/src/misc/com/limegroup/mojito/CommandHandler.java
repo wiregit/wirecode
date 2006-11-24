@@ -70,7 +70,8 @@ public class CommandHandler {
             "select .+",
             "nextid",
             "rt_gui",
-            "tiles_gui"
+            "tiles_gui",
+            "arcs_gui"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -410,6 +411,12 @@ public class CommandHandler {
     
     public static void tiles_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         Class clazz = Class.forName("com.limegroup.mojito.visual.TilesVisualizer");
+        Method show = clazz.getDeclaredMethod("show", Context.class);
+        show.invoke(null, dht);
+    }
+    
+    public static void arcs_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        Class clazz = Class.forName("com.limegroup.mojito.visual.ArcsVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
     }
