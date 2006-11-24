@@ -37,6 +37,8 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
     
     private KUID localNodeId;
     
+    private volatile boolean running = true;
+    
     public static TilesVisualizer show(final Context context) {
         final TilesVisualizer tiles = new TilesVisualizer(context.getLocalNodeID());
         SwingUtilities.invokeLater(new Runnable() {
@@ -48,6 +50,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
                     public void windowActivated(WindowEvent e) {}
                     public void windowClosed(WindowEvent e) {}
                     public void windowClosing(WindowEvent e) {
+                        tiles.running = false;
                         context.getMessageDispatcher().removeMessageDispatcherListener(tiles);
                     }
                     public void windowDeactivated(WindowEvent e) {}
@@ -77,7 +80,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
         
         Runnable repaint = new Runnable() {
             public void run() {
-                while(true) {
+                while(running) {
                     repaint();
                     
                     try { 
@@ -87,7 +90,9 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
             }
         };
         
-        new Thread(repaint).start();
+        Thread thread = new Thread(repaint);
+        thread.setDaemon(true);
+        thread.start();
     }
     
     public void paint(Graphics g) {
@@ -116,7 +121,7 @@ public class TilesVisualizer extends JPanel implements MessageDispatcherListener
             if (nodeId != null) {
                 paintTile(nodeId, true);
             }
-        } else if (type.equals(EventType.MESSAGE_SEND)) {
+        } else if (type.equals(EventType.MESSAGE_RECEIVED)) {
             DHTMessage message = evt.getMessage();
             paintTile(message.getContact().getNodeID(), false);
         }
