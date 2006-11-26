@@ -268,6 +268,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             failed.addAll(s.getFailedValues());
         }
         
+        for (DHTValue value : values) {
+            if (!failed.contains(value)) {
+                value.setLocationCount(nodes.size());
+            }
+        }
+        
         if (processList.size() == 1) {
             StoreProcess s = processList.get(0);
             if (s.exception != null) {

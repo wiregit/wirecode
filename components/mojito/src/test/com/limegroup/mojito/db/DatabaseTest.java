@@ -449,6 +449,5 @@ public class DatabaseTest extends BaseTestCase {
         public Set<SocketAddress> getBannedHosts() {
             return bannedHosts;
         }
-        
     }
 }

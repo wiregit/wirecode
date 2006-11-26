@@ -137,14 +137,14 @@ public class DHTValueManager implements Runnable {
             }
         }
         
-        StoreResult evt = context.store(value).get();
+        StoreResult result = context.store(value).get();
         published++;
         
         if (LOG.isTraceEnabled()) {
-            if (evt.getNodes().isEmpty()) {
+            if (result.getNodes().isEmpty()) {
                 LOG.trace("Failed to store " + value);
             } else {
-                LOG.trace(evt.toString());
+                LOG.trace(result.toString());
             }
         }
     }
