@@ -45,8 +45,7 @@ public class BrowserUtilsTest extends BaseTestCase {
 		
 		String contents = new String(FileUtils.readFileFully(prefsFile));
 		assertTrue(contents.contains(BrowserUtils.MAGNET_KEY));
-		assertTrue(contents.contains(BrowserUtils.UNIX_PREFS));
-		assertTrue(contents.contains("limewire"));
+		assertTrue(contents.contains(BrowserUtils.HANDLER_PREFS));
 		
 		// idempotence
 		long size = prefsFile.length();
