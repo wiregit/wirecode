@@ -1,12 +1,16 @@
 package com.limegroup.gnutella.dht.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -16,6 +20,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.LifecycleEvent;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -59,9 +64,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {
-            FileInputStream in = null;
+            InputStream in = null;
             try {
-                in = new FileInputStream(FILE);
+                in = new BufferedInputStream(new FileInputStream(FILE));
                 ObjectInputStream ois = new ObjectInputStream(in);
                 Contact node = null;
                 while((node = (Contact)ois.readObject()) != null){
@@ -74,9 +79,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             } catch (IOException e) {
                 LOG.error("IOException", e);
             } finally {
-                if (in != null) {
-                    try { in.close(); } catch (IOException ignore) {}
-                }
+                IOUtils.close(in);
             }
         }
     }
@@ -128,9 +131,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         List<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
-            FileOutputStream out = null;
+            OutputStream out = null;
             try {
-                out = new FileOutputStream(FILE);
+                out = new BufferedOutputStream(new FileOutputStream(FILE));
                 ObjectOutputStream oos = new ObjectOutputStream(out);
                 
                 // Sort by MRS
@@ -152,9 +155,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             } catch (IOException err) {
                 LOG.error("IOException", err);
             } finally {
-                if (out != null) {
-                    try { out.close(); } catch (IOException ignore) {}
-                }
+                IOUtils.close(out);
             }
         }
     }
