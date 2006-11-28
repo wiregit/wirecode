@@ -111,7 +111,7 @@ public class ContentRequest extends VendorMessage {
         
         this.sha1 = urn.getBytes();
         this.fileName = getBytes(fileName);
-        this.extension = FileUtils.indexOfExtension(fileName);
+        this.extension = getExtensionIndex(fileName);
         this.metaData = getBytes(metaData);
         this.fileSize = fileSize;
         this.length = length;
@@ -224,6 +224,13 @@ public class ContentRequest extends VendorMessage {
             } catch (NumberFormatException ignore) {}
         }
         
+        return -1;
+    }
+    
+    private static int getExtensionIndex(String fileName) {
+        if (fileName != null && fileName.length() > 0) {
+            return FileUtils.indexOfExtension(fileName);
+        }
         return -1;
     }
     
