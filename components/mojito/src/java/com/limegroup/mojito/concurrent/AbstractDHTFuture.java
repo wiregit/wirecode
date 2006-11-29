@@ -65,23 +65,27 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         // TODO: Not sure if it's a good or bad idea to
         // call the listener on the caller Thread if the
         // DHTFuture is done
+        boolean done = false;
         synchronized (listeners) {
-            if (isDone()) {
-                try {
-                    V result = get();
-                    listener.handleResult(result);
-                } catch (InterruptedException ignore) {
-                } catch (ExecutionException ex) {
-                    // NOTE: This is different from Future.cancel()!
-                    // It's possible to cancel a ResponseHandler which
-                    // is also throwing a CancellationException!
-                    Throwable cause = ex.getCause();
-                    if (!(cause instanceof CancellationException)) {
-                        listener.handleThrowable(cause);
-                    }
-                }
-            } else {
+            done = isDone();
+            if (!done) {
                 listeners.add(listener);
+            }
+        }
+        
+        if (done) {
+            try {
+                V result = get();
+                listener.handleResult(result);
+            } catch (InterruptedException ignore) {
+            } catch (ExecutionException ex) {
+                // NOTE: This is different from Future.cancel()!
+                // It's possible to cancel a ResponseHandler which
+                // is also throwing a CancellationException!
+                Throwable cause = ex.getCause();
+                if (!(cause instanceof CancellationException)) {
+                    listener.handleThrowable(cause);
+                }
             }
         }
     }
@@ -118,10 +122,13 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      * be called on the DHTFuture Thread!
      */
     public void fireResult(V result) {
-        synchronized(listeners) {
-            for (DHTResultListener<V> l : listeners) {
-                l.handleResult(result);
-            }
+        List<DHTResultListener<V>> copy = null;
+        synchronized (listeners) {
+            copy = new ArrayList<DHTResultListener<V>>(listeners);
+        }
+        
+        for (DHTResultListener<V> l : copy) {
+            l.handleResult(result);
         }
     }
     
@@ -130,10 +137,13 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      * Meant to be called on the DHTFuture Thread!
      */
     public void fireThrowable(Throwable ex) {
-        synchronized(listeners) {
-            for (DHTResultListener<V> l : listeners) {
-                l.handleThrowable(ex);
-            }
+        List<DHTResultListener<V>> copy = null;
+        synchronized (listeners) {
+            copy = new ArrayList<DHTResultListener<V>>(listeners);
+        }
+        
+        for (DHTResultListener<V> l : copy) {
+            l.handleThrowable(ex);
         }
     }
 }
