@@ -30,7 +30,7 @@ import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
- * The manager for the LimeWire Gnutella DHT. 
+ * The controller for the LimeWire Gnutella DHT. 
  * A node should connect to the DHT only if it has previously been designated as capable 
  * by the <tt>NodeAssigner</tt> or if it is forced to. 
  * Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
@@ -39,11 +39,13 @@ import com.limegroup.mojito.util.BucketUtils;
  * The NodeAssigner should be the only class to have the authority to 
  * initialize the DHT and connect to the network.
  * 
- * This manager can be in one of the four following states:
+ * This controller can be in one of the four following states:
  * 1) not running.
  * 2) running and bootstrapping: the dht is trying to bootstrap.
  * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
  * 3) running and bootstrapped.
+ * 
+ * <b>Warning:</b> The methods in this class are NOT synchronized.
  * 
  * The current implementation is specific to the Mojito DHT. 
  */
@@ -59,7 +61,7 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * Whether or not the DHT controlled by this controller is running.
      */
-    private boolean running = false;
+    private volatile boolean running = false;
 
     /**
      * The DHT bootstrapper instance.
@@ -117,6 +119,8 @@ abstract class AbstractDHTController implements DHTController {
             return;
         }
         
+        running = false;
+        
         LOG.debug("Shutting down DHT Controller");
         
         if(LOG.isTraceEnabled()) {
@@ -133,8 +137,6 @@ abstract class AbstractDHTController implements DHTController {
         if (dht != null) {
             dht.stop();
         }
-        
-        running = false;
     }
     
     /**
