@@ -58,6 +58,11 @@ public interface DHTController {
     public boolean isRunning();
     
     /**
+     * Returns whether or not this node is bootstrapped
+     */
+    public boolean isBootstrapped();
+    
+    /**
      * Returns whether this Node is waiting for Nodes or not
      */
     public boolean isWaitingForNodes();

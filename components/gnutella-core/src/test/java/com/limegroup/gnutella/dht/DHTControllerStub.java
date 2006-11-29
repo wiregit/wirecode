@@ -60,4 +60,7 @@ public class DHTControllerStub implements DHTController {
     public void stop() {
     }
 
+	public boolean isBootstrapped() {
+		return dht.isBootstrapped();
+	}
 }

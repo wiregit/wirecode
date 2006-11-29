@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht.impl;
 
 import java.net.SocketAddress;
-import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.LifecycleEvent;
@@ -18,6 +17,9 @@ import com.limegroup.mojito.settings.ContextSettings;
  * 
  */
 public class LimeDHTManager implements DHTManager {
+	
+	private static final DHTController NULL_CONTROLLER = 
+		new NullDHTController();
     
     /**
      * The Vendor code of this DHT Node
@@ -32,38 +34,37 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The DHTController instance
      */
-    private DHTController controller = null;
+    private DHTController controller = NULL_CONTROLLER;
     
     public synchronized void start(boolean activeMode) {
+    	
+    	//controller already running in the correct mode?
+    	if(controller.isRunning() 
+    			&& (controller.isActiveNode() == activeMode)) {
+    		return;
+    	}
         
-        if (controller == null || (controller.isActiveNode() != activeMode)) {
-            if (controller != null) {
-                controller.stop();
-            }
-            
-            if (activeMode) {
-                controller = new ActiveDHTNodeController(vendor, version);
-            } else {
-                controller = new PassiveDHTNodeController(vendor, version);
-            }
+    	controller.stop();
+
+    	if (activeMode) {
+            controller = new ActiveDHTNodeController(vendor, version);
+        } else {
+            controller = new PassiveDHTNodeController(vendor, version);
         }
+
         controller.start();
     }
     
     public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
-        if (controller != null) {
-            controller.addActiveDHTNode(hostAddress);
-        }
+        controller.addActiveDHTNode(hostAddress);
     }
     
     public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (controller != null) {
-            controller.addPassiveDHTNode(hostAddress);
-        }
+        controller.addPassiveDHTNode(hostAddress);
     }
 
     public synchronized void addressChanged() {
-        if(controller == null || !controller.isRunning()) {
+        if(!controller.isRunning()) {
             return;
         }
         
@@ -73,7 +74,7 @@ public class LimeDHTManager implements DHTManager {
     }
     
     public synchronized void sendUpdatedCapabilities() {
-        if(controller == null || !controller.isRunning()) {
+        if(!controller.isRunning()) {
             return;
         }
         
@@ -81,48 +82,28 @@ public class LimeDHTManager implements DHTManager {
     }
     
     public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
-        if(controller == null) {
-            return Collections.emptyList();
-        }
-        
         return controller.getActiveDHTNodes(maxNodes);
     }
     
     public synchronized boolean isActiveNode() {
-        if(controller != null) {
-            return (controller.isActiveNode() 
-                    && controller.isRunning());
-        }
-     
-        return false;
+        return (controller.isActiveNode() && controller.isRunning());
     }
     
     public synchronized void stop(){
-        if (controller != null) {
-            controller.stop();
-            controller = null;
-        }
+        controller.stop();
+        controller = NULL_CONTROLLER;
     }
     
     public synchronized boolean isRunning() {
-        if(controller != null) {
-            return controller.isRunning();
-        }
-        return false;
+        return controller.isRunning();
     }
     
     public synchronized boolean isBootstrapped() {
-        if(controller != null) {
-            return controller.getMojitoDHT().isBootstrapped();
-        }
-        return false;
+        return controller.isBootstrapped();
     }
     
     public synchronized boolean isWaitingForNodes() {
-        if(controller != null) {
-            return controller.isWaitingForNodes();
-        }
-        return false;
+        return controller.isWaitingForNodes();
     }
 
     /**
@@ -132,10 +113,7 @@ public class LimeDHTManager implements DHTManager {
      * 
      */
     public synchronized MojitoDHT getMojitoDHT() {
-        if(controller != null) {
-            return controller.getMojitoDHT();
-        }
-        return null;
+        return controller.getMojitoDHT();
     }
 
     /**
@@ -145,10 +123,6 @@ public class LimeDHTManager implements DHTManager {
      * 
      */
     public synchronized void handleLifecycleEvent(LifecycleEvent evt) {
-        if(controller == null) {
-            return;
-        }
-        
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(controller.isRunning() 
                     && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {

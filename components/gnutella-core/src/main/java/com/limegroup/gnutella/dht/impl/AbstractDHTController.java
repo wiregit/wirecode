@@ -197,7 +197,11 @@ abstract class AbstractDHTController implements DHTController {
         return running;
     }
     
-    public boolean isWaitingForNodes() {
+    public boolean isBootstrapped() {
+		return dht.isBootstrapped();
+	}
+
+	public boolean isWaitingForNodes() {
         return bootstrapper.isWaitingForNodes();
     }
     
