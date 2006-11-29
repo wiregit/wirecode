@@ -254,9 +254,19 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             }
         };
         
-        process(verifier);
+        verify(verifier);
     }
 
+    /**
+     * Called by verify(SecureMessage, SecureMessageCallback) to execute
+     * the Runnable that does the actual verification. You may override
+     * this method to execute the Runnable on a different Thread.
+     */
+    protected void verify(Runnable verifier) {
+        // See verify(SecureMessage, SecureMessageCallback)
+        process(verifier);
+    }
+    
     private void interest(int ops, boolean on) {
         DatagramChannel c = channel;
         if (c == null) {
