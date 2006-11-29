@@ -114,7 +114,19 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         FontMetrics fm = g2.getFontMetrics();
         g2.drawString("Input", width/4f - fm.stringWidth("Input")/2f, 30);
         g2.setColor(Color.red);
-        g2.drawString("Output", width-width/4f-fm.stringWidth("Output")/2f, 30);
+        g2.drawString("Output", width-width/4f - fm.stringWidth("Output")/2f, 30);
+        
+        g2.setFont(getFont().deriveFont(FONT_SIZE/2));
+        fm = g2.getFontMetrics();
+        g2.setColor(new Color(0, 255, 0));
+        g2.drawString("response", width/4f - fm.stringWidth("response")/2f, 48);
+        g2.setColor(new Color(0, 255, 255));
+        g2.drawString("request", width/4f - fm.stringWidth("request")/2f, 60);
+        
+        g2.setColor(new Color(255, 0, 0));
+        g2.drawString("request", width-width/4f - fm.stringWidth("request")/2f, 48);
+        g2.setColor(new Color(255, 0, 255));
+        g2.drawString("response", width-width/4f - fm.stringWidth("response")/2f, 60);
         
         g2.setColor(Color.orange);
         g2.setStroke(new BasicStroke(2.0f));
@@ -228,6 +240,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             if (type.equals(EventType.MESSAGE_SEND)) {
                 red = 255;
+                if (!request) {
+                    blue = 255;
+                }
                 if (localY < nodeY) {
                     start = 90f;
                     extent = -extent();
@@ -237,6 +252,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 }
             } else {
                 green = 255;
+                if (request) {
+                    blue = 255;
+                }
                 if (localY < nodeY) {
                     start = -90f;
                     extent = -extent();
@@ -279,7 +297,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 type = EventType.MESSAGE_SEND;
             }
             
-            arcs.handle(type, nodeId, false);
+            arcs.handle(type, nodeId, true);
             
             // Sleep a bit...
             //Thread.sleep(sleep);
