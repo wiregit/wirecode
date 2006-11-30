@@ -116,7 +116,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         DHTSettings.DHT_BOOTSTRAP_HOSTS.setValue(hosts);
         
         //only first hex counts
-        KUID id = KUID.create(ArrayUtils.parseHexString("03ED9650238A6C576C987793C01440A0EA91A1FB"));
+        KUID id = KUID.create("03ED9650238A6C576C987793C01440A0EA91A1FB");
         Contact localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         
@@ -127,7 +127,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         assertEquals(address+":"+port, hosts[0]);
         
         //change first hex. Should point to last elem of the list
-        id = KUID.create(ArrayUtils.parseHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB"));
+        id = KUID.create("F3ED9650238A6C576C987793C01440A0EA91A1FB");
         localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         addr = (InetSocketAddress) bootstrapper.getSIMPPHost();

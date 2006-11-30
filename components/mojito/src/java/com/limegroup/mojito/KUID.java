@@ -19,7 +19,9 @@
  
 package com.limegroup.mojito;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -451,7 +453,7 @@ public class KUID implements Comparable<KUID>, Serializable {
                 md.update((byte)((mdi.rnd      ) & 0xFF));
             }
             
-            return create(md.digest());
+            return new KUID(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -476,14 +478,34 @@ public class KUID implements Comparable<KUID>, Serializable {
      * Creates and returns a KUID from a byte array
      */
     public static KUID create(byte[] id) {
-        return new KUID(id);
+        byte[] dst = new byte[id.length];
+        System.arraycopy(id, 0, dst, 0, id.length);
+        return new KUID(dst);
     }
     
     /**
      * Creates and returns a KUID from a hex encoded String
      */
     public static KUID create(String id) {
-        return create(ArrayUtils.parseHexString(id));
+        return new KUID(ArrayUtils.parseHexString(id));
+    }
+    
+    /**
+     * Creates a KUID from the given InputStream
+     */
+    public static KUID create(InputStream in) throws IOException {
+        byte[] id = new byte[LENGTH];
+        int len = -1;
+        int r = 0;
+        while((len = in.read(id, r, id.length-r)) >= 0) {
+            r += len;
+        }
+        
+        if (r != id.length) {
+            throw new EOFException();
+        }
+        
+        return new KUID(id);
     }
     
     /**
@@ -518,7 +540,7 @@ public class KUID implements Comparable<KUID>, Serializable {
             random[length] = (byte) ((prefixByte & ~mask) | (randByte & mask));
         }
         
-        return KUID.create(random);
+        return new KUID(random);
     }
     
     /**
