@@ -275,6 +275,6 @@ public class Main implements ActivityCallback, ErrorCallback {
     public void handleAddressStateChanged() {
     }
     
-    public void handleLifecycleEvent(LifecycleEvent evt) {
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
     }
 }

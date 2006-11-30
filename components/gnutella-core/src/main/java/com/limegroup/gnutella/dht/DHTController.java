@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 
@@ -71,7 +71,7 @@ public interface DHTController {
      * A callback method to notify the DHTController about 
      * ConnectionLifecycleEvents
      */
-    public void handleConnectionLifecycleEvent(LifecycleEvent evt);
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt);
     
     /**
      * Returns this controller's Mojito DHT instance.

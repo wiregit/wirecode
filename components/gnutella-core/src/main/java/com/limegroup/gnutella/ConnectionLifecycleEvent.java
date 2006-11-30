@@ -2,9 +2,9 @@ package com.limegroup.gnutella;
 
 import java.util.EventObject;
 
-public class LifecycleEvent extends EventObject {
+public class ConnectionLifecycleEvent extends EventObject {
     
-    public static enum LifeEvent {
+    public static enum ConnectionLifeEvent {
         CONNECTING, 
         CONNECTED, 
         DISCONNECTED, 
@@ -16,26 +16,26 @@ public class LifecycleEvent extends EventObject {
     }
     
     private final ManagedConnection connection;
-    private final LifeEvent type;
+    private final ConnectionLifeEvent type;
     
-    public LifecycleEvent(Object source, LifeEvent type, ManagedConnection c) {
+    public ConnectionLifecycleEvent(Object source, ConnectionLifeEvent type, ManagedConnection c) {
         super(source);
         this.connection = c;
         this.type = type;
     }
 
     /**
-     * Constructs a LifeCycleEvent with no connection associated.
+     * Constructs a ConnectionLifecycleEvent with no connection associated.
      * This is usefull for CONNECTED, DISCONNECTED, NO_INTERNET and
      * ADDRESS_CHANGED events
      * 
      * @param manager
      */
-    public LifecycleEvent(Object source, LifeEvent type) {
+    public ConnectionLifecycleEvent(Object source, ConnectionLifeEvent type) {
         this(source, type, null);
     }
 
-    public LifeEvent getType() {
+    public ConnectionLifeEvent getType() {
         return type;
     }
 
@@ -44,43 +44,39 @@ public class LifecycleEvent extends EventObject {
     }
 
     public boolean isConnectingEvent() {
-        return (type == LifeEvent.CONNECTING); 
+        return (type == ConnectionLifeEvent.CONNECTING); 
     }
     
     public boolean isConnectedEvent() {
-        return (type == LifeEvent.CONNECTED);
+        return (type == ConnectionLifeEvent.CONNECTED);
     }
     
     public boolean isDisconnectedEvent() {
-        return (type == LifeEvent.DISCONNECTED);
+        return (type == ConnectionLifeEvent.DISCONNECTED);
     }
     
     public boolean isNoInternetEvent() {
-        return (type == LifeEvent.NO_INTERNET);
+        return (type == ConnectionLifeEvent.NO_INTERNET);
     }
     
     public boolean isConnectionInitializingEvent() {
-        return (type == LifeEvent.CONNECTION_INITIALIZING);
+        return (type == ConnectionLifeEvent.CONNECTION_INITIALIZING);
     }
     
     public boolean isConnectionClosedEvent() {
-        return (type == LifeEvent.CONNECTION_CLOSED);
+        return (type == ConnectionLifeEvent.CONNECTION_CLOSED);
     }
     
     public boolean isConnectionInitializedEvent() {
-        return (type == LifeEvent.CONNECTION_INITIALIZED);
+        return (type == ConnectionLifeEvent.CONNECTION_INITIALIZED);
     }
     
     public boolean isConnectionCapabilitiesEvent() {
-        return (type == LifeEvent.CONNECTION_CAPABILITIES);
-    }
-    
-    public boolean isConnectionLifecycleEvent() {
-        return connection != null;
+        return (type == ConnectionLifeEvent.CONNECTION_CAPABILITIES);
     }
     
     public String toString() {
-        StringBuffer buffer = new StringBuffer("LifecycleEvent: [event=");
+        StringBuffer buffer = new StringBuffer("ConnectionLifecycleEvent: [event=");
         buffer.append(type);
         buffer.append(", connection=");
         if(connection != null) {

@@ -85,10 +85,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         assertEquals(20, dht.getPingedNodesList().size());
         assertEquals(new InetSocketAddress("localhost", 2000), dht.getPingedNodesList().get(19));
         
-        //should never ping same host twice
-        Set<SocketAddress> nodesList = nodeAdder.getNodesSet();
-        assertTrue(nodesList.isEmpty());
-        
         //try cancelling node adder and starting it again
         controller.stop();
         assertFalse("Node adder should not be running", nodeAdder.isRunning());
@@ -97,14 +93,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         for(int i = 0; i < 100; i++) {
             controller.addActiveDHTNode(new InetSocketAddress("localhost", 2100+i));
         }
-        nodeAdder = controller.getRandomNodeAdder();
-        nodesList = nodeAdder.getNodesSet();
-        assertEquals(30, nodesList.size());
-        assertEquals(new InetSocketAddress("localhost", 2199), nodesList.iterator().next());
-        //try starting the node adder
+        //see if the nodes were pinged
         Thread.sleep(500);
         assertEquals(50, dht.getPingedNodesList().size());
-        assertEquals(new InetSocketAddress("localhost", 2170), dht.getPingedNodesList().get(49));
+        assertEquals(new InetSocketAddress("localhost", 2199), dht.getPingedNodesList().get(20));
         
     }
     

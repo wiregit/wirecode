@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
-import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
@@ -27,7 +27,7 @@ public class NullDHTController implements DHTController {
 		return null;
 	}
 
-	public void handleConnectionLifecycleEvent(LifecycleEvent evt) {}
+	public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
 
 	public boolean isActiveNode() {
 		return false;

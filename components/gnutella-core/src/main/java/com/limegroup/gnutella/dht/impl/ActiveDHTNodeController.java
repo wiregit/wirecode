@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
@@ -113,9 +113,13 @@ class ActiveDHTNodeController extends AbstractDHTController {
         return true;
     }
 
-    public void handleConnectionLifecycleEvent(LifecycleEvent evt) {
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();
+        if(c == null) {
+            return;
+        }
+        
         String host = c.getAddress();
         int port = c.getPort();
 

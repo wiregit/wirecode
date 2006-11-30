@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.LifecycleEvent.LifeEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent.ConnectionLifeEvent;
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -248,10 +248,10 @@ public class ConnectionManager implements ConnectionAcceptor {
     private volatile float _measuredDownstreamBandwidth = 0.f;
     
     /**
-     * List of event listeners for LifeCycleEvents.
+     * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private CopyOnWriteArrayList<LifecycleListener> lifeCycleListeners = 
-        new CopyOnWriteArrayList<LifecycleListener>();
+    private CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
+        new CopyOnWriteArrayList<ConnectionLifecycleListener>();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using
@@ -1426,8 +1426,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         }
         
         if(!willTryToReconnect) {
-            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifecycleEvent.LifeEvent.DISCONNECTED, null));
+            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifecycleEvent.ConnectionLifeEvent.DISCONNECTED, null));
         }
     }
     
@@ -1574,8 +1574,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         RouterService.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
-        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this, 
-                LifeEvent.CONNECTION_CLOSED,
+        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this, 
+                ConnectionLifeEvent.CONNECTION_CLOSED,
                 c));
 
         // 5) Clean up Unicaster
@@ -1704,11 +1704,11 @@ public class ConnectionManager implements ConnectionAcceptor {
                 need--;
             }
             _fetchers.addAll(fetchers);
-            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifeEvent.CONNECTING, null));
+            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifeEvent.CONNECTING, null));
         } else if (need == 0) {
-            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifeEvent.CONNECTED, null));
+            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifeEvent.CONNECTED, null));
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1799,8 +1799,8 @@ public class ConnectionManager implements ConnectionAcceptor {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifeEvent.CONNECTION_INITIALIZING,
+        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                ConnectionLifeEvent.CONNECTION_INITIALIZING,
                 mc));
      
         try {
@@ -1967,8 +1967,8 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifeEvent.CONNECTION_INITIALIZING,
+            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifeEvent.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2021,8 +2021,8 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                    LifeEvent.CONNECTION_INITIALIZING,
+            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifeEvent.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2049,8 +2049,8 @@ public class ConnectionManager implements ConnectionAcceptor {
             // announce its initialization
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
-                dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                        LifeEvent.CONNECTION_INITIALIZED,
+                dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                        ConnectionLifeEvent.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
             }
@@ -2331,8 +2331,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         
         // Notify the user that they have no internet connection and that
         // we will automatically retry
-        dispatchLifecycleEvent(new LifecycleEvent(ConnectionManager.this,
-                LifeEvent.NO_INTERNET));
+        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                ConnectionLifeEvent.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
@@ -2396,25 +2396,25 @@ public class ConnectionManager implements ConnectionAcceptor {
     }
     
     /**
-     * registers a listener for LifeCycleEvents
+     * registers a listener for ConnectionLifeCycleEvents
      */
-    public void registerLifecycleListener(LifecycleListener listener) {
-        lifeCycleListeners.addIfAbsent(listener);
+    public void registerConnectionLifecycleListener(ConnectionLifecycleListener listener) {
+        connectionLifeCycleListeners.addIfAbsent(listener);
     }
     
     /**
-     * unregisters a listener for LifeCycleEvents
+     * unregisters a listener for ConnectionLifeCycleEvents
      */
-    public void unregisterLifecycleListener(LifecycleListener listener) {
-        lifeCycleListeners.remove(listener);
+    public void unregisterConnectionLifecycleListener(ConnectionLifecycleListener listener) {
+        connectionLifeCycleListeners.remove(listener);
     }
     
     /**
-     * dispatches a LifecycleEvent to any registered listeners 
+     * dispatches a ConnectionLifecycleEvent to any registered listeners 
      */
-    public void dispatchLifecycleEvent(LifecycleEvent evt) {
-        for(LifecycleListener listener : lifeCycleListeners) {
-            listener.handleLifecycleEvent(evt);
+    public void dispatchConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+        for(ConnectionLifecycleListener listener : connectionLifeCycleListeners) {
+            listener.handleConnectionLifecycleEvent(evt);
         }
     }
     

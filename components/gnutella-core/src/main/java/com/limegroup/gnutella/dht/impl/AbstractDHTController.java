@@ -61,7 +61,7 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * Whether or not the DHT controlled by this controller is running.
      */
-    private volatile boolean running = false;
+    private boolean running = false;
 
     /**
      * The DHT bootstrapper instance.
@@ -71,10 +71,11 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * The random node adder.
      */
-    private RandomNodeAdder dhtNodeAdder;
+    private final RandomNodeAdder dhtNodeAdder;
     
     public AbstractDHTController() {
         bootstrapper = new LimeDHTBootstrapper(this);
+        dhtNodeAdder = new RandomNodeAdder();
     }
 
     /**
@@ -128,11 +129,7 @@ abstract class AbstractDHTController implements DHTController {
         }
         
         bootstrapper.stop();
-        
-        if (dhtNodeAdder != null) {
-            dhtNodeAdder.stop();
-            dhtNodeAdder = null;
-        }
+        dhtNodeAdder.stop();
         
         if (dht != null) {
             dht.stop();
@@ -151,11 +148,8 @@ abstract class AbstractDHTController implements DHTController {
         if(!dht.isBootstrapped()){
             bootstrapper.addBootstrapHost(hostAddress);
         } else if(addToDHTNodeAdder){
-            if(dhtNodeAdder == null) {
-                dhtNodeAdder = new RandomNodeAdder();
-            }
-            
             dhtNodeAdder.addDHTNode(hostAddress);
+            dhtNodeAdder.start();
         }
     }
     
@@ -211,6 +205,9 @@ abstract class AbstractDHTController implements DHTController {
      * Sets the MojitoDHT instance. Meant to be called once!
      */
     protected void setMojitoDHT(MojitoDHT dht) {
+        
+        assert (this.dht == null);
+        
         assert (dht != null);
         
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
@@ -293,33 +290,40 @@ abstract class AbstractDHTController implements DHTController {
         
         private static final int MAX_SIZE = 30;
         
-        private Object dhtNodesLock = new Object();
-        
-        private Set<SocketAddress> dhtNodes;
+        private final Set<SocketAddress> dhtNodes;
         
         private TimerTask timerTask;
         
-        private volatile boolean isRunning;
+        private boolean isRunning;
         
         public RandomNodeAdder() {
             dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
+        }
+        
+        public synchronized void start() {
+            if(isRunning) {
+                return;
+            }
             long delay = DHTSettings.DHT_NODE_ADDER_DELAY.getValue();
             timerTask = RouterService.schedule(this, delay, delay);
             isRunning = true;
         }
         
-        void addDHTNode(SocketAddress address) {
-            synchronized (dhtNodesLock) {
-                dhtNodes.add(address);
-            }
+        synchronized void addDHTNode(SocketAddress address) {
+            dhtNodes.add(address);
         }
         
         public void run() {
             
-            Set<SocketAddress> nodes = null;
-            synchronized (dhtNodesLock) {
-                nodes = dhtNodes;
-                dhtNodes = new FixedSizeLIFOSet<SocketAddress>(MAX_SIZE);
+            List<SocketAddress> nodes = null;
+            synchronized (this) {
+                
+                if(!running) {
+                    return;
+                }
+                
+                nodes = new ArrayList<SocketAddress>(dhtNodes);
+                dhtNodes.clear();
             }
             
             synchronized(dht) {
@@ -335,16 +339,13 @@ abstract class AbstractDHTController implements DHTController {
                 
         }
         
-        boolean isRunning() {
+        synchronized boolean isRunning() {
             return isRunning;
         }
         
-        Set<SocketAddress> getNodesSet(){
-            return dhtNodes;
-        }
-        
-        void stop() {
+        synchronized void stop() {
             timerTask.cancel();
+            dhtNodes.clear();
             isRunning = false;
         }
     }

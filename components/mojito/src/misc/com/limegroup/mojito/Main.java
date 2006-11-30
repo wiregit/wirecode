@@ -38,7 +38,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
@@ -406,7 +406,7 @@ public class Main {
         public void handleAddressStateChanged() {
         }
 
-        public void handleLifecycleEvent(LifecycleEvent evt) {
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         }
 
         public void handleTorrent(File torrentFile) {

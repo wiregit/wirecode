@@ -890,7 +890,7 @@ public final class MessageRouterTest extends BaseTestCase {
             return false;
         }
 
-        public void handleLifecycleEvent(LifecycleEvent evt) {}
+        public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
         
         public int getVendor() {
             return 0;

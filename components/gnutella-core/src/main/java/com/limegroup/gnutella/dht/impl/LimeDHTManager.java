@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.impl;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.gnutella.LifecycleEvent;
+import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -18,9 +18,6 @@ import com.limegroup.mojito.settings.ContextSettings;
  */
 public class LimeDHTManager implements DHTManager {
 	
-	private static final DHTController NULL_CONTROLLER = 
-		new NullDHTController();
-    
     /**
      * The Vendor code of this DHT Node
      */
@@ -34,7 +31,7 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The DHTController instance
      */
-    private DHTController controller = NULL_CONTROLLER;
+    private DHTController controller = new NullDHTController();
     
     public synchronized void start(boolean activeMode) {
     	
@@ -91,7 +88,7 @@ public class LimeDHTManager implements DHTManager {
     
     public synchronized void stop(){
         controller.stop();
-        controller = NULL_CONTROLLER;
+        controller = new NullDHTController();
     }
     
     public synchronized boolean isRunning() {
@@ -122,7 +119,7 @@ public class LimeDHTManager implements DHTManager {
      * it still qualifies.
      * 
      */
-    public synchronized void handleLifecycleEvent(LifecycleEvent evt) {
+    public synchronized void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             if(controller.isRunning() 
                     && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
@@ -131,9 +128,7 @@ public class LimeDHTManager implements DHTManager {
             return;
         } 
 
-        if(evt.isConnectionLifecycleEvent()) {
-            controller.handleConnectionLifecycleEvent(evt);
-        }
+        controller.handleConnectionLifecycleEvent(evt);
     }
     
     public int getVendor() {
