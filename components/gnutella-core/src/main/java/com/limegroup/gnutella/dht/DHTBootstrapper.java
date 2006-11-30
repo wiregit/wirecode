@@ -38,10 +38,4 @@ public interface DHTBootstrapper {
      * nodes to bootstrap from.
      */
     public boolean isWaitingForNodes();
-    
-    /**
-     * Returns wether the bootstrapper is currently bootstrapping from the 
-     * persisted routing table.
-     */
-    public boolean isBootstrappingFromRT();
 }

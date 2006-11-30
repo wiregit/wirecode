@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;

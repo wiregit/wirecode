@@ -15,6 +15,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;

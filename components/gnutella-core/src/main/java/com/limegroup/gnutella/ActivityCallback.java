@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 
@@ -22,7 +24,7 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener, LifecycleListener
+public interface ActivityCallback extends DownloadCallback, FileEventListener, ConnectionLifecycleListener
 {
     
     /**
@@ -96,7 +98,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, L
      * This event is triggered by the ConnectionManager
      * 
      */
-    public void handleLifecycleEvent(LifecycleEvent evt);
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt);
     
     /**
      * Notifies the GUI that the given shared file has new information.

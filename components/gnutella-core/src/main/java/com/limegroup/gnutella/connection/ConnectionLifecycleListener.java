@@ -1,4 +1,5 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.connection;
+
 
 public interface ConnectionLifecycleListener {
 

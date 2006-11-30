@@ -164,10 +164,6 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         return waiting.get();
     }
     
-    public boolean isBootstrappingFromRT() {
-        return bootstrappingFromRT.get();
-    }
-    
     /**
      * Gets the SIMPP host responsible for the keyspace containing the local node ID
      * 

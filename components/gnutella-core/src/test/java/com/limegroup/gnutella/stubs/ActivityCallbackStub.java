@@ -9,11 +9,11 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 

@@ -12,8 +12,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ConnectionLifecycleEvent.ConnectionLifeEvent;
 import com.limegroup.gnutella.connection.CompositeQueue;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.DeflaterWriter;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
@@ -24,6 +24,7 @@ import com.limegroup.gnutella.connection.MessageReceiver;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.ConnectionLifeEvent;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;

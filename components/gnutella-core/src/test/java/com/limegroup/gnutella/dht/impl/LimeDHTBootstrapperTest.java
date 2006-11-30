@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
@@ -67,7 +68,9 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         Thread.sleep(300);
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
-        assertTrue("Should be bootstrapping from RT", bootstrapper.isBootstrappingFromRT());
+        AtomicBoolean bool = 
+            (AtomicBoolean) PrivilegedAccessor.getValue(bootstrapper, "bootstrappingFromRT");
+        assertTrue("Should be bootstrapping from RT", bool.get());
         //now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue(future.isCancelled());
@@ -95,7 +98,9 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",5000));
         Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         assertFalse(bootstrapper.isWaitingForNodes());
-        assertFalse(bootstrapper.isBootstrappingFromRT());
+        AtomicBoolean bool = 
+            (AtomicBoolean) PrivilegedAccessor.getValue(bootstrapper, "bootstrappingFromRT");
+        assertFalse(bool.get());
         Thread.sleep(100);
         //now add other host: it should not cancel the previous attempt
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",6000));

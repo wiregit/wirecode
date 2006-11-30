@@ -3,8 +3,8 @@ package com.limegroup.gnutella.dht;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.gnutella.ConnectionLifecycleListener;
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.util.IpPort;
 
 /**

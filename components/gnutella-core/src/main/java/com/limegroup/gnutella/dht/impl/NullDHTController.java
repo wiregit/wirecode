@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
-import com.limegroup.gnutella.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;

@@ -15,9 +15,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.ConnectionLifecycleEvent.ConnectionLifeEvent;
 import com.limegroup.gnutella.connection.ConnectionChecker;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.ConnectionLifeEvent;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;

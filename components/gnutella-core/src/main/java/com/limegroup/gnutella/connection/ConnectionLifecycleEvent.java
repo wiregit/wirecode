@@ -1,6 +1,8 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.connection;
 
 import java.util.EventObject;
+
+import com.limegroup.gnutella.ManagedConnection;
 
 public class ConnectionLifecycleEvent extends EventObject {
     

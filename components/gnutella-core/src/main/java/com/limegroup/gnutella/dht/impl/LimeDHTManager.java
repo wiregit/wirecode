@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.impl;
 import java.net.SocketAddress;
 import java.util.List;
 
-import com.limegroup.gnutella.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
