@@ -61,30 +61,33 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
         DHTFuture<PingResult> future = dht.ping(addr);
         
         DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
-            public void futureDone(DHTFuture<? extends PingResult> future) {
-                try {
-                    PingResult result = future.get();
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Ping succeeded to: " + result);
-                    }
-                    
-                    Contact node = result.getContact();
-                    synchronized (PassiveDHTNodeRouteTable.this) {
-                        KUID previous = leafDHTNodes.put(addr, node.getNodeID());
-                        
-                        if (previous == null || !previous.equals(node.getNodeID())) {
-                            // Add it as a priority Node
-                            node.setTimeStamp(Contact.PRIORITY_CONTACT);
-                            add(node);
-                        }
-                    }
-                } catch (ExecutionException e) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Ping failed to: " + addr, e);
-                    }
-                } catch (CancellationException ignore) {
-                } catch (InterruptedException ignore) {
+            public void handleFutureSuccess(PingResult result) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Ping succeeded to: " + result);
                 }
+                
+                Contact node = result.getContact();
+                synchronized (PassiveDHTNodeRouteTable.this) {
+                    KUID previous = leafDHTNodes.put(addr, node.getNodeID());
+                    
+                    if (previous == null || !previous.equals(node.getNodeID())) {
+                        // Add it as a priority Node
+                        node.setTimeStamp(Contact.PRIORITY_CONTACT);
+                        add(node);
+                    }
+                }
+            }
+
+            public void handleFutureFailure(ExecutionException e) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("Ping failed to: " + addr, e);
+                }
+            }
+            
+            public void handleFutureCancelled(CancellationException e) {
+            }
+
+            public void handleFutureInterrupted(InterruptedException e) {
             }
         };
         

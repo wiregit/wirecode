@@ -23,7 +23,6 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import com.limegroup.mojito.Context;
@@ -151,20 +150,17 @@ public class PingManager extends AbstractManager<PingResult> {
                 futureMap.remove(address);
             }
         }
-
+        
         @Override
-        public void fireFutureDone() {
-            try {
-                @SuppressWarnings("unused")
-                PingResult result = get();
-                networkStats.PINGS_OK.incrementStat();
-            } catch (ExecutionException e) {
-                networkStats.PINGS_FAILED.incrementStat();
-            } catch (CancellationException ignore) {
-            } catch (InterruptedException ignore) {
-            }
-            
-            super.fireFutureDone();
+        public void fireFutureSuccess(PingResult value) {
+            networkStats.PINGS_OK.incrementStat();
+            super.fireFutureSuccess(value);
+        }
+        
+        @Override
+        public void fireFutureFailure(ExecutionException e) {
+            networkStats.PINGS_FAILED.incrementStat();
+            super.fireFutureFailure(e);
         }
     }
 }

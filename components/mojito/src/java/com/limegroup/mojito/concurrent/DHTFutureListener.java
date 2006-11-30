@@ -19,14 +19,20 @@
 
 package com.limegroup.mojito.concurrent;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+
 
 /**
  * The listener interface for receiving DHTFuture notifications.
  */
 public interface DHTFutureListener<T> {
     
-    /**
-     * Invoked when a DHTFuture reaches its done state
-     */
-    public void futureDone(DHTFuture<? extends T> future);
+    public void handleFutureSuccess(T result);
+    
+    public void handleFutureFailure(ExecutionException e);
+    
+    public void handleFutureCancelled(CancellationException e);
+    
+    public void handleFutureInterrupted(InterruptedException e);
 }

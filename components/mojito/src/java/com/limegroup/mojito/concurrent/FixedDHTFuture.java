@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.concurrent;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -43,7 +44,16 @@ public class FixedDHTFuture<T> implements DHTFuture<T> {
     }
     
     public void addDHTFutureListener(DHTFutureListener<T> listener) {
-        listener.futureDone(this);
+        try {
+            T value = get();
+            listener.handleFutureSuccess(value);
+        } catch (ExecutionException e) {
+            listener.handleFutureFailure(e);
+        } catch (CancellationException e) {
+            listener.handleFutureCancelled(e);
+        } catch (InterruptedException e) {
+            listener.handleFutureInterrupted(e);
+        }
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {

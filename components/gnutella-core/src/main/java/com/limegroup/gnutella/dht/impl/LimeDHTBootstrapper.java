@@ -219,18 +219,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
     }
     
     private class InitialBootstrapListener implements DHTFutureListener<BootstrapResult> {
-        
-        public void futureDone(DHTFuture<? extends BootstrapResult> future) {
-            try {
-                handleResult(future.get());
-            } catch (ExecutionException e) {
-                handleThrowable(e.getCause());
-            } catch (CancellationException ignore) {
-            } catch (InterruptedException ignore) {
-            }
-        }
 
-        private void handleResult(BootstrapResult result) {
+        public void handleFutureSuccess(BootstrapResult result) {
             
             if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
                 LOG.debug("Initial bootstrap ping succeded");
@@ -297,27 +287,22 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             }
         }
         
-        private void handleThrowable(Throwable ex) {
-            LOG.error("Throwable", ex);
+        public void handleFutureFailure(ExecutionException e) {
+            LOG.error("ExecutionException", e);
             stop();
+        }
+        
+        public void handleFutureCancelled(CancellationException e) {
+        }
+
+        public void handleFutureInterrupted(InterruptedException e) {
         }
     }
     
     private class WaitingBootstrapListener implements DHTFutureListener<BootstrapResult> {
         
-        public void futureDone(DHTFuture<? extends BootstrapResult> future) {
-            try {
-                handleResult(future.get());
-            } catch (ExecutionException e) {
-                handleThrowable(e.getCause());
-            } catch (CancellationException ignore) {
-            } catch (InterruptedException ignore) {
-            }
-        }
-
-        private void handleResult(BootstrapResult result) {
-            
-            //this listener should never be called when bootstrapping from RT
+        public void handleFutureSuccess(BootstrapResult result) {
+            // this listener should never be called when bootstrapping from RT
             Assert.that(!bootstrappingFromRT.get());
             
             if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
@@ -352,9 +337,15 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             bootstrapFuture.addDHTFutureListener(this);
         }
         
-        private void handleThrowable(Throwable ex) {
-            LOG.debug(ex);
+        public void handleFutureFailure(ExecutionException e) {
+            LOG.debug("ExecutionException" , e);
             stop();
+        }
+        
+        public void handleFutureCancelled(CancellationException e) {
+        }
+
+        public void handleFutureInterrupted(InterruptedException e) {
         }
     }
 }

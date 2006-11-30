@@ -328,65 +328,66 @@ public class RouteTableImpl implements RouteTable {
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
         DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
-            public void futureDone(DHTFuture<? extends PingResult> future) {
-                try {
-                    PingResult result = future.get();
-                    
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(node + " is trying to spoof " + result);
-                    }
-                    
-                    // DO NOTHING! The DefaultMessageHandler takes care 
-                    // of everything else! DO NOT BAN THE NODE!!!
-                    // Reason: It was maybe just a Node ID collision!
-                    
-                } catch (ExecutionException e) {
-                    DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
-                    
-                    // We can only make decisions for timeouts! 
-                    if (timeout == null) {
-                        return;
-                    }
-                    
-                    KUID nodeId = timeout.getNodeID();
-                    SocketAddress address = timeout.getSocketAddress();
-                    
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(ContactUtils.toString(nodeId, address) 
-                                + " did not respond! Replacing it with " + node);
-                    }
-                    
-                    synchronized (RouteTableImpl.this) {
-                        Bucket bucket = bucketTrie.select(nodeId);
-                        Contact current = bucket.get(nodeId);
-                        if (current != null && current.equals(existing)) {
-                            
-                            /*
-                             * See JIRA issue MOJITO-54
-                             */
-                            
-                            // NOTE: We cannot call updateContactInBucket(...) here
-                            // because it would do the spoof check again.
-                            node.updateWithExistingContact(current);
-                            Contact replaced = bucket.updateContact(node);
-                            assert (replaced == current);
-                            
-                            fireContactUpdate(bucket, current, node);
-                            
-                            // If the Node is in the Cache then ping the least recently
-                            // seen live Node which might promote the new Node to a
-                            // live Contact!
-                            if (bucket.containsCachedContact(nodeId)) {
-                                pingLeastRecentlySeenNode(bucket);
-                            }
-                        } else {
-                            add(node);
-                        }
-                    }
-                    
-                } catch (CancellationException ignore) {
-                } catch (InterruptedException ignore) {
+            
+            public void handleFutureSuccess(PingResult result) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn(node + " is trying to spoof " + result);
                 }
+                
+                // DO NOTHING! The DefaultMessageHandler takes care 
+                // of everything else! DO NOT BAN THE NODE!!!
+                // Reason: It was maybe just a Node ID collision!
+            }
+            
+            public void handleFutureFailure(ExecutionException e) {
+                DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
+                
+                // We can only make decisions for timeouts! 
+                if (timeout == null) {
+                    return;
+                }
+                
+                KUID nodeId = timeout.getNodeID();
+                SocketAddress address = timeout.getSocketAddress();
+                
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(ContactUtils.toString(nodeId, address) 
+                            + " did not respond! Replacing it with " + node);
+                }
+                
+                synchronized (RouteTableImpl.this) {
+                    Bucket bucket = bucketTrie.select(nodeId);
+                    Contact current = bucket.get(nodeId);
+                    if (current != null && current.equals(existing)) {
+                        
+                        /*
+                         * See JIRA issue MOJITO-54
+                         */
+                        
+                        // NOTE: We cannot call updateContactInBucket(...) here
+                        // because it would do the spoof check again.
+                        node.updateWithExistingContact(current);
+                        Contact replaced = bucket.updateContact(node);
+                        assert (replaced == current);
+                        
+                        fireContactUpdate(bucket, current, node);
+                        
+                        // If the Node is in the Cache then ping the least recently
+                        // seen live Node which might promote the new Node to a
+                        // live Contact!
+                        if (bucket.containsCachedContact(nodeId)) {
+                            pingLeastRecentlySeenNode(bucket);
+                        }
+                    } else {
+                        add(node);
+                    }
+                }
+            }
+
+            public void handleFutureCancelled(CancellationException e) {
+            }
+            
+            public void handleFutureInterrupted(InterruptedException e) {
             }
         };
         

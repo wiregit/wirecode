@@ -29,9 +29,10 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.db.Database;
@@ -191,25 +192,24 @@ public class CommandHandler {
         out.println("Bootstrapping... " + addr);
         
         DHTFutureListener<BootstrapResult> listener = new DHTFutureListener<BootstrapResult>() {
-            public void futureDone(DHTFuture<? extends BootstrapResult> future) {
-                try {
-                    handleResult(future.get());
-                } catch (Exception e) {
-                    handleThrowable(e.getCause());
-                }
-            }
-
-            private void handleResult(BootstrapResult result) {
+            
+            public void handleFutureSuccess(BootstrapResult result) {
                 if (result.getEventType() == ResultType.BOOTSTRAP_SUCCEEDED) {
                     out.println("Bootstraping finished:\n" + result);
                     out.flush();
                 }
             }
-            
-            private void handleThrowable(Throwable ex) {
+
+            public void handleFutureFailure(ExecutionException e) {
                 out.println("Bootstraping failed");
-                ex.printStackTrace(out);
+                e.printStackTrace(out);
                 out.flush();
+            }
+            
+            public void handleFutureCancelled(CancellationException e) {
+            }
+            
+            public void handleFutureInterrupted(InterruptedException e) {
             }
         };
         

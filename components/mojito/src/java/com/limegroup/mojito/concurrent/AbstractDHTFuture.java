@@ -22,6 +22,8 @@ package com.limegroup.mojito.concurrent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 
@@ -67,7 +69,16 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
         
         if (done) {
-            listener.futureDone(this);
+            try {
+                V value = get();
+                listener.handleFutureSuccess(value);
+            } catch (ExecutionException e) {
+                listener.handleFutureFailure(e);
+            } catch (CancellationException e) {
+                listener.handleFutureCancelled(e);
+            } catch (InterruptedException e) {
+                listener.handleFutureInterrupted(e);
+            }
         }
     }
     
@@ -78,23 +89,49 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
     @Override
     protected void done() {
         assert (isDone());
+        
         super.done();
         deregister();
-        fireFutureDone();
-    }
-    
-    public void fireFutureDone() {
-        fireFutureDone(this);
-    }
-    
-    public void fireFutureDone(DHTFuture<V> future) {
-        List<DHTFutureListener<V>> copy = null;
-        synchronized (listeners) {
-            copy = new ArrayList<DHTFutureListener<V>>(listeners);
-        }
         
-        for (DHTFutureListener<V> l : copy) {
-            l.futureDone(future);
+        try {
+            V value = get();
+            fireFutureSuccess(value);
+        } catch (ExecutionException e) {
+            fireFutureFailure(e);
+        } catch (CancellationException e) {
+            fireFutureCancelled(e);
+        } catch (InterruptedException e) {
+            fireFutureInterrupted(e);
+        }
+    }
+    
+    private List<DHTFutureListener<V>> listeners() {
+        synchronized (listeners) {
+            return new ArrayList<DHTFutureListener<V>>(listeners);
+        }
+    }
+    
+    public void fireFutureSuccess(V value) {
+        for (DHTFutureListener<V> l : listeners()) {
+            l.handleFutureSuccess(value);
+        }
+    }
+    
+    public void fireFutureFailure(ExecutionException e) {
+        for (DHTFutureListener<V> l : listeners()) {
+            l.handleFutureFailure(e);
+        }
+    }
+    
+    public void fireFutureCancelled(CancellationException e) {
+        for (DHTFutureListener<V> l : listeners()) {
+            l.handleFutureCancelled(e);
+        }
+    }
+    
+    public void fireFutureInterrupted(InterruptedException e) {
+        for (DHTFutureListener<V> l : listeners()) {
+            l.handleFutureInterrupted(e);
         }
     }
 }
