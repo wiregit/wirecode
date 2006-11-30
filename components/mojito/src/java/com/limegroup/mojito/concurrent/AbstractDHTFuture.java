@@ -105,9 +105,10 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
     }
     
-    private List<DHTFutureListener<V>> listeners() {
+    @SuppressWarnings("unchecked")
+    private DHTFutureListener<V>[] listeners() {
         synchronized (listeners) {
-            return new ArrayList<DHTFutureListener<V>>(listeners);
+            return listeners.toArray(new DHTFutureListener[0]);
         }
     }
     
