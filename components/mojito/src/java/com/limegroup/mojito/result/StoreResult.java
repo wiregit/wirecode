@@ -21,7 +21,6 @@ package com.limegroup.mojito.result;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.limegroup.mojito.db.DHTValue;
@@ -39,7 +38,7 @@ public class StoreResult {
     private Collection<DHTValue> failed;
     
     @SuppressWarnings("unchecked")
-    public StoreResult(List<? extends Contact> nodes, 
+    public StoreResult(Collection<? extends Contact> nodes, 
             Collection<? extends DHTValue> values, 
             Collection<? extends DHTValue> failed) {
         
