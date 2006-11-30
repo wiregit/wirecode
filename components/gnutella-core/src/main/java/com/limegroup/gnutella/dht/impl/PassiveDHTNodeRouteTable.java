@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.result.DHTResultListener;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.Contact;
@@ -57,30 +59,36 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
         
         final InetSocketAddress addr = new InetSocketAddress(host, port);
         DHTFuture<PingResult> future = dht.ping(addr);
-        future.addDHTResultListener(new DHTResultListener<PingResult>() {
-            public void handleResult(PingResult result) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Ping succeeded to: " + result);
-                }
-                
-                Contact node = result.getContact();
-                synchronized (PassiveDHTNodeRouteTable.this) {
-                    KUID previous = leafDHTNodes.put(addr, node.getNodeID());
-                    
-                    if (previous == null || !previous.equals(node.getNodeID())) {
-                        // Add it as a priority Node
-                        node.setTimeStamp(Contact.PRIORITY_CONTACT);
-                        add(node);
+        
+        DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
+            public void futureDone(DHTFuture<? extends PingResult> future) {
+                try {
+                    PingResult result = future.get();
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Ping succeeded to: " + result);
                     }
+                    
+                    Contact node = result.getContact();
+                    synchronized (PassiveDHTNodeRouteTable.this) {
+                        KUID previous = leafDHTNodes.put(addr, node.getNodeID());
+                        
+                        if (previous == null || !previous.equals(node.getNodeID())) {
+                            // Add it as a priority Node
+                            node.setTimeStamp(Contact.PRIORITY_CONTACT);
+                            add(node);
+                        }
+                    }
+                } catch (ExecutionException e) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Ping failed to: " + addr, e);
+                    }
+                } catch (CancellationException ignore) {
+                } catch (InterruptedException ignore) {
                 }
             }
-
-            public void handleThrowable(Throwable ex) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Ping failed to: " + addr, ex);
-                }
-            }
-        });
+        };
+        
+        future.addDHTFutureListener(listener);
     }
     
     /**

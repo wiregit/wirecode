@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.exceptions.BootstrapTimeoutException;
 import com.limegroup.mojito.exceptions.CollisionException;
 import com.limegroup.mojito.exceptions.DHTException;
@@ -202,7 +205,45 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
-            future.fireResult(BootstrapResult.createBootstrapPingSucceededResult());
+            // This is a little hack and an incorrect way to
+            // use Futures but we've not many options here.
+            // We want to notify the listeners that we've found
+            // an initial bootstrap Node even though bootstrapping
+            // isn't finished yet...
+            DHTFuture<BootstrapResult> pingSucceeded = new DHTFuture<BootstrapResult>() {
+                
+                private BootstrapResult result 
+                    = BootstrapResult.createBootstrapPingSucceededResult();
+                
+                public void addDHTFutureListener(DHTFutureListener<BootstrapResult> listener) {
+                    future.addDHTFutureListener(listener);
+                }
+
+                public boolean cancel(boolean mayInterruptIfRunning) {
+                    return future.cancel(mayInterruptIfRunning);
+                }
+
+                public BootstrapResult get() 
+                        throws InterruptedException, ExecutionException {
+                    return result;
+                }
+
+                public BootstrapResult get(long timeout, TimeUnit unit) 
+                        throws InterruptedException, ExecutionException, TimeoutException {
+                    return result;
+                }
+
+                public boolean isCancelled() {
+                    return future.isCancelled();
+                }
+
+                public boolean isDone() {
+                    return future.isDone();
+                }
+            };
+            
+            future.fireFutureDone(pingSucceeded);
+            
             phaseOneStart = System.currentTimeMillis();
 
             boolean foundNewContacts = startBootstrapLookups(node);

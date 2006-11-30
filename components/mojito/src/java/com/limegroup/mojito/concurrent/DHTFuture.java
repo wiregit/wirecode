@@ -21,7 +21,6 @@ package com.limegroup.mojito.concurrent;
 
 import java.util.concurrent.Future;
 
-import com.limegroup.mojito.result.DHTResultListener;
 
 /**
  * The DHTFuture extends Futures by Listeners.
@@ -29,9 +28,9 @@ import com.limegroup.mojito.result.DHTResultListener;
 public interface DHTFuture<T> extends Future<T> {
     
     /**
-     * Adds a DHTResultListener to the DHTFuture. The listener
+     * Adds a DHTFutureListener to the DHTFuture. The listener
      * is called when the DHTFuture finishes or if it has
      * alredy finished it will call the listener immediately.
      */
-    public void addDHTResultListener(DHTResultListener<T> listener);
+    public void addDHTFutureListener(DHTFutureListener<T> listener);
 }

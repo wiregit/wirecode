@@ -23,6 +23,8 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -89,7 +91,7 @@ public class PingManager extends AbstractManager<PingResult> {
      * is a Node ID collision
      */
     public DHTFuture<PingResult> collisionPing(Contact node) {
-        // The idea is to invert our local Node so that the
+        // The idea is to invert our local Node ID so that the
         // other Node doesn't get the impression we're trying
         // to spoof anything and we don't want that the other
         // guy adds this Contact to its RouteTable. To do so
@@ -151,15 +153,18 @@ public class PingManager extends AbstractManager<PingResult> {
         }
 
         @Override
-        public void fireResult(PingResult result) {
-            networkStats.PINGS_OK.incrementStat();
-            super.fireResult(result);
-        }
-        
-        @Override
-        public void fireThrowable(Throwable ex) {
-            networkStats.PINGS_FAILED.incrementStat();
-            super.fireThrowable(ex);
+        public void fireFutureDone() {
+            try {
+                @SuppressWarnings("unused")
+                PingResult result = get();
+                networkStats.PINGS_OK.incrementStat();
+            } catch (ExecutionException e) {
+                networkStats.PINGS_FAILED.incrementStat();
+            } catch (CancellationException ignore) {
+            } catch (InterruptedException ignore) {
+            }
+            
+            super.fireFutureDone();
         }
     }
 }

@@ -16,12 +16,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.result;
+
+package com.limegroup.mojito.concurrent;
+
 
 /**
- * The interface for reciving Bootstrap events.
+ * The listener interface for receiving DHTFuture notifications.
  */
-public interface BootstrapListener extends DHTResultListener<BootstrapResult> {
+public interface DHTFutureListener<T> {
     
+    /**
+     * Invoked when a DHTFuture reaches its done state
+     */
+    public void futureDone(DHTFuture<? extends T> future);
 }

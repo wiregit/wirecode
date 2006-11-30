@@ -26,10 +26,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +37,9 @@ import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
+import com.limegroup.mojito.concurrent.FixedDHTFuture;
 import com.limegroup.mojito.exceptions.DHTTimeoutException;
-import com.limegroup.mojito.result.DHTResultListener;
-import com.limegroup.mojito.result.PingListener;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Bucket;
 import com.limegroup.mojito.routing.Contact;
@@ -50,6 +49,7 @@ import com.limegroup.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.ContactUtils;
+import com.limegroup.mojito.util.ExceptionUtils;
 
 /**
  * A PatriciaTrie bases RouteTable implementation for the Mojito DHT.
@@ -327,59 +327,65 @@ public class RouteTableImpl implements RouteTable {
      * state is that both Contacts have the same Node ID.
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
-        PingListener listener = new PingListener() {
-            public void handleResult(PingResult result) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(node + " is trying to spoof " + result);
-                }
-                
-                // DO NOTHING! The DefaultMessageHandler takes care 
-                // of everything else! DO NOT BAN THE NODE!!!
-                // Reason: It was maybe just a Node ID collision!
-            }
-            
-            public void handleThrowable(Throwable ex) {
-                
-                // We can only make decisions for timeouts! 
-                if (!(ex instanceof DHTTimeoutException)) {
-                    return;
-                }
-                
-                DHTTimeoutException timeout = (DHTTimeoutException)ex;
-                KUID nodeId = timeout.getNodeID();
-                SocketAddress address = timeout.getSocketAddress();
-                
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(ContactUtils.toString(nodeId, address) 
-                            + " did not respond! Replacing it with " + node);
-                }
-                
-                synchronized (RouteTableImpl.this) {
-                    Bucket bucket = bucketTrie.select(nodeId);
-                    Contact current = bucket.get(nodeId);
-                    if (current != null && current.equals(existing)) {
-                        
-                        /*
-                         * See JIRA issue MOJITO-54
-                         */
-                        
-                        // NOTE: We cannot call updateContactInBucket(...) here
-                        // because it would do the spoof check again.
-                        node.updateWithExistingContact(current);
-                        Contact replaced = bucket.updateContact(node);
-                        assert (replaced == current);
-                        
-                        fireContactUpdate(bucket, current, node);
-                        
-                        // If the Node is in the Cache then ping the least recently
-                        // seen live Node which might promote the new Node to a
-                        // live Contact!
-                        if (bucket.containsCachedContact(nodeId)) {
-                            pingLeastRecentlySeenNode(bucket);
-                        }
-                    } else {
-                        add(node);
+        DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
+            public void futureDone(DHTFuture<? extends PingResult> future) {
+                try {
+                    PingResult result = future.get();
+                    
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn(node + " is trying to spoof " + result);
                     }
+                    
+                    // DO NOTHING! The DefaultMessageHandler takes care 
+                    // of everything else! DO NOT BAN THE NODE!!!
+                    // Reason: It was maybe just a Node ID collision!
+                    
+                } catch (ExecutionException e) {
+                    DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
+                    
+                    // We can only make decisions for timeouts! 
+                    if (timeout == null) {
+                        return;
+                    }
+                    
+                    KUID nodeId = timeout.getNodeID();
+                    SocketAddress address = timeout.getSocketAddress();
+                    
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(ContactUtils.toString(nodeId, address) 
+                                + " did not respond! Replacing it with " + node);
+                    }
+                    
+                    synchronized (RouteTableImpl.this) {
+                        Bucket bucket = bucketTrie.select(nodeId);
+                        Contact current = bucket.get(nodeId);
+                        if (current != null && current.equals(existing)) {
+                            
+                            /*
+                             * See JIRA issue MOJITO-54
+                             */
+                            
+                            // NOTE: We cannot call updateContactInBucket(...) here
+                            // because it would do the spoof check again.
+                            node.updateWithExistingContact(current);
+                            Contact replaced = bucket.updateContact(node);
+                            assert (replaced == current);
+                            
+                            fireContactUpdate(bucket, current, node);
+                            
+                            // If the Node is in the Cache then ping the least recently
+                            // seen live Node which might promote the new Node to a
+                            // live Contact!
+                            if (bucket.containsCachedContact(nodeId)) {
+                                pingLeastRecentlySeenNode(bucket);
+                            }
+                        } else {
+                            add(node);
+                        }
+                    }
+                    
+                } catch (CancellationException ignore) {
+                } catch (InterruptedException ignore) {
                 }
             }
         };
@@ -833,19 +839,23 @@ public class RouteTableImpl implements RouteTable {
      * Pings the given Contact and adds the given DHTEventListener to
      * the DHTFuture if it's not null
      */
-    DHTFuture<PingResult> ping(Contact node, DHTResultListener<PingResult> listener) {
+    DHTFuture<PingResult> ping(Contact node, DHTFutureListener<PingResult> listener) {
         DHTFuture<PingResult> future = null;
         
         if (pingCallback != null) {
             future = pingCallback.ping(node);
             
         } else {
-            future = new DefaultDHTFuture(node);
+            // If there's no PingCallback then create a fake
+            // DHTFuture that simulates an instant timeout.
+            future = new FixedDHTFuture<PingResult>(new DHTTimeoutException(
+                    node.getNodeID(), node.getContactAddress(), null, 0L));
+            
             handleFailure(node.getNodeID(), node.getContactAddress());
         }
         
         if (listener != null) {
-            future.addDHTResultListener(listener);
+            future.addDHTFutureListener(listener);
         }
         
         return future;
@@ -1078,47 +1088,5 @@ public class RouteTableImpl implements RouteTable {
         buffer.append("Total Down Contacts: ").append(down).append("\n");
         buffer.append("Total Unknown Contacts: ").append(unknown).append("\n");
         return buffer.toString();
-    }
-    
-    /**
-     * A dummy implementation of DHTFuture that emulates a ping timeout
-     */
-    private static class DefaultDHTFuture implements DHTFuture<PingResult> {
-        
-        private Contact node;
-        
-        public DefaultDHTFuture(Contact node) {
-            this.node = node;
-        }
-        
-        public void addDHTResultListener(DHTResultListener<PingResult> listener) {
-            listener.handleThrowable(new DHTTimeoutException(
-                    node.getNodeID(), node.getContactAddress(), null, 0L));
-        }
-
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        public PingResult get() throws InterruptedException, ExecutionException {
-            throw new ExecutionException(
-                    new DHTTimeoutException(
-                            node.getNodeID(), node.getContactAddress(), null, 0L));
-        }
-
-        public PingResult get(long timeout, TimeUnit unit) 
-                throws InterruptedException, ExecutionException, TimeoutException {
-            throw new ExecutionException(
-                    new DHTTimeoutException(
-                            node.getNodeID(), node.getContactAddress(), null, 0L));
-        }
-
-        public boolean isCancelled() {
-            return false;
-        }
-
-        public boolean isDone() {
-            return true;
-        }
     }
 }

@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.FixedDHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.routing.Contact;
@@ -187,7 +188,7 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
         public Future<DHTValue> next() {
             // Return the values we aleady have first...
             if (values.hasNext()) {
-                return new ReturnDHTValueFuture(values.next());
+                return new FixedDHTFuture<DHTValue>(values.next());
             }
             
             // ...and continue with retreiving the values
@@ -203,39 +204,6 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
         
         public void remove() {
             throw new UnsupportedOperationException();
-        }
-    }
-    
-    /**
-     * Wraps a single DHTValue into a Future
-     */
-    private static class ReturnDHTValueFuture implements Future<DHTValue> {
-        
-        private DHTValue value;
-        
-        private ReturnDHTValueFuture(DHTValue value) {
-            this.value = value;
-        }
-
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
-        }
-
-        public DHTValue get() throws InterruptedException, ExecutionException {
-            return value;
-        }
-
-        public DHTValue get(long timeout, TimeUnit unit) 
-                throws InterruptedException, ExecutionException, TimeoutException {
-            return value;
-        }
-
-        public boolean isCancelled() {
-            return false;
-        }
-
-        public boolean isDone() {
-            return true;
         }
     }
     

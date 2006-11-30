@@ -22,20 +22,17 @@ package com.limegroup.mojito.concurrent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import com.limegroup.mojito.result.DHTResultListener;
 
 /**
  * An abstract implementation of DHTFuture
  */
 public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTFuture<V> {
 
-    private List<DHTResultListener<V>> listeners 
-        = new ArrayList<DHTResultListener<V>>();
-
+    private List<DHTFutureListener<V>> listeners 
+        = new ArrayList<DHTFutureListener<V>>();
+    
     public AbstractDHTFuture(Callable<V> callable) {
         super(callable);
     }
@@ -51,14 +48,10 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTResultListener(com.limegroup.mojito.event.DHTEventListener)
+     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTFutureListener(com.limegroup.mojito.concurrent.DHTFutureListener)
      */
-    public void addDHTResultListener(DHTResultListener<V> listener) {
+    public void addDHTFutureListener(DHTFutureListener<V> listener) {
         if (listener == null) {
-            return;
-        }
-        
-        if (isCancelled()) {
             return;
         }
         
@@ -74,19 +67,7 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
         
         if (done) {
-            try {
-                V result = get();
-                listener.handleResult(result);
-            } catch (InterruptedException ignore) {
-            } catch (ExecutionException ex) {
-                // NOTE: This is different from Future.cancel()!
-                // It's possible to cancel a ResponseHandler which
-                // is also throwing a CancellationException!
-                Throwable cause = ex.getCause();
-                if (!(cause instanceof CancellationException)) {
-                    listener.handleThrowable(cause);
-                }
-            }
+            listener.futureDone(this);
         }
     }
     
@@ -96,54 +77,24 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      */
     @Override
     protected void done() {
+        assert (isDone());
         super.done();
-        
         deregister();
-        
-        if (!isCancelled()) {
-            try {
-                V result = get();
-                fireResult(result);
-            } catch (InterruptedException ignore) {
-            } catch (ExecutionException ex) {
-                // NOTE: This is different from Future.cancel()!
-                // It's possible to cancel a ResponseHandler which
-                // is also throwing a CancellationException!
-                Throwable cause = ex.getCause();
-                if (!(cause instanceof CancellationException)) {
-                    fireThrowable(cause);
-                }
-            }
-        }
+        fireFutureDone();
     }
     
-    /**
-     * Notifies all listeners about the result. Meant to
-     * be called on the DHTFuture Thread!
-     */
-    public void fireResult(V result) {
-        List<DHTResultListener<V>> copy = null;
-        synchronized (listeners) {
-            copy = new ArrayList<DHTResultListener<V>>(listeners);
-        }
-        
-        for (DHTResultListener<V> l : copy) {
-            l.handleResult(result);
-        }
+    public void fireFutureDone() {
+        fireFutureDone(this);
     }
     
-    /**
-     * Notifies all listeners about an Exception that occured. 
-     * Meant to be called on the DHTFuture Thread!
-     */
-    public void fireThrowable(Throwable ex) {
-        List<DHTResultListener<V>> copy = null;
+    public void fireFutureDone(DHTFuture<V> future) {
+        List<DHTFutureListener<V>> copy = null;
         synchronized (listeners) {
-            copy = new ArrayList<DHTResultListener<V>>(listeners);
+            copy = new ArrayList<DHTFutureListener<V>>(listeners);
         }
         
-        for (DHTResultListener<V> l : copy) {
-            l.handleThrowable(ex);
+        for (DHTFutureListener<V> l : copy) {
+            l.futureDone(future);
         }
     }
 }

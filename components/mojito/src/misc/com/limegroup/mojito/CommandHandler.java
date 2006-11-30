@@ -31,9 +31,10 @@ import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.util.concurrent.Future;
 
-import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.db.DHTValueType;
-import com.limegroup.mojito.result.BootstrapListener;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.result.BootstrapResult;
 import com.limegroup.mojito.result.FindValueResult;
 import com.limegroup.mojito.result.PingResult;
@@ -189,22 +190,30 @@ public class CommandHandler {
         
         out.println("Bootstrapping... " + addr);
         
-        BootstrapListener listener = new BootstrapListener() {
-            public void handleResult(BootstrapResult result) {
+        DHTFutureListener<BootstrapResult> listener = new DHTFutureListener<BootstrapResult>() {
+            public void futureDone(DHTFuture<? extends BootstrapResult> future) {
+                try {
+                    handleResult(future.get());
+                } catch (Exception e) {
+                    handleThrowable(e.getCause());
+                }
+            }
+
+            private void handleResult(BootstrapResult result) {
                 if (result.getEventType() == ResultType.BOOTSTRAP_SUCCEEDED) {
                     out.println("Bootstraping finished:\n" + result);
                     out.flush();
                 }
             }
             
-            public void handleThrowable(Throwable ex) {
+            private void handleThrowable(Throwable ex) {
                 out.println("Bootstraping failed");
                 ex.printStackTrace(out);
                 out.flush();
             }
         };
         
-        dht.bootstrap(addr).addDHTResultListener(listener);
+        dht.bootstrap(addr).addDHTFutureListener(listener);
     }
     
     public static void put(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
