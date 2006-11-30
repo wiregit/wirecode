@@ -495,14 +495,15 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     public static KUID create(InputStream in) throws IOException {
         byte[] id = new byte[LENGTH];
+        
         int len = -1;
         int r = 0;
-        while((len = in.read(id, r, id.length-r)) > 0) {
+        while(r < id.length) {
+            len = in.read(id, r, id.length-r);
+            if (len < 0) {
+                throw new EOFException();
+            }
             r += len;
-        }
-        
-        if (r != id.length) {
-            throw new EOFException();
         }
         
         return new KUID(id);
