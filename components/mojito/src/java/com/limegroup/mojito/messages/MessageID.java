@@ -19,7 +19,9 @@
 
 package com.limegroup.mojito.messages;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
@@ -71,10 +73,31 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     }
 
     /**
+     * Creates a MessageID from the given InputStream
+     */
+    public static MessageID createWithInputStream(InputStream in) throws IOException {
+        byte[] messageId = new byte[LENGTH];
+        
+        int len = -1;
+        int r = 0;
+        while(r < messageId.length) {
+            len = in.read(messageId, r, messageId.length-r);
+            if (len < 0) {
+                throw new EOFException();
+            }
+            r += len;
+        }
+        
+        return new MessageID(messageId);
+    }
+    
+    /**
      * Creates and returns a MessageID from the given byte Array
      */
     public static MessageID createWithBytes(byte[] messageId) {
-        return new MessageID(messageId);
+        byte[] copy = new byte[messageId.length];
+        System.arraycopy(messageId, 0, copy, 0, messageId.length);
+        return new MessageID(copy);
     }
 
     /**
@@ -94,7 +117,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
             }
         }
 
-        return createWithBytes(messageId);
+        return new MessageID(messageId);
     }
 
     /**
@@ -102,7 +125,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
      * hex encoded String
      */
     public static MessageID createWithHexString(String id) {
-        return createWithBytes(ArrayUtils.parseHexString(id));
+        return new MessageID(ArrayUtils.parseHexString(id));
     }
     
     /**

@@ -76,7 +76,7 @@ public class MessageInputStream extends DataInputStream {
      * Reads a MessageID from the InputStream 
      */
     public MessageID readMessageID() throws IOException {
-        return MessageID.createWithBytes(readBytes(MessageID.LENGTH));
+        return MessageID.createWithInputStream(this);
     }
     
     /**
