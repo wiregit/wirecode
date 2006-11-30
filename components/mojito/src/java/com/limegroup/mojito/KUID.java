@@ -497,7 +497,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         byte[] id = new byte[LENGTH];
         int len = -1;
         int r = 0;
-        while((len = in.read(id, r, id.length-r)) >= 0) {
+        while((len = in.read(id, r, id.length-r)) > 0) {
             r += len;
         }
         
