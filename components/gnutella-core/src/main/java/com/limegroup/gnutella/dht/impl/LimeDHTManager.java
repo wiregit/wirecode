@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dht.impl;
 import java.net.SocketAddress;
 import java.util.List;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -60,14 +61,19 @@ public class LimeDHTManager implements DHTManager {
         controller.addPassiveDHTNode(hostAddress);
     }
 
-    public synchronized void addressChanged() {
-        if(!controller.isRunning()) {
-            return;
-        }
-        
-        // Restart the DHT (will get the new adress from RouterService)
-        controller.stop();
-        controller.start();
+    public void addressChanged() {
+        // Do this in a different thread as there are some blocking ops.
+        RouterService.schedule(new Runnable() {
+            public void run() {
+                synchronized(LimeDHTManager.this) {
+                    if(!controller.isRunning()) {
+                        return;
+                    }
+                    controller.stop();
+                    controller.start();
+                }
+            }
+        }, 0, 0);
     }
     
     public synchronized void sendUpdatedCapabilities() {

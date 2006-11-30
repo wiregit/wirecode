@@ -1831,7 +1831,6 @@ public class RouterService {
         if(callback != null)
             callback.handleAddressStateChanged();        
         
-        dhtManager.addressChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1842,12 +1841,16 @@ public class RouterService {
         if(!NetworkUtils.isValidPort(port))
             return false;
 
+        
         // reset the last connect back time so the next time the TCP/UDP
         // validators run they try to connect back.
         if (acceptor != null)
         	acceptor.resetLastConnectBackTime();
         if (UDPSERVICE != null)
         	UDPSERVICE.resetLastConnectBackTime();
+        
+        // notify the dht
+        dhtManager.addressChanged();
         
         if (manager != null) {
         	Properties props = new Properties();

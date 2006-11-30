@@ -342,7 +342,9 @@ abstract class AbstractDHTController implements DHTController {
         }
         
         synchronized void stop() {
-            timerTask.cancel();
+            if(timerTask != null) {
+                timerTask.cancel();
+            }
             dhtNodes.clear();
             isRunning = false;
         }
