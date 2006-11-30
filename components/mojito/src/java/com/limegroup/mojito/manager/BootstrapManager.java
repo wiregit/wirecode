@@ -202,6 +202,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 LOG.debug("Bootstraping phase 1 from node: " + node);
             }
             
+            // We want to notify the listeners that we've found
+            // an initial bootstrap Node even though bootstrapping
+            // isn't finished yet...
             future.fireFutureSuccess(BootstrapResult.createBootstrapPingSucceededResult());
             
             phaseOneStart = System.currentTimeMillis();
