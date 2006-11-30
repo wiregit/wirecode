@@ -488,7 +488,7 @@ public class RouteTableTest extends BaseTestCase {
         
         for (int i = 1; i < NODE_IDS.length; i++) {
             SocketAddress src = new InetSocketAddress("localhost", PORT+i);
-            KUID nodeId = KUID.create(NODE_IDS[i]);
+            KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
             int vendor = 0;
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
@@ -519,18 +519,18 @@ public class RouteTableTest extends BaseTestCase {
         
         // Check if all Buckets exist
         for (int i = 0; i < BUCKET_IDS.length; i++) {
-            KUID nodeId = KUID.create(BUCKET_IDS[i]);
+            KUID nodeId = KUID.createWithHexString(BUCKET_IDS[i]);
             Bucket b = routeTable.getBucket(nodeId);
             assertEquals(nodeId, b.getBucketID());
         }
         
         // Check if the local Node is in the right Bucket
         Bucket bucket = routeTable.getBucket(localNode.getNodeID());
-        assertEquals(KUID.create(LOCAL_NODE_BUCKET_ID), bucket.getBucketID());
+        assertEquals(KUID.createWithHexString(LOCAL_NODE_BUCKET_ID), bucket.getBucketID());
         
         // Check if the live Nodes are in the right Buckets
         for (int i = 0; i < LIVE_NODE_IDS.length; i++) {
-            KUID nodeId = KUID.create(LIVE_NODE_IDS[i]);
+            KUID nodeId = KUID.createWithHexString(LIVE_NODE_IDS[i]);
             Contact node1 = routeTable.select(nodeId);
             assertEquals(nodeId, node1.getNodeID());
             
@@ -541,7 +541,7 @@ public class RouteTableTest extends BaseTestCase {
         
         // Check if the cached Nodes are in the right Buckets
         for (int i = 0; i < CACHED_NODE_IDS.length; i++) {
-            KUID nodeId = KUID.create(CACHED_NODE_IDS[i]);
+            KUID nodeId = KUID.createWithHexString(CACHED_NODE_IDS[i]);
             Contact node1 = routeTable.get(nodeId);
             assertNotNull(node1);
             assertEquals(nodeId, node1.getNodeID());
@@ -589,14 +589,14 @@ public class RouteTableTest extends BaseTestCase {
             String line = null;
             
             while((line = in.readLine()) != null) {
-                KUID key = KUID.create(line);
+                KUID key = KUID.createWithHexString(line);
                 String[] tmp = in.readLine().split(",");
                 assertEquals(K, tmp.length);
                 
                 KUID[] selected = new KUID[tmp.length];
                 
                 for (int i = 0; i < tmp.length; i++) {
-                    selected[i] = KUID.create(tmp[i]);
+                    selected[i] = KUID.createWithHexString(tmp[i]);
                 }
                 entries.add(new EntryImpl<KUID, KUID[]>(key, selected));
             }
@@ -725,7 +725,7 @@ public class RouteTableTest extends BaseTestCase {
         int port = 3000;
         for(String nodeId : NODE_IDS) {
             Contact node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.create(nodeId),
+                    0,0,KUID.createWithHexString(nodeId),
                     new InetSocketAddress("localhost", port++), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
         }

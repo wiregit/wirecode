@@ -215,7 +215,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
         });
         
     	for (String id : NODE_IDS) {
-            KUID nodeId = KUID.create(id);
+            KUID nodeId = KUID.createWithHexString(id);
             SocketAddress addr = new InetSocketAddress("localhost", 5000);
             routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}

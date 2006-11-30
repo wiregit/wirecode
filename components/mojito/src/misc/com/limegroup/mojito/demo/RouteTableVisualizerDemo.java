@@ -218,7 +218,7 @@ public class RouteTableVisualizerDemo {
         List<Contact> nodes = new ArrayList<Contact>();
         for (int i = 1; i < NODE_IDS.length; i++) {
             SocketAddress src = new InetSocketAddress("localhost", 3000+i);
-            KUID nodeId = KUID.create(NODE_IDS[i]);
+            KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
             int vendor = 0;
             int version = 0;
             SocketAddress con = new InetSocketAddress("localhost", 30000+i);

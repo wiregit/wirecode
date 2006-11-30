@@ -69,7 +69,7 @@ public class MessageInputStream extends DataInputStream {
      * Reads a KUID from the InputStream 
      */
     public KUID readKUID() throws IOException {
-        return KUID.create(this);
+        return KUID.createWithInputStream(this);
     }
     
     /**

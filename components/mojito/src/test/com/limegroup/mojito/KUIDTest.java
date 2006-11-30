@@ -38,8 +38,8 @@ public class KUIDTest extends BaseTestCase {
     }
     
     public void testCompareTo() {
-        KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
-        KUID b = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID a = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.createWithHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
         
         assertEquals(0, a.compareTo(a));
         assertEquals(-1, a.compareTo(b));
@@ -49,8 +49,8 @@ public class KUIDTest extends BaseTestCase {
     }
     
     public void testImmutability() {
-        KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
-        KUID b = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID a = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
         KUID c = null;
         
         c = b.flip(10); // tests set+unset
@@ -59,25 +59,25 @@ public class KUIDTest extends BaseTestCase {
         
         byte[] bytes = b.getBytes();
         bytes[10] ^= bytes[10];
-        c = KUID.create(bytes);
+        c = KUID.createWithBytes(bytes);
         assertEquals(a, b);
         assertNotEquals(b, c);
     }
     
     public void testIsNearer() {
         
-        KUID lookup = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
-        KUID worst = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
-        KUID best = KUID.create("F2617265969422D11CFB73C75EE8B649132DFB37");
+        KUID lookup = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID worst = KUID.createWithHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID best = KUID.createWithHexString("F2617265969422D11CFB73C75EE8B649132DFB37");
         
         assertTrue(worst.isNearerTo(lookup, best));
         assertFalse(best.isNearerTo(lookup, worst));
     }
     
     public void testSetBit() {
-        KUID a = KUID.create("0000000000000000000000000000000000000000");
-        KUID b = KUID.create("1000000000000000000000000000000000000000");
-        KUID c = KUID.create("0800000000000000000000000000000000000000");
+        KUID a = KUID.createWithHexString("0000000000000000000000000000000000000000");
+        KUID b = KUID.createWithHexString("1000000000000000000000000000000000000000");
+        KUID c = KUID.createWithHexString("0800000000000000000000000000000000000000");
         
         assertFalse(a.isBitSet(3));
         
@@ -101,9 +101,9 @@ public class KUIDTest extends BaseTestCase {
     }
     
     public void testXor() {
-        KUID a = KUID.create("E3ED9650238A6C576C987793C01440A0EA91A1FB");
-        KUID b = KUID.create("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
-        KUID c = KUID.create("1188A6A8CCB7E7831E1DDE2312074C663663B993");
+        KUID a = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.createWithHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID c = KUID.createWithHexString("1188A6A8CCB7E7831E1DDE2312074C663663B993");
         
         assertEquals(c, a.xor(b));
     }

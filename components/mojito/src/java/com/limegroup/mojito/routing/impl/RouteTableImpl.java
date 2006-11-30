@@ -105,7 +105,7 @@ public class RouteTableImpl implements RouteTable {
      * for the local Node
      */
     public RouteTableImpl(byte[] nodeId) {
-        this(KUID.create(nodeId));
+        this(KUID.createWithBytes(nodeId));
     }
     
     /**
@@ -113,7 +113,7 @@ public class RouteTableImpl implements RouteTable {
      * for the local Node
      */
     public RouteTableImpl(String nodeId) {
-        this(KUID.create(nodeId));
+        this(KUID.createWithHexString(nodeId));
     }
     
     /**

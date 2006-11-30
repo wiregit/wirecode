@@ -477,7 +477,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Creates and returns a KUID from a byte array
      */
-    public static KUID create(byte[] id) {
+    public static KUID createWithBytes(byte[] id) {
         byte[] dst = new byte[id.length];
         System.arraycopy(id, 0, dst, 0, id.length);
         return new KUID(dst);
@@ -486,14 +486,14 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Creates and returns a KUID from a hex encoded String
      */
-    public static KUID create(String id) {
+    public static KUID createWithHexString(String id) {
         return new KUID(ArrayUtils.parseHexString(id));
     }
     
     /**
      * Creates a KUID from the given InputStream
      */
-    public static KUID create(InputStream in) throws IOException {
+    public static KUID createWithInputStream(InputStream in) throws IOException {
         byte[] id = new byte[LENGTH];
         
         int len = -1;

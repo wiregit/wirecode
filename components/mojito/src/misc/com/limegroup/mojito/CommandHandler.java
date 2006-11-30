@@ -224,9 +224,9 @@ public class CommandHandler {
             byte[] value = null;
             
             if (args[1].equals("kuid")) {
-                key = KUID.create(args[2]);
+                key = KUID.createWithHexString(args[2]);
             } else {
-                key = KUID.create(md.digest(args[2].getBytes("UTF-8")));
+                key = KUID.createWithBytes(md.digest(args[2].getBytes("UTF-8")));
             }
             md.reset();
             
@@ -274,9 +274,9 @@ public class CommandHandler {
             
             KUID key = null;
             if (args[1].equals("kuid")) {
-                key = KUID.create(args[2]);
+                key = KUID.createWithHexString(args[2]);
             } else {
-                key = KUID.create(md.digest(args[2].getBytes("UTF-8")));
+                key = KUID.createWithBytes(md.digest(args[2].getBytes("UTF-8")));
             }
             md.reset();
             
@@ -313,9 +313,9 @@ public class CommandHandler {
             
             KUID key = null;
             if (args[1].equals("kuid")) {
-                key = KUID.create(args[2]);
+                key = KUID.createWithHexString(args[2]);
             } else {
-                key = KUID.create(md.digest(args[2].getBytes("UTF-8")));
+                key = KUID.createWithBytes(md.digest(args[2].getBytes("UTF-8")));
             }
             md.reset();
             
@@ -379,7 +379,7 @@ public class CommandHandler {
     }
     
     public static void id(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        KUID nodeId = KUID.create(args[1]);
+        KUID nodeId = KUID.createWithHexString(args[1]);
         out.println("Setting NodeID to: " + nodeId);
         Method m = dht.getClass().getDeclaredMethod("setLocalNodeID", new Class[]{KUID.class});
         m.setAccessible(true);
@@ -387,7 +387,7 @@ public class CommandHandler {
     }
     
     public static void select(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        KUID nodeId = KUID.create(args[1]);
+        KUID nodeId = KUID.createWithHexString(args[1]);
         out.println("Selecting: " + nodeId);
         
         RouteTable routeTable = ((Context)dht).getRouteTable();
