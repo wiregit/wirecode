@@ -45,7 +45,7 @@ public class FixedDHTFuture<T> implements DHTFuture<T> {
     
     public void addDHTFutureListener(DHTFutureListener<T> listener) {
         if (listener == null) {
-            return;
+            throw new NullPointerException("DHTFutureListener is null");
         }
         
         try {

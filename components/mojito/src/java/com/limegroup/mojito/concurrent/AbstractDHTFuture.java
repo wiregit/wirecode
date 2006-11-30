@@ -54,7 +54,7 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
      */
     public void addDHTFutureListener(DHTFutureListener<V> listener) {
         if (listener == null) {
-            return;
+            throw new NullPointerException("DHTFutureListener is null");
         }
         
         // TODO: Not sure if it's a good or bad idea to
