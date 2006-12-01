@@ -158,6 +158,10 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
         waiting.set(false);
         bootstrappingFromRT.set(false);
         
+        if(dhtNodeFetcher != null) {
+            dhtNodeFetcher.stop();
+            dhtNodeFetcher = null;
+        }
     }
     
     public boolean isWaitingForNodes() {

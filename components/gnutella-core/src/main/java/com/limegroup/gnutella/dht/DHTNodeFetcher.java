@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -60,7 +61,7 @@ public class DHTNodeFetcher {
     /**
      * The Runnable that requests DHT hosts.
      */
-    private TimedFetcher fetcher = null;
+    private TimerTask fetcherTask = null;
     
     /**
      * Whether or the fethcer is currently pinging a single host
@@ -75,7 +76,7 @@ public class DHTNodeFetcher {
     /**
      * A settable expiry time for the pings.
      */
-    private int pingExpireTime = -1;
+    private volatile int pingExpireTime = -1;
     
     public DHTNodeFetcher(DHTBootstrapper bootstrapper) {
         this.bootstrapper = bootstrapper;
@@ -170,11 +171,11 @@ public class DHTNodeFetcher {
             return;
         }
         
-        IpPort ipp = new IpPortImpl((InetSocketAddress) hostAddress);
-        
         //this should preempt over ping ranker, as we know this hostAddress
         //can send back DHT hosts
         if(!pingingSingleHost.getAndSet(true)) {
+
+            IpPort ipp = new IpPortImpl((InetSocketAddress) hostAddress);
             
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Requesting DHT hosts from host " + hostAddress);
@@ -190,10 +191,16 @@ public class DHTNodeFetcher {
     }
     
     public void startTimerTask() {
-        fetcher = new TimedFetcher();
         long fetcherTime = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
         long initialFetch = (long) (Math.random() * fetcherTime);
-        RouterService.schedule(fetcher, initialFetch, fetcherTime);
+        fetcherTask = RouterService.schedule(new TimedFetcher(), initialFetch, fetcherTime);
+    }
+    
+    public void stop() {
+        if(fetcherTask != null) {
+            fetcherTask.cancel();
+            fetcherTask = null;
+        }
     }
     
     /**
