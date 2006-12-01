@@ -379,7 +379,9 @@ public class NodeAssigner {
             (_isHardcoreCapable &&
             //AND is my average uptime AND current uptime high enough?
             (averageTime >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
-                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L)));
+                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L))
+                    //AND I have accepted incoming messages over UDP
+                    && RouterService.isGUESSCapable());
                      
         //don't give active capability to active ultrapeers
         if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 

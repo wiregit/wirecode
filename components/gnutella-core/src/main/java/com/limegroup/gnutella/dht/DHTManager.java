@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
@@ -53,6 +55,9 @@ public interface DHTManager extends ConnectionLifecycleListener {
         
         private byte mode;
         
+        private static Map<DHTMode, byte[]> capabilitiesVMMap = 
+            new HashMap<DHTMode, byte[]>();
+        
         private DHTMode(int state) {
             this.mode = (byte)(state & 0xFF);
         }
@@ -74,6 +79,8 @@ public interface DHTManager extends ConnectionLifecycleListener {
                 assert (MODES[index] == null);
                 MODES[index] = m;
             }
+            capabilitiesVMMap.put(ACTIVE, new byte[]{ 'A', 'D', 'H', 'T' });
+            capabilitiesVMMap.put(PASSIVE, new byte[]{ 'P', 'D', 'H', 'T' });
         }
         
         /**
@@ -87,6 +94,10 @@ public interface DHTManager extends ConnectionLifecycleListener {
                 return s;
             }
             return null;
+        }
+        
+        public static byte[] getCapabilitiesVMBytes(DHTMode mode) {
+            return capabilitiesVMMap.get(mode);
         }
     }
     
