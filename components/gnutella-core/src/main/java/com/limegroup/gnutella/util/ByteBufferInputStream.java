@@ -52,7 +52,7 @@ public class ByteBufferInputStream extends InputStream {
     /**
      * Returns the underlying array of ByteBuffer(s).
      */
-    public ByteBuffer[] buffers() {
+    public ByteBuffer[] getBuffers() {
         if (buffers == EMPTY) {
             throw new IllegalStateException("InputStream is closed");
         }
