@@ -122,7 +122,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             if (!running) {
                 ThreadFactory factory = new ThreadFactory() {
                     public Thread newThread(Runnable r) {
-                        Thread thread = context.getThreadFactory().newThread(r);
+                        Thread thread = context.getDHTExecutorService().getThreadFactory().newThread(r);
                         thread.setName(context.getName() + "-MessageDispatcherExecutor");
                         thread.setDaemon(true);
                         return thread;
@@ -134,7 +134,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 executor = Executors.newFixedThreadPool(1, factory);
                 
-                thread = context.getThreadFactory().newThread(this);
+                thread = context.getDHTExecutorService().getThreadFactory().newThread(this);
                 thread.setName(context.getName() + "-MessageDispatcherThread");
                 thread.setDaemon(Boolean.getBoolean("com.limegroup.mojito.io.MessageDispatcherIsDaemon"));
                 thread.start();

@@ -273,7 +273,8 @@ public class Main {
                     MojitoDHT d = CommandHandler.load(dht, line.split(" "), out);
                     dht.stop();
                     dhts.set(current, d);
-                    d.setThreadFactory(dht.getThreadFactory());
+                    d.getDHTExecutorService().setThreadFactory(
+                            dht.getDHTExecutorService().getThreadFactory());
                     //System.out.println(dht.getLocalAddress());
                     //System.out.println(d.getLocalAddress());
                     d.bind(dht.getLocalAddress());

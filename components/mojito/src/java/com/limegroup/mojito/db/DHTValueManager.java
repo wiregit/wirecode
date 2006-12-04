@@ -68,7 +68,8 @@ public class DHTValueManager implements Runnable {
                 delay = DatabaseSettings.REPUBLISH_PERIOD.getValue();
                 long initialDelay = delay;
                 
-                future = context.scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
+                future = context.getDHTExecutorService()
+                    .scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
             }
         }
     }

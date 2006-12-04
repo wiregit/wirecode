@@ -149,7 +149,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             
             BootstrapProcess process = new BootstrapProcess(copy);
             future = new BootstrapFuture(process);
-            context.execute(future);
+            context.getDHTExecutorService().execute(future);
             return future;
         }
     }

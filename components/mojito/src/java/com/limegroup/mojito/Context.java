@@ -43,17 +43,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueFactory;
 import com.limegroup.mojito.db.DHTValueManager;
-import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.exceptions.NotBootstrappedException;
 import com.limegroup.mojito.io.MessageDispatcher;
@@ -125,12 +127,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private GlobalLookupStatisticContainer globalLookupStats;
     private DatabaseStatisticContainer databaseStats;
     
-    private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
-    
-    private ScheduledExecutorService scheduledExecutor;
-    private ExecutorService contextExecutor;
-    
     private DHTSizeEstimator estimator;
+    
+    private volatile DHTExecutorService executorService = new DefaultDHTExecutorService();
     
     /**
      * Constructor to create a new Context
@@ -203,38 +202,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         networkStats = new NetworkStatisticContainer(getLocalNodeID());
         globalLookupStats = new GlobalLookupStatisticContainer(getLocalNodeID());
         databaseStats = new DatabaseStatisticContainer(getLocalNodeID());
-    }
-    
-    /**
-     * Initializes Context's scheduled Executor
-     */
-    private void initContextTimer() {
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-ContextScheduledThreadPool");
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        
-        scheduledExecutor = Executors.newScheduledThreadPool(1, factory);
-    }
-    
-    /**
-     * Initializes Context's (regular) Executor
-     */
-    private void initContextExecutor() {
-        ThreadFactory factory = new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread thread = getThreadFactory().newThread(r);
-                thread.setName(getName() + "-ContextCachedThreadPool");
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        
-        contextExecutor = Executors.newCachedThreadPool(factory);
     }
     
     /*
@@ -553,25 +520,6 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#setThreadFactory(java.util.concurrent.ThreadFactory)
-     */
-    public void setThreadFactory(ThreadFactory threadFactory) {
-        if (threadFactory == null) {
-            threadFactory = new DefaultThreadFactory();
-        }
-        
-        this.threadFactory = threadFactory;
-    }
-    
-    /**
-     * Returns the current ThreadFactory
-     */
-    public ThreadFactory getThreadFactory() {
-        return threadFactory;
-    }
-    
-    /*
-     * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setMessageFactory(com.limegroup.mojito.messages.MessageFactory)
      */
     public synchronized void setMessageFactory(MessageFactory messageFactory) {
@@ -689,6 +637,26 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     
     /*
      * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#setDHTExecutorService(com.limegroup.mojito.concurrent.DHTExecutorService)
+     */
+    public void setDHTExecutorService(DHTExecutorService executorService) {
+        if (executorService == null) {
+            executorService = new DefaultDHTExecutorService();
+        }
+        
+        this.executorService = executorService;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#getDHTExecutorService()
+     */
+    public DHTExecutorService getDHTExecutorService() {
+        return executorService;
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isRunning()
      */
     public synchronized boolean isRunning() {
@@ -774,8 +742,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         // Startup the local Node
         getLocalNode().shutdown(false);
         
-        initContextTimer();
-        initContextExecutor();
+        executorService.start();
         
         pingManager.init();
         findNodeManager.init();
@@ -842,55 +809,12 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         bucketRefresher.stop();
         dhtValueManager.stop();
         
-        scheduledExecutor.shutdownNow();
-        contextExecutor.shutdownNow();
+        executorService.stop();
         messageDispatcher.stop();
         
         bootstrapManager.setBootstrapped(false);
         
         estimator.clear();
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
-     */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
-            long delay, long period, TimeUnit unit) {
-        return scheduledExecutor.scheduleAtFixedRate(command, delay, period, unit);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
-     */
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
-            long initialDelay, long delay, TimeUnit unit) {
-        return scheduledExecutor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#schedule(java.util.concurrent.Callable, long, java.util.concurrent.TimeUnit)
-     */
-    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
-        return scheduledExecutor.schedule(task, delay, unit);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#submit(java.util.concurrent.Callable)
-     */
-    public <V> Future<V> submit(Callable<V> task) {
-        return contextExecutor.submit(task);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#execute(java.lang.Runnable)
-     */
-    public void execute(Runnable command) {
-        contextExecutor.execute(command);
     }
     
     /**
@@ -1116,10 +1040,130 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     private class DefaultThreadFactory implements ThreadFactory {
         
-        private volatile int num = 0;
+        private AtomicInteger number = new AtomicInteger(0);
         
         public Thread newThread(Runnable r) {
-            return new Thread(r, getName()+"-"+(num++));
+            return new Thread(r, getName() + "-" + number.getAndIncrement());
+        }
+    }
+    
+    /**
+     * A default implementation of DHTExecutorService
+     */
+    private class DefaultDHTExecutorService implements DHTExecutorService {
+        
+        private volatile ThreadFactory threadFactory = new DefaultThreadFactory();
+        
+        private ScheduledExecutorService scheduledExecutor;
+        
+        private ExecutorService cachedExecutor;
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.concurrent.DHTExecutorService#start()
+         */
+        public void start() {
+            initScheduledExecutor();
+            initCachedExecutor();
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.concurrent.DHTExecutorService#stop()
+         */
+        public void stop() {
+            scheduledExecutor.shutdownNow();
+            cachedExecutor.shutdownNow();
+        }
+
+        /**
+         * Initializes Context's scheduled Executor
+         */
+        private void initScheduledExecutor() {
+            ThreadFactory factory = new ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    Thread thread = getThreadFactory().newThread(r);
+                    thread.setName(getName() + "-ContextScheduledThreadPool");
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            };
+            
+            scheduledExecutor = Executors.newScheduledThreadPool(1, factory);
+        }
+        
+        /**
+         * Initializes Context's (regular) Executor
+         */
+        private void initCachedExecutor() {
+            ThreadFactory factory = new ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    Thread thread = getThreadFactory().newThread(r);
+                    thread.setName(getName() + "-ContextCachedThreadPool");
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            };
+            
+            cachedExecutor = Executors.newCachedThreadPool(factory);
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.concurrent.DHTExecutorService#getThreadFactory()
+         */
+        public ThreadFactory getThreadFactory() {
+            return threadFactory;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.concurrent.DHTExecutorService#setThreadFactory(java.util.concurrent.ThreadFactory)
+         */
+        public void setThreadFactory(ThreadFactory threadFactory) {
+            this.threadFactory = threadFactory;
+        }
+
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.MojitoDHT#scheduleAtFixedRate(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+         */
+        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
+                long delay, long period, TimeUnit unit) {
+            return scheduledExecutor.scheduleAtFixedRate(command, delay, period, unit);
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.MojitoDHT#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+         */
+        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
+                long initialDelay, long delay, TimeUnit unit) {
+            return scheduledExecutor.scheduleWithFixedDelay(command, initialDelay, delay, unit);
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.MojitoDHT#schedule(java.util.concurrent.Callable, long, java.util.concurrent.TimeUnit)
+         */
+        public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
+            return scheduledExecutor.schedule(task, delay, unit);
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.MojitoDHT#submit(java.util.concurrent.Callable)
+         */
+        public <V> Future<V> submit(Callable<V> task) {
+            return cachedExecutor.submit(task);
+        }
+        
+        /*
+         * (non-Javadoc)
+         * @see com.limegroup.mojito.MojitoDHT#execute(java.lang.Runnable)
+         */
+        public void execute(Runnable command) {
+            cachedExecutor.execute(command);
         }
     }
     

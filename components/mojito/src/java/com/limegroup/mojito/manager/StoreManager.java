@@ -56,7 +56,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         StoreResponseHandler handler = new StoreResponseHandler(context, values);
         StoreFuture future = new StoreFuture(handler);
         
-        context.execute(future);
+        context.getDHTExecutorService().execute(future);
         return future;
     }
     
@@ -69,7 +69,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
         StoreResponseHandler handler 
             = new StoreResponseHandler(context, node, queryKey, values);
         StoreFuture future = new StoreFuture(handler);
-        context.execute(future);
+        context.getDHTExecutorService().execute(future);
         return future;
     }
     

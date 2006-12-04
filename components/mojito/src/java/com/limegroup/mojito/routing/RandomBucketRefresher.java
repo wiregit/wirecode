@@ -60,7 +60,8 @@ public class RandomBucketRefresher implements Runnable {
                 initialDelay = delay + (long)(delay * Math.random());
             }
             
-            future = context.scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
+            future = context.getDHTExecutorService()
+                .scheduleWithFixedDelay(this, initialDelay, delay, TimeUnit.MILLISECONDS);
         }
     }
     

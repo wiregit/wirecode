@@ -10,11 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -24,10 +19,11 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.result.BootstrapResult;
@@ -118,8 +114,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public void execute(Runnable command) {}
-
         public DHTFuture<FindValueResult> get(KUID key) {
             return null;
         }
@@ -151,11 +145,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public String getName() {
             return null;
         }
-
-        public ThreadFactory getThreadFactory() {
-            return null;
-        }
-
+        
         public Collection<DHTValue> getValues() {
             return null;
         }
@@ -197,18 +187,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit) {
-            return null;
-        }
-
-        public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
-            return null;
-        }
-
-        public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-            return null;
-        }
-
         public void setDatabase(Database database) {}
 
         public void setExternalPort(int port) {}
@@ -220,9 +198,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void setMessageFactory(MessageFactory messageFactory) {}
 
         public void setRouteTable(RouteTable routeTable) {}
-
-        public void setThreadFactory(ThreadFactory threadFactory) {}
-
+        
         public BigInteger size() {
             return null;
         }
@@ -232,10 +208,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void stop() {}
 
         public void store(OutputStream out) throws IOException {}
-
-        public <V> Future<V> submit(Callable<V> task) {
-            return null;
-        }
         
         public void setHostFilter(HostFilter hostFilter) {
         }
@@ -243,7 +215,13 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public List<SocketAddress> getPingedNodesList(){
             return pingedList;
         }
-        
+
+        public DHTExecutorService getDHTExecutorService() {
+            return null;
+        }
+
+        public void setDHTExecutorService(DHTExecutorService executors) {
+        }
     }
 
 }

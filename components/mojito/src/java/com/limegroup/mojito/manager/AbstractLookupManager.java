@@ -74,7 +74,7 @@ abstract class AbstractLookupManager<V> extends AbstractManager<V> {
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
                 
-                context.execute(future);
+                context.getDHTExecutorService().execute(future);
             }
             
             return future;

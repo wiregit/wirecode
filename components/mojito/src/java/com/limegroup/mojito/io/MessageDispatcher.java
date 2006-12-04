@@ -829,7 +829,8 @@ public abstract class MessageDispatcher {
             running = true;
             
             if (thread == null) {
-                thread = context.getThreadFactory().newThread(this);
+                thread = context.getDHTExecutorService()
+                    .getThreadFactory().newThread(this);
                 thread.setName(context.getName() + "-CleanupTask");
                 thread.setDaemon(true);
                 thread.start();

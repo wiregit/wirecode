@@ -209,7 +209,7 @@ abstract class AbstractDHTController implements DHTController {
         assert (this.dht == null);
         
         dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
-        dht.setThreadFactory(new ThreadFactory() {
+        dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
             public Thread newThread(Runnable runnable) {
                 return new ManagedThread(runnable);
             }

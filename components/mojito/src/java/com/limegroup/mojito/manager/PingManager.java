@@ -125,7 +125,7 @@ public class PingManager extends AbstractManager<PingResult> {
                 futureMap.put(address, future);
                 networkStats.PINGS_SENT.incrementStat();
                 
-                context.execute(future);
+                context.getDHTExecutorService().execute(future);
             }
             
             return future;

@@ -26,16 +26,12 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
+import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DHTValueType;
+import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
 import com.limegroup.mojito.result.BootstrapResult;
@@ -159,18 +155,6 @@ public interface MojitoDHT {
     public SocketAddress getLocalAddress();
     
     /**
-     * Sets the ThreadFactory that will be used to create
-     * all Thread. Passing null will reset it to the default
-     * ThreadFactory
-     */
-    public void setThreadFactory(ThreadFactory threadFactory);
-    
-    /**
-     * Returns the ThreadFactory that's used to create Threads
-     */
-    public ThreadFactory getThreadFactory();
-    
-    /**
      * Sets the MessageFactory
      */
     public void setMessageFactory(MessageFactory messageFactory);
@@ -239,42 +223,14 @@ public interface MojitoDHT {
     public DHTFuture<StoreResult> remove(KUID key);
     
     /**
-     * Creates and executes a periodic action that becomes enabled first
-     * after the given initial delay, and subsequently with the given
-     * period. The action is executed on Mojito DHTs internal scheduled 
-     * Executor (an unbound ThreadPoolExecutor).
+     * 
      */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, 
-            long delay, long period, TimeUnit unit);
+    public void setDHTExecutorService(DHTExecutorService executorService);
     
     /**
-     * Creates and executes a periodic action that becomes enabled first
-     * after the given initial delay, and subsequently with the given
-     * delay. The action is executed on Mojito DHTs internal scheduled 
-     * Executor (an unbound ThreadPoolExecutor).
+     * 
      */
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, 
-            long initialDelay, long delay, TimeUnit unit);
-            
-    /**
-     * Creates and executes a ScheduledFuture that becomes enabled after the
-     * given delay. The task is executed on Mojito DHTs internal scheduled 
-     * Executor (an unbound ThreadPoolExecutor).
-     */
-    public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit);
-    
-    /**
-     * Submits a value-returning task for execution and returns a Future
-     * representing the pending results of the task. The task is executed on
-     * Mojito DHTs internal Executor (an unbound ThreadPoolExecutor).
-     */
-    public <V> Future<V> submit(Callable<V> task);
-    
-    /**
-     * Executes the given command at some time in the future. The command 
-     * is executed on Mojito DHTs internal Executor (an unbound ThreadPoolExecutor).
-     */
-    public void execute(Runnable command);
+    public DHTExecutorService getDHTExecutorService();
     
     /**
      * Writes the current state of Monjito DHT to the OutputStream

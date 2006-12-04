@@ -59,7 +59,7 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
         GetValueResponseHandler handler 
             = new GetValueResponseHandler(context, node, valueId, nodeIds);
         GetValueFuture future = new GetValueFuture(handler);
-        context.execute(future);
+        context.getDHTExecutorService().execute(future);
         return future;
     }
     
