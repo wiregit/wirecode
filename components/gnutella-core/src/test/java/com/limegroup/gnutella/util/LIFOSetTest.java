@@ -27,8 +27,6 @@ public class LIFOSetTest extends BaseTestCase {
         String test2 = "test2";
         String test3 = "test3";
         String test4 = "test4";
-        String test5 = "test5";
-        String test6 = "test6";
         
         Set<String> lifo = new LIFOSet<String>();
         assertEquals(lifo.size(),0);
@@ -63,8 +61,6 @@ public class LIFOSetTest extends BaseTestCase {
         it.next();
         it.remove();
         assertFalse(lifo.contains(test4));
-        it.remove();
-        assertFalse(lifo.contains(null));
         
         //try add all & remove all
         lifo = new LIFOSet<String>();

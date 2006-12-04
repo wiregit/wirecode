@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -153,8 +154,14 @@ public class LIFOSet<E> implements Set<E>{
         }
         
         public void remove() {
+            if(index == (list.size() - 1)) {
+               throw new IllegalStateException(); 
+            }
             set.remove(current);
-            list.remove(current);
+            E removed = list.remove(index + 1);
+            if(removed != current) {
+                throw new ConcurrentModificationException();
+            }
             current=null;
         }
      }
