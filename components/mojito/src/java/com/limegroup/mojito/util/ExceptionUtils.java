@@ -30,7 +30,7 @@ public class ExceptionUtils {
      * Returns true if Throwable <tt>t</tt> was caused by an another
      * Exception that is of type <tt>clazz</tt>
      */
-    public static boolean isCauseBy(Throwable t, Class<? extends Throwable> clazz) {
+    public static boolean isCausedBy(Throwable t, Class<? extends Throwable> clazz) {
         return getCause(t, clazz) != null;
     }
     
