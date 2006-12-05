@@ -13,4 +13,11 @@ public final class SecuritySettings extends LimeProps {
     public static final LongSetting CHANGE_QK_EVERY
         = FACTORY.createSettableLongSetting("CHANGE_QK_EVERY", 
                 6L*60L*60L*1000L, "change_qk_every", 1L*60L*60L*1000L, 24L*60L*60L*1000L);
+    
+    /**
+     * The grace period for which an old QK stays valid
+     */
+    public static final LongSetting QK_GRACE_PERIOD
+        = FACTORY.createSettableLongSetting("QK_GRACE_PERIOD", 
+                20L*60L*1000L, "qk_grace_period", 1L*60L*1000L, 24L*60L*60L*1000L);
 }

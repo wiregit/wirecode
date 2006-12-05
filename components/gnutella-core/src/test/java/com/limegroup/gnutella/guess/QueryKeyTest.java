@@ -12,6 +12,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.settings.SecuritySettings;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryKeyTest(String name) {
@@ -174,6 +175,38 @@ public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNotEquals(qk5, qk6);
         
         // It's no longer valid
+        assertFalse(qk1.isFor(address1));
+    }
+    
+    public void testGracePeriod() throws Exception {
+        SocketAddress address1 = new InetSocketAddress("www.microsoft.com", 1024);
+        QueryKey qk1 = QueryKey.getQueryKey(address1);
+        
+        assertTrue(qk1.isFor(address1));
+        
+        // Switch the KeyGenerator
+        PrivilegedAccessor.invokeAllStaticMethods(QueryKey.class, "newKeyGenerator", null);
+        
+        // Should be still valid
+        assertTrue(qk1.isFor(address1));
+        
+        Field lastQueryKeyChange = QueryKey.class.getDeclaredField("lastQueryKeyChange");
+        lastQueryKeyChange.setAccessible(true);
+        lastQueryKeyChange.set(null, System.currentTimeMillis() 
+                - SecuritySettings.QK_GRACE_PERIOD.getValue() 
+                + 100L);
+        
+        // 100ms left before we're over the grace period. It should
+        // be still valid unless it took longer to get from setting
+        // the value to this check
+        assertTrue(qk1.isFor(address1));
+        
+        // 100ms over the grace period...
+        lastQueryKeyChange.set(null, System.currentTimeMillis() 
+                - SecuritySettings.QK_GRACE_PERIOD.getValue() 
+                - 100L);
+        
+        // Boom, we're over the grace period and it's no longer valid
         assertFalse(qk1.isFor(address1));
     }
 }
