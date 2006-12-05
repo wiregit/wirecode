@@ -577,35 +577,55 @@ public abstract class MessageDispatcher {
      */
     public boolean handleWrite() throws IOException {
         
+        // Get a local reference of outputQueue and
+        // replace it with a new List. Stuff that is
+        // being added will end up in the new List and
+        // we work localy with the previous List.
+        List<Tag> queue = null;
         synchronized (outputQueueLock) {
-            Tag tag = null;
-            while (!outputQueue.isEmpty()) {
-                tag = outputQueue.get(0);
+            queue = outputQueue;
+            outputQueue = new LinkedList<Tag>();
+        }
+        
+        Tag tag = null;
+        while (!queue.isEmpty()) {
+            tag = queue.get(0);
 
-                if (tag.isCancelled()) {
-                    outputQueue.remove(0);
-                    continue;
-                }
-
-                try {
-                    SocketAddress dst = tag.getSocketAddress();
-                    ByteBuffer data = tag.getData();
-                    
-                    if (send(dst, data)) {
-                        // Wohoo! Message was sent!
-                        outputQueue.remove(0);
-                        registerInput(tag);
-                    } else {
-                        // Dang! Re-Try next time!
-                        break;
-                    }
-                } catch (IOException err) {
-                    LOG.error("IOException", err);
-                    outputQueue.remove(0);
-                    process(new ErrorProcessor(tag, err));
-                }
+            if (tag.isCancelled()) {
+                queue.remove(0);
+                continue;
             }
 
+            try {
+                SocketAddress dst = tag.getSocketAddress();
+                ByteBuffer data = tag.getData();
+                
+                if (send(dst, data)) {
+                    // Wohoo! Message was sent!
+                    queue.remove(0);
+                    registerInput(tag);
+                } else {
+                    // Dang! Re-Try next time!
+                    break;
+                }
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                queue.remove(0);
+                process(new ErrorProcessor(tag, err));
+            }
+        }
+
+        // If something was left in the queue then append
+        // everything from the current outputQueue and switch
+        // the reference to queue. In other words, stuff that
+        // was not send stays in the front of the Queue followed
+        // by stuff that was added during the while-loop above.
+        synchronized (outputQueueLock) {
+            if (!queue.isEmpty()) {
+                queue.addAll(outputQueue);
+                outputQueue = queue;
+            }
+            
             boolean isEmpty = outputQueue.isEmpty();
             interestWrite(!isEmpty);
             return !isEmpty;
