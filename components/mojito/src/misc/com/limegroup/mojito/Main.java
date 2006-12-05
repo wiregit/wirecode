@@ -52,8 +52,10 @@ import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.BootstrapResult.ResultType;
 import com.limegroup.mojito.settings.RouteTableSettings;
+import com.limegroup.mojito.util.MojitoUtils;
 
 public class Main {
     
@@ -150,7 +152,6 @@ public class Main {
     
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
-        DHTFuture<BootstrapResult> future = null;
         
         Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
         
@@ -177,12 +178,6 @@ public class Main {
         
         future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
         
-        if(bootstrapHost != null) {
-            bootstrapHostSet.add(bootstrapHost);
-        } else {
-            bootstrapHostSet.add(new InetSocketAddress("localhost", port));
-        }
-        
         int start = 0;
         if (bootstrapHost == null) {
             dhts.get(0).start();
@@ -191,41 +186,40 @@ public class Main {
             // 1...n bootstraps from 0
         }
         
+        System.out.println("start: " + start);
         for(int i = start; i < dhts.size(); i++) {
             try {
                 MojitoDHT dht = dhts.get(i);
                 dht.start();
                 
-                future = dht.bootstrap(bootstrapHostSet);
+                BootstrapResult result = MojitoUtils.bootstrap(dht, bootstrapHost).get();
                 
-                BootstrapResult evt = future.get();
-                //bootstrapHostSet.add(dht.getContactAddress());
+                time += result.getTotalTime();
                 
-                time += evt.getTotalTime();
-                
-                if (evt.getEventType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
+                if (result.getResultType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                     System.out.println("Node #" + i + " finished bootstrapping from " 
-                            + bootstrapHostSet + " in " + evt.getTotalTime() + "ms");
+                            + bootstrapHost + " in " + result.getTotalTime() + "ms");
                 } else {
                     System.out.println("Node #" + i + " failed to bootstrap from " 
-                            + bootstrapHostSet + "\n" + evt);
+                            + bootstrapHost + "\n" + result);
                 }
             } catch (Exception err) {
-                System.out.println("Node #" + i + " failed to bootstrap from " + bootstrapHostSet);
+                System.out.println("Node #" + i + " failed to bootstrap from " + bootstrapHost);
                 err.printStackTrace();
             }
         }
         
         if (dhts.size() > 1) {
-            BootstrapResult evt = dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
-            time += evt.getTotalTime();
+            BootstrapResult result = MojitoUtils.bootstrap(
+                    dhts.get(0), dhts.get(1).getContactAddress()).get();
+            time += result.getTotalTime();
             
-            if (evt.getEventType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
+            if (result.getResultType().equals(ResultType.BOOTSTRAP_SUCCEEDED)) {    
                 System.out.println("Node #0 finished bootstrapping from " 
-                        + dhts.get(1).getContactAddress() + " in " + evt.getTotalTime() + "ms");
+                        + dhts.get(1).getContactAddress() + " in " + result.getTotalTime() + "ms");
             } else {
                 System.out.println("Node #0 failed to bootstrap from " 
-                        + dhts.get(1).getContactAddress() + "\n" + evt);
+                        + dhts.get(1).getContactAddress() + "\n" + result);
             }
         }
         

@@ -28,9 +28,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.concurrent.DHTFutureAdapter;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.response.FindNodeResponseHandler;
 import com.limegroup.mojito.result.FindNodeResult;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.settings.RouteTableSettings;
 
 /**
@@ -95,7 +99,16 @@ public class RandomBucketRefresher implements Runnable {
                 // Nodes in our RouteTable, try bootstrapping
                 // this will take some MRS nodes and bootstraps
                 // from them.
-                context.bootstrap(); 
+                
+                DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+                    @Override
+                    public void handleFutureSuccess(PingResult result) {
+                        context.bootstrap(result.getContact());
+                    }
+                };
+                
+                DHTFuture<PingResult> future = context.findActiveContact();
+                future.addDHTFutureListener(listener);
             }
             return;
         }

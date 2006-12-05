@@ -2,7 +2,6 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.Test;
 
@@ -18,7 +17,6 @@ import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.settings.NetworkSettings;
-import com.limegroup.mojito.util.ArrayUtils;
 
 public class LimeDHTBootstrapperTest extends DHTTestCase {
     
@@ -65,18 +63,15 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         fillRoutingTable(dhtContext.getRouteTable(), 2);
         //should be bootstrapping from routing table
         bootstrapper.bootstrap();
-        DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
+        DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
         Thread.sleep(300);
-        assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
-        AtomicBoolean bool = 
-            (AtomicBoolean) PrivilegedAccessor.getValue(bootstrapper, "bootstrappingFromRT");
-        assertTrue("Should be bootstrapping from RT", bool.get());
+        assertTrue((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
         //now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
-        assertTrue(future.isCancelled());
+        assertTrue("ping future should be cancelled", future.isCancelled());
+        Thread.sleep(300);
         future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
-        Thread.sleep(300);
         //should be bootstrapping
         assertTrue(dhtContext.isBootstrapping());
         //now try adding more hosts -- should keep them but not bootstrap
@@ -96,15 +91,12 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         Thread.sleep(100);
         assertTrue("Should be waiting", bootstrapper.isWaitingForNodes());
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",5000));
-        Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
-        assertFalse(bootstrapper.isWaitingForNodes());
-        AtomicBoolean bool = 
-            (AtomicBoolean) PrivilegedAccessor.getValue(bootstrapper, "bootstrappingFromRT");
-        assertFalse(bool.get());
+        Future future = (Future)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
+        assertNotNull("Should be pinging", future);
+        assertFalse((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
         Thread.sleep(100);
         //now add other host: it should not cancel the previous attempt
         bootstrapper.addBootstrapHost(new InetSocketAddress("localhost",6000));
-        future = (Future)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         assertFalse(future.isCancelled());
     }
     
@@ -121,7 +113,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         
         bootstrapper.bootstrap();
-        InetSocketAddress addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
+        InetSocketAddress addr = (InetSocketAddress) bootstrapper.getSimppHost();
         String address = addr.getHostName();
         int port = addr.getPort();
         assertEquals(address+":"+port, hosts[0]);
@@ -130,7 +122,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         id = KUID.createWithHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB");
         localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
-        addr = (InetSocketAddress) bootstrapper.getSIMPPHost();
+        addr = (InetSocketAddress) bootstrapper.getSimppHost();
         address = addr.getHostName();
         port = addr.getPort();
         assertEquals(address+":"+port, hosts[2]);

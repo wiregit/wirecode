@@ -31,6 +31,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.Contact;
+import com.limegroup.mojito.routing.ContactFactory;
 
 /**
  * Miscellaneous untilities for Contacts
@@ -186,5 +187,36 @@ public final class ContactUtils {
         return NetworkUtils.isSameAddressSpace(
                     a.getContactAddress(), 
                     b.getContactAddress());
+    }
+
+    /**
+     * 
+     */
+    public static Contact createCollisionPingSender(Contact localNode) {
+        // The idea is to invert our local Node ID so that the
+        // other Node doesn't get the impression we're trying
+        // to spoof anything and we don't want that the other
+        // guy adds this Contact to its RouteTable. To do so
+        // we're creating a firewalled version of our local Node
+        // (with the inverted Node ID of course).
+        int vendor = localNode.getVendor();
+        int version = localNode.getVersion();
+        KUID nodeId = localNode.getNodeID().invert();
+        SocketAddress addr = localNode.getContactAddress();
+        Contact sender = ContactFactory.createLiveContact(
+                addr, vendor, version, nodeId, addr, 0, Contact.FIREWALLED_FLAG);
+        
+        return sender;
+    }
+
+    public static boolean isCollisionPingSender(KUID nodeId, Contact sender) {
+        // The sender must be firewalled!
+        if (!sender.isFirewalled()) {
+            return false;
+        }
+        
+        // See createCollisionPingSender(...)
+        KUID expectedSenderId = nodeId.invert();
+        return expectedSenderId.equals(sender.getNodeID());
     }
 }

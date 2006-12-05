@@ -29,23 +29,20 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.Future;
 
-import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.result.BootstrapResult;
 import com.limegroup.mojito.result.FindValueResult;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.StoreResult;
-import com.limegroup.mojito.result.BootstrapResult.ResultType;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.DHTStats;
-import com.limegroup.mojito.util.ArrayUtils;
 import com.limegroup.mojito.util.CollectionUtils;
 
 public class CommandHandler {
@@ -73,7 +70,8 @@ public class CommandHandler {
             "nextid",
             "rt_gui",
             "tiles_gui",
-            "arcs_gui"
+            "arcs_gui",
+            "test"
     };
     
     public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
@@ -190,30 +188,14 @@ public class CommandHandler {
         SocketAddress addr = new InetSocketAddress(host, port);
         
         out.println("Bootstrapping... " + addr);
-        
-        DHTFutureListener<BootstrapResult> listener = new DHTFutureListener<BootstrapResult>() {
-            
-            public void handleFutureSuccess(BootstrapResult result) {
-                if (result.getEventType() == ResultType.BOOTSTRAP_SUCCEEDED) {
-                    out.println("Bootstraping finished:\n" + result);
-                    out.flush();
-                }
-            }
-
-            public void handleFutureFailure(ExecutionException e) {
-                out.println("Bootstraping failed");
-                e.printStackTrace(out);
-                out.flush();
-            }
-            
-            public void handleFutureCancelled(CancellationException e) {
-            }
-            
-            public void handleFutureInterrupted(InterruptedException e) {
-            }
-        };
-        
-        dht.bootstrap(addr).addDHTFutureListener(listener);
+        try {
+            PingResult pong = dht.ping(addr).get();
+            BootstrapResult result = dht.bootstrap(pong.getContact()).get();
+            out.println("Bootstraping finished:\n" + result);
+            out.flush();
+        } catch (Exception e) {
+            e.printStackTrace(out);
+        }
     }
     
     public static void put(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
@@ -428,5 +410,40 @@ public class CommandHandler {
         Class clazz = Class.forName("com.limegroup.mojito.visual.ArcsVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
+    }
+    
+    public static void test(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
+        Set<SocketAddress> hosts = new LinkedHashSet<SocketAddress>();
+        
+        hosts.add(new InetSocketAddress("www.apple.com", 80));
+        hosts.add(new InetSocketAddress("www.microsoft.com", 80));
+        hosts.add(new InetSocketAddress("www.ibm.com", 80));
+        hosts.add(new InetSocketAddress("www.heise.de", 80));
+        hosts.add(new InetSocketAddress("www.kapsi.de", 80));
+        hosts.add(new InetSocketAddress("www.ardverk.com", 80));
+        hosts.add(new InetSocketAddress("www.n24.de", 80));
+        hosts.add(new InetSocketAddress("www.n-tv.de", 80));
+        hosts.add(new InetSocketAddress("www.cnn.com", 80));
+        hosts.add(new InetSocketAddress("www.flickr.com", 80));
+        hosts.add(new InetSocketAddress("www.slyck.com", 80));
+        hosts.add(new InetSocketAddress("www.macnn.com", 80));
+        hosts.add(new InetSocketAddress("www.xlr8yourmac.com", 80));
+        hosts.add(new InetSocketAddress("www.haribo.de", 80));
+        hosts.add(new InetSocketAddress("www.citibank.com", 80));
+        hosts.add(new InetSocketAddress("www.quiksilver.com", 80));
+        hosts.add(new InetSocketAddress("www.nutella.de", 80));
+        
+        hosts.add(new InetSocketAddress("localhost", 3000));
+        
+        System.out.println(hosts);
+        
+        try {
+            Context context = (Context)dht;
+            context.ping(hosts);
+            out.println("foo");
+        } catch (Exception e) {
+            e.printStackTrace(out);
+            out.flush();
+        }
     }
 }

@@ -21,6 +21,8 @@ package com.limegroup.mojito.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Miscellaneous utilities for Collections
@@ -28,6 +30,18 @@ import java.util.Iterator;
 public final class CollectionUtils {
     
     private CollectionUtils() {}
+    
+    /**
+     * Converts the given Collection to a Set (if it isn't
+     * already a Set)
+     */
+    public static <T> Set<T> toSet(Collection<T> c) {
+        if (c instanceof Set) {
+            return (Set<T>)c;
+        }
+        
+        return new LinkedHashSet<T>(c);
+    }
     
     /**
      * Returns the given Collection as formatted String

@@ -86,6 +86,13 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createLongSetting("WAIT_ON_LOCK", 3L*60L*1000L);
     
     /**
+     * Whether or not assertion is enabled for collision pings.
+     * This is used for testing! Default should be always true!
+     */
+    public static final BooleanSetting ASSERT_COLLISION_PING
+        = FACTORY.createBooleanSetting("ASSERT_COLLISION_PING", true);
+    
+    /**
      * This Node's Vendor code
      */
     public static final IntSetting VENDOR

@@ -166,7 +166,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             RouterService.getHostCatcher().add(ep, false);
         }
         
-        nodeFetcher.startTimerTask();
+        nodeFetcher.start();
         Thread.sleep(500);
         Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
         assertEquals(UDP_ACCESS.length, hosts.size());
@@ -186,7 +186,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
             ep.setDHTMode(DHTMode.PASSIVE);
             RouterService.getHostCatcher().add(ep, false);
         }
-        nodeFetcher.startTimerTask();
+        nodeFetcher.start();
         Thread.sleep(1000);
         byte[] datagramBytes;
         DatagramPacket pack;

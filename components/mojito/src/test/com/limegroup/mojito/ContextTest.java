@@ -12,6 +12,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.MojitoUtils;
 
 public class ContextTest extends BaseTestCase {
     
@@ -47,11 +48,11 @@ public class ContextTest extends BaseTestCase {
                 dht.start();
                 
                 if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
+                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
                 }
                 dhts.add(dht);
             }
-            dhts.get(0).bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
+            MojitoUtils.bootstrap(dhts.get(0), new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             // Shutdown a random MojitoDHT instance

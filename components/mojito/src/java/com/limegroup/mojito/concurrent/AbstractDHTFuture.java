@@ -112,25 +112,37 @@ public abstract class AbstractDHTFuture<V> extends FutureTask<V> implements DHTF
         }
     }
     
-    public void fireFutureSuccess(V value) {
+    /**
+     * Fires a success event
+     */
+    protected void fireFutureSuccess(V value) {
         for (DHTFutureListener<V> l : listeners()) {
             l.handleFutureSuccess(value);
         }
     }
     
-    public void fireFutureFailure(ExecutionException e) {
+    /**
+     * Fires an ExecutionException event
+     */
+    protected void fireFutureFailure(ExecutionException e) {
         for (DHTFutureListener<V> l : listeners()) {
             l.handleFutureFailure(e);
         }
     }
     
-    public void fireFutureCancelled(CancellationException e) {
+    /**
+     * Fires an CancellationException event
+     */
+    protected void fireFutureCancelled(CancellationException e) {
         for (DHTFutureListener<V> l : listeners()) {
             l.handleFutureCancelled(e);
         }
     }
     
-    public void fireFutureInterrupted(InterruptedException e) {
+    /**
+     * Fires an InterruptedException event
+     */
+    protected void fireFutureInterrupted(InterruptedException e) {
         for (DHTFutureListener<V> l : listeners()) {
             l.handleFutureInterrupted(e);
         }

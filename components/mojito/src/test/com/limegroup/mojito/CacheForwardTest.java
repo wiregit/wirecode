@@ -36,11 +36,13 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.CallableResponseHandler;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.MojitoUtils;
 import com.limegroup.mojito.util.UnitTestUtils;
 
 
@@ -79,7 +81,7 @@ public class CacheForwardTest extends BaseTestCase {
             dht1.start();
             Context context1 = (Context)dht1;
             
-            UnitTestUtils.setBootstrapping(dht1, true);            
+            UnitTestUtils.setBootstrapping(dht1, KUID.createRandomID());            
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             
@@ -130,13 +132,15 @@ public class CacheForwardTest extends BaseTestCase {
                 dht.start();
                 
                 if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", PORT)).get();
+                    PingResult result = dht.ping(new InetSocketAddress("localhost", PORT)).get();
+                    dht.bootstrap(result.getContact());
                 } else {
                     creator = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            creator.bootstrap(new InetSocketAddress("localhost", PORT+1)).get();
+            PingResult result = creator.ping(new InetSocketAddress("localhost", PORT+1)).get();
+            creator.bootstrap(result.getContact());
             Thread.sleep(250);
             
             // Store the value
@@ -371,7 +375,7 @@ public class CacheForwardTest extends BaseTestCase {
      * Bootstraps the given Node from one of the other Nodes
      */
     private static void bootstrap(MojitoDHT dht, Collection<? extends MojitoDHT> dhts) throws Exception {
-        dht.bootstrap(getRandomAddress(dht, dhts)).get();
+        MojitoUtils.bootstrap(dht, getRandomAddress(dht, dhts)).get();
     }
     
     /**

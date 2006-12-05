@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.settings.RouteTableSettings;
+import com.limegroup.mojito.util.MojitoUtils;
 
 
 public class CollisionTest extends BaseTestCase {
@@ -65,8 +66,8 @@ public class CollisionTest extends BaseTestCase {
             original = MojitoFactory.createDHT("OriginalDHT");
             original.bind(new InetSocketAddress(PORT+1));
             original.start();
-            original.bootstrap(bootstrap.getContactAddress()).get();
-            bootstrap.bootstrap(original.getContactAddress()).get();
+            MojitoUtils.bootstrap(original, bootstrap.getContactAddress()).get();
+            MojitoUtils.bootstrap(bootstrap, original.getContactAddress()).get();
             
             // The spoofer Node
             spoofer = MojitoFactory.createDHT("Spoofer Node");
@@ -79,7 +80,7 @@ public class CollisionTest extends BaseTestCase {
             
             spoofer.bind(new InetSocketAddress(PORT+2));
             spoofer.start();
-            spoofer.bootstrap(bootstrap.getContactAddress()).get();
+            MojitoUtils.bootstrap(spoofer, bootstrap.getContactAddress()).get();
             Thread.sleep(500);
             
             assertNotEquals(original.getLocalNodeID(), spoofer.getLocalNodeID());
@@ -136,9 +137,8 @@ public class CollisionTest extends BaseTestCase {
             original = MojitoFactory.createDHT("OriginalDHT");
             original.bind(new InetSocketAddress(PORT+1));
             original.start();
-            original.bootstrap(bootstrap.getContactAddress()).get();
-            bootstrap.bootstrap(original.getContactAddress()).get();
-            
+            MojitoUtils.bootstrap(original, bootstrap.getContactAddress()).get();
+            MojitoUtils.bootstrap(bootstrap, original.getContactAddress()).get();
             original.stop();
             
             List<Contact> nodes = ((Context)bootstrap).getRouteTable().getContacts();
@@ -164,7 +164,7 @@ public class CollisionTest extends BaseTestCase {
             
             replacement.bind(new InetSocketAddress(PORT+2));
             replacement.start();
-            replacement.bootstrap(bootstrap.getContactAddress()).get();
+            MojitoUtils.bootstrap(replacement, bootstrap.getContactAddress()).get();
             
             Thread.sleep(5L * NetworkSettings.TIMEOUT.getValue());
             

@@ -64,6 +64,11 @@ public class DHTNodeFetcher {
     private TimerTask fetcherTask = null;
     
     /**
+     * A lock for the TimerTask
+     */
+    private Object fetcherTaskLock = new Object();
+    
+    /**
      * Whether or the fethcer is currently pinging a single host
      */
     private AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
@@ -113,11 +118,11 @@ public class DHTNodeFetcher {
             }
             
             if(LOG.isDebugEnabled()){
-                LOG.debug("Adding active host from HostCatcher: "+ ep.getAddress());
+                LOG.debug("Adding active host from HostCatcher: "+ ep.getSocketAddress());
             }
             
             haveActive = true;
-            bootstrapper.addBootstrapHost(new InetSocketAddress(ep.getAddress(), ep.getPort()));
+            bootstrapper.addBootstrapHost(ep.getSocketAddress());
         }
         
         if(haveActive) { //we have added active hosts already - no need to request
@@ -186,20 +191,52 @@ public class DHTNodeFetcher {
             if(pinger == null) {
                 pinger = new UDPPinger();
             }
-            pinger.rank(Arrays.asList(ipp), new SinglePingRequestListener(), null, m, pingExpireTime);
+            
+            pinger.rank(Arrays.asList(ipp), 
+                    new SinglePingRequestListener(), null, m, pingExpireTime);
         }
     }
     
-    public void startTimerTask() {
-        long fetcherTime = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
-        long initialFetch = (long) (Math.random() * fetcherTime);
-        fetcherTask = RouterService.schedule(new TimedFetcher(), initialFetch, fetcherTime);
+    /**
+     * Starts the DHTNodeFetcher
+     */
+    public void start() {
+        synchronized (fetcherTaskLock) {
+            if (fetcherTask != null) {
+                return;
+            }
+            
+            long fetcherTime = DHTSettings.DHT_NODE_FETCHER_TIME.getValue();
+            long initialFetch = (long) (Math.random() * fetcherTime);
+            
+            Runnable task = new Runnable() {
+                public void run() {
+                    requestDHTHosts();
+                }
+            };
+            
+            fetcherTask = RouterService.schedule(task, initialFetch, fetcherTime);
+        }
     }
     
+    /**
+     * Stops the DHTNodeFetcher
+     */
     public void stop() {
-        if(fetcherTask != null) {
-            fetcherTask.cancel();
-            fetcherTask = null;
+        synchronized (fetcherTaskLock) {
+            if (fetcherTask != null) {
+                fetcherTask.cancel();
+                fetcherTask = null;
+            }
+        }
+    }
+    
+    /**
+     * Returns true if the DHTNodeFetcher is running
+     */
+    public boolean isRunning() {
+        synchronized (fetcherTaskLock) {
+            return fetcherTask != null;
         }
     }
     
@@ -215,24 +252,15 @@ public class DHTNodeFetcher {
         }
         
         PingReply reply = (PingReply) m;
-        List<IpPort> l = reply.getPackedDHTIPPorts();
+        List<IpPort> list = reply.getPackedDHTIPPorts();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Received ping reply from "+reply.getAddress());
         }
         
-        for (IpPort ipp : l) {
-            bootstrapper.addBootstrapHost(
-                    new InetSocketAddress(ipp.getInetAddress(), ipp.getPort()));
-        }
-    }
-    
-    private class TimedFetcher implements Runnable {
-        public void run() {
-            if (!bootstrapper.isWaitingForNodes()) {
-                return;
-            }
-            requestDHTHosts();
+        for (IpPort ipp : list) {
+            bootstrapper.addBootstrapHost(new InetSocketAddress(
+                    ipp.getInetAddress(), ipp.getPort()));
         }
     }
     
@@ -258,9 +286,9 @@ public class DHTNodeFetcher {
             //stop when not waiting anymore OR when not connected to the Gnutella network 
             //OR timeout
             boolean cancel = (pingingSingleHost.get() 
-                                        ||delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue())
-                                        || !RouterService.isConnected()
-                                        || (!bootstrapper.isWaitingForNodes());
+                                || delay > DHTSettings.MAX_NODE_FETCHER_TIME.getValue()
+                                || !RouterService.isConnected()
+                                || !isRunning());
             if(cancel){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Cancelling UDP ping after "+delay+" ms, connected: "
@@ -298,6 +326,5 @@ public class DHTNodeFetcher {
             }
             pingingSingleHost.set(false);
         }
-        
     }
 }

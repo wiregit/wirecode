@@ -182,14 +182,17 @@ public interface MojitoDHT {
     public void setDatabase(Database database);
     
     /**
-     * Tries to bootstrap from the given SocketAddress
+     * Bootstraps the MojitoDHT from the given Contact. Use
+     * the ping() methods to find a Contact!
      */
-    public DHTFuture<BootstrapResult> bootstrap(SocketAddress address);
+    public DHTFuture<BootstrapResult> bootstrap(Contact node);
     
     /**
-     * Tries to bootstrap from one of the items in the hostList
+     * Tries to ping Contacts in the RouteTable. You may use
+     * this method to find a remote Node from where you can
+     * bootstrap your MojitoDHT instance.
      */
-    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList);
+    public DHTFuture<PingResult> findActiveContact();
     
     /**
      * Tries to ping the given address

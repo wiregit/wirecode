@@ -58,6 +58,13 @@ public class KademliaSettings extends MojitoProps {
                 "parallel_pings", 1, 30);
     
     /**
+     * The maximum number of ping failures before pinging is
+     * given up
+     */
+    public static final IntSetting MAX_PARALLEL_PING_FAILURES
+        = FACTORY.createIntSetting("MAX_PARALLEL_PING_FAILURES", 40);
+    
+    /**
      * The FIND_NODE lookup timeout
      */
     public static final LongSetting FIND_NODE_LOOKUP_TIMEOUT

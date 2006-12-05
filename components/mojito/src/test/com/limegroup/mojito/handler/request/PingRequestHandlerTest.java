@@ -8,10 +8,12 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.UnitTestUtils;
 
@@ -59,7 +61,7 @@ public class PingRequestHandlerTest extends BaseTestCase {
             // Pings to prevent other Nodes from seleting it as
             // their initial bootstrap Node
             Context context1 = (Context)dht1;
-            UnitTestUtils.setBootstrapping(dht1, true);            
+            UnitTestUtils.setBootstrapping(dht1, KUID.createRandomID());            
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             
@@ -70,14 +72,31 @@ public class PingRequestHandlerTest extends BaseTestCase {
                 assertTrue(expected.getCause() instanceof DHTException);
             }
             
-            // Mext collision Ping. Different Node IDs -> should not work (same as above)
+            // next collision Ping. Different Node IDs -> should not work (same as above)
             context1.setContactAddress(new InetSocketAddress("localhost", 2000));
             Context context2 = (Context)dht2;
+            
+            // Disable local assertion to make sure the network level
+            // collision ping checks work
+            ContextSettings.ASSERT_COLLISION_PING.setValue(false);
             try {
                 PingResult result = context2.collisionPing(dht1.getLocalNode()).get();
                 fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
+            } catch (IllegalArgumentException err) {
+                fail("Should not have thrown an IllegalArgumentException", err);
+            }
+            
+            // Re-Enable local assertion to make sure you can't create
+            // malfored collision pings like above
+            ContextSettings.ASSERT_COLLISION_PING.setValue(true);
+            try {
+                PingResult result = context2.collisionPing(dht1.getLocalNode()).get();
+                fail("DHT-1 did respond to our request " + result);
+            } catch (ExecutionException expected) {
+                assertTrue(expected.getCause() instanceof DHTException);
+            } catch (IllegalArgumentException expected) {
             }
             
             // Set DHT-2's Node ID to DHT-1 and try again. This should work!

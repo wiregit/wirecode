@@ -28,11 +28,23 @@ import java.util.concurrent.ExecutionException;
  */
 public interface DHTFutureListener<T> {
     
+    /**
+     * Called if a task finished with the given result
+     */
     public void handleFutureSuccess(T result);
     
+    /**
+     * Called if a task finished with an ExecutionException
+     */
     public void handleFutureFailure(ExecutionException e);
     
+    /**
+     * Called if a task was cancelled
+     */
     public void handleFutureCancelled(CancellationException e);
     
+    /**
+     * Called if a task was interrupted
+     */
     public void handleFutureInterrupted(InterruptedException e);
 }

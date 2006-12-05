@@ -3,6 +3,7 @@ package com.limegroup.mojito.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import com.limegroup.mojito.Context;
@@ -16,16 +17,16 @@ public class UnitTestUtils {
         
     }
     
-    public static void setBootstrapping(MojitoDHT dht, boolean bootstrapping) throws Exception {
+    public static void setBootstrapping(MojitoDHT dht, KUID nodeId) throws Exception {
         Context context = (Context)dht;
         Field bmField = Context.class.getDeclaredField("bootstrapManager");
         bmField.setAccessible(true);
         
         BootstrapManager bootstrapManager = (BootstrapManager)bmField.get(context);
-        Field futureField = BootstrapManager.class.getDeclaredField("future");
+        Field futureField = BootstrapManager.class.getDeclaredField("futures");
         futureField.setAccessible(true);
         
-        if (bootstrapping) {
+        if (nodeId != null) {
             Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
             Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
             con.setAccessible(true);
@@ -36,9 +37,9 @@ public class UnitTestUtils {
                 }
             });
             
-            futureField.set(bootstrapManager, future);
+            futureField.set(bootstrapManager, Collections.singletonMap(nodeId, future));
         } else {
-            futureField.set(bootstrapManager, null);
+            futureField.set(bootstrapManager, Collections.emptyMap());
         }
     }
     

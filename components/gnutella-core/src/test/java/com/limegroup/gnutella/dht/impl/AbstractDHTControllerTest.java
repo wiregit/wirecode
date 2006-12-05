@@ -106,14 +106,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void bind(SocketAddress address) throws IOException {}
 
-        public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList) {
-            return null;
-        }
-
-        public DHTFuture<BootstrapResult> bootstrap(SocketAddress address) {
-            return null;
-        }
-
         public DHTFuture<FindValueResult> get(KUID key) {
             return null;
         }
@@ -221,6 +213,14 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         }
 
         public void setDHTExecutorService(DHTExecutorService executors) {
+        }
+
+        public DHTFuture<BootstrapResult> bootstrap(Contact node) {
+            return null;
+        }
+
+        public DHTFuture<PingResult> findActiveContact() {
+            return null;
         }
     }
 

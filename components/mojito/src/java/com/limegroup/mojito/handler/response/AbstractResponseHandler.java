@@ -395,6 +395,14 @@ abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> 
      */
     protected void fireTimeoutException(KUID nodeId, SocketAddress address, 
             RequestMessage request, long time) {
-        setException(new DHTTimeoutException(nodeId, address, request, time));
+        setException(createTimeoutException(nodeId, address, request, time));
+    }
+    
+    /**
+     * A helper method to create Timeout Exceptions
+     */
+    protected DHTTimeoutException createTimeoutException(KUID nodeId, SocketAddress address, 
+            RequestMessage request, long time) {
+        return new DHTTimeoutException(nodeId, address, request, time);
     }
 }

@@ -85,16 +85,17 @@ public class Tag {
     
     Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) 
             throws IOException {
-        this(contact.getNodeID(), contact.getContactAddress(), message, responseHandler, contact.getAdaptativeTimeout());
+        this(contact.getNodeID(), contact.getContactAddress(), message, 
+                responseHandler, contact.getAdaptativeTimeout());
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler) 
-            throws IOException {
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
+            ResponseHandler responseHandler) throws IOException {
         this(nodeId, dst, message, responseHandler, -1L);
     }
     
-    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, ResponseHandler responseHandler, long timeout) 
-            throws IOException {
+    Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
+            ResponseHandler responseHandler, long timeout) throws IOException {
         
         this.nodeId = nodeId;
         this.dst = dst;

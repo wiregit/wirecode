@@ -33,6 +33,7 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.MojitoUtils;
 
 public class DHTValueTest extends BaseTestCase {
     
@@ -65,13 +66,13 @@ public class DHTValueTest extends BaseTestCase {
                 dht.start();
                 
                 if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
+                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
                 } else {
                     first = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            first.bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
+            MojitoUtils.bootstrap(first, new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             KUID key = KUID.createRandomID();

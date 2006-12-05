@@ -2,10 +2,9 @@ package com.limegroup.mojito.manager;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.TestSuite;
 
@@ -15,13 +14,19 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.exceptions.DHTTimeoutException;
 import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.NetworkSettings;
 
 public class BootstrapManagerTest extends BaseTestCase {
+    
+    static {
+        System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+    }
     
     protected static MojitoDHT BOOTSTRAP_DHT;
     protected static final int BOOTSTRAP_DHT_PORT = 3000;
@@ -54,6 +59,7 @@ public class BootstrapManagerTest extends BaseTestCase {
         BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");
         BOOTSTRAP_DHT.bind(BOOTSTRAP_DHT_PORT);
         BOOTSTRAP_DHT.start();
+        
         //setup test node
         TEST_DHT = MojitoFactory.createDHT("dht-test");
         TEST_DHT.bind(2000);
@@ -66,29 +72,40 @@ public class BootstrapManagerTest extends BaseTestCase {
         TEST_DHT.stop();
     }
     
-    public void testBootstrapFailure() throws Exception{
+    public void testBootstrapFailure() throws Exception {
+        ((Context)BOOTSTRAP_DHT).setExternalAddress(
+                new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT));
+        
         //try failure first
         BOOTSTRAP_DHT.stop();
-        HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
-        bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
-        BootstrapResult evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_FAILED);
-        assertEquals(BOOTSTRAP_DHT.getContactAddress(), evt.getFailedHosts().get(0));
+        
+        try {
+            ((Context)TEST_DHT).ping(BOOTSTRAP_DHT.getLocalNode()).get();
+            fail("BOOTSTRAP_DHT should not respond");
+        } catch (ExecutionException err) {
+            assertTrue(err.getCause() instanceof DHTTimeoutException);
+        }
+        
+        BootstrapResult result = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getLocalNode()).get();
+        assertEquals(BootstrapResult.ResultType.BOOTSTRAP_FAILED, result.getResultType());
+        assertEquals(BOOTSTRAP_DHT.getLocalNodeID(), result.getContact().getNodeID());
     }
 
     public void testBootstrapFromList() throws Exception{
         //try pings to a bootstrap list
         //add some bad hosts
-        HashSet<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
+        Set<SocketAddress> bootstrapSet = new LinkedHashSet<SocketAddress>();
         bootstrapSet.clear();
         for(int i= 1; i < 5; i++) {
             bootstrapSet.add(new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT+i));
         }
         //add good host
         bootstrapSet.add(BOOTSTRAP_DHT.getContactAddress());
-        BootstrapResult evt = TEST_DHT.bootstrap(bootstrapSet).get();
-        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
-        assertNotContains(evt.getFailedHosts(), BOOTSTRAP_DHT.getContactAddress());
+        
+        PingResult pong = ((Context)TEST_DHT).ping(bootstrapSet).get();
+        BootstrapResult result = TEST_DHT.bootstrap(pong.getContact()).get();
+        assertEquals(result.getResultType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
+        assertEquals(BOOTSTRAP_DHT.getLocalNodeID(), result.getContact().getNodeID());
     }
     
     @SuppressWarnings("unchecked")
@@ -107,9 +124,12 @@ public class BootstrapManagerTest extends BaseTestCase {
                 0,0,BOOTSTRAP_DHT.getLocalNodeID(),
                 BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
-        //now try bootstrapping from RT
-        BootstrapResult evt = TEST_DHT.bootstrap(Collections.EMPTY_SET).get();
-        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
+        
+        // Start pinging Nodes from the RouteTable
+        PingResult pong = TEST_DHT.findActiveContact().get();
+        // And bootstrap from the first Node that responds
+        BootstrapResult evt = TEST_DHT.bootstrap(pong.getContact()).get();
+        assertEquals(evt.getResultType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
     }
     
     public void testBootstrapPoorRatio() throws Exception{
@@ -125,33 +145,10 @@ public class BootstrapManagerTest extends BaseTestCase {
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);
 
-        BootstrapResult evt = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getContactAddress()).get();
-        assertEquals(evt.getEventType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
+        PingResult pong = TEST_DHT.ping(BOOTSTRAP_DHT.getContactAddress()).get();
+        BootstrapResult result = TEST_DHT.bootstrap(pong.getContact()).get();
+        assertEquals(result.getResultType(), BootstrapResult.ResultType.BOOTSTRAP_SUCCEEDED);
         //see if RT was purged
         assertNotContains(rt.getActiveContacts(), node);
-    }
-
-    public void testBootstrapFromInvalidHostList() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
-        Set<SocketAddress> hostList = new HashSet<SocketAddress>();
-        hostList.add(new InetSocketAddress(1));
-        hostList.add(new InetSocketAddress("localhost", 2));
-        hostList.add(new InetSocketAddress("localhost", 0));
-        hostList.add(new InetSocketAddress("localhost", 5000));
-        hostList.add(new InetSocketAddress("www.google.com", 0));
-        
-        MojitoDHT dht = MojitoFactory.createDHT();
-        
-        try {
-            dht.bind(5000);
-            dht.start();
-            
-            dht.bootstrap(hostList);
-            fail(dht + " should have rejected the invalid hostList " + hostList);
-        } catch (IllegalArgumentException ignore) {
-            //ignore.printStackTrace();
-        } finally {
-            dht.stop();
-        }
     }
 }

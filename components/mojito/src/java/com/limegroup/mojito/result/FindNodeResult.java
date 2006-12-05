@@ -69,7 +69,7 @@ public class FindNodeResult {
     /**
      * Returns the number of failed hosts during this lookup
      */
-    public int getFailures() {
+    public int getFailureCount() {
         return failures;
     }
     

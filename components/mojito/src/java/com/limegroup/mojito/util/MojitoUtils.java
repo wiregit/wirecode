@@ -19,31 +19,30 @@
 
 package com.limegroup.mojito.util;
 
+import java.net.SocketAddress;
+import java.util.concurrent.ExecutionException;
 
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.DHTMessage;
-import com.limegroup.mojito.messages.PingRequest;
+import com.limegroup.mojito.MojitoDHT;
+import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.PingResult;
 
-/**
- * Miscellaneous untilities for Messages
- */
-public class MessageUtils {
+public class MojitoUtils {
     
-    private MessageUtils() {
+    private MojitoUtils() {
         
     }
     
     /**
-     * Returns true if the given DHTMessage is a Node ID collision test ping
+     * A helper method to bootstrap a MojitoDHT instance.
      * 
-     * @param nodeId The local Node ID
-     * @param message The Message
+     * It tries to ping the given SocketAddress (this blocks) and in
+     * case of a success it will kick off a bootstrap process and returns
+     * a DHTFuture for the process.
      */
-    public static boolean isCollisionPingRequest(KUID nodeId, DHTMessage message) {
-        if (!(message instanceof PingRequest)) {
-            return false;
-        }
-        
-        return ContactUtils.isCollisionPingSender(nodeId, message.getContact());
+    public static DHTFuture<BootstrapResult> bootstrap(MojitoDHT dht, SocketAddress addr) 
+            throws ExecutionException, InterruptedException {
+        PingResult pong = dht.ping(addr).get();
+        return dht.bootstrap(pong.getContact());
     }
 }

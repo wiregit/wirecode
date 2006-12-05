@@ -33,6 +33,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -89,6 +90,7 @@ import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.statistics.GlobalLookupStatisticContainer;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.statistics.RoutingStatisticContainer;
+import com.limegroup.mojito.util.BucketUtils;
 import com.limegroup.mojito.util.CryptoUtils;
 import com.limegroup.mojito.util.DHTSizeEstimator;
 import com.limegroup.mojito.util.DatabaseUtils;
@@ -818,8 +820,35 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     }
     
     /**
+     * Returns a Set of active Contacts sorted by most recently
+     * seen to least recently seen
+     */
+    private Set<Contact> getActiveContacts() {
+        Set<Contact> nodes = new LinkedHashSet<Contact>();
+        List<Contact> contactList = getRouteTable().getActiveContacts();
+        Collections.sort(contactList, BucketUtils.MRS_COMPARATOR);
+        nodes.addAll(contactList);
+        nodes.remove(getLocalNode());
+        return nodes;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#ping()
+     */
+    public DHTFuture<PingResult> findActiveContact() {
+        return pingManager.ping(getActiveContacts());
+    }
+    
+    /**
+     * Tries to ping a Set of hosts
+     */
+    public DHTFuture<PingResult> ping(Set<SocketAddress> hosts) {
+        return pingManager.pingAddresses(hosts);
+    }
+    
+    /**
      * Pings the DHT node with the given SocketAddress. 
-     * Warning: This method should not be used to ping contacts from the routing table
      * 
      * @param address The address of the remote Node
      */
@@ -839,6 +868,13 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
      */
     public DHTFuture<PingResult> collisionPing(Contact node) {
         return pingManager.collisionPing(node);
+    }
+    
+    /** 
+     * Sends a special collision test Ping to the given Node 
+     */
+    public DHTFuture<PingResult> collisionPing(Set<Contact> nodes) {
+        return pingManager.collisionPing(nodes);
     }
     
     /** 
@@ -876,27 +912,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         return findNodeManager.lookup(lookupId);
     }
     
-    /**
-     * Tries to bootstrap from the local Route Table.
-     */
-    public DHTFuture<BootstrapResult> bootstrap() {
-        return bootstrapManager.bootstrap();
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#bootstrap(java.net.SocketAddress)
-     */
-    public DHTFuture<BootstrapResult> bootstrap(SocketAddress address) {
-        return bootstrap(Collections.singleton(address));
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#bootstrap(java.util.Set)
-     */
-    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> hostList) {
-        return bootstrapManager.bootstrap(hostList);
+    public DHTFuture<BootstrapResult> bootstrap(Contact node) {
+        return bootstrapManager.bootstrap(node);
     }
     
     /*

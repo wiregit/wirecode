@@ -4,74 +4,76 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
+import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.concurrent.DHTFutureListener;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.result.BootstrapResult;
+import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.BootstrapResult.ResultType;
 
-/**
- * This class bootstrapps a DHT off of the Gnutella network.
- * 
- * It uses the following 4 methods to find bootstrap hosts: 
- * 1) DHT nodes already received from the Gnutella network during the current session.
- * 2) Bootstrap hosts stored in the corresponding SIMPP setting.
- * 3) A persisted DHT routing table.
- * 4) The DHT node fetcher, which sends UDP pings requesting DHT IP:Ports
- * in the Gnutella network.
- *  
- */
-class LimeDHTBootstrapper implements DHTBootstrapper{
+class LimeDHTBootstrapper implements DHTBootstrapper {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
-    
-    /**
-     * The DHT controller
-     */
-    private DHTController controller;
-    
-    /**
-     * The Gnutella DHT node fetcher 
-     */
-    private DHTNodeFetcher dhtNodeFetcher;
-    
-    /**
-     * A flag set to true when we are bootstrapping from our persisted Routing Table
-     */
-    private AtomicBoolean bootstrappingFromRT = new AtomicBoolean(false);
-    
-    /**
-     * Flag set to true if the bootstrapper is waiting for a bootstrap node.
-     */
-    private AtomicBoolean waiting = new AtomicBoolean(false);
     
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
      * Limit size to 50 for now.
      */
-    private volatile Set<SocketAddress> bootstrapHosts = 
-        Collections.synchronizedSet(new FixedSizeLIFOSet<SocketAddress>(50));
+    private Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
     
     /**
-     * The bootstrap's <tt>Future</tt> object
+     * A flag that indicates whether or not we've tried to
+     * bootstrap from the RouteTable 
+     */
+    private boolean triedRouteTable = false;
+    
+    /**
+     * The future of the ping process
+     */
+    private DHTFuture<PingResult> pingFuture;
+    
+    /**
+     * A flag that indicates whether or not the current
+     * pingFuture (see above) is pinging Nodes from the
+     * RouteTable
+     */
+    private boolean fromRouteTable = false;
+    
+    /**
+     * The future of the bootstrap process
      */
     private DHTFuture<BootstrapResult> bootstrapFuture;
+    
+    /**
+     * The DHT controller
+     */
+    private DHTController controller;
+
+    /**
+     * The DHTNodeFetcher instance
+     */
+    private DHTNodeFetcher nodeFetcher;
+    
+    /**
+     * The lock Object
+     */
+    private Object lock = new Object();
     
     public LimeDHTBootstrapper(DHTController controller) {
         this.controller = controller;
@@ -88,23 +90,20 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
      * we receive nodes from the network, it should pre-empt the existing
      * bootstrap and start with them. This is achieved by calling cancel on 
      * the future.
-     * 
      */
     public void bootstrap() {
-        
-        MojitoDHT dht = controller.getMojitoDHT();
-        
-        if(dht.isBootstrapped()) {
-            return;
+        synchronized (lock) {
+            
+            if (getMojitoDHT().isBootstrapped()) {
+                return;
+            }
+            
+            if (hosts.isEmpty()) {
+                tryBootstrapFromRouteTable();
+            } else {
+                tryBootstrapFromHostsSet();
+            }
         }
-
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Starting bootstrap, bootstrapHosts: "+bootstrapHosts);
-        }
-        
-        bootstrappingFromRT.set(bootstrapHosts.isEmpty());
-        bootstrapFuture = dht.bootstrap(bootstrapHosts);
-        bootstrapFuture.addDHTFutureListener(new InitialBootstrapListener());
     }
     
     /**
@@ -116,56 +115,153 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
      */
     public void addBootstrapHost(SocketAddress hostAddress) {
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Adding host: "+hostAddress);
-        }
-        
-        //Keep bootstrap list small because it should be updated often
-        bootstrapHosts.add(hostAddress);
-        
-        if(waiting.getAndSet(false) || bootstrappingFromRT.getAndSet(false)) {
-            MojitoDHT dht = controller.getMojitoDHT();
+        synchronized (lock) {
             
-            //we may have bootstrapped (Mojito internal -- see RandomBucketRefresher.run()) 
-            //in the meanwhile
-            if(dht.isBootstrapped()) {
+            if (getMojitoDHT().isBootstrapped()) {
                 return;
             }
             
-            LOG.debug("Cancelling bootstrap and starting over");
-
-            bootstrapFuture.cancel(true);
-            bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTFutureListener(new WaitingBootstrapListener());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Adding host: "+hostAddress);
+            }
+            
+            hosts.add(hostAddress);
+            tryBootstrapFromHostsSet();
         }
     }
     
     public void addPassiveNode(SocketAddress hostAddress) {
-        if(dhtNodeFetcher == null || !waiting.get()) {
-            return;
-        }
-        dhtNodeFetcher.requestDHTHosts(hostAddress);
-    }
-
-    public void stop() {
-        
-        LOG.debug("Stopping");
-        
-        if(bootstrapFuture != null) {
-            bootstrapFuture.cancel(true);
-        }
-        
-        waiting.set(false);
-        bootstrappingFromRT.set(false);
-        
-        if(dhtNodeFetcher != null) {
-            dhtNodeFetcher.stop();
-            dhtNodeFetcher = null;
+        synchronized (lock) {
+            if (nodeFetcher == null || !isWaitingForNodes()) {
+                return;
+            }
+            
+            nodeFetcher.requestDHTHosts(hostAddress);
         }
     }
     
+    /**
+     * Stops bootstrapping
+     */
+    public void stop() {
+        synchronized (lock) {
+            if (pingFuture != null) {
+                pingFuture.cancel(true);
+                pingFuture = null;
+            }
+            
+            if (bootstrapFuture != null) {
+                bootstrapFuture.cancel(true);
+                bootstrapFuture = null;
+            }
+            
+            stopNodeFetcher();
+            triedRouteTable = false;
+            fromRouteTable = false;
+        }
+    }
+    
+    /**
+     * We're waiting for Nodes if:
+     * 
+     * 1) We're NOT bootstrapped
+     * 2) And there's no bootstrap process active OR we are bootstrapping from routetable
+     * 
+     * TODO: Deprecated because its former purpose was to
+     * stop the DHTNodeFetcher. Maybe useful for testing.
+     */
+    @Deprecated
     public boolean isWaitingForNodes() {
-        return waiting.get();
+        synchronized (lock) {
+            return !getMojitoDHT().isBootstrapped() && bootstrapFuture == null;
+        }
+    }
+
+    /**
+     * Tries to bootstrap the local Node from an existing
+     * RouteTable.
+     */
+    private void tryBootstrapFromRouteTable() {
+        synchronized (lock) {
+            
+            // Make sure we try this only once. 
+            if (triedRouteTable) {
+                return;
+            }
+            
+            if (pingFuture != null || bootstrapFuture != null) {
+                return;
+            }
+            
+            pingFuture = getMojitoDHT().findActiveContact();
+            pingFuture.addDHTFutureListener(new PongListener());
+            
+            triedRouteTable = true;
+            fromRouteTable = true;
+        }
+    }
+    
+    /**
+     * Tries to bootstrap the local Node from the hosts Set
+     */
+    private void tryBootstrapFromHostsSet() {
+        synchronized (lock) {
+            // We're already in the bootstrapping stage? If so
+            // don't bother any further!
+            if (bootstrapFuture != null) {
+                return;
+            }
+            
+            // Are we already pinging somebody? Interrupt the
+            // process in case of RouteTable pings as we've
+            // probably more luck with a fresh IP:Port we got
+            // from the DHTNodeFetcher!
+            if (fromRouteTable) {
+                fromRouteTable = false;
+                if (pingFuture != null) {
+                    pingFuture.cancel(true);
+                    pingFuture = null;
+                }
+            }
+            
+            if (pingFuture != null) {
+                return;
+            }
+            
+            Iterator<SocketAddress> it = hosts.iterator();
+            assert (it.hasNext());
+            
+            SocketAddress addr = it.next();
+            it.remove();
+            
+            pingFuture = getMojitoDHT().ping(addr);
+            pingFuture.addDHTFutureListener(new PongListener());
+        }
+    }
+    
+    /**
+     * Notify our connections that we are now a bootstrapped DHT node 
+     */
+    private void updatedCapabilities() {
+        controller.sendUpdatedCapabilities();
+    }
+    
+    /**
+     * Returns MojitoDHT instance
+     */
+    private MojitoDHT getMojitoDHT() {
+        return controller.getMojitoDHT();
+    }
+    
+    /**
+     * Stops the DHTNodeFetcher. You must synchronize on
+     * the 'lock' Object prior to calling this!
+     */
+    private void stopNodeFetcher() {
+        if (nodeFetcher != null) {
+            nodeFetcher.stop();
+            nodeFetcher = null;
+        }
     }
     
     /**
@@ -175,9 +271,9 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    public SocketAddress getSIMPPHost(){
+    SocketAddress getSimppHost(){
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
-        List<SocketAddress> hostList = new ArrayList<SocketAddress>(simppHosts.length);
+        List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
 
         for (String hostString : simppHosts) {
             int index = hostString.indexOf(":");
@@ -192,153 +288,145 @@ class LimeDHTBootstrapper implements DHTBootstrapper{
             try {
                 String host = hostString.substring(0, index);
                 int port = Integer.parseInt(hostString.substring(index+1).trim());
-                SocketAddress addr = new InetSocketAddress(host, port);
-                hostList.add(addr);
+                list.add(new InetSocketAddress(host, port));
             } catch(NumberFormatException nfe) {
                 LOG.error(new UnknownHostException("invalid host: " + hostString));
             }
         }
 
-        if(hostList.isEmpty()) {
+        if (list.isEmpty()) {
             return null;
         }
         
-        MojitoDHT dht = controller.getMojitoDHT();
+        KUID localId = getMojitoDHT().getLocalNodeID();
         
         //each host in the list is responsible for a subspace of the keyspace
         //first 4 bits responsible for dividing the keyspace
-        int localPrefix = (int)((dht.getLocalNodeID().getBytes()[0] & 0xF0) >> 4);
+        int localPrefix = (int)((localId.getBytes()[0] & 0xF0) >> 4);
         //now map to hostlist size
-        int index = (int)(((float)hostList.size()/16f) * localPrefix);
-        return hostList.get(index);
+        int index = (int)(((float)list.size()/16f) * localPrefix);
+        return list.get(index);
     }
     
-    private void handleSuccess() {
-        // Notify our connections that we are now a bootstrapped DHT node 
-        controller.sendUpdatedCapabilities();
-    }
-    
-    private class InitialBootstrapListener implements DHTFutureListener<BootstrapResult> {
+    /**
+     * The PongListener waits for the Ping response (Pong) from a
+     * remote Node. If a Node responds we'll begin bootstrapping
+     * from it and if it doesn't we'll:
+     * 
+     * 1) start the DHTNodeFetcher if it isn't already running
+     * 2) check the hosts Set for other Nodes and ping 'em
+     */
+    private class PongListener implements DHTFutureListener<PingResult> {
+        public void handleFutureSuccess(PingResult result) {
+            synchronized (lock) {
+                pingFuture = null;
 
-        public void handleFutureSuccess(BootstrapResult result) {
-            
-            if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
-                LOG.debug("Initial bootstrap ping succeded");
+                // Stop the DHTNodeFetcher, we don't need it anymore
+                // as we found a Node that did respond to our initial
+                // bootstrap ping
+                stopNodeFetcher();
                 
-                waiting.set(false);
-                bootstrappingFromRT.set(false);
-                return;
+                bootstrapFuture = getMojitoDHT().bootstrap(result.getContact());
+                bootstrapFuture.addDHTFutureListener(new BootstrapListener());
+            }
+        }
+        
+        public void handleFutureFailure(ExecutionException e) {
+            synchronized (lock) {
+                pingFuture = null;
                 
-            } else if(ResultType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
-                LOG.debug("Initial bootstrap completed");
-
-                handleSuccess();
-                return;
-            } 
-
-            MojitoDHT dht = controller.getMojitoDHT();
-            
-            //failure!
-            if(bootstrappingFromRT.getAndSet(false)) {
-                //we were bootstrapping from the RT AND failed: try SIMPP hosts
-                SocketAddress simppBootstrapHost = getSIMPPHost();
-                if(simppBootstrapHost != null) {
-                    
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Bootstraping from SIMPP host: "+simppBootstrapHost);
+                if (e.getCause() instanceof DHTException) {
+                    // Try to bootstrap from a SIMPP Host if
+                    // bootstrapping from the RouteTable failed
+                    // and try the hosts Set otherwise
+                    SocketAddress simpp = null;
+                    if (fromRouteTable && (simpp = getSimppHost()) != null) {
+                        addBootstrapHost(simpp);
+                    } else {
+                        retry();
                     }
-                    
-                    bootstrapFuture = dht.bootstrap(simppBootstrapHost);
                 } else {
-                    if(bootstrapHosts.isEmpty()) { //put ourselve in waiting mode and return
-                        
-                        LOG.debug("Starting Node fetcher and going to wait mode");
-                        
-                        waiting.set(true);
-                        dhtNodeFetcher = new DHTNodeFetcher(LimeDHTBootstrapper.this);
-                        dhtNodeFetcher.startTimerTask();
-                        return;
-                    } 
-                    
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Retrying bootstrap with host list: "+bootstrapHosts);
-                    }
-                    
-                    //otherwise try again
-                    bootstrapFuture = dht.bootstrap(bootstrapHosts);
+                    LOG.error("ExecutionException", e);
+                    stop();
                 }
-                bootstrapFuture.addDHTFutureListener(new WaitingBootstrapListener());
-                return;
             }
-            
-            //we were not bootstrapping from RT. Try again!
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Retrying bootstrap with host list: "+bootstrapHosts);
-            }
-            
-            bootstrapHosts.removeAll(result.getFailedHosts());
-            bootstrappingFromRT.set(bootstrapHosts.isEmpty());
-            bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTFutureListener(this);
         }
         
-        public void handleFutureFailure(ExecutionException e) {
-            LOG.error("ExecutionException", e);
-            stop();
+        private void retry() {
+            // Start the DHTNodeFetcher if it isn't running
+            // The NodeFetcher calls addBootstrapHost() which
+            // will restart the bootstrapping. Otherwise see
+            // if there are entries in the hosts Set
+            if (nodeFetcher == null) {
+                nodeFetcher = new DHTNodeFetcher(LimeDHTBootstrapper.this);
+                nodeFetcher.start();
+            } else {
+                bootstrap();
+            }
         }
         
         public void handleFutureCancelled(CancellationException e) {
+            synchronized (lock) {
+                LOG.error("CancellationException", e);
+                stop();
+            }
         }
 
         public void handleFutureInterrupted(InterruptedException e) {
+            synchronized (lock) {
+                LOG.error("InterruptedException", e);
+                stop();
+            }
         }
     }
     
-    private class WaitingBootstrapListener implements DHTFutureListener<BootstrapResult> {
-        
+    /**
+     * The BootstrapListener waits for the result of the bootstrapping result.
+     * On a success we'll update our capabilities and if bootstrapping failed
+     * we'll just try it again. 
+     */
+    private class BootstrapListener implements DHTFutureListener<BootstrapResult> {
         public void handleFutureSuccess(BootstrapResult result) {
-            // this listener should never be called when bootstrapping from RT
-            Assert.that(!bootstrappingFromRT.get());
-            
-            if(ResultType.BOOTSTRAP_PING_SUCCEEDED.equals(result.getEventType())) {
-                LOG.debug("Ping succeded in waitingBootstrapListener");
+            synchronized (lock) {
+                bootstrapFuture = null;
                 
-                waiting.set(false); //this will also stop the node fetcher
-                return;
-                
-            } else if(ResultType.BOOTSTRAP_SUCCEEDED.equals(result.getEventType())) {
-                LOG.debug("Bootstrap succeded in waitingBootstrapListener");
-                
-                handleSuccess();
-                return;
-                
+                ResultType type = result.getResultType();
+                switch(type) {
+                    case BOOTSTRAP_SUCCEEDED:
+                        updatedCapabilities();
+                        break;
+                    case BOOTSTRAP_FAILED:
+                        // Try again!
+                        bootstrap();
+                        break;
+                    default:
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("Unknown result type: " + type);
+                        }
+                        break;
+                }
             }
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("hostlist: " + result.getFailedHosts() 
-                        + " failed in waitingBootstrapListener");
-            }
-            
-            bootstrapHosts.removeAll(result.getFailedHosts());
-            if(bootstrapHosts.isEmpty()) {
-                waiting.set(true);
-                return;
-            } 
-            
-            MojitoDHT dht = controller.getMojitoDHT();
-            bootstrapFuture = dht.bootstrap(bootstrapHosts);
-            bootstrapFuture.addDHTFutureListener(this);
         }
         
         public void handleFutureFailure(ExecutionException e) {
-            LOG.debug("ExecutionException" , e);
-            stop();
+            synchronized (lock) {
+                LOG.error("ExecutionException", e);
+                stop();
+            }
         }
         
         public void handleFutureCancelled(CancellationException e) {
+            synchronized (lock) {
+                LOG.error("CancellationException", e);
+                stop();
+            }
         }
 
         public void handleFutureInterrupted(InterruptedException e) {
+            synchronized (lock) {
+                LOG.error("InterruptedException", e);
+                stop();
+            }
         }
     }
 }

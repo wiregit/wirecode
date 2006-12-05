@@ -194,10 +194,10 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public boolean isBootstrapped() {
-		return dht.isBootstrapped();
-	}
+	return dht.isBootstrapped();
+    }
 
-	public boolean isWaitingForNodes() {
+    public boolean isWaitingForNodes() {
         return bootstrapper.isWaitingForNodes();
     }
     
@@ -250,9 +250,7 @@ abstract class AbstractDHTController implements DHTController {
      */
     private static class IpPortRemoteContact implements IpPort {
         
-        private final InetAddress nodeAddress;
-        
-        private final int port;
+        private InetSocketAddress addr;
         
         public IpPortRemoteContact(Contact node) {
             
@@ -260,21 +258,23 @@ abstract class AbstractDHTController implements DHTController {
                 throw new IllegalArgumentException("Contact not instance of InetSocketAddress");
             }
             
-            InetSocketAddress addr = (InetSocketAddress) node.getContactAddress();
-            this.nodeAddress = addr.getAddress();
-            this.port = addr.getPort();
+            addr = (InetSocketAddress) node.getContactAddress();
         }
         
         public String getAddress() {
-            return nodeAddress.getHostAddress();
+            return getInetAddress().getHostAddress();
         }
 
         public InetAddress getInetAddress() {
-            return nodeAddress;
+            return addr.getAddress();
         }
 
         public int getPort() {
-            return port;
+            return addr.getPort();
+        }
+        
+        public SocketAddress getSocketAddress() {
+            return addr;
         }
     }
     
