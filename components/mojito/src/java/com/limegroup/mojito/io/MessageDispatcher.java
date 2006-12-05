@@ -897,8 +897,8 @@ public abstract class MessageDispatcher {
      */
     private class ResponseProcessor implements Runnable, SecureMessageCallback {
         
-        private Receipt receipt;
-        private ResponseMessage response;
+        private final Receipt receipt;
+        private final ResponseMessage response;
         
         private ResponseProcessor(Receipt receipt, ResponseMessage response) {
             this.receipt = receipt;
@@ -977,7 +977,7 @@ public abstract class MessageDispatcher {
      */
     private class RequestProcessor implements Runnable, SecureMessageCallback {
         
-        private RequestMessage request;
+        private final RequestMessage request;
         
         private RequestProcessor(RequestMessage request) {
             this.request = request;
@@ -1033,7 +1033,7 @@ public abstract class MessageDispatcher {
      */
     private class TimeoutProcessor implements Runnable {
         
-        private Receipt receipt;
+        private final Receipt receipt;
         
         private TimeoutProcessor(Receipt receipt) {
             this.receipt = receipt;
@@ -1062,7 +1062,7 @@ public abstract class MessageDispatcher {
      */
     private class TickProcessor implements Runnable {
         
-        private Receipt receipt;
+        private final Receipt receipt;
         
         private TickProcessor(Receipt receipt) {
             this.receipt = receipt;
@@ -1078,9 +1078,9 @@ public abstract class MessageDispatcher {
      */
     private class ErrorProcessor implements Runnable {
         
-        private Tag tag;
+        private final Tag tag;
         
-        private IOException exception;
+        private final IOException exception;
         
         private ErrorProcessor(Tag tag, IOException exception) {
             this.tag = tag;
