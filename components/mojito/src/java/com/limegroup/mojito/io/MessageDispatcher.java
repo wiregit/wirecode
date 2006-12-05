@@ -120,6 +120,13 @@ public abstract class MessageDispatcher {
     
     private Filter filter;
     
+    /**
+     * Whether or not a new ByteBuffer should be allocated for
+     * every message we receive
+     */
+    private volatile boolean allocateNewByteBuffer 
+        = NetworkSettings.ALLOCATE_NEW_BUFFER.getValue();
+    
     public MessageDispatcher(Context context) {
         this.context = context;
         
@@ -207,6 +214,21 @@ public abstract class MessageDispatcher {
                 cleanupTask = null;
             }
         }
+    }
+    
+    /**
+     * Sets whether or not a new ByteBuffer should be allocated
+     */
+    public void setAllocateNewByteBuffer(boolean allocateNewByteBuffer) {
+        this.allocateNewByteBuffer = allocateNewByteBuffer;
+    }
+    
+    /**
+     * Returns whether or not a new ByteBuffer is allocated for
+     * every message
+     */
+    public boolean getAllocateNewByteBuffer() {
+        return allocateNewByteBuffer;
     }
     
     /**
@@ -412,11 +434,14 @@ public abstract class MessageDispatcher {
         SocketAddress src = receive((ByteBuffer)inputBuffer.clear());
         if (src != null) {
             inputBuffer.flip();
-            int length = inputBuffer.remaining();
-
-            ByteBuffer data = ByteBuffer.allocate(length);
-            data.put(inputBuffer);
-            data.rewind();
+            
+            ByteBuffer data = inputBuffer;
+            if (getAllocateNewByteBuffer()) {
+                int length = inputBuffer.remaining();
+                data = ByteBuffer.allocate(length);
+                data.put(inputBuffer);
+                data.rewind();
+            }
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
             return message;

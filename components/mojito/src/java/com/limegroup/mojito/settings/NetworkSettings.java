@@ -87,4 +87,11 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final BooleanSetting ACCEPT_FORCED_ADDRESS
         = FACTORY.createBooleanSetting("ACCEPT_FORCED_ADDRESS", false);
+    
+    /**
+     * Whether or not a new ByteBuffer should be allocated for
+     * every message we're receiving
+     */
+    public static final BooleanSetting ALLOCATE_NEW_BUFFER
+        = FACTORY.createBooleanSetting("ALLOCATE_NEW_BUFFER", false);
 }
