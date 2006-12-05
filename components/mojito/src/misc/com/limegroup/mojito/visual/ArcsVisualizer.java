@@ -165,19 +165,17 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     public void handleMessageDispatcherEvent(MessageDispatcherEvent evt) {
         EventType type = evt.getEventType();
-        KUID nodeId = evt.getNodeID();
-        boolean request = (evt.getMessage() instanceof RequestMessage);
+        KUID nodeId = null;
         
         if (type.equals(EventType.MESSAGE_RECEIVED)) {
             nodeId = evt.getMessage().getContact().getNodeID();
         } else if (type.equals(EventType.MESSAGE_SEND)) {
             nodeId = evt.getNodeID();
-        }
-        
-        if (nodeId == null) {
+        } else {
             return;
         }
         
+        boolean request = (evt.getMessage() instanceof RequestMessage);
         handle(type, nodeId, request);
     }
     
@@ -199,10 +197,15 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private long timeStamp = System.currentTimeMillis();
         
+        
         public Node(EventType type, KUID nodeId, boolean request) {
             this.type = type;
             this.nodeId = nodeId;
             this.request = request;
+            
+            if (nodeId == null) {
+                assert (request && type.equals(EventType.MESSAGE_SEND));
+            }
         }
         
         private int alpha() {
@@ -222,6 +225,17 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         }
         
         public boolean paint(float localX, float localY, float width, float height, Graphics2D g) {
+            
+            if (nodeId != null) {
+                paintArc(localX, localY, width, height, g);
+            } else {
+                paintLine(localX, localY, width, height, g);
+            }
+            
+            return (System.currentTimeMillis() - timeStamp) >= DURATION;
+        }
+        
+        private void paintArc(float localX, float localY, float width, float height, Graphics2D g) {
             
             float nodeY = position(nodeId, height)-DOT_SIZE/2f;
             float distance = Math.max(localY, nodeY) - Math.min(localY, nodeY);
@@ -267,8 +281,17 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             g.setStroke(STROKE);
             g.setColor(new Color(red, green, blue, alpha()));
             g.draw(new Arc2D.Float(arcX, arcY+DOT_SIZE/2f, bow, distance, start, extent, Arc2D.OPEN));
+        }
+        
+        private void paintLine(float localX, float localY, float width, float height, Graphics2D g) {
+            g.setStroke(STROKE);
+            g.setColor(new Color(255, 0, 0, alpha()));
             
-            return (System.currentTimeMillis() - timeStamp) >= DURATION;
+            float x1 = localX;
+            float y1 = localY + DOT_SIZE/2f;
+            float x2 = x1 + (width/(2f*180f)) * extent();
+            float y2 = y1;
+            g.draw(new Line2D.Float(x1, y1, x2, y2));
         }
     }
     
