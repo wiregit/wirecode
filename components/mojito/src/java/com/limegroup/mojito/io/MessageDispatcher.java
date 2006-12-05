@@ -118,7 +118,7 @@ public abstract class MessageDispatcher {
     
     private List<MessageDispatcherListener> listeners;
     
-    private Filter filter;
+    private volatile Filter filter;
     
     /**
      * Whether or not a new ByteBuffer should be allocated for
