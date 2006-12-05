@@ -52,7 +52,7 @@ import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
  * is not full, updating the last seen time stamp of Nodes and 
  * so forth.
  */
-public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
+public class DefaultMessageHandler {
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
     
@@ -66,57 +66,17 @@ public class DefaultMessageHandler implements RequestHandler, ResponseHandler {
         databaseStats = context.getDatabaseStats();
     }
     
-    /**
-     * Hardcoded to return Long.MAX_VALUE 
-     */
-    public long getTimeout() {
-        return Long.MAX_VALUE;
-    }
-
-    /**
-     * Hardcoded to return false
-     */
-    public boolean isCancelled() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.handler.ResponseHandler#handleResponse(com.limegroup.mojito.messages.ResponseMessage, long)
-     */
     public void handleResponse(ResponseMessage message, long time) throws IOException {
         addLiveContactInfo(message.getContact(), message);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.handler.ResponseHandler#handleTimeout(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, long)
-     */
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         context.getRouteTable().handleFailure(nodeId, dst);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.handler.RequestHandler#handleRequest(com.limegroup.mojito.messages.RequestMessage)
-     */
     public void handleRequest(RequestMessage message) throws IOException {
         addLiveContactInfo(message.getContact(), message);
-    }
-    
-    /**
-     * Not implemented as never called
-     */
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
-        // never called
-    }
-    
-    /**
-     * Not implemeted as never called
-     */
-    public void handleTick() {
-        // never called
     }
     
     /**

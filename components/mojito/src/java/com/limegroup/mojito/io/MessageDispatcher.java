@@ -928,9 +928,7 @@ public abstract class MessageDispatcher {
         private void processResponse() {
             try {
                 defaultHandler.handleResponse(response, receipt.time());
-                if (receipt.getResponseHandler() != defaultHandler) {
-                    receipt.getResponseHandler().handleResponse(response, receipt.time());
-                }
+                receipt.getResponseHandler().handleResponse(response, receipt.time());
             } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("An error occured dusring processing the response", e);
@@ -1019,8 +1017,15 @@ public abstract class MessageDispatcher {
             
             if (requestHandler != null) {
                 try {
+                    // Call the default handler after the custom handler
+                    // for two reasons: The first reason is security, the
+                    // custom handler can do message specific checks and
+                    // can throw an Exception if something is fishy and the
+                    // second reason is a small optimization (return under
+                    // certain conditions k-closest Nodes without the
+                    // requester).
                     requestHandler.handleRequest(request);
-                    defaultHandler.handleRequest(request); // AFTER!
+                    defaultHandler.handleRequest(request);
                 } catch (IOException e) {
                     LOG.error("An exception occured during processing the request", e);
                 }
@@ -1047,9 +1052,7 @@ public abstract class MessageDispatcher {
                 long time = receipt.time();
                 
                 defaultHandler.handleTimeout(nodeId, dst, msg, time);
-                if (receipt.getResponseHandler() != defaultHandler) {
-                    receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
-                }
+                receipt.getResponseHandler().handleTimeout(nodeId, dst, msg, time);
             } catch (IOException e) {
                 receipt.handleError(e);
                 LOG.error("ReceiptMap removeEldestEntry error: ", e);
