@@ -49,10 +49,8 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
-import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.result.BootstrapResult;
-import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.BootstrapResult.ResultType;
 import com.limegroup.mojito.settings.RouteTableSettings;
 import com.limegroup.mojito.util.MojitoUtils;
@@ -186,7 +184,6 @@ public class Main {
             // 1...n bootstraps from 0
         }
         
-        System.out.println("start: " + start);
         for(int i = start; i < dhts.size(); i++) {
             try {
                 MojitoDHT dht = dhts.get(i);

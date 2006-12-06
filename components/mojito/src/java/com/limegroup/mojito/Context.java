@@ -76,8 +76,8 @@ import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.result.FindValueResult;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.StoreResult;
+import com.limegroup.mojito.routing.BucketRefresher;
 import com.limegroup.mojito.routing.Contact;
-import com.limegroup.mojito.routing.RandomBucketRefresher;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.routing.impl.LocalContact;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
@@ -112,8 +112,8 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
     private RouteTable routeTable;
     private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
-    private DHTValueManager dhtValueManager;
-    private RandomBucketRefresher bucketRefresher;
+    private DHTValueManager valueManager;
+    private BucketRefresher bucketRefresher;
     
     private PingManager pingManager;
     private FindNodeManager findNodeManager;
@@ -184,9 +184,9 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         setMessageDispatcher(null);
         
         messageHelper = new MessageHelper(this);
-        dhtValueManager = new DHTValueManager(this);
+        valueManager = new DHTValueManager(this);
 
-        bucketRefresher = new RandomBucketRefresher(this);
+        bucketRefresher = new BucketRefresher(this);
         
         pingManager = new PingManager(this);
         findNodeManager = new FindNodeManager(this);
@@ -755,7 +755,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         estimator = new DHTSizeEstimator();
         messageDispatcher.start();
         bucketRefresher.start();
-        dhtValueManager.start();
+        valueManager.start();
     }
     
     /*
@@ -809,7 +809,7 @@ public class Context implements MojitoDHT, RouteTable.PingCallback {
         running = false;
         
         bucketRefresher.stop();
-        dhtValueManager.stop();
+        valueManager.stop();
         
         executorService.stop();
         messageDispatcher.stop();

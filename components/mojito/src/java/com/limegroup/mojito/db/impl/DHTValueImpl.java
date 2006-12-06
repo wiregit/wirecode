@@ -29,8 +29,7 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.routing.Contact;
-import com.limegroup.mojito.settings.DatabaseSettings;
-import com.limegroup.mojito.settings.KademliaSettings;
+import com.limegroup.mojito.util.DatabaseUtils;
 
 /**
  * An implementation of DHTValue
@@ -232,16 +231,7 @@ public class DHTValueImpl implements DHTValue, Serializable {
             return false;
         }
         
-        long t = (long)((locationCount 
-                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
-                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
-        
-        // Do never republish more than every X minutes
-        long nextPublishTime = Math.max(t, 
-                DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
-        
-        long time = lastRepublishingTime + nextPublishTime;
-        return System.currentTimeMillis() >= time;
+        return DatabaseUtils.isRepublishingRequired(lastRepublishingTime, locationCount);
     }
     
     /*

@@ -80,4 +80,21 @@ public class DatabaseUtils {
     public static boolean isExpired(RouteTable routeTable, DHTValue value) {
         return System.currentTimeMillis() >= getExpirationTime(routeTable, value);
     }
+    
+    /**
+     * 
+     */
+    public static boolean isRepublishingRequired(long lastRepublishingTime, int locationCount) {
+        long t = (long)((locationCount 
+                * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
+                    / KademliaSettings.REPLICATION_PARAMETER.getValue());
+        
+        // Do never republish more than every X minutes
+        long nextPublishTime = Math.max(t, 
+                DatabaseSettings.MIN_VALUE_REPUBLISH_INTERVAL.getValue());
+        
+        long time = lastRepublishingTime + nextPublishTime;
+        
+        return System.currentTimeMillis() >= time;
+    }
 }

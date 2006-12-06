@@ -45,7 +45,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * Stores a single DHTValue on the DHT
      */
     public DHTFuture<StoreResult> store(DHTValue value) {
-        return store(Collections.singletonList(value));
+        return store(Collections.singleton(value));
     }
     
     /**

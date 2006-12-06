@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,12 +101,6 @@ public abstract class MessageDispatcher {
     /** A lock for the ReceiptMap */
     private Object receiptMapLock = new Object();
     
-    /** 
-     * The CleanupTask goes periodically through the ReceiptMap 
-     * and prunes out ResponseHandlers that have timed-out.
-     */
-    private CleanupTask cleanupTask;
-    
     protected final Context context;
     
     private DefaultMessageHandler defaultHandler;
@@ -119,6 +115,8 @@ public abstract class MessageDispatcher {
     private List<MessageDispatcherListener> listeners;
     
     private volatile Filter filter;
+    
+    private ScheduledFuture cleanupTaskFuture;
     
     /**
      * Whether or not a new ByteBuffer should be allocated for
@@ -196,9 +194,17 @@ public abstract class MessageDispatcher {
     public void start() {
         // Start the CleanupTask
     	synchronized (receiptMapLock) {
-            if (cleanupTask == null) {
-                cleanupTask = new CleanupTask();
-                cleanupTask.start();
+            if (cleanupTaskFuture == null) {
+                long delay = NetworkSettings.CLEANUP_RECEIPTS_DELAY.getValue();
+                
+                Runnable task = new Runnable() {
+                    public void run() {
+                        cleanup();
+                    }
+                };
+                
+                cleanupTaskFuture = context.getDHTExecutorService().scheduleWithFixedDelay(
+                      task, 0L, delay, TimeUnit.MILLISECONDS);
             }
         }
     }
@@ -209,9 +215,9 @@ public abstract class MessageDispatcher {
     public void stop() {
         // Stop the CleanupTask
     	synchronized (receiptMapLock) {
-            if (cleanupTask != null) {
-                cleanupTask.stop();
-                cleanupTask = null;
+            if (cleanupTaskFuture != null) {
+                cleanupTaskFuture.cancel(true);
+                cleanupTaskFuture = null;
             }
         }
     }
@@ -836,59 +842,6 @@ public abstract class MessageDispatcher {
                 return true;
             }
             return false;
-        }
-    }
-    
-    /**
-     * The CleanupTask calls is periodical intervals 
-     * ReceiptMap's cleanup() methods
-     */
-    private class CleanupTask implements Runnable {
-    	
-    	private Thread thread = null;
-    	private volatile boolean running = true;
-    	
-        public void run() {
-            long sleep = NetworkSettings.CLEANUP_RECEIPTS_INTERVAL.getValue();
-        	
-            try {
-                while(running) {
-                    synchronized(receiptMapLock) {
-                        if (receiptMap.isEmpty()) {
-                            receiptMapLock.wait();
-                        }
-                        
-                        receiptMap.cleanup();
-                    }
-                    
-                    Thread.sleep(sleep);
-                }
-            } catch (InterruptedException err) {
-                if (running) {
-                    LOG.error("InterruptedException", err);
-                }
-            }
-        }
-        
-        public void start() {
-            running = true;
-            
-            if (thread == null) {
-                thread = context.getDHTExecutorService()
-                    .getThreadFactory().newThread(this);
-                thread.setName(context.getName() + "-CleanupTask");
-                thread.setDaemon(true);
-                thread.start();
-            }
-        }
-        
-        public void stop() {
-            running = false;
-            
-            if (thread != null) {
-            	thread.interrupt();
-            	thread = null;
-            }
         }
     }
     

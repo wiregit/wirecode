@@ -67,8 +67,8 @@ public final class NetworkSettings extends MojitoProps {
     /**
      * The cleanup rate for Receipts
      */
-    public static final LongSetting CLEANUP_RECEIPTS_INTERVAL
-        = FACTORY.createLongSetting("CLEANUP_RECEIPTS_INTERVAL", 50L);
+    public static final LongSetting CLEANUP_RECEIPTS_DELAY
+        = FACTORY.createLongSetting("CLEANUP_RECEIPTS_DELAY", 50L);
     
     /**
      * The buffer size for incoming messages

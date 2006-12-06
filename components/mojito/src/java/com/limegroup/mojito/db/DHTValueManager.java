@@ -20,6 +20,9 @@
 package com.limegroup.mojito.db;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -27,10 +30,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.concurrent.DHTFutureListener;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
 import com.limegroup.mojito.util.DatabaseUtils;
+
 
 /**
  * The DHTValueManager periodically publishes all local DHTValues 
@@ -42,16 +48,11 @@ public class DHTValueManager implements Runnable {
     
     private Context context;
     
-    private Object lock = new Object();
-    
-    private DatabaseStatisticContainer databaseStats;
+    private RepublishTask republishTask = new RepublishTask();
     
     private ScheduledFuture future;
     
-    private int published = 0;
-    private int evicted = 0;
-    
-    private long delay = 0L;
+    private DatabaseStatisticContainer databaseStats;
     
     public DHTValueManager(Context context) {
         this.context = context;
@@ -63,9 +64,9 @@ public class DHTValueManager implements Runnable {
      * Starts the DHTValueManager
      */
     public void start() {
-        synchronized (lock) {
+        synchronized (republishTask) {
             if (future == null) {
-                delay = DatabaseSettings.REPUBLISH_PERIOD.getValue();
+                long delay = DatabaseSettings.REPUBLISH_PERIOD.getValue();
                 long initialDelay = delay;
                 
                 future = context.getDHTExecutorService()
@@ -78,108 +79,179 @@ public class DHTValueManager implements Runnable {
      * Stops the DHTValueManager
      */
     public void stop() {
-        synchronized (lock) {
+        synchronized (republishTask) {
             if (future != null) {
                 future.cancel(true);
                 future = null;
+            }
+            
+            republishTask.stop();
+        }
+    }
+    
+    public void run() {
+        synchronized (republishTask) {
+            // There is no point in running the DHTValueManager
+            // if we're not bootstrapped!
+            if (!context.isBootstrapped() || context.isBootstrapping()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is not bootstrapped");
+                }
+                return;
+            }
+            
+            // Republish but make sure the task from the previous
+            // run() has finished as we don't want parallel republishing
+            if (republishTask.isDone()) {
+                republishTask.republish();
             }
         }
     }
     
     /**
-     * Publishes or expires the given DHTValue
+     * The RepublishTask publishes DHTValue(s) one-by-one by going
+     * through a List of DHTValues. Everytime a store finishes it
+     * continues with the next DHTValue until all DHTValues have
+     * been republished
      */
-    private void manage(DHTValue value) throws Exception {
+    private class RepublishTask implements DHTFutureListener<StoreResult> {
         
-        // Check if value is still in DB because we're
-        // working with a copy of the Collection.
-        Database database = context.getDatabase();
-        synchronized(database) {
-            
-            if (!database.contains(value)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(value + " is no longer stored in our database");
-                }
-                return;
+        private Iterator<DHTValue> values = null;
+        
+        private DHTFuture<StoreResult> future = null;
+        
+        /**
+         * Stops the RepublishTask
+         */
+        public synchronized void stop() {
+            if (future != null) {
+                future.cancel(true);
+                future = null;
             }
             
-            if (DatabaseUtils.isExpired(context.getRouteTable(), value)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(value + " is expired!");
+            values = null;
+        }
+        
+        /**
+         * Returns whether or not the RepublishTask is done
+         */
+        public synchronized boolean isDone() {
+            return values == null || !values.hasNext();
+        }
+        
+        /**
+         * Starts the republishing
+         */
+        public synchronized void republish() {
+            Database database = context.getDatabase();
+            Collection<DHTValue> c = database.values();
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " has " + c.size() + " DHTValues to process");
+            }
+            
+            values = c.iterator();
+            next();
+        }
+        
+        /**
+         * Republishes the next DHTValue
+         */
+        private synchronized boolean next() {
+            if (isDone()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is done with publishing");
+                }
+                return false;
+            }
+            
+            while(values.hasNext()) {
+                DHTValue value = values.next();
+                if (manage(value)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        /**
+         * Publishes or expires the given DHTValue
+         */
+        private boolean manage(DHTValue value) {
+            
+            // Check if value is still in DB because we're
+            // working with a copy of the Collection.
+            Database database = context.getDatabase();
+            synchronized(database) {
+                
+                if (!database.contains(value)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(value + " is no longer stored in our database");
+                    }
+                    return false;
                 }
                 
-                database.remove(value);
-                evicted++;
-                databaseStats.EXPIRED_VALUES.incrementStat();
-                return;
+                if (DatabaseUtils.isExpired(context.getRouteTable(), value)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(value + " is expired!");
+                    }
+                    
+                    database.remove(value);
+                    databaseStats.EXPIRED_VALUES.incrementStat();
+                    return false;
+                }
+                
+                if (!value.isLocalValue()) {
+                    LOG.trace(value + " is not a local value");
+                    return false;
+                }
+                
+                if (!value.isRepublishingRequired()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(value + " does not require republishing");
+                    }
+                    return false;
+                }
             }
             
-            if (!value.isLocalValue()) {
-                LOG.trace(value + " is not a local value");
-                return;
+            databaseStats.REPUBLISHED_VALUES.incrementStat();
+            
+            future = context.store(value);
+            future.addDHTFutureListener(this);
+            return true;
+        }
+        
+        public void handleFutureSuccess(StoreResult result) {
+            if (LOG.isInfoEnabled()) {
+                if (result.getNodes().isEmpty()) {
+                    LOG.info("Failed to store " + result.getValues());
+                } else {
+                    LOG.info(result);
+                }
             }
             
-            if (!value.isRepublishingRequired()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(value + " does not require republishing");
-                }
-                return;
+            if (!next()) {
+                stop();
             }
         }
         
-        databaseStats.REPUBLISHED_VALUES.incrementStat();
-        
-        synchronized (lock) {
-            if (future == null || future.isCancelled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Publisher is cancelled");
-                }
-                return;
-            }
-        }
-        
-        StoreResult result = context.store(value).get();
-        published++;
-        
-        if (LOG.isTraceEnabled()) {
-            if (result.getNodes().isEmpty()) {
-                LOG.trace("Failed to store " + value);
-            } else {
-                LOG.trace(result.toString());
-            }
-        }
-    }
-    
-    public void run() {
-        
-        if (!context.isBootstrapped() || context.isBootstrapping()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Skipping this republishing interval 'cause we're " 
-                        + "either not bootstrapped or we're bootstrapping: " 
-                        + context.isBootstrapped() + "/" + context.isBootstrapping());
-            }
-            return;
-        }
-        
-        published = 0;
-        evicted = 0;
-        
-        Database database = context.getDatabase();
-        Collection<DHTValue> values = database.values();
-        
-        for(DHTValue value : values) {
-            if (context.isBootstrapping()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " is bootstrapping, interrupting publisher");
-                }
-                break;
-            }
+        public void handleFutureFailure(ExecutionException e) {
+            LOG.error("ExecutionException", e);
             
-            try {
-                manage(value);
-            } catch (Exception err) {
-                LOG.error("Exception", err);
+            if (!next()) {
+                stop();
             }
         }
+
+        public void handleFutureCancelled(CancellationException e) {
+            LOG.error("CancellationException", e);
+            stop();
+        }
+        
+        public void handleFutureInterrupted(InterruptedException e) {
+            LOG.error("CancellationException", e);
+            stop();
+        }   
     }
 }
