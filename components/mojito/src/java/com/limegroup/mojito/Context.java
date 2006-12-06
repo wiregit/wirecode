@@ -816,6 +816,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         bootstrapManager.setBootstrapped(false);
         
         estimator.clear();
+        
+        // Set the external port back to zero to indicate
+        // we're firewalled. It restores essentially the
+        // initial state.
+        setExternalPort(0);
     }
     
     /**
