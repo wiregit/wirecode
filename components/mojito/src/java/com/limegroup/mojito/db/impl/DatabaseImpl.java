@@ -69,7 +69,8 @@ public class DatabaseImpl implements Database {
     
     private static final long serialVersionUID = -4857315774747734947L;
     
-    private Map<KUID, DHTValueBag> database = new HashMap<KUID, DHTValueBag>();
+    /** LOCKING: this */
+    private final Map<KUID, DHTValueBag> database = new HashMap<KUID, DHTValueBag>();
     
     /**
      * The maximum database size. Can be negative to 
@@ -86,7 +87,7 @@ public class DatabaseImpl implements Database {
     /**
      * The DatabaseSecurityConstraint handle
      */
-    private DatabaseSecurityConstraint securityConstraint 
+    private volatile DatabaseSecurityConstraint securityConstraint 
         = new DefaultDatabaseSecurityConstraint();
     
     /**
@@ -97,7 +98,7 @@ public class DatabaseImpl implements Database {
     /**
      * The Host filter. Used to ban hosts when database flooding is detected.
      */
-    private transient HostFilter filter;
+    private transient volatile HostFilter filter;
 
     
     public DatabaseImpl() {

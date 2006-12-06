@@ -52,7 +52,7 @@ class BucketNode implements Bucket {
     
     private KUID bucketId;
     
-    private int depth;
+    private final int depth;
     
     private PatriciaTrie<KUID, Contact> nodeTrie;
     
