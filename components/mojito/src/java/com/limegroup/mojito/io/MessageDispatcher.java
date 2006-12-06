@@ -651,16 +651,17 @@ public abstract class MessageDispatcher {
         // the reference to queue. In other words, stuff that
         // was not send stays in the front of the Queue followed
         // by stuff that was added during the while-loop above.
+        boolean isEmpty = false;
         synchronized (outputQueueLock) {
-            if (!queue.isEmpty()) {
-                queue.addAll(outputQueue);
-                outputQueue = queue;
-            }
-            
-            boolean isEmpty = outputQueue.isEmpty();
-            interestWrite(!isEmpty);
-            return !isEmpty;
+        	if (!queue.isEmpty()) {
+        		queue.addAll(outputQueue);
+        		outputQueue = queue;
+        	}
+
+        	isEmpty = outputQueue.isEmpty();
         }
+        interestWrite(!isEmpty);
+        return !isEmpty;
     }
     
     /**
