@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.TimerTask;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -103,6 +105,11 @@ public class NodeAssigner {
      * Wether or not this node is "Hardcore" capable
      */
     private static boolean _isHardcoreCapable;
+    
+    /**
+     * The node assigner's timer task
+     */
+    private TimerTask timer;
 
     /** 
      * Creates a new <tt>NodeAssigner</tt>. 
@@ -143,7 +150,13 @@ public class NodeAssigner {
                 }
             }
         };            
-        RouterService.schedule(task, 0, TIMER_DELAY);
+        timer = RouterService.schedule(task, 0, TIMER_DELAY);
+    }
+    
+    public void stop() {
+        if(timer != null) {
+            timer.cancel();
+        }
     }
     
     /**

@@ -1020,6 +1020,8 @@ public class RouterService {
                 return;
                 
             _state = StartStatus.SHUTTING;
+            
+            nodeAssigner.stop();
 
             dhtManager.stop();
             
