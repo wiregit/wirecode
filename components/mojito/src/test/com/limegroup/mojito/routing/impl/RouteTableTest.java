@@ -473,7 +473,7 @@ public class RouteTableTest extends BaseTestCase {
         toPing.clear();
         
         routeTable = new RouteTableImpl(NODE_IDS[0]);
-        routeTable.setPingCallback(new RouteTable.ContactPinger() {
+        routeTable.setContactPinger(new RouteTable.ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 toPing.add(node);
                 return null;
@@ -663,7 +663,7 @@ public class RouteTableTest extends BaseTestCase {
     
     public void testSelectLiveNodes() throws Exception { 
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setPingCallback(new RouteTable.ContactPinger() {
+        routeTable.setContactPinger(new RouteTable.ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
@@ -716,7 +716,7 @@ public class RouteTableTest extends BaseTestCase {
     
     public void testPurge() {
         RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setPingCallback(new RouteTable.ContactPinger() {
+        routeTable.setContactPinger(new RouteTable.ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }

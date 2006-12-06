@@ -208,7 +208,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     
     public void testEstimateSize() {
     	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setPingCallback(new ContactPinger() {
+        routeTable.setContactPinger(new ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }

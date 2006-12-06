@@ -142,7 +142,7 @@ public interface RouteTable extends Serializable {
     /**
      * Sets the RouteTable PingCallback
      */
-    public void setPingCallback(ContactPinger callback);
+    public void setContactPinger(ContactPinger pinger);
     
     /**
      * Adds a RouteTableListener

@@ -77,9 +77,9 @@ public class RouteTableImpl implements RouteTable {
     private Bucket smallestSubtreeBucket = null;
    
     /**
-     * A reference to the PingCallback
+     * A reference to the ContactPinger
      */
-    private transient ContactPinger pingCallback;
+    private transient ContactPinger pinger;
     
     /**
      * The local Node
@@ -142,10 +142,10 @@ public class RouteTableImpl implements RouteTable {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#setPingCallback(com.limegroup.mojito.routing.RouteTable.PingCallback)
+     * @see com.limegroup.mojito.routing.RouteTable#setContactPinger(com.limegroup.mojito.routing.RouteTable.ContactPinger)
      */
-    public void setPingCallback(ContactPinger pingCallback) {
-        this.pingCallback = pingCallback;
+    public void setContactPinger(ContactPinger pinger) {
+        this.pinger = pinger;
     }
 
     /**
@@ -843,11 +843,11 @@ public class RouteTableImpl implements RouteTable {
     DHTFuture<PingResult> ping(Contact node, DHTFutureListener<PingResult> listener) {
         DHTFuture<PingResult> future = null;
         
-        if (pingCallback != null) {
-            future = pingCallback.ping(node);
+        if (pinger != null) {
+            future = pinger.ping(node);
             
         } else {
-            // If there's no PingCallback then create a fake
+            // If there's no ContactPinger then create a fake
             // DHTFuture that simulates an instant timeout.
             future = new FixedDHTFuture<PingResult>(new DHTTimeoutException(
                     node.getNodeID(), node.getContactAddress(), null, 0L));

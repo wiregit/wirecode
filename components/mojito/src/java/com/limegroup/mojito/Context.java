@@ -415,7 +415,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             routeTable = new RouteTableImpl();
         }
         
-        routeTable.setPingCallback(this);
+        routeTable.setContactPinger(this);
         routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
         
         this.routeTable = routeTable;
@@ -799,7 +799,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                     try {
                         messageDispatcher.send(node, request, null);
                     } catch (IOException err) {
-                        err.printStackTrace();
                         LOG.error("IOException", err);
                     }
                 }
