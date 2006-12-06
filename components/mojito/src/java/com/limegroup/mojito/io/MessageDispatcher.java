@@ -379,8 +379,6 @@ public abstract class MessageDispatcher {
      * Enqueues Tag to the Output queue
      */
     protected boolean enqueueOutput(Tag tag) {
-        // The purpose of this locking is to set
-        // interest write properly.
         synchronized(outputQueueLock) {
             outputQueue.add(tag);
         }
