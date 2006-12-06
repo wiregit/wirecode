@@ -687,11 +687,21 @@ public abstract class MessageDispatcher {
         fireMessageSend(tag.getNodeID(), tag.getSocketAddress(), tag.getMessage());
     }
     
-    /** Called to indicate an interest in reading */
-    protected abstract void interestRead(boolean on);
+    /** 
+     * Called to indicate an interest in reading something from
+     * the Network.
+     */
+    protected void interestRead(boolean on) {
+        // DO NOTHING
+    }
     
-    /** Called to indicate an interest in writing */
-    protected abstract void interestWrite(boolean on);
+    /** 
+     * Called to indicate an interest in writing something to
+     * the Network.
+     */
+    protected void interestWrite(boolean on) {
+        // DO NOTHING
+    }
     
     /** Called to process a Task */
     protected abstract void process(Runnable runnable);

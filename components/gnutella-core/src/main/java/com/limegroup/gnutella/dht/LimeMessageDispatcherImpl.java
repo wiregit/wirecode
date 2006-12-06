@@ -173,16 +173,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
     
     @Override
-    protected void interestRead(boolean on) {
-        // DO NOTHING
-    }
-
-    @Override
-    protected void interestWrite(boolean on) {
-        // DO NOTHING
-    }
-
-    @Override
     public boolean isRunning() {
         return running;
     }
