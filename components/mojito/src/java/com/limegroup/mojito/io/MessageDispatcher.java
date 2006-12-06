@@ -441,12 +441,14 @@ public abstract class MessageDispatcher {
         if (src != null) {
             inputBuffer.flip();
             
-            ByteBuffer data = inputBuffer;
+            ByteBuffer data = null;
             if (getAllocateNewByteBuffer()) {
                 int length = inputBuffer.remaining();
                 data = ByteBuffer.allocate(length);
                 data.put(inputBuffer);
                 data.rewind();
+            } else {
+                data = inputBuffer.slice();
             }
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);
