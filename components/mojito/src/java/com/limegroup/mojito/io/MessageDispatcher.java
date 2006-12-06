@@ -820,7 +820,7 @@ public abstract class MessageDispatcher {
          */
         public void cleanup() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
-                final Receipt receipt = it.next();
+                Receipt receipt = it.next();
                 
                 if (receipt.isCancelled()) {
                     // The user cancelled the Future
@@ -838,7 +838,7 @@ public abstract class MessageDispatcher {
         }
         
         protected boolean removeEldestEntry(Map.Entry<MessageID, Receipt> eldest) {
-            final Receipt receipt = (Receipt)eldest.getValue();
+            Receipt receipt = eldest.getValue();
             
             boolean timeout = receipt.timeout();
             if (super.removeEldestEntry(eldest) || timeout) {
