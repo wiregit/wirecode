@@ -13,7 +13,7 @@ import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.routing.RouteTable.PingCallback;
+import com.limegroup.mojito.routing.RouteTable.ContactPinger;
 import com.limegroup.mojito.routing.impl.RouteTableImpl;
 
 public class DHTSizeEstimatorTest extends BaseTestCase {
@@ -208,7 +208,7 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     
     public void testEstimateSize() {
     	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
-        routeTable.setPingCallback(new PingCallback() {
+        routeTable.setPingCallback(new ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }

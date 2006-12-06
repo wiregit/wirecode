@@ -79,7 +79,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * A reference to the PingCallback
      */
-    private transient PingCallback pingCallback;
+    private transient ContactPinger pingCallback;
     
     /**
      * The local Node
@@ -144,7 +144,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#setPingCallback(com.limegroup.mojito.routing.RouteTable.PingCallback)
      */
-    public void setPingCallback(PingCallback pingCallback) {
+    public void setPingCallback(ContactPinger pingCallback) {
         this.pingCallback = pingCallback;
     }
 

@@ -100,7 +100,7 @@ import com.limegroup.mojito.util.HostFilter;
  * The Context is the heart of Mojito where everything comes 
  * together. 
  */
-public class Context implements MojitoDHT, RouteTable.PingCallback {
+public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     

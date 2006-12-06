@@ -209,7 +209,7 @@ public class RouteTableVisualizerDemo {
     }
 
     public void populateRouteTable(RouteTableImpl rt) {
-        rt.setPingCallback(new RouteTable.PingCallback() {
+        rt.setPingCallback(new RouteTable.ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
                 return null;
             }
