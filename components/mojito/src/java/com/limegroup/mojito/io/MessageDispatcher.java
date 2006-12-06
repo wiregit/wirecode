@@ -383,9 +383,10 @@ public abstract class MessageDispatcher {
         // interest write properly.
         synchronized(outputQueueLock) {
             outputQueue.add(tag);
-            interestWrite(true);
-            return true;
         }
+        
+        interestWrite(true);
+        return true;
     }
     
     /**
