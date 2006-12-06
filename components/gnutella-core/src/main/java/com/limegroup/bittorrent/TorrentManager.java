@@ -136,7 +136,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	}
 	
 	public void addEventListener(TorrentEventListener listener) {
-		listeners.add(listener);
+		if (!listeners.add(listener))
+			throw new IllegalArgumentException("listener "+listener+" already registered");
 	}
 	
 	public void removeEventListener(TorrentEventListener listener) {
