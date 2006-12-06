@@ -807,7 +807,7 @@ public abstract class MessageDispatcher {
          */
         public void cleanup() {
             for(Iterator<Receipt> it = values().iterator(); it.hasNext(); ) {
-                Receipt receipt = it.next();
+                final Receipt receipt = it.next();
                 
                 if (receipt.isCancelled()) {
                     // The user cancelled the Future
@@ -817,8 +817,7 @@ public abstract class MessageDispatcher {
                     receipt.received();
                     it.remove();
                     
-                    fireReceiptTimeout(receipt);
-                    process(new TimeoutProcessor(receipt));
+                    process(new TimeoutProcessor(receipt, true));
                 } else {
                     process(new TickProcessor(receipt));
                 }
@@ -826,19 +825,12 @@ public abstract class MessageDispatcher {
         }
         
         protected boolean removeEldestEntry(Map.Entry<MessageID, Receipt> eldest) {
-            Receipt receipt = (Receipt)eldest.getValue();
+            final Receipt receipt = (Receipt)eldest.getValue();
             
             boolean timeout = receipt.timeout();
             if (super.removeEldestEntry(eldest) || timeout) {
                 receipt.received();
-                
-                if(timeout) {
-                    fireReceiptTimeout(receipt);
-                } else {
-                    fireReceiptEvicted(receipt);
-                }
-                
-                process(new TimeoutProcessor(receipt));
+                process(new TimeoutProcessor(receipt, timeout));
                 return true;
             }
             return false;
@@ -987,17 +979,29 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * An implementation of Runnable to handle Timeouts.
+     * An implementation of Runnable to handle Timeouts. The eviction
+     * of ResponseHandlers (we send too many requests and we hit the
+     * ReceiptMap limit) is also treated as a timeout
      */
     private class TimeoutProcessor implements Runnable {
         
         private final Receipt receipt;
         
-        private TimeoutProcessor(Receipt receipt) {
+        private final boolean timeout;
+        
+        private TimeoutProcessor(Receipt receipt, boolean timeout) {
             this.receipt = receipt;
+            this.timeout = timeout;
         }
         
         public void run() {
+            
+            if (timeout) {
+                fireReceiptTimeout(receipt);
+            } else {
+                fireReceiptEvicted(receipt);
+            }
+            
             try {
                 KUID nodeId = receipt.getNodeID();
                 SocketAddress dst = receipt.getSocketAddress();
