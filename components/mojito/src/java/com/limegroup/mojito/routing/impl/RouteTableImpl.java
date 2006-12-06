@@ -23,7 +23,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
@@ -90,7 +89,8 @@ public class RouteTableImpl implements RouteTable {
      * A list of RouteTableListeners. It's initialized lazily in
      * RouteTable#addRouteTableListener() 
      */
-    private transient List<RouteTableListener> listeners;
+    private transient final List<RouteTableListener> listeners =
+        new CopyOnWriteArrayList<RouteTableListener>();
     
     /**
      * Create a new RouteTable and generates a new random Node ID
@@ -159,13 +159,9 @@ public class RouteTableImpl implements RouteTable {
      * 
      * @param l The RouteTableListener instance to add
      */
-    public synchronized void addRouteTableListener(RouteTableListener l) {
+    public void addRouteTableListener(RouteTableListener l) {
         if (l == null) {
             throw new NullPointerException("RouteTableListener is null");
-        }
-        
-        if (listeners == null) {
-            listeners = new CopyOnWriteArrayList<RouteTableListener>();
         }
         
         listeners.add(l);
@@ -176,14 +172,12 @@ public class RouteTableImpl implements RouteTable {
      * 
      * @param l The RouteTableListener instance to remove
      */
-    public synchronized void removeRouteTableListener(RouteTableListener l) {
+    public void removeRouteTableListener(RouteTableListener l) {
         if (l == null) {
             throw new NullPointerException("RouteTableListener is null");
         }
         
-        if (listeners != null) {
-            listeners.remove(l);
-        }
+        listeners.remove(l);
     }
     
     /*
@@ -1019,25 +1013,12 @@ public class RouteTableImpl implements RouteTable {
     protected void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
             Contact existing, Contact node, EventType type) {
         
-        // To keep the overhead low we're waiting till last
-        // minute with creating the RouteTableEvent object.
-        
-        List<RouteTableListener> l = listeners;
-        if (l != null) {
-            Iterator<RouteTableListener> it = l.iterator();
-            if (it.hasNext()) {
-                
-                // OK, we know now that there's at least one listener!
-                // Create the RouteTableEvent object!
-                RouteTableEvent event = new RouteTableEvent(
-                        this, bucket, left, right, existing, node, type);
-                
-                // And fire the Events!
-                while(it.hasNext()) {
-                    it.next().handleRouteTableEvent(event);
-                }
-            }
-        }
+        if (listeners.isEmpty())
+            return;
+        RouteTableEvent event = new RouteTableEvent(
+                this, bucket, left, right, existing, node, type);
+        for (RouteTableListener listener : listeners)
+            listener.handleRouteTableEvent(event);
     }
     
     public synchronized String toString() {

@@ -112,7 +112,8 @@ public abstract class MessageDispatcher {
     
     private ByteBuffer inputBuffer;
     
-    private List<MessageDispatcherListener> listeners;
+    private final List<MessageDispatcherListener> listeners =
+        new CopyOnWriteArrayList<MessageDispatcherListener>();
     
     private volatile Filter filter;
     
@@ -149,13 +150,9 @@ public abstract class MessageDispatcher {
      * 
      * @param l The MessageDispatcherListener instance to add
      */
-    public synchronized void addMessageDispatcherListener(MessageDispatcherListener l) {
+    public void addMessageDispatcherListener(MessageDispatcherListener l) {
         if (l == null) {
             throw new NullPointerException("MessageDispatcherListener is null");
-        }
-        
-        if (listeners == null) {
-            listeners = new CopyOnWriteArrayList<MessageDispatcherListener>();
         }
         
         listeners.add(l);
@@ -166,14 +163,12 @@ public abstract class MessageDispatcher {
      * 
      * @param l The MessageDispatcherListener instance to remove
      */
-    public synchronized void removeMessageDispatcherListener(MessageDispatcherListener l) {
+    public void removeMessageDispatcherListener(MessageDispatcherListener l) {
         if (l == null) {
             throw new NullPointerException("MessageDispatcherListener is null");
         }
         
-        if (listeners != null) {
-            listeners.remove(l);
-        }
+        listeners.remove(l);
     }
     
     /**
@@ -785,18 +780,12 @@ public abstract class MessageDispatcher {
     
     protected void fireMessageDispatcherEvent(KUID nodeId, SocketAddress dst, 
             DHTMessage message, EventType type) {
-        
-        List<MessageDispatcherListener> list = listeners;
-        if (list != null) {
-            Iterator<MessageDispatcherListener> it = list.iterator();
-            if (it.hasNext()) {
-                MessageDispatcherEvent evt 
-                    = new MessageDispatcherEvent(this, nodeId, dst, message, type);
-                while(it.hasNext()) {
-                    it.next().handleMessageDispatcherEvent(evt);
-                }
-            }
-        }
+        if (listeners.isEmpty())
+            return;
+        MessageDispatcherEvent evt = 
+            new MessageDispatcherEvent(this, nodeId, dst, message, type);
+        for (MessageDispatcherListener listener : listeners)
+            listener.handleMessageDispatcherEvent(evt);
     }
     
     /**
