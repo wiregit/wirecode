@@ -98,6 +98,16 @@ public interface Database extends Serializable {
     public int getValueCount();
     
     /**
+     * Returns the maximum number of keys
+     */
+    public int getMaxDatabaseSize();
+    
+    /**
+     * Returns the maximum number of values per key
+     */
+    public int getMaxValuesPerKey();
+    
+    /**
      * Clears the Database
      */
     public void clear();

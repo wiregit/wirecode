@@ -40,10 +40,8 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         
         // TODO allow as many signed values as you want?
         
-        // TODO we assume it's an instance of DatabaseImpl
-        DatabaseImpl impl = (DatabaseImpl)database;
-        int maxDatabaseSize = impl.maxDatabaseSize;
-        int maxValuesPerKey = impl.maxValuesPerKey;
+        int maxDatabaseSize = database.getMaxDatabaseSize();
+        int maxValuesPerKey = database.getMaxValuesPerKey();
         
         // Limit the number of keys
         if (bag == null) {
@@ -56,14 +54,14 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
             return (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey);
         }
         
-        return allowReplace(impl, bag, existing, entity);
+        return allowReplace(database, bag, existing, entity);
     }
     
     /**
      * Returns true if it's OK to replace the existing value with
      * the new value
      */
-    private boolean allowReplace(DatabaseImpl database, DHTValueBag bag, 
+    private boolean allowReplace(Database database, DHTValueBag bag, 
             DHTValueEntity existing, DHTValueEntity entity) {
         
         // Non-local values cannot replace local values

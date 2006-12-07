@@ -130,6 +130,22 @@ public class DatabaseImpl implements Database {
 
     /*
      * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#getMaxDatabaseSize()
+     */
+    public int getMaxDatabaseSize() {
+        return maxDatabaseSize;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.Database#getMaxValuesPerKey()
+     */
+    public int getMaxValuesPerKey() {
+        return maxValuesPerKey;
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#getKeyCount()
      */
     public synchronized int getKeyCount() {
