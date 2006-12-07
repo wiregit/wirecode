@@ -45,8 +45,8 @@ import com.limegroup.mojito.util.EntryImpl;
  */
 public class PingManager extends AbstractManager<PingResult> {
     
-    private Map<SocketAddress, PingFuture> futureMap 
-        = new HashMap<SocketAddress, PingFuture>();
+    private final Map<SocketAddress, PingFuture> futureMap 
+        = Collections.synchronizedMap(new HashMap<SocketAddress, PingFuture>());
     
     private NetworkStatisticContainer networkStats;
     
@@ -56,16 +56,7 @@ public class PingManager extends AbstractManager<PingResult> {
     }
     
     public void init() {
-        synchronized (getPingLock()) {
-            futureMap.clear();
-        }
-    }
-    
-    /**
-     * Returns the lock Object
-     */
-    private Object getPingLock() {
-        return futureMap;
+        futureMap.clear();
     }
     
     /**
@@ -156,24 +147,22 @@ public class PingManager extends AbstractManager<PingResult> {
      * @param key The remote Node's address
      */
     private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, Set<?> nodes) {
-        synchronized (getPingLock()) {
-            
-            PingFuture future = (key != null ? futureMap.get(key) : null);
-            
+        PingFuture future;
+        synchronized (futureMap) {
+            future = (key != null ? futureMap.get(key) : null);
+
             if (future == null) {
                 PingResponseHandler handler = new PingResponseHandler(context, sender, nodes);
-                
+
                 future = new PingFuture(key, handler);
                 if (key != null) {
                     futureMap.put(key, future);
                 }
-                networkStats.PINGS_SENT.incrementStat();
-                
-                context.getDHTExecutorService().execute(future);
             }
-            
-            return future;
         }
+        networkStats.PINGS_SENT.incrementStat();
+        context.getDHTExecutorService().execute(future);
+        return future;
     }
     
     /**
@@ -181,7 +170,7 @@ public class PingManager extends AbstractManager<PingResult> {
      */
     private class PingFuture extends AbstractDHTFuture<PingResult> {
 
-        private SocketAddress key;
+        private final SocketAddress key;
         
         public PingFuture(SocketAddress key, Callable<PingResult> handler) {
             super(handler);
@@ -191,9 +180,7 @@ public class PingManager extends AbstractManager<PingResult> {
         @Override
         protected void deregister() {
             if (key != null) {
-                synchronized (getPingLock()) {
-                    futureMap.remove(key);
-                }
+                futureMap.remove(key);
             }
         }
         
