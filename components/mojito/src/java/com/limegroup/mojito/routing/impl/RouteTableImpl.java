@@ -88,8 +88,7 @@ public class RouteTableImpl implements RouteTable {
     private Contact localNode;
     
     /**
-     * A list of RouteTableListeners. It's initialized lazily in
-     * RouteTable#addRouteTableListener() 
+     * A list of RouteTableListeners.
      */
     private transient volatile List<RouteTableListener> listeners 
         = new CopyOnWriteArrayList<RouteTableListener>();
