@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,14 +61,11 @@ abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> 
     /** The maximum number of errors that may occur */
     private int maxErrors;
     
-    /** LOCK */
-    private Object lock = new Object();
-    
     /** Whether or not this handler has been started */
-    private boolean started = false;
+    private final AtomicBoolean started = new AtomicBoolean();
     
     /** Whether or not this handler has finished */
-    private boolean finished = false;
+    private final AtomicBoolean finished = new AtomicBoolean();
     
     /** A handle to Context */
     protected final Context context;
@@ -85,7 +83,7 @@ abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> 
      * In other words, the front-end is waiting for the result
      * from the back-end.
      */
-    private OnewayExchanger<V, DHTException> exchanger 
+    private final OnewayExchanger<V, DHTException> exchanger 
         = new OnewayExchanger<V, DHTException>(true);
     
     public AbstractResponseHandler(Context context) {
@@ -349,36 +347,32 @@ abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> 
      * @see java.util.concurrent.Callable#call()
      */
     public V call() throws InterruptedException, DHTException {
-        synchronized (lock) { 
+        try {
+            if (!started.getAndSet(true)) {
+                start();
+            }
+
             try {
-                if (!started) {
-                    started = true;
-                    start();
-                }
-                
+                return exchanger.get(getLockTimeout(), TimeUnit.MILLISECONDS);
+            } catch (TimeoutException err) {
+                throw new LockTimeoutException("Timeout: " + timeout + ", State: " + toString());
+            } catch (CancellationException err) {
+                // ResponseHandler was cancelled (back-end)
+                cancelled();
+                throw err;
+            } catch (InterruptedException err) {
+                // Future was cancelled (front-end)
+                cancelled();
+                throw err;
+            }
+
+        } finally {
+            if (!finished.getAndSet(true)) {
+
                 try {
-                    return exchanger.get(getLockTimeout(), TimeUnit.MILLISECONDS);
-                } catch (TimeoutException err) {
-                    throw new LockTimeoutException("Timeout: " + timeout + ", State: " + toString());
-                } catch (CancellationException err) {
-                    // ResponseHandler was cancelled (back-end)
-                    cancelled();
-                    throw err;
-                } catch (InterruptedException err) {
-                    // Future was cancelled (front-end)
-                    cancelled();
-                    throw err;
-                }
-                
-            } finally {
-                if (!finished) {
-                    finished = true;
-                    
-                    try {
-                        finish();
-                    } catch (Throwable t) {
-                        LOG.error("Throwable", t);
-                    }
+                    finish();
+                } catch (Throwable t) {
+                    LOG.error("Throwable", t);
                 }
             }
         }
