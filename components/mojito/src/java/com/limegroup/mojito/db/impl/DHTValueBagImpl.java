@@ -30,26 +30,28 @@ class DHTValueBagImpl implements DHTValueBag {
     /**
      * The key if this value
      */
-    private KUID valueId;
+    private final KUID valueId;
 
     /**
      * The request load associated with this DHT value bag
+     * LOCKING: this
      */
     private float requestLoad = 0f;
     
     /**
      * The time the request load was last updated
+     * LOCKING: this
      */
     private long lastRequestTime;
     
     /**
      * The Map of <OriginatorID,DHTValue>
      */
-    private Map<KUID, DHTValue> valuesMap;
+    private final Map<KUID, DHTValue> valuesMap;
     
     public DHTValueBagImpl(KUID valueId) {
         this.valueId = valueId;
-        valuesMap = new HashMap<KUID, DHTValue>();
+        valuesMap = Collections.synchronizedMap(new HashMap<KUID, DHTValue>());
     }
     
     public KUID getValueId() {
@@ -90,10 +92,14 @@ class DHTValueBagImpl implements DHTValueBag {
         return valuesMap.values();
     }
     
+    public Object getValuesLock() {
+        return valuesMap;
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.mojito.db.impl.DHTValueBag#getRequestLoad()
      */
-    public float getRequestLoad() {
+    public synchronized float getRequestLoad() {
         return requestLoad;
     }
     
@@ -101,7 +107,7 @@ class DHTValueBagImpl implements DHTValueBag {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValueBag#incrementRequestLoad()
      */
-    public float incrementRequestLoad() {
+    public synchronized float incrementRequestLoad() {
         
         //Use Exponentially weighted moving average (EMA) to compute load
         //on this particular value bag. 
@@ -169,8 +175,10 @@ class DHTValueBagImpl implements DHTValueBag {
         buffer.append("Load: ").append(getRequestLoad()).append("\n");
         buffer.append("Values:").append("\n");
         
-        for(DHTValue value : getAllValues()) {    
-            buffer.append(value).append("\n\n");
+        synchronized(getValuesLock()) {
+            for(DHTValue value : getAllValues()) {    
+                buffer.append(value).append("\n\n");
+            }
         }
         
         return buffer.toString();

@@ -251,7 +251,9 @@ public class DefaultMessageHandler {
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
                         DHTValueBag bag = database.get(valueId);
                         if(bag != null) {
-                            valuesToForward.addAll(bag.getAllValues());
+                            synchronized(bag.getValuesLock()) {
+                                valuesToForward.addAll(bag.getAllValues());
+                            }
                         }
                     }
                 
@@ -292,12 +294,16 @@ public class DefaultMessageHandler {
                             int count = 0;
                             DHTValueBag bag = database.get(valueId);
                             if(bag != null ) {
-                                for (DHTValue value : bag.getAllValues()) {
-                                    if (!value.isLocalValue()) {
-                                        //System.out.println("REMOVING: " + value + "\n");
-                                        
-                                        database.remove(value);
-                                        count++;
+                                // bag->database does not happen
+                                // because the database monitor is already held.
+                                synchronized(bag.getValuesLock()) {
+                                    for (DHTValue value : bag.getAllValues()) {
+                                        if (!value.isLocalValue()) {
+                                            //System.out.println("REMOVING: " + value + "\n");
+                                            
+                                            database.remove(value);
+                                            count++;
+                                        }
                                     }
                                 }
                                 databaseStats.STORE_FORWARD_REMOVALS.addData(count);

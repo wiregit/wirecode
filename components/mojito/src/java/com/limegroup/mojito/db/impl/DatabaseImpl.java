@@ -362,7 +362,9 @@ public class DatabaseImpl implements Database {
     public synchronized Collection<DHTValue> values() {
         List<DHTValue> values = new ArrayList<DHTValue>();
         for (DHTValueBag bag : database.values()) {
-            values.addAll(bag.getAllValues());
+            synchronized(bag.getValuesLock()) {
+                values.addAll(bag.getAllValues());
+            }
         }
         return Collections.unmodifiableList(values);
     }

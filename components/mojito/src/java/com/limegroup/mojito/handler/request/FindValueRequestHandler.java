@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -70,53 +71,60 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         if (bag != null) {
             map = bag.getValuesMap();
         }
-        
-        // The Map should never be empty if it wasn't null
-        if (!map.isEmpty()) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Hit! " + lookup + "\n" + bag);
-            }
-            
-            // The keys and values we'll return
-            Set<KUID> retKeys = Collections.emptySet();
-            Collection<DHTValue> retValues = Collections.emptyList();
-            
-            // The keys the remote Node is requesting
-            Collection<KUID> nodeIds = request.getKeys();
-            
-            // Nothing specific requested?
-            if (nodeIds.isEmpty()) {
-                // If there's only one value for this key then send 
-                // just the DHTValue
-                if (map.size() == 1) {
-                    retValues = map.values();
-                    
-                // Otherwise send the keys and the remote Node must
-                // figure out what it's looking for
-                } else {
-                    retKeys = map.keySet();
+
+        boolean empty = false;
+        // The keys and values we'll return
+        Set<KUID> retKeys = Collections.emptySet();
+        Collection<DHTValue> retValues = Collections.emptyList();
+        synchronized(bag.getValuesLock()) {
+            // The Map should never be empty if it wasn't null
+            if (!map.isEmpty()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Hit! " + lookup + "\n" + bag);
                 }
-            } else {
-                // Send all requested values back.
-                // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                retValues = new ArrayList<DHTValue>(nodeIds.size());
-                for (KUID nodeId : nodeIds) {
-                    DHTValue value = map.get(nodeId);
-                    if (value != null) {
-                        retValues.add(value);
+
+                // The keys the remote Node is requesting
+                Collection<KUID> nodeIds = request.getKeys();
+
+                // Nothing specific requested?
+                if (nodeIds.isEmpty()) {
+                    // If there's only one value for this key then send 
+                    // just the DHTValue
+                    if (map.size() == 1) {
+                        retValues = new ArrayList<DHTValue>(map.values());
+
+                        // Otherwise send the keys and the remote Node must
+                        // figure out what it's looking for
+                    } else {
+                        retKeys = new HashSet<KUID>(map.keySet());
+                    }
+                } else {
+                    // Send all requested values back.
+                    // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
+                    retValues = new ArrayList<DHTValue>(nodeIds.size());
+                    for (KUID nodeId : nodeIds) {
+                        DHTValue value = map.get(nodeId);
+                        if (value != null) {
+                            retValues.add(value);
+                        }
                     }
                 }
+
+            } else {
+                empty = true;
             }
-            
-            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
-           
-            FindValueResponse response = context.getMessageHelper()
-                        .createFindValueResponse(request, retKeys, retValues, 
-                                bag.incrementRequestLoad());
-            context.getMessageDispatcher().send(request.getContact(), response);
-        } else {
+        }
+        
+        if (empty) {
             // OK, send Contacts instead!
             findNodeDelegate.handleRequest(message);
+        } else {
+            context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
+
+            FindValueResponse response = context.getMessageHelper()
+            .createFindValueResponse(request, retKeys, retValues, 
+                    bag.incrementRequestLoad());
+            context.getMessageDispatcher().send(request.getContact(), response);
         }
     }
 }

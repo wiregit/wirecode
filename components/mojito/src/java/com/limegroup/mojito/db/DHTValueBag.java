@@ -33,12 +33,14 @@ public interface DHTValueBag extends Serializable {
     public KUID getValueId();
 
     /**
-     * Returns a Map values and their keys
+     * Returns a Map values and their keys.  Make sure you hold
+     * getValuesLock() while manipulating.
      */
     public Map<KUID, DHTValue> getValuesMap();
 
     /**
-     * Returns a Collection of DHTValues
+     * Returns a Collection of DHTValues.  Make sure you hold
+     * getValuesLock() while manipulating.
      */
     public Collection<DHTValue> getAllValues();
 
@@ -77,4 +79,10 @@ public interface DHTValueBag extends Serializable {
      * @param nodeId The value's creator KUID
      */
     public boolean containsKey(KUID nodeId);
+    
+    /**
+     * @return object whose monitor should be held while
+     * reading any of  the values collections.
+     */
+    public Object getValuesLock();
 }
