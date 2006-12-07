@@ -45,15 +45,15 @@ public class FindValueResult implements Iterable<Future<DHTValueEntity>> {
     
     private static final Log LOG = LogFactory.getLog(FindValueResult.class);
     
-    private Context context;
+    private final Context context;
     
-    private KUID lookupId;
+    private final KUID lookupId;
     
-    private Collection<FindValueResponse> responses;
+    private final Collection<FindValueResponse> responses;
     
-    private long time;
+    private final long time;
     
-    private int hop;
+    private final int hop;
     
     @SuppressWarnings("unchecked")
     public FindValueResult(Context context, 

@@ -31,11 +31,11 @@ import com.limegroup.mojito.routing.Contact;
  */
 public class StoreResult {
     
-    private Collection<Contact> nodes;
+    private final Collection<Contact> nodes;
     
-    private Collection<DHTValueEntity> values;
-    
-    private Collection<DHTValueEntity> failed;
+    private final Collection<DHTValueEntity> values;
+
+    private final Collection<DHTValueEntity> failed;
     
     @SuppressWarnings("unchecked")
     public StoreResult(Collection<? extends Contact> nodes, 

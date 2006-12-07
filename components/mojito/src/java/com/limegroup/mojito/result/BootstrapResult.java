@@ -46,12 +46,12 @@ public class BootstrapResult {
         BOOTSTRAP_FAILED;
     }
     
-    private Contact node;
+    private final Contact node;
     
-    private long phaseOneTime = -1L;
-    private long phaseTwoTime = -1L;
+    private final long phaseOneTime;
+    private final long phaseTwoTime;
     
-    private ResultType resultType;
+    private final ResultType resultType;
     
     public BootstrapResult(Contact node, 
             long phaseOneTime, long phaseTwoTime, ResultType resultType) {

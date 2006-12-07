@@ -33,17 +33,17 @@ import com.limegroup.mojito.routing.Contact;
  */
 public class FindNodeResult {
     
-    private KUID lookupId;
+    private final KUID lookupId;
     
-    private Map<Contact, QueryKey> nodes;
+    private final Map<Contact, QueryKey> nodes;
     
-    private Collection<Contact> collisions;
+    private final Collection<Contact> collisions;
     
-    private long time;
+    private final long time;
     
-    private int hop;
+    private final int hop;
     
-    private int failures;
+    private final int failures;
     
     @SuppressWarnings("unchecked")
     public FindNodeResult(KUID lookupId, 

@@ -30,16 +30,16 @@ import com.limegroup.mojito.routing.Contact;
 public class PingResult {
     
     /** The remote Contact */
-    private Contact node;
+    private final Contact node;
     
     /** My external address */
-    private SocketAddress externalAddress;
+    private final SocketAddress externalAddress;
     
     /** The estimated DHT size */
-    private BigInteger estimatedSize;
+    private final BigInteger estimatedSize;
     
     /** the Round Trip Time (RTT) */
-    private long time;
+    private final long time;
     
     /**
      * Constructs a new PingEvent
