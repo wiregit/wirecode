@@ -81,8 +81,9 @@ public class DHTValueTest extends BaseTestCase {
             byte[] b = "Hello World".getBytes();
             
             long time = System.currentTimeMillis();
-            DHTValue value = DHTValueFactory.createLocalValue(
-                    first.getLocalNode(), key, type, version, b);
+            DHTValueEntity value = new DHTValueEntity(
+                    first.getLocalNode(), first.getLocalNode(), key, 
+                        new DHTValue(type, version, b), true);
             
             // Pre-Condition
             assertEquals(0, value.getLocationCount());

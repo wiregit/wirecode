@@ -25,7 +25,7 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.MessageID;
@@ -40,16 +40,16 @@ public class StoreRequestImpl extends AbstractRequestMessage
 
     private QueryKey queryKey;
     
-    private Collection<DHTValue> values;
+    private Collection<DHTValueEntity> values;
     
     @SuppressWarnings("unchecked")
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            QueryKey queryKey, Collection<? extends DHTValue> values) {
+            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.queryKey = queryKey;
-        this.values = (Collection<DHTValue>)values;
+        this.values = (Collection<DHTValueEntity>)values;
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
@@ -57,20 +57,20 @@ public class StoreRequestImpl extends AbstractRequestMessage
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();
-        this.values = in.readDHTValues(getContact());
+        this.values = in.readDHTValueEntities(getContact());
     }
     
     public QueryKey getQueryKey() {
         return queryKey;
     }
 
-    public Collection<DHTValue> getDHTValues() {
+    public Collection<DHTValueEntity> getDHTValues() {
         return values;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeQueryKey(queryKey);
-        out.writeDHTValues(values);
+        out.writeDHTValueEntities(values);
     }
 
     public String toString() {

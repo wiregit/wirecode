@@ -1,3 +1,22 @@
+/*
+ * Mojito Distributed Hash Table (Mojito DHT)
+ * Copyright (C) 2006 LimeWire LLC
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 package com.limegroup.mojito.db;
 
 import java.io.Serializable;
@@ -18,31 +37,31 @@ public interface DHTValueBag extends Serializable {
      * 
      * @return true if the value was added, false otherwise
      */
-    public boolean add(DHTValue value);
+    public boolean add(DHTValueEntity entity);
     
     /**
      * Removes a <tt>DHTValue</tt> from this value bag.
      * 
      * @return true if the value was removed, false otherwise
      */
-    public boolean remove(DHTValue value);
+    public boolean remove(DHTValueEntity entity);
     
     /**
      * Return's this Bag's value IDs.
      */
-    public KUID getValueId();
+    public KUID getPrimaryKey();
 
     /**
      * Returns a Map values and their keys.  Make sure you hold
      * getValuesLock() while manipulating.
      */
-    public Map<KUID, DHTValue> getValuesMap();
+    public Map<KUID, DHTValueEntity> getValuesMap();
 
     /**
      * Returns a Collection of DHTValues.  Make sure you hold
      * getValuesLock() while manipulating.
      */
-    public Collection<DHTValue> getAllValues();
+    public Collection<DHTValueEntity> getAllValues();
 
     /**
      * Returns the request load associated with this value bag, i.e. the
@@ -70,15 +89,15 @@ public interface DHTValueBag extends Serializable {
     /**
      * Returns the DHTValue for the given Node ID
      */
-    public DHTValue get(KUID nodeId);
+    public DHTValueEntity get(KUID secondaryKey);
     
     /**
      * Returns true if this bag contains a value coming from the 
      * specified creator <tt>KUID</tt>.
      * 
-     * @param nodeId The value's creator KUID
+     * @param secondaryKey The value's creator KUID
      */
-    public boolean containsKey(KUID nodeId);
+    public boolean containsKey(KUID secondaryKey);
     
     /**
      * @return object whose monitor should be held while

@@ -22,7 +22,7 @@ package com.limegroup.mojito.messages;
 import java.util.Collection;
 
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 
 /**
  * An interface for FindValueResponse implementations
@@ -37,7 +37,7 @@ public interface FindValueResponse extends LookupResponse {
     /**
      * Returns a Collection of DHTValue(s)
      */
-    public Collection<DHTValue> getValues();
+    public Collection<DHTValueEntity> getValues();
     
     /**
      * Returns the request load for this key

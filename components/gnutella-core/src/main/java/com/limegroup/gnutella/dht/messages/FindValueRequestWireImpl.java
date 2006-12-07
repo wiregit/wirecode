@@ -16,7 +16,7 @@ public class FindValueRequestWireImpl extends AbstractMessageWire<FindValueReque
         return delegate.getLookupID();
     }
 
-    public Collection<KUID> getKeys() {
-        return delegate.getKeys();
+    public Collection<KUID> getSecondaryKeys() {
+        return delegate.getSecondaryKeys();
     }
 }

@@ -34,14 +34,14 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.FixedDHTFuture;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.routing.Contact;
 
 /**
  * The FindValueResult is fired when a FIND_VALUE lookup finishes
  */
-public class FindValueResult implements Iterable<Future<DHTValue>> {
+public class FindValueResult implements Iterable<Future<DHTValueEntity>> {
     
     private static final Log LOG = LogFactory.getLog(FindValueResult.class);
     
@@ -78,7 +78,7 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
     /**
      * Returns an Iterator of Futures that return the DHTValue(s)
      */
-    public Iterator<Future<DHTValue>> iterator() {
+    public Iterator<Future<DHTValueEntity>> iterator() {
         return new ValuesIterator();
     }
 
@@ -107,10 +107,10 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
         }
         
         int i = 0;
-        for (Future<DHTValue> future : this) {
+        for (Future<DHTValueEntity> future : this) {
             try {
-                DHTValue value = future.get();
-                buffer.append(i++).append(": ").append(value).append("\n");
+                DHTValueEntity entity = future.get();
+                buffer.append(i++).append(": ").append(entity).append("\n");
             } catch (InterruptedException err) {
                 LOG.error("InterruptedException", err);
                 buffer.append(err);
@@ -134,18 +134,18 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
      * exhaustive there's only one FindValueResponse) and delegates 
      * all method calls to ContactValuesIterator.
      */
-    private class ValuesIterator implements Iterator<Future<DHTValue>> {
+    private class ValuesIterator implements Iterator<Future<DHTValueEntity>> {
         
         private Iterator<FindValueResponse> resps = responses.iterator();
         
         @SuppressWarnings("unchecked")
-        private Iterator<Future<DHTValue>> values = Collections.EMPTY_LIST.iterator();
+        private Iterator<Future<DHTValueEntity>> values = Collections.EMPTY_LIST.iterator();
         
         public boolean hasNext() {
             return resps.hasNext() || values.hasNext();
         }
         
-        public Future<DHTValue> next() {
+        public Future<DHTValueEntity> next() {
             if (!values.hasNext()) {
                 if (!resps.hasNext()) {
                     throw new NoSuchElementException();
@@ -167,13 +167,13 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
      * the remote Node send us first and continues with retreiving
      * values from the remote Node.
      */
-    private class ContactValuesIterator implements Iterator<Future<DHTValue>> {
+    private class ContactValuesIterator implements Iterator<Future<DHTValueEntity>> {
         
         private Contact node;
         
         private Iterator<KUID> keys;
         
-        private Iterator<DHTValue> values;
+        private Iterator<DHTValueEntity> values;
         
         private ContactValuesIterator(FindValueResponse response) {
             this.node = response.getContact();
@@ -185,17 +185,17 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
             return keys.hasNext() || values.hasNext();
         }
 
-        public Future<DHTValue> next() {
+        public Future<DHTValueEntity> next() {
             // Return the values we aleady have first...
             if (values.hasNext()) {
-                return new FixedDHTFuture<DHTValue>(values.next());
+                return new FixedDHTFuture<DHTValueEntity>(values.next());
             }
             
             // ...and continue with retreiving the values
             // from the remote Node
             if (keys.hasNext()) {
                 KUID nodeId = keys.next();
-                Future<Collection<DHTValue>> future = context.get(node, lookupId, nodeId);
+                Future<Collection<DHTValueEntity>> future = context.get(node, lookupId, nodeId);
                 return new GetDHTValueFuture(future);
             }
             
@@ -215,11 +215,11 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
      * We count on the fact that we're requesting a single value
      * and receive either none or one value.
      */
-    private static class GetDHTValueFuture implements Future<DHTValue> {
+    private static class GetDHTValueFuture implements Future<DHTValueEntity> {
         
-        private Future<Collection<DHTValue>> future;
+        private Future<Collection<DHTValueEntity>> future;
         
-        private GetDHTValueFuture(Future<Collection<DHTValue>> future) {
+        private GetDHTValueFuture(Future<Collection<DHTValueEntity>> future) {
             this.future = future;
         }
 
@@ -227,8 +227,8 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
             return future.cancel(mayInterruptIfRunning);
         }
 
-        public DHTValue get() throws InterruptedException, ExecutionException {
-            Collection<DHTValue> values = future.get();
+        public DHTValueEntity get() throws InterruptedException, ExecutionException {
+            Collection<DHTValueEntity> values = future.get();
             if (values.size() > 1) {
                 throw new IllegalStateException("Expected none or one DHTValue: " + values);
             }
@@ -237,9 +237,9 @@ public class FindValueResult implements Iterable<Future<DHTValue>> {
             return values.iterator().next();
         }
 
-        public DHTValue get(long timeout, TimeUnit unit) 
+        public DHTValueEntity get(long timeout, TimeUnit unit) 
                 throws InterruptedException, ExecutionException, TimeoutException {
-            Collection<DHTValue> values = future.get(timeout, unit);
+            Collection<DHTValueEntity> values = future.get(timeout, unit);
             if (values.size() > 1) {
                 throw new IllegalStateException("Expected none or one DHTValue: " + values);
             }

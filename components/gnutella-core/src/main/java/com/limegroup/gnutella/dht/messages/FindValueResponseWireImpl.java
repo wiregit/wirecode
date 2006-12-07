@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.messages;
 import java.util.Collection;
 
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.FindValueResponse;
 
 public class FindValueResponseWireImpl extends AbstractMessageWire<FindValueResponse> 
@@ -17,7 +17,7 @@ public class FindValueResponseWireImpl extends AbstractMessageWire<FindValueResp
         return delegate.getKeys();
     }
 
-    public Collection<DHTValue> getValues() {
+    public Collection<DHTValueEntity> getValues() {
         return delegate.getValues();
     }
 

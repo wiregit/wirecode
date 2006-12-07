@@ -49,6 +49,11 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
     
     /**
+     * Type for UTF-8 encoded Strings
+     */
+    public static final DHTValueType TEXT = new DHTValueType("TEXT");
+    
+    /**
      * A value that is used for testing purposes
      */
     public static final DHTValueType TEST = new DHTValueType("TEST");

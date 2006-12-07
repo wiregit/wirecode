@@ -36,7 +36,7 @@ import java.util.Map.Entry;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
@@ -97,11 +97,18 @@ public class MessageInputStream extends DataInputStream {
      * 
      * @param sender The Contact that send us the DHTValue
      */
-    public DHTValue readDHTValue(Contact sender) throws IOException {
+    public DHTValueEntity readDHTValueEntity(Contact sender) throws IOException {
         Contact creator = readContact();
-        
         KUID valueId = readKUID();
-        DHTValueType type = readValueType();
+        DHTValue value = readDHTValue();
+        return new DHTValueEntity(creator, sender, valueId, value, false);
+    }
+    
+    /**
+     * 
+     */
+    private DHTValue readDHTValue() throws IOException {
+        DHTValueType valueType = readValueType();
         int version = readUnsignedShort();
         
         byte[] data = null;
@@ -111,23 +118,23 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return DHTValueFactory.createRemoteValue(creator, sender, valueId, type, version, data);
+        return new DHTValue(valueType, version, data);
     }
     
     /**
      * Reads multiple DHTValues from the InputStream 
      */
-    public List<DHTValue> readDHTValues(Contact sender) throws IOException {
+    public List<DHTValueEntity> readDHTValueEntities(Contact sender) throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
             return Collections.emptyList();
         }
         
-        DHTValue[] values = new DHTValue[size];
-        for(int i = 0; i < values.length; i++) {
-            values[i] = readDHTValue(sender);
+        DHTValueEntity[] entities = new DHTValueEntity[size];
+        for(int i = 0; i < entities.length; i++) {
+            entities[i] = readDHTValueEntity(sender);
         }
-        return Arrays.asList(values);
+        return Arrays.asList(entities);
     }
     
     /**

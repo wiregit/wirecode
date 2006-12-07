@@ -19,10 +19,10 @@
 
 package com.limegroup.mojito.util;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.settings.DatabaseSettings;
@@ -38,18 +38,18 @@ public class DatabaseUtils {
     /**
      * Returns the expiration time of the given DHTValue
      */
-    public static long getExpirationTime(RouteTable routeTable, DHTValue value) {
+    public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
         // Local DHTValues don't expire
-        if (value.isLocalValue()) {
+        if (entity.isLocalValue()) {
             return Long.MAX_VALUE;
         }
         
-        KUID valueId = value.getValueID();
+        KUID primaryKey = entity.getKey();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        List<Contact> nodes = routeTable.select(valueId, k, false);
+        Collection<Contact> nodes = routeTable.select(primaryKey, k, false);
         
-        long creationTime = value.getCreationTime();
+        long creationTime = entity.getCreationTime();
         long expirationTime = DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
         
         // If there are less than k Nodes or the local Node is member
@@ -60,7 +60,7 @@ public class DatabaseUtils {
         // The value expires inversly proportional otherwise by using
         // the xor distance
         } else {
-            KUID valueBucketId = routeTable.getBucketID(valueId);
+            KUID valueBucketId = routeTable.getBucketID(primaryKey);
             KUID localBucketId = routeTable.getBucketID(routeTable.getLocalNode().getNodeID());
             KUID xor = localBucketId.xor(valueBucketId);
             
@@ -77,8 +77,8 @@ public class DatabaseUtils {
     /**
      * Returns whether or not the given DHTValue has expired
      */
-    public static boolean isExpired(RouteTable routeTable, DHTValue value) {
-        return System.currentTimeMillis() >= getExpirationTime(routeTable, value);
+    public static boolean isExpired(RouteTable routeTable, DHTValueEntity entity) {
+        return System.currentTimeMillis() >= getExpirationTime(routeTable, entity);
     }
     
     /**

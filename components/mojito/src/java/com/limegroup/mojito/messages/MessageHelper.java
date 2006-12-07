@@ -28,7 +28,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.messages.impl.DefaultMessageFactory;
@@ -109,13 +109,13 @@ public class MessageHelper {
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
+            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
         return factory.createFindValueResponse(getLocalNode(), request.getMessageID(), keys, 
                 values, requestLoad);
     }
 
     public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, 
-            Collection<? extends DHTValue> values) {
+            Collection<? extends DHTValueEntity> values) {
         return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, values);
     }
 

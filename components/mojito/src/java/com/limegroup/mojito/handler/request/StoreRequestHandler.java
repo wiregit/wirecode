@@ -31,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.StoreRequest;
@@ -83,15 +83,15 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        Collection<DHTValue> values = request.getDHTValues();
+        Collection<DHTValueEntity> values = request.getDHTValues();
         
         List<Entry<KUID,Status>> status 
             = new ArrayList<Entry<KUID,Status>>(values.size());
         
         Database database = context.getDatabase();
         
-        for (DHTValue value : values) {
-            KUID valueId = value.getValueID();
+        for (DHTValueEntity value : values) {
+            KUID valueId = value.getKey();
             
             // under the assumption that the requester sent us a lookup before
             // check if we are part of the closest alive nodes to this value

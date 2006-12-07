@@ -28,7 +28,7 @@ import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.StatsRequest.StatisticType;
 import com.limegroup.mojito.messages.StoreResponse.Status;
 import com.limegroup.mojito.routing.Contact;
@@ -86,13 +86,13 @@ public interface MessageFactory {
      * Creates and returns a FindValueResponse Message
      */
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad);
+            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad);
 
     /**
      * Creates and returns a StoreRequest Message
      */
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValue> values);
+            QueryKey queryKey, Collection<? extends DHTValueEntity> values);
 
     /**
      * Creates and returns a StoreResponse Message

@@ -33,6 +33,7 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.handler.CallableResponseHandler;
@@ -146,8 +147,8 @@ public class CacheForwardTest extends BaseTestCase {
             // Store the value
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
             KUID valueId = KUID.createRandomID();
-            byte[] value = "Hello World".getBytes();
-            StoreResult evt = creator.put(valueId, DHTValueType.TEST, 0, value).get();
+            DHTValue value = new DHTValue(DHTValueType.TEST, 0, "Hello World".getBytes());
+            StoreResult evt = creator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
             
             // And check the initial state
@@ -157,10 +158,10 @@ public class CacheForwardTest extends BaseTestCase {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
-                for (DHTValue dhtValue : dht.getValues()) {
-                    assertEquals(valueId, dhtValue.getValueID());
-                    assertEquals(value, dhtValue.getData());
-                    assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+                for (DHTValueEntity dhtValue : dht.getValues()) {
+                    assertEquals(valueId, dhtValue.getKey());
+                    assertEquals(value, dhtValue.getValue());
+                    assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
                 }
                 
@@ -192,10 +193,10 @@ public class CacheForwardTest extends BaseTestCase {
                 if (dht != furthest) {
                     assertEquals(1, dht.getDatabase().getKeyCount());
                     assertEquals(1, dht.getDatabase().getValueCount());
-                    for (DHTValue dhtValue : dht.getValues()) {
-                        assertEquals(valueId, dhtValue.getValueID());
-                        assertEquals(value, dhtValue.getData());
-                        assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+                    for (DHTValueEntity dhtValue : dht.getValues()) {
+                        assertEquals(valueId, dhtValue.getKey());
+                        assertEquals(value, dhtValue.getValue());
+                        assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                         assertEquals(creator.getLocalNodeID(), dhtValue.getSender().getNodeID());
                     }
                 }
@@ -205,10 +206,10 @@ public class CacheForwardTest extends BaseTestCase {
             // previous 'closest' Node
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValue dhtValue : nearest.getValues()) {
-                assertEquals(valueId, dhtValue.getValueID());
-                assertEquals(value, dhtValue.getData());
-                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+            for (DHTValueEntity dhtValue : nearest.getValues()) {
+                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(value, dhtValue.getValue());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The closest Node send us the value!
                 assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -234,10 +235,10 @@ public class CacheForwardTest extends BaseTestCase {
             
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValue dhtValue : nearest.getValues()) {
-                assertEquals(valueId, dhtValue.getValueID());
-                assertEquals(value, dhtValue.getData());
-                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+            for (DHTValueEntity dhtValue : nearest.getValues()) {
+                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(value, dhtValue.getValue());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The closest Node send us the value!
                 assertEquals(closest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -273,10 +274,10 @@ public class CacheForwardTest extends BaseTestCase {
             
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
-            for (DHTValue dhtValue : middle.getValues()) {
-                assertEquals(valueId, dhtValue.getValueID());
-                assertEquals(value, dhtValue.getData());
-                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+            for (DHTValueEntity dhtValue : middle.getValues()) {
+                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(value, dhtValue.getValue());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The nearest Node send us the value
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
@@ -328,10 +329,10 @@ public class CacheForwardTest extends BaseTestCase {
             // And we should have the value now
             assertEquals(1, furthest.getDatabase().getKeyCount());
             assertEquals(1, furthest.getDatabase().getValueCount());
-            for (DHTValue dhtValue : furthest.getValues()) {
-                assertEquals(valueId, dhtValue.getValueID());
-                assertEquals(value, dhtValue.getData());
-                assertEquals(creator.getLocalNodeID(), dhtValue.getCreatorID());
+            for (DHTValueEntity dhtValue : furthest.getValues()) {
+                assertEquals(valueId, dhtValue.getKey());
+                assertEquals(value, dhtValue.getValue());
+                assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
                 
                 // The nearest Node send us the value
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());

@@ -30,5 +30,5 @@ public interface DatabaseSecurityConstraint extends Serializable {
      * Returns true if it's OK to store the given DHTValue in the 
      * Database and DHTValueBag respectively.
      */
-    public boolean allowStore(Database database, DHTValueBag bag, DHTValue value);
+    public boolean allowStore(Database database, DHTValueBag bag, DHTValueEntity entity);
 }

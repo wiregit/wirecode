@@ -25,7 +25,7 @@ import java.util.Collection;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.io.MessageOutputStream;
 import com.limegroup.mojito.messages.FindValueResponse;
@@ -40,7 +40,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
 
     private Collection<KUID> keys;
     
-    private Collection<DHTValue> values;
+    private Collection<DHTValueEntity> values;
     
     private float requestLoad;
 
@@ -48,11 +48,11 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<KUID> keys,
-            Collection<? extends DHTValue> values, float requestLoad) {
+            Collection<? extends DHTValueEntity> values, float requestLoad) {
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
         
         this.keys = keys;
-        this.values = (Collection<DHTValue>)values;
+        this.values = (Collection<DHTValueEntity>)values;
         this.requestLoad = requestLoad;
     }
 
@@ -62,14 +62,14 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         
         this.requestLoad = in.readFloat();
         this.keys = in.readKUIDs();
-        this.values = in.readDHTValues(getContact());
+        this.values = in.readDHTValueEntities(getContact());
     }
     
     public Collection<KUID> getKeys() {
         return keys;
     }
     
-    public Collection<DHTValue> getValues() {
+    public Collection<DHTValueEntity> getValues() {
         return values;
     }
     
@@ -80,7 +80,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeFloat(requestLoad);
         out.writeKUIDs(keys);
-        out.writeDHTValues(values);
+        out.writeDHTValueEntities(values);
     }
     
     public String toString() {

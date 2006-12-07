@@ -25,10 +25,10 @@ import java.util.Collection;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
+import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.exceptions.DHTNoSuchElementException;
-import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -38,7 +38,7 @@ import com.limegroup.mojito.routing.Contact;
 /**
  * The GetValueResponseHandler retrieves DHTValues from a remote Node
  */
-public class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValue>> {
+public class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValueEntity>> {
         
     private Contact node;
     
@@ -72,7 +72,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<Collection<
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         if (message instanceof FindValueResponse) {
-            Collection<DHTValue> values = ((FindValueResponse)message).getValues();
+            Collection<DHTValueEntity> values = ((FindValueResponse)message).getValues();
             setReturnValue(values);
             
         // Imagine the following case: We do a lookup for a value 

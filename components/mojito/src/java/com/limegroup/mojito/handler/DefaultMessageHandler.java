@@ -31,8 +31,8 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -184,7 +184,7 @@ public class DefaultMessageHandler {
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        List<DHTValue> valuesToForward = new ArrayList<DHTValue>();
+        List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
         Database database = context.getDatabase();
         synchronized(database) {
@@ -251,9 +251,7 @@ public class DefaultMessageHandler {
                         databaseStats.STORE_FORWARD_COUNT.incrementStat();
                         DHTValueBag bag = database.get(valueId);
                         if(bag != null) {
-                            synchronized(bag.getValuesLock()) {
-                                valuesToForward.addAll(bag.getAllValues());
-                            }
+                            valuesToForward.addAll(bag.getAllValues());
                         }
                     }
                 
@@ -297,7 +295,7 @@ public class DefaultMessageHandler {
                                 // bag->database does not happen
                                 // because the database monitor is already held.
                                 synchronized(bag.getValuesLock()) {
-                                    for (DHTValue value : bag.getAllValues()) {
+                                    for (DHTValueEntity value : bag.getAllValues()) {
                                         if (!value.isLocalValue()) {
                                             //System.out.println("REMOVING: " + value + "\n");
                                             

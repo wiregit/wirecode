@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -99,7 +99,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
+            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
         return new FindValueResponseWireImpl(
                 delegate.createFindValueResponse(contact, messageId, keys, values, requestLoad));
     }
@@ -126,7 +126,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValue> values) {
+            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         return new StoreRequestWireImpl(
                 delegate.createStoreRequest(contact, messageId, queryKey, values));
     }

@@ -33,8 +33,8 @@ import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DatabaseSecurityConstraint;
 import com.limegroup.mojito.routing.Contact;
@@ -160,15 +160,15 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#store(com.limegroup.mojito.db.DHTValue)
      */
-    public synchronized boolean store(DHTValue value) {
-        if (!allowStore(value)) {
+    public synchronized boolean store(DHTValueEntity entity) {
+        if (!allowStore(entity)) {
             return false;
         }
         
-        if (value.isEmpty()) {
-            return remove(value);
+        if (entity.getValue().isEmpty()) {
+            return remove(entity);
         } else {
-            return add(value);
+            return add(entity);
         }
     }
     
@@ -176,19 +176,19 @@ public class DatabaseImpl implements Database {
      * Adds the given DHTValue to the Database. Returns
      * true if the operation succeeded.
      */
-    private synchronized boolean add(DHTValue value) {
-        if (value.isEmpty()) {
+    private synchronized boolean add(DHTValueEntity entity) {
+        if (entity.getValue().isEmpty()) {
             throw new IllegalArgumentException();
         }
         
-        KUID valueId = value.getValueID();
+        KUID valueId = entity.getKey();
         DHTValueBag bag = database.get(valueId);
         
         if (bag == null) {
             bag = new DHTValueBagImpl(valueId);
         }
         
-        if (bag.add(value)) {
+        if (bag.add(entity)) {
             if (!database.containsKey(valueId)) {
                 database.put(valueId, bag);
             }
@@ -201,20 +201,20 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#remove(com.limegroup.mojito.db.DHTValue)
      */
-    public synchronized boolean remove(DHTValue value) {
+    public synchronized boolean remove(DHTValueEntity entity) {
         
-        KUID valueId = value.getValueID();
-        DHTValueBag bag = database.get(valueId);
-        if (bag != null && bag.remove(value)) {
+        KUID primaryKey = entity.getKey();
+        DHTValueBag bag = database.get(primaryKey);
+        if (bag != null && bag.remove(entity)) {
 
             if (bag.isEmpty()) {
-                database.remove(valueId);
+                database.remove(primaryKey);
             }
             
             if (hostValuesMap != null) {
                 
                 InetAddress addr = ((InetSocketAddress) 
-                        value.getCreator().getContactAddress()).getAddress();
+                        entity.getCreator().getContactAddress()).getAddress();
                 
                 // TODO: Handle only IPv4 addresses for now. 
                 // See allowStore(DHTValue) for more information!
@@ -253,9 +253,9 @@ public class DatabaseImpl implements Database {
      * and then delegates calls to the DatabaseSecurityConstraint instance 
      * if possible
      */
-    private boolean allowStore(DHTValue value) {
+    private boolean allowStore(DHTValueEntity entity) {
         
-        DHTValueBag bag = database.get(value.getValueID());
+        DHTValueBag bag = database.get(entity.getKey());
         
         // TODO: exclude signed value also
         if (bag == null) {
@@ -263,7 +263,7 @@ public class DatabaseImpl implements Database {
             // We can only check for flooding by the value creator, not by the sender, 
             // because that could be misused to prevent us from storing real values
 
-            Contact creator = value.getCreator();
+            Contact creator = entity.getCreator();
             InetAddress addr = ((InetSocketAddress)creator
                                     .getContactAddress()).getAddress();
             
@@ -300,7 +300,7 @@ public class DatabaseImpl implements Database {
         // Check with the security constraint now
         DatabaseSecurityConstraint dbsc = securityConstraint;
         if (dbsc != null) {
-            return dbsc.allowStore(this, bag, value);
+            return dbsc.allowStore(this, bag, entity);
         }
         
         return true;
@@ -312,9 +312,9 @@ public class DatabaseImpl implements Database {
      */
     private void banContact(Contact contact) {
         // Remove all values by this contact
-        for(DHTValue value: values()) {
-            if(value.getCreator().equals(contact)) {
-                remove(value);
+        for(DHTValueEntity entity: values()) {
+            if(entity.getCreator().equals(contact)) {
+                remove(entity);
             }
         }
         
@@ -337,11 +337,11 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#contains(com.limegroup.mojito.db.DHTValue)
      */
-    public synchronized boolean contains(DHTValue value) {
-        DHTValueBag bag = get(value.getValueID()); 
+    public synchronized boolean contains(DHTValueEntity entity) {
+        DHTValueBag bag = get(entity.getKey()); 
         
         if (bag != null) {
-            return bag.containsKey(value.getCreatorID());
+            return bag.containsKey(entity.getSecondaryKey());
         } 
         
         return false;
@@ -359,8 +359,8 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#values()
      */
-    public synchronized Collection<DHTValue> values() {
-        List<DHTValue> values = new ArrayList<DHTValue>();
+    public synchronized Collection<DHTValueEntity> values() {
+        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
         for (DHTValueBag bag : database.values()) {
             synchronized(bag.getValuesLock()) {
                 values.addAll(bag.getAllValues());

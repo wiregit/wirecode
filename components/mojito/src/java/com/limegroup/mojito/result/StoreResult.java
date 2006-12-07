@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.routing.Contact;
 
 /**
@@ -33,18 +33,18 @@ public class StoreResult {
     
     private Collection<Contact> nodes;
     
-    private Collection<DHTValue> values;
+    private Collection<DHTValueEntity> values;
     
-    private Collection<DHTValue> failed;
+    private Collection<DHTValueEntity> failed;
     
     @SuppressWarnings("unchecked")
     public StoreResult(Collection<? extends Contact> nodes, 
-            Collection<? extends DHTValue> values, 
-            Collection<? extends DHTValue> failed) {
+            Collection<? extends DHTValueEntity> values, 
+            Collection<? extends DHTValueEntity> failed) {
         
         this.nodes = (Collection<Contact>)nodes;
-        this.values = (Collection<DHTValue>)values;
-        this.failed = (Collection<DHTValue>)failed;
+        this.values = (Collection<DHTValueEntity>)values;
+        this.failed = (Collection<DHTValueEntity>)failed;
     }
     
     /**
@@ -58,7 +58,7 @@ public class StoreResult {
     /**
      * Returns a Collection of DHTValue(s) that were stored
      */
-    public Collection<DHTValue> getValues() {
+    public Collection<DHTValueEntity> getValues() {
         return values;
     }
     
@@ -66,7 +66,7 @@ public class StoreResult {
      * Returns a Collection of DHTValue(s) that couldn't
      * be stored on the DHT
      */
-    public Collection<DHTValue> getFailed() {
+    public Collection<DHTValueEntity> getFailed() {
         return failed;
     }
     
@@ -74,8 +74,8 @@ public class StoreResult {
      * Returns a Collection of DHTValue(s) that were successfully 
      * stored on the DHT
      */
-    public Collection<DHTValue> getSucceeded() {
-        Set<DHTValue> succeeded = new HashSet<DHTValue>(getValues());
+    public Collection<DHTValueEntity> getSucceeded() {
+        Set<DHTValueEntity> succeeded = new HashSet<DHTValueEntity>(getValues());
         succeeded.removeAll(getFailed());
         return succeeded;
     }
@@ -85,15 +85,15 @@ public class StoreResult {
         
         buffer.append("SUCEEDED").append("\n");
         int i = 0;
-        for (DHTValue value : getSucceeded()) {
+        for (DHTValueEntity value : getSucceeded()) {
             buffer.append("  ").append(i++).append(": ").append(value).append("\n");
         }
         
-        Collection<DHTValue> failed = getFailed();
+        Collection<DHTValueEntity> failed = getFailed();
         if (!failed.isEmpty()) {
             buffer.append("FAILED:").append("\n");
             i = 0;
-            for (DHTValue value : failed) {
+            for (DHTValueEntity value : failed) {
                 buffer.append("  ").append(i++).append(": ").append(value).append("\n");
             }
         }

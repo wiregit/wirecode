@@ -55,7 +55,7 @@ public class FindValueRequestImpl extends AbstractLookupRequest
         this.keys = in.readKUIDs();
     }
     
-    public Collection<KUID> getKeys() {
+    public Collection<KUID> getSecondaryKeys() {
         return keys;
     }
     

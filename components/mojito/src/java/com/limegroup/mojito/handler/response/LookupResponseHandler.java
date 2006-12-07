@@ -19,6 +19,9 @@
 
 package com.limegroup.mojito.handler.response;
 
+import static com.limegroup.mojito.handler.response.LookupResponseHandler.LookupType.FIND_NODE;
+import static com.limegroup.mojito.handler.response.LookupResponseHandler.LookupType.FIND_VALUE;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -44,7 +47,7 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -542,7 +545,7 @@ abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
         }
         
         Collection<KUID> keys = response.getKeys();
-        Collection<DHTValue> values = response.getValues();
+        Collection<DHTValueEntity> values = response.getValues();
         
         if (keys.isEmpty() && values.isEmpty()) {
             if (LOG.isWarnEnabled()) {

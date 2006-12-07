@@ -19,8 +19,8 @@
 
 package com.limegroup.mojito.db.impl;
 
-import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.DatabaseSecurityConstraint;
 
@@ -31,15 +31,16 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
     
     private static final long serialVersionUID = 4513377023367562179L;
 
-    public boolean allowStore(Database database, DHTValueBag bag, DHTValue value) {
+    public boolean allowStore(Database database, DHTValueBag bag, DHTValueEntity entity) {
         
         // Allow as many local values as you want!
-        if (value.isLocalValue()) {
+        if (entity.isLocalValue()) {
             return true;
         }
         
         // TODO allow as many signed values as you want?
         
+        // TODO we assume it's an instance of DatabaseImpl
         DatabaseImpl impl = (DatabaseImpl)database;
         int maxDatabaseSize = impl.maxDatabaseSize;
         int maxValuesPerKey = impl.maxValuesPerKey;
@@ -50,12 +51,12 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
         }
         
         // Limit the number of values per key
-        DHTValue existing = bag.get(value.getCreatorID());
+        DHTValueEntity existing = bag.get(entity.getSecondaryKey());
         if (existing == null) {
             return (maxValuesPerKey < 0 || bag.size() < maxValuesPerKey);
         }
         
-        return allowReplace(impl, bag, existing, value);
+        return allowReplace(impl, bag, existing, entity);
     }
     
     /**
@@ -63,20 +64,20 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
      * the new value
      */
     private boolean allowReplace(DatabaseImpl database, DHTValueBag bag, 
-            DHTValue existing, DHTValue value) {
+            DHTValueEntity existing, DHTValueEntity entity) {
         
         // Non-local values cannot replace local values
-        if (existing.isLocalValue() && !value.isLocalValue()) {
+        if (existing.isLocalValue() && !entity.isLocalValue()) {
             return false;
         }
         
         // Non-direct values cannot replace direct values
-        if (existing.isDirect() && !value.isDirect()) {
+        if (existing.isDirect() && !entity.isDirect()) {
             return false;
         }
         
         // It's not possible to remove a value indirectly
-        if (!value.isDirect() && value.isEmpty()) {
+        if (!entity.isDirect() && entity.getValue().isEmpty()) {
             return false;
         }
         

@@ -19,103 +19,153 @@
 
 package com.limegroup.mojito.db;
 
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.routing.Contact;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+
+import com.limegroup.mojito.util.ArrayUtils;
 
 /**
- * The DHTValue class represents a <key, value> tuple that
- * is stored on the DHT. Besides the actual <key, value> tuple 
- * it's also storing the originator of the DHTValue as well as
- * the sender of the DHTValue.
+ * A DHTValue is a type, version and value triple
  */
-public interface DHTValue {
+public class DHTValue implements Serializable {
+    
+    private static final long serialVersionUID = -7381830963268622187L;
+
+    /**
+     * An empty byte array
+     */
+    private static final byte[] EMPTY = new byte[0];
     
     /**
      * An empty value
      */
-    public static final byte[] EMPTY_DATA = new byte[0];
-    
-    /** 
-     * Returns the ValueID
-     */
-    public KUID getValueID();
+    public static final DHTValue EMPTY_VALUE = new DHTValue(DHTValueType.BINARY, 0, EMPTY);
     
     /**
-     * Returns the Type of the Value
+     * The type of the value
      */
-    public DHTValueType getValueType();
+    private final DHTValueType valueType;
     
     /**
-     * Returns the version of this DHT value
+     * The version of the value
      */
-    public int getVersion();
-    
-    /** 
-     * Returns the Value. Beware: The returned byte array is 
-     * <b>NOT</b> a copy!
-     */
-    public byte[] getData();
-    
-    /** 
-     * Returns the size of the value 
-     */
-    public int size();
-    
-    /** 
-     * Returns whether or not the value is empty
-     */
-    public boolean isEmpty();
-    
-    /** 
-     * Returns the creator of the value 
-     */
-    public Contact getCreator();
+    private final int version;
     
     /**
-     * Returns the Node ID of the value creator
+     * The actual value
      */
-    public KUID getCreatorID();
-    
-    /** 
-     * Returns the sender of the value 
-     */
-    public Contact getSender();
-    
-    /** 
-     * Returns the creationTime of this DHTValue object 
-     */ 
-    public long getCreationTime();
+    private final byte[] value;
     
     /**
-     * Returns the time when this DHTValue was republished
+     * The hash code of this value
      */
-    public long getPublishTime();
+    private final int hashCode;
     
-    /** 
-     * Returns whether or not the originator and sender 
-     * of the DHTValue are the same
+    public DHTValue(DHTValueType valueType, 
+            int version, byte[] value) {
+        this.valueType = valueType;
+        this.version = version;
+        
+        if (value == null || value.length == 0) {
+            value = EMPTY;
+        }
+        
+        this.value = value;
+        
+        this.hashCode = Arrays.hashCode(value);
+    }
+
+    /**
+     * Returns the type of the value
      */
-    public boolean isDirect();
-    
-    /** 
-     * Returns whether or not this is a local DHTValue 
-     */
-    public boolean isLocalValue();
+    public DHTValueType getValueType() {
+        return valueType;
+    }
     
     /**
-     * Returns true if this DHTValue requires republishing. Returns
-     * always false if this is a non-local value.
+     * Returns the version of the value
      */
-    public boolean isRepublishingRequired();
+    public int getVersion() {
+        return version;
+    }
     
     /**
-     * Sets the number of locations where this DHTValue was stored and 
-     * the lastRepublishingTime to the current System time
+     * 
      */
-    public void setLocationCount(int locationCount);
+    public void writeValue(OutputStream out) throws IOException {
+        out.write(value, 0, value.length);
+    }
     
     /**
-     * Returns the number of locations where this DHTValue was stored
+     * Returns the actual value (a copy)
      */
-    public int getLocationCount();
+    public byte[] getValue() {
+        return getValue(new byte[value.length], 0, value.length);
+    }
+    
+    /**
+     * Returns the actual value (a copy)
+     */
+    public byte[] getValue(byte[] dst, int offset, int length) {
+        System.arraycopy(value, 0, dst, 0, value.length);
+        return dst;
+    }
+    
+    /**
+     * Returns the size of the value
+     */
+    public int size() {
+        return value.length;
+    }
+    
+    /**
+     * Returns true if this is an empty value
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+    
+    public int hashCode() {
+        return hashCode;
+    }
+    
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof DHTValue)) {
+            return false;
+        }
+        
+        DHTValue other = (DHTValue)o;
+        return valueType.equals(other.valueType)
+                    && version == other.version
+                    && Arrays.equals(value, other.value);
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("DHTValueType: ").append(getValueType()).append("\n");
+        buffer.append("Version: ").append(getVersion()).append("\n");
+        
+        buffer.append("Value: ");
+        if (isEmpty()) {
+            buffer.append("This is an empty value (REMOVE operation)");
+        } else {
+            try {
+                if (valueType.equals(DHTValueType.TEXT) 
+                        || valueType.equals(DHTValueType.TEST)) {
+                    buffer.append(new String(getValue(), "UTF-8")).append("\n");
+                } else {
+                    buffer.append(ArrayUtils.toHexString(getValue())).append("\n");
+                }
+            } catch (UnsupportedEncodingException err) {
+                throw new Error(err);
+            }
+        }
+        
+        return buffer.toString();
+    }
 }

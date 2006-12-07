@@ -20,14 +20,13 @@
 package com.limegroup.mojito.manager;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.handler.response.StoreResponseHandler;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
@@ -42,17 +41,10 @@ public class StoreManager extends AbstractManager<StoreResult> {
     }
     
     /**
-     * Stores a single DHTValue on the DHT
-     */
-    public DHTFuture<StoreResult> store(DHTValue value) {
-        return store(Collections.singleton(value));
-    }
-    
-    /**
      * Stores a collection of DHTValues on the DHT. All DHTValues
      * must have the same valueId!
      */
-    public DHTFuture<StoreResult> store(Collection<? extends DHTValue> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
         StoreResponseHandler handler = new StoreResponseHandler(context, values);
         StoreFuture future = new StoreFuture(handler);
         
@@ -64,7 +56,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * Stores a collection of DHTValues at the given Contact.
      */
     public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
-            Collection<? extends DHTValue> values) {
+            Collection<? extends DHTValueEntity> values) {
         
         StoreResponseHandler handler 
             = new StoreResponseHandler(context, node, queryKey, values);

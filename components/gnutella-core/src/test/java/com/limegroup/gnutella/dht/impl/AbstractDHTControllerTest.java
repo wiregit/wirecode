@@ -22,7 +22,7 @@ import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueType;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
@@ -137,10 +137,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public String getName() {
             return null;
         }
-        
-        public Collection<DHTValue> getValues() {
-            return null;
-        }
 
         public int getVendor() {
             return 0;
@@ -168,10 +164,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public DHTFuture<PingResult> ping(SocketAddress dst) {
             pingedList.add(dst);
-            return null;
-        }
-
-        public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value) {
             return null;
         }
 
@@ -222,6 +214,13 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public DHTFuture<PingResult> findActiveContact() {
             return null;
         }
-    }
 
+        public Collection<DHTValueEntity> getValues() {
+            return null;
+        }
+
+        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+            return null;
+        }
+    }
 }

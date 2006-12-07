@@ -49,10 +49,10 @@ public interface Database extends Serializable {
      * Adds or removes the given DHTValue depending on
      * whether or not it's empty. 
      * 
-     * @param value DHTValue to store (add or remove)
+     * @param entity DHTValue to store (add or remove)
      * @return Whether or not the given DHTValue was added or removed
      */
-    public boolean store(DHTValue value);
+    public boolean store(DHTValueEntity entity);
     
     /**
      * Removes the given DHTValue from the Database
@@ -60,7 +60,7 @@ public interface Database extends Serializable {
      * @param DHTValueImpl to remove
      * @return Whether or not the given DHTValue was removed
      */
-    public boolean remove(DHTValue value);
+    public boolean remove(DHTValueEntity entity);
     
     /**
      * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
@@ -73,7 +73,7 @@ public interface Database extends Serializable {
      * Returns whether or not the given DHTValue is stored in our
      * Database
      */
-    public boolean contains(DHTValue value);
+    public boolean contains(DHTValueEntity entiry);
     
     /**
      * Returns all Keys. The returned Set is unmodifyable!
@@ -84,7 +84,7 @@ public interface Database extends Serializable {
      * Returns all DHTValues. The returned Collection
      * is unmodifyable!
      */
-    public Collection<DHTValue> values();
+    public Collection<DHTValueEntity> values();
     
     /**
      * Returns the number of Keys in the Database

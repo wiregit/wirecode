@@ -116,7 +116,7 @@ public class DHTValueManager implements Runnable {
      */
     private class RepublishTask implements DHTFutureListener<StoreResult> {
         
-        private Iterator<DHTValue> values = null;
+        private Iterator<DHTValueEntity> values = null;
         
         private DHTFuture<StoreResult> future = null;
         
@@ -144,7 +144,7 @@ public class DHTValueManager implements Runnable {
          */
         public synchronized void republish() {
             Database database = context.getDatabase();
-            Collection<DHTValue> c = database.values();
+            Collection<DHTValueEntity> c = database.values();
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " + c.size() + " DHTValues to process");
@@ -166,7 +166,7 @@ public class DHTValueManager implements Runnable {
             }
             
             while(values.hasNext()) {
-                DHTValue value = values.next();
+                DHTValueEntity value = values.next();
                 if (manage(value)) {
                     return true;
                 }
@@ -178,46 +178,43 @@ public class DHTValueManager implements Runnable {
         /**
          * Publishes or expires the given DHTValue
          */
-        private boolean manage(DHTValue value) {
+        private boolean manage(DHTValueEntity entity) {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
             Database database = context.getDatabase();
             synchronized(database) {
                 
-                if (!database.contains(value)) {
+                if (!database.contains(entity)) {
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace(value + " is no longer stored in our database");
+                        LOG.trace(entity + " is no longer stored in our database");
                     }
                     return false;
                 }
                 
-                if (DatabaseUtils.isExpired(context.getRouteTable(), value)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(value + " is expired!");
+                if (entity.isLocalValue()) {
+                    if (!entity.isRepublishingRequired()) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(entity + " does not require republishing");
+                        }
+                        return false;
                     }
-                    
-                    database.remove(value);
-                    databaseStats.EXPIRED_VALUES.incrementStat();
-                    return false;
-                }
-                
-                if (!value.isLocalValue()) {
-                    LOG.trace(value + " is not a local value");
-                    return false;
-                }
-                
-                if (!value.isRepublishingRequired()) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(value + " does not require republishing");
+                } else {
+                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(entity + " is expired!");
+                        }
+                        
+                        database.remove(entity);
+                        databaseStats.EXPIRED_VALUES.incrementStat();
+                        return false;
                     }
-                    return false;
                 }
             }
             
             databaseStats.REPUBLISHED_VALUES.incrementStat();
             
-            future = context.store(value);
+            future = context.store(entity);
             future.addDHTFutureListener(this);
             return true;
         }
@@ -245,12 +242,12 @@ public class DHTValueManager implements Runnable {
         }
 
         public void handleFutureCancelled(CancellationException e) {
-            LOG.error("CancellationException", e);
+            LOG.debug("CancellationException", e);
             stop();
         }
         
         public void handleFutureInterrupted(InterruptedException e) {
-            LOG.error("CancellationException", e);
+            LOG.debug("CancellationException", e);
             stop();
         }   
     }

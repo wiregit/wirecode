@@ -32,5 +32,5 @@ public interface FindValueRequest extends LookupRequest {
      * Returns a Collection of KUIDs the remote Node
      * is looking for
      */
-    public Collection<KUID> getKeys();
+    public Collection<KUID> getSecondaryKeys();
 }

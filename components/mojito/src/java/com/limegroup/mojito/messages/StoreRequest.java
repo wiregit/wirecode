@@ -22,7 +22,7 @@ package com.limegroup.mojito.messages;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 
 /**
  * An interface for StoreRequest implementations
@@ -39,5 +39,5 @@ public interface StoreRequest extends RequestMessage {
      * A Collection of DHTValue(s) we're supposed to
      * store at our Node
      */
-    public Collection<DHTValue> getDHTValues();
+    public Collection<DHTValueEntity> getDHTValues();
 }

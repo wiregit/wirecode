@@ -32,7 +32,7 @@ import com.limegroup.gnutella.util.ByteBufferInputStream;
 import com.limegroup.gnutella.util.ByteBufferOutputStream;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.io.MessageInputStream;
 import com.limegroup.mojito.messages.DHTMessage;
 import com.limegroup.mojito.messages.FindNodeRequest;
@@ -146,7 +146,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValue> values, float requestLoad) {
+            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
         return new FindValueResponseImpl(context, contact, messageId, keys, values, requestLoad);
     }
 
@@ -169,7 +169,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValue> values) {
+            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         return new StoreRequestImpl(context, contact, messageId, queryKey, values);
     }
 

@@ -8,7 +8,7 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -50,10 +50,10 @@ public class DatabaseUtilsTest extends BaseTestCase {
         
         assertEquals(16, routeTable.size());
         
-        Contact originator = routeTable.getLocalNode();
-        KUID valueId = originator.getNodeID().invert();
-        DHTValue value = DHTValueFactory.createRemoteValue(
-                originator, originator, valueId, DHTValueType.TEST, 0, "Hello World".getBytes());
+        Contact creator = routeTable.getLocalNode();
+        KUID valueId = creator.getNodeID().invert();
+        DHTValueEntity value = new DHTValueEntity(creator, creator, valueId, 
+                new DHTValue(DHTValueType.TEST, 0, "Hello World".getBytes()), false);
         
         long expectedExpiresAt = value.getCreationTime() + DatabaseSettings.VALUE_EXPIRATION_TIME.getValue();
         assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));

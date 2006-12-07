@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.messages.FindNodeResponse;
@@ -73,7 +73,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private QueryKey queryKey;
     
     /** The Value(s) we're going to store */
-    private Collection<DHTValue> values;
+    private Collection<DHTValueEntity> values;
     
     /** A list of StoreProcesses. One StoreProcess per Contact */
     private List<StoreProcess> processList = new ArrayList<StoreProcess>();
@@ -87,39 +87,30 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     /** The number of parallel stores */
     private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
-    public StoreResponseHandler(Context context, DHTValue value) {
-        this(context, null, null, Collections.singletonList(value));
-    }
-    
     @SuppressWarnings("unchecked")
     public StoreResponseHandler(Context context, 
-            Collection<? extends DHTValue> values) {
+            Collection<? extends DHTValueEntity> values) {
         this(context, null, null, values);
     }
 
-    public StoreResponseHandler(Context context, 
-            Contact node, QueryKey queryKey, DHTValue value) {
-        this(context, node, queryKey, Collections.singletonList(value));
-    }
-    
     @SuppressWarnings("unchecked")
     public StoreResponseHandler(Context context, Contact node, 
-            QueryKey queryKey, Collection<? extends DHTValue> values) {
+            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         super(context);
         
         assert (values != null && !values.isEmpty());
         
         this.node = node;
         this.queryKey = queryKey;
-        this.values = (Collection<DHTValue>)values;
+        this.values = (Collection<DHTValueEntity>)values;
         
         if (!isSingleNodeStore()) {
-            for (DHTValue value : values) {
+            for (DHTValueEntity value : values) {
                 if (valueId == null) {
-                    valueId = value.getValueID();
+                    valueId = value.getKey();
                 }
                 
-                if (!valueId.equals(value.getValueID())) {
+                if (!valueId.equals(value.getKey())) {
                     throw new IllegalArgumentException("All DHTValues must have the same Value ID");
                 }
             }
@@ -129,7 +120,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     /**
      * Returns the Collection of DHTValues
      */
-    public Collection<DHTValue> getValues() {
+    public Collection<DHTValueEntity> getValues() {
         return values;
     }
     
@@ -261,14 +252,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
      */
     private synchronized void done() {
         List<Contact> nodes = new ArrayList<Contact>();
-        Set<DHTValue> failed = new HashSet<DHTValue>();
+        Set<DHTValueEntity> failed = new HashSet<DHTValueEntity>();
         
         for (StoreProcess s : processList) {
             nodes.add(s.node);
             failed.addAll(s.getFailedValues());
         }
         
-        for (DHTValue value : values) {
+        for (DHTValueEntity value : values) {
             if (!failed.contains(value)) {
                 value.setLocationCount(nodes.size());
             }
@@ -298,13 +289,13 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         private QueryKey queryKey;
         
         /** The Values to store */
-        private Iterator<DHTValue> it;
+        private Iterator<DHTValueEntity> it;
         
         /** The value that is currently beeing stored */
-        private DHTValue value = null;
+        private DHTValueEntity value = null;
         
         /** A List of values that couldn't be stored */
-        private List<DHTValue> failed = new ArrayList<DHTValue>();
+        private List<DHTValueEntity> failed = new ArrayList<DHTValueEntity>();
         
         /*  */
         private KUID nodeId;
@@ -317,7 +308,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         @SuppressWarnings("unchecked")
         private StoreProcess(Contact node, QueryKey queryKey, 
-                Collection<? extends DHTValue> values) {
+                Collection<? extends DHTValueEntity> values) {
             this.node = node;
             this.queryKey = queryKey;
             
@@ -329,7 +320,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 values = Collections.emptyList();
             }
             
-            this.it = (Iterator<DHTValue>)values.iterator();
+            this.it = (Iterator<DHTValueEntity>)values.iterator();
         }
         
         /**
@@ -401,7 +392,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
          * Returns a list of all DHTValues that couldn't be
          * stored at the given Node
          */
-        public List<DHTValue> getFailedValues() {
+        public List<DHTValueEntity> getFailedValues() {
             if (value != null) {
                 failed.add(value);
                 value = null;

@@ -54,118 +54,123 @@ public class DatabaseTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    private static DHTValue createLocalDHTValue(byte[] value) {
+    private static DHTValueEntity createLocalDHTValue(byte[] value) {
         return createLocalDHTValue(KUID.createRandomID(), 
                 KUID.createRandomID(), value);
     }
     
-    private static DHTValue createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
+    private static DHTValueEntity createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         Contact node = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
-        return DHTValueFactory.createLocalValue(node, valueId, DHTValueType.TEST, 0, value);
+        return new DHTValueEntity(node, node, valueId, 
+                new DHTValue(DHTValueType.TEST, 0, value), true);
     }
     
-    private static DHTValue createDirectDHTValue(byte[] value) {
+    private static DHTValueEntity createDirectDHTValue(byte[] value) {
         return createDirectDHTValue(KUID.createRandomID(), 
                 KUID.createRandomID(), value);
     }
     
-    private static DHTValue createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
+    private static DHTValueEntity createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
         Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG);
-        return DHTValueFactory.createRemoteValue(node, node, valueId, DHTValueType.TEST, 0, value);
+        
+        return new DHTValueEntity(node, node, valueId, 
+                new DHTValue(DHTValueType.TEST, 0, value), false);
     }
     
-    private static DHTValue createIndirectDHTValue(byte[] value) {
+    private static DHTValueEntity createIndirectDHTValue(byte[] value) {
         return createIndirectDHTValue(KUID.createRandomID(), 
                 KUID.createRandomID(), KUID.createRandomID(), value);
     }
     
-    private static DHTValue createIndirectDHTValue(KUID origId, KUID senderId, KUID valueId, byte[] value) {
+    private static DHTValueEntity createIndirectDHTValue(KUID creatorId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact orig = ContactFactory.createLiveContact(addr, 0, 0, origId, addr, 0, Contact.DEFAULT_FLAG);
-        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);   
-        return DHTValueFactory.createRemoteValue(orig, sender, valueId, DHTValueType.TEST, 0, value);
+        Contact creator = ContactFactory.createLiveContact(addr, 0, 0, creatorId, addr, 0, Contact.DEFAULT_FLAG);
+        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);  
+        
+        return new DHTValueEntity(creator, sender, valueId, 
+                new DHTValue(DHTValueType.TEST, 0, value), false);
     }
     
     public void testLocalAdd() throws Exception {
         Database database = new DatabaseImpl();
         
         // Add a local value
-        DHTValue value1 = createLocalDHTValue("Hello World".getBytes());
+        DHTValueEntity value1 = createLocalDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
-                    .getValuesMap().get(value1.getCreatorID()).getData()));
+                database.get(value1.getKey())
+                    .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Neither direct...
-        DHTValue value2 = createDirectDHTValue(value1.getCreatorID(), 
-                value1.getValueID(), "Mojito".getBytes());
+        DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
+                value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getValueID())
-                    .getValuesMap().get(value2.getCreatorID()).getData()));
+                database.get(value2.getKey())
+                    .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
         
         // ...nor indirect values can replace a local value
-        DHTValue value3 = createIndirectDHTValue(value1.getCreatorID(), 
-                KUID.createRandomID(), value1.getValueID(), "Mary".getBytes());
+        DHTValueEntity value3 = createIndirectDHTValue(value1.getSecondaryKey(), 
+                KUID.createRandomID(), value1.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value3.getValueID())
-                    .getValuesMap().get(value3.getCreatorID()).getData()));
+                database.get(value3.getKey())
+                    .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Only local values can replace local values
-        DHTValue value4 = createLocalDHTValue(value1.getCreatorID(), 
-                value1.getValueID(), "Tonic".getBytes());
+        DHTValueEntity value4 = createLocalDHTValue(value1.getSecondaryKey(), 
+                value1.getKey(), "Tonic".getBytes());
         database.store(value4);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getValueID())
-                    .getValuesMap().get(value4.getCreatorID()).getData()));
+                database.get(value4.getKey())
+                    .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
         
         // Add a new direct value
-        DHTValue value5 = createDirectDHTValue("Mojito".getBytes());
+        DHTValueEntity value5 = createDirectDHTValue("Mojito".getBytes());
         database.store(value5);
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getValueID())
-                    .getValuesMap().get(value5.getCreatorID()).getData()));
+                database.get(value5.getKey())
+                    .getValuesMap().get(value5.getSecondaryKey()).getValue().getValue()));
         
         // local values replace direct values
-        DHTValue value6 = createLocalDHTValue(value5.getCreatorID(), 
-                value5.getValueID(), "Mary".getBytes());
+        DHTValueEntity value6 = createLocalDHTValue(value5.getSecondaryKey(), 
+                value5.getKey(), "Mary".getBytes());
         database.store(value6);
         assertEquals(2, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value6.getValueID())
-                    .getValuesMap().get(value6.getCreatorID()).getData()));
+                database.get(value6.getKey())
+                    .getValuesMap().get(value6.getSecondaryKey()).getValue().getValue()));
         
         // Add an indirect value
-        DHTValue value7 = createDirectDHTValue("Bloody".getBytes());
+        DHTValueEntity value7 = createDirectDHTValue("Bloody".getBytes());
         database.store(value7);
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Bloody".getBytes(), 
-                database.get(value7.getValueID())
-                    .getValuesMap().get(value7.getCreatorID()).getData()));
+                database.get(value7.getKey())
+                    .getValuesMap().get(value7.getSecondaryKey()).getValue().getValue()));
         
         // local values replace indirect values
-        DHTValue value8 = createLocalDHTValue(value7.getCreatorID(), 
-                value7.getValueID(), "Lime".getBytes());
+        DHTValueEntity value8 = createLocalDHTValue(value7.getSecondaryKey(), 
+                value7.getKey(), "Lime".getBytes());
         database.store(value8);
         assertEquals(3, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Lime".getBytes(), 
-                database.get(value8.getValueID())
-                    .getValuesMap().get(value8.getCreatorID()).getData()));
+                database.get(value8.getKey())
+                    .getValuesMap().get(value8.getSecondaryKey()).getValue().getValue()));
 
     }
     
@@ -173,13 +178,13 @@ public class DatabaseTest extends BaseTestCase {
         Database database = new DatabaseImpl();
         
         // Add a directly stored value
-        DHTValue value1 = createDirectDHTValue("Hello World".getBytes());
+        DHTValueEntity value1 = createDirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
-                    .getValuesMap().get(value1.getCreatorID()).getData()));
+                database.get(value1.getKey())
+                    .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Shouldn't change
         database.store(value1);
@@ -187,163 +192,163 @@ public class DatabaseTest extends BaseTestCase {
         assertEquals(1, database.getValueCount());
         
         // The originator is issuing a direct store request
-        DHTValue value2 = createDirectDHTValue(value1.getCreatorID(), 
-                value1.getValueID(), "Mojito".getBytes());
+        DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
+                value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getValueID())
-                    .getValuesMap().get(value2.getCreatorID()).getData()));
+                database.get(value2.getKey())
+                    .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
         
         // A directly stored value cannot be replaced by
         // an indirect value
-        DHTValue value3 = createIndirectDHTValue(value2.getCreatorID(), 
-                    KUID.createRandomID(), value2.getValueID(), "Tough".getBytes());
+        DHTValueEntity value3 = createIndirectDHTValue(value2.getSecondaryKey(), 
+                    KUID.createRandomID(), value2.getKey(), "Tough".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value3.getValueID())
-                    .getValuesMap().get(value3.getCreatorID()).getData()));
+                database.get(value3.getKey())
+                    .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
     }
     
     public void testIndirectAdd() throws Exception {
         Database database = new DatabaseImpl();
         
         // Add an indiriectly stored value
-        DHTValue value1 = createIndirectDHTValue("Hello World".getBytes());
+        DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
-                    .getValuesMap().get(value1.getCreatorID()).getData()));
+                database.get(value1.getKey())
+                    .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Indirect replaces indirect
-        DHTValue value2 = createIndirectDHTValue(value1.getCreatorID(), 
-                KUID.createRandomID(), value1.getValueID(), "Mojito".getBytes());
+        DHTValueEntity value2 = createIndirectDHTValue(value1.getSecondaryKey(), 
+                KUID.createRandomID(), value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value2.getValueID())
-                    .getValuesMap().get(value2.getCreatorID()).getData()));
+                database.get(value2.getKey())
+                    .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
         
         // Direct replaces indirect
-        DHTValue value3 = createDirectDHTValue(value2.getCreatorID(), 
-                value2.getValueID(), "Tonic".getBytes());
+        DHTValueEntity value3 = createDirectDHTValue(value2.getSecondaryKey(), 
+                value2.getKey(), "Tonic".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value3.getValueID())
-                    .getValuesMap().get(value3.getCreatorID()).getData()));
+                database.get(value3.getKey())
+                    .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Indirect shouldn't replace direct
-        DHTValue value4 = createIndirectDHTValue(value3.getCreatorID(), 
-                KUID.createRandomID(), value3.getValueID(), "Mary".getBytes());
+        DHTValueEntity value4 = createIndirectDHTValue(value3.getSecondaryKey(), 
+                KUID.createRandomID(), value3.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value4.getValueID())
-                    .getValuesMap().get(value4.getCreatorID()).getData()));
+                database.get(value4.getKey())
+                    .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
     }
     
     public void testMultipleValues() throws Exception {
         Database database = new DatabaseImpl();
         
         // Add a value
-        DHTValue value1 = createIndirectDHTValue("Hello World".getBytes());
+        DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
-                    .getValuesMap().get(value1.getCreatorID()).getData()));
+                database.get(value1.getKey())
+                    .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
         
         // Same Key but different originator/sender
-        DHTValue value2 = createIndirectDHTValue(KUID.createRandomID(), 
-                KUID.createRandomID(), value1.getValueID(), "Tonic".getBytes());
+        DHTValueEntity value2 = createIndirectDHTValue(KUID.createRandomID(), 
+                KUID.createRandomID(), value1.getKey(), "Tonic".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
-                database.get(value2.getValueID())
-                    .getValuesMap().get(value2.getCreatorID()).getData()));
+                database.get(value2.getKey())
+                    .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
         
         // Same Key but a different originator
-        DHTValue value3 = createDirectDHTValue(KUID.createRandomID(),
-                value1.getValueID(), "Mary".getBytes());
+        DHTValueEntity value3 = createDirectDHTValue(KUID.createRandomID(),
+                value1.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
         assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
-                database.get(value3.getValueID())
-                    .getValuesMap().get(value3.getCreatorID()).getData()));
+                database.get(value3.getKey())
+                    .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
         
         // Different Key
-        DHTValue value4 = createDirectDHTValue("Olga".getBytes());
+        DHTValueEntity value4 = createDirectDHTValue("Olga".getBytes());
         database.store(value4);
         assertEquals(2, database.getKeyCount());
         assertEquals(4, database.getValueCount());
         assertTrue(Arrays.equals("Olga".getBytes(), 
-                database.get(value4.getValueID())
-                    .getValuesMap().get(value4.getCreatorID()).getData()));
+                database.get(value4.getKey())
+                    .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
     }
     
     public void testRemove() throws Exception {
         Database database = new DatabaseImpl();
         
         // Add a value
-        DHTValue value1 = createIndirectDHTValue("Hello World".getBytes());
+        DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value1.getValueID())
-                    .getValuesMap().get(value1.getCreatorID()).getData()));
+                database.get(value1.getKey())
+                    .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
         
         // It's not possible to remove a value indirectly
-        DHTValue value2 = createIndirectDHTValue(value1.getCreatorID(), 
-                KUID.createRandomID(), value1.getValueID(), new byte[0]);
+        DHTValueEntity value2 = createIndirectDHTValue(value1.getSecondaryKey(), 
+                KUID.createRandomID(), value1.getKey(), new byte[0]);
         database.store(value2);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
-                database.get(value2.getValueID())
-                    .getValuesMap().get(value2.getCreatorID()).getData()));
+                database.get(value2.getKey())
+                    .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
         
         // But we can remove values directly
-        DHTValue value3 = createDirectDHTValue(value1.getCreatorID(), 
-                value1.getValueID(), new byte[0]);
+        DHTValueEntity value3 = createDirectDHTValue(value1.getSecondaryKey(), 
+                value1.getKey(), new byte[0]);
         database.store(value3);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
         
         // Add a new local value
-        DHTValue value4 = createLocalDHTValue("Mojito".getBytes());
+        DHTValueEntity value4 = createLocalDHTValue("Mojito".getBytes());
         database.store(value4);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value4.getValueID())
-                    .getValuesMap().get(value4.getCreatorID()).getData()));
+                database.get(value4.getKey())
+                    .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
         
         // A local value cannot be removed
-        DHTValue value5 = createDirectDHTValue(value4.getCreatorID(), 
-                value4.getValueID(), new byte[0]);
+        DHTValueEntity value5 = createDirectDHTValue(value4.getSecondaryKey(), 
+                value4.getKey(), new byte[0]);
         database.store(value5);
         assertEquals(1, database.getKeyCount());
         assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
-                database.get(value5.getValueID())
-                    .getValuesMap().get(value5.getCreatorID()).getData()));
+                database.get(value5.getKey())
+                    .getValuesMap().get(value5.getSecondaryKey()).getValue().getValue()));
         
         // But a local value can remove a local value
-        DHTValue value6 = createLocalDHTValue(value4.getCreatorID(), 
-                value4.getValueID(), new byte[0]);
+        DHTValueEntity value6 = createLocalDHTValue(value4.getSecondaryKey(), 
+                value4.getKey(), new byte[0]);
         database.store(value6);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
@@ -364,16 +369,17 @@ public class DatabaseTest extends BaseTestCase {
                 new InetSocketAddress("169.0.1.2", 1111), 0, 0, KUID.createRandomID()
                 , new InetSocketAddress("169.0.1.2", 1111), 1, 0);
 
-        DHTValue value = null;
+        DHTValueEntity value = null;
         //should allow x direct values
         for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
-            value = DHTValueFactory.createRemoteValue(badHost, badHost, 
-                    KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                        new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);
+            
             assertTrue(db.store(value));
         }
         //and reject after that
-        DHTValue newValue = DHTValueFactory.createRemoteValue(badHost, badHost,
-                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+        DHTValueEntity newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should make some space for a new one
@@ -381,18 +387,19 @@ public class DatabaseTest extends BaseTestCase {
         assertTrue(db.store(value));
         
         //should also reject an indirect one coming from the bad host
-        newValue = DHTValueFactory.createRemoteValue(badHost, goodHost,  
-                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+        newValue = new DHTValueEntity(badHost, goodHost, KUID.createRandomID(), 
+                new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should not allow more, even if it is coming indirectly        
-        newValue = DHTValueFactory.createRemoteValue(badHost, badHost, 
-                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+        newValue = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);;
         assertFalse(db.store(newValue));
         
         //but should allow one created by a good host
-        DHTValue goodValue = DHTValueFactory.createRemoteValue(goodHost, goodHost, 
-                KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+        DHTValueEntity goodValue = new DHTValueEntity(goodHost, goodHost, KUID.createRandomID(), 
+                new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);
+        
         assertTrue(db.store(goodValue));
 
         //test banning now
@@ -401,8 +408,8 @@ public class DatabaseTest extends BaseTestCase {
                 , new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
         for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
-            value = DHTValueFactory.createRemoteValue(badHost, badHost, 
-                    KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes());
+            value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 
+                    new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false);
             db.store(value);
         }
         //should have banned the host

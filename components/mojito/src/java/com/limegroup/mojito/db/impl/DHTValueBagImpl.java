@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueBag;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.settings.DatabaseSettings;
 
 /**
@@ -30,7 +30,7 @@ class DHTValueBagImpl implements DHTValueBag {
     /**
      * The key if this value
      */
-    private final KUID valueId;
+    private final KUID primaryKey;
 
     /**
      * The request load associated with this DHT value bag
@@ -47,26 +47,37 @@ class DHTValueBagImpl implements DHTValueBag {
     /**
      * The Map of <OriginatorID,DHTValue>
      */
-    private final Map<KUID, DHTValue> valuesMap;
+    private final Map<KUID, DHTValueEntity> entityMap;
     
-    public DHTValueBagImpl(KUID valueId) {
-        this.valueId = valueId;
-        valuesMap = Collections.synchronizedMap(new HashMap<KUID, DHTValue>());
+    public DHTValueBagImpl(KUID primaryKey) {
+        this.primaryKey = primaryKey;
+        entityMap = Collections.synchronizedMap(new HashMap<KUID, DHTValueEntity>());
     }
     
-    public KUID getValueId() {
-        return valueId;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#add(com.limegroup.mojito.db.DHTValue)
+    /**
+     * 
      */
-    public boolean add(DHTValue value) {
-        if (!valueId.equals(value.getValueID())) {
-            throw new IllegalArgumentException("Value ID must be " + valueId);
+    public KUID getPrimaryKey() {
+        return primaryKey;
+    }
+    
+    /**
+     * 
+     */
+    public Object getValuesLock() {
+        return entityMap;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#add(com.limegroup.mojito.db.DHTValueEntity)
+     */
+    public boolean add(DHTValueEntity entity) {
+        if (!primaryKey.equals(entity.getKey())) {
+            throw new IllegalArgumentException("Key must be " + primaryKey);
         }
         
-        valuesMap.put(value.getCreatorID(), value);
+        entityMap.put(entity.getSecondaryKey(), entity);
         return true;
     }
     
@@ -74,26 +85,24 @@ class DHTValueBagImpl implements DHTValueBag {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.DHTValueBag#get(com.limegroup.mojito.KUID)
      */
-    public DHTValue get(KUID nodeId) {
-        return valuesMap.get(nodeId);
+    public DHTValueEntity get(KUID secondaryKey) {
+        return entityMap.get(secondaryKey);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValuesMap()
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#getValuesMap()
      */
-    public Map<KUID, DHTValue> getValuesMap() {
-        return Collections.unmodifiableMap(valuesMap);
+    public Map<KUID, DHTValueEntity> getValuesMap() {
+        return Collections.unmodifiableMap(entityMap);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#getDHTValues()
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#getAllValues()
      */
-    public Collection<DHTValue> getAllValues() {
-        return valuesMap.values();
-    }
-    
-    public Object getValuesLock() {
-        return valuesMap;
+    public Collection<DHTValueEntity> getAllValues() {
+        return entityMap.values();
     }
     
     /* (non-Javadoc)
@@ -140,44 +149,48 @@ class DHTValueBagImpl implements DHTValueBag {
         return requestLoad;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#remove(java.lang.Object)
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#remove(com.limegroup.mojito.db.DHTValueEntity)
      */
-    public boolean remove(DHTValue value) {
-        return (valuesMap.remove(value.getCreatorID()) != null);
+    public boolean remove(DHTValueEntity entity) {
+        return (entityMap.remove(entity.getSecondaryKey()) != null);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#size()
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#size()
      */
     public int size() {
-        return valuesMap.size();
+        return entityMap.size();
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#isEmpty()
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#isEmpty()
      */
     public boolean isEmpty() {
-        return valuesMap.isEmpty();
+        return entityMap.isEmpty();
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.mojito.db.impl.DHTValueBag#containsKey(com.limegroup.mojito.KUID)
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.db.DHTValueBag#containsKey(com.limegroup.mojito.KUID)
      */
     public boolean containsKey(KUID key) {
-        return valuesMap.containsKey(key);
+        return entityMap.containsKey(key);
     }
 
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Bag: ").append(getValueId()).append("\n");
+        buffer.append("Bag: ").append(getPrimaryKey()).append("\n");
         buffer.append("Load: ").append(getRequestLoad()).append("\n");
         buffer.append("Values:").append("\n");
         
         synchronized(getValuesLock()) {
-            for(DHTValue value : getAllValues()) {    
-                buffer.append(value).append("\n\n");
+            for(DHTValueEntity entity : getAllValues()) {    
+                buffer.append(entity).append("\n");  
             }
         }
         

@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.MessageID;
 import com.limegroup.mojito.messages.DHTMessage.OpCode;
 import com.limegroup.mojito.messages.StatsRequest.StatisticType;
@@ -85,14 +86,19 @@ public class MessageOutputStream extends DataOutputStream {
     /**
      * Writes the given DHTValue to the OutputStream
      */
-    public void writeDHTValue(DHTValue value) throws IOException {
-        writeContact(value.getCreator());
-        
-        value.getValueID().write(this);
+    public void writeDHTValueEntity(DHTValueEntity entity) throws IOException {
+        writeContact(entity.getCreator());
+        entity.getKey().write(this);
+        writeDHTValue(entity.getValue());
+    }
+    
+    /**
+     * 
+     */
+    private void writeDHTValue(DHTValue value) throws IOException {
         writeInt(value.getValueType().toInt());
         writeShort(value.getVersion());
-        
-        byte[] data = value.getData();
+        byte[] data = value.getValue();
         writeShort(data.length);
         write(data, 0, data.length);
     }
@@ -110,10 +116,10 @@ public class MessageOutputStream extends DataOutputStream {
     /**
      * Writes the given Collection of DHTValues to the OutputStream
      */
-    public void writeDHTValues(Collection<? extends DHTValue> values) throws IOException {
+    public void writeDHTValueEntities(Collection<? extends DHTValueEntity> values) throws IOException {
         writeCollectionSize(values);
-        for(DHTValue value : values) {
-            writeDHTValue(value);
+        for(DHTValueEntity entity : values) {
+            writeDHTValueEntity(entity);
         }
     }
     

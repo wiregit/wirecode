@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.result.BootstrapResult;
@@ -240,7 +241,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreResult evt = dht.put(key, DHTValueType.TEST, 0, value).get();
+            StoreResult evt = dht.put(key, new DHTValue(DHTValueType.TEST, 0, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());

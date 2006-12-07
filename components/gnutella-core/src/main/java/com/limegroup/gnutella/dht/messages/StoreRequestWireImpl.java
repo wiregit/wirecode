@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht.messages;
 import java.util.Collection;
 
 import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.messages.StoreRequest;
 
 public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest> 
@@ -13,7 +13,7 @@ public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest>
         super(delegate);
     }
 
-    public Collection<DHTValue> getDHTValues() {
+    public Collection<DHTValueEntity> getDHTValues() {
         return delegate.getDHTValues();
     }
 

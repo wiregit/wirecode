@@ -224,12 +224,12 @@ public class BucketRefresher implements Runnable {
         }
         
         public void handleFutureCancelled(CancellationException e) {
-            LOG.error("CancellationException", e);
+            LOG.debug("CancellationException", e);
             stop();
         }
         
         public void handleFutureInterrupted(InterruptedException e) {
-            LOG.error("CancellationException", e);
+            LOG.debug("CancellationException", e);
             stop();
         }
     }

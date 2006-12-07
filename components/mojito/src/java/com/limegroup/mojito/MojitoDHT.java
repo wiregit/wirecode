@@ -30,7 +30,7 @@ import java.util.Set;
 import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueType;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.io.MessageDispatcher;
 import com.limegroup.mojito.messages.MessageFactory;
@@ -207,7 +207,7 @@ public interface MojitoDHT {
     /**
      * Returns a Collection of all values in the Database
      */
-    public Collection<DHTValue> getValues();
+    public Collection<DHTValueEntity> getValues();
     
     /**
      * Tries to find the value for the given key
@@ -216,9 +216,8 @@ public interface MojitoDHT {
     
     /**
      * Stores the given key, value pair
-     * @param version TODO
      */
-    public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value);
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
     
     /**
      * Removes the value for the given key

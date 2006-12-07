@@ -8,7 +8,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValue;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.ContactFactory;
@@ -85,19 +86,20 @@ public class DHTValueBagImplTest extends BaseTestCase {
     	DHTValueBagImpl bag = new DHTValueBagImpl(valueId);
     	
     	SocketAddress addr = new InetSocketAddress(6666);
-        Contact orig = ContactFactory.createLiveContact(addr, 0, 0, 
+        Contact creator = ContactFactory.createLiveContact(addr, 0, 0, 
         		KUID.createRandomID(), addr, 0, Contact.DEFAULT_FLAG);
         Contact sender = ContactFactory.createLiveContact(addr, 0, 0, 
         		KUID.createRandomID(), addr, 0, Contact.DEFAULT_FLAG);   
         
         try {
-        	bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-        			KUID.createRandomID(), DHTValueType.TEST, 0, "test".getBytes()));
+            bag.add(new DHTValueEntity(creator, sender, KUID.createRandomID(), 
+                        new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false));
         	assertTrue("Should have thrown an exception: wrong KUID", false);
         } catch(IllegalArgumentException ex) {}
         
-        bag.add(DHTValueFactory.createRemoteValue(orig, sender, 
-    			valueId, DHTValueType.TEST, 0, "test".getBytes()));
+        bag.add(new DHTValueEntity(creator, sender, valueId, 
+                    new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false));
+        
         assertEquals(1, bag.size());
         assertFalse(bag.isEmpty());
     }

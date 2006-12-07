@@ -53,9 +53,8 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.concurrent.DHTExecutorService;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueFactory;
+import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueManager;
-import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.db.impl.DatabaseImpl;
 import com.limegroup.mojito.exceptions.NotBootstrappedException;
@@ -482,32 +481,32 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private void purgeDatabase(boolean remove) {
         synchronized (database) {
             Contact localNode = getLocalNode();
-            int oldValueCount = database.getValueCount();
-            int removedCount = 0;
-            for (DHTValue value : database.values()) {
-                if (value.isLocalValue()) {
-                    // Make sure all local DHTValues have the
-                    // local Node as the originator
-                    DHTValueFactory.setCreator(value, localNode);
-                } else {
+            
+            // Get a copy of all values
+            Collection<DHTValueEntity> values 
+                = new ArrayList<DHTValueEntity>(database.values());
+            
+            // Clear the Database
+            database.clear();
+            
+            // And re-add everything
+            for (DHTValueEntity entity : values) {
+                // If it's a local value then make sure we're the
+                // creator of the value
+                if (entity.isLocalValue()) {
+                    database.store(entity.changeCreator(localNode));
                     
-                    // Remove all non local DHTValues. We're assuming
-                    // the Node IDs are totally random so chances are 
-                    // slim to none that we're responsible for the values
-                    // again. Even if we are there's no way to test
-                    // it until we've re-bootstrapped in which case the
-                    // the other guys will send us anyways DHTValues to
-                    // store. So, any work would be redundant!
-                    
-                    if (remove || DatabaseUtils.isExpired(getRouteTable(), value)) {
-                        database.remove(value);
-                        removedCount++;
-                    }
+                // We're assuming the Node IDs are totally random so
+                // chances are slim to none that we're responseible 
+                // for the values again. Even if we are there's no way
+                // to test it until we've fully re-bootstrapped in
+                // which case the other guys will send us the values
+                // anyways as from there perspective we're just a new
+                // node.
+                } else if (!remove && !DatabaseUtils.isExpired(getRouteTable(), entity)) {
+                    database.store(entity);
                 }
             }
-            
-            // Make sure we've really removed the values
-            assert (database.getValueCount() == (oldValueCount - removedCount));
         }
     }
     
@@ -896,7 +895,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Retrieve all DHTValues from the remote Node that are 
      * stored under the given valueId and nodeIds
      */
-    public DHTFuture<Collection<DHTValue>> get(Contact node, KUID valueId, KUID nodeId) {
+    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, KUID valueId, KUID nodeId) {
         return get(node, valueId, Collections.singleton(nodeId));
     }
     
@@ -904,7 +903,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Retrieve all DHTValues from the remote Node that are 
      * stored under the given valueId and nodeIds
      */
-    public DHTFuture<Collection<DHTValue>> get(Contact node, 
+    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, 
             KUID valueId, Collection<KUID> nodeIds) {
         return getValueManager.get(node, valueId, nodeIds);
     }
@@ -916,23 +915,27 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return findNodeManager.lookup(lookupId);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#bootstrap(com.limegroup.mojito.routing.Contact)
+     */
     public DHTFuture<BootstrapResult> bootstrap(Contact node) {
         return bootstrapManager.bootstrap(node);
     }
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, byte[])
+     * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
-    public DHTFuture<StoreResult> put(KUID key, DHTValueType type, int version, byte[] value) {
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "put()");
         }
         
-        DHTValue dhtValue = DHTValueFactory
-            .createLocalValue(getLocalNode(), key, type, version, value);
-        database.store(dhtValue);
-        return store(dhtValue);
+        DHTValueEntity entity = new DHTValueEntity(
+                getLocalNode(), getLocalNode(), key, value, true);
+        database.store(entity);
+        return store(entity);
     }
     
     /*
@@ -945,25 +948,21 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         // To remove a KeyValue you just store an empty value!
-        return put(key, DHTValueType.BINARY, 0, DHTValue.EMPTY_DATA);
+        return put(key, DHTValue.EMPTY_VALUE);
     }
     
     /** 
      * Stores the given DHTValue 
      */
-    public DHTFuture<StoreResult> store(DHTValue value) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName(), "store()");
-        }
-        
-        return storeManager.store(value);
+    public DHTFuture<StoreResult> store(DHTValueEntity entity) {
+        return store(Collections.singleton(entity));
     }
    
     /**
      * Stores a Collection of DHTValue(s). All values must have the same
      * valueId!
      */
-    public DHTFuture<StoreResult> store(Collection<? extends DHTValue> values) {
+    public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
         if(!isBootstrapped()) {
             throw new NotBootstrappedException(getName(), "store()");
         }
@@ -971,19 +970,12 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return storeManager.store(values);
     }
     
-    /** 
-     * Stores the given DHTValue 
-     */
-    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, DHTValue value) {
-        return store(node, queryKey, Collections.singleton(value));
-    }
-    
     /**
      * Stores a Collection of DHTValue(s) at the given Node. 
      * All values must have the same valueId!
      */
     public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
-            Collection<? extends DHTValue> values) {
+            Collection<? extends DHTValueEntity> values) {
         
         return storeManager.store(node, queryKey, values);
     }
@@ -1000,10 +992,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getValues()
      */
-    public Collection<DHTValue> getValues() {
+    public Collection<DHTValueEntity> getValues() {
         Database database = getDatabase();
         synchronized (database) {
-            return new ArrayList<DHTValue>(database.values());
+            return new ArrayList<DHTValueEntity>(database.values());
         }
     }
     
