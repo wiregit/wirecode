@@ -43,7 +43,7 @@ public final class ArrayUtils {
      * Returns data as a HEX String
      */
     public static String toHexString(byte[] data) {
-        return toHexString(data, -1);
+        return toHexString(data, 0, data.length, -1);
     }
     
     /**
@@ -51,10 +51,29 @@ public final class ArrayUtils {
      * every wrapAtColumn
      */
     public static String toHexString(byte[] data, int wrapAtColumn) {
-        StringBuilder buffer = new StringBuilder(data.length * 2);
+        return toHexString(data, 0, data.length, wrapAtColumn);
+    }
+    
+    /**
+     * Returns data as a hex encoded String
+     */
+    public static String toHexString(byte[] data, int offset, int length) {
+        return toHexString(data, offset, length, -1);
+    }
+    
+    /**
+     * Returns data as a hex encoded String
+     */
+    public static String toHexString(byte[] data, int offset, int length, int wrapAtColumn) {
+        int end = offset+length;
         
+        if (offset < 0 || length < 0 || end > data.length) {
+            throw new IllegalArgumentException("offset=" + offset + ", length=" + length);
+        }
+        
+        StringBuilder buffer = new StringBuilder(length * 2);
         int column = 0;
-        for(int i = 0; i < data.length; i++) {
+        for(int i = offset; i < end; i++) {
             
             if (wrapAtColumn > 0 && column > wrapAtColumn) {
                 buffer.append("\n");
@@ -71,7 +90,7 @@ public final class ArrayUtils {
      * Returns data as BIN String
      */
     public static String toBinString(byte[] data) {
-        return toBinString(data, -1);
+        return toBinString(data, 0, data.length, -1);
     }
     
     /**
@@ -79,10 +98,29 @@ public final class ArrayUtils {
      * every wrapAtColumn
      */
     public static String toBinString(byte[] data, int wrapAtColumn) {
-        StringBuilder buffer = new StringBuilder(data.length * 8);
+        return toBinString(data, 0, data.length, wrapAtColumn);
+    }
+    
+    /**
+     * Returns data as a binary encoded String
+     */
+    public static String toBinString(byte[] data, int offset, int length) {
+        return toBinString(data, offset, length, -1);
+    }
+    
+    /**
+     * Returns data as a binary encoded String
+     */
+    public static String toBinString(byte[] data, int offset, int length, int wrapAtColumn) {
+        int end = offset+length;
         
+        if (offset < 0 || length < 0 || end > data.length) {
+            throw new IllegalArgumentException("offset=" + offset + ", length=" + length);
+        }
+        
+        StringBuilder buffer = new StringBuilder(length * 8);
         int column = 0;
-        for(int i = 0; i < data.length; i++) {
+        for(int i = offset; i < end; i++) {
             
             if (wrapAtColumn > 0 && column >= wrapAtColumn) {
                 buffer.append("\n");
