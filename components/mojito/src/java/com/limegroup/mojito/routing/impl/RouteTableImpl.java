@@ -19,6 +19,8 @@
  
 package com.limegroup.mojito.routing.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,8 +91,8 @@ public class RouteTableImpl implements RouteTable {
      * A list of RouteTableListeners. It's initialized lazily in
      * RouteTable#addRouteTableListener() 
      */
-    private transient final List<RouteTableListener> listeners =
-        new CopyOnWriteArrayList<RouteTableListener>();
+    private transient volatile List<RouteTableListener> listeners 
+        = new CopyOnWriteArrayList<RouteTableListener>();
     
     /**
      * Create a new RouteTable and generates a new random Node ID
@@ -138,6 +140,12 @@ public class RouteTableImpl implements RouteTable {
         
         consecutiveFailures = 0;
         smallestSubtreeBucket = null;
+    }
+    
+    private void readObject(ObjectInputStream in) 
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        listeners = new CopyOnWriteArrayList<RouteTableListener>();
     }
     
     /*
@@ -1013,12 +1021,16 @@ public class RouteTableImpl implements RouteTable {
     protected void fireRouteTableEvent(Bucket bucket, Bucket left, Bucket right, 
             Contact existing, Contact node, EventType type) {
         
-        if (listeners.isEmpty())
+        if (listeners.isEmpty()) {
             return;
+        }
+        
         RouteTableEvent event = new RouteTableEvent(
                 this, bucket, left, right, existing, node, type);
-        for (RouteTableListener listener : listeners)
+        
+        for (RouteTableListener listener : listeners) {
             listener.handleRouteTableEvent(event);
+        }
     }
     
     public synchronized String toString() {
