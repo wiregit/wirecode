@@ -55,9 +55,9 @@ public class MessageID implements Comparable<MessageID>, Serializable {
         GENERATOR.nextBytes(RANDOM_PAD);
     }
 
-    private byte[] messageId;
+    private final byte[] messageId;
 
-    private int hashCode = -1;
+    private final int hashCode;
 
     private MessageID(byte[] messageId) {
         if (messageId == null) {
@@ -70,6 +70,7 @@ public class MessageID implements Comparable<MessageID>, Serializable {
         }
         
         this.messageId = messageId;
+        this.hashCode = Arrays.hashCode(messageId);
     }
 
     /**
@@ -192,13 +193,6 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     }
 
     public int hashCode() {
-        if (hashCode == -1) {
-            hashCode = Arrays.hashCode(messageId);
-            if (hashCode == -1) {
-                hashCode = 0;
-            }
-        }
-
         return hashCode;
     }
 
