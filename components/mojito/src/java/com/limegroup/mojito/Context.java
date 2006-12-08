@@ -21,7 +21,6 @@ package com.limegroup.mojito;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -425,12 +424,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
     }
 
-    /**
-     * Returns the RouteTable
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#getRouteTable()
      */
-    public RouteTable getRouteTable() {
-        // Not synchronized 'cause only called when Mojito is running and 
-        // while Mojito is running you cannot change the RouteTable
+    public synchronized RouteTable getRouteTable() {
         return routeTable;
     }
 
@@ -440,6 +438,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public synchronized void setDatabase(Database database) {
         setDatabase(database, true);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#getDatabase()
+     */
+    public synchronized Database getDatabase() {
+        return database;
     }
     
     /**
@@ -509,15 +515,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 }
             }
         }
-    }
-    
-    /**
-     * Returns the Database
-     */
-    public Database getDatabase() {
-        // Not synchronized 'cause only called when Mojito is running and 
-        // while Mojito is running you cannot change the Database
-        return database;
     }
     
     /*
@@ -1179,14 +1176,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         public void execute(Runnable command) {
             cachedExecutor.execute(command);
         }
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#store(java.io.OutputStream)
-     */
-    public void store(OutputStream out) throws IOException {
-        MojitoFactory.store(this, out);
     }
     
     public String toString() {

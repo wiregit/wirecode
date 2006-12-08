@@ -7,8 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +21,8 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
+import com.limegroup.mojito.db.Database;
+import com.limegroup.mojito.routing.RouteTable;
 import com.limegroup.mojito.statistics.DHTStatsManager;
 
 /**
@@ -42,14 +44,24 @@ class ActiveDHTNodeController extends AbstractDHTController {
 
         DHTStatsManager.clear();
         
-        MojitoDHT mojitoDHT = null;
+        MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
+        
         if (DHTSettings.PERSIST_DHT.getValue() && 
                 FILE.exists() && FILE.isFile()) {
-            
-            InputStream in = null;
+            ObjectInputStream in = null;
             try {
-                in = new BufferedInputStream(new FileInputStream(FILE));
-                mojitoDHT = MojitoFactory.load(in, vendor, version);
+                in = new ObjectInputStream(
+                        new BufferedInputStream(
+                            new FileInputStream(FILE)));
+                
+                RouteTable routeTable = (RouteTable)in.readObject();
+                Database database = (Database)in.readObject();
+                
+                synchronized (dht) {
+                    dht.setRouteTable(routeTable);
+                    dht.setDatabase(database);
+                }
+                
             } catch (FileNotFoundException e) {
                 LOG.error("FileNotFoundException", e);
             } catch (ClassNotFoundException e) {
@@ -61,11 +73,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
             }
         }
         
-        if (mojitoDHT == null) {
-            mojitoDHT = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
-        }
-        
-        setMojitoDHT(mojitoDHT);
+        setMojitoDHT(dht);
     }
 
     /**
@@ -97,10 +105,17 @@ class ActiveDHTNodeController extends AbstractDHTController {
         sendUpdatedCapabilities();
         
         if (DHTSettings.PERSIST_DHT.getValue()) {
-            OutputStream out = null;
+            ObjectOutputStream out = null;
             try {
-                out = new BufferedOutputStream(new FileOutputStream(FILE));
-                getMojitoDHT().store(out);
+                out = new ObjectOutputStream(
+                        new BufferedOutputStream(
+                            new FileOutputStream(FILE)));
+                MojitoDHT dht = getMojitoDHT();
+                synchronized (dht) {
+                    out.writeObject(dht.getRouteTable());
+                    out.writeObject(dht.getDatabase());
+                }
+                out.flush();
             } catch (IOException err) {
                 LOG.error("IOException", err);
             } finally {

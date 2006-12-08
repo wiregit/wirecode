@@ -19,10 +19,14 @@
  
 package com.limegroup.mojito;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -331,29 +335,50 @@ public class CommandHandler {
         }
     }
     
-    public static MojitoDHT load(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static MojitoDHT load(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         File file = new File(args[1]);
         out.println("Loading: " + file);
-        FileInputStream fis = new FileInputStream(file);
+        ObjectInputStream ois = null;
         
         try {
-            return MojitoFactory.load(fis);
-        } catch (ClassNotFoundException err) {
-            err.printStackTrace(out);
+            ois = new ObjectInputStream(
+                    new BufferedInputStream(
+                        new FileInputStream(file)));
+            RouteTable routeTable = (RouteTable)ois.readObject();
+            Database database = (Database)ois.readObject();
+            
+            MojitoDHT mojito = MojitoFactory.createDHT(dht.getName());
+            synchronized (mojito) {
+                mojito.setRouteTable(routeTable);
+                mojito.setDatabase(database);
+            }
+            return mojito;
         } finally {
-            fis.close();
+            try {
+                if (ois != null) { ois.close(); }
+            } catch (IOException ignore) {}
         }
-        
-        return null;
     }
     
     public static void store(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
         File file = new File(args[1]);
         out.println("Storing: " + file);
-        FileOutputStream fos = new FileOutputStream(file);
-        //dht.store(fos, true, true);
-        dht.store(fos);
-        fos.close();
+        ObjectOutputStream oos = null;
+        
+        try {
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(
+                        new FileOutputStream(file)));
+            synchronized (dht) {
+                oos.writeObject(dht.getRouteTable());
+                oos.writeObject(dht.getDatabase());
+            }
+            oos.flush();
+        } finally {
+            try {
+                if (oos != null) { oos.close(); }
+            } catch (IOException ignore) {}
+        }
     }
     
     public static void stats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {

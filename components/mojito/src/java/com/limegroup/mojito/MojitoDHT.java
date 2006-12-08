@@ -20,7 +20,6 @@
 package com.limegroup.mojito;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
@@ -166,10 +165,14 @@ public interface MojitoDHT {
     public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher);
     
     /**
-     * Sets and returns the RouteTable. The class must be a sub-class of
-     * <tt>RouteTable</tt>
+     * Sets the RouteTable
      */
     public void setRouteTable(RouteTable routeTable);
+    
+    /**
+     * Returns the RouteTable
+     */
+    public RouteTable getRouteTable();
     
     /**
      * Sets the Host Filter
@@ -180,6 +183,11 @@ public interface MojitoDHT {
      * Sets the Database
      */
     public void setDatabase(Database database);
+    
+    /**
+     * Returns the Database
+     */
+    public Database getDatabase();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use
@@ -233,9 +241,4 @@ public interface MojitoDHT {
      * 
      */
     public DHTExecutorService getDHTExecutorService();
-    
-    /**
-     * Writes the current state of Monjito DHT to the OutputStream
-     */
-    public void store(OutputStream out) throws IOException;
 }

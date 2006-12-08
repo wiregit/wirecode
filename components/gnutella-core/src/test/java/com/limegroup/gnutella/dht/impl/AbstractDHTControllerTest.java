@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht.impl;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -173,6 +172,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void setDatabase(Database database) {}
 
+        public Database getDatabase() {
+            return null;
+        }
+        
         public void setExternalPort(int port) {}
 
         public MessageDispatcher setMessageDispatcher(Class<? extends MessageDispatcher> messageDispatcher) {
@@ -183,6 +186,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void setRouteTable(RouteTable routeTable) {}
         
+        public RouteTable getRouteTable() {
+            return null;
+        }
+        
         public BigInteger size() {
             return null;
         }
@@ -190,8 +197,6 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void start() {}
 
         public void stop() {}
-
-        public void store(OutputStream out) throws IOException {}
         
         public void setHostFilter(HostFilter hostFilter) {
         }
