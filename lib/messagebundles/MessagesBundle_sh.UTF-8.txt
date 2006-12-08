@@ -46,7 +46,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=U REDU
@@ -112,7 +112,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Vrati sva podeï¿½avanja u stanje koje je po
 OPTIONS_LEARN_MORE_LABEL=Saznaj viï¿½e o ovome...
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=Da
@@ -120,7 +120,7 @@ YES=Da
 NO=Ne
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=Proseï¿½an protok
@@ -152,13 +152,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB/s
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=LimeWare: Prikljuï¿½en na mreï¿½u za razmenu informacija
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=Informacije o LimeWire-u
@@ -191,7 +191,7 @@ ABOUT_BUTTON_TIP=Zatvori ovaj prozor
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=Savet dana
@@ -209,7 +209,7 @@ TOTD_CLOSE=Zatvori
 TOTD_LOADING_TIPS=Uï¿½itavanje saveta...
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=Pokretanje programa...
@@ -225,7 +225,7 @@ GOING_PRO_TITLE=Najrazvijenija razmena datoteka na Planeti!
 GOING_PRO_DESCRIPTION=Bolji rezultati pretrage.\nTurbo preuzimanje datoteka.\nSpajanje na viï¿½e kompjutera.\nPersonalizovana tehniï¿½ka podrï¿½ka.\nBesplatne nove verzije programa za 6 meseci.
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire - Mreï¿½na razmena datoteka
@@ -239,7 +239,7 @@ TRAY_EXIT_LATER_LABEL=Iskljuï¿½i LimeWire posle razmene datoteka
 TRAY_EXIT_LABEL=Iskljuï¿½i LimeWire
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=Pretraga
@@ -261,7 +261,7 @@ UPLOAD_TITLE=Slanje
 CONSOLE_TITLE=Komandni reï¿½im
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=Traï¿½i i preuzmi datoteke iz udaljenih raï¿½unara
@@ -275,7 +275,7 @@ LIBRARY_TIP=Pregledaj fascikle sa primljenim datotekama
 CONSOLE_TIP=Pregledaj beleï¿½ke o izvrï¿½enim akcijama
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=Program
@@ -575,7 +575,7 @@ MENU_HELP_ERROR_MNEMONIC=G
 MENU_HELP_ERROR_ACCESSIBLE=Prikaï¿½i prozor sa prijavom greï¿½ke, radi testiranja
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=Prikaï¿½i kvalitet veze
@@ -595,7 +595,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire je detektovao zaï¿½titni zid (firewal
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire nije detektovao zaï¿½titni zid (firewall)
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=ï¿½rafiraj redove
@@ -605,7 +605,7 @@ TABLES_REAL_TIME_SORTING=Poreï¿½aj automatski
 TABLES_DISPLAY_TOOLTIPS=Opï¿½irniji opis
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Niste prikljuï¿½eni na Internet. Da bi ste se prikljuï¿½ili, kliknite na 'Poveï¿½i se' u meniju 'Program'. Pretraï¿½ivanje neï¿½e raditi dok se ne prikljuï¿½ite.
@@ -723,7 +723,7 @@ SEARCH_BACK_TO_SEARCH=Povratak na pretragu
 SEARCH_BLOCK_HOST=Da li ï¿½elite ukloniti rezultate pretrage sa raï¿½unara na adresi 
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 MAGNET_COPY_MAGNET_LINKS_LABEL=Saï¿½uvaj u memoriji Magnet adrese
@@ -733,7 +733,7 @@ MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Saï¿½uvaj privremeno u memoriji Magnet adrese o
 MAGNET_COPY_MAGNET_LINKS_WARNING=Neke saï¿½uvane Magnet adrese moï¿½da nisu dostupne jer udaljeni raï¿½unar ima zaï¿½titni zid.
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -750,7 +750,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Pretraï¿½i ï¿½ta ima novo za: {0}
 SEARCH_XML_FIELD_ACTION_NAME=Traï¿½i u vezi {0}: {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Obeleï¿½i sve
@@ -900,7 +900,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=Podesi...
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Podesi razmenu datoteka
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -925,7 +925,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Ukloni obeleï¿½enu pesmu sa liste
 PLAYLIST_FILE_DESCRIPTION=Lista pesama (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
@@ -941,7 +941,7 @@ MEDIA_FORWARD_BUTTON_TIP=Sledeï¿½
 MEDIA_REWIND_BUTTON_TIP=Predhodna
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Uvek snimi kao...
@@ -978,7 +978,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL=Datoteka sa istim sadrï¿½ajem veï¿½ se nalazi na {0
 NO_FILENAME_LABEL=Bez imena datoteke
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=Odaberi lokaciju za snimanje datoteke
@@ -986,7 +986,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=Odaberi lokaciju za snimanje datoteke
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=Sve fascikle
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Datoteka veï¿½ postoji
@@ -1037,7 +1037,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=Nije moguï¿½e podesiti lokaciju datoteke zbog gre
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Ista datoteka se veï¿½ preuzima.
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=Snimi datoteku kao
@@ -1052,7 +1052,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Nastavi
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Ista datoteka je veï¿½ u arhivi
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=Razmenjuj datoteku
@@ -1283,11 +1283,11 @@ DOWNLOAD_SERACH_ORGINAL_TIP=Ponovi pretragu koja je ranije pronaï¿½la ovu datote
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=Prekini slanje datoteke
@@ -1355,9 +1355,9 @@ UPLOAD_ACTIVE=Aktivno
 UPLOAD_QUEUED=Redosled
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1366,7 +1366,7 @@ UPLOAD_QUEUED=Redosled
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=Prikaï¿½i dolazeï¿½e pretrage
@@ -1379,7 +1379,7 @@ MONITOR_VIEW_LEAF_MESSAGE=Vaï¿½ program je zaï¿½tiï¿½en Ultrapeer-om, pa ï¿½ete 
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=Modem
@@ -1393,7 +1393,7 @@ T3_SPEED=T3 ili brï¿½e
 MULTICAST_SPEED=Mreï¿½a
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=Preuzimanje datoteka
@@ -1403,7 +1403,7 @@ HTML_PAGE_LISTING=Lista datoteka za
 HTML_PAGE_MAGNET=Magnet veze za brï¿½e preuzimanje (ako imate LimeWire)
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=Udaljeni raï¿½unar
@@ -1475,7 +1475,7 @@ CV_ADD_PORT_LABEL=Kanal:
 CV_ADD_DIALOG_TITLE=Dodaj Gnutella vezu
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=Sliï¿½ica
@@ -1527,7 +1527,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Lista svih posebno delj
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 CONSOLE_SAVE_BUTTON_LABEL=Saï¿½uvaj
@@ -1535,7 +1535,7 @@ CONSOLE_SAVE_BUTTON_LABEL=Saï¿½uvaj
 CONSOLE_DIALOG_SAVE_TITLE=Saï¿½uvaj kao...
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 lista
@@ -1572,7 +1572,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Datoteka nije prepoznata.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 SETUP_DIALOG_TITLE=LimeWire podeï¿½avanje
@@ -1649,27 +1649,26 @@ SETUP_FINISH_LABEL=LimeWire je uspeï¿½no podeï¿½en. Kliknite na dugme "Zavrï¿½i"
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=Obeleï¿½i
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Obeleï¿½i
@@ -1679,7 +1678,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Obeleï¿½i fasciklu
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Snimanje u fasciklu:
@@ -1693,7 +1692,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=Koristi standardnu
 INIT_SAVE_DEFAULT_BUTTON_TIP=Koristite standardnu fasciklu
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=Nadogradnja na PRO verziju
@@ -1729,7 +1728,7 @@ JAVA_UPGRADE_QUESTION=Da li ï¿½elite da besplatno preuzmete najnoviju Java verzi
 LANGUAGE_LOADING=Uï¿½itavanje jezika
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=Audio
@@ -2030,7 +2029,7 @@ INTERNETARCHIVE_UPLOADER_CHECKIN=Provera...
 INTERNETARCHIVE_IDRETRIEVER_TITLE=ï¿½ekanje na proveru...
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=Dodaj...
@@ -2044,13 +2043,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=Dodaj novu stavku na listu
 LIST_EDITOR_REMOVE_BUTTON_TIP=Ukloni obeleï¿½enu stavku
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=Ulaz
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Razgovor...
@@ -2064,7 +2063,7 @@ GENERAL_LAUNCH_BUTTON_TIP=Pokreni datoteku
 GENERAL_CLEAR_HISTORY=Obriï¿½i istoriju
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=Blokiraj udaljeni raï¿½unar
@@ -2080,7 +2079,7 @@ CHAT_SEND_BUTTON_TIP=Poï¿½alji poruku udaljenom raï¿½unaru
 CHAT_STOP_BUTTON_TIP=Prekini razgovor sa vlasnikom udaljenog raï¿½unara
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Razgovor sa
@@ -2090,7 +2089,7 @@ CHAT_HOST_UNAVAILABLE=Udaljeni raï¿½unar nije na respolaganju
 CHAT_YOU=Vi
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=Uï¿½itavanje spiska izvora...
@@ -2164,7 +2163,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Uï¿½itavanje snimljenih datot
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Uï¿½itavanje sigurnosnih podeï¿½avanja...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=LimeWire se iskljuï¿½uje...
@@ -2198,7 +2197,7 @@ SUPPORT_LIMEWIRE_11=Podrï¿½ite LimeWire i nezavisne medije. Kupite PRO.
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Objavljena nova verzija!
@@ -2218,7 +2217,7 @@ UPDATE_RESTART=Potrebno je ponovo pokrenuti LimeWire da bi se nadogradio na novu
 UPDATE_RESTART_TITLE=Nadogradnja spremna
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2236,7 +2235,7 @@ UPDATE_RESTART_TITLE=Nadogradnja spremna
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=Poruka
@@ -2279,7 +2278,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Da li ï¿½elite da delite ovu fasciklu?
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 NO_INTERNET=Vaï¿½ raï¿½unar ne pokazuje da imate aktivan Internet pristup ili je zaï¿½titni zid (firewall) blokirao LimeWire-u pristup Internetu. Molimo Vas da proverite vezu sa Internetom ili podesite zaï¿½titni zid, a zatim iz menija "Program" odaberite "Povezivanje" da bi se LimeWire povezao na Internet.
@@ -2324,7 +2323,7 @@ ERROR_INVALID_NAME_DOWNLOAD=LimeWire nije mogao da otvori nepotpuno preuzetu dat
 ERROR_INVALID_NAME_GENERIC=LimeWire ne moï¿½e otvoriti potrebnu datoteku zato ï¿½to naziv datoteke sadrï¿½i znakove koje ne podrï¿½ava Vaï¿½ operativni sistem. LimeWire moï¿½e raditi nestabilno.
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=Greï¿½ka u programu
@@ -2352,7 +2351,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=Uvek odbaci sve greï¿½ke
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire nije bio u moguï¿½nosti da se prikljuï¿½i na server za prijavu greï¿½aka da bi poslao izveï¿½taj. Za pomoï¿½ u otkrivanju kvara, molimo Vas kopirajte sedeï¿½i tekst i poï¿½aljite e-mailom na adresu: bugs@limewire.com. Hvala Vam.
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWire nije uspeo da se pokrene. Ovo se obiï¿½no deï¿½ava zbog zaï¿½titnog zida (firewall) koji blokira LimeWire-u izlaz na Internet ili povratnu vezu na Vaï¿½em raï¿½unaru. Molimo Vas da dozvolite LimeWire-u izlaz na Internet i ponovo ga pokrenete.
@@ -2483,8 +2482,9 @@ ERROR_INTERNETARCHIVE_COMMUNICATION=Pojavila se greï¿½ka u komunikaciji sa Inter
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=Pregled licence
@@ -2496,7 +2496,7 @@ LICENSE_VERIFY=Proveri
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=Detalji Creative Commons licence.
@@ -2520,7 +2520,7 @@ LICENSE_CC_VERIFICATION=Prikaï¿½i potvrdnu stranicu
 LICENSE_CC=Creative Commons licenca
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 LICENSE_WEED_TITLE=Detalji WeedShare licence
@@ -2544,7 +2544,7 @@ LICENSE_WEED_VERIFICATION=Pogledaj stranicu za proveru
 LICENSE_WEED=Weedshare
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=Detalji licence
@@ -2554,7 +2554,7 @@ LICENSE_UNKNOWN_INVALID=Ova datoteka moï¿½e zahtevati licencu da bi se otvorila 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=ï¿½uvanje
@@ -2639,7 +2639,7 @@ OPTIONS_CONTENT_FILTER_MAIN_TITLE=Sadrï¿½aj
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Napravili ste izmene u podeï¿½avanjima. Da li ï¿½elite da ih saï¿½uvate?
@@ -2679,7 +2679,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Broj dana za ï¿½uvanje nedovrï¿½enih 
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=Razmena fascikli
@@ -2702,7 +2702,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Da li ï¿½elite da razmenjujete Vaï¿½e nove fasci
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=Vrste datoteka za razmenu
@@ -2717,7 +2717,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Razmena standardnih vrsta datoteka.
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=Brzina veze
@@ -2727,7 +2727,7 @@ OPTIONS_SPEED_LABEL=Moï¿½ete navesti brzinu Vaï¿½e Internet veze da bi LimeWire 
 OPTIONS_SPEED_BOX_LABEL=Brzina:
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer moguï¿½nosti
@@ -2737,7 +2737,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Ako vaï¿½ raï¿½unar ima brzu Internet vezu,
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Iskljuï¿½ite Ultrapeer moguï¿½nost:
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB pretraga
@@ -2748,7 +2748,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Omoguï¿½ite OOB pretragu:
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=Maksimalan broj preuzimanja
@@ -2759,7 +2759,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Maksimalan broj preuzimanja:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Brisanje spiska preuzetih datoteka
@@ -2770,7 +2770,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Automatski izbriï¿½i spisak preuzetih dat
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Iskoriï¿½ï¿½enost veze za preuzimanje
@@ -2783,7 +2783,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Brzina preuzimanja:
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=Upozorenje o licenci
@@ -2794,7 +2794,7 @@ OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Prikaï¿½i licencu:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=Brisanje spiska poslatih datoteka
@@ -2805,7 +2805,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automatski izbriï¿½i spisak poslatih datote
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=Iskoriï¿½ï¿½enost veze za slanje
@@ -2828,7 +2828,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Moï¿½ete odabrati da li ï¿½elite da a
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Omoguï¿½i razmenu nekompletnih datoteka:
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=Maksimalni broj slanja datoteka
@@ -2838,13 +2838,13 @@ OPTIONS_UPLOAD_MAX_LABEL=Maksimalni broj istovremenih slanja datoteka. Ova vredn
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Maksimalni broj istovremenih slanja:
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Pokreni slanje:
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=Slanje po osobi
@@ -2854,7 +2854,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=Podesite maksimalni broj slanja datoteka po osob
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Broj preuzimanja po osobi:
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=Prikljuï¿½i se prilikom pokretanja programa
@@ -2864,13 +2864,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=Odaberite da li ï¿½elite da se LimeWire automat
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Prikljuï¿½i se prilikom pokretanja:
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2883,19 +2883,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Prikljuï¿½i se prilikom pokretanja:
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=Iskljuï¿½ivanje programa
@@ -2915,7 +2914,7 @@ OPTIONS_TRAY_ICON_DISPLAY_TITLE=Sliï¿½ica za rad u pozadini
 OPTIONS_TRAY_ICON_DISPLAY_LABEL=Moguï¿½e je prikazati sliï¿½icu u pozadini i dok je LimeWire vidljiv na ekranu.
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=Nove verzije
@@ -2929,7 +2928,7 @@ OPTIONS_UPDATE_SERVICE=Radne verzije
 OPTIONS_UPDATE_MAJOR=Konaï¿½ne verzije
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Omoguï¿½i razgovor:
@@ -2939,7 +2938,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=Komunikacija sa udaljenim raï¿½unarom
 OPTIONS_CHAT_ACTIVE_LABEL=Moï¿½ete ukljuï¿½iti ili iskljuï¿½iti razgovor.
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Koristite LimeWire MP3 Player:
@@ -2949,13 +2948,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Podeï¿½avanja player-a
 OPTIONS_PLAYER_PREFERENCE_LABEL=Moï¿½ete puï¿½tati multimedijalne datoteke preko ugraï¿½enog LimeWire player-a, a on ï¿½e biti omoguï¿½en tek ako ukljuï¿½ite ovu opciju. Takoï¿½e, biï¿½e potrebno ponovo startovati sistem ako menjate ovu opciju.
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2969,7 +2968,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Moï¿½ete puï¿½tati multimedijalne datoteke preko
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Ukljuï¿½i pokazivaï¿½ kvaliteta veze:
@@ -3001,7 +3000,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Preuzimanje:
 OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Slanje:
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Omoguï¿½i punjenje iTunes muzike:
@@ -3011,7 +3010,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=Punjenje
 OPTIONS_ITUNES_PREFERENCE_LABEL=LimeWire moï¿½e automatski napuniti iTunes sa novopreuzetim pesmama.
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Razmena
@@ -3041,7 +3040,7 @@ OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Kapacitet memorije
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=Moï¿½ete podesiti koliko memorije ï¿½e biti upotrebljeno za sluï¿½anje muzike uï¿½ivo (radio). Ako iTunes ili neki drugi ureï¿½aj ima problema sa puï¿½tanjem, poveï¿½ajte ovu vrednost. Veï¿½a vrednost znaï¿½i upotreba viï¿½e memorije.
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=Prikazivaï¿½ Internet stranica
@@ -3069,7 +3068,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Moï¿½ete odabrati koji audio player ï¿½eli
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio Player
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=Izveï¿½tavanje o greï¿½kama
@@ -3079,7 +3078,7 @@ OPTIONS_BUGS_LABEL=Moï¿½ete odabirati naï¿½in izveï¿½tavanja o greï¿½kama. Klikn
 OPTIONS_BUGS_VIEW_EXAMPLE=Prikaï¿½i primer
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=Ne prikazuj viï¿½e ovu poruku
@@ -3093,7 +3092,7 @@ OPTIONS_POPUPS_LABEL=Ponovno prikazivanje poruka za koje ste odabrali "Ne prikaz
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Vrati na standardno podeï¿½avanje:
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=Ako datoteka veï¿½ postoji
@@ -3108,7 +3107,7 @@ OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Uvek pitaj ï¿½ta da se radi
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Automatsko popunjavanje oznaka
@@ -3118,14 +3117,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=Moï¿½ete ukljuï¿½iti ili iskljuï¿½iti automatsko popu
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Omoguï¿½i automatsko popunjavanje tekstualnih polja:
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=Da bi koristili novu podlogu za program, morate ponovo pokrenuti LimeWire.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=Maksimalni broj pretraï¿½ivanja
@@ -3135,7 +3134,8 @@ OPTIONS_SEARCH_MAX_LABEL=Moï¿½ete podesiti maksimalni broj istovremenih pretraï¿
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maksimalni broj pretraï¿½ivanja:
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=Kvalitet rezultata pretrage
@@ -3152,6 +3152,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Prikaï¿½i sve rezultate
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=Brzina veze za prikazane rezultate
@@ -3168,7 +3169,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=Prikaï¿½i sve brzine
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=Izdvajanje rezultata
@@ -3177,7 +3178,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=Moï¿½ete izdvojiti samo odreï¿½ene rezultate pretra
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=Izdvajanje vrste rezultata
@@ -3193,7 +3194,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Izostavi .vbs datoteke
 OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Izostavi .wmv/.asf datoteke
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=Zabrana pristupa udaljenim raï¿½unarima
@@ -3206,7 +3208,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=Moï¿½ete propustiti poruke sa odreï¿½enih udaljenih
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=Podeï¿½avanje veze
@@ -3223,7 +3225,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Uvek
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=Regionalno podeï¿½avanje
@@ -3234,7 +3236,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Ukljuï¿½ite prioritet na:
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=Osluï¿½kivanje kanala
@@ -3245,7 +3247,7 @@ OPTIONS_PORT_BOX_LABEL=Osluï¿½kivanje kanala:
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=Podeï¿½avanje rutera
@@ -3260,7 +3262,7 @@ OPTIONS_ROUTER_NOTHING=Ne preduzmi niï¿½ta (Nije preporuï¿½eno)
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=Podizanje operativnog sistema
@@ -3271,6 +3273,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=Pokreni prilikom podizanja sistema:
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=Proxy
@@ -3300,21 +3303,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Korisniï¿½ko ime:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=ï¿½ifra:
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 #? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 #? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 OPTIONS_CONTENT_FILTER_TITLE=Uklanjanje zabranjenih datoteka
@@ -3325,7 +3329,7 @@ OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Ukloni zabranjene datoteke
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 OPTIONS_SEARCH_JUNK_TITLE=Smeï¿½
@@ -3352,7 +3356,7 @@ OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Iskljuï¿½ivo:
 OPTIONS_SEARCH_JUNK_RESET_LABEL=Izbriï¿½i beleï¿½ke o tome ï¿½ta je smeï¿½
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=Protok
@@ -3376,7 +3380,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Prikaï¿½i dodatnu statistiku:
 GNUTELLA_MESSAGES=Gnutella
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=Protok
@@ -3697,7 +3701,7 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Proseï¿½na veliï¿½ina
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=Proseï¿½na veliï¿½ina u kilobajtima primljenih poruka preko LimeWire-a.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
@@ -3734,7 +3738,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Pogodak
 STATS_QRP_LEAF_ROUTED_QUERIES_MISS=Pogreï¿½na potvrda
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 ERROR_MESSAGES=Greï¿½ke
@@ -3765,7 +3769,7 @@ STATS_ERROR_VENDOR_TITLE=Poruke vlasnika
 STATS_ERROR_VENDOR_LABEL=Greï¿½ke prilikom ï¿½itanja poruka vlasnika datoteka.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 SENT_MESSAGES=Poslato
@@ -3990,7 +3994,7 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobajti za Multicast pushes, poslati sa svih Gnutella programa prema drugim LimeWire programima.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 HANDSHAKING=Povezivanje
@@ -4016,7 +4020,7 @@ STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Izlazni server odbijen
 STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Statistika odbijenih odlaznih veza na Gnutella mreï¿½u.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 COMPRESSABLE_MESSAGES=Sabijanje
@@ -4030,7 +4034,7 @@ STATS_COMPRESSABLE_DOWNSTREAM_TITLE=Dolazeï¿½
 STATS_COMPRESSABLE_DOWNSTREAM_LABEL=Statistika za sabijeni dolazeï¿½i saobraï¿½aj u kilobajtima.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 FLOW_CONTROLLED_MESSAGES=Kontrola protoka
@@ -4044,7 +4048,7 @@ STATS_FLOW_CONTROL_BYTES_TITLE=Kilobajti
 STATS_FLOW_CONTROL_BYTES_LABEL=Statistika za tok kontrolisanih poruka u kilobajtima.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=Greï¿½ke preusmeravanja
@@ -4057,7 +4061,7 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=Potvrï¿½ene greske preusmeravanja
 STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=Greï¿½ke u preusmeravanju rezultata upita.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=Izdvojene poruke
@@ -4070,7 +4074,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Veze
 STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Ukupan broj pokuï¿½aja povezivanja na Gnutella mreï¿½u, iznutra ili spolja.
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=Ulazni zahtevi
@@ -4078,7 +4082,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=Ulazni zahtevi
 STATS_TOTAL_HTTP_REQUESTS_LABEL=Ukupan broj primljenih zahteva. Ovo ukljuï¿½uje sve pokuï¿½aje povezivanja (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, itd...)
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 DOWNLOAD_STATISTICS=Preuzimanja
@@ -4104,7 +4108,7 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP vreme prikljuï¿½enja
 STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Beleï¿½i vreme u milisekundama za uspostavljanje TCP veze za preuzimanje datoteka. Ovo moï¿½e varirati, na primer, kada su serveri preoptereï¿½eni.
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=Slanje
@@ -4126,7 +4130,7 @@ STATS_UPLOAD_GENERAL_TITLE=Uopï¿½teno
 STATS_UPLOAD_GENERAL_LABEL=Ukupan broj pokuï¿½anih, zavrï¿½enih, prekinutih ili zaustavljenih slanja datoteka. Ovi podaci su uveï¿½ani po prikljuï¿½ku, a ne po broju delova. Zaustavljeno slanje biï¿½e takoï¿½e raï¿½unato kao prekinuto slanje.
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4139,7 +4143,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=kilobajta
 Y_AXIS_BANDWIDTH_LABEL=kilobajta
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4335,7 +4339,7 @@ ERROR_VENDOR_UNRECOGNIZED=Poruka snabdevaï¿½a nije prepoznatljiva
 ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire je naiï¿½ao na problem prilikom pokretanja i nije u moguï¿½nosti da nastavi sa radom. Moï¿½ete pokuï¿½ati da reï¿½ite problem odreï¿½enim podeï¿½avanjem u Windows-u. Kliknite desnim dugmetom miï¿½a na LimeWire sliï¿½icu na radnoj povrï¿½ini i iz padajuï¿½eg menija odaberite 'Properties' (osobine). Kliknite na 'Compatibility' (usklaï¿½enost) stranicu u vrhu dobijenog prozora, zatim na 'Run this program in compatibility mode for' i odaberite ispod toga 'Windows 2000'. Zatim kliknite na "OK" i ponovo pokrenite LimeWire.
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=Sve poruke

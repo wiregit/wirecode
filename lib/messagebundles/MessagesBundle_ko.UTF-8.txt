@@ -48,7 +48,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=확인
@@ -114,7 +114,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=모든 설정을 초기 상태로 되돌림
 OPTIONS_LEARN_MORE_LABEL=이 옵션에 대해서 더 배우기...
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=네
@@ -122,7 +122,7 @@ YES=네
 NO=아니오
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=평균적인 처리 능력
@@ -154,13 +154,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB/초
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=LimeWire: 그누테라 네트워크
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=LimeWire 정보
@@ -193,7 +193,7 @@ ABOUT_CONCLUSION=마지막으로, LimeWire는 프로젝트에 아이디어를 �
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 ABOUT_BT_NOTICE=BitTorrent, the BitTorrent 로고, 그리고 Torrent는 BitTorrent Inc.의 대표 브랜드입니다.
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=오늘의 팁
@@ -211,7 +211,7 @@ TOTD_CLOSE=닫기
 TOTD_LOADING_TIPS=팁을 읽어오고 있습니다.
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=처음
@@ -227,7 +227,7 @@ GOING_PRO_TITLE=지구상에서 가장 뛰어난 파일 공유 프로그램!
 GOING_PRO_DESCRIPTION=보다 많은 검색 결과\n터보모드 다운로드 속도\n보다 많은 소스에 접속\n 개별 기술 서포트\n6개월간의 무료 업그레이드
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire：그누테라 네트워크를 실행중
@@ -241,7 +241,7 @@ TRAY_EXIT_LATER_LABEL=전송 후 종료
 TRAY_EXIT_LABEL=즉시 종료
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=검색
@@ -263,7 +263,7 @@ UPLOAD_TITLE=업로드
 CONSOLE_TITLE=제어
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=검색해 파일을 다운로드
@@ -277,7 +277,7 @@ LIBRARY_TIP=다른 이름으로 저장 파일의 장소 표시
 CONSOLE_TIP=로그 메시지를 보여줌
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=파일 (F)
@@ -577,7 +577,7 @@ MENU_HELP_ERROR_MNEMONIC=E
 MENU_HELP_ERROR_ACCESSIBLE=테스트용 pop-up 에러를 생성
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=접속 레벨 표시
@@ -597,7 +597,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire가 방화벽을 감지했습니다
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire는 방화벽을 감지하고 있지 않습니다
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=줄무늬 열
@@ -607,7 +607,7 @@ TABLES_REAL_TIME_SORTING=자동 정렬
 TABLES_DISPLAY_TOOLTIPS=도구 팁 확장
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=네트워크에 접속되고 있지 않습니다. 접속하려면 "파일" 메뉴로부터 "접속" 을 선택해 주세요. 접속할 때까지는, 검색은 아무런 결과를 보여주지 않을 수 있습니다.
@@ -725,7 +725,7 @@ SEARCH_BACK_TO_SEARCH=검색으로 돌아가기
 SEARCH_BLOCK_HOST=＃로 호스트로부터의 검색 결과를 차단하고 싶습니까?
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 MAGNET_COPY_MAGNET_LINKS_LABEL=마그넷 링크를 클립보드에 복사
@@ -735,7 +735,7 @@ MAGNET_COPY_MAGNET_LINKS_TOOLTIP=선택 파일의 마그넷 링크를 클립보�
 MAGNET_COPY_MAGNET_LINKS_WARNING=작성된 마그넷 링크의 하나 또는 그 이상은, 호스트가 방화벽을 작동하고 있으므로 접속하지 못할 수 있습니다.
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -752,7 +752,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME="새로운 정보"검색： {0}
 SEARCH_XML_FIELD_ACTION_NAME={0}을 검색：  {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=전체 선택
@@ -902,7 +902,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=설정...
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=공유 옵션을 설정
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -927,7 +927,7 @@ PLAYLIST_DELETE_BUTTON_TIP=선택한 파일을 재생 리스트로부터 제거
 PLAYLIST_FILE_DESCRIPTION=재생 리스트 파일 (*. m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire 미디어 플레이어
@@ -943,7 +943,7 @@ MEDIA_FORWARD_BUTTON_TIP=다음
 MEDIA_REWIND_BUTTON_TIP=이전 
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=항상 다른이름으로 저장
@@ -980,7 +980,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: 같은 내용의 기존 파일이 라�
 NO_FILENAME_LABEL=파일명 없음
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=다른 이름으로 저장 위치를 선택
@@ -988,7 +988,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=다른 이름으로 저장 위치를 선택
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=모든 폴더
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=기존 파일 있어
@@ -1039,7 +1039,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=파일 시스템의 에러에 의해 파일 위�
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=같은 파일이 이미 다운로드 되었습니다.
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=다른 이름으로 저장
@@ -1054,7 +1054,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=계속
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=라이브러리에 동일 파일이 존재합니다.
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=파일 공유
@@ -1285,11 +1285,11 @@ DOWNLOAD_SERACH_ORGINAL_LABEL=원래 쿼리
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 TORRENTS_COULD_NOT_READ_SNAPSHOT=죄송합니다만, LimeWire는 당신의 오래된 torrents를 재시작 할 수 없습니다.
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=업로드 정지
@@ -1357,9 +1357,9 @@ UPLOAD_ACTIVE=작동
 UPLOAD_QUEUED=차례 대기
 #### UPLOAD_BT_SEEDING=Seeding
 UPLOAD_BT_SEEDING=공유중
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1368,7 +1368,7 @@ UPLOAD_BITTORRENT_HOSTNAME={0}를 위한 무리
 UPLOAD_BITTORRENT_AGENTS=멀티플
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=소득 검색 보기
@@ -1381,7 +1381,7 @@ MONITOR_VIEW_LEAF_MESSAGE=사용의 클라이언트는 울트라 유저에 의�
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=모뎀
@@ -1395,7 +1395,7 @@ T3_SPEED=T3 이상
 MULTICAST_SPEED=이더넷
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=다운로드하는 페이지
@@ -1405,7 +1405,7 @@ HTML_PAGE_LISTING=파일의 리스트
 HTML_PAGE_MAGNET=민첩한 다운로드를 위한 마그넷 링크 (LimeWire 가 인스톨 되고 있는 경우)
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=호스트
@@ -1477,7 +1477,7 @@ CV_ADD_PORT_LABEL=포트：
 CV_ADD_DIALOG_TITLE=그누테라 접속을 더
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=아이콘
@@ -1529,7 +1529,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=모든 개별 공유 �
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 CONSOLE_SAVE_BUTTON_LABEL=저장
@@ -1537,7 +1537,7 @@ CONSOLE_SAVE_BUTTON_LABEL=저장
 CONSOLE_DIALOG_SAVE_TITLE=다른이름으로 저장
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 재생 리스트
@@ -1574,7 +1574,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=그 파일은 해석할 수 없다
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 SETUP_DIALOG_TITLE=Limewire 설정
@@ -1651,27 +1651,26 @@ SETUP_FINISH_LABEL=설정이 성공적으로 저장되었습니다. "완료"버�
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=선택
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=선택
@@ -1681,7 +1680,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=폴더를 선택
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=폴더：
@@ -1695,7 +1694,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=초기설정 사용
 INIT_SAVE_DEFAULT_BUTTON_TIP=초기설정 폴더 사용
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=PRO 에 업그레이드
@@ -1731,7 +1730,7 @@ JAVA_UPGRADE_QUESTION=무료로 Java의 업그레이드를 실시하고 싶습�
 #? LANGUAGE_LOADING=
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=음악
@@ -2032,7 +2031,7 @@ INTERNETARCHIVE_UPLOADER_COMPLETED=업로드 성공 파일
 #? INTERNETARCHIVE_IDRETRIEVER_TITLE=
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=추가...
@@ -2046,13 +2045,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=신규 리스트 항목을 추가
 LIST_EDITOR_REMOVE_BUTTON_TIP=선택 항목을 제거
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=입력
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=채팅...
@@ -2066,7 +2065,7 @@ GENERAL_LAUNCH_BUTTON_TIP=파일 실행
 GENERAL_CLEAR_HISTORY=이력 지움
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=호스트 차단
@@ -2082,7 +2081,7 @@ CHAT_SEND_BUTTON_TIP=호스트에게 메시지 송신
 CHAT_STOP_BUTTON_TIP=호스트와의 채팅 종료
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=채팅 상대
@@ -2092,7 +2091,7 @@ CHAT_HOST_UNAVAILABLE=호스트가 이용할 수 없습니다
 CHAT_YOU=자신
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=정보 자원을 불러오는 중...
@@ -2166,7 +2165,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=다른 이름으로 저장 �
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=안전한 설정을 불러오는 중...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=LimeWire 종료 중...
@@ -2200,7 +2199,7 @@ SUPPORT_LIMEWIRE_11=독립한 미디어 컨텐츠의 공유를 도움 지원
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=새로운 버젼이 있습니다!
@@ -2220,7 +2219,7 @@ UPDATE_RESTART=LimeWire는 업데이트를 설치하려면 재시작이 필요�
 UPDATE_RESTART_TITLE=업데이트의 준비 완료
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2238,7 +2237,7 @@ UPDATE_RESTART_TITLE=업데이트의 준비 완료
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=메시지
@@ -2281,7 +2280,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=이 폴더를 공유하시겠습니까?
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 #? NO_INTERNET=
@@ -2326,7 +2325,7 @@ ERROR_INVALID_NAME_DOWNLOAD=선택한 다운로드에 의한 파일명에, 사�
 ERROR_INVALID_NAME_GENERIC=파일명에 사용의 시스템으로 대응하고 있지 않는 문자가 있기때문에, 필요한 파일을 열리지 않는 상황.
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=내부의 에러
@@ -2354,7 +2353,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=항상 모든 에러를 삭제
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire가 버그 서버에 접속 불가합니다. LimeWire의 버그 수정을 위해서 www.limewire.com으로 방문하셔서 'Support'를 클릭하여 정보를 보내주십시오. 감사합니다.
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWire는 초기화해 시작을 할 수 없는 상태.  통상 이 문제는 방화벽 프로그램이, 인터넷 또는 로컬의 기기에 의한 루프백 접속에의, LimeWire의 접속을 차단하고 있기 때문에 일어나는 것.  LimeWire의 인터넷에의 접속을 허가한 후 LimeWire를 다시 실행하여주십시오.
@@ -2485,8 +2484,9 @@ ERROR_XML_SEARCH_TOO_LARGE=검색이 특정화너무 되고 , 검색을 소규�
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=라이센스를 본다
@@ -2498,7 +2498,7 @@ LICENSE_VERIFY=확인
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=창조적으로 일반용의 정보 상세
@@ -2522,7 +2522,7 @@ LICENSE_CC_VERIFICATION=검증 페이지를 본다
 LICENSE_CC=창조적으로 일반용
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 LICENSE_WEED_TITLE=도움이 되지 않는 공유에 관한 상세
@@ -2546,7 +2546,7 @@ LICENSE_WEED_VERIFICATION=검증 페이지를 본다
 LICENSE_WEED=도움이 되지 않는 공유
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=라이센스의 상세
@@ -2556,7 +2556,7 @@ LICENSE_UNKNOWN_INVALID=이 파일을 열거나 보거나 하려면 , 라이센�
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=다른 이름으로 저장
@@ -2641,7 +2641,7 @@ OPTIONS_PROXY_MAIN_TITLE=프록시
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=설정이 변경되었습니다. 변경내용을 저장하시겠습니까?
@@ -2681,7 +2681,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=미완성 파일을 보관 유지하�
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=공유 폴더
@@ -2704,7 +2704,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=새롭게 다른 이름으로 저장된 폴더�
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=공유하는 확장자(extension)
@@ -2719,7 +2719,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=초기설정의 확장자(extension
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=접속 속도
@@ -2729,7 +2729,7 @@ OPTIONS_SPEED_LABEL=LimeWire 의 퍼포먼스 최적화를 위해서(때문에),
 OPTIONS_SPEED_BOX_LABEL=속도：
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=울트라 유저 기능
@@ -2739,7 +2739,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=사용의 컴퓨터에 빠른 인터넷 접
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=울트라 유저 기능을 쓸모없는：
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB 검색
@@ -2750,7 +2750,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=OOB 검색 사용가능：
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=최고 다운로드수
@@ -2761,7 +2761,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=최고 다운로드수：
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=다운로드를 지움
@@ -2772,7 +2772,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=완료한 다운로드를 자동적으로
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=다운로드 처리 능력
@@ -2785,7 +2785,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=다운로드 속도：
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=다운로드를 지움
@@ -2796,7 +2796,7 @@ OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=라이센스 경고 표시：
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=업로드를 지움
@@ -2807,7 +2807,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=완료한 업로드를 자동적으로 지�
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=업로드 처리 능력
@@ -2830,7 +2830,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=부분적으로 다운로드된 파�
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=부분적 공유 허용 :
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=최고 업로드 슬롯
@@ -2840,13 +2840,13 @@ OPTIONS_UPLOAD_MAX_LABEL=더 이상의 업로드수를 허가하지 않습니다
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=최고 업로드 슬롯：
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=최소 업로드 슬롯：
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=일인당 업로드수
@@ -2856,7 +2856,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=일인당 이만큼의 업로드를 허가
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=일인당 업로드수：
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=시작시 접속
@@ -2866,13 +2866,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=어플리케이션의 시작시에, 자동적�
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=시작시에 접속：
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2885,19 +2885,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=시작시에 접속：
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=종료시의 옵션
@@ -2917,7 +2916,7 @@ OPTIONS_TRAY_ICON_DISPLAY_TITLE=시스템 트레이 아이콘
 OPTIONS_TRAY_ICON_DISPLAY_LABEL=라임와이어가 보이는 동안 시스템 트레이에 아이콘을 보여줌.
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=업데이트 옵션
@@ -2931,7 +2930,7 @@ OPTIONS_UPDATE_SERVICE=서비스 신규 제공
 OPTIONS_UPDATE_MAJOR=정식버전 릴리즈
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=채팅 사용가능 ：
@@ -2941,7 +2940,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=호스트와의 커뮤니케이션
 OPTIONS_CHAT_ACTIVE_LABEL=채팅을 작동/종료 할 수 있습니다.
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 플레이어를 사용：
@@ -2951,13 +2950,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=플레이어 옵션
 OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire 또는 시스템 초기설정의 플레이어를 사용할 수 있습니다. 또, 플레이어의 컨트롤을 작동/종료하려면 LimeWire를 재시작해야 합니다.
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2971,7 +2970,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire 또는 시스템 초기설정의 플레
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=접속 레벨 표시:
@@ -3003,7 +3002,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=다운로드:
 OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=업로드:
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=iTunes 가져오기 사용：
@@ -3013,7 +3012,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=가져오는중
 OPTIONS_ITUNES_PREFERENCE_LABEL=iTunes에 새롭게 다운로드한 노래를 가져오기 할 수 있습니다.
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=공유
@@ -3043,7 +3042,7 @@ OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=버퍼 사이즈
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=브라우저 옵션
@@ -3071,7 +3070,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=어느 오디오 플레이어를 사용할
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=오디오 플레이어
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=버그 리포트
@@ -3081,7 +3080,7 @@ OPTIONS_BUGS_LABEL=버그 리포트의 송신 방법 선택할 수 있습니다.
 OPTIONS_BUGS_VIEW_EXAMPLE=예시 보기
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=다음부터 이 메시지를 표시하지 않음
@@ -3095,7 +3094,7 @@ OPTIONS_POPUPS_LABEL="다음부터 이 메시지를 표시하지 않음" 또는 
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=초기설정으로 되돌림:
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 #? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
@@ -3110,7 +3109,7 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=초기설정으로 되돌림:
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=자동 보완 기능
@@ -3120,14 +3119,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=텍스트란 자동 보완 기능을 작동/정지 �
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=텍스트란 자동 보완 기능을 사용:
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=스킨의 변경은, LimeWire 재시작 후에 반영됩니다.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=대검찰청색수
@@ -3137,7 +3136,8 @@ OPTIONS_SEARCH_MAX_LABEL=병행해 실시할 수 있는 대검찰청색수를 �
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=대검찰청색수：
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=검색 결과의 접속 레벨
@@ -3154,6 +3154,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=모든 접속 레벨을 표시
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=검색 결과의 속도
@@ -3170,7 +3171,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=모든 속도를 표시
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=결과를 필터
@@ -3179,7 +3180,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=특정의 캐릭터 라인을 포함한 검색 결�
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=결과의 형식에 의해 파이르타화
@@ -3195,7 +3196,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=.vbs 파일을 무시
 #? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=호스트를 필터화
@@ -3208,7 +3210,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=IP주소를 허가 리스트에 입력하는 것으
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=우선하는 접속
@@ -3225,7 +3227,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=항상
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=우선하는 지역
@@ -3236,7 +3238,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=우선 설정을 사용：
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=기다리는 포트
@@ -3247,7 +3249,7 @@ OPTIONS_PORT_BOX_LABEL=다음의 포트 기다림：
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=라우터 구성
@@ -3262,7 +3264,7 @@ OPTIONS_ROUTER_NOTHING=아무것도 하지 않는다(비추천)
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=시스템 시작시
@@ -3273,6 +3275,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=시스템 시작시에 LimeWire를 시작：
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=프록시
@@ -3302,21 +3305,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=사용자명
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=비밀번호
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 #? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 #? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
@@ -3327,7 +3331,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=비밀번호
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 OPTIONS_SEARCH_JUNK_TITLE=정크파일
@@ -3354,7 +3358,7 @@ OPTIONS_SEARCH_JUNK_TITLE=정크파일
 #? OPTIONS_SEARCH_JUNK_RESET_LABEL=
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=처리 능력
@@ -3378,7 +3382,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=고급 누계 표시
 GNUTELLA_MESSAGES=그누테라
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=처리 능력
@@ -3699,7 +3703,7 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=평균적 사이즈
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=LimeWires로부터 수신한 메시지에 있어서의 평균적 사이즈의 킬로바이트수
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
@@ -3736,7 +3740,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_HIT=히트수
 STATS_QRP_LEAF_ROUTED_QUERIES_MISS=정오
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 ERROR_MESSAGES=에러
@@ -3767,7 +3771,7 @@ STATS_ERROR_VENDOR_TITLE=공유자메시지
 STATS_ERROR_VENDOR_LABEL=공유자메시지를 읽어내 안에 일어나는 에러
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 SENT_MESSAGES=송신완료
@@ -3992,7 +3996,7 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=푸쉬
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=그 외 LimeWires에 대해, 모든 그누테라 클라이언트로부터 송신된 멀티 캐스트 푸쉬의 킬로바이트 총수
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 HANDSHAKING=악수
@@ -4018,7 +4022,7 @@ STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=밖으로 향한 서버 거부
 STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=밖으로 향한 그누테라 접속 악수의 서버로부터의 거부에 관한 누계
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 COMPRESSABLE_MESSAGES=압축
@@ -4032,7 +4036,7 @@ STATS_COMPRESSABLE_DOWNSTREAM_TITLE=하류
 STATS_COMPRESSABLE_DOWNSTREAM_LABEL=압축된 하류 트래픽에 있어서의 킬로바이트수의 누계
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 FLOW_CONTROLLED_MESSAGES=플로우 관리
@@ -4046,7 +4050,7 @@ STATS_FLOW_CONTROL_BYTES_TITLE=킬로바이트
 STATS_FLOW_CONTROL_BYTES_LABEL=플로우 관리된 메시지에 있어서의 킬로바이트수의 누계
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=루트 에러
@@ -4059,7 +4063,7 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=루트 에러 일어난다
 STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=루트 에러에의 요청수
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=필터화 된 메시지
@@ -4072,7 +4076,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=접속
 STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=내부 또는 외부에서 실행된 그누테라 접속 시행의 총수
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=내향 요청
@@ -4080,7 +4084,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=내향 요청
 STATS_TOTAL_HTTP_REQUESTS_LABEL=장기에 걸쳐 수신된 내향 요청의 총수. 여기에는 모든접속 시도가 포함되어 있습니다(GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, 그 외).
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 DOWNLOAD_STATISTICS=다운로드
@@ -4106,7 +4110,7 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP 접속 시간
 STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=TCP 접속의 다운로드를 달성하기 위해서, 1,000분의 1초 단위로 시간을 기록. 예를 들면 서버가 높은 로드일 때는, 이 시간은 변화.
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=업로드
@@ -4128,7 +4132,7 @@ STATS_UPLOAD_GENERAL_TITLE=일반
 STATS_UPLOAD_GENERAL_LABEL=시행, 완료, 중단, 또는 한계 상태에 있는 업로드의 총수. 이러한 수치는 정리는 아니고, 각 접속에 대해 구문 분석 됩니다.. (한계의 업로드는, 중단된 업로드로서 센다. )
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4141,7 +4145,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=킬로바이트
 Y_AXIS_BANDWIDTH_LABEL=킬로바이트
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4337,7 +4341,7 @@ ERROR_VENDOR_UNRECOGNIZED=인식되지 않은 공유자 메시지
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=모든 메시지

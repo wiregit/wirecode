@@ -48,7 +48,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=OK
@@ -114,7 +114,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Vrátiť všetky nadstavenia na pôvodné
 OPTIONS_LEARN_MORE_LABEL=Zistiť viac o tejto voľbe...
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=Áno
@@ -122,7 +122,7 @@ YES=Áno
 NO=Nie
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 #? GENERAL_AVERAGE_BANDWIDTH=
@@ -154,13 +154,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB/s
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=limeWire: Zdieľanie informácií
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=O LimeWire
@@ -193,7 +193,7 @@ ABOUT_SUPPORT_BLURB=Na otázky ohľadom LimeWire PRO odpovedajú naši technick�
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=Tip dňa
@@ -211,7 +211,7 @@ TOTD_CLOSE=Zatvoriť
 TOTD_LOADING_TIPS=Načitavam tipy
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=Začíname
@@ -227,7 +227,7 @@ GOING_PRO_TITLE=Najpokročilejší program na zdieľanie súborov na planéte!
 GOING_PRO_DESCRIPTION=Lepšie výsledky pri hľadaní\nTurbo rýchlosť sťahovania\nPripojenie na viac zdrojov\nPersonalizovaná technická podpora\nAktualizácie na šesť mesiacov zdarma
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire
@@ -241,7 +241,7 @@ TRAY_EXIT_LATER_LABEL=Ukončiť po stiahnutí
 TRAY_EXIT_LABEL=Ukončiť
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=Hľadanie
@@ -263,7 +263,7 @@ UPLOAD_TITLE=Sťahovania odo mňa
 CONSOLE_TITLE=Konzola
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=Vyhľadávanie a sťahovanie súborov
@@ -277,7 +277,7 @@ LIBRARY_TIP=Zobrazenie umiestnenia uložených súborov
 CONSOLE_TIP=Zobrazenie Log správ
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=Súbor
@@ -577,7 +577,7 @@ MENU_HELP_ERROR_MNEMONIC=c
 MENU_HELP_ERROR_ACCESSIBLE=Vytvoriť vyskakovacie okno chybového hlásenia na testovanie
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=Zobraziť kvalitu pripojenia
@@ -597,7 +597,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire zistil prítomnosť firewallu
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire nedetekoval prítomnosť firewallu
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 #? TABLES_USE_ROWSTRIPE=
@@ -607,7 +607,7 @@ TABLES_REAL_TIME_SORTING=Automaticky zoradiť
 #? TABLES_DISPLAY_TOOLTIPS=
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Momentálne nie ste pripojený k sieti. Pre pripojenie, vyberte "Pripojiť" z menu "Súbor". Vaše vyhľadávanie nemusí zobraziť žiadne výsledky, pokiaľ nie ste pripojený.
@@ -725,7 +725,7 @@ SEARCH_BACK_TO_SEARCH=Späť k hľadaniu
 SEARCH_BLOCK_HOST=Chcete zakázať vyhľadávanie zo servera
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_LABEL=
@@ -735,7 +735,7 @@ SEARCH_BLOCK_HOST=Chcete zakázať vyhľadávanie zo servera
 #? MAGNET_COPY_MAGNET_LINKS_WARNING=
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -752,7 +752,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Vyhľadávanie "Čo je nové": {0}
 SEARCH_XML_FIELD_ACTION_NAME=Vyhľadávanie {0}: {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Vybrať všetko
@@ -902,7 +902,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=Nastavenie...
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Nastaviť možnosti zdieľania
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -927,7 +927,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Odstrániť vybrané súbory z Playlistu
 PLAYLIST_FILE_DESCRIPTION=Súbory Playlistu (*.mp3)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=Prehrávač médií LimeWire
@@ -943,7 +943,7 @@ MEDIA_FORWARD_BUTTON_TIP=Ďalší
 MEDIA_REWIND_BUTTON_TIP=Predchádzajúci
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Vždy uložiť ako...
@@ -980,7 +980,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL=<b>Poznámka</b>: Súbor s tým istým obsahom už 
 NO_FILENAME_LABEL=Bez názvu
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=Vybrať priečinok na uloženie
@@ -988,7 +988,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=Vybrať priečinok na uloženie
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=Všetky priečinky
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Taký súbor už existuje
@@ -1039,7 +1039,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=Nedá sa zmeniť umiestnenie súboru kvôli chybe
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Tento súbor sa už sťahuje.
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=Uložiť súbor ako
@@ -1054,7 +1054,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Pokračovať
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Tento súbor už v knižnici existuje
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=Zdieľanie súboru
@@ -1285,11 +1285,11 @@ DOWNLOAD_SERACH_ORGINAL_TIP=Vykoná také isté vyhľadávanie ako to, ktoré na
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=Ukončiť preberanie súboru
@@ -1357,9 +1357,9 @@ UPLOAD_ACTIVE=Aktívne
 UPLOAD_QUEUED=Požiadané
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1368,7 +1368,7 @@ UPLOAD_QUEUED=Požiadané
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=Zobraziť prichádzajúce vyhľadávania
@@ -1381,7 +1381,7 @@ MONITOR_VIEW_SEARCHES=Vyhľadávania
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=Modem
@@ -1395,7 +1395,7 @@ T3_SPEED=T3 or Higher
 MULTICAST_SPEED=Ethernet
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=Sťahovanie
@@ -1405,7 +1405,7 @@ HTML_PAGE_LISTING=Zoznam súborov pre
 #? HTML_PAGE_MAGNET=
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=Server
@@ -1477,7 +1477,7 @@ CV_ADD_PORT_LABEL=Port:
 CV_ADD_DIALOG_TITLE=Pridať pripojenie Gnutella
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=Ikona
@@ -1529,7 +1529,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Zoznam všetkých samos
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 CONSOLE_SAVE_BUTTON_LABEL=Uložiť
@@ -1537,7 +1537,7 @@ CONSOLE_SAVE_BUTTON_LABEL=Uložiť
 CONSOLE_DIALOG_SAVE_TITLE=Uložiť ako
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=Playlist
@@ -1574,7 +1574,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Súbor sa nedá analyzovať.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 SETUP_DIALOG_TITLE=Interaktívne nastavenie LimeWire
@@ -1651,27 +1651,26 @@ SETUP_FINISH_LABEL=Nastavenie LimeWire je dokončené. Stlačte prosím "Dokonč
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=Vybrať
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Vybrať
@@ -1681,7 +1680,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Vybrať priečinok
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Uložiť priečinok:
@@ -1695,7 +1694,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=Použiť predvolený
 INIT_SAVE_DEFAULT_BUTTON_TIP=Použiť prevolený priečinok
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=Upgrade na PRO
@@ -1731,7 +1730,7 @@ JAVA_UPGRADE_QUESTION=Chcete zadarmo Java upgrade?
 LANGUAGE_LOADING=Načítavam jazyky
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=Audio
@@ -2032,7 +2031,7 @@ INTERNETARCHIVE_UPLOADER_CHECKIN=Overovanie...
 INTERNETARCHIVE_IDRETRIEVER_TITLE=Identifikačná požiadavka...
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=Pridať...
@@ -2046,13 +2045,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=Pridať novú položku zoznamu
 LIST_EDITOR_REMOVE_BUTTON_TIP=Odstrániť vybranú položku
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=Vstup
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Chat...
@@ -2066,7 +2065,7 @@ GENERAL_LAUNCH_BUTTON_TIP=Načítať súbor
 GENERAL_CLEAR_HISTORY=Vymazať históriu
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=Blokovať tento server
@@ -2082,7 +2081,7 @@ CHAT_SEND_BUTTON_TIP=Poslať správu na server
 CHAT_STOP_BUTTON_TIP=Zastaviť chat so serverom
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Chatovať s
@@ -2092,7 +2091,7 @@ CHAT_HOST_UNAVAILABLE=Server je nedostupný
 CHAT_YOU=Vy
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=Načítavam zdroje...
@@ -2166,7 +2165,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Načítavam uložené súbory
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Načítavam bezpečnostné nastavenia...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=Vypínam LimeWire...
@@ -2200,7 +2199,7 @@ SUPPORT_LIMEWIRE_11=Podporte LimeWire a nezávislý obsah médií. Zakúpte si P
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Je dostupná nová verzia!
@@ -2220,7 +2219,7 @@ UPDATE_RESTART=Aby sa mohla naištalovať aktualizácia, je potrebné reštartov
 UPDATE_RESTART_TITLE=Aktualizácia je pripravená
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2238,7 +2237,7 @@ UPDATE_RESTART_TITLE=Aktualizácia je pripravená
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=Správa
@@ -2281,7 +2280,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Chcete zdieľať tento priečinok?
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 NO_INTERNET=Zdá sa, že váš počítač nemá aktívne pripojenie k internet alebo váš firewall blokuje LimeWire prístup k internetu. Skontrolujte prosím pripojenie alebo nastavenie firewallu a potom zvoľte "Pripojiť" z menu Súbor pre pripojenie LimeWire k sieti.
@@ -2326,7 +2325,7 @@ ERROR_INVALID_NAME_DOWNLOAD=LimeWire nemohol otvoriť nedokončený súbor vybra
 ERROR_INVALID_NAME_GENERIC=LimeWire nemohol otvoriť potrebný súbor, pretože názov súboru obsahuje znaky, ktoré nie sú podporované vašim operačným systémom. LimeWire sa môže správať neočakávane.
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=Vnútorná chyba
@@ -2354,7 +2353,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=Vždy odmietnuť všetky chyby
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire sa nemohol spojiť so serverom na nahlásenie chyby a odoslať nižšiu správu o chybe.Ak chcete pomôcť s dokonalením LimeWire, navštívte proím www.limewire.com a kliknite na 'Support'. Ďakujeme.
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWire sa nemohol inicializovať a spustiť. Zväčša tento problém spôsobuje firewall blokujúci prístup LimeWire do internetu alebo uzavreté pripojenia na lokálnom počítači.Povoľte prosím pre LimeWire prístup k internetu a reštartujte LimeWire.
@@ -2485,8 +2484,9 @@ ERROR_INTERNETARCHIVE_COMMUNICATION=Došlo ku chybe v komunikácií s internetov
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=Zobraziť licenciu
@@ -2498,7 +2498,7 @@ LICENSE_VERIFY=Overiť
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=Detaily Creative Commons
@@ -2522,7 +2522,7 @@ LICENSE_CC_VERIFICATION=Zobraziť overovaciu stránku
 LICENSE_CC=Creative Commons
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 #? LICENSE_WEED_TITLE=
@@ -2546,7 +2546,7 @@ LICENSE_CC=Creative Commons
 #? LICENSE_WEED=
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=Detaily licencie
@@ -2556,7 +2556,7 @@ LICENSE_UNKNOWN_INVALID=Tento súbor môže požadovať licenciu na otvorenie a 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Ukladanie
@@ -2641,7 +2641,7 @@ OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Sieťové rozhranie
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Zmenili ste niektoré nastavenia. Chcete uložiť zmeny?
@@ -2681,7 +2681,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Počet dní na zachovanie nedokončen
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=Zdieľané priečinky
@@ -2704,7 +2704,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Chcete zdieľať vaše nové ukladacie periečin
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=Zdieľané prípony súborov
@@ -2719,7 +2719,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Zdieľať pôvodné prípony súbor
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=Rýchlosť pripojenia
@@ -2729,7 +2729,7 @@ OPTIONS_SPEED_LABEL=Môžete špecifikovať vašu rýchlosť pripojenia, aby Lim
 OPTIONS_SPEED_BOX_LABEL=Rýchlosť:
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 #? OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=
@@ -2739,7 +2739,7 @@ OPTIONS_SPEED_BOX_LABEL=Rýchlosť:
 #? OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 #? OPTIONS_DISABLE_OOB_SEARCHING_TITLE=
@@ -2750,7 +2750,7 @@ OPTIONS_SPEED_BOX_LABEL=Rýchlosť:
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=Maximum sťahovaných súborov
@@ -2761,7 +2761,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Maximum súčasne sťahovaných súborov:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Vymazať sťahované súbory
@@ -2772,7 +2772,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Zmazať zoznam úspešne stiahnutých sú
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Bandwith sťahovania
@@ -2785,7 +2785,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Rýchlosť sťahovania:
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=Licenčné varovanie
@@ -2796,7 +2796,7 @@ OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Zobraziť licenčné varovanie:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=Vymazať zoznam odoslatých súborov:
@@ -2807,7 +2807,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Automaticky zmazať úspešne odoslaté sú
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=Bandwidth odosielania
@@ -2830,7 +2830,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Môžete vybrať, či chcete automati
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Povoliť zdieľanie čiastočne stiahnutých súborov:
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=Maximum slotov pre odosielanie
@@ -2840,13 +2840,13 @@ OPTIONS_UPLOAD_MAX_LABEL=Nikdy nebude povolených viac ako tento počet odosiela
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Maximum slotov pre odosielanie:
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 #? OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=Odosielanie na jednu osobu
@@ -2856,7 +2856,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=Povoliť tento počet odosielaní na jednu osobu
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Odosielanie na jednu osobu:
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=Pripojenie pri štarte programu
@@ -2866,13 +2866,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=Môžete vybrať, či chcete automaticky pripoj
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Pripojiť pri štarte programu:
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2885,19 +2885,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Pripojiť pri štarte programu:
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=Možnosti vypínania
@@ -2917,7 +2916,7 @@ OPTIONS_TRAY_ICON_DISPLAY_TITLE=Ikona v systémovej lište
 OPTIONS_TRAY_ICON_DISPLAY_LABEL=Tu môžete zobraziť ikonu v systémovej lište pokiaľ je LimeWire zobrazovaný.
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=Možnosti aktualizácie
@@ -2931,7 +2930,7 @@ OPTIONS_UPDATE_SERVICE=Operačná verzia
 OPTIONS_UPDATE_MAJOR=Hlavná verzia
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Povoliť chat:
@@ -2941,7 +2940,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=Serverová komunikácia
 OPTIONS_CHAT_ACTIVE_LABEL=Tu môžete zapnúť alebo vypnúť chat.
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Použiť LimeWire prehrávač médií:
@@ -2951,13 +2950,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Môžnosti prehrávača
 OPTIONS_PLAYER_PREFERENCE_LABEL=Môžete vybrať, či multimédia má prehrávať LimeWire alebo váš obľúbený prehrávač. Prehrávač médií a playlist sa objaví len ak je nastavená táto možnosť. Na povolenie alebo zakázanie prehrávania médií je potrebný reštart programu.
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2971,7 +2970,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Môžete vybrať, či multimédia má prehráva�
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Zobraziť indikátor kvality pripojenia:
@@ -3003,7 +3002,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Pre sťahovanie:
 OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Pre odosielanie:
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Povoliť iTunes import:
@@ -3013,7 +3012,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=Importovanie
 OPTIONS_ITUNES_PREFERENCE_LABEL=Tu môžete nastaviť, či má LimeWire automaticky pridať nové stiahnuté piesne do iTunes.
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Zdieľanie
@@ -3043,7 +3042,7 @@ OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Veľkosť bufferu
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=Môžete konfigurovať veľkosť bufferu, ktorá bude použitá pre streaming médií. Ak iTunes alebo iné prehrávače médií vyžadujú častý rebuffering, túto hodnotu zvýšte. Vyšie nastavenie môže používať viac pamäte.
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=Môžnosti prehliadača
@@ -3071,7 +3070,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Tu môžete vybrať, ktorý prehrávač au
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Prehrávač audia
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=Hlásenie chýb
@@ -3081,7 +3080,7 @@ OPTIONS_BUGS_LABEL=Tu môžete vybrať, ako sa má posielať hlásenie chýb. Pr
 OPTIONS_BUGS_VIEW_EXAMPLE=Ukážka
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=Na budúce už nezobrazovať túto hlášku
@@ -3095,7 +3094,7 @@ OPTIONS_POPUPS_LABEL=Znovu zobraziť správy, pre ktoré ste zvolili 'Na budúce
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Vrátiť pôvodné hodnoty:
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=Nastavenie pre existujúci súbor
@@ -3110,7 +3109,7 @@ OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Vždy sa spýtať, čo urobiť
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Automatické dokončovanie textu
@@ -3120,14 +3119,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=Tu môžete povoliť alebo zakázať automatické dok
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Povoliť automatické dokončovanie textových polí:
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=Aby ste mohli vyskúšať novú tému, je potrebné reštartovať LimeWire.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=Maximálny počet vyhľadávaní
@@ -3137,7 +3136,8 @@ OPTIONS_SEARCH_MAX_LABEL=Tu môžete nastaviť maximálny počet súčasne prebi
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maximum hľadaní:
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=Kvalita výsledkov hľadania
@@ -3154,6 +3154,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Zobraziť všetky kvality
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=Rýchlosť výsledku hľadania
@@ -3170,7 +3171,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=Zobraziť všetky rýchlosti
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=Filtrovať výsledky
@@ -3179,7 +3180,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=Tu môžete odfiltrovať výsledky hľadania obsahu
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filtrovať typy výsledkov
@@ -3195,7 +3196,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ignorovať .vbs súbory
 OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ignorovať .wmv/.asf súbory
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=Filtrovať servery
@@ -3208,7 +3210,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=Tu môžete povoliť správy z konkrétnych servero
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=Preferencie pripojení
@@ -3225,7 +3227,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Vždy
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=lokálne preferencie
@@ -3236,7 +3238,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Zapnúť preferencie:
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=Počúvací port
@@ -3247,7 +3249,7 @@ OPTIONS_PORT_BOX_LABEL=Počúvať na porte:
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=Konfigurácia routra
@@ -3262,7 +3264,7 @@ OPTIONS_ROUTER_NOTHING=Nespraviť nič (Neodporúča sa)
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=Štart programu
@@ -3273,6 +3275,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=Spúšťať spolu so štartom systému:
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=Proxy
@@ -3302,21 +3305,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Používateľské meno:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Heslo:
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 OPTIONS_NETWORK_INTERFACE_TITLE=Sieťové rozhranie
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 OPTIONS_NETWORK_INTERFACE_LABEL=Môžete prikázať LimeWire aby spájal odchádzajúce pripojenia na IP adresy zo špecifického sieťového rozhrania. Listening sockets will still listen on all available interfaces. Je to praktické pre domáce multi servery. Ak neskôr zakážete toto rozhranie, LimeWire sa vráti k spájaniu na ľubovoľné adresy.
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Použiť špecifické sieťové rozhranie.
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire nedokázal zistiť, ktoré sieťové rozhrania sú dostupné na tomto počítači. Odchádzajúce spojenia budú spájané do ľubovoľných rozhraní.
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 OPTIONS_CONTENT_FILTER_TITLE=Filtrovanie obsahu
@@ -3327,7 +3331,7 @@ OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Povoliť filtrovanie obsahu
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 OPTIONS_SEARCH_JUNK_TITLE=Odpad
@@ -3354,7 +3358,7 @@ OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Striktný
 OPTIONS_SEARCH_JUNK_RESET_LABEL=Zabudnúť skúšobné dáta
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=Bandwidth
@@ -3378,7 +3382,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Zobraziť rozšírenú štatistiku:
 GNUTELLA_MESSAGES=Gnutella
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=Bandwidth
@@ -3699,7 +3703,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 #? QRP_MESSAGES=
@@ -3736,7 +3740,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 #? ERROR_MESSAGES=
@@ -3767,7 +3771,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_ERROR_VENDOR_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 #? SENT_MESSAGES=
@@ -3992,7 +3996,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 #? HANDSHAKING=
@@ -4018,7 +4022,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 #? COMPRESSABLE_MESSAGES=
@@ -4032,7 +4036,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 #? FLOW_CONTROLLED_MESSAGES=
@@ -4046,7 +4050,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_FLOW_CONTROL_BYTES_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 #? STATS_ROUTE_ERRORS_TITLE=
@@ -4059,7 +4063,7 @@ STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_LABEL=TCP zaznamenané požiadavky zo vše
 #? STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=Filtrované správy
@@ -4072,7 +4076,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Pripojenia
 STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Všetky pokusy Gnutella pripojenia, iniciované interne alebo externe.
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=Prichádzajúce požiadavky
@@ -4080,7 +4084,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=Prichádzajúce požiadavky
 STATS_TOTAL_HTTP_REQUESTS_LABEL=Všetky prichádzajúce požiadavky obdržané za čas. Zahŕňa všetky pokusy pripojenia (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, atď.).
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 #? DOWNLOAD_STATISTICS=
@@ -4106,7 +4110,7 @@ STATS_TOTAL_HTTP_REQUESTS_LABEL=Všetky prichádzajúce požiadavky obdržané z
 #? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 #? UPLOAD_STATISTICS=
@@ -4128,7 +4132,7 @@ STATS_TOTAL_HTTP_REQUESTS_LABEL=Všetky prichádzajúce požiadavky obdržané z
 #? STATS_UPLOAD_GENERAL_LABEL=
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4141,7 +4145,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=kilobyty
 Y_AXIS_BANDWIDTH_LABEL=kilobyty
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4337,7 +4341,7 @@ ERROR_REPLY_INVALID_PORT=Neplatný reply port
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 #? GENERAL_ALL_MESSAGES_LABEL=

@@ -49,7 +49,7 @@ HAS_TIPS_OF_THE_DAY=true
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=了解
@@ -115,7 +115,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=すべての設定を初期状態に戻す
 #? OPTIONS_LEARN_MORE_LABEL=
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=はい
@@ -123,7 +123,7 @@ YES=はい
 NO=いいえ
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=平均的な処理能力
@@ -155,13 +155,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB/秒
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=LimeWire: オープンな情報共有を可能にする\t
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=LimeWire についての情報
@@ -194,7 +194,7 @@ ABOUT_CONCLUSION=最後ではありますが、LimeWireはプロジェクトに�
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=本日のワンポイント
@@ -212,7 +212,7 @@ TOTD_CLOSE=閉じる
 #? TOTD_LOADING_TIPS=
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=初めに
@@ -228,7 +228,7 @@ GOING_PRO_TITLE=地球上で最も優れたファイル共有プログラム！
 GOING_PRO_DESCRIPTION=より多くの検索結果\n最適化されたダウンロード速度\nより多くのソースへの接続\n個別の技術サポート\n六ヶ月間の無料アップグレード
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire：グヌーテラ ネットワークを実行中
@@ -242,7 +242,7 @@ TRAY_EXIT_LATER_LABEL=転送後に終了
 TRAY_EXIT_LABEL=終了
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=検索
@@ -264,7 +264,7 @@ UPLOAD_TITLE=アップロード
 #? CONSOLE_TITLE=
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=検索してファイルをダウンロードする
@@ -278,7 +278,7 @@ LIBRARY_TIP=保存ファイルの場所を表示する
 #? CONSOLE_TIP=
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=ファイル (F)
@@ -578,7 +578,7 @@ MENU_HELP_ERROR_MNEMONIC=E
 MENU_HELP_ERROR_ACCESSIBLE=テスト用のポップアップ・エラーを生成する
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=接続レベルを表示
@@ -598,7 +598,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWireがファイアウォールを検知�
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWireはファイアウォールを検知していない
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=縞模様の列
@@ -608,7 +608,7 @@ TABLES_REAL_TIME_SORTING=自動的にソート
 TABLES_DISPLAY_TOOLTIPS=ツールチップの拡張
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=ネットワークに接続されていません。接続するには"ファイル"メニューから"接続"を選択してください。接続するまでは、検索は何も結果を出さない可能性があります。
@@ -726,7 +726,7 @@ SEARCH_BACK_TO_SEARCH=検索に戻る
 SEARCH_BLOCK_HOST=＃でホストからの検索結果を、ブロックしたいか？
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 MAGNET_COPY_MAGNET_LINKS_LABEL=マグネット・リンクをクリップボードにコピー
@@ -736,7 +736,7 @@ MAGNET_COPY_MAGNET_LINKS_TOOLTIP=選択ファイルのマグネット・リン�
 MAGNET_COPY_MAGNET_LINKS_WARNING=作成されたマグネット・リンクの1つまたはそれ以上は、ホストがファイアウォールされているので、アクセスできない可能性有り
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -753,7 +753,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME="新しい情報"検索： {0}
 SEARCH_XML_FIELD_ACTION_NAME={0}を検索：  {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 #? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
@@ -903,7 +903,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=設定...
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=共有オプションを設定
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -928,7 +928,7 @@ PLAYLIST_DELETE_BUTTON_TIP=選択したファイルを再生リストから除�
 PLAYLIST_FILE_DESCRIPTION=再生リストファイル (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire メディア・プレイヤー
@@ -944,7 +944,7 @@ MEDIA_FORWARD_BUTTON_TIP=早送りする
 MEDIA_REWIND_BUTTON_TIP=巻き戻しする
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 #? DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=
@@ -981,7 +981,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL=<b>Note</b>: 同じ内容の既存ファイルが�
 NO_FILENAME_LABEL=ファイル名無し
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=保存位置を選択
@@ -989,7 +989,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=保存位置を選択
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=全フォルダ
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=既存ファイル有り
@@ -1040,7 +1040,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=ファイルシステムのエラーにより、�
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=同じエラーが既にダウンロードされている
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=ダウンロードを保存
@@ -1055,7 +1055,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=継続
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=ライブラリに同一ファイルが既存
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=ファイル共有
@@ -1286,11 +1286,11 @@ DOWNLOAD_SHOW_FIRST_DOWNLOAD_WARNING=LimeWireはこのファイルのライセ�
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=アップロードを停止
@@ -1358,9 +1358,9 @@ UPLOAD_ACTIVE=有効
 UPLOAD_QUEUED=順番待ち
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1369,7 +1369,7 @@ UPLOAD_QUEUED=順番待ち
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=流れてくる検索文字
@@ -1382,7 +1382,7 @@ MONITOR_VIEW_LEAF_MESSAGE=お使いのクライアントは Ulトラッパー �
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=モデム
@@ -1396,7 +1396,7 @@ T3_SPEED=T3 以上
 MULTICAST_SPEED=イーサネット
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=ダウンロードするページ
@@ -1406,7 +1406,7 @@ HTML_PAGE_LISTING=ファイルのリスト
 HTML_PAGE_MAGNET=素早いダウンロードのためのマグネット・リンク (LimeWire がインストールされている場合)
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=ホスト
@@ -1478,7 +1478,7 @@ CV_ADD_PORT_LABEL=ポート：
 CV_ADD_DIALOG_TITLE=グヌーテラ接続を加える
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=アイコン
@@ -1530,7 +1530,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=全ての個別共有�
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 #? CONSOLE_SAVE_BUTTON_LABEL=
@@ -1538,7 +1538,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=全ての個別共有�
 #? CONSOLE_DIALOG_SAVE_TITLE=
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 再生リスト
@@ -1575,7 +1575,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=そのファイルは解析できない
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 #? SETUP_DIALOG_TITLE=
@@ -1652,27 +1652,26 @@ SETUP_FINISH_LABEL=設定は無事に完了。"完了"ボタンを押してLimeW
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=選択
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=選択
@@ -1682,7 +1681,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=フォルダを選択
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=フォルダ：
@@ -1696,7 +1695,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=標準を使用
 INIT_SAVE_DEFAULT_BUTTON_TIP=標準のフォルダを使用する
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=PRO にアップグレード
@@ -1732,7 +1731,7 @@ JAVA_UPGRADE_QUESTION=無料でJavaのアップグレードを行いたいです
 #? LANGUAGE_LOADING=
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=音楽
@@ -2033,7 +2032,7 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? INTERNETARCHIVE_IDRETRIEVER_TITLE=
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=追加...
@@ -2047,13 +2046,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=新規リスト項目を追加する
 LIST_EDITOR_REMOVE_BUTTON_TIP=選択項目を除去する
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=入力
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=チャット...
@@ -2067,7 +2066,7 @@ GENERAL_LAUNCH_BUTTON_TIP=ファイルを開く
 GENERAL_CLEAR_HISTORY=履歴を消去
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=ホストをブロック
@@ -2083,7 +2082,7 @@ CHAT_SEND_BUTTON_TIP=ホストへメッセージを送信する
 CHAT_STOP_BUTTON_TIP=ホストとのチャットを終了する
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=チャット相手
@@ -2093,7 +2092,7 @@ CHAT_HOST_UNAVAILABLE=ホストが利用できない
 CHAT_YOU=自分
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=情報資源をロード中...
@@ -2167,7 +2166,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=保存ファイルをロー�
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=安全な設定をロード中...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=LimeWireを中断
@@ -2201,7 +2200,7 @@ SUPPORT_LIMEWIRE_11=独立したメディア・コンテンツの共有を助け
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=新しいバージョン有り！
@@ -2221,7 +2220,7 @@ UPDATE_RESTART=LimeWireはアップデートをインストールするには、
 UPDATE_RESTART_TITLE=アップデートの準備完了
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2239,7 +2238,7 @@ UPDATE_RESTART_TITLE=アップデートの準備完了
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=メッセージ
@@ -2282,7 +2281,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=このフォルダを共有するか？
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 #? NO_INTERNET=
@@ -2327,7 +2326,7 @@ ERROR_INVALID_NAME_DOWNLOAD=選択したダウンロードによるファイル�
 ERROR_INVALID_NAME_GENERIC=ファイル名にお使いのシステムで対応していない文字があるため、必要なファイルを開けられない状況。
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=内部のエラー
@@ -2355,7 +2354,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=常に全エラーを破棄
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire のバグサーバーに接続不可。LimeWireのバグ修正のためにエラーをコピーし、bugs@limewire.comまで電子メールを送信すること。
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWireは初期化し起動ができない状態。 通常この問題はファイアウォール・プログラムが、インターネットまたはローカルの器機によるループバック接続への、LimeWireのアクセスをブロックしているために起こるもの。 LimeWireのインターネットへのアクセスを許可し、LimeWireを再度始動。
@@ -2486,8 +2485,9 @@ ERROR_XML_SEARCH_TOO_LARGE=検索が特定化されすぎているので、検�
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=ライセンスを見る
@@ -2499,7 +2499,7 @@ LICENSE_VERIFY=確認する
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=創造的で一般向けの情報詳細
@@ -2523,7 +2523,7 @@ LICENSE_CC_VERIFICATION=検証ページを見る
 LICENSE_CC=創造的で一般向け
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 LICENSE_WEED_TITLE=役に立たない共有に関する詳細
@@ -2547,7 +2547,7 @@ LICENSE_WEED_VERIFICATION=検証ページを見る
 LICENSE_WEED=役に立たない共有
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=ライセンスの詳細
@@ -2557,7 +2557,7 @@ LICENSE_UNKNOWN_INVALID=このファイルを開けたり見たりするには�
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=保存
@@ -2642,7 +2642,7 @@ OPTIONS_PROXY_MAIN_TITLE=プロキシ
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=特定の設定を変更。変更を保存？
@@ -2682,7 +2682,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=未完成ファイルを保持する�
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=共有フォルダ
@@ -2705,7 +2705,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=新たに保存されたフォルダを共有し
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=共有する拡張子
@@ -2720,7 +2720,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=初期設定の拡張子を共有�
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=接続速度
@@ -2730,7 +2730,7 @@ OPTIONS_SPEED_LABEL=LimeWire のパフォーマンス最適化のために、接
 OPTIONS_SPEED_BOX_LABEL=速度：
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ulトラッパー 機能
@@ -2740,7 +2740,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=お使いのコンピュータに速いイ�
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ulトラッパー機能を無効化：
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB 検索
@@ -2751,7 +2751,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=OOB 検索を有効化：
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=最高ダウンロード数
@@ -2762,7 +2762,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=最高ダウンロード数：
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=ダウンロードを消去
@@ -2773,7 +2773,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=完了したダウンロードを自動�
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=ダウンロード処理能力
@@ -2786,7 +2786,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=ダウンロード速度：
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=ダウンロードを消去
@@ -2797,7 +2797,7 @@ OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=ライセンス警告表示：
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=アップロードを消去
@@ -2808,7 +2808,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=完了したアップロードを自動的�
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=アップロード処理能力
@@ -2831,7 +2831,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=部分的にダウンロードされ�
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=部分ファイル共有を許可
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=最高アップロード・スロット
@@ -2841,13 +2841,13 @@ OPTIONS_UPLOAD_MAX_LABEL=これ以上のアップロード数を許可しない�
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=最高アップロード・スロット：
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=最小アップロード・スロット：
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=一人当たりのアップロード数
@@ -2857,7 +2857,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=一人当たりこれだけのアップロード
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=一人当たりのアップロード数：
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=起動時の接続
@@ -2867,13 +2867,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=アプリケーションの起動時に、自�
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=起動時に接続：
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2886,19 +2886,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=起動時に接続：
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=終了時のオプション
@@ -2918,7 +2917,7 @@ OPTIONS_SHUTDOWN_TO_TRAY_LABEL=システム・トレイに最小限化して収�
 #? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=アップデート・オプション
@@ -2932,7 +2931,7 @@ OPTIONS_UPDATE_SERVICE=サービス新規提供
 OPTIONS_UPDATE_MAJOR=主な発売
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=チャットを有効化・：
@@ -2942,7 +2941,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=ホストとのコミュニケーション
 OPTIONS_CHAT_ACTIVE_LABEL=チャットを有効/無効にできる
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 プレイヤーを使用：
@@ -2952,13 +2951,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=プレイヤー・オプション
 OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire またはシステム初期設定のプレイヤーが使用できる。また、プレイヤーのコントロールを無効/有効にするには LimeWire を再起動させる必要がある。
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2972,7 +2971,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=LimeWire またはシステム初期設定のプ
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=接続レベル表示を出す
@@ -3004,7 +3003,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=ダウンロード
 OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=アップロード
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=iTunesインポートを有効化：
@@ -3014,7 +3013,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=インポート中
 OPTIONS_ITUNES_PREFERENCE_LABEL=iTunesに新たにダウンロードした歌をインポートできる
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=共有
@@ -3044,7 +3043,7 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=パスワード：
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=ブラウザ・オプション
@@ -3072,7 +3071,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=どのオーディオ・プレイヤーを
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=オーディオ・プレイヤー
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=バグ報告
@@ -3082,7 +3081,7 @@ OPTIONS_BUGS_LABEL=バグ報告の送信方法選択できる。"例を見る"�
 OPTIONS_BUGS_VIEW_EXAMPLE=例を見る
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=今後このメッセージを表示しない
@@ -3096,7 +3095,7 @@ OPTIONS_POPUPS_LABEL="今後このメッセージを表示しない"または"�
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=初期設定に戻す
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 #? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
@@ -3111,7 +3110,7 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=初期設定に戻す
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=自動補完機能
@@ -3121,14 +3120,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=テキスト欄の自動補完機能を有効/無効�
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=テキスト欄の自動補完機能を有効化
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=スキンの変更は、LimeWireの再起動後に反映される
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=最高検索数
@@ -3138,7 +3137,8 @@ OPTIONS_SEARCH_MAX_LABEL=並行して実施できる最高検索数を設定で�
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=最高検索数：
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=検索結果の接続レベル
@@ -3155,6 +3155,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=すべての接続レベルを表示
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=検索結果の速度
@@ -3171,7 +3172,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=すべての速度を表示
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=結果をフィルタ
@@ -3180,7 +3181,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=特定の文字列を含む検索結果を出す
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=結果の形式によってファイルタ化
@@ -3196,7 +3197,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=.vbs ファイルを無視
 #? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=ホストをフィルタ化
@@ -3209,7 +3211,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=IPアドレスを許可リストに入力するこ�
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=優先する接続
@@ -3226,7 +3228,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=常に
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=優先する地域
@@ -3237,7 +3239,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=優先設定を有効化：
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=待ち受けるポート
@@ -3248,7 +3250,7 @@ OPTIONS_PORT_BOX_LABEL=次のポートで待ち受ける：
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=ルーター構成
@@ -3263,7 +3265,7 @@ OPTIONS_ROUTER_NOTHING=何もしない（推薦なし）
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=システム起動時
@@ -3274,6 +3276,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=システム起動時にLimeWireを起動：
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=プロキシ
@@ -3303,21 +3306,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=ユーザー名
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=パスワード
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 #? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 #? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
@@ -3328,7 +3332,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=パスワード
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 #? OPTIONS_SEARCH_JUNK_TITLE=
@@ -3355,7 +3359,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=パスワード
 #? OPTIONS_SEARCH_JUNK_RESET_LABEL=
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=処理能力
@@ -3379,7 +3383,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=上級の累計を表示
 GNUTELLA_MESSAGES=グヌーテラ
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=処理能力
@@ -3700,7 +3704,7 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=平均的サイズ
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=LimeWiresから受信したメッセージにおける平均的サイズのキロバイト数
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
@@ -3737,7 +3741,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_HIT=ヒット
 STATS_QRP_LEAF_ROUTED_QUERIES_MISS=正誤
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 ERROR_MESSAGES=エラー
@@ -3768,7 +3772,7 @@ STATS_ERROR_VENDOR_TITLE=開発元メッセージ
 STATS_ERROR_VENDOR_LABEL=開発元メッセージを読み取り中に起きるエラー
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 SENT_MESSAGES=送信済み
@@ -3993,7 +3997,7 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=プッシュ
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=その他LimeWiresに対し、全グヌーテラ・クライアントから送信されたマルチキャスト・プッシュのキロバイト総数
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 HANDSHAKING=握手
@@ -4019,7 +4023,7 @@ STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=外向きサーバー拒否
 STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=外向きグヌーテラ接続握手のサーバーからの拒否に関する累計
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 COMPRESSABLE_MESSAGES=圧縮
@@ -4033,7 +4037,7 @@ STATS_COMPRESSABLE_DOWNSTREAM_TITLE=下流
 STATS_COMPRESSABLE_DOWNSTREAM_LABEL=圧縮された下流トラフィックにおけるキロバイト数の累計
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 FLOW_CONTROLLED_MESSAGES=フロー管理
@@ -4047,7 +4051,7 @@ STATS_FLOW_CONTROL_BYTES_TITLE=キロバイト
 STATS_FLOW_CONTROL_BYTES_LABEL=フロー管理されたメッセージにおけるキロバイト数の累計
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=ルート・エラー
@@ -4060,7 +4064,7 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=ルート・エラー起きる
 STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=ルート・エラーへの質問数
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=フィルタ化されたメッセージ
@@ -4073,7 +4077,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=接続
 STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=内部または外部で開始されたグヌーテラ接続試行の総数
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=内向きリクエスト
@@ -4081,7 +4085,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=内向きリクエスト
 STATS_TOTAL_HTTP_REQUESTS_LABEL=長期に渡り受信された内向きリクエストの総数。ここには全接続試行がある(GET、HEAD、GIV、CHAT、GNUTELLA、MAGNET、その他)。
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 DOWNLOAD_STATISTICS=ダウンロード
@@ -4107,7 +4111,7 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP接続時間
 STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=TCP接続のダウンロードを達成するために、1,000分の1秒単位で時間を記録。例えばサーバーが高いロードである時は、この時間は変化する。
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=アップロード
@@ -4129,7 +4133,7 @@ STATS_UPLOAD_GENERAL_TITLE=一般
 STATS_UPLOAD_GENERAL_LABEL=試行、完了、中断、または行き詰まりの状態にあるアップロードの総数。これらの数値は一まとまりではなく、各接続について構文解析される。（行き詰まりのアップロードは、中断されたアップロードとして数える。）
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4142,7 +4146,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=キロバイト
 Y_AXIS_BANDWIDTH_LABEL=キロバイト
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4338,7 +4342,7 @@ ERROR_VENDOR_UNRECOGNIZED=認識されない開発元メッセージ
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=全メッセージ

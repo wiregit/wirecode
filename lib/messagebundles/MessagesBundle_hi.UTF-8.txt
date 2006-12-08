@@ -46,7 +46,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=ठीक है
@@ -112,7 +112,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=डिफौल्ट अवस्था मे
 #? OPTIONS_LEARN_MORE_LABEL=
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=हाँ
@@ -120,7 +120,7 @@ YES=हाँ
 NO=नहीं
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=माध्य बेंडविड्त
@@ -152,13 +152,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB प्रति सेकंड
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 #? APP_TITLE=
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=लैमवैर के बारे में
@@ -191,7 +191,7 @@ ABOUT_BUTTON_TIP=अबौट विन्डो को बन्द करो.
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=दिन की टिप सूची
@@ -209,7 +209,7 @@ TOTD_CLOSE=बन्द करो
 #? TOTD_LOADING_TIPS=
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=आरम्भ हो रहा है
@@ -225,7 +225,7 @@ GETTING_STARTED_CONTENTS=LimeWire प्रारम्भ करने के �
 #? GOING_PRO_DESCRIPTION=
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 #? TRAY_TOOLTIP=
@@ -239,7 +239,7 @@ TRAY_EXIT_LATER_LABEL=स्थानांतर के बाद निर्�
 TRAY_EXIT_LABEL=निर्गम करो
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=खोज
@@ -261,7 +261,7 @@ UPLOAD_TITLE=अपलोड्स
 #? CONSOLE_TITLE=
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=खोज एवं डाउनलोड फाइल्स.
@@ -275,7 +275,7 @@ LIBRARY_TIP=संचित फ़ाइलों के भण्डार क�
 #? CONSOLE_TIP=
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=फाइल (F)
@@ -575,7 +575,7 @@ MENU_HELP_ERROR_MNEMONIC=E
 MENU_HELP_ERROR_ACCESSIBLE=पॉपअप त्रुटि को ज़ॉचने के लिये उत्पन्न करें.
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 #? STATUS_BAR_SHOW_CONNECTION_QUALITY=
@@ -595,7 +595,7 @@ MENU_HELP_ERROR_ACCESSIBLE=पॉपअप त्रुटि को ज़ॉ�
 #? STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=पंक्तियों को मिटाओ
@@ -605,7 +605,7 @@ TABLES_REAL_TIME_SORTING=स्वचालित क्रमबद्ध
 TABLES_DISPLAY_TOOLTIPS=विस्तृत सुझावें
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=आप नैटवर्क से कनेक्ट नहीं है। इसके लिये, "Connect" को "File" मेनु से चुनें.
@@ -723,7 +723,7 @@ SEARCH_BACK_TO_SEARCH=खोज मे वापस
 SEARCH_BLOCK_HOST=क्या आप होस्ट से खोज परिणामों को ब्लॉक करना चाहते है
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 #? MAGNET_COPY_MAGNET_LINKS_LABEL=
@@ -733,7 +733,7 @@ SEARCH_BLOCK_HOST=क्या आप होस्ट से खोज परि
 #? MAGNET_COPY_MAGNET_LINKS_WARNING=
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -750,7 +750,7 @@ SEARCH_BLOCK_HOST=क्या आप होस्ट से खोज परि
 #? SEARCH_XML_FIELD_ACTION_NAME=
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 #? CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=
@@ -900,7 +900,7 @@ LIBRARY_RENAME_BUTTON_LABEL=पुनः नाम दो
 #? LIBRARY_SHARED_FILES_CONFIGURE_MENU=
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -925,7 +925,7 @@ PLAYLIST_DELETE_BUTTON_TIP=प्ले-सूची में चयनित �
 PLAYLIST_FILE_DESCRIPTION=प्लेय सूचि फाइल्स (.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire प्लेयर
@@ -941,7 +941,7 @@ MEDIA_FORWARD_BUTTON_TIP=अगला
 MEDIA_REWIND_BUTTON_TIP=पिछला
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 #? DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=
@@ -978,7 +978,7 @@ MEDIA_REWIND_BUTTON_TIP=पिछला
 #? NO_FILENAME_LABEL=
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 #? DOWNLOAD_LOCATION_DIALOG_TITLE=
@@ -986,7 +986,7 @@ MEDIA_REWIND_BUTTON_TIP=पिछला
 #? DIRECTORY_CHOOSER_FILE_DESCRIPTION=
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 #? SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=
@@ -1037,7 +1037,7 @@ MEDIA_REWIND_BUTTON_TIP=पिछला
 #? SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 #? DOWNLOADER_UTILS_FILECHOOSER_TITLE=
@@ -1052,7 +1052,7 @@ MEDIA_REWIND_BUTTON_TIP=पिछला
 #? DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 #? SHARE_FILE_POPUP_MENU_LABEL=
@@ -1283,11 +1283,11 @@ DOWNLOAD_PRIORITY_PRIORITIZE=कतार
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=अपलोड को खत्म करो
@@ -1355,9 +1355,9 @@ UPLOAD_ACTIVE=क्रियाशील
 UPLOAD_QUEUED=कतार में
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1366,7 +1366,7 @@ UPLOAD_QUEUED=कतार में
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=अन्दर आने वाली खोज को दिखायें
@@ -1379,7 +1379,7 @@ MONITOR_VIEW_SEARCHES=खोजें
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=मौडम
@@ -1393,7 +1393,7 @@ T3_SPEED=T3 अथवा अधिक
 MULTICAST_SPEED=ईथरनैट
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=डाउनलोड पृष्ठ
@@ -1403,7 +1403,7 @@ HTML_PAGE_LISTING=केलिए फाइल सूचिमय
 #? HTML_PAGE_MAGNET=
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=होस्ट्
@@ -1475,7 +1475,7 @@ CV_ADD_PORT_LABEL=पोर्ट
 CV_ADD_DIALOG_TITLE=Gnutella कनेक्शन जोड़ें
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=अइकॉन
@@ -1527,7 +1527,7 @@ LIBRARY_TREE_INCOMPLETE_DIRECTORY=अपूर्ण फ़ाइल्स
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 #? CONSOLE_SAVE_BUTTON_LABEL=
@@ -1535,7 +1535,7 @@ LIBRARY_TREE_INCOMPLETE_DIRECTORY=अपूर्ण फ़ाइल्स
 #? CONSOLE_DIALOG_SAVE_TITLE=
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 प्लेय सूचि
@@ -1572,7 +1572,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. फाइल पार्स नहीं हो �
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 #? SETUP_DIALOG_TITLE=
@@ -1649,27 +1649,26 @@ SETUP_FINISH_LABEL=लैमवैर प्रतिष्ठापन सफ�
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=चुनो
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=चुनो
@@ -1679,7 +1678,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=कोष्ठ चुनो
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=कोष्ठः
@@ -1693,7 +1692,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=डिफौल्ट उपयोग करो
 INIT_SAVE_DEFAULT_BUTTON_TIP=डिफॉल्ट डैरक्टरी का उपयोग करो.
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 #? PRO_TITLE=
@@ -1729,7 +1728,7 @@ JAVA_UPGRADE_QUESTION=क्या आप फ्री जावा अपग्
 #? LANGUAGE_LOADING=
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 #? XML_audios__audio=
@@ -2030,7 +2029,7 @@ META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 #? INTERNETARCHIVE_IDRETRIEVER_TITLE=
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=जोड़ो
@@ -2044,13 +2043,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=नया लिस्ट आइटम जोड़�
 LIST_EDITOR_REMOVE_BUTTON_TIP=चुने हुए अइटम को हटायें.
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=इनपुट्
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=बातचीत
@@ -2064,7 +2063,7 @@ GENERAL_LAUNCH_BUTTON_TIP=फाइल को चलायें.
 GENERAL_CLEAR_HISTORY=हिस्ट्री मिटाओ
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=होस्ट को रोको
@@ -2080,7 +2079,7 @@ CHAT_SEND_BUTTON_TIP=होस्ट को संदेश भेजें.
 CHAT_STOP_BUTTON_TIP=होस्ट के साथ बातचीत बन्द करें.
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=के साथ बातचीत
@@ -2090,7 +2089,7 @@ CHAT_HOST_UNAVAILABLE=होस्ट उपलब्ध नहीं
 CHAT_YOU=आप
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=औजार लोड हो रहे हैं...
@@ -2164,7 +2163,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=संचित फाइल�
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=सुरक्षा स्थापित विकल्पें लोड हो रहें है...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=लाइमवायर शटडाउन हो रहा है...
@@ -2198,7 +2197,7 @@ SUPPORT_LIMEWIRE_05=खुला नैटवर्क को सहायक
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=नया आवर्तन उपलब्ध है।
@@ -2218,7 +2217,7 @@ UPDATE_TIP=अपडेट के लिये http://www.limewire.com देख
 #? UPDATE_RESTART_TITLE=
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2236,7 +2235,7 @@ UPDATE_TIP=अपडेट के लिये http://www.limewire.com देख
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=सन्देश
@@ -2279,7 +2278,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=कोष्ठ को बांटने यो�
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 #? NO_INTERNET=
@@ -2324,7 +2323,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=कोष्ठ को बांटने यो�
 #? ERROR_INVALID_NAME_GENERIC=
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=भीतरी गलती:
@@ -2352,7 +2351,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=हमेशा सभी त्रुटियॉ
 #? ERROR_INTERNAL_SERVLET_FAILED=
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 #? ERROR_INTERNET_IS_BLOCKED=
@@ -2483,8 +2482,9 @@ ERROR_XML_SEARCH_TOO_LARGE=आपकी खोज विशिष्ठ है �
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 #? LICENSE_VIEW_LICENSE=
@@ -2496,7 +2496,7 @@ ERROR_XML_SEARCH_TOO_LARGE=आपकी खोज विशिष्ठ है �
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=अधिकार पत्र विवरण
@@ -2520,7 +2520,7 @@ LICENSE_CC_VERIFICATION=प्रमाणीकरण पृष्ठ को �
 LICENSE_CC=Creative Commons
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 #? LICENSE_WEED_TITLE=
@@ -2544,7 +2544,7 @@ LICENSE_CC=Creative Commons
 #? LICENSE_WEED=
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 #? LICENSE_UNKNOWN_TITLE=
@@ -2554,7 +2554,7 @@ LICENSE_CC=Creative Commons
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=संचित हो रहा है
@@ -2639,7 +2639,7 @@ OPTIONS_PROXY_MAIN_TITLE=प्रॉक्सी
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 #? OPTIONS_SAVE_ON_CLOSE=
@@ -2679,7 +2679,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=अपूर्ण फ़ाइलो
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=बटी हुई डायरैक्टरियॉ
@@ -2702,7 +2702,7 @@ OPTIONS_SHARED_DIRS_LABEL=आप फाइलों को बांटने �
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=विस्तार को बाटने योग्य बनायें
@@ -2717,7 +2717,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=डिफॉल्ट फाइल 
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=कनैक्शन गति
@@ -2727,7 +2727,7 @@ OPTIONS_SPEED_LABEL=आप अपने कनेक्शन गति चय�
 OPTIONS_SPEED_BOX_LABEL=गति
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer क्षमता
@@ -2737,7 +2737,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer क्षमता
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapeer सक्षमता को निष्क्रीय करें:
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB खोजना
@@ -2748,7 +2748,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=OOB खोज को सक्षम क
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=अधिकतम डाउनलोड
@@ -2759,7 +2759,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=अधिकतम डाउनलोड:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=डाउनलोड की सफाई
@@ -2770,7 +2770,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=स्वतःसफाई संपू�
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=डाउनलोड बेंडविड्त
@@ -2783,7 +2783,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=डाउनलोड गति:
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 #? OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=
@@ -2794,7 +2794,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=डाउनलोड गति:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=अपलोड की सफाई
@@ -2805,7 +2805,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=स्वतःसफाई संपूर
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=अपलोड बेंडविड्त
@@ -2828,7 +2828,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_TITLE=अपूर्ण फ़ाइल्
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=अधूरा बांटने की आज्ञा दें
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=अधिकतम अपलोड स्लॉट्स
@@ -2838,13 +2838,13 @@ OPTIONS_UPLOAD_MAX_TITLE=अधिकतम अपलोड स्लॉट्�
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=अधिकतम अपलोड स्लॉट्सः
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=अपलोड स्लॉट्स प्रारंभ करो:
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=अपलोड्स प्रति व्यक्ति
@@ -2854,7 +2854,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=इसे बहुत अपलोड प्र
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=अपलोड्स प्रति व्यक्ति:
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=प्ररस्भ होने पर कनैक्ट करें
@@ -2864,13 +2864,13 @@ OPTIONS_CONNECT_ON_STARTUP_TITLE=प्ररस्भ होने पर क�
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=प्ररस्भ होने पर कनैक्ट करें
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2883,19 +2883,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=प्ररस्भ होने �
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=शटडाउन विकल्प
@@ -2915,7 +2914,7 @@ OPTIONS_SHUTDOWN_TO_TRAY_LABEL=सिस्टम पट्टी में छ�
 #? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=विकल्पों अपडेट् करो
@@ -2929,7 +2928,7 @@ OPTIONS_UPDATE_SERVICE=सर्विस रिलीज़
 OPTIONS_UPDATE_MAJOR=प्रधान रिलीज़
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=बातचीत योग्य करें:
@@ -2939,7 +2938,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=होस्ट संवाद
 OPTIONS_CHAT_ACTIVE_LABEL=आप बातचीत on या off कर सकते हैं।
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=LimeWire MP3 प्लेयर को उपयोग करें
@@ -2949,13 +2948,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=प्लेयर विकल्प
 #? OPTIONS_PLAYER_PREFERENCE_LABEL=
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2969,7 +2968,7 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=प्लेयर विकल्प
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
@@ -3001,7 +3000,7 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=प्लेयर विकल्प
 #? OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=iTunes निर्यात को सक्षम करो:
@@ -3011,7 +3010,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=निर्यात करना
 #? OPTIONS_ITUNES_PREFERENCE_LABEL=
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=शेअर होना
@@ -3041,7 +3040,7 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=कूटशब्द
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=ब्राउज़र विकल्प
@@ -3069,7 +3068,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=आप ऑडियो प्लेयर 
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=ऑडियो प्लेयर
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=कीड़ा विवरण
@@ -3079,7 +3078,7 @@ OPTIONS_BUGS_TITLE=कीड़ा विवरण
 OPTIONS_BUGS_VIEW_EXAMPLE=अनलोकन उदाहरण
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=इस संदेश को पुनः न दिखायें
@@ -3093,7 +3092,7 @@ OPTIONS_POPUPS_TITLE=पॉपअप्स
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=डिफॉल्ट को पलटें
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 #? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
@@ -3108,7 +3107,7 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=डिफॉल्ट को पलटे
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=स्वतःपूर्ण
@@ -3118,14 +3117,14 @@ OPTIONS_AUTOCOMPLETE_TITLE=स्वतःपूर्ण
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=स्वतःपूर्ण टेक्स्ट् क्षेत्र को सक्रीय करें
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 #? THEME_CHANGED_MESSAGE=
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=अधिकतम खोजें
@@ -3135,7 +3134,8 @@ OPTIONS_SEARCH_MAX_TITLE=अधिकतम खोजें
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=अधिकतम खोजें:
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=खोज परिणाम की विशेषता
@@ -3152,6 +3152,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=सब विशेषताओं क�
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=खोज परिणाम गति
@@ -3168,7 +3169,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=सब गतियों को दिखाओ
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=फिल्टर नतीजा
@@ -3177,7 +3178,7 @@ OPTIONS_IGNORE_RESULTS_TITLE=फिल्टर नतीजा
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=फिल्टर नतीजा वर्ग
@@ -3193,7 +3194,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=.vbs फ़ाइलों को छ�
 #? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=फ़िल्टर होस्ट्स
@@ -3206,7 +3208,7 @@ OPTIONS_ALLOW_MESSAGES_TITLE=होस्ट्स स्वीकारें
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=स्थानीय प्राथमिकता
@@ -3223,7 +3225,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=हमेशा
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=स्थानीय प्राथमिकता
@@ -3234,7 +3236,7 @@ OPTIONS_CONNECT_LOCALE_PREF_TITLE=स्थानीय प्राथमिक
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=श्रोता पोर्ट
@@ -3245,7 +3247,7 @@ OPTIONS_PORT_BOX_LABEL=पोर्ट् पर सुनें
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=राउटर रूपरेखा
@@ -3260,7 +3262,7 @@ OPTIONS_ROUTER_NOTHING=कुछ न करें
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=सिस्टम प्रारम्भ
@@ -3271,6 +3273,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=सिस्टम प्रारम्भ म�
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=प्रॉक्सी
@@ -3300,21 +3303,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=उपयोगकर्ता-नाम
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=कूटशब्द
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 #? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 #? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
@@ -3325,7 +3329,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=कूटशब्द
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 #? OPTIONS_SEARCH_JUNK_TITLE=
@@ -3352,7 +3356,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=कूटशब्द
 #? OPTIONS_SEARCH_JUNK_RESET_LABEL=
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=बेन्डविड्थ
@@ -3376,7 +3380,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=उच्च आकड़े दिखाओ:
 GNUTELLA_MESSAGES=Gnutella
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=बेन्डविड्थ
@@ -3697,7 +3701,7 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=औसत परिमाण
 #? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
@@ -3734,7 +3738,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_HIT=मारो
 STATS_QRP_LEAF_ROUTED_QUERIES_MISS=झूठा धनात्मक
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 ERROR_MESSAGES=त्रुटियॉ
@@ -3765,7 +3769,7 @@ STATS_ERROR_VENDOR_TITLE=विक्रेता संदेश
 #? STATS_ERROR_VENDOR_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 SENT_MESSAGES=भेजा
@@ -3990,7 +3994,7 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=धक्के
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 HANDSHAKING=हस्तांतर
@@ -4016,7 +4020,7 @@ STATS_HANDSHAKING_INCOMING_TITLE=अंदर की ओर आनेवाल�
 #? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 COMPRESSABLE_MESSAGES=दबाव
@@ -4030,7 +4034,7 @@ STATS_COMPRESSABLE_DOWNSTREAM_TITLE=डाउनस्ट्रीम
 #? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 FLOW_CONTROLLED_MESSAGES=बहाव में नियंत्रण
@@ -4044,7 +4048,7 @@ STATS_FLOW_CONTROL_BYTES_TITLE=किलोबाइट्स
 #? STATS_FLOW_CONTROL_BYTES_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=राउटिंग में त्रुटियॉ
@@ -4057,7 +4061,7 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=राउटिंग त्रुटिय
 #? STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=फिल्टर हुए संदेश
@@ -4070,7 +4074,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=कनेक्शनों
 #? STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=अन्दर आने वाले निवेदन
@@ -4078,7 +4082,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=अन्दर आने वाले निव
 #? STATS_TOTAL_HTTP_REQUESTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 DOWNLOAD_STATISTICS=डाउनलोड्स
@@ -4104,7 +4108,7 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP कनैक्ट समय
 #? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=अपलोड्स
@@ -4126,7 +4130,7 @@ STATS_UPLOAD_GENERAL_TITLE=सामान्य
 #? STATS_UPLOAD_GENERAL_LABEL=
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4139,7 +4143,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=किलो-बाइट्स
 Y_AXIS_BANDWIDTH_LABEL=किलो-बाइट्स
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4335,7 +4339,7 @@ ERROR_VENDOR_UNRECOGNIZED=विक्रेता संदेश पहचा�
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=सब संदेश

@@ -46,7 +46,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=OK
@@ -112,7 +112,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Taasta kõik programmi algsätted.
 OPTIONS_LEARN_MORE_LABEL=Uuri rohkem selle valiku kohta...
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=Jah
@@ -120,7 +120,7 @@ YES=Jah
 NO=Ei
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=Keskmine ülekandekiirus
@@ -152,13 +152,13 @@ GENERAL_UNIT_KILOBYTES=KB
 GENERAL_UNIT_KBPSEC=KB/s
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=LimeWire: võimaldamaks avatud informatsiooni jagamist
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=Teave LimeWire'st
@@ -191,7 +191,7 @@ ABOUT_SUPPORT_BLURB=LimeWire PRO alastele küsimustele vastatakse kohusetundliku
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=Päeva nõuanne
@@ -209,7 +209,7 @@ TOTD_CLOSE=Sulge
 TOTD_LOADING_TIPS=Nõuannete laadimine...
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=Alustamine
@@ -225,7 +225,7 @@ GOING_PRO_TITLE=Maailma kõige võimsam failide jagamise programm!
 GOING_PRO_DESCRIPTION=Paremad otsingutulemused.\nTurbo-Kiirusega allalaadimiskiirus.\nJuurdepääs uutele võõrustajatele.\nPersonaalne tehniline tugi.\nKuus kuud tasuta uuendusi
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire: joostes Gnutella võrgul
@@ -239,7 +239,7 @@ TRAY_EXIT_LATER_LABEL=Välju pärast ülekandeid
 TRAY_EXIT_LABEL=Välju
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=Otsi
@@ -261,7 +261,7 @@ UPLOAD_TITLE=Üleslaadimised
 CONSOLE_TITLE=Konsool
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=Otsi ja tiri faile.
@@ -275,7 +275,7 @@ LIBRARY_TIP=Vaata failide hoidlat.
 CONSOLE_TIP=Vaata logimise teateid
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=Fail
@@ -575,7 +575,7 @@ MENU_HELP_ERROR_MNEMONIC=G
 MENU_HELP_ERROR_ACCESSIBLE=Genereeri veateade testimiseks.
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=Näita ühenduse kvaliteeti
@@ -595,7 +595,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire avastas tulemüüri
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire pole avastanud tulemüüri
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=Vöötread
@@ -605,7 +605,7 @@ TABLES_REAL_TIME_SORTING=Sorteeri automaatselt
 TABLES_DISPLAY_TOOLTIPS=Pikendatud seadmeväli
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Sa ei ole ühendatud võrku. Ühendamiseks, vali "Ühenda" menüüst "Fail". Sinu otsingud ei tagasta enne ühtegi tulemust, kui oled ühendatud.
@@ -723,7 +723,7 @@ SEARCH_BACK_TO_SEARCH=Tagasi otsingusse
 SEARCH_BLOCK_HOST=Kas soovid blokeerida sellelt võõrustajalt tulevad otsingu tulemused
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 MAGNET_COPY_MAGNET_LINKS_LABEL=Kopeeri Magnet lingid vabamällu
@@ -733,7 +733,7 @@ MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Kopeeri valitud failide Magnet lingid vabamäll
 MAGNET_COPY_MAGNET_LINKS_WARNING=Ühel või rohkematel loodud magnetilinkidele ei pääse ligi kuna nende võõrustajad on kaitstud tulemüüriga.
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -750,7 +750,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Osides "Mida uut": {0}
 SEARCH_XML_FIELD_ACTION_NAME=Otsides {0}: {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Vali kõik
@@ -900,7 +900,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=Seadista
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Seadista jagamise valikud
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -925,7 +925,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Eemalda valitud fail esitlusloendist
 PLAYLIST_FILE_DESCRIPTION=Esitlusloendi failid (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire meedia mängija
@@ -941,7 +941,7 @@ MEDIA_FORWARD_BUTTON_TIP=Järgmine
 MEDIA_REWIND_BUTTON_TIP=Eelmine
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Alati salvesta nimega...
@@ -978,7 +978,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL==<b>Teade</b>: sellise sisuga fail eksisteerib juba
 NO_FILENAME_LABEL=Nimetu fail
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=Vali salvestamispaik
@@ -986,7 +986,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=Vali salvestamispaik
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=Kõik kataloogid
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Fail juba eksisteerib
@@ -1037,7 +1037,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=Ei suutnud määrata failile asukohta tänu veale
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Sama faili juba laaditakse alla.
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=Salvesta eraldi
@@ -1052,7 +1052,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Jätka
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Sama fail eksisteerib raamatukogus
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=Jaga faili
@@ -1283,11 +1283,11 @@ DOWNLOAD_SERACH_ORGINAL_LABEL=Originaalpäring
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=Tapa üleslaadimine
@@ -1355,9 +1355,9 @@ UPLOAD_ACTIVE=Aktiivne
 UPLOAD_QUEUED=Järjekorras
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1366,7 +1366,7 @@ UPLOAD_QUEUED=Järjekorras
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=Näita sissetulevaid otsinguid
@@ -1379,7 +1379,7 @@ MONITOR_VIEW_LEAF_MESSAGE=Sinu klient on terminal allikas ning on kaitstud Super
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=Modem
@@ -1393,7 +1393,7 @@ T3_SPEED=T3 või parem
 MULTICAST_SPEED=Ethernet
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=Tiri lehekülg
@@ -1403,7 +1403,7 @@ HTML_PAGE_LISTING=Failide sorteerimine alusel
 HTML_PAGE_MAGNET=Magnet lingid kiireteks tirimisteks (kui sul on LimeWire installeeritud)
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=Võõrustaja
@@ -1475,7 +1475,7 @@ CV_ADD_PORT_LABEL=Port:
 CV_ADD_DIALOG_TITLE=Lisa Gnutella ühendus
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=Ikoon
@@ -1527,7 +1527,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Loetelu kõigist üksik
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 CONSOLE_SAVE_BUTTON_LABEL=Salvesta
@@ -1535,7 +1535,7 @@ CONSOLE_SAVE_BUTTON_LABEL=Salvesta
 CONSOLE_DIALOG_SAVE_TITLE=Salvesta nimega
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 Esitlusloend
@@ -1572,7 +1572,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Faili koostisosi ei suudeta tuvastada.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 SETUP_DIALOG_TITLE=LimeWire’I paigaldamise dialoog
@@ -1649,27 +1649,26 @@ SETUP_FINISH_LABEL=LimeWire paigaldus on õnnestunult lõpetatud. Palun vajuta "
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=Vali
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Vali
@@ -1679,7 +1678,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Vali kaust
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Salvestamiste kaust:
@@ -1693,7 +1692,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=Kasuta vaikseadistust
 INIT_SAVE_DEFAULT_BUTTON_TIP=Kasuta vaikseadistuse kausta
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=Uuenda PRO-ks
@@ -1729,7 +1728,7 @@ JAVA_UPGRADE_QUESTION=Kas soovid saada tasuta Java uuenduse?
 LANGUAGE_LOADING=Laadin keeli
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=Audio
@@ -2030,7 +2029,7 @@ CC_PUBLISHER_CC_INTRO_URL_LABEL=Kuidas see töötab?
 #? INTERNETARCHIVE_IDRETRIEVER_TITLE=
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=Lisa...
@@ -2044,13 +2043,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=Lisa uus loetelu ühik.
 LIST_EDITOR_REMOVE_BUTTON_TIP=Eemalda selekteeritud ühik.
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=Sisestus
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Saada teade...
@@ -2064,7 +2063,7 @@ GENERAL_LAUNCH_BUTTON_TIP=Käivita fail.
 GENERAL_CLEAR_HISTORY=Puhasta ajalugu
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=Blokeeri võõrustaja
@@ -2080,7 +2079,7 @@ CHAT_SEND_BUTTON_TIP=Saada võõrustajale teade.
 CHAT_STOP_BUTTON_TIP=Lõpeta võõrutajaga suhtlemine.
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Suheldes
@@ -2090,7 +2089,7 @@ CHAT_HOST_UNAVAILABLE=Võõrustaja ei ole kättesaadaval
 CHAT_YOU=Sina
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=Laen ressursse...
@@ -2164,7 +2163,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Laen salvestatud faile...
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Laen turva sätteid...
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=Lülitan LimeWiret välja...
@@ -2198,7 +2197,7 @@ SUPPORT_LIMEWIRE_11=Aita toetada jagada iseseisva meedia sisu. Muretse PRO.
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Uuem väljalase saadaval!
@@ -2218,7 +2217,7 @@ UPDATE_TIP=Uuendamiseks mine http://www.limewire.com!
 #? UPDATE_RESTART_TITLE=
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2236,7 +2235,7 @@ UPDATE_TIP=Uuendamiseks mine http://www.limewire.com!
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=Teade
@@ -2279,7 +2278,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Jagan seda kausta?
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 NO_INTERNET=Sinu masinal ei paista olevat ektiivset interneti ühendust või tulemüür blokeerib LimeWirel internetile juurdepääsemise. Palun kontrolli oma ühendust või tulemüüri sätteid ja siis vali "Ühenda" Faili menüüst ühendamaks LimeWiret võrku.
@@ -2324,7 +2323,7 @@ ERROR_INVALID_NAME_DOWNLOAD=LimeWirel ei õnnestunud avada poolelijäänud faile
 ERROR_INVALID_NAME_GENERIC=LimeWire ei suuda avada vajalikku faili kuna faili nimi sisaldab tähti mida sinu operatsiooni süsteem ei tunne. LimeWire võib käituda ootamatul viisil.
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=Sisemine hälve
@@ -2352,7 +2351,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=Alati tunnista kõik vead kõlbmatuks
 ERROR_INTERNAL_SERVLET_FAILED=LimeWirel ei õnnestund ühenduda serveriga, et saata aljärgnev veateade. Aitamaks viga parandada palun kopeerida alljärgnev tekst ekirja ja saata see aadressil bugs@limewire.com. Tänan.
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWirel ei õnnestunud käivituda. Seda põhjustab tavaliselt tulemüür, mis plokeerib LimeWirel juurdepääsu internetile või saadab ühenduse tagasi kohalikku masinasse. Palun luba LimeWirel internetile juurdepääs ja taaskäivita LimeWire.
@@ -2483,8 +2482,9 @@ ERROR_XML_SEARCH_TOO_LARGE=Sinu otsing on liiga täpne. Palun muuda oma otsing l
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=Vaata litsentsi
@@ -2496,7 +2496,7 @@ LICENSE_VERIFY=Kontrolli
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=Creative Commons detailid
@@ -2520,7 +2520,7 @@ LICENSE_CC_VERIFICATION=Vaata kinnitus lehekülge
 LICENSE_CC=Creative Commons
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 LICENSE_WEED_TITLE=Weedshare detailid
@@ -2544,7 +2544,7 @@ LICENSE_WEED_VERIFICATION=Vaata kinnitus lehekülge
 LICENSE_WEED=Weedshare
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=Litsensi detailid
@@ -2554,7 +2554,7 @@ LICENSE_UNKNOWN_INVALID=See fail võib vajada litsensi, et avaneda ja sisu vaada
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Salvestan
@@ -2639,7 +2639,7 @@ OPTIONS_CONTENT_FILTER_MAIN_TITLE=Sisu
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Sa oled teinud muudatusi mõnedes sättetes. Kas soovid salvestada neid muudatusi?
@@ -2679,7 +2679,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Päevad kaua hoida poolelijäänud fa
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=Jagatud Kaustad
@@ -2702,7 +2702,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Kas sa soovid jagada oma uut salvestamise kausta
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=Jagatud failitüübid
@@ -2717,7 +2717,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Jaga väiksätetega määratud fail
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=Ühenduse kiirus
@@ -2727,7 +2727,7 @@ OPTIONS_SPEED_LABEL=Sa võid täpsustada oma ühenduse kiiruse, et LimeWire saak
 OPTIONS_SPEED_BOX_LABEL=Kiirus:
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Superkasutaja võimalused
@@ -2737,7 +2737,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Kui sinu arvutil on kiire interneti ühenus
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Lülita välja Superkasutaja võimalused:
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB otsing
@@ -2748,7 +2748,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Luba OOB otsing:
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=Allalaadimiste maksimum
@@ -2759,7 +2759,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Allalaadimiste maksimum:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Puhasta allalaaditud
@@ -2770,7 +2770,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhastada lõpetatud allalaadimised:
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Allalaadimise ribavahe
@@ -2783,7 +2783,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse kiirus
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 #? OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=
@@ -2794,7 +2794,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Ühenduse kiirus
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=Puhasta üleslaetud
@@ -2805,7 +2805,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Auto-puhasta lõpetatud üleslaadimised:
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=Üleslaadimise ribavahe
@@ -2828,7 +2828,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Sa võid valida kas soovid jagada aut
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Luba jagada poolikuid:
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=Maksimum ülesleatavad kohad
@@ -2838,13 +2838,13 @@ OPTIONS_UPLOAD_MAX_LABEL=Mitte kunagi ära luba ruhkem kui niipalju üleslaadija
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Maksimum ülesleatavad kohad:
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Alusta üleslaadimise kuhad:
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=Üleslaadimisi ühele isikule
@@ -2854,7 +2854,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=Luba nii palju üleslaadimisi igale isikule.
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Üleslaadimisi ühele isikule:
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=Ühenda automaatselt võrku
@@ -2864,13 +2864,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=Sa võid valida kas automaatselt ühendada võr
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Ühenda automaatselt võrku:
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2883,19 +2883,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Ühenda automaatselt võrku:
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=Sulgemise valikud
@@ -2915,7 +2914,7 @@ OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Vähenda süsteemikandikule
 #? OPTIONS_TRAY_ICON_DISPLAY_LABEL=
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=Uuenduse valikud
@@ -2929,7 +2928,7 @@ OPTIONS_UPDATE_SERVICE=Teenuse väljalase
 OPTIONS_UPDATE_MAJOR=Uuem väljalase
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Luba teatevahetust:
@@ -2939,7 +2938,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=Võõrustaja kommunikatsioon
 OPTIONS_CHAT_ACTIVE_LABEL=Sa võid teatevahetuse sisse või välja lülitada.
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Kasutas LimeWire meedia pleierit:
@@ -2949,13 +2948,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Pleieri valikud
 OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid mängida meediat LimeWire pleieriga võis süsteemile instaleerid pleieriga. Meediapleier ja esitlusloend ilmuvad ainult juhul kui see valik on määratud. Muudatuste jõustumiseks väheb vaja programm uuesti käivitada.
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2969,7 +2968,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid mängida meediat Lime
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 #? OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=
@@ -3001,7 +3000,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Sa võid valida kas soovid mängida meediat Lime
 #? OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Luba iTunes failivahetus:
@@ -3011,7 +3010,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=Toimub andmeülekanne
 OPTIONS_ITUNES_PREFERENCE_LABEL=Sa võid LimeWirel lasta tõsta uued allalaetud laulud iTunes'i.
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Jagamine
@@ -3041,7 +3040,7 @@ OPTIONS_ITUNES_DAAP_PASSWORD_TEXTFIELD_LABEL=Võtmesõna:
 #? OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=Sirvija valikud
@@ -3069,7 +3068,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Sa võid valida millist audio pleierit kas
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Audio pleier
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=Vigade aruanne
@@ -3079,7 +3078,7 @@ OPTIONS_BUGS_LABEL=Sa võid valida kuidas vigade aruandeid peaks saatma. Vaadata
 OPTIONS_BUGS_VIEW_EXAMPLE=Vaata näidet
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=Ära mulle seda teadet enam edasta
@@ -3093,7 +3092,7 @@ OPTIONS_POPUPS_LABEL=Näita teateid millele oled valinud kas 'Ära mulle seda te
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Taasta algseadistus:
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 #? OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=
@@ -3108,7 +3107,7 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=Taasta algseadistus:
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Teksti proovilahendid
@@ -3118,14 +3117,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=Sa võid tekstiriba proovilahendid lülitada sisse v�
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Lülita tekstiriba proovilahendid sisse:
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=Proovimaks uusi küljendusi, pead LimeWire uuesti käivitama.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=Maksimum otsinguid
@@ -3135,7 +3134,8 @@ OPTIONS_SEARCH_MAX_LABEL=Sa võid määrata korraga toimuvate otsingute maksimaa
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maksimum otsinguid.
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=Otsingutulemuse kvaliteet
@@ -3152,6 +3152,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Näita kõiki kvaliteete
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=Otsingutulemuse ühenduskiirus
@@ -3168,7 +3169,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=Näita kõiki kiiruseid
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=Eemalda tulemused
@@ -3177,7 +3178,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=Sa võid eemaldada otsingutulemusi mis sisaldavad t
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=Eemalda tulemustest tüübid
@@ -3193,7 +3194,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Eemalda .vbs failid
 #? OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=Eemalda võõrustajaid
@@ -3206,7 +3208,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=Sa võid lubada teateid vahetada teatud võõrustaj
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=Ühenduse eesõigused
@@ -3223,7 +3225,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Alati
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=Kohalikud eesõigused
@@ -3234,7 +3236,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Lülita eesõigus sisse:
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=Pordi loendamine
@@ -3245,7 +3247,7 @@ OPTIONS_PORT_BOX_LABEL=Loenda port:
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=Ruuteri konfigureerimine
@@ -3260,7 +3262,7 @@ OPTIONS_ROUTER_NOTHING=Ära tee midagi (mitte soovitatav)
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=Süsteemi üleslaadimine
@@ -3271,6 +3273,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=Käivita koos süsteemi algkäivitusega:
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=Proksi
@@ -3300,21 +3303,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Kasutajanimi:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Parool:
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 #? OPTIONS_NETWORK_INTERFACE_TITLE=
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 #? OPTIONS_NETWORK_INTERFACE_LABEL=
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 #? OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 #? OPTIONS_NETWORK_INTERFACE_CANT_LIST=
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 #? OPTIONS_CONTENT_FILTER_TITLE=
@@ -3325,7 +3329,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Parool:
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 #? OPTIONS_SEARCH_JUNK_TITLE=
@@ -3352,7 +3356,7 @@ OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Parool:
 #? OPTIONS_SEARCH_JUNK_RESET_LABEL=
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=Ribavahelaius
@@ -3376,7 +3380,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Näita täpsemat statistikat:
 GNUTELLA_MESSAGES=Gnutella
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=Ribavahelaius
@@ -3697,7 +3701,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 #? QRP_MESSAGES=
@@ -3734,7 +3738,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 #? ERROR_MESSAGES=
@@ -3765,7 +3769,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_ERROR_VENDOR_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 #? SENT_MESSAGES=
@@ -3990,7 +3994,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 #? HANDSHAKING=
@@ -4016,7 +4020,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 #? COMPRESSABLE_MESSAGES=
@@ -4030,7 +4034,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_COMPRESSABLE_DOWNSTREAM_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 #? FLOW_CONTROLLED_MESSAGES=
@@ -4044,7 +4048,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_FLOW_CONTROL_BYTES_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 #? STATS_ROUTE_ERRORS_TITLE=
@@ -4057,7 +4061,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 #? STATS_FILTERED_MESSAGES_TITLE=
@@ -4070,7 +4074,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 #? STATS_TOTAL_HTTP_REQUESTS_TITLE=
@@ -4078,7 +4082,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_TOTAL_HTTP_REQUESTS_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 #? DOWNLOAD_STATISTICS=
@@ -4104,7 +4108,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 #? UPLOAD_STATISTICS=
@@ -4126,7 +4130,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? STATS_UPLOAD_GENERAL_LABEL=
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4139,7 +4143,7 @@ RECEIVED_LIMEWIRE=LimeWire’I teated
 #? Y_AXIS_BANDWIDTH_LABEL=
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4335,7 +4339,7 @@ ERROR_QUERY_EMPTY=Tühi päring
 #? ERROR_STARTUP_WINDOWS_COMPATIBILITY=
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 #? GENERAL_ALL_MESSAGES_LABEL=

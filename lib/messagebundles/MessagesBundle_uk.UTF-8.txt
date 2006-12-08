@@ -46,7 +46,7 @@ HAS_TIPS_OF_THE_DAY=false
 ################################################################################
 
 ################################################################################
-# Key/value pairs for general strings that can be used in any components
+# Key/value pairs for general strings that can be used in any components.
 ################################################################################
 #### GENERAL_OK_BUTTON_LABEL=OK
 GENERAL_OK_BUTTON_LABEL=OK
@@ -112,7 +112,7 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Повернути до стандартн�
 OPTIONS_LEARN_MORE_LABEL=Дізнатися більше...
 
 ################################################################################
-# Key/value pairs for general terms, such as "yes" and "no"
+# Key/value pairs for general terms, such as "yes" and "no".
 ################################################################################
 #### YES=Yes
 YES=Так
@@ -120,7 +120,7 @@ YES=Так
 NO=Ні
 
 ################################################################################
-# Key/value pairs for general informative terms
+# Key/value pairs for general informative terms.
 ################################################################################
 #### GENERAL_AVERAGE_BANDWIDTH=Average Bandwidth
 GENERAL_AVERAGE_BANDWIDTH=Середня пропускна спроможність
@@ -152,13 +152,13 @@ GENERAL_UNIT_KILOBYTES=Kб
 GENERAL_UNIT_KBPSEC=Kб/с
 
 ################################################################################
-# Key/value pair for the main application title
+# Key/value pair for the main application title.
 ################################################################################
 #### APP_TITLE=LimeWire: Enabling Open Information Sharing
 APP_TITLE=LimeWire: Дозволяючи вільно ділитись інформацією
 
 ################################################################################
-# Key/Value pairs for the about window, accessed through the help menu
+# Key/Value pairs for the about window, accessed through the help menu.
 ################################################################################
 #### ABOUT_TITLE=About LimeWire
 ABOUT_TITLE=Про LimeWire
@@ -191,7 +191,7 @@ ABOUT_SUPPORT_BLURB=Питання
 #### ABOUT_BT_NOTICE=BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc.
 #? ABOUT_BT_NOTICE=
 ###################################################################
-# Key/value pairs for the tip of the day window (not the tips themselves)
+# Key/value pairs for the tip of the day window (not the tips themselves).
 ###################################################################
 #### TOTD_TITLE=Tip of the Day
 TOTD_TITLE=Порада дня
@@ -209,7 +209,7 @@ TOTD_CLOSE=Закрити
 TOTD_LOADING_TIPS=Завантаження порад...
 
 ###################################################################
-# Key/value pairs for the Getting Started image
+# Key/value pairs for the Getting Started image.
 ###################################################################
 #### GETTING_STARTED_TITLE=Getting Started
 GETTING_STARTED_TITLE=Починаємо роботу
@@ -225,7 +225,7 @@ GETTING_STARTED_CONTENTS=Щоб розпочати роботу з LimeWire, у 
 #? GOING_PRO_DESCRIPTION=
 
 ###################################################################
-# Key/value pairs for the Windows system tray
+# Key/value pairs for the Windows system tray.
 ###################################################################
 #### TRAY_TOOLTIP=LimeWire
 TRAY_TOOLTIP=LimeWire
@@ -239,7 +239,7 @@ TRAY_EXIT_LATER_LABEL=Вийти після завершення заванта�
 TRAY_EXIT_LABEL=Вийти
 
 ################################################################################
-# Key/value pairs for the titles of the main windows
+# Key/value pairs for the titles of the main windows.
 ################################################################################
 #### SEARCH_TITLE=Search
 SEARCH_TITLE=Пошук
@@ -261,7 +261,7 @@ UPLOAD_TITLE=Вивантаження
 CONSOLE_TITLE=Консоль
 
 ################################################################################
-# Key/value pairs for the tooltips of the main windows
+# Key/value pairs for the tooltips of the main windows.
 ################################################################################
 #### SEARCH_TIP=Search and Download Files
 SEARCH_TIP=Шукати та завантажувати файли
@@ -275,7 +275,7 @@ LIBRARY_TIP=Подивитись вже завантажені файли
 CONSOLE_TIP=Подивитись протокол роботи
 
 ################################################################################
-# Key/Value pairs for the pull-down menus in the main window
+# Key/Value pairs for the pull-down menus in the main window.
 ################################################################################
 #### MENU_FILE_TITLE=File
 MENU_FILE_TITLE=Файл
@@ -575,7 +575,7 @@ MENU_HELP_ERROR=Створити помилка
 MENU_HELP_ERROR_ACCESSIBLE=Генерувати Повідомлення про помилку для тестування
 
 ################################################################################
-# Key/value pairs for status bar components and right-click menu
+# Key/value pairs for status bar components and right-click menu.
 ################################################################################
 #### STATUS_BAR_SHOW_CONNECTION_QUALITY=Show Connection Quality
 STATUS_BAR_SHOW_CONNECTION_QUALITY=Показувати якість підключення
@@ -595,7 +595,7 @@ STATUS_BAR_FIREWALL_FOUND_TOOLTIP=LimeWire знайшов firewall
 STATUS_BAR_FIREWALL_NOT_FOUND_TOOLTIP=LimeWire не знайшов firewall 
 
 ################################################################################
-# Key/value pairs for general tables info
+# Key/value pairs for general tables info.
 ################################################################################
 #### TABLES_USE_ROWSTRIPE=Stripe Rows
 TABLES_USE_ROWSTRIPE=Відмітити ряди
@@ -605,7 +605,7 @@ TABLES_REAL_TIME_SORTING=Сортувати автоматично
 TABLES_DISPLAY_TOOLTIPS=Розширені Підказки
 
 ################################################################################
-# Key/value pairs for SearchView stuff
+# Key/value pairs for SearchView stuff.
 ################################################################################
 #### SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu. Your search may not return any results until you connect.
 SEARCH_NOT_CONNECTED=Ви не підключені до мережі. Щоб підключитися, виберіть «Підключитись» у меню «Файл». Ваш пошук не дасть результатів, поки ви не підключитесь.
@@ -723,7 +723,7 @@ SEARCH_BACK_TO_SEARCH=Назад до Пошуку
 SEARCH_BLOCK_HOST=Ви бажаєте заблокувати результати пошуку з цього комп’ютера
 
 ################################################################################
-# Magnet stuff
+# Magnet stuff.
 ################################################################################
 #### MAGNET_COPY_MAGNET_LINKS_LABEL=Copy Magnet Links to Clipboard
 MAGNET_COPY_MAGNET_LINKS_LABEL=Копіювати Посилання Magnet 
@@ -733,7 +733,7 @@ MAGNET_COPY_MAGNET_LINKS_TOOLTIP=Копіювати Посилання Magnet О
 MAGNET_COPY_MAGNET_LINKS_WARNING=Одне або більше створених посилань Magnet може бути недоступним через те, що хости поза firewall’ом. 
 
 ################################################################################
-# Search actions
+# Search actions.
 ################################################################################
 # {0} the space separated list of keywords
 #### SEARCH_FOR_KEYWORDS_ACTION_NAME=Search for Keywords: {0}
@@ -750,7 +750,7 @@ SEARCH_WHATS_NEW_MEDIATYPE_ACTION_NAME=Шукати «Що нового?» в: {
 SEARCH_XML_FIELD_ACTION_NAME=Шукати: {0}: {1}
 
 ################################################################################
-# CheckBoxList actions
+# CheckBoxList actions.
 ################################################################################
 #### CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Select All
 CHECK_BOX_LIST_SELECT_ALL_ACTION_NAME=Виділити Усі
@@ -900,7 +900,7 @@ LIBRARY_SHARED_FILES_CONFIGURE=Налаштувати...
 LIBRARY_SHARED_FILES_CONFIGURE_MENU=Налаштувати Спільне Використання
 
 ################################################################################
-# Key/value pairs for the Library Search
+# Key/value pairs for the Library Search.
 ################################################################################
 #### LIBRARY_SEARCH_PANEL_LABEL=Search In Shared Files:
 #? LIBRARY_SEARCH_PANEL_LABEL=
@@ -925,7 +925,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Видалити Обраний Файл з Плей�
 PLAYLIST_FILE_DESCRIPTION=Плейлісти (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player
+# Key/value pairs for the integrated media player.
 ################################################################################
 #### MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire Media Player
@@ -941,7 +941,7 @@ MEDIA_FORWARD_BUTTON_TIP=Наступна
 MEDIA_REWIND_BUTTON_TIP=Попередня
 
 ################################################################################
-# Key/value pairs for DownloaderDialog
+# Key/value pairs for DownloaderDialog.
 ################################################################################
 #### DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Always Save As...
 DOWNLOADER_DIALOG_DEFAULT_ACTION_SAVE_AS_LABEL=Завжди Зберігати Як
@@ -978,7 +978,7 @@ DOWNLOADER_DIALOG_NOTE_LABEL=<b>Зауважте! </b> Такий самий ф�
 NO_FILENAME_LABEL=Нема Імені Файлу
 
 ################################################################################
-# Key/value pair for download location dialog
+# Key/value pair for download location dialog.
 ################################################################################
 #### DOWNLOAD_LOCATION_DIALOG_TITLE=Choose Save Location
 DOWNLOAD_LOCATION_DIALOG_TITLE=Оберіть місце збереження
@@ -986,7 +986,7 @@ DOWNLOAD_LOCATION_DIALOG_TITLE=Оберіть місце збереження
 DIRECTORY_CHOOSER_FILE_DESCRIPTION=Усі Теки
 
 ################################################################################
-# Key/value pair for save location error states
+# Key/value pair for save location error states.
 ################################################################################
 #### SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=File Already Exists
 SAVE_LOCATION_ALREADY_EXISTS_SHORT_ERROR=Файл вже існує
@@ -1037,7 +1037,7 @@ SAVE_LOCATION_FILESYSTEM_ERROR=Не можу встановити як місц�
 SAVE_LOCATION_ALREADY_DOWNLOADING_ERROR=Такий самий файл вже завантажується
 
 ################################################################################
-# Key/value pairs for DownloaderUtils
+# Key/value pairs for DownloaderUtils.
 ################################################################################
 #### DOWNLOADER_UTILS_FILECHOOSER_TITLE=Save Download As
 DOWNLOADER_UTILS_FILECHOOSER_TITLE=Зберігти Завантаження Як
@@ -1052,7 +1052,7 @@ DOWNLOADER_UTILS_HASH_CONFLICT_CONTINUE_LABEL=Продовжити
 DOWNLOADER_UTILS_ALREADY_IN_LIBRARY=Такий самий файл вже в Бібліотеці
 
 ################################################################################
-# Key/value pair for sharing of files specially/individually
+# Key/value pair for sharing of files specially/individually.
 ################################################################################
 #### SHARE_FILE_POPUP_MENU_LABEL=Share File
 SHARE_FILE_POPUP_MENU_LABEL=Поділитись файлом
@@ -1283,11 +1283,11 @@ DOWNLOAD_SERACH_ORGINAL_TIP=Розпочати такий самий пошук,
 
 #### TORRENTS_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old torrents.
 #? TORRENTS_COULD_NOT_READ_SNAPSHOT=
-#### TORRENTS_TRACKER_FAILURE=<html><table width=350><tr><td>LimeWire cannot download the torrent:<br>&nbsp&nbsp<i>{0}</i><br>The tracker responded:<br>&nbsp&nbsp<i>{1}</i></td></tr></table></html>
+#### TORRENTS_TRACKER_FAILURE=<html><body><table width="350"><tr><td>LimeWire cannot download the torrent:<br />&nbsp;&nbsp;<i>{0}</i><br />The tracker responded:<br />&nbsp;&nbsp;<i>{1}</i></td></tr></table></body></html>
 #? TORRENTS_TRACKER_FAILURE=
 
 ###################################################################
-# Key/value pairs for UploadView
+# Key/value pairs for UploadView.
 ###################################################################
 #### UPLOAD_POPUP_MENU_KILL_UPLOAD=Kill Upload
 UPLOAD_POPUP_MENU_KILL_UPLOAD=Припинити Вивантаження
@@ -1355,9 +1355,9 @@ UPLOAD_ACTIVE=Активне
 UPLOAD_QUEUED=В черзі
 #### UPLOAD_BT_SEEDING=Seeding
 #? UPLOAD_BT_SEEDING=
-#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop.  Are you sure you want to do this?
+#### UPLOAD_BT_STOP=If you stop this upload, the torrent download will stop. Are you sure you want to do this?
 #? UPLOAD_BT_STOP=
-#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough.  You should let it upload some more.  Are you sure you want to stop it?
+#### UPLOAD_BT_SEED_MORE=This upload is a torrent and it hasn't seeded enough. You should let it upload some more. Are you sure you want to stop it?
 #? UPLOAD_BT_SEED_MORE=
 # {0} is the name of the torrent
 #### UPLOAD_BITTORRENT_HOSTNAME=Swarm for {0}
@@ -1366,7 +1366,7 @@ UPLOAD_QUEUED=В черзі
 #? UPLOAD_BITTORRENT_AGENTS=
 
 ###################################################################
-# Key/value pairs for MonitorView
+# Key/value pairs for MonitorView.
 ###################################################################
 #### MONITOR_VIEW_INCOMING_SEARCHES=Show Incoming Searches
 MONITOR_VIEW_INCOMING_SEARCHES=Показувати вхідні пошукові запити
@@ -1379,7 +1379,7 @@ MONITOR_VIEW_LEAF_MESSAGE=Ваш клієнт – вузол «лист», як�
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
-# options window, setup windows, and potentially other places
+# options window, setup windows, and potentially other places.
 ################################################################################
 #### MODEM_SPEED=Modem
 MODEM_SPEED=Модем
@@ -1393,7 +1393,7 @@ T3_SPEED=T3 or Higher
 MULTICAST_SPEED=Ethernet
 
 ################################################################################
-# HTML Page stuff
+# HTML Page stuff.
 ################################################################################
 #### HTML_PAGE_TITLE=Download Page
 HTML_PAGE_TITLE=Сторінка Завантаження
@@ -1403,7 +1403,7 @@ HTML_PAGE_LISTING=Список файлів для
 HTML_PAGE_MAGNET=Посилання Magnet для Швидких Завантаження (якщо встановлено LimeWire)
 
 ###################################################################
-# Key/value pairs for ConnectionView
+# Key/value pairs for ConnectionView.
 ###################################################################
 #### CV_COLUMN_HOST=Host
 CV_COLUMN_HOST=Хост
@@ -1475,7 +1475,7 @@ CV_ADD_PORT_LABEL=Порт
 CV_ADD_DIALOG_TITLE=Додати підключення Gnutella
 
 ################################################################################
-# Key/value pairs for strings in the library window
+# Key/value pairs for strings in the library window.
 ################################################################################
 #### LIBRARY_TABLE_ICON=Icon
 LIBRARY_TABLE_ICON=Значок
@@ -1527,7 +1527,7 @@ LIBRARY_TREE_INDIVIDUALLY_SHARED_FILES_DIRECTORY_TOOLTIP=Список окрем
 #? LIBRARY_TREE_HIDE_TORRENT_METAFOLDER_LABEL=
 
 ################################################################################
-# Key/value pairs for strings in the console window
+# Key/value pairs for strings in the console window.
 ################################################################################
 #### CONSOLE_SAVE_BUTTON_LABEL=Save
 CONSOLE_SAVE_BUTTON_LABEL=Зберегти
@@ -1535,7 +1535,7 @@ CONSOLE_SAVE_BUTTON_LABEL=Зберегти
 CONSOLE_DIALOG_SAVE_TITLE=Зберегти як
 
 ###################################################################
-# Key/value pairs for PlayListGUI
+# Key/value pairs for PlayListGUI.
 ###################################################################
 #### PLAYLIST_TITLE=MP3 Playlist
 PLAYLIST_TITLE=MP3 плейліст
@@ -1572,7 +1572,7 @@ PLAYLIST_FILE_PARSE_PROBLEM=. Файл не може бути проаналіз
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
-# if you don't have a limewire.props file
+# if you don't have a limewire.props file.
 ################################################################################
 #### SETUP_DIALOG_TITLE=Limewire Setup Dialog
 SETUP_DIALOG_TITLE=Налаштування Limewire
@@ -1649,27 +1649,26 @@ SETUP_FINISH_LABEL=LimeWire успішно налаштовано. Натисн�
 #### SETUP_ASSOCIATIONS_LABEL=What type of resources should LimeWire open?
 #? SETUP_ASSOCIATIONS_LABEL=
 
-
 ################################################################################
-# Key/value pairs for miscellaneous associations 
+# Key/value pairs for miscellaneous associations.
 ################################################################################
 #### ASSOCIATIONS_MANGET_DESCRIPTION="magnet:" links
 #? ASSOCIATIONS_MANGET_DESCRIPTION=
 #### ASSOCIATIONS_TORRENT_DESCRIPTION=".torrent" files
 #? ASSOCIATIONS_TORRENT_DESCRIPTION=
-#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire.  Would you like LimeWire to fix this?
+#### ASSOCIATIONS_UNLINKED_WARNING=One or more files or protocols that LimeWire uses are no longer associated with LimeWire. Would you like LimeWire to fix this?
 #? ASSOCIATIONS_UNLINKED_WARNING=
 #### ASSOCIATIONS_OTHER_OPTION=Details
 #? ASSOCIATIONS_OTHER_OPTION=
 
 ################################################################################
-# Key/value pairs for the file chooser
+# Key/value pairs for the file chooser.
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
 DIRECTORY_CHOOSER_CAPTION=Вибір
 
 ################################################################################
-# Key/value pairs for a directory file chooser
+# Key/value pairs for a directory file chooser.
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
 FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Обрати
@@ -1679,7 +1678,7 @@ FILE_CHOOSER_DIRECTORY_TITLE=Обрати теку
 ################################################################################
 # Key/value pairs for strings in the init package
 # com.limegroup.gnutella.gui.init -- the wizard to setup the program when
-# limewire.props is not present or when the "INSTALLED" setting is false
+# limewire.props is not present or when the "INSTALLED" setting is false.
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Save Folder:
 INIT_SAVE_DIRECTORY_FIELD_LABEL=Папка для збереження
@@ -1693,7 +1692,7 @@ INIT_SAVE_DEFAULT_BUTTON_LABEL=За замовчуванням
 INIT_SAVE_DEFAULT_BUTTON_TIP=Тека за замовчуванням
 
 ################################################################################
-# Key/Value pairs for the pro window on startup
+# Key/Value pairs for the pro window on startup.
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
 PRO_TITLE=Оновити до PRO 
@@ -1729,7 +1728,7 @@ JAVA_UPGRADE_QUESTION=Бажаєте безплатно поновити Java?
 LANGUAGE_LOADING=Завантажую мови
 
 ###################################################################
-# Key/value pairs for XML
+# Key/value pairs for XML.
 ###################################################################
 #### XML_audios__audio=Audio
 XML_audios__audio=Аудіо
@@ -2030,7 +2029,7 @@ INTERNETARCHIVE_UPLOADER_CHECKIN=Реєструюсь...
 INTERNETARCHIVE_IDRETRIEVER_TITLE=Запитую Ідентифікатор...
 
 ################################################################################
-# Key/value pairs for the StandardListEditor reusable component
+# Key/value pairs for the StandardListEditor reusable component.
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
 LIST_EDITOR_ADD_BUTTON=Додати...
@@ -2044,13 +2043,13 @@ LIST_EDITOR_ADD_BUTTON_TIP=Додати Новий Об’єкт до списк
 LIST_EDITOR_REMOVE_BUTTON_TIP=Видалити Обране
 
 ################################################################################
-# Key/value pairs for the InputField reusable component
+# Key/value pairs for the InputField reusable component.
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
 INPUT_FIELD_GENERIC_CAPTION=Введення
 
 ################################################################################
-# Key/value pairs for general button labels/tooltips used in various windows
+# Key/value pairs for general button labels/tooltips used in various windows.
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
 GENERAL_CHAT_BUTTON_LABEL=Чат...
@@ -2064,7 +2063,7 @@ GENERAL_LAUNCH_BUTTON_TIP=Відкрити файл
 GENERAL_CLEAR_HISTORY=Прибрати історію
 
 ################################################################################
-# Key/value pairs for ButtonRow labels and tooltips
+# Key/value pairs for ButtonRow labels and tooltips.
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
 CHAT_BLOCK_BUTTON_LABEL=Блокувати хост
@@ -2080,7 +2079,7 @@ CHAT_SEND_BUTTON_TIP=Надіслати повідомлення хосту
 CHAT_STOP_BUTTON_TIP=Припинити чат з хостом
 
 ################################################################################
-# Key/value pairs for the ChatFrame that is displayed while chatting
+# Key/value pairs for the ChatFrame that is displayed while chatting.
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Чат з
@@ -2090,7 +2089,7 @@ CHAT_HOST_UNAVAILABLE=Хост недоступний
 CHAT_YOU=Ви
 
 ###################################################################
-# Key/value pairs for splash screen status text
+# Key/value pairs for splash screen status text.
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading Resources...
 SPLASH_STATUS_RESOURCE_MANAGER=Шукаю ресурси...
@@ -2164,7 +2163,7 @@ SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Завантажую збер
 SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Завантажую налаштування безпеки
 
 ##################################################################
-# Key/value pairs for the shutdown window
+# Key/value pairs for the shutdown window.
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
 SHUTDOWN_TITLE=Вимикаю LimeWire...
@@ -2198,7 +2197,7 @@ SUPPORT_LIMEWIRE_11=Підтримайте LimeWire і незалежний ме
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
-# update of LimeWire available
+# update of LimeWire available.
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=New Version Available!
 UPDATE_DIALOG_CAPTION=Є нова версія!
@@ -2218,7 +2217,7 @@ UPDATE_RESTART=LimeWire потребує перезапуску, щоб вста
 UPDATE_RESTART_TITLE=Оновлення готове
 
 ################################################################################
-# Key/Value pairs for dropped files to share dialog
+# Key/Value pairs for dropped files to share dialog.
 ################################################################################
 #### SHARED_FILES_DROP_DIALOG_TITLE=Share Dropped Files?
 #? SHARED_FILES_DROP_DIALOG_TITLE=
@@ -2236,7 +2235,7 @@ UPDATE_RESTART_TITLE=Оновлення готове
 #? SHARED_FILES_DROP_DIALOG_EMPTY_SELECTION_MESSAGE=
 
 ################################################################################
-# Key/Value pairs for other messages displayed to the user
+# Key/Value pairs for other messages displayed to the user.
 ################################################################################
 #### MESSAGE_CAPTION=Message
 MESSAGE_CAPTION=Повідомлення
@@ -2279,7 +2278,7 @@ MESSAGE_SENSITIVE_SHARE_BOTTOM=Зробити теку спільною?
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
-# internet
+# internet.
 ################################################################################
 #### NO_INTERNET=Your machine does not appear to have an active Internet connection or a firewall is blocking LimeWire from accessing the internet. Please check your connection or firewall settings and then select "Connect" from the File menu to connect LimeWire to the network.
 NO_INTERNET=Ваш комп’ютер схоже не має підключення до Інтернету або firewall не дає LimeWire доступу до нього. Будь ласка, перевірте підключення або налаштування firewall, а потім натисніть «Підключитись» з меню «Файл» для того, щоб підключитись до мережі.
@@ -2324,7 +2323,7 @@ ERROR_INVALID_NAME_DOWNLOAD=LimeWire не зміг відкрити неповн
 ERROR_INVALID_NAME_GENERIC=LimeWire не зміг відкрити неповний файл тому, що ім’я файлу має в собі символи, які не підтримуються Вашою файловою системою. LimeWire може поводитись непередбачувано.
 
 ################################################################################
-# Key/Value pairs for internal error messages
+# Key/Value pairs for internal error messages.
 ################################################################################
 #### ERROR_INTERNAL_TITLE=Internal Error
 ERROR_INTERNAL_TITLE=Внутрішня помилка
@@ -2352,7 +2351,7 @@ ERROR_INTERNAL_ALWAYS_DISCARD=Завжди не зважати на усі по�
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire не зміг підключитися до серверу, щоб надіслаи повідомлення про помилку. Для подальшої підтримки та, якщо Ви бажаєте нам допомогти, будь ласка, відвідайте www.limewire.com та оберіть «Підтримка». Дякуємо.
 
 ################################################################################
-# Key/Value pairs for error messages
+# Key/Value pairs for error messages.
 ################################################################################
 #### ERROR_INTERNET_IS_BLOCKED=LimeWire was unable to initialize and start. This is usually due to a firewall program blocking LimeWire's access to the internet or loopback connections on the local machine. Please allow LimeWire access to the internet and restart LimeWire.
 ERROR_INTERNET_IS_BLOCKED=LimeWire не зміг запуститися та ініціалізуватися. Зазвичай, це через firewall, який блокує LimeWire доступ до Інтернету або не дозволяє закольцовані підключення на Вашому комп’ютері. Будь ласка, надайте LimeWire доступ до Інтернету та перезапустіть LimeWire.
@@ -2483,8 +2482,9 @@ ERROR_INTERNETARCHIVE_COMMUNICATION=Помилка під час зв’язку
 #? ERROR_COULD_NOT_OPEN_TORRENT_URL=
 #### ERROR_BAD_TORRENT_URL=The specified URL is not valid. Please check your input.
 #? ERROR_BAD_TORRENT_URL=
+
 ################################################################################
-# Messages for Licensing
+# Messages for Licensing.
 ################################################################################
 #### LICENSE_VIEW_LICENSE=View License
 LICENSE_VIEW_LICENSE=Переглянути ліцензію
@@ -2496,7 +2496,7 @@ LICENSE_VERIFY=Перевірити
 #? LICENSE_SAVE_DETAILS_TO_FILE=
 
 ################################################################################
-# Messages for Creative Commons Licensing
+# Messages for Creative Commons Licensing.
 ################################################################################
 #### LICENSE_CC_TITLE=Creative Commons Details
 LICENSE_CC_TITLE=Деталі Creative Commons
@@ -2520,7 +2520,7 @@ LICENSE_CC_VERIFICATION=Переглянути сторінку підтверд
 LICENSE_CC=Creative Commons 
 
 ################################################################################
-# Messages for Weed Licensing
+# Messages for Weed Licensing.
 ################################################################################
 #### LICENSE_WEED_TITLE=Weedshare Details
 LICENSE_WEED_TITLE=Деталі Weedshare
@@ -2544,7 +2544,7 @@ LICENSE_WEED_VERIFICATION=Переглянути сторінку підтвер
 LICENSE_WEED=Weedshare
 
 ################################################################################
-# Messages for Unknown licenses
+# Messages for Unknown licenses.
 ################################################################################
 #### LICENSE_UNKNOWN_TITLE=License Details
 LICENSE_UNKNOWN_TITLE=Деталі Ліцензії
@@ -2554,7 +2554,7 @@ LICENSE_UNKNOWN_INVALID=Для того, щоб відкрити і перегл
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
 # the visual names of the panes in the options tree
-# package com.limegroup.gnutella.gui.options
+# package com.limegroup.gnutella.gui.options.
 ################################################################################
 #### OPTIONS_SAVE_MAIN_TITLE=Saving
 OPTIONS_SAVE_MAIN_TITLE=Збереження
@@ -2639,7 +2639,7 @@ OPTIONS_NETWORK_INTERFACE_MAIN_TITLE=Інтерфейс мережі
 
 ################################################################################
 # Key/value pairs for the save directory options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings. Would you like to save these changes?
 OPTIONS_SAVE_ON_CLOSE=Ви змінили деякі налаштуваня. Зберігти?
@@ -2679,7 +2679,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=Зберігати неповні ф�
 
 ################################################################################
 # Key/value pairs for the shared directories options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_DIRS_TITLE=Shared Folders
 OPTIONS_SHARED_DIRS_TITLE=Спільні теки
@@ -2702,7 +2702,7 @@ OPTIONS_SHARED_NEW_SAVE_FOLDERS=Ви бажаєте, ділитись Вашим
 
 ################################################################################
 # Key/value pairs for the shared extension options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SHARED_EXTENSIONS_TITLE=Shared Extensions
 OPTIONS_SHARED_EXTENSIONS_TITLE=Спільні розширення
@@ -2717,7 +2717,7 @@ OPTIONS_SHARED_EXTENSIONS_DEFAULT_BUTTON_TIP=Ділитись файлами з 
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection speed
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SPEED_TITLE=Connection Speed
 OPTIONS_SPEED_TITLE=Швидкість підключення
@@ -2727,7 +2727,7 @@ OPTIONS_SPEED_LABEL=Ви можете вказати швидкість Вашо
 OPTIONS_SPEED_BOX_LABEL=Швидкість:
 
 ################################################################################
-# Key/Value pairs for disabling supernode support
+# Key/Value pairs for disabling supernode support.
 ################################################################################
 #### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
 OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Можливості Ultrapeer
@@ -2737,7 +2737,7 @@ OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=Якщо Ваш комп’ютер має 
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Вимкнути можливості Ultrapeer:
 
 ################################################################################
-# Key/Value pairs for disabling OOB support
+# Key/Value pairs for disabling OOB support.
 ################################################################################
 #### OPTIONS_DISABLE_OOB_SEARCHING_TITLE=OOB Searching
 OPTIONS_DISABLE_OOB_SEARCHING_TITLE=ВП пошук
@@ -2748,7 +2748,7 @@ OPTIONS_DISABLE_OOB_SEARCHING_BOX_LABEL=Увімкнути ВП Пошук:
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_MAX_TITLE=Maximum Downloads
 OPTIONS_DOWNLOAD_MAX_TITLE=Максимум завантажень
@@ -2759,7 +2759,7 @@ OPTIONS_DOWNLOAD_MAX_NUMBER_LABEL=Максимум завантажень:
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing downloads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_CLEAR_TITLE=Clear Downloads
 OPTIONS_DOWNLOAD_CLEAR_TITLE=Прибирання завантажень
@@ -2770,7 +2770,7 @@ OPTIONS_DOWNLOAD_CLEAR_CHECK_BOX_LABEL=Прибирати виконані за�
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to downloads in the options window
+# to downloads in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Download Bandwidth
 OPTIONS_DOWNLOAD_BANDWIDTH_TITLE=Пропускна спроможність на завантаження
@@ -2783,7 +2783,7 @@ OPTIONS_DOWNLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=Швидкість заванта�
 
 ################################################################################
 # Key/Value pairs for the options for download license warning
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=License Warning
 OPTIONS_DOWNLOAD_LICENSE_WARNING_TITLE=Попередження про ліцензію
@@ -2794,7 +2794,7 @@ OPTIONS_DOWNLOAD_LICENSE_WARNING_CHECK_BOX_LABEL=Показувати попер
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_CLEAR_TITLE=Clear Uploads
 OPTIONS_UPLOAD_CLEAR_TITLE=Прибирання вивантажень
@@ -2805,7 +2805,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=Автоматично прибирати �
 
 ################################################################################
 # Key/Value pairs for the options for setting the bandwidth devoted
-# to uploads in the options window
+# to uploads in the options window.
 ################################################################################
 #### OPTIONS_UPLOAD_BANDWIDTH_TITLE=Upload Bandwidth
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=Пропускна спроможність на вивантаження
@@ -2828,7 +2828,7 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_LABEL=Ви можете обрати, чи 
 OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=Дозволити ділитись частковими файлами:
 
 ################################################################################
-# Key/Value pairs for the options for the hard maximum number of uploads
+# Key/Value pairs for the options for the hard maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_MAX_TITLE=Max Upload Slots
 OPTIONS_UPLOAD_MAX_TITLE=Максимум слотів на вивантаження
@@ -2838,13 +2838,13 @@ OPTIONS_UPLOAD_MAX_LABEL=Ніколи не дозволяти більше ви�
 OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Максимум слотів на вивантаження
 
 ################################################################################
-# Key/Value pairs for the options for the soft maximum number of uploads
+# Key/Value pairs for the options for the soft maximum number of uploads.
 ################################################################################
 #### OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start Upload Slots:
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Стартувати вивантажень:
 
 ################################################################################
-# Key/Value pairs for the options for the number of uploads per persons
+# Key/Value pairs for the options for the number of uploads per persons.
 ################################################################################
 #### OPTIONS_UPLOAD_PER_PERSON_TITLE=Uploads Per Person
 OPTIONS_UPLOAD_PER_PERSON_TITLE=Вивантажень на особу
@@ -2854,7 +2854,7 @@ OPTIONS_UPLOAD_PER_PERSON_LABEL=Дозвволити таку кількість
 OPTIONS_UPLOAD_PER_PERSON_NUMBER_LABEL=Вивантажень на особу:
 
 ################################################################################
-# Key/Value pairs for connecting on startup
+# Key/Value pairs for connecting on startup.
 ################################################################################
 #### OPTIONS_CONNECT_ON_STARTUP_TITLE=Connect on Startup
 OPTIONS_CONNECT_ON_STARTUP_TITLE=Підключатись при старті
@@ -2864,13 +2864,13 @@ OPTIONS_CONNECT_ON_STARTUP_LABEL=Ви можете обрати, чи пілдк
 OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Підключатись при старті
 
 ###############################################################################
-# Key/Value pairs for BitTorrent options
+# Key/Value pairs for BitTorrent options.
 ###############################################################################
 #### OPTIONS_BITTORRENT_SETTINGS_TITLE=BitTorrent Settings
 #? OPTIONS_BITTORRENT_SETTINGS_TITLE=
-#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings.  It is highly recommended that LimeWire manage these settings.  Invalid or inappropriate values may cause severe performance and/or memory problems.
+#### OPTIONS_BITTORRENT_SETTINGS_LABEL=You can choose whether or not LimeWire should manage your Bittorrent protocol settings. It is highly recommended that LimeWire manage these settings. Invalid or inappropriate values may cause severe performance and/or memory problems.
 #? OPTIONS_BITTORRENT_SETTINGS_LABEL=
-#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems.  Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
+#### OPTIONS_BITTORRENT_CUSTOM_WARNING=Invalid or inappropriate custom values may cause severe performance and/or memory problems. Unless you really know what you're doing, it is highly recommended that you let LimeWire manage these settings.
 #? OPTIONS_BITTORRENT_CUSTOM_WARNING=
 #### OPTIONS_BITTORRENT_CHECK_BOX_LABEL=Let LimeWire manage my BitTorrent settings. (Recommended)
 #? OPTIONS_BITTORRENT_CHECK_BOX_LABEL=
@@ -2883,19 +2883,18 @@ OPTIONS_CONNECT_ON_STARTUP_CHECK_BOX_LABEL=Підключатись при ст�
 #### OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=Experimental disk access
 #? OPTIONS_BITTORRENT_EXPERIMENTAL_DISK=
 
-
 ###############################################################################
-# Key/Value pairs for the auto start bittorrents pane item
+# Key/Value pairs for the auto start bittorrents pane item.
 ###############################################################################
 #### OPTIONS_BITTORRENT_AUTO_START_TITLE=Automatically start torrents
 #? OPTIONS_BITTORRENT_AUTO_START_TITLE=
-#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella
+#### OPTIONS_BITTORRENT_AUTO_START_LABEL=You can choose whether to automatically start torrents downloaded from Gnutella.
 #? OPTIONS_BITTORRENT_AUTO_START_LABEL=
 #### OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=Start automatically
 #? OPTIONS_BITTORRENT_AUTO_START_CHECKBOX=
 
 ################################################################################
-# Key/Value pairs for shutdown options
+# Key/Value pairs for shutdown options.
 ################################################################################
 #### OPTIONS_SHUTDOWN_TITLE=Shutdown Behavior
 OPTIONS_SHUTDOWN_TITLE=Поведінка при виході
@@ -2915,7 +2914,7 @@ OPTIONS_TRAY_ICON_DISPLAY_TITLE=Іконка в треї
 OPTIONS_TRAY_ICON_DISPLAY_LABEL=Можна показувати іконку в треї, коли LimeWire активний.
 
 ################################################################################
-# Key/Value pairs for update options
+# Key/Value pairs for update options.
 ################################################################################
 #### OPTIONS_UPDATE_TITLE=Update Options
 OPTIONS_UPDATE_TITLE=Налаштування оновлень
@@ -2929,7 +2928,7 @@ OPTIONS_UPDATE_SERVICE=Сервісні версії
 OPTIONS_UPDATE_MAJOR=Основні версії
 
 ################################################################################
-# Key/Value pairs for the chat options in the options window
+# Key/Value pairs for the chat options in the options window.
 ################################################################################
 #### OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Enable Chat:
 OPTIONS_CHAT_ACTIVE_CHECK_BOX_LABEL=Увімкнути чат:
@@ -2939,7 +2938,7 @@ OPTIONS_CHAT_ACTIVE_TITLE=Зв’язок з хостами
 OPTIONS_CHAT_ACTIVE_LABEL=Ви можете ввімкнути чи вимкнути чат.
 
 ################################################################################
-# Key/Value pairs for the player options in the options window
+# Key/Value pairs for the player options in the options window.
 ################################################################################
 #### OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Use LimeWire Media Player:
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=Використовувати Програвач LimeWire:
@@ -2949,13 +2948,13 @@ OPTIONS_PLAYER_PREFERENCE_TITLE=Налаштування програвача
 OPTIONS_PLAYER_PREFERENCE_LABEL=Ви можете обрати, програвати медіа файли в LimeWire або в системному плеєрі за замовчуванням. Програвач буде показано тільки, якщо ця опція встановлена. Потрібен буде перезапуск для запровадження змін.
 
 ################################################################################
-# Key/Value pairs for the association options in the options window
+# Key/Value pairs for the association options in the options window.
 ################################################################################
 #### OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=Check these associations when starting LimeWire:
 #? OPTIONS_ASSOCIATIONS_ACTIVE_CHECK_BOX_LABEL=
 #### OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=Links and File Types
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_TITLE=
-#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols.  You can also instruct LimeWire to always regain these associations if another program takes them.
+#### OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=You can use LimeWire to open certain filetypes and protocols. You can also instruct LimeWire to always regain these associations if another program takes them.
 #? OPTIONS_ASSOCIATIONS_PREFERENCE_LABEL=
 #### OPTIONS_ASSOCIATIONS_LINKS_PROMPT=Use LimeWire for...
 #? OPTIONS_ASSOCIATIONS_LINKS_PROMPT=
@@ -2969,7 +2968,7 @@ OPTIONS_PLAYER_PREFERENCE_LABEL=Ви можете обрати, програва
 #? OPTIONS_ASSOCIATIONS_GRAB_NEVER=
 
 ################################################################################
-# Key/Value pairs for the status bar options in the options window
+# Key/Value pairs for the status bar options in the options window.
 ################################################################################
 #### OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Show Connection Quality Indicator:
 OPTIONS_STATUS_BAR_CONNECTION_QUALITY_CHECK_BOX_LABEL=Показувати індікатор якості підключення:
@@ -3001,7 +3000,7 @@ OPTIONS_STATUS_BAR_BANDWIDTH_DOWNLOADS=Завантаження:
 OPTIONS_STATUS_BAR_BANDWIDTH_UPLOADS=Вивантаження:
 
 ################################################################################
-# Key/Value pairs for the iTunes options in the options window
+# Key/Value pairs for the iTunes options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes importing:
 OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Дозволити імпорт з iTunes 
@@ -3011,7 +3010,7 @@ OPTIONS_ITUNES_PREFERENCE_TITLE=Імпорт
 OPTIONS_ITUNES_PREFERENCE_LABEL=LimeWire може імпортувати тільки но завантажені пісні до iTunes.
 
 ################################################################################
-# Key/Value pairs for the iTunes/DAAP options in the options window
+# Key/Value pairs for the iTunes/DAAP options in the options window.
 ################################################################################
 #### OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Sharing
 OPTIONS_ITUNES_DAAP_PREFERENCE_TITLE=Спільне
@@ -3041,7 +3040,7 @@ OPTIONS_ITUNES_DAAP_BUFFER_SIZE_TITLE=Розмір буферу
 OPTIONS_ITUNES_DAAP_BUFFER_SIZE_LABEL=Ви можете налаштувати розмір буфера для потокових медіа файлів. Якщо iTunes або інші плеєри часто проводять ребуферизацію, збільшіть це значення. Більше значення може потребувати більше пам’яті.
 
 ################################################################################
-# Key/Value pairs for url handler options
+# Key/Value pairs for url handler options.
 ################################################################################
 #### OPTIONS_BROWSER_PREFERENCE_TITLE=Browser Options
 OPTIONS_BROWSER_PREFERENCE_TITLE=Вибір браузера
@@ -3069,7 +3068,7 @@ OPTIONS_AUDIO_PLAYER_PREFERENCE_LABEL=Ви можете вибрати, який
 OPTIONS_AUDIO_PLAYER_BOX_LABEL=Аудіо плеєр
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message bug reports
+# Key/value pairs for asking whether or not to display message bug reports.
 ################################################################################
 #### OPTIONS_BUGS_TITLE=Bug Reports
 OPTIONS_BUGS_TITLE=Звіти про помилки
@@ -3079,7 +3078,7 @@ OPTIONS_BUGS_LABEL=Ви можете обрати, як відправляти �
 OPTIONS_BUGS_VIEW_EXAMPLE=Переглянути приклад
 
 ################################################################################
-# Key/value pairs for asking whether or not to display message popups
+# Key/value pairs for asking whether or not to display message popups.
 ################################################################################
 #### OPTIONS_DO_NOT_ASK_AGAIN=Do not display this message again
 OPTIONS_DO_NOT_ASK_AGAIN=Не показувати більше
@@ -3093,7 +3092,7 @@ OPTIONS_POPUPS_LABEL=Знову показувати повідомлення д
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=За замовчуванням:
 
 ################################################################################
-# Key/value pairs for default action when trying to download existing file
+# Key/value pairs for default action when trying to download existing file.
 ################################################################################
 #### OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=File Already Exists Behavior
 OPTIONS_DEFAULT_ACTION_FILE_EXISTS_TITLE=Поведінка, якщо файл вже існує
@@ -3108,7 +3107,7 @@ OPTIONS_DEFAULT_ACTION_FILE_EXISTS_ASK_LABEL=Завжди питати, що р�
 
 ################################################################################
 # Key/value pairs for the options pane used to enable and disable autocomplete
-# search textfield
+# search textfield.
 ################################################################################
 #### OPTIONS_AUTOCOMPLETE_TITLE=Text Autocompletion
 OPTIONS_AUTOCOMPLETE_TITLE=Автозавершення тексту
@@ -3118,14 +3117,14 @@ OPTIONS_AUTOCOMPLETE_LABEL=Ви можете ввімкнути або вимк�
 OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Ввімкнути автозавершення текстових полей:
 
 ################################################################################
-# Key/Value pairs for theme options
+# Key/Value pairs for theme options.
 ################################################################################
 #### THEME_CHANGED_MESSAGE=To try your new skin, you must restart LimeWire.
 THEME_CHANGED_MESSAGE=Щоб спробувати новий скін, потрібно перезапустити LimeWire.
 
 ################################################################################
 # Key/Value pairs for the options for the maximum number of searches
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_MAX_TITLE=Maximum Searches
 OPTIONS_SEARCH_MAX_TITLE=Максимум пошуків
@@ -3135,7 +3134,8 @@ OPTIONS_SEARCH_MAX_LABEL=Ви можете встановити максимал
 OPTIONS_SEARCH_MAX_NUMBER_LABEL=Максимум пошуків:
 
 ################################################################################
-# Key/Value pairs for search quality options in the options window
+# Key/Value pairs for search quality options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_QUALITY_TITLE=Search Result Quality
 OPTIONS_SEARCH_QUALITY_TITLE=Якість результатів пошуку
@@ -3152,6 +3152,7 @@ OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Показувати усі резул�
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_SPEED_TITLE=Search Result Speed
 OPTIONS_SEARCH_SPEED_TITLE=Швидкість в результатах пошуку
@@ -3168,7 +3169,7 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=Показувати усі швидкості
 
 ################################################################################
 # Key/Value pairs for result filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULTS_TITLE=Filter Results
 OPTIONS_IGNORE_RESULTS_TITLE=Фільтрування результатів
@@ -3177,7 +3178,7 @@ OPTIONS_IGNORE_RESULTS_LABEL=Можна фільтрувати результа�
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter Result Types
 OPTIONS_IGNORE_RESULT_TYPES_TITLE=Типи фільтрування
@@ -3193,7 +3194,8 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=Ігнорувати файли .vbs
 OPTIONS_IGNORE_RESULT_TYPES_WMV_ASF_BOX_LABEL=Ігнорувати файли .wmv/.asf
 
 ################################################################################
-# Key/Value pairs for message filtering options in the options window
+# Key/Value pairs for message filtering options
+# in the options window.
 ################################################################################
 #### OPTIONS_IGNORE_MESSAGES_TITLE=Filter Hosts
 OPTIONS_IGNORE_MESSAGES_TITLE=Фільтрувати хости
@@ -3206,7 +3208,7 @@ OPTIONS_ALLOW_MESSAGES_LABEL=Ви можете дозволити повідом
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_PREF_TITLE=Connection Preferencing
 OPTIONS_CONNECT_PREF_TITLE=Перевага в підключеннях
@@ -3223,7 +3225,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=Завжди
 
 ################################################################################
 # Key/Value pairs for the options for setting connection locale preferences
-# in the advanced panel of the options window
+# in the advanced panel of the options window.
 ################################################################################
 #### OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale Preferencing
 OPTIONS_CONNECT_LOCALE_PREF_TITLE=Перевага за мовою
@@ -3234,7 +3236,7 @@ OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Надавати перев�
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_PORT_TITLE=Listening Port
 OPTIONS_PORT_TITLE=Прослуховування портів
@@ -3245,7 +3247,7 @@ OPTIONS_PORT_BOX_LABEL=Слухати порт:
 
 ################################################################################
 # Key/Value pairs for the options for router configuration
-# in the advanced panel in the options window
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_ROUTER_TITLE=Router Configuration
 OPTIONS_ROUTER_TITLE=Конфігурація марштутизатора
@@ -3260,7 +3262,7 @@ OPTIONS_ROUTER_NOTHING=Нічого не робити (Не рекомендов
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_STARTUP_TITLE=System Startup
 OPTIONS_STARTUP_TITLE=Запуск з системою
@@ -3271,6 +3273,7 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=Запускати з системою:
 
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_PROXY_TITLE=Proxy
 OPTIONS_PROXY_TITLE=Proxy
@@ -3300,21 +3303,22 @@ OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Ім’я користувача:
 OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Пароль:
 
 ################################################################################
-# Key/value pairs for the network interface pane item.
+# Key/value pairs for the network interface pane item
+# in the advanced panel in the options window.
 ################################################################################
 #### OPTIONS_NETWORK_INTERFACE_TITLE=Network Interface
 OPTIONS_NETWORK_INTERFACE_TITLE=Мережевий інтерфейс
-#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface.  Listening sockets will still listen on all available interfaces.  This is useful on multi-homed hosts.  If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
+#### OPTIONS_NETWORK_INTERFACE_LABEL=You can tell LimeWire to bind outgoing connections to an IP address from a specific network interface. Listening sockets will still listen on all available interfaces. This is useful on multi-homed hosts. If you later disable this interface, LimeWire will revert to binding to an arbitrary address.
 OPTIONS_NETWORK_INTERFACE_LABEL=Ви можете налаштувати LimeWire так, щоб він пов’язував вихідні підлючення з IP адресою з певного мережевого інтерфейсу. Прослуховування сокетів буде відбуватись на всіх інтерфейсах. Якщо Ви пізніше вимкнете цей інтерфейс, LimeWire буде пов’язувати підключення до довільного інтерфейсу.
 
 #### OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Use a specific network interface.
 OPTIONS_NETWORK_INTERFACE_USE_CUSTOM=Використовувати певний мережевий інтерфейс.
-#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine.  Outgoing connections will bind to any arbitrary interface.
+#### OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire was unable to determine which network interfaces are available on this machine. Outgoing connections will bind to any arbitrary interface.
 OPTIONS_NETWORK_INTERFACE_CANT_LIST=LimeWire не зміг встановити, які мережеві інтерфейси є не цьому комп’ютері. Вихідні підключення будуть зв’язані до довільним інтерфейсом.
 
 ################################################################################
 # Key/value pairs for the content filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_CONTENT_FILTER_TITLE=Content Filters
 OPTIONS_CONTENT_FILTER_TITLE=Фільтрування змісту
@@ -3325,7 +3329,7 @@ OPTIONS_CONTENT_FILTER_CHECKBOX_LABEL=Дозволити фільтруванн�
 
 ################################################################################
 # Key/value pairs for the junk filter options window item
-# in the options window
+# in the options window.
 ################################################################################
 #### OPTIONS_SEARCH_JUNK_TITLE=Junk
 OPTIONS_SEARCH_JUNK_TITLE=Непотріб
@@ -3352,7 +3356,7 @@ OPTIONS_SEARCH_JUNK_THRESHOLD_STRICT=Суворий
 OPTIONS_SEARCH_JUNK_RESET_LABEL=Забути данні тренування
 
 ################################################################################
-# Key/value pairs for top-level stats panels
+# Key/value pairs for top-level stats panels.
 ################################################################################
 #### STATS_BANDWIDTH_PANE_TITLE=Bandwidth
 STATS_BANDWIDTH_PANE_TITLE=Рух данних
@@ -3376,7 +3380,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Показувати додаткову стат�
 GNUTELLA_MESSAGES=Gnutella
 
 ################################################################################
-# Key/value pairs for bandwidth statistics panes
+# Key/value pairs for bandwidth statistics panes.
 ################################################################################
 #### BANDWIDTH_KEY=Bandwidth
 BANDWIDTH_KEY=Рух
@@ -3697,7 +3701,7 @@ STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Середній розмір
 STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=Середній розмір отриманих повідомлень від клієнтів LimeWire у кілобайтах.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- qrp messages
+# Key/value pairs for advanced Gnutella message statistics -- QRP messages.
 ################################################################################
 #### QRP_MESSAGES=QRP
 QRP_MESSAGES=QRP
@@ -3734,7 +3738,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Відгук
 STATS_QRP_LEAF_ROUTED_QUERIES_MISS=Хибно позитивні
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- errors messages
+# Key/value pairs for advanced Gnutella message statistics -- errors messages.
 ################################################################################
 #### ERROR_MESSAGES=Errors
 ERROR_MESSAGES=Помилки
@@ -3765,7 +3769,7 @@ STATS_ERROR_VENDOR_TITLE=Повідомлення постачальника
 STATS_ERROR_VENDOR_LABEL=Помилки під час читання повідомлень постачальника.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- sent messages
+# Key/value pairs for advanced Gnutella message statistics -- sent messages.
 ################################################################################
 #### SENT_MESSAGES=Sent
 SENT_MESSAGES=Надіслано
@@ -3990,7 +3994,7 @@ STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 STATS_LIME_SENT_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Кілобайти pushes широкомовлення надісланих від усіх клієнтів Gnutella, порівняно з клієнтами LimeWire.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- handshaking
+# Key/value pairs for advanced Gnutella message statistics -- handshaking.
 ################################################################################
 #### HANDSHAKING=Handshaking
 HANDSHAKING=Встановлення зв’язку
@@ -4016,7 +4020,7 @@ STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Відмови інших сер�
 STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Статистика відмов під час встановлення зв’язку(вихідні підключення) Gnutella. 
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- compression
+# Key/value pairs for advanced Gnutella message statistics -- compression.
 ################################################################################
 #### COMPRESSABLE_MESSAGES=Compression
 COMPRESSABLE_MESSAGES=Стискання
@@ -4030,7 +4034,7 @@ STATS_COMPRESSABLE_DOWNSTREAM_TITLE=На вхід
 STATS_COMPRESSABLE_DOWNSTREAM_LABEL=Статистика стиснутого трафіку на вихід.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- flow control
+# Key/value pairs for advanced Gnutella message statistics -- flow control.
 ################################################################################
 #### FLOW_CONTROLLED_MESSAGES=Flow Control
 FLOW_CONTROLLED_MESSAGES=Керування потоків
@@ -4044,7 +4048,7 @@ STATS_FLOW_CONTROL_BYTES_TITLE=Кілобайти
 STATS_FLOW_CONTROL_BYTES_LABEL=Статистика потоко-керованих повідомлень у кілобайтах.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- route error stats
+# Key/value pairs for advanced Gnutella message statistics -- route error stats.
 ################################################################################
 #### STATS_ROUTE_ERRORS_TITLE=Routing Errors
 STATS_ROUTE_ERRORS_TITLE=Помилки маршрутизації
@@ -4057,7 +4061,7 @@ STATS_QUERY_REPLY_ROUTE_ERRORS_TITLE=Помилки маршрутизації �
 STATS_QUERY_REPLY_ROUTE_ERRORS_LABEL=Помилки маршрутизації відгуків на запити.
 
 ################################################################################
-# Key/value pairs for advanced Gnutella message statistics -- other stats
+# Key/value pairs for advanced Gnutella message statistics -- other stats.
 ################################################################################
 #### STATS_FILTERED_MESSAGES_TITLE=Filtered Messages
 STATS_FILTERED_MESSAGES_TITLE=Фільтровано повідомлень
@@ -4070,7 +4074,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Підключення
 STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Загальна кількість спроб встановити підключення, ініційованих як зовні, так і всередені.
 
 ################################################################################
-# Key/value pairs for advanced HTTP statistics
+# Key/value pairs for advanced HTTP statistics.
 ################################################################################
 #### STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming Requests
 STATS_TOTAL_HTTP_REQUESTS_TITLE=Вхідні запити
@@ -4078,7 +4082,7 @@ STATS_TOTAL_HTTP_REQUESTS_TITLE=Вхідні запити
 STATS_TOTAL_HTTP_REQUESTS_LABEL=Загальна кількість запитів отриманих за весь час. Включає усі спроби підключення (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, та інше...).
 
 ################################################################################
-# Key/value pairs for advanced Download statistics
+# Key/value pairs for advanced Download statistics.
 ################################################################################
 #### DOWNLOAD_STATISTICS=Downloads
 DOWNLOAD_STATISTICS=Завантаження
@@ -4104,7 +4108,7 @@ STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=Час підключення TCP
 STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Записує час в мілісекундах, який знадобився для встановлення з’єднання TCP. Може бути різним, наприклад, коли серевери завантажені.
 
 ################################################################################
-# Key/value pairs for advanced Upload statistics
+# Key/value pairs for advanced Upload statistics.
 ################################################################################
 #### UPLOAD_STATISTICS=Uploads
 UPLOAD_STATISTICS=Вивантаження
@@ -4126,7 +4130,7 @@ STATS_UPLOAD_GENERAL_TITLE=Загально
 STATS_UPLOAD_GENERAL_LABEL=Всього спроб, завершених, перерваних, зупинених вивантажень. Ці цифри збільшуються кожного підключення, не при передачі порцій даних. (Зупинені вивантаження також рахуються як незавершені).
 
 ################################################################################
-# Key/Value pairs for statistics graph axis labels
+# Key/Value pairs for statistics graph axis labels.
 ################################################################################
 # defaults
 #### DEFAULT_X_AXIS_LABEL=seconds
@@ -4139,7 +4143,7 @@ DEFAULT_Y_BYTE_AXIS_LABEL=кілобайти
 Y_AXIS_BANDWIDTH_LABEL=кілобайти
 
 ################################################################################
-# Key/Value pairs for statistics graph legend labels and stat window titles
+# Key/Value pairs for statistics graph legend labels and stat window titles.
 ################################################################################
 # Column names
 #### STATS_LEGEND_NAME=Name
@@ -4335,7 +4339,7 @@ ERROR_VENDOR_UNRECOGNIZED=Нерозпізнана помилка постача
 ERROR_STARTUP_WINDOWS_COMPATIBILITY=LimeWire зазнав помилки під час запуску і не може продовжити. Можливо, Ви зможете розв’язати проблему, змінивши налаштування сумісності Windows. Правий-клік на іконці LimeWire, «Властивості», «Сумісність». Відмітьте «Запускати цю програму у режимі сумісності з Windows 2000». Натисніть ОК, та перезапустіть програму.
 
 ###############################################################################
-# Key/value pairs for general message labels
+# Key/value pairs for general message labels.
 ###############################################################################
 #### GENERAL_ALL_MESSAGES_LABEL=All Messages
 GENERAL_ALL_MESSAGES_LABEL=Усі повідомлення
