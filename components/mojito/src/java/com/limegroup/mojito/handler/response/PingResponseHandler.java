@@ -90,6 +90,11 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
             } else if (o instanceof SocketAddress) {
                 pinger = new SocketAddressPinger((Set<SocketAddress>)nodes);
             } else if (o instanceof Entry) {
+                Entry e = (Entry)o;
+                if (!(e.getKey() instanceof KUID)
+                        || !(e.getValue() instanceof SocketAddress)) {
+                    throw new IllegalArgumentException("Must be a Set of Entry<KUID, SocketAddress>");
+                }
                 pinger = new EntryPinger((Set<Entry<KUID,SocketAddress>>)nodes);
             } else {
                 throw new IllegalArgumentException("Must be a Set of Contacts, SocketAddresses or Map.Entry<KUID, SocketAddress>");
@@ -125,7 +130,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
     public void setMaxParallelPingFailures(int maxParallelPingFailures) {
         if (maxParallelPingFailures < 0) {
-            this.maxParallelPingFailures = KademliaSettings.MAX_PARALLEL_PING_FAILURES.getValue();
+            this.maxParallelPingFailures 
+                = KademliaSettings.MAX_PARALLEL_PING_FAILURES.getValue();
         } else {
             this.maxParallelPingFailures = maxParallelPingFailures;
         }
