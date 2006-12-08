@@ -12,6 +12,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.impl.AbstractDHTController.RandomNodeAdder;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -62,7 +63,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     public void testRandomNodeAdder() throws Exception {
         DHTSettings.PERSIST_DHT.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        AbstractDHTController controller = new ActiveDHTNodeController(1, 1);
+        AbstractDHTController controller = new ActiveDHTNodeController(1, 1, new DHTManagerStub());
         controller.start();
         MojitoDHTStub dht = new MojitoDHTStub();
         PrivilegedAccessor.setValue(controller, "dht", dht);

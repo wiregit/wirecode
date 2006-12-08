@@ -6,7 +6,7 @@ import com.limegroup.gnutella.ManagedConnection;
 
 public class ConnectionLifecycleEvent extends EventObject {
     
-    public static enum ConnectionLifeEvent {
+    public static enum EventType {
         CONNECTING, 
         CONNECTED, 
         DISCONNECTED, 
@@ -18,9 +18,9 @@ public class ConnectionLifecycleEvent extends EventObject {
     }
     
     private final ManagedConnection connection;
-    private final ConnectionLifeEvent type;
+    private final EventType type;
     
-    public ConnectionLifecycleEvent(Object source, ConnectionLifeEvent type, ManagedConnection c) {
+    public ConnectionLifecycleEvent(Object source, EventType type, ManagedConnection c) {
         super(source);
         this.connection = c;
         this.type = type;
@@ -33,11 +33,11 @@ public class ConnectionLifecycleEvent extends EventObject {
      * 
      * @param manager
      */
-    public ConnectionLifecycleEvent(Object source, ConnectionLifeEvent type) {
+    public ConnectionLifecycleEvent(Object source, EventType type) {
         this(source, type, null);
     }
 
-    public ConnectionLifeEvent getType() {
+    public EventType getType() {
         return type;
     }
 
@@ -46,35 +46,35 @@ public class ConnectionLifecycleEvent extends EventObject {
     }
 
     public boolean isConnectingEvent() {
-        return (type == ConnectionLifeEvent.CONNECTING); 
+        return (type == EventType.CONNECTING); 
     }
     
     public boolean isConnectedEvent() {
-        return (type == ConnectionLifeEvent.CONNECTED);
+        return (type == EventType.CONNECTED);
     }
     
     public boolean isDisconnectedEvent() {
-        return (type == ConnectionLifeEvent.DISCONNECTED);
+        return (type == EventType.DISCONNECTED);
     }
     
     public boolean isNoInternetEvent() {
-        return (type == ConnectionLifeEvent.NO_INTERNET);
+        return (type == EventType.NO_INTERNET);
     }
     
     public boolean isConnectionInitializingEvent() {
-        return (type == ConnectionLifeEvent.CONNECTION_INITIALIZING);
+        return (type == EventType.CONNECTION_INITIALIZING);
     }
     
     public boolean isConnectionClosedEvent() {
-        return (type == ConnectionLifeEvent.CONNECTION_CLOSED);
+        return (type == EventType.CONNECTION_CLOSED);
     }
     
     public boolean isConnectionInitializedEvent() {
-        return (type == ConnectionLifeEvent.CONNECTION_INITIALIZED);
+        return (type == EventType.CONNECTION_INITIALIZED);
     }
     
     public boolean isConnectionCapabilitiesEvent() {
-        return (type == ConnectionLifeEvent.CONNECTION_CAPABILITIES);
+        return (type == EventType.CONNECTION_CAPABILITIES);
     }
     
     public String toString() {

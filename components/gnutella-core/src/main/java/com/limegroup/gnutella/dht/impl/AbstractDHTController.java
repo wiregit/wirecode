@@ -16,10 +16,14 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTFilterDelegate;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
+import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
@@ -27,6 +31,7 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.routing.Contact;
+import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -73,9 +78,16 @@ abstract class AbstractDHTController implements DHTController {
      */
     private final RandomNodeAdder dhtNodeAdder;
     
-    public AbstractDHTController() {
-        bootstrapper = new LimeDHTBootstrapper(this);
+    /**
+     * The DHT event dispatcher
+     */
+    private final EventDispatcher<DHTEvent, DHTEventListener> dhtEventDispatcher;
+    
+    public AbstractDHTController(EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+        bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
         dhtNodeAdder = new RandomNodeAdder();
+        dhtEventDispatcher = dispatcher;
+        DHTStatsManager.clear();
     }
 
     /**
@@ -104,6 +116,7 @@ abstract class AbstractDHTController implements DHTController {
             dht.start();
             running = true;
             bootstrapper.bootstrap();
+            dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
         } catch (IOException err) {
             LOG.error(err);
         }
@@ -124,16 +137,14 @@ abstract class AbstractDHTController implements DHTController {
         
         LOG.debug("Shutting down DHT Controller");
         
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("Shut down trace: ", new Exception());
-        }
-        
         bootstrapper.stop();
         dhtNodeAdder.stop();
         
         if (dht != null) {
             dht.stop();
         }
+        
+        dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
     }
     
     /**

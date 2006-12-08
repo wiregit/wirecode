@@ -24,6 +24,12 @@ public class DHTManagerStub implements DHTManager {
     public boolean isRunning() {return true;}
 
     public boolean isWaitingForNodes() {return false;}
+    
+    public void addEventListener(DHTEventListener listener) {}
+
+    public void dispatchEvent(DHTEvent event) {}
+
+    public void removeEventListener(DHTEventListener listener) {}
 
     public void start(boolean activeMode) {}
 

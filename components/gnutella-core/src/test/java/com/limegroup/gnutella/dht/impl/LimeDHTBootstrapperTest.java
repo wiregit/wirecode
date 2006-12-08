@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
+import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -46,7 +47,8 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
-        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht));
+        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht), 
+                new DHTEventDispatcherStub());
         dhtContext = (Context)dht;
         dhtContext.bind(new InetSocketAddress("localhost", 2000));
         dhtContext.start();

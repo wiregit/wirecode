@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IpPort;
 
 /**
@@ -18,7 +19,8 @@ import com.limegroup.gnutella.util.IpPort;
  * TODO: The manager will later expose the methods to use the DHT, i.e. store 
  * and retrieve values.
  */
-public interface DHTManager extends ConnectionLifecycleListener {
+public interface DHTManager extends ConnectionLifecycleListener, 
+EventDispatcher<DHTEvent, DHTEventListener>{
     
     /**
      * Various modes a DHT Node may have

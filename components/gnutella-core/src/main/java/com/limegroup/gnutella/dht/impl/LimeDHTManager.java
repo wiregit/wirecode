@@ -2,10 +2,13 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.net.SocketAddress;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.IpPort;
@@ -34,6 +37,12 @@ public class LimeDHTManager implements DHTManager {
      */
     private DHTController controller = new NullDHTController();
     
+    /**
+     * List of event listeners for ConnectionLifeCycleEvents.
+     */
+    private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners = 
+        new CopyOnWriteArrayList<DHTEventListener>();
+    
     public synchronized void start(boolean activeMode) {
     	
     	//controller already running in the correct mode?
@@ -45,9 +54,9 @@ public class LimeDHTManager implements DHTManager {
     	controller.stop();
 
     	if (activeMode) {
-            controller = new ActiveDHTNodeController(vendor, version);
+            controller = new ActiveDHTNodeController(vendor, version, this);
         } else {
-            controller = new PassiveDHTNodeController(vendor, version);
+            controller = new PassiveDHTNodeController(vendor, version, this);
         }
 
         controller.start();
@@ -76,14 +85,6 @@ public class LimeDHTManager implements DHTManager {
         }, 0, 0);
     }
     
-    public synchronized void sendUpdatedCapabilities() {
-        if(!controller.isRunning()) {
-            return;
-        }
-        
-        controller.sendUpdatedCapabilities();
-    }
-    
     public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
         return controller.getActiveDHTNodes(maxNodes);
     }
@@ -107,6 +108,22 @@ public class LimeDHTManager implements DHTManager {
     
     public synchronized boolean isWaitingForNodes() {
         return controller.isWaitingForNodes();
+    }
+    
+    public void addEventListener(DHTEventListener listener) {
+        if(!dhtEventListeners.addIfAbsent(listener)) {
+            throw new IllegalArgumentException("Listener " + listener + " already registered");
+        }
+    }
+
+    public void dispatchEvent(DHTEvent event) {
+        for(DHTEventListener listener : dhtEventListeners) {
+            listener.handleDHTEvent(event);
+        }
+    }
+
+    public void removeEventListener(DHTEventListener listener) {
+        dhtEventListeners.remove(listener);
     }
 
     /**

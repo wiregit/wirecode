@@ -349,8 +349,8 @@ public class RouterService {
         fileManager.registerFileManagerEventListener(callback);
         RouterService.setMessageRouter(router);
         
-        manager.registerConnectionLifecycleListener(callback);
-        manager.registerConnectionLifecycleListener(dhtManager);
+        manager.addEventListener(callback);
+        manager.addEventListener(dhtManager);
         
         nodeAssigner = new NodeAssigner(uploadManager, 
                                         downloadManager, 

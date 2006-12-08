@@ -16,6 +16,8 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
@@ -901,5 +903,13 @@ public final class MessageRouterTest extends BaseTestCase {
             return 0;
         }
 
+        public void addEventListener(DHTEventListener listener) {
+        }
+
+        public void dispatchEvent(DHTEvent event) {
+        }
+
+        public void removeEventListener(DHTEventListener listener) {
+        }
     }
 }

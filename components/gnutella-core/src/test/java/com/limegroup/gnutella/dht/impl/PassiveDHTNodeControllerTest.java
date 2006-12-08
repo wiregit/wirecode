@@ -8,10 +8,14 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -21,6 +25,9 @@ import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.RouteTable;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
+    
+    private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub = 
+        new DHTEventDispatcherStub();
     
     public PassiveDHTNodeControllerTest(String name) {
         super(name);
@@ -55,7 +62,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(0, 0);
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(0, 0, dispatcherStub);
         Context context = (Context) controller.getMojitoDHT();
         Contact localContact = context.getLocalNode();
         KUID nodeID = context.getLocalNodeID();
@@ -64,7 +71,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         fillRoutingTable(rt, 2*numPersistedNodes);
         controller.stop();
         //now nodeID should have changed and we should have persisted SOME nodes
-        controller = new PassiveDHTNodeController(0, 0);
+        controller = new PassiveDHTNodeController(0, 0, dispatcherStub);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         assertNotEquals(nodeID, context.getLocalNodeID());
@@ -118,7 +125,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     private class PassiveControllerTest extends PassiveDHTNodeController {
         
         public PassiveControllerTest(int vendor, int version) {
-            super(vendor, version);
+            super(vendor, version, dispatcherStub);
         }
 
         @Override

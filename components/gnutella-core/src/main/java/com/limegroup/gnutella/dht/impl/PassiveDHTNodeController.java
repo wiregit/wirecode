@@ -18,15 +18,17 @@ import java.util.List;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.routing.Contact;
-import com.limegroup.mojito.statistics.DHTStatsManager;
 import com.limegroup.mojito.util.BucketUtils;
 
 /**
@@ -53,9 +55,10 @@ class PassiveDHTNodeController extends AbstractDHTController{
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
     
-    public PassiveDHTNodeController(int vendor, int version) {
+    public PassiveDHTNodeController(int vendor, int version, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
 
-        DHTStatsManager.clear();
+        super(dispatcher);
         MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
         
         limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);

@@ -15,15 +15,17 @@ import java.util.List;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.MojitoFactory;
 import com.limegroup.mojito.db.Database;
 import com.limegroup.mojito.routing.RouteTable;
-import com.limegroup.mojito.statistics.DHTStatsManager;
 
 /**
  * Controlls an active DHT node.
@@ -40,9 +42,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
-    public ActiveDHTNodeController(int vendor, int version) {
-
-        DHTStatsManager.clear();
+    public ActiveDHTNodeController(int vendor, int version, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+        super(dispatcher);
         
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         

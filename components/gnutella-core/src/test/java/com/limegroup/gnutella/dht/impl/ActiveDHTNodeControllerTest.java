@@ -7,9 +7,13 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
@@ -20,6 +24,9 @@ import com.limegroup.mojito.routing.impl.RemoteContact;
 import com.limegroup.mojito.settings.ContextSettings;
 
 public class ActiveDHTNodeControllerTest extends DHTTestCase {
+    
+    private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub = 
+        new DHTEventDispatcherStub();
     
     public ActiveDHTNodeControllerTest(String name) {
         super(name);
@@ -48,7 +55,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
         Context context = (Context) controller.getMojitoDHT();
         KUID nodeID = context.getLocalNodeID();
         RouteTable rt = context.getRouteTable();
@@ -67,7 +74,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                 State.UNKNOWN);
         rt.add(node);
         controller.stop();
-        controller = new ActiveDHTNodeController(0, 0);
+        controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         //should have the same nodeID as before
@@ -80,7 +87,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
         controller.start();
         //bootstrap active node
         controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));

@@ -24,7 +24,7 @@ import com.limegroup.gnutella.connection.MessageReceiver;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.ConnectionLifeEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
@@ -1078,8 +1078,8 @@ public class ManagedConnection extends Connection
             else if(currentId == latestId)
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
             //fire a vendor event
-            _manager.dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(this, 
-                    ConnectionLifeEvent.CONNECTION_CAPABILITIES , this));
+            _manager.dispatchEvent(new ConnectionLifecycleEvent(this, 
+                    EventType.CONNECTION_CAPABILITIES , this));
                 
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        

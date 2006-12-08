@@ -19,7 +19,7 @@ import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.ConnectionLifeEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -33,6 +33,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.statistics.HTTPStat;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
@@ -73,7 +74,8 @@ import com.limegroup.gnutella.util.ThreadFactory;
  * ConnectionManager has methods to get up and downstream bandwidth, but it
  * doesn't quite fit the BandwidthTracker interface.
  */
-public class ConnectionManager implements ConnectionAcceptor {
+public class ConnectionManager implements ConnectionAcceptor, 
+EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
     /**
      * Timestamp for the last time the user selected to disconnect.
@@ -252,7 +254,7 @@ public class ConnectionManager implements ConnectionAcceptor {
     /**
      * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
+    private final CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
         new CopyOnWriteArrayList<ConnectionLifecycleListener>();
 
     /**
@@ -1428,8 +1430,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         }
         
         if(!willTryToReconnect) {
-            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    ConnectionLifecycleEvent.ConnectionLifeEvent.DISCONNECTED, null));
+            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    ConnectionLifecycleEvent.EventType.DISCONNECTED, null));
         }
     }
     
@@ -1576,8 +1578,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         RouterService.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
-        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this, 
-                ConnectionLifeEvent.CONNECTION_CLOSED,
+        dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this, 
+                EventType.CONNECTION_CLOSED,
                 c));
 
         // 5) Clean up Unicaster
@@ -1706,11 +1708,11 @@ public class ConnectionManager implements ConnectionAcceptor {
                 need--;
             }
             _fetchers.addAll(fetchers);
-            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    ConnectionLifeEvent.CONNECTING, null));
+            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    EventType.CONNECTING, null));
         } else if (need == 0) {
-            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    ConnectionLifeEvent.CONNECTED, null));
+            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    EventType.CONNECTED, null));
         }
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1801,8 +1803,8 @@ public class ConnectionManager implements ConnectionAcceptor {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                ConnectionLifeEvent.CONNECTION_INITIALIZING,
+        dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                EventType.CONNECTION_INITIALIZING,
                 mc));
      
         try {
@@ -1969,8 +1971,8 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    ConnectionLifeEvent.CONNECTION_INITIALIZING,
+            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    EventType.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2023,8 +2025,8 @@ public class ConnectionManager implements ConnectionAcceptor {
                 // down.
                 adjustConnectionFetchers();
             }
-            dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    ConnectionLifeEvent.CONNECTION_INITIALIZING,
+            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                    EventType.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2051,8 +2053,8 @@ public class ConnectionManager implements ConnectionAcceptor {
             // announce its initialization
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
-                dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                        ConnectionLifeEvent.CONNECTION_INITIALIZED,
+                dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                        EventType.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
             }
@@ -2333,8 +2335,8 @@ public class ConnectionManager implements ConnectionAcceptor {
         
         // Notify the user that they have no internet connection and that
         // we will automatically retry
-        dispatchConnectionLifecycleEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                ConnectionLifeEvent.NO_INTERNET));
+        dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                EventType.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
@@ -2397,29 +2399,32 @@ public class ConnectionManager implements ConnectionAcceptor {
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
     }
     
-    /**
-     * registers a listener for ConnectionLifeCycleEvents
-     */
-    public void registerConnectionLifecycleListener(ConnectionLifecycleListener listener) {
-        connectionLifeCycleListeners.addIfAbsent(listener);
-    }
     
+    /**
+     * Registers a listener for ConnectionLifeCycleEvents
+     */
+    public void addEventListener(ConnectionLifecycleListener listener) {
+        if(!connectionLifeCycleListeners.addIfAbsent(listener)) {
+            throw new IllegalArgumentException("Listener "+listener+" already registered");
+        }
+    }
+
+    /**
+     * Dispatches a ConnectionLifecycleEvent to any registered listeners 
+     */
+    public void dispatchEvent(ConnectionLifecycleEvent event) {
+        for(ConnectionLifecycleListener listener : connectionLifeCycleListeners) {
+            listener.handleConnectionLifecycleEvent(event);
+        }
+    }
+
     /**
      * unregisters a listener for ConnectionLifeCycleEvents
      */
-    public void unregisterConnectionLifecycleListener(ConnectionLifecycleListener listener) {
+    public void removeEventListener(ConnectionLifecycleListener listener) {
         connectionLifeCycleListeners.remove(listener);
     }
-    
-    /**
-     * dispatches a ConnectionLifecycleEvent to any registered listeners 
-     */
-    public void dispatchConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        for(ConnectionLifecycleListener listener : connectionLifeCycleListeners) {
-            listener.handleConnectionLifecycleEvent(evt);
-        }
-    }
-    
+
     /**
      * Count how many connections have already received N messages
      */

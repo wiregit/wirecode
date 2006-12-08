@@ -15,8 +15,12 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
+import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
+import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.MojitoDHT;
@@ -75,8 +79,15 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
      */
     private Object lock = new Object();
     
-    public LimeDHTBootstrapper(DHTController controller) {
+    /**
+     * The DHT event dispatcher
+     */
+    private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
+    
+    public LimeDHTBootstrapper(DHTController controller, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
         this.controller = controller;
+        this.dispatcher = dispatcher;
     }
     
     /**
@@ -240,10 +251,12 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
     }
     
     /**
-     * Notify our connections that we are now a bootstrapped DHT node 
+     * Notify our connections and event listeners 
+     * that we are now a bootstrapped DHT node 
      */
-    private void updatedCapabilities() {
+    private void finish() {
         controller.sendUpdatedCapabilities();
+        dispatcher.dispatchEvent(new DHTEvent(this, EventType.CONNECTED));
     }
     
     /**
@@ -367,14 +380,14 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         
         public void handleFutureCancelled(CancellationException e) {
             synchronized (lock) {
-                LOG.error("CancellationException", e);
+                LOG.debug("Bootstrap Ping Cancelled", e);
                 stop();
             }
         }
 
         public void handleFutureInterrupted(InterruptedException e) {
             synchronized (lock) {
-                LOG.error("InterruptedException", e);
+                LOG.debug("Bootstrap Ping Interrupted", e);
                 stop();
             }
         }
@@ -393,7 +406,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                 ResultType type = result.getResultType();
                 switch(type) {
                     case BOOTSTRAP_SUCCEEDED:
-                        updatedCapabilities();
+                        finish();
                         break;
                     case BOOTSTRAP_FAILED:
                         // Try again!
@@ -417,14 +430,14 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         
         public void handleFutureCancelled(CancellationException e) {
             synchronized (lock) {
-                LOG.error("CancellationException", e);
+                LOG.debug("Bootstrap Cancelled", e);
                 stop();
             }
         }
 
         public void handleFutureInterrupted(InterruptedException e) {
             synchronized (lock) {
-                LOG.error("InterruptedException", e);
+                LOG.debug("Bootstrap Interrupted", e);
                 stop();
             }
         }
