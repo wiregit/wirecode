@@ -56,6 +56,7 @@ import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.result.Result;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.BucketUtils;
@@ -70,7 +71,7 @@ import com.limegroup.mojito.util.EntryImpl;
  * 
  * Think of the LookupResponseHandler as some kind of State-Machine.
  */
-abstract class LookupResponseHandler<V> extends AbstractResponseHandler<V> {
+abstract class LookupResponseHandler<V extends Result> extends AbstractResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     

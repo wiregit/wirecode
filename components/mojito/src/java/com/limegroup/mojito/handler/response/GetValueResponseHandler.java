@@ -33,12 +33,13 @@ import com.limegroup.mojito.messages.FindValueRequest;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.result.GetValueResult;
 import com.limegroup.mojito.routing.Contact;
 
 /**
  * The GetValueResponseHandler retrieves DHTValues from a remote Node
  */
-public class GetValueResponseHandler extends AbstractResponseHandler<Collection<DHTValueEntity>> {
+public class GetValueResponseHandler extends AbstractResponseHandler<GetValueResult> {
         
     private Contact node;
     
@@ -72,8 +73,10 @@ public class GetValueResponseHandler extends AbstractResponseHandler<Collection<
     @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         if (message instanceof FindValueResponse) {
-            Collection<DHTValueEntity> values = ((FindValueResponse)message).getValues();
-            setReturnValue(values);
+            Collection<DHTValueEntity> values 
+                = ((FindValueResponse)message).getValues();
+            
+            setReturnValue(new GetValueResult(message.getContact(), values));
             
         // Imagine the following case: We do a lookup for a value 
         // on the 59th minute and start retrieving the values on 

@@ -149,12 +149,12 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * The bootstrap process looks like:
      * 
+     *     0) Find a Node that's connected to the DHT
      * +--->
-     * |   1) Find a Node that responds to our Ping
-     * |   2) Lookup own Node ID
-     * |   3) Lookup radnom IDs
-     * +---4) Prune RouteTable and restart if too many errors in #3
-     *     5) Done
+     * |   1) Lookup own Node ID
+     * |   2) Refresh all Buckets with prefixed random IDs
+     * +---3) Prune RouteTable and restart if too many errors in #2
+     *     4) Done
      */
     private class BootstrapProcess implements Callable<BootstrapResult> {
         
@@ -351,7 +351,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     }
     
     /**
-     * 
+     * Thrown to indicate our RouteTable is stale (a lot of dead contacts)
      */
     @SuppressWarnings("serial")
     private static class StaleRouteTableException extends DHTException {

@@ -73,6 +73,7 @@ import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.result.BootstrapResult;
 import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.result.FindValueResult;
+import com.limegroup.mojito.result.GetValueResult;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.BucketRefresher;
@@ -895,7 +896,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Retrieve all DHTValues from the remote Node that are 
      * stored under the given valueId and nodeIds
      */
-    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, KUID valueId, KUID nodeId) {
+    public DHTFuture<GetValueResult> get(Contact node, KUID valueId, KUID nodeId) {
         return get(node, valueId, Collections.singleton(nodeId));
     }
     
@@ -903,7 +904,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Retrieve all DHTValues from the remote Node that are 
      * stored under the given valueId and nodeIds
      */
-    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, 
+    public DHTFuture<GetValueResult> get(Contact node, 
             KUID valueId, Collection<KUID> nodeIds) {
         return getValueManager.get(node, valueId, nodeIds);
     }

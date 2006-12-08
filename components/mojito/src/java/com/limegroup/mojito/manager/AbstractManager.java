@@ -20,11 +20,12 @@
 package com.limegroup.mojito.manager;
 
 import com.limegroup.mojito.Context;
+import com.limegroup.mojito.result.Result;
 
 /**
  * An abstract class for various types of Managers.
  */
-abstract class AbstractManager<V> {
+abstract class AbstractManager<V extends Result> {
     
     protected final Context context;
     

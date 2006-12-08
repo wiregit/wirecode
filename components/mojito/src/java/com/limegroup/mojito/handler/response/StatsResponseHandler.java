@@ -31,11 +31,12 @@ import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StatsResponse;
+import com.limegroup.mojito.result.StatsResult;
 
 /**
  * The StatsResponseHandler handles responses for Stats requests
  */
-public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse> {
+public class StatsResponseHandler extends AbstractResponseHandler<StatsResult> {
 
     private static final Log LOG = LogFactory.getLog(StatsResponseHandler.class);
     
@@ -49,7 +50,8 @@ public class StatsResponseHandler extends AbstractResponseHandler<StatsResponse>
             LOG.trace("Stats request to " + message.getContact() + " succeeded");
         }
         
-        setReturnValue((StatsResponse)message);
+        StatsResponse response = (StatsResponse)message;
+        setReturnValue(new StatsResult(response.getStatistics()));
     }
 
     @Override

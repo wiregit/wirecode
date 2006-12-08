@@ -31,7 +31,7 @@ import com.limegroup.mojito.routing.Contact;
  * The FindNodeResult is fired when a FIND_NODE lookup
  * finishes
  */
-public class FindNodeResult {
+public class FindNodeResult implements Result {
     
     private final KUID lookupId;
     

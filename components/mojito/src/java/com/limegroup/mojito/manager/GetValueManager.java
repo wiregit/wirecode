@@ -20,15 +20,13 @@
 package com.limegroup.mojito.manager;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
-import com.limegroup.mojito.db.DHTValue;
-import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.handler.response.GetValueResponseHandler;
+import com.limegroup.mojito.result.GetValueResult;
 import com.limegroup.mojito.routing.Contact;
 
 /**
@@ -37,24 +35,16 @@ import com.limegroup.mojito.routing.Contact;
  * rather than to find it. That means you must know which Node is storing
  * a value!
  */
-public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
+public class GetValueManager extends AbstractManager<GetValueResult> {
 
     public GetValueManager(Context context) {
         super(context);
     }
     
     /**
-     * Tries to get a value from the remote Node
-     */
-    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, 
-            KUID valueId, KUID nodeId) {
-        return get(node, valueId, Collections.singleton(nodeId));
-    }
-    
-    /**
      * Tries to get one or more values from the remote Node
      */
-    public DHTFuture<Collection<DHTValueEntity>> get(Contact node, 
+    public DHTFuture<GetValueResult> get(Contact node, 
             KUID valueId, Collection<KUID> nodeIds) {
         
         GetValueResponseHandler handler 
@@ -67,7 +57,7 @@ public class GetValueManager extends AbstractManager<Collection<DHTValue>> {
     /**
      * A "get value" specific implementation of DHTFuture
      */
-    private class GetValueFuture extends AbstractDHTFuture<Collection<DHTValueEntity>> {
+    private class GetValueFuture extends AbstractDHTFuture<GetValueResult> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
             super(callable);

@@ -27,13 +27,14 @@ import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
+import com.limegroup.mojito.result.Result;
 
 /**
  * The AbstractLookupManager class manages lookups for Nodes or Values
  * and makes sure there are never two or more parallel lookups for
  * the same key.
  */
-abstract class AbstractLookupManager<V> extends AbstractManager<V> {
+abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V> {
     
     private Map<KUID, LookupFuture> futureMap = new HashMap<KUID, LookupFuture>();
     

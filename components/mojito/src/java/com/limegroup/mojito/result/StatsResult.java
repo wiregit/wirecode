@@ -16,31 +16,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages;
 
-import java.util.Collection;
+package com.limegroup.mojito.result;
 
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValueEntity;
-
-/**
- * An interface for FindValueResponse implementations
- */
-public interface FindValueResponse extends LookupResponse {
+public class StatsResult implements Result {
     
-    /**
-     * Returns a Collection of KUIDs that a Node has to offer
-     */
-    public Collection<KUID> getKeys();
+    private final String statistics;
     
-    /**
-     * Returns a Collection of DHTValueEntity(s)
-     */
-    public Collection<DHTValueEntity> getValues();
+    public StatsResult(String statistics) {
+        this.statistics = statistics;
+    }
     
-    /**
-     * Returns the request load for this key
-     */
-    public float getRequestLoad();
+    public String getStatistics() {
+        return statistics;
+    }
+    
+    public String toString() {
+        return statistics;
+    }
 }

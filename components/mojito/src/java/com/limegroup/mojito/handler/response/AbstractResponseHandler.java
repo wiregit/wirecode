@@ -37,6 +37,7 @@ import com.limegroup.mojito.exceptions.LockTimeoutException;
 import com.limegroup.mojito.handler.CallableResponseHandler;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
+import com.limegroup.mojito.result.Result;
 import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.NetworkSettings;
 import com.limegroup.mojito.util.ContactUtils;
@@ -45,7 +46,7 @@ import com.limegroup.mojito.util.OnewayExchanger;
 /**
  * An abstract base class for ResponseHandlers
  */
-abstract class AbstractResponseHandler<V> implements CallableResponseHandler<V> {
+abstract class AbstractResponseHandler<V extends Result> implements CallableResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     

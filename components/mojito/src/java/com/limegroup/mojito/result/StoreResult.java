@@ -29,7 +29,7 @@ import com.limegroup.mojito.routing.Contact;
 /**
  * The StoreResult is fired when a STORE request has finished
  */
-public class StoreResult {
+public class StoreResult implements Result {
     
     private final Collection<Contact> nodes;
     

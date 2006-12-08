@@ -16,31 +16,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages;
+
+package com.limegroup.mojito.result;
 
 import java.util.Collection;
 
-import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValueEntity;
+import com.limegroup.mojito.routing.Contact;
+import com.limegroup.mojito.util.CollectionUtils;
 
 /**
- * An interface for FindValueResponse implementations
+ * The result of a GetValue operation
  */
-public interface FindValueResponse extends LookupResponse {
+public class GetValueResult implements Result {
     
-    /**
-     * Returns a Collection of KUIDs that a Node has to offer
-     */
-    public Collection<KUID> getKeys();
+    private final Contact node;
     
-    /**
-     * Returns a Collection of DHTValueEntity(s)
-     */
-    public Collection<DHTValueEntity> getValues();
+    private final Collection<DHTValueEntity> values;
     
-    /**
-     * Returns the request load for this key
-     */
-    public float getRequestLoad();
+    @SuppressWarnings("unchecked")
+    public GetValueResult(Contact node,
+            Collection<? extends DHTValueEntity> values) {
+        this.node = node;
+        this.values = (Collection<DHTValueEntity>)values;
+    }
+    
+    public Contact getContact() {
+        return node;
+    }
+    
+    public Collection<DHTValueEntity> getValues() {
+        return values;
+    }
+    
+    public String toString() {
+        return CollectionUtils.toString(values);
+    }
 }

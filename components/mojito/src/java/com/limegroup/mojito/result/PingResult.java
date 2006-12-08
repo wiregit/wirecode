@@ -27,7 +27,7 @@ import com.limegroup.mojito.routing.Contact;
 /**
  * PingResult(s) are fired for successful pings
  */
-public class PingResult {
+public class PingResult implements Result {
     
     /** The remote Contact */
     private final Contact node;

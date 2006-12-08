@@ -47,6 +47,7 @@ import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.messages.StoreRequest;
 import com.limegroup.mojito.messages.StoreResponse;
 import com.limegroup.mojito.messages.StoreResponse.Status;
+import com.limegroup.mojito.result.Result;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
@@ -144,7 +145,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 GetQueryKeyHandler handler = new GetQueryKeyHandler(context, node);
                 
                 try {
-                    queryKey = handler.call();
+                    queryKey = handler.call().getQueryKey();
                 } catch (InterruptedException e) {
                     throw new DHTException(e);
                 }
@@ -409,7 +410,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     /**
      * GetQueryKeyHandler tries to get the QueryKey of a Node
      */
-    private static class GetQueryKeyHandler extends AbstractResponseHandler<QueryKey> {
+    private static class GetQueryKeyHandler extends AbstractResponseHandler<GetQueryKeyResult> {
         
         private Contact node;
         
@@ -470,7 +471,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 context.getRouteTable().add(node);
             }
             
-            setReturnValue(response.getQueryKey());
+            setReturnValue(new GetQueryKeyResult(response.getQueryKey()));
         }
         
         @Override
@@ -485,6 +486,19 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
             
             setException(new DHTBackendException(nodeId, dst, message, e));
+        }
+    }
+    
+    private static class GetQueryKeyResult implements Result {
+        
+        private final QueryKey queryKey;
+        
+        public GetQueryKeyResult(QueryKey queryKey) {
+            this.queryKey = queryKey;
+        }
+        
+        public QueryKey getQueryKey() {
+            return queryKey;
         }
     }
 }

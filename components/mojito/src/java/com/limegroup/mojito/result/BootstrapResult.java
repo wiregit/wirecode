@@ -26,7 +26,7 @@ import com.limegroup.mojito.routing.Contact;
  * BootstrapResults are fired during bootstrapping and after
  * bootstrapping has finished
  */
-public class BootstrapResult {
+public class BootstrapResult implements Result {
     
     /**
      * Various types of Bootstrap Events

@@ -16,31 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package com.limegroup.mojito.messages;
 
-import java.util.Collection;
-
-import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValueEntity;
+package com.limegroup.mojito.result;
 
 /**
- * An interface for FindValueResponse implementations
+ * 
  */
-public interface FindValueResponse extends LookupResponse {
-    
-    /**
-     * Returns a Collection of KUIDs that a Node has to offer
-     */
-    public Collection<KUID> getKeys();
-    
-    /**
-     * Returns a Collection of DHTValueEntity(s)
-     */
-    public Collection<DHTValueEntity> getValues();
-    
-    /**
-     * Returns the request load for this key
-     */
-    public float getRequestLoad();
+public interface Result {
+
 }
