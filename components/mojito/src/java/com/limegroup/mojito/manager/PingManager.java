@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -33,11 +32,11 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.AbstractDHTFuture;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.handler.response.PingResponseHandler;
+import com.limegroup.mojito.handler.response.PingResponseHandler.PingIterator;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.statistics.NetworkStatisticContainer;
 import com.limegroup.mojito.util.ContactUtils;
-import com.limegroup.mojito.util.EntryImpl;
 
 /**
  * The PingManager takes care of concurrent Pings and makes sure
@@ -62,49 +61,38 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Host
      */
-    public DHTFuture<PingResult> ping(SocketAddress address) {
-        if (address == null) {
-            throw new NullPointerException("SocketAddress is null");
-        }
-        return ping(null, address, Collections.singleton(address));
+    public DHTFuture<PingResult> ping(SocketAddress host) {
+        PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(host);
+        return ping(null, host, pinger);
     }
 
     public DHTFuture<PingResult> pingAddresses(Set<SocketAddress> hosts) {
-        if (hosts == null) {
-            throw new NullPointerException("Set<SocketAddress> is null");
-        }
-        return ping(null, null, hosts);
+        PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(hosts);
+        return ping(null, null, pinger);
     }
     
     /**
      * Sends a ping to the remote Node
      */
     public DHTFuture<PingResult> ping(Contact node) {
-        if (node == null) {
-            throw new NullPointerException("Contact is null");
-        }
-        return ping(null, node.getContactAddress(), Collections.singleton(node));
+        PingIterator pinger = new PingIteratorFactory.ContactPinger(node);
+        return ping(null, node.getContactAddress(), pinger);
     }
     
     /**
      * Sends a ping to the remote Node
      */
     public DHTFuture<PingResult> ping(KUID nodeId, SocketAddress address) {
-        if (address == null) {
-            throw new NullPointerException("SocketAddress is null");
-        }
-        Entry<KUID,SocketAddress> entry = new EntryImpl<KUID, SocketAddress>(nodeId, address);
-        return ping(null, address, Collections.singleton(entry));
+        PingIterator pinger = new PingIteratorFactory.EntryPinger(nodeId, address);
+        return ping(null, address, pinger);
     }
     
     /**
      * Sends a ping to the remote Node
      */
     public DHTFuture<PingResult> ping(Set<Contact> nodes) {
-        if (nodes == null) {
-            throw new NullPointerException("Set<Contact> is null");
-        }
-        return ping(null, null, nodes);
+        PingIterator pinger = new PingIteratorFactory.ContactPinger(nodes);
+        return ping(null, null, pinger);
     }
     
     /**
@@ -112,10 +100,6 @@ public class PingManager extends AbstractManager<PingResult> {
      * is a Node ID collision
      */
     public DHTFuture<PingResult> collisionPing(Contact node) {
-        if (node == null) {
-            throw new NullPointerException("Contact is null");
-        }
-        
         return collisionPing(node.getContactAddress(), Collections.singleton(node));
     }
     
@@ -123,10 +107,6 @@ public class PingManager extends AbstractManager<PingResult> {
      * 
      */
     public DHTFuture<PingResult> collisionPing(Set<Contact> nodes) {
-        if (nodes == null) {
-            throw new NullPointerException("Set<Contact> is null");
-        }
-        
         return collisionPing(null, nodes);
     }
     
@@ -136,7 +116,8 @@ public class PingManager extends AbstractManager<PingResult> {
      */
     private DHTFuture<PingResult> collisionPing(SocketAddress key, Set<Contact> nodes) {
         Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
-        return ping(sender, key, nodes);
+        PingIterator pinger = new PingIteratorFactory.CollisionPinger(context, sender, nodes);
+        return ping(sender, key, pinger);
     }
     
     /**
@@ -146,13 +127,13 @@ public class PingManager extends AbstractManager<PingResult> {
      * @param nodeId The remote Node's KUID (can be null)
      * @param key The remote Node's address
      */
-    private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, Set<?> nodes) {
+    private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, PingIterator pinger) {
         PingFuture future;
         synchronized (futureMap) {
             future = (key != null ? futureMap.get(key) : null);
 
             if (future == null) {
-                PingResponseHandler handler = new PingResponseHandler(context, sender, nodes);
+                PingResponseHandler handler = new PingResponseHandler(context, sender, pinger);
 
                 future = new PingFuture(key, handler);
                 if (key != null) {

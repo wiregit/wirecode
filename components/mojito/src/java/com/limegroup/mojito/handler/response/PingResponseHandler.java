@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,14 +32,11 @@ import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTBadResponseException;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.messages.MessageID;
-import com.limegroup.mojito.messages.PingRequest;
 import com.limegroup.mojito.messages.PingResponse;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.result.PingResult;
 import com.limegroup.mojito.routing.Contact;
-import com.limegroup.mojito.settings.ContextSettings;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.util.ContactUtils;
 
@@ -59,56 +53,26 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
     private int maxParallelPingFailures;
     
-    private Contact sender;
+    private final Contact sender;
     
     private int active = 0;
     
     private int failures = 0;
     
-    private Pinger pinger = null;
+    private final PingIterator pinger;
     
     private Object lock = new Object();
     
-    public PingResponseHandler(Context context, Set<?> nodes) {
-        this(context, null, nodes);
+    public PingResponseHandler(Context context, PingIterator pinger) {
+        this(context, null, pinger);
     }
     
     @SuppressWarnings("unchecked")
-    public PingResponseHandler(Context context, Contact sender, Set<?> nodes) {
+    public PingResponseHandler(Context context, Contact sender, PingIterator pinger) {
         super(context);
         
-        // Node ID collision test Ping
-        if (sender != null && ContextSettings.ASSERT_COLLISION_PING.getValue()) {
-            assertCollisionPing(context, sender, nodes);
-        }
-        
-        // Check only the first element and assume 
-        // they're all of the same type.
-        for (Object o : nodes) {
-            if (o instanceof Contact) {
-                pinger = new ContactPinger((Set<Contact>)nodes);
-            } else if (o instanceof SocketAddress) {
-                pinger = new SocketAddressPinger((Set<SocketAddress>)nodes);
-            } else if (o instanceof Entry) {
-                Entry e = (Entry)o;
-                if (!(e.getKey() instanceof KUID)
-                        || !(e.getValue() instanceof SocketAddress)) {
-                    throw new IllegalArgumentException("Must be a Set of Entry<KUID, SocketAddress>");
-                }
-                pinger = new EntryPinger((Set<Entry<KUID,SocketAddress>>)nodes);
-            } else {
-                throw new IllegalArgumentException("Must be a Set of Contacts, SocketAddresses or Map.Entry<KUID, SocketAddress>");
-            }
-            
-            break;
-        }
-        
-        if (pinger == null) {
-            assert (nodes.isEmpty());
-            pinger = new NullPinger();
-        }
-        
         this.sender = sender;
+        this.pinger = pinger;
         
         setParallelism(-1);
         setMaxParallelPingFailures(-1);
@@ -145,13 +109,14 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     protected void start() throws DHTException {
         super.start();
         
-        if (!hasNext()) {
+        if (!pinger.hasNext()) {
             throw new DHTException("No hosts to ping");
         }
         
         try {
             synchronized (lock) {
-                pingNext(new DHTException("All SocketAddresses were invalid and there are no Hosts left to Ping"));
+                pingNextAndThrowIfDone(new DHTException(
+                        "All SocketAddresses were invalid and there are no Hosts left to Ping"));
             }
         } catch (IOException e) {
             throw new DHTException(e);
@@ -175,7 +140,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         BigInteger estimatedSize = response.getEstimatedSize();
         
         if (node.getContactAddress().equals(externalAddress)) {
-            pingNext(new DHTBadResponseException(node + " is trying to set our external address to its address!"));
+            pingNextAndThrowIfDone(new DHTBadResponseException(node 
+                    + " is trying to set our external address to its address!"));
             return;
         }
         
@@ -188,7 +154,8 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
             // actual Node ID
             
             if (sender == null) {
-                pingNext(new DHTBadResponseException(node + " is trying to spoof our Node ID"));
+                pingNextAndThrowIfDone(new DHTBadResponseException(node 
+                        + " is trying to spoof our Node ID"));
             } else {
                 setReturnValue(new PingResult(node, externalAddress, estimatedSize, time));
             }
@@ -220,7 +187,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
                 fireTimeoutException(nodeId, dst, message, time);
             } // else wait for the last response, timeout or error
         } else {
-            pingNext(createTimeoutException(nodeId, dst, message, time));
+            pingNextAndThrowIfDone(createTimeoutException(nodeId, dst, message, time));
         }
     }
     
@@ -240,7 +207,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
             } catch (IOException err) {
                 LOG.error("IOException", err);
                 
-                if (!hasNext()) {
+                if (!pinger.hasNext()) {
                     setException(new DHTException(err));
                 }
             }
@@ -249,21 +216,16 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         }
     }
     
-    @SuppressWarnings("unchecked")
-    private void ping(KUID nodeId, SocketAddress dst) throws IOException {
-        PingRequest request = null;
-        
-        if (sender == null) {
-            // Regular Ping
-            request = context.getMessageHelper().createPingRequest(dst);
-        } else {
-            // Node ID collision test Ping
-            request = context.getMessageFactory().createPingRequest(
-                    sender, MessageID.createWithSocketAddress(dst));
+    private void pingNextAndThrowIfDone(DHTException e) throws IOException {
+        while(pinger.hasNext() && canMore()) {
+            if (pinger.pingNext(context, this)) {
+                active++;
+            }
         }
         
-        context.getMessageDispatcher().send(nodeId, dst, request, this);
-        active++;
+        if (!hasActive()) {
+            setException(e);
+        }
     }
     
     private void response(Contact node) {
@@ -275,16 +237,6 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         failures++;
     }
     
-    private void pingNext(DHTException e) throws IOException {
-        while(hasNext() && canMore()) {
-            next();
-        }
-        
-        if (!hasActive()) {
-            setException(e);
-        }
-    }
-    
     private boolean canMore() {
         return active < getParallelism();
     }
@@ -294,109 +246,25 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     private boolean giveUp() {
-        return (!hasNext() || failures >= getMaxParallelPingFailures());
+        return (!pinger.hasNext() || failures >= getMaxParallelPingFailures());
     }
     
-    private boolean hasNext() {
-        return pinger.hasNext();
-    }
-    
-    private void next() throws IOException {
-        pinger.next();
-    }
-    
-    private static void assertCollisionPing(Context context, Contact sender, Set<?> nodes) {
+    /**
+     * The PingIterator interfaces allows PingResponseHandler to
+     * send ping requests to any type of contacts like SocketAddress
+     * or an actual Contact
+     */
+    public static interface PingIterator {
         
-        KUID localId = context.getLocalNodeID();
-        
-        if (!ContactUtils.isCollisionPingSender(localId, sender)) {
-            throw new IllegalArgumentException(sender + " is not a valid collision ping Contact");
-        }
-        
-        for (Object o : nodes) {
-            if (!(o instanceof Contact)) {
-                throw new IllegalArgumentException("Must be a Set of Contacts");
-            }
-            
-            Contact node = (Contact)o;
-            if (!localId.equals(node.getNodeID())) {
-                throw new IllegalArgumentException(node + " must have the same ID as the local Node ID: " + localId);
-            }
-        }
-    }
-    
-    private static interface Pinger {
+        /**
+         * Returns true if there are more elements to ping
+         */
         public boolean hasNext();
         
-        public void next() throws IOException;
-    }
-    
-    private class ContactPinger implements Pinger {
-        
-        private Iterator<Contact> it = null;
-        
-        private ContactPinger(Set<Contact> nodes) {
-            it = nodes.iterator();
-        }
-        
-        public boolean hasNext() {
-            return it.hasNext();
-        }
-        
-        public void next() throws IOException {
-            Contact node = it.next();
-            ping(node.getNodeID(), node.getContactAddress());
-        }
-    }
-    
-    private class SocketAddressPinger implements Pinger {
-        private Iterator<SocketAddress> it = null;
-        
-        private SocketAddressPinger(Set<SocketAddress> addresses) {
-            it = addresses.iterator();
-        }
-        
-        public boolean hasNext() {
-            return it.hasNext();
-        }
-        
-        public void next() throws IOException {
-            SocketAddress addr = it.next();
-            ping(null, addr);
-        }
-    }
-    
-    private class EntryPinger implements Pinger {
-        
-        private Iterator<Entry<KUID, SocketAddress>> it = null;
-        
-        private EntryPinger(Set<Entry<KUID, SocketAddress>> entries) {
-            it = entries.iterator();
-        }
-        
-        public boolean hasNext() {
-            return it.hasNext();
-        }
-        
-        public void next() throws IOException {
-            Entry<KUID, SocketAddress> entry = it.next();
-            KUID nodeId = entry.getKey();
-            SocketAddress addr = entry.getValue();
-            ping(nodeId, addr);
-        }
-    }
-    
-    private class NullPinger implements Pinger {
-        
-        private NullPinger() {
-        }
-        
-        public boolean hasNext() {
-            return false;
-        }
-        
-        public void next() throws IOException {
-            throw new UnsupportedOperationException();
-        }
+        /**
+         * Sends a ping to the next element
+         */
+        public boolean pingNext(Context context, 
+                PingResponseHandler responseHandler) throws IOException;
     }
 }
