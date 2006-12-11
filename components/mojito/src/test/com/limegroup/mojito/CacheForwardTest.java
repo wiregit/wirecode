@@ -26,6 +26,7 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import junit.framework.TestSuite;
 
@@ -36,8 +37,8 @@ import com.limegroup.mojito.db.DHTValue;
 import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.db.DHTValueType;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.handler.CallableResponseHandler;
 import com.limegroup.mojito.result.PingResult;
+import com.limegroup.mojito.result.Result;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.routing.impl.LocalContact;
@@ -98,15 +99,19 @@ public class CacheForwardTest extends BaseTestCase {
             
             // Get the QueryKey...
             Class clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
-            Constructor<CallableResponseHandler<QueryKey>> con 
+            Constructor<Callable<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
-            CallableResponseHandler<QueryKey> handler 
-                = con.newInstance(context2, context1.getLocalNode());
+            Callable<Result> handler = con.newInstance(context2, context1.getLocalNode());
             
             try {
-                QueryKey queryKey = handler.call();
+                Result result = handler.call();
+                clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyResult");
+                Method m = clazz.getDeclaredMethod("getQueryKey", new Class[0]);
+                m.setAccessible(true);
+                
+                QueryKey queryKey = (QueryKey)m.invoke(result, new Object[0]);
                 assertNotNull(queryKey);
             } catch (DHTException err) {
                 fail("DHT-1 did not return a QueryKey", err);
