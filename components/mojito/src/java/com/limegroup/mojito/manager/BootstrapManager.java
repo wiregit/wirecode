@@ -20,7 +20,6 @@
 package com.limegroup.mojito.manager;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -53,10 +52,12 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     
     private static final Log LOG = LogFactory.getLog(BootstrapManager.class);
     
-    private Map<KUID, BootstrapFuture> futures = Collections.emptyMap();
-    
-    /** The lock Object */
-    private Object lock = new Object();
+    /**
+     * The BootstrapFuture object that will contain the result
+     * of our bootstrap.
+     * LOCKING: this
+     */
+    private BootstrapFuture future;
     
     /** Whether or not we're bootstrapped */
     private volatile boolean bootstrapped = false;
@@ -66,19 +67,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     }
     
     /**
-     * Returns the lock Object
-     */
-    private Object getBootstrapLock() {
-        return lock;
-    }
-    
-    /**
      * Returns true if this Node is currently bootstrapping
      */
-    public boolean isBootstrapping() {
-        synchronized (getBootstrapLock()) {
-            return !futures.isEmpty();
-        }
+    public synchronized boolean isBootstrapping() {
+        return future == null || (!future.isCancelled() && !future.isDone()); 
     }
     
     /**
@@ -99,14 +91,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * Stops bootstrapping if there are any bootstrapping processes active
      */
-    public void stop() {
-        synchronized (getBootstrapLock()) {
-            for (BootstrapFuture future : futures.values()) {
-                future.cancel(true);
-            }
-            
-            futures = Collections.emptyMap();
-        }
+    public synchronized void stop() {
+        if (future != null)
+            future.cancel(true);
     }
     
     /**
@@ -123,27 +110,22 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         if (node == null) {
             throw new NullPointerException("Contact is null");
         }
-        
+
         if (node.equals(context.getLocalNode())) {
             throw new IllegalArgumentException("Cannot bootstrap from local Node");
         }
-        
-        synchronized (getBootstrapLock()) {
-            BootstrapFuture future = futures.get(node.getNodeID());
-            if (future == null) {
-                
-                // Make sure there is only one bootstrap process active!
-                // Having parallel bootstrap proccesses is too expensive!
-                deregister();
-                
-                BootstrapProcess process = new BootstrapProcess(node);
-                future = new BootstrapFuture(process);
-                futures = Collections.singletonMap(node.getNodeID(), future);
-                context.getDHTExecutorService().execute(future);
-            }
-            
-            return future;
+
+        // Make sure there is only one bootstrap process active!
+        // Having parallel bootstrap proccesses is too expensive!
+        deregister();
+        BootstrapProcess process = new BootstrapProcess(node);
+        BootstrapFuture f = new BootstrapFuture(process);
+        synchronized (this) {
+            future = f;
         }
+        context.getDHTExecutorService().execute(f);
+
+        return f;
     }
     
     /**
@@ -163,7 +145,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         
         private boolean retriedBootstrap = false;
         
-        private Contact node;
+        private final Contact node;
         
         public BootstrapProcess(Contact node) {
             this.node = node;
