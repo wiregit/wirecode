@@ -19,6 +19,7 @@
 
 package com.limegroup.mojito.manager;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -36,23 +37,15 @@ import com.limegroup.mojito.result.Result;
  */
 abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V> {
     
-    private Map<KUID, LookupFuture> futureMap = new HashMap<KUID, LookupFuture>();
+    private final Map<KUID, LookupFuture> futureMap = 
+        Collections.synchronizedMap(new HashMap<KUID, LookupFuture>());
     
     public AbstractLookupManager(Context context) {
         super(context);
     }
     
     public void init() {
-        synchronized(getLookupLock()) {
-            futureMap.clear();
-        }
-    }
-    
-    /**
-     * Returns the lock Object
-     */
-    private Object getLookupLock() {
-        return futureMap;
+        futureMap.clear();
     }
     
     /**
@@ -67,19 +60,20 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
      * number of results
      */
     private DHTFuture<V> lookup(KUID lookupId, int count) {
-        synchronized(getLookupLock()) {
-            LookupFuture future = futureMap.get(lookupId);
+        LookupFuture future;
+        synchronized(futureMap) {
+            future = futureMap.get(lookupId);
             if (future == null) {
                 Callable<V> handler = createLookupHandler(lookupId, count);
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
                 
-                context.getDHTExecutorService().execute(future);
-            }
-            
-            return future;
+            } else
+                return future;
         }
+        context.getDHTExecutorService().execute(future);
+        return future;
     }
     
     /**
@@ -95,9 +89,9 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
      */
     private class LookupFuture extends AbstractDHTFuture<V> {
 
-        private KUID lookupId;
+        private final KUID lookupId;
         
-        private Callable<V> handler;
+        private final Callable<V> handler;
         
         public LookupFuture(KUID lookupId, Callable<V> handler) {
             super(handler);
@@ -107,9 +101,7 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
 
         @Override
         protected void deregister() {
-            synchronized(getLookupLock()) {
-                futureMap.remove(lookupId);
-            }
+            futureMap.remove(lookupId);
         }
 
         public String toString() {
