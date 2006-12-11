@@ -216,6 +216,10 @@ public class Tag {
         return false;
     }
     
+    public String toString() {
+        return "Tag for " + message.toString();
+    }
+    
     /**
      * The Receipt class keeps track of requests we've sent and 
      * handles the response messages.
