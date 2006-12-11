@@ -905,6 +905,14 @@ public class RouteTableImpl implements RouteTable {
      * @see com.limegroup.mojito.routing.RouteTable#purge()
      */
     public synchronized void purge() {
+        purge(-1L);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.routing.RouteTable#purge(long)
+     */
+    public synchronized void purge(long lastContactTime) {
         if (localNode == null) {
             throw new IllegalStateException("RouteTable is not initialized");
         }
@@ -921,7 +929,7 @@ public class RouteTableImpl implements RouteTable {
         // true rebuild. That means forget the cached Contacts! 
         // This is more about merging Buckets than actually rebuilding
         // the RouteTable.
-        rebuild(false);
+        rebuild(false, lastContactTime);
     }
     
     /*
@@ -934,7 +942,7 @@ public class RouteTableImpl implements RouteTable {
         }
         
         // Do a true RouteTable rebuild.
-        rebuild(true);
+        rebuild(true, -1L);
     }
     
     /**
@@ -942,7 +950,7 @@ public class RouteTableImpl implements RouteTable {
      * current RouteTable and re-adds the Contacts from
      * the copies.
      */
-    private void rebuild(boolean isTrueRebuild) {
+    private void rebuild(boolean isTrueRebuild, long lastContactTime) {
         
         // Get the local Node (clear() will set it to null)
         Contact localNode = this.localNode;
@@ -967,8 +975,19 @@ public class RouteTableImpl implements RouteTable {
         boolean removed = activeNodes.remove(localNode);
         assert (removed);
         
+        // Get the current time
+        long currentTime = System.currentTimeMillis();
+        
         // Re-add the active Contacts
         for (Contact node : activeNodes) {
+            
+            // Drop all Contacts that haven't send us messages
+            // (requests or responses) for longer than 'lastContactTime'
+            if (lastContactTime >= 0L 
+                    && (currentTime - node.getTimeStamp()) < lastContactTime) {
+                continue;
+            }
+
             if (isTrueRebuild) {
                 node.unknown();
             }
@@ -979,6 +998,14 @@ public class RouteTableImpl implements RouteTable {
         // And re-add the cached Contacts
         if (isTrueRebuild) {
             for (Contact node : cachedNodes) {
+                
+                // Drop all Contacts that haven't send us messages
+                // (requests or responses) for longer than 'lastContactTime'
+                if (lastContactTime >= 0L 
+                        && (currentTime - node.getTimeStamp()) < lastContactTime) {
+                    continue;
+                }
+                
                 node.unknown();
                 add(node);
             }
