@@ -26,6 +26,10 @@ public class ContentResponseData implements Serializable {
         this.message = message;
     }
     
+    protected ContentResponseData() {
+    	this.created = System.currentTimeMillis();
+    }
+    
     /** Returns if this is OK. */
     public boolean isOK() {
         return ok;
