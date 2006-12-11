@@ -70,7 +70,12 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      * Returns true if this Node is currently bootstrapping
      */
     public synchronized boolean isBootstrapping() {
-        return future == null || (!future.isCancelled() && !future.isDone()); 
+        // A Future that was cancelled is also done
+        if (future == null || future.isDone() /*|| future.isCancelled() */) {
+            return false;
+        }
+        
+        return true; 
     }
     
     /**
@@ -92,8 +97,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      * Stops bootstrapping if there are any bootstrapping processes active
      */
     public synchronized void stop() {
-        if (future != null)
+        if (future != null) {
             future.cancel(true);
+            future = null;
+        }
     }
     
     /**
