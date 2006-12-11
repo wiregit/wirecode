@@ -74,9 +74,7 @@ public class Main {
             
             if (args.length >= 4) {
                 bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
-            }/* else {
-                bootstrapHost = new InetSocketAddress("localhost", port);
-            }*/
+            }
         }
         
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -182,6 +180,7 @@ public class Main {
             start = 1;
             
             // 1...n bootstraps from 0
+            bootstrapHost = new InetSocketAddress("localhost", port);
         }
         
         for(int i = start; i < dhts.size(); i++) {
