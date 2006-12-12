@@ -20,9 +20,9 @@ import com.limegroup.mojito.settings.NetworkSettings;
 
 public class PingManagerTest extends BaseTestCase {
     
-    /*static {
+    static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }*/
+    }
     
     public PingManagerTest(String name){
         super(name);
@@ -76,8 +76,8 @@ public class PingManagerTest extends BaseTestCase {
                 fail(e);
             }
         } finally {
-            if (dht1 != null) { dht1.stop(); }
-            if (dht2 != null) { dht2.stop(); }
+            if (dht1 != null) { dht1.close(); }
+            if (dht2 != null) { dht2.close(); }
         }
     }
 }

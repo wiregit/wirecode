@@ -118,8 +118,8 @@ public class CacheForwardTest extends BaseTestCase {
             }
             
         } finally {
-            if (dht1 != null) { dht1.stop(); }
-            if (dht2 != null) { dht2.stop(); }
+            if (dht1 != null) { dht1.close(); }
+            if (dht2 != null) { dht2.close(); }
         }
     }
     
@@ -372,7 +372,7 @@ public class CacheForwardTest extends BaseTestCase {
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {
-                dht.stop();
+                dht.close();
             }
         }
     }

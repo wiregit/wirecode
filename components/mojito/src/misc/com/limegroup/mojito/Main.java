@@ -247,7 +247,7 @@ public class Main {
             try {
                 if (line.indexOf("quit") >= 0) {
                     for(int i = 0; i < dhts.size(); i++) {
-                        dhts.get(i).stop();
+                        dhts.get(i).close();
                     }
                     System.exit(0);
                 } else if (line.indexOf("switch") >= 0) {
@@ -261,7 +261,7 @@ public class Main {
                     CommandHandler.handle(dht, line, out);
                 } else if (line.indexOf("load") >= 0) {
                     MojitoDHT d = CommandHandler.load(dht, line.split(" "), out);
-                    dht.stop();
+                    dht.close();
                     dhts.set(current, d);
                     d.getDHTExecutorService().setThreadFactory(
                             dht.getDHTExecutorService().getThreadFactory());

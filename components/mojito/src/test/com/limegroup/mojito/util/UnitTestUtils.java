@@ -3,7 +3,6 @@ package com.limegroup.mojito.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 
 import com.limegroup.mojito.Context;
@@ -23,7 +22,7 @@ public class UnitTestUtils {
         bmField.setAccessible(true);
         
         BootstrapManager bootstrapManager = (BootstrapManager)bmField.get(context);
-        Field futureField = BootstrapManager.class.getDeclaredField("futures");
+        Field futureField = BootstrapManager.class.getDeclaredField("future");
         futureField.setAccessible(true);
         
         if (nodeId != null) {
@@ -37,9 +36,9 @@ public class UnitTestUtils {
                 }
             });
             
-            futureField.set(bootstrapManager, Collections.singletonMap(nodeId, future));
+            futureField.set(bootstrapManager, future);
         } else {
-            futureField.set(bootstrapManager, Collections.emptyMap());
+            futureField.set(bootstrapManager, null);
         }
     }
     

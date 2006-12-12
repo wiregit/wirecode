@@ -71,7 +71,7 @@ public abstract class DHTTestCase extends BaseTestCase {
     
     public static void globalTearDown() throws Exception {
         for(MojitoDHT dht : DHT_LIST) {
-            dht.stop();
+            dht.close();
         }
         RouterService.shutdown();
     }

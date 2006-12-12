@@ -93,7 +93,7 @@ public class MessageDispatcherTest extends BaseTestCase {
             assertTrue(sent);
             
         } finally {
-            dht.stop();
+            dht.close();
         }
     }
 }

@@ -59,7 +59,7 @@ public class ContextTest extends BaseTestCase {
             Random generator = new Random();
             int index = generator.nextInt(dhts.size());
             MojitoDHT down = dhts.get(index);
-            down.stop();
+            down.close();
             
             // Check now if the expected number of Nodes
             // was notified about the shutdown
@@ -84,7 +84,7 @@ public class ContextTest extends BaseTestCase {
             assertEquals(expected, count);
         } finally {
             for (MojitoDHT dht : dhts) {
-                dht.stop();
+                dht.close();
             }
         }
     }

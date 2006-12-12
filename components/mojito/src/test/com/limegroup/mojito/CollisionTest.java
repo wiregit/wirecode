@@ -108,15 +108,15 @@ public class CollisionTest extends BaseTestCase {
             
         } finally {
             if (bootstrap != null) {
-                bootstrap.stop();
+                bootstrap.close();
             }
             
             if (original != null) {
-                original.stop();
+                original.close();
             }
             
             if (spoofer != null) {
-                spoofer.stop();
+                spoofer.close();
             }
         }
     }
@@ -183,15 +183,15 @@ public class CollisionTest extends BaseTestCase {
         } finally {
             
             if (bootstrap != null) {
-                bootstrap.stop();
+                bootstrap.close();
             }
             
             if (original != null) {
-                original.stop();
+                original.close();
             }
             
             if (replacement != null) {
-                replacement.stop();
+                replacement.close();
             }
         }
     }

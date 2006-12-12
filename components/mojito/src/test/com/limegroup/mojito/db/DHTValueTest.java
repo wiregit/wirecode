@@ -104,7 +104,7 @@ public class DHTValueTest extends BaseTestCase {
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {
-                dht.stop();
+                dht.close();
             }
         }
     }

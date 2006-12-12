@@ -199,6 +199,8 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void stop() {}
         
+        public void close() {}
+        
         public void setHostFilter(HostFilter hostFilter) {
         }
 

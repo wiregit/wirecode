@@ -141,7 +141,7 @@ abstract class AbstractDHTController implements DHTController {
         dhtNodeAdder.stop();
         
         if (dht != null) {
-            dht.stop();
+            dht.close();
         }
         
         dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));

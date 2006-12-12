@@ -68,15 +68,15 @@ public class BootstrapManagerTest extends BaseTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        BOOTSTRAP_DHT.stop();
-        TEST_DHT.stop();
+        BOOTSTRAP_DHT.close();
+        TEST_DHT.close();
     }
     
     public void testBootstrapFailure() throws Exception {
         ((Context)BOOTSTRAP_DHT).setExternalAddress(
                 new InetSocketAddress("localhost", BOOTSTRAP_DHT_PORT));
         
-        //try failure first
+        // try failure first
         BOOTSTRAP_DHT.stop();
         
         try {
@@ -89,6 +89,8 @@ public class BootstrapManagerTest extends BaseTestCase {
         BootstrapResult result = TEST_DHT.bootstrap(BOOTSTRAP_DHT.getLocalNode()).get();
         assertEquals(BootstrapResult.ResultType.BOOTSTRAP_FAILED, result.getResultType());
         assertEquals(BOOTSTRAP_DHT.getLocalNodeID(), result.getContact().getNodeID());
+        
+        BOOTSTRAP_DHT.close();
     }
 
     public void testBootstrapFromList() throws Exception{

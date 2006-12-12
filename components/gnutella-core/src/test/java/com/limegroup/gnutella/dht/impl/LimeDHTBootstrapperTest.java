@@ -58,7 +58,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     protected void tearDown() throws Exception {
         bootstrapper.stop();
         dhtContext.getRouteTable().clear();
-        dhtContext.stop();
+        dhtContext.close();
     }
     
     public void testAddBootstrapHost() throws Exception{

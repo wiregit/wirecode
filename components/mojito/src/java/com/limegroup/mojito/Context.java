@@ -755,10 +755,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         valueManager.start();
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#stop()
-     */
     public synchronized void stop() {
         if (!isRunning()) {
             return;
@@ -809,10 +805,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         executorService.stop();
         messageDispatcher.stop();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#close()
+     */
+    public synchronized void close() {
+        stop();
         
         bootstrapManager.setBootstrapped(false);
-        
         estimator.clear();
+        
+        setExternalPort(0);
     }
     
     /**

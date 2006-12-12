@@ -109,16 +109,6 @@ public interface MojitoDHT {
     public void bind(SocketAddress address) throws IOException;
     
     /**
-     * Returns whether or not this DHT is running
-     */
-    public boolean isRunning();
-    
-    /**
-     * Returns whether or not this DHT is bootstrapped
-     */
-    public boolean isBootstrapped();
-    
-    /**
      * Starts the DHT
      */
     public void start();
@@ -127,6 +117,21 @@ public interface MojitoDHT {
      * Stops the DHT
      */
     public void stop();
+    
+    /**
+     * Closes the DHT instance and releases all resources
+     */
+    public void close();
+    
+    /**
+     * Returns whether or not this DHT is running
+     */
+    public boolean isRunning();
+    
+    /**
+     * Returns whether or not this DHT is bootstrapped
+     */
+    public boolean isBootstrapped();
     
     /**
      * Returns the approximate size of the DHT
