@@ -121,7 +121,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     
     protected boolean nextStep(ResponseMessage message) throws IOException {
         if (message instanceof FindNodeResponse) 
-            return super.nextStep(message);
+            return handleNodeResponse((FindNodeResponse)message);
         
         if (!(message instanceof FindValueResponse))
             throw new IllegalArgumentException("this is a find value handler");

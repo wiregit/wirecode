@@ -386,10 +386,16 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         finishLookupIfDone();
     }
     
-    protected boolean nextStep(ResponseMessage message) throws IOException{
-        if (!(message instanceof FindNodeResponse))
-            throw new IllegalArgumentException("this is a FindNodeHandler");
-        FindNodeResponse response = (FindNodeResponse)message;
+    /**
+     * @return if the next step in the lookup should be performed.
+     */
+    protected abstract boolean nextStep(ResponseMessage message) throws IOException;
+    
+    /**
+     * Handles a node response message.  This type of message is handled in the same
+     * way regardless of the type of lookup.
+     */
+    protected final boolean handleNodeResponse(FindNodeResponse response) throws IOException{
         Contact sender = response.getContact();
         Collection<Contact> nodes = response.getNodes();
         for(Contact node : nodes) {

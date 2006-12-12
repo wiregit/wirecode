@@ -27,6 +27,7 @@ import java.util.Map;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -134,4 +135,13 @@ public class FindNodeResponseHandler
     protected LookupRequest createLookupRequest(SocketAddress addr) {
         return context.getMessageHelper().createFindNodeRequest(addr, lookupId);
     }
+
+    @Override
+    protected boolean nextStep(ResponseMessage message) throws IOException {
+        if (!(message instanceof FindNodeResponse))
+            throw new IllegalArgumentException("this is find node handler");
+        return handleNodeResponse((FindNodeResponse)message);
+    }
+    
+    
 }
