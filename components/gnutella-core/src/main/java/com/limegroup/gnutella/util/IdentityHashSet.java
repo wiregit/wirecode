@@ -131,7 +131,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 *
 	 * @return a shallow copy of this set.
 	 */
-	public Object clone() {
+	@SuppressWarnings("unchecked")
+    public Object clone() {
 		try { 
 			IdentityHashSet<E> newSet = (IdentityHashSet<E>) super.clone();
 			newSet.map = (IdentityHashMap<E, Object>) map.clone();
@@ -168,7 +169,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * Reconstitute the <tt>HashSet</tt> instance from a stream (that is,
 	 * deserialize it).
 	 */
-	private void readObject(java.io.ObjectInputStream s)
+	@SuppressWarnings("unchecked")
+    private void readObject(java.io.ObjectInputStream s)
 	throws java.io.IOException, ClassNotFoundException {
 //		Read in any hidden serialization magic
 		s.defaultReadObject();
