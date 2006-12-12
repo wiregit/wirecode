@@ -19,13 +19,10 @@
 
 package com.limegroup.mojito.handler.response;
 
-import static com.limegroup.mojito.handler.response.LookupResponseHandler.LookupType.FIND_NODE;
-import static com.limegroup.mojito.handler.response.LookupResponseHandler.LookupType.FIND_VALUE;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,13 +44,9 @@ import com.limegroup.gnutella.util.TrieUtils;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.db.DHTValueEntity;
 import com.limegroup.mojito.exceptions.DHTBackendException;
 import com.limegroup.mojito.exceptions.DHTException;
-import com.limegroup.mojito.messages.FindNodeResponse;
-import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
-import com.limegroup.mojito.messages.MessageHelper;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
 import com.limegroup.mojito.result.Result;
@@ -75,45 +68,31 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
-    /**
-     * The type of the lookup
-     */
-    public static enum LookupType {
-        FIND_NODE,
-        FIND_VALUE;
-    }
-    
     /** The ID we're looking for */
-    private KUID lookupId;
+    protected final KUID lookupId;
     
     /** The ID which is furthest away from the lookupId */
-    private KUID furthestId;
+    private final KUID furthestId;
     
     /** Set of queried KUIDs */
-    private Set<KUID> queried = new HashSet<KUID>();
+    private final Set<KUID> queried = new HashSet<KUID>();
     
     /** Trie of Contacts we're going to query */
-    private Trie<KUID, Contact> toQuery 
+    protected final Trie<KUID, Contact> toQuery 
         = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    private Trie<KUID, Entry<Contact, QueryKey>> responses 
+    private final Trie<KUID, Entry<Contact, QueryKey>> responses 
         = new PatriciaTrie<KUID, Entry<Contact, QueryKey>>(KUID.KEY_ANALYZER);
     
     /** A Map we're using to count the number of hops */
-    private Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
+    private final Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
     
     /** The k-closest IDs we selected to start the lookup */
-    private Set<KUID> routeTableNodes = new LinkedHashSet<KUID>();
-    
-    /** Collection of Contacts that collide with our Node ID */
-    private Collection<Contact> collisions = new LinkedHashSet<Contact>();
-    
-    /** Collection of FindValueResponses if this is a FIND_VALUE lookup  */
-    private Collection<FindValueResponse> valueResponses = null;
+    private final Set<KUID> routeTableNodes = new LinkedHashSet<KUID>();
     
     /** A Set of Contacts that have the same Node ID as the local Node */
-    private Set<Contact> forcedContacts = new LinkedHashSet<Contact>();
+    private final Set<Contact> forcedContacts = new LinkedHashSet<Contact>();
 
     /** The number of currently active (parallel) searches */
     private int activeSearches = 0;
@@ -122,7 +101,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     private int responseCount = 0;
     
     /** The current hop */
-    private int currentHop = 0;
+    protected int currentHop = 0;
     
     /** The expected result set size (aka K) */
     private int resultSetSize;
@@ -130,17 +109,11 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     /** The number of parallel lookups */
     private int parellelism;
 
-    /** The type of the lookup */
-    private LookupType lookupType;
-    
     /**
      * Whether or not this lookup tries to return k live nodes.
      * This will increase the size of the set of hosts to query.
      */
     private boolean selectAliveNodesOnly = false;
-    
-    /** Whether or not this is an exhaustive lookup. */
-    private boolean exchaustive = false;
     
     /** The time when this lookup started */
     private long startTime = -1L;
@@ -163,10 +136,9 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     /** A lock to manage parallel lookups */
     private Object lock = new Object();
     
-    public LookupResponseHandler(Context context, LookupType lookupType, KUID lookupId) {
+    protected LookupResponseHandler(Context context, KUID lookupId) {
         super(context);
         
-        this.lookupType = lookupType;
         this.lookupId = lookupId;
         this.furthestId = lookupId.invert();
         
@@ -174,27 +146,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         setParallelism(-1); // Default number of parallel lookups
         setResultSetSize(-1); // Default result set size
         setDeleteFurthest(KademliaSettings.DELETE_FURTHEST_CONTACT.getValue());
-    }
-    
-    /**
-     * Returns the type of the lookup
-     */
-    public LookupType getLookupType() {
-        return lookupType;
-    }
-    
-    /**
-     * Returns true if this is a FIND_NODE lookup
-     */
-    public boolean isNodeLookup() {
-        return lookupType.equals(LookupType.FIND_NODE);
-    }
-    
-    /**
-     * Returns true if this is a FIND_VALUE lookup
-     */
-    public boolean isValueLookup() {
-        return lookupType.equals(LookupType.FIND_VALUE);
     }
     
     /**
@@ -230,22 +181,15 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      */
     public void setParallelism(int parellelism) {
         if (parellelism < 0) {
-            switch(getLookupType()) {
-                case FIND_NODE:
-                    this.parellelism  = KademliaSettings.FIND_NODE_PARALLEL_LOOKUPS.getValue();
-                    break;
-                case FIND_VALUE:
-                    this.parellelism = KademliaSettings.FIND_VALUE_PARALLEL_LOOKUPS.getValue();
-                    break;
-                default:
-                    throw new IllegalStateException(toString());
-            }
+            this.parellelism = getDefaultParallelism();
         } else if (parellelism > 0) {
             this.parellelism = parellelism;
         } else {
             throw new IllegalArgumentException("parellelism=" + parellelism);
         }
     }
+    
+    protected abstract int getDefaultParallelism();
     
     /**
      * Returns the number of parallel lookups this handler
@@ -269,23 +213,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      */
     public Collection<Contact> getForcedContacts() {
         return Collections.unmodifiableSet(forcedContacts);
-    }
-    
-    /**
-     * Sets whether or not this is an exhaustive lookup
-     * (works only with FIND_VALUE lookups)
-     */
-    public void setExhaustive(boolean exchaustive) {
-        if (isValueLookup()) {
-            this.exchaustive = exchaustive;
-        }
-    }
-    
-    /**
-     * Returns whether or not this is an exhaustive lookup
-     */
-    public boolean isExhaustive() {
-        return exchaustive;
     }
     
     /**
@@ -314,25 +241,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return routeTableFailures;
     }
     
-    /**
-     * Returns true if this lookup has timed out
-     */
-    private boolean isTimeout(long time) {
-        long lookupTimeout = -1L;
-        switch(getLookupType()) {
-            case FIND_NODE:
-                lookupTimeout = KademliaSettings.FIND_NODE_LOOKUP_TIMEOUT.getValue();
-                break;
-            case FIND_VALUE:
-                lookupTimeout = KademliaSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue();
-                break;
-            default:
-                throw new IllegalStateException(toString());
-        }
+    protected abstract boolean isTimeout(long time);
         
-        return lookupTimeout > 0L && time >= lookupTimeout;
-    }
-    
     /**
      * Sets whether or not only alive Contacts from the local 
      * RouteTable should be used as the lookup start Set. The
@@ -466,113 +376,13 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         
         currentHop = hop.intValue();
         
-        boolean nextStep = false;
-        if (message instanceof FindNodeResponse) {
-            nextStep = handleFindNodeResponse((FindNodeResponse)message);
-        } else if (message instanceof FindValueResponse) {
-            nextStep = handleFindValueResponse((FindValueResponse)message);
-        }
-        
-        if (nextStep) {
+        if (nextStep(message)) 
             nextLookupStep();
-        }
         
         finishLookupIfDone();
     }
     
-    private boolean handleFindNodeResponse(FindNodeResponse response) throws IOException {
-        Contact sender = response.getContact();
-        Collection<Contact> nodes = response.getNodes();
-        for(Contact node : nodes) {
-            
-            if (!ContactUtils.isValidContact(sender, node)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping invalid Contact: " + node);
-                }
-                continue;
-            }
-            
-            // Make sure we're not mixing IPv4 and IPv6 addresses.
-            // See RouteTableImpl.add() for more Info!
-            if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
-                
-                // Log as ERROR so that we're not missing this
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " is from a different IP address space than local Node");
-                }
-                continue;
-            }
-            
-            if (ContactUtils.isLocalContact(context, node, collisions)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping colliding Contact: " + node);
-                }
-                
-                continue;
-            }
-            
-            if (!isQueried(node) 
-                    && !isYetToBeQueried(node)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding " + node + " to the yet-to-be queried list");
-                }
-                
-                addYetToBeQueried(node, currentHop+1);
-                
-                // Add them to the routing table as not alive
-                // contacts. We're likely going to add them
-                // anyways!
-                assert (node.isAlive() == false);
-                context.getRouteTable().add(node);
-            }
-        }
-        
-        if (!nodes.isEmpty()) {
-            addResponse(sender, response.getQueryKey());
-        }
-        
-        return true;
-    }
-    
-    private boolean handleFindValueResponse(FindValueResponse response) throws IOException {
-        Contact sender = response.getContact();
-        
-        if (!isValueLookup()) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(sender + " sent an illegal response " + response 
-                        + " for a " + getLookupType() + " lookup");
-            }
-            return true;
-        }
-        
-        Collection<KUID> keys = response.getKeys();
-        Collection<DHTValueEntity> values = response.getValues();
-        
-        if (keys.isEmpty() && values.isEmpty()) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(sender + " returned neither keys nor values for " + lookupId);
-            }
-            
-            // Continue with the lookup...
-            return true;
-        }
-        
-        if (valueResponses == null) {
-            valueResponses = new ArrayList<FindValueResponse>();
-        }
-        
-        valueResponses.add(response);
-        
-        // Terminate the FIND_VALUE lookup if it isn't
-        // an exhaustive lookup
-        if (!isExhaustive()) {
-            killActiveSearches();
-            return false;
-        }
-        
-        // Continue otherwise...
-        return true;
-    }
+    protected abstract boolean nextStep(ResponseMessage message) throws IOException;
     
     @Override
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
@@ -734,19 +544,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     protected boolean sendLookupRequest(Contact node) throws IOException {
         SocketAddress addr = node.getContactAddress();
         
-        MessageHelper messageHelper = context.getMessageHelper();
-        LookupRequest request = null;
-        switch(getLookupType()) {
-            case FIND_NODE:
-                request = messageHelper.createFindNodeRequest(addr, lookupId);
-                break;
-            case FIND_VALUE:
-                Collection<KUID> noKeys = Collections.emptySet();
-                request = messageHelper.createFindValueRequest(addr, lookupId, noKeys);
-                break;
-            default:
-                throw new IllegalStateException(toString());
-        }
+        LookupRequest request = createLookupRequest(addr);
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending " + node + " a " + request);
@@ -760,6 +558,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
         return requestWasSent;
     }
+    
+    protected abstract LookupRequest createLookupRequest(SocketAddress addr);
     
     /**
      * Calls finishLookup() if the lookup isn't already
@@ -801,7 +601,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     /**
      * Sets the 'activeSearches' counter to zero
      */
-    private void killActiveSearches() {
+    protected void killActiveSearches() {
         activeSearches = 0;
     }
     
@@ -822,7 +622,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     }
     
     /** Returns whether or not the Node has been queried */
-    private boolean isQueried(Contact node) {
+    protected boolean isQueried(Contact node) {
         return queried.contains(node.getNodeID());            
     }
     
@@ -832,13 +632,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         toQuery.remove(node.getNodeID());
     }
     
-    /** Returns whether or not the Node is in the to-query Trie */
-    private boolean isYetToBeQueried(Contact node) {
-        return toQuery.containsKey(node.getNodeID());            
-    }
-    
     /** Adds the Node to the to-query Trie */
-    private boolean addYetToBeQueried(Contact node, int hop) {
+    protected boolean addYetToBeQueried(Contact node, int hop) {
             
         if (isQueried(node)) {
             return false;
@@ -860,7 +655,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     }
     
     /** Adds the Contact-QueryKey Tuple to the response Trie */
-    private void addResponse(Contact node, QueryKey queryKey) {
+    protected void addResponse(Contact node, QueryKey queryKey) {
         
         Entry<Contact,QueryKey> entry 
             = new EntryImpl<Contact,QueryKey>(node, queryKey, true);
@@ -914,36 +709,12 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return nearest;
     }
     
-    /**
-     * Returns a Collection of FindValueResponse if this was 
-     * a FIND_VALUE lookup
-     */
-    public Collection<FindValueResponse> getValues() {
-        if (!isValueLookup()) {
-            throw new UnsupportedOperationException("This is not a FIND_VALUE lookup: " + getLookupType());
-        }
-        
-        if (valueResponses != null) {
-            return valueResponses;
-        }
-        return Collections.emptyList();
-    }
-    
-    /**
-     * Returns a Collection of Contacts that did collide with the
-     * local Node ID
-     */
-    public Collection<Contact> getCollisions() {
-        return collisions;
-    }
-    
     public String toString() {
         long time = getElapsedTime();
         boolean timeout = isTimeout(time);
         int activeSearches = getActiveSearches();
         
-        return "Type: " + getLookupType() 
-            + ", lookup: " + lookupId 
+        return ", lookup: " + lookupId 
             + ", time: " + time 
             + ", timeout: " + timeout 
             + ", activeSearches: " + activeSearches;
