@@ -83,6 +83,11 @@ public interface MojitoDHT {
     public boolean isFirewalled();
     
     /**
+     * Returns true if this Node is bound to a Network Interface
+     */
+    public boolean isBound();
+    
+    /**
      * Binds the DHT to the specified Port number and the
      * any-address
      * 
@@ -109,6 +114,11 @@ public interface MojitoDHT {
     public void bind(SocketAddress address) throws IOException;
     
     /**
+     * Returns whether or not this DHT is running
+     */
+    public boolean isRunning();
+    
+    /**
      * Starts the DHT
      */
     public void start();
@@ -122,11 +132,6 @@ public interface MojitoDHT {
      * Closes the DHT instance and releases all resources
      */
     public void close();
-    
-    /**
-     * Returns whether or not this DHT is running
-     */
-    public boolean isRunning();
     
     /**
      * Returns whether or not this DHT is bootstrapped

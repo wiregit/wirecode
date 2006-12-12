@@ -100,6 +100,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         
         private List<SocketAddress> pingedList = new ArrayList<SocketAddress>(); 
         
+        public boolean isBound() {
+            return true;
+        }
+
         public void bind(InetAddress addr, int port) throws IOException {}
 
         public void bind(int port) throws IOException {}

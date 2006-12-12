@@ -123,6 +123,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     private volatile boolean running = false;
     
+    private volatile boolean bound = false;
+    
     private DHTStats stats;
     private NetworkStatisticContainer networkStats;
     private GlobalLookupStatisticContainer globalLookupStats;
@@ -625,14 +627,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     public boolean isFirewalled() {
         return getLocalNode().isFirewalled();
     }
-
-    /**
-     * Returns whether or not the MessageDispatcher has
-     * an open DatagramChannel
-     */
-    public boolean isOpen() {
-        return messageDispatcher.isOpen();
-    }
     
     /*
      * (non-Javadoc)
@@ -679,6 +673,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     /*
      * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#isBound()
+     */
+    public synchronized boolean isBound() {
+        return bound;
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bind(int)
      */
     public synchronized void bind(int port) throws IOException {
@@ -698,7 +700,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#bind(java.net.SocketAddress)
      */
     public synchronized void bind(SocketAddress localAddress) throws IOException {
-        if (isOpen()) {
+        if (isBound()) {
             throw new IOException(getName() + " is already bound");
         }
         
@@ -722,6 +724,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         getLocalNode().nextInstanceID();
         
         messageDispatcher.bind(localAddress);
+        bound = true;
     }
     
     /*
@@ -729,7 +732,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#start()
      */
     public synchronized void start() {
-        if (!isOpen()) {
+        if (!isBound()) {
             throw new IllegalStateException(getName() + " is not bound");
         }
         
@@ -757,11 +760,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     public synchronized void stop() {
         if (!isRunning()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(getName() + " is not running");
+            }
             return;
         }
         
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Stopping " + name);
+            LOG.debug("Stopping " + getName());
         }
         
         // Shutdown the local Node
@@ -814,10 +820,18 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     public synchronized void close() {
         stop();
         
+        if (!isBound()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(getName() + " is not bound");
+            }
+            return;
+        }
+        
         bootstrapManager.setBootstrapped(false);
         estimator.clear();
         
         setExternalPort(0);
+        bound = false;
     }
     
     /**
