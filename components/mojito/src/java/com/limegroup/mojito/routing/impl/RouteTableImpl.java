@@ -952,9 +952,6 @@ public class RouteTableImpl implements RouteTable {
      */
     private void rebuild(boolean isTrueRebuild, long lastContactTime) {
         
-        // Get the local Node (clear() will set it to null)
-        Contact localNode = this.localNode;
-        
         // Get the active Contacts
         List<Contact> activeNodes = getActiveContacts();
         activeNodes = BucketUtils.sortAliveToFailed(activeNodes);
