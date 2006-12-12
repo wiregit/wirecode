@@ -22,16 +22,11 @@ package com.limegroup.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
-import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
 import com.limegroup.mojito.messages.ResponseMessage;
@@ -39,18 +34,12 @@ import com.limegroup.mojito.result.FindNodeResult;
 import com.limegroup.mojito.routing.Contact;
 import com.limegroup.mojito.settings.KademliaSettings;
 import com.limegroup.mojito.statistics.FindNodeLookupStatisticContainer;
-import com.limegroup.mojito.util.ContactUtils;
 
 /**
  * The FindNodeResponseHandler class implements FIND_NODE specific features.
  */
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeResult> {
-    
-    private static final Log LOG = LogFactory.getLog(FindNodeResponseHandler.class);
-    
-    /** Collection of Contacts that collide with our Node ID */
-    private final Collection<Contact> collisions = new LinkedHashSet<Contact>();
     
     private FindNodeLookupStatisticContainer lookupStat;
     
@@ -125,74 +114,12 @@ public class FindNodeResponseHandler
         setReturnValue(result);
     }
     
-    protected boolean nextStep(ResponseMessage message) throws IOException {
-        if (!(message instanceof FindNodeResponse))
-            throw new IllegalArgumentException("this is a FindNodeHandler");
-        FindNodeResponse response = (FindNodeResponse)message;
-        Contact sender = response.getContact();
-        Collection<Contact> nodes = response.getNodes();
-        for(Contact node : nodes) {
-            
-            if (!ContactUtils.isValidContact(sender, node)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping invalid Contact: " + node);
-                }
-                continue;
-            }
-            
-            // Make sure we're not mixing IPv4 and IPv6 addresses.
-            // See RouteTableImpl.add() for more Info!
-            if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
-                
-                // Log as ERROR so that we're not missing this
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(node + " is from a different IP address space than local Node");
-                }
-                continue;
-            }
-            
-            if (ContactUtils.isLocalContact(context, node, collisions)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Dropping colliding Contact: " + node);
-                }
-                
-                continue;
-            }
-            
-            if (!isQueried(node) 
-                    && !isYetToBeQueried(node)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding " + node + " to the yet-to-be queried list");
-                }
-                
-                addYetToBeQueried(node, currentHop+1);
-                
-                // Add them to the routing table as not alive
-                // contacts. We're likely going to add them
-                // anyways!
-                assert (node.isAlive() == false);
-                context.getRouteTable().add(node);
-            }
-        }
-        
-        if (!nodes.isEmpty()) {
-            addResponse(sender, response.getQueryKey());
-        }
-        
-        return true;
-    }
-    
     /**
      * Returns a Collection of Contacts that did collide with the
      * local Node ID
      */
     public Collection<Contact> getCollisions() {
         return collisions;
-    }
-    
-    /** Returns whether or not the Node is in the to-query Trie */
-    private boolean isYetToBeQueried(Contact node) {
-        return toQuery.containsKey(node.getNodeID());            
     }
     
     protected int getDefaultParallelism() {

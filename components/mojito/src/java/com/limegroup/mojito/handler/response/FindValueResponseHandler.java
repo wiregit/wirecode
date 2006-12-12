@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValueEntity;
+import com.limegroup.mojito.messages.FindNodeResponse;
 import com.limegroup.mojito.messages.FindValueResponse;
 import com.limegroup.mojito.messages.LookupRequest;
 import com.limegroup.mojito.messages.RequestMessage;
@@ -118,7 +119,10 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         return Collections.emptyList();
     }
     
-    protected boolean nextStep(ResponseMessage message) {
+    protected boolean nextStep(ResponseMessage message) throws IOException {
+        if (message instanceof FindNodeResponse) 
+            return super.nextStep(message);
+        
         if (!(message instanceof FindValueResponse))
             throw new IllegalArgumentException("this is a find value handler");
         FindValueResponse response = (FindValueResponse)message;
