@@ -24,9 +24,9 @@ import com.limegroup.mojito.settings.NetworkSettings;
 
 public class BootstrapManagerTest extends BaseTestCase {
     
-    static {
+    /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-    }
+    }*/
     
     protected static MojitoDHT BOOTSTRAP_DHT;
     protected static final int BOOTSTRAP_DHT_PORT = 3000;
