@@ -112,8 +112,8 @@ public abstract class MessageDispatcher {
     
     private ByteBuffer inputBuffer;
     
-    private final List<MessageDispatcherListener> listeners =
-        new CopyOnWriteArrayList<MessageDispatcherListener>();
+    private final List<MessageDispatcherListener> listeners 
+        = new CopyOnWriteArrayList<MessageDispatcherListener>();
     
     private volatile Filter filter;
     
@@ -218,6 +218,14 @@ public abstract class MessageDispatcher {
     }
     
     /**
+     * Closes the MessageDispatcher and releases all resources
+     */
+    public void close() {
+        stop();
+        clear();
+    }
+    
+    /**
      * Sets whether or not a new ByteBuffer should be allocated
      */
     public void setAllocateNewByteBuffer(boolean allocateNewByteBuffer) {
@@ -236,11 +244,6 @@ public abstract class MessageDispatcher {
      * Returns whether or not the MessageDispatcher is running
      */
     public abstract boolean isRunning();
-    
-    /**
-     * Returns whether or not the DatagramChannel is open
-     */
-    public abstract boolean isOpen();
     
     /**
      * Sends a ResponseMessage to the given Contact
@@ -281,8 +284,8 @@ public abstract class MessageDispatcher {
      * The actual send method.
      */
     protected boolean send(Tag tag) throws IOException {
-        if (!isOpen()) {
-            throw new IOException("Channel is not open!");
+        if (!isRunning()) {
+            throw new IOException("Cannot send Message because MessageDispatcher is not running");
         }
         
         KUID nodeId = tag.getNodeID();
@@ -665,7 +668,15 @@ public abstract class MessageDispatcher {
      * sent or false if there was insufficient space in the
      * output buffer (that means you'll have to re-try it later
      * again).
+     * 
+     * IMPORTANT: The expected behavior is the same as 
+     * DatagramChannel.send(BytBuffer,SocketAddress). That means
+     * if you are not able to send the data return false and 
+     * leave the ByteBuffer untouched!
      */
+    // We could pass a slice to this method to enforce the expected
+    // behavior but there's maybe an use-case like Kadmlia over TCP
+    // where it makes sense to send the data piece-by-piece...
     protected abstract boolean send(SocketAddress dst, ByteBuffer data) throws IOException;
     
     /**
@@ -686,18 +697,18 @@ public abstract class MessageDispatcher {
     
     /** 
      * Called to indicate an interest in reading something from
-     * the Network.
+     * the Network. Override this method if you need this functionality!
      */
     protected void interestRead(boolean on) {
-        // DO NOTHING
+        // DO NOTHING, OVERRIDE TO ADD FUNCTIONALITY
     }
     
     /** 
      * Called to indicate an interest in writing something to
-     * the Network.
+     * the Network. Override this method if you need this functionality!
      */
     protected void interestWrite(boolean on) {
-        // DO NOTHING
+        // DO NOTHING, OVERRIDE TO ADD FUNCTIONALITY
     }
     
     /** Called to process a Task */
@@ -743,10 +754,9 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Cleans up the receipt mapping. Meant for
-     * internal use only! DO NOT CALL!
+     * Cleans up the receipt mapping.
      */
-    protected void cleanup() {
+    private void cleanup() {
         synchronized (receiptMapLock) {
             receiptMap.cleanup();
         }

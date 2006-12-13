@@ -107,12 +107,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     @Override
     public void bind(SocketAddress address) throws IOException {
-        running = true;
-    }
-
-    @Override
-    public boolean isOpen() {
-        return running;
     }
     
     @Override
@@ -125,8 +119,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         super.stop();
-        
-        clear();
     }
 
     /* 

@@ -74,7 +74,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     public void bind(SocketAddress address) throws IOException {
         synchronized (channelLock) {
             if (isOpen()) {
-                throw new IOException("Already open");
+                throw new IOException("DatagramChannel is already open");
             }
             
             channel = DatagramChannel.open();
@@ -92,10 +92,13 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         }
     }
     
-    @Override
+    /**
+     * Returns true if the DatagramChannel is open
+     */
     public boolean isOpen() {
-        DatagramChannel c = channel;
-        return c != null && c.isOpen();
+        synchronized (channelLock) {
+            return channel != null && channel.isOpen();
+        }
     }
 
     /**
@@ -109,16 +112,22 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * Returns the DatagramChannel Socket's local SocketAddress
      */
     public SocketAddress getLocalSocketAddress() {
-        DatagramChannel c = channel;
-        if (c != null) {
-            return c.socket().getLocalSocketAddress();
+        synchronized (channelLock) {
+            if (channel != null && channel.isOpen()) {
+                return channel.socket().getLocalSocketAddress();
+            }
+            return null;
         }
-        return null;
+        
     }
     
     @Override
     public void start() {
         synchronized (channelLock) {
+            if (!isOpen()) {
+                throw new IllegalStateException("MessageDispatcher is not bound");
+            }
+            
             if (!running) {
                 ThreadFactory factory = new ThreadFactory() {
                     public Thread newThread(Runnable r) {
@@ -129,7 +138,6 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                     }
                 };
                 
-                clear();
                 running = true;
                 
                 executor = Executors.newFixedThreadPool(1, factory);
@@ -153,14 +161,13 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             if (running) {
                 running = false;
                 try {
-                    channelLock.wait(10L*1000L);
+                    channelLock.wait(1L*1000L);
                 } catch (InterruptedException e) {
                     LOG.error("InterruptedException", e);
                 }
             }
             
             super.stop();
-            clear();
             
             if (executor != null) {
                 // Don't accept new tasks (we rely also on the fact that 
@@ -188,7 +195,14 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 thread.interrupt();
                 thread = null;
             }
-            
+        }
+    }
+    
+    @Override
+    public void close() {
+        super.close();
+        
+        synchronized (channelLock) {
             if (selector != null) {
                 try {
                     selector.close();
@@ -208,7 +222,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             }
         }
     }
-
+    
     @Override
     public boolean isRunning() {
         return running;
@@ -217,7 +231,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     @Override
     protected void process(Runnable runnable) {
         synchronized (channelLock) {
-            if (running) {
+            if (isRunning()) {
                 executor.execute(runnable);
             }
         }
@@ -268,23 +282,27 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     private void interest(int ops, boolean on) {
-        DatagramChannel c = channel;
-        if (c == null) {
-            return;
-        }
-        
-        try {
-            SelectionKey sk = c.keyFor(selector);
-            if (sk != null && sk.isValid()) {
-                synchronized(c.blockingLock()) {
-                    if (on) {
-                        sk.interestOps(sk.interestOps() | ops);
-                    } else {
-                        sk.interestOps(sk.interestOps() & ~ops);
+        synchronized (channelLock) {
+            if (!isOpen()) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("DatagramChannel is not open");
+                }
+                return;
+            }
+            
+            try {
+                SelectionKey sk = channel.keyFor(selector);
+                if (sk != null && sk.isValid()) {
+                    synchronized(channel.blockingLock()) {
+                        if (on) {
+                            sk.interestOps(sk.interestOps() | ops);
+                        } else {
+                            sk.interestOps(sk.interestOps() & ~ops);
+                        }
                     }
                 }
-            }
-        } catch (CancelledKeyException ignore) {}
+            } catch (CancelledKeyException ignore) {}
+        }
     }
 
     @Override
@@ -299,12 +317,24 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected SocketAddress receive(ByteBuffer dst) throws IOException {
-        return channel.receive(dst);
+        synchronized (channelLock) {
+            if (!isOpen()) {
+                throw new IOException("DatagramChannel is not open");
+            }
+            
+            return channel.receive(dst);            
+        }
     }
 
     @Override
     protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
-        return channel.send(data, dst) > 0;
+        synchronized (channelLock) {
+            if (!isOpen()) {
+                throw new IOException("DatagramChannel is not open");
+            }
+            
+            return channel.send(data, dst) > 0;            
+        }
     }
 
     public void run() {
@@ -328,12 +358,9 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 }
             }
         } catch (IOException err) {
-            LOG.fatal("IOException", err);
-        } finally {
-            synchronized (channelLock) {
-                running = false;
-                channelLock.notifyAll();
-            }
+            // Pass it to the UncaughtExceptionHandler
+            Thread.currentThread().getUncaughtExceptionHandler()
+                .uncaughtException(Thread.currentThread(), err);
         }
     }
 }
