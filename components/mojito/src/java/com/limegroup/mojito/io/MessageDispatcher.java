@@ -79,11 +79,11 @@ public abstract class MessageDispatcher {
     
     private static final Log LOG = LogFactory.getLog(MessageDispatcher.class);
     
-    protected static final int INPUT_BUFFER_SIZE 
-        = NetworkSettings.INPUT_BUFFER_SIZE.getValue();
+    protected static final int RECEIVE_BUFFER_SIZE 
+        = NetworkSettings.RECEIVE_BUFFER_SIZE.getValue();
     
-    protected static final int OUTPUT_BUFFER_SIZE 
-        = NetworkSettings.OUTPUT_BUFFER_SIZE.getValue();
+    protected static final int SEND_BUFFER_SIZE 
+        = NetworkSettings.SEND_BUFFER_SIZE.getValue();
     
     /** The maximum size of a serialized Message we can send */
     private static final int MAX_MESSAGE_SIZE
@@ -110,7 +110,7 @@ public abstract class MessageDispatcher {
     private StoreRequestHandler storeHandler;
     private StatsRequestHandler statsHandler;
     
-    private ByteBuffer inputBuffer;
+    private ByteBuffer receiveBuffer;
     
     private final List<MessageDispatcherListener> listeners 
         = new CopyOnWriteArrayList<MessageDispatcherListener>();
@@ -136,7 +136,7 @@ public abstract class MessageDispatcher {
         storeHandler = new StoreRequestHandler(context);
         statsHandler = new StatsRequestHandler(context);
         
-        inputBuffer = ByteBuffer.allocate(INPUT_BUFFER_SIZE);
+        receiveBuffer = ByteBuffer.allocate(RECEIVE_BUFFER_SIZE);
     }
     
     /**
@@ -434,18 +434,18 @@ public abstract class MessageDispatcher {
      * if no Messages were in the input queue.
      */
     private DHTMessage readMessage() throws MessageFormatException, IOException {
-        SocketAddress src = receive((ByteBuffer)inputBuffer.clear());
+        SocketAddress src = receive((ByteBuffer)receiveBuffer.clear());
         if (src != null) {
-            inputBuffer.flip();
+            receiveBuffer.flip();
             
             ByteBuffer data = null;
             if (getAllocateNewByteBuffer()) {
-                int length = inputBuffer.remaining();
+                int length = receiveBuffer.remaining();
                 data = ByteBuffer.allocate(length);
-                data.put(inputBuffer);
+                data.put(receiveBuffer);
                 data.rewind();
             } else {
-                data = inputBuffer.slice();
+                data = receiveBuffer.slice();
             }
             
             DHTMessage message = deserialize(src, data/*.asReadOnlyBuffer()*/);

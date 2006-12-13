@@ -73,14 +73,14 @@ public final class NetworkSettings extends MojitoProps {
     /**
      * The buffer size for incoming messages
      */
-    public static final IntSetting INPUT_BUFFER_SIZE
-        = FACTORY.createIntSetting("INPUT_BUFFER_SIZE", 64*1024);
+    public static final IntSetting RECEIVE_BUFFER_SIZE
+        = FACTORY.createIntSetting("RECEIVE_BUFFER_SIZE", 64*1024);
     
     /**
      * The buffer size for outgoing messages
      */
-    public static final IntSetting OUTPUT_BUFFER_SIZE
-        = FACTORY.createIntSetting("OUTPUT_BUFFER_SIZE", 64*1024);
+    public static final IntSetting SEND_BUFFER_SIZE
+        = FACTORY.createIntSetting("SEND_BUFFER_SIZE", 64*1024);
     
     /**
      * Whether or not we're accepting forced addresses

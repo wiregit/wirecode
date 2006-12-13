@@ -85,8 +85,8 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             
             DatagramSocket socket = channel.socket();
             socket.setReuseAddress(false);
-            socket.setReceiveBufferSize(INPUT_BUFFER_SIZE);
-            socket.setSendBufferSize(OUTPUT_BUFFER_SIZE);
+            socket.setReceiveBufferSize(RECEIVE_BUFFER_SIZE);
+            socket.setSendBufferSize(SEND_BUFFER_SIZE);
             
             socket.bind(address);
         }
