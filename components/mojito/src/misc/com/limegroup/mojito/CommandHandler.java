@@ -409,7 +409,7 @@ public class CommandHandler {
     public static void kill(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
         if (dht.isRunning()) {
             out.println("Stopping " + dht.getName());
-            dht.close();
+            dht.stop();
         }
     }
     
