@@ -13,15 +13,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * Keeps track of content requests & responses.
@@ -377,7 +373,14 @@ public class ContentManager {
         			// TODO fberger timeout... check
         			auth.sendAuthorizationRequest(details, 0);
         		}
+            } else {
+        		synchronized(REQUESTED) {
+        			setContentAuthority(auth);
+        		}
             }
+        } else {
+        	// FIXME
+        	System.err.println("Initialization of content authority failed!");
         }
     }
     
