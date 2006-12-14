@@ -13,6 +13,7 @@ import java.security.SignatureException;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
@@ -32,7 +33,7 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
     
     private URN urn;
     
-    private boolean okay;
+    private Authorization auth;
     
     private String message;
     
@@ -68,7 +69,7 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
         }
         
         try {
-            okay = ggep.getInt(GGEP.GGEP_HEADER_SHA1_VALID) != 0;
+            auth = Authorization.valueOf(ggep.getInt(GGEP.GGEP_HEADER_SHA1_VALID));
         } catch (BadGGEPPropertyException e) {
         }
         
@@ -100,19 +101,19 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
     /**
      * Constructs a new ContentRequest for the given SHA1 URN.
      */
-    public ContentResponse(URN urn, boolean okay, String message) {
-        this(urn, okay, message, System.currentTimeMillis());
+    public ContentResponse(URN urn, Authorization auth, String message) {
+        this(urn, auth, message, System.currentTimeMillis());
     }
     
     /**
      * 
      */
-    private ContentResponse(URN urn, boolean okay, String message, long timeStamp) {
+    private ContentResponse(URN urn, Authorization auth, String message, long timeStamp) {
         super(F_LIME_VENDOR_ID, F_CONTENT_RESP, VERSION, 
-                derivePayload(urn, okay, message, timeStamp));
+                derivePayload(urn, auth, message, timeStamp));
         
         this.urn = urn;
-        this.okay = okay;
+        this.auth = auth;
         this.message = message;
         this.timeStamp = timeStamp;
     }
@@ -120,7 +121,7 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
     /**
      * Constructs the payload from given SHA1 Urn & okay flag.
      */
-    private static byte[] derivePayload(URN urn, boolean okay, String message, long timeStamp) {
+    private static byte[] derivePayload(URN urn, Authorization auth, String message, long timeStamp) {
         if (urn == null) {
             throw new NullPointerException("URN is null");
         }
@@ -132,7 +133,7 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
         GGEP ggep =  new GGEP(true);
         
         ggep.put(GGEP.GGEP_HEADER_SHA1, urn.getBytes());
-        ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);
+        ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, auth.getValue());
         
         if (message != null && message.length() > 0) {
             try {
@@ -166,13 +167,6 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
      */
     public URN getURN() {
         return urn;
-    }
-    
-    /**
-     * Gets the 'ok' flag for the URN.
-     */
-    public boolean isOK() {
-        return okay;
     }
     
     /**
@@ -234,7 +228,7 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("URN: ").append(getURN()).append("\n");
-        buffer.append("OK: ").append(isOK()).append("\n");
+        buffer.append("Authorization: ").append(auth).append("\n");
         buffer.append("Message: ").append(getMessage()).append("\n");
         buffer.append("TimeStamp: ").append(getTimeStamp()).append("\n");
         buffer.append("Signature: ").append((getSecureSignature() != null ? getSecureSignature().length : "null")).append("\n");
@@ -248,4 +242,8 @@ public class ContentResponse extends VendorMessage implements SecureMessage {
     static interface ContentResponseSigner {
         public void sign(OutputStream out, byte[] data);
     }
+
+	public Authorization getAuthorization() {
+		return auth;
+	}
 }

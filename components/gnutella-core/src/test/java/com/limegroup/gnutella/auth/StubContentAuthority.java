@@ -4,21 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.messages.Message;
 
 public class StubContentAuthority implements ContentAuthority {
 
     private List<FileDetails> sent = new LinkedList<FileDetails>();
 
-    public boolean initialize() {
-        return false;
+    public void initialize() throws Exception {
+    
     }
 
     public List<FileDetails> getSent() {
         return sent;
     }
 
-	public void sendAuthorizationRequest(FileDetails details, long timeout) {
+	public void sendAuthorizationRequest(FileDetails details) {
 		sent.add(details);
 	}
 
@@ -30,6 +29,11 @@ public class StubContentAuthority implements ContentAuthority {
 	public void shutdown() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public long getTimeout() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

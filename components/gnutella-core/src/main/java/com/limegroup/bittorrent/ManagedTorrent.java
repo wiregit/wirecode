@@ -214,7 +214,7 @@ BTLinkListener {
 	private void validateTorrent() {
 		ContentResponseObserver observer = new ContentResponseObserver() {
 			 public void handleResponse(URN urn, ContentResponseData response) {
-                 if(response != null && !response.isOK() &&
+                 if(response != null && response.isUnauthorized() &&
                 		 urn.equals(context.getMetaInfo().getURN())) {
                 	 
                      boolean wasActive;
@@ -229,7 +229,7 @@ BTLinkListener {
              }
 		};
 		RouterService.getContentManager().request(context.getMetaInfo().getFileDesc(),
-				observer, 5000);
+				observer);
 	}
 	
 	/**

@@ -2049,7 +2049,7 @@ public class ManagedDownloader extends AbstractDownloader
                 
                 ContentResponseObserver observer = new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
-                        if (response != null && !response.isOK()) {
+                        if (response != null && response.isUnauthorized()) {
                             invalidated = true;
                             stop();
                         }
@@ -2057,7 +2057,7 @@ public class ManagedDownloader extends AbstractDownloader
                 };
                 
                 // TODO fberger remove hardcoded timeout
-                RouterService.getContentManager().request(getDetails(), observer, 5000);
+                RouterService.getContentManager().request(getDetails(), observer);
             }
         }
     }

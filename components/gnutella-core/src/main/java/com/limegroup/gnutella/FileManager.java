@@ -1168,7 +1168,7 @@ public abstract class FileManager {
         FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
         ContentResponseData r = RouterService.getContentManager().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
-        if(r != null && !r.isOK())
+        if(r != null && r.isUnauthorized())
             return null;
         
 
@@ -1449,10 +1449,10 @@ public abstract class FileManager {
             cm.request(fd, new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
-                   if(r != null && !r.isOK())
+                   if(r != null && r.isUnauthorized())
                        removeFileIfShared(fd.getFile());
                }
-            }, 5000);
+            });
         }
     }
 

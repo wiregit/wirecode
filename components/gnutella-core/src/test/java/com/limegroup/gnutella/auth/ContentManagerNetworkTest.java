@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
@@ -18,6 +21,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -28,7 +32,9 @@ import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
  
 public class ContentManagerNetworkTest extends BaseTestCase {
-    
+
+	private static final Log LOG = LogFactory.getLog(ContentManagerNetworkTest.class);
+	
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     
     private static URN URN_1;
@@ -63,8 +69,9 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
+        ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.setValue(false);
         mgr = new ContentManager();
-        crOne = new ContentResponse(URN_1, true, "True");
+        crOne = new ContentResponse(URN_1, Authorization.AUTHORIZED, "True");
         one = new Observer();
         assertNull(mgr.getResponse(URN_1));
         assertNull(one.urn);
@@ -81,8 +88,11 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.setReuseAddress(true);
         socket.setSoTimeout(5000);
         
-        mgr.setContentAuthority(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort()), true));
-        mgr.request(details_1, one, 2000);
+        mgr.setContentAuthorities(new ContentAuthority[] { 
+        		new IpPortContentAuthority(new IpPortImpl("127.0.0.1", socket.getLocalPort()), true)
+        });
+        mgr.initialize();
+        mgr.request(details_1, one);
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         socket.receive(packet);
@@ -113,11 +123,11 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         
         mgr.shutdown();
         mgr = new ContentManager() {
-            protected ContentAuthority getDefaultContentAuthority() {
-                return new IpPortContentAuthority(authority, true);
+            protected ContentAuthority[] getDefaultContentAuthorities() {
+                return new ContentAuthority[] { new IpPortContentAuthority(authority, true) };
             }
         };
-        mgr.request(details_1, one, 2000);
+        mgr.request(details_1, one);
         mgr.initialize();
         
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
@@ -140,19 +150,23 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         socket.close();
     }
     
-    public void testResponseReceived() throws Exception {        
-        ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.setValue(false);
-        
+    public void testResponseReceived() throws Exception {
+    	LOG.debug("testResponseReceived");
         mgr.shutdown();
         mgr = RouterService.getContentManager();
+        mgr.setContentAuthorities(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", 5555)));
         mgr.initialize();
+        
 //        Thread.yield();
         Thread.sleep(1000);
-        mgr.request(details_1, one, 4000);
-        UDPService.instance().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
-        Thread.sleep(1000); // let the message process.
+        synchronized (one) {
+        	mgr.request(details_1, one);
+        	UDPService.instance().send(crOne, InetAddress.getLocalHost(), LISTEN_PORT);
+        	one.wait();
+        }
+        
         assertNotNull(mgr.getResponse(URN_1));
-        assertTrue(mgr.getResponse(URN_1).isOK());
+        assertEquals(Authorization.AUTHORIZED, mgr.getResponse(URN_1).getAuthorization());
         assertTrue(mgr.isVerified(URN_1));
         assertEquals(one.urn, URN_1);
         assertEquals(one.response, mgr.getResponse(URN_1));
@@ -162,9 +176,11 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         private URN urn;
         private ContentResponseData response;
         
-        public void handleResponse(URN urn, ContentResponseData response) {
+        public synchronized void handleResponse(URN urn, ContentResponseData response) {
+        	LOG.debug(this + "handelResponse " + urn + " " + response);        	
             this.urn = urn;
             this.response = response;
+            notify();
         }
     }
     
@@ -177,13 +193,11 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     	}
     	
 		public File getFile() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public String getFileName() {
-			// TODO Auto-generated method stub
-			return null;
+			return "";
 		}
 
 		public long getFileSize() {

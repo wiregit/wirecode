@@ -43,6 +43,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -2265,7 +2266,7 @@ public class DownloadTest extends BaseTestCase {
         RouterService.download(rfds,false,null);
         Thread.sleep(1000);
         synchronized(COMPLETE_LOCK) {
-        	RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(TestFile.hash(), false, "False"), addr);
+        	RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(TestFile.hash(), Authorization.UNAUTHORIZED, "False"), addr);
         	waitForInvalid();       
         }
     }

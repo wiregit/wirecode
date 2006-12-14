@@ -2,7 +2,13 @@ package com.limegroup.gnutella.auth;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import junit.framework.Test;
 
@@ -10,16 +16,19 @@ import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 import com.limegroup.gnutella.util.ManagedThread;
  
 public class ContentManagerTest extends BaseTestCase {
-    
+
+	private static final Log LOG = LogFactory.getLog(ContentManagerTest.class); 
+	
+	private static final int DELTA = 20;
+	
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";
     private static final String S_URN_3 = "urn:sha1:PABCDEFGAPOJTS5FJUPAKOZWUGZQYPFB";
@@ -56,33 +65,25 @@ public class ContentManagerTest extends BaseTestCase {
 	}
     
     public static void globalSetUp() throws Exception {
+    	
+    }
+    
+    public void setUp() throws Exception {
     	URN_1 = URN.createSHA1Urn(S_URN_1);
     	details_1 = new ContentManagerNetworkTest.URNFileDetails(URN_1);
     	URN_2 = URN.createSHA1Urn(S_URN_2);
     	details_2 = new ContentManagerNetworkTest.URNFileDetails(URN_2);
     	URN_3 = URN.createSHA1Urn(S_URN_3);
     	details_3 = new ContentManagerNetworkTest.URNFileDetails(URN_3);
-    }
-    
-    public void setUp() throws Exception {
-    	
     	
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
-        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);        
-        mgr = new ContentManager() {
-        	@Override
-        	protected ContentAuthority getDefaultContentAuthority() {
-        		try {
-					return new IpPortContentAuthority(new IpPortImpl("127.0.0.1", 9999), true);
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return null;
-        	}
-        };
-        crOne = new ContentResponse(URN_1, true, "True");
-        crTwo = new ContentResponse(URN_2, false, "False");
+        ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
+        ContentSettings.ONLY_SECURE_CONTENT_RESPONSES.setValue(false);
+        
+        mgr = createManager(new IpPortContentAuthority("127.0.0.1", 9999, true));
+
+        crOne = new ContentResponse(URN_1, Authorization.AUTHORIZED, "True");
+        crTwo = new ContentResponse(URN_2, Authorization.UNAUTHORIZED, "False");
 
         one = new Observer();
         two = new Observer();
@@ -114,25 +115,26 @@ public class ContentManagerTest extends BaseTestCase {
      */
     public void testResponseStored() throws Exception {
     	
-        mgr.request(details_1, one, 0);
-        RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
+    	mgr.request(details_1, one);
+    	RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
         assertNotNull(mgr.getResponse(URN_1));
         assertNull(mgr.getResponse(URN_2));
 
         ContentResponseData res = mgr.getResponse(URN_1);
-        assertTrue(res.isOK());
+        assertEquals(Authorization.AUTHORIZED, res.getAuthorization());
 
-        mgr.request(details_2, two, 0);
+        mgr.request(details_2, two);
         RouterService.getMessageRouter().handleUDPMessage(crTwo, addr);
         assertNotNull(mgr.getResponse(URN_2));
         res = mgr.getResponse(URN_2);
-        assertFalse(res.isOK());
+        assertEquals(Authorization.UNAUTHORIZED, res.getAuthorization());
     }
     
     /** Makes sure that handleResponse is called rightly. */
     public void testHandleResponseCalled() throws Exception {
-        mgr.request(details_1, one, 0);
-        mgr.request(details_2, two, 0);
+    	LOG.debug("responseCalled");
+        mgr.request(details_1, one);
+        mgr.request(details_2, two);
         assertNull(one.urn);
         assertNull(two.urn);
         assertNull(one.response);
@@ -140,45 +142,45 @@ public class ContentManagerTest extends BaseTestCase {
 
         RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
         assertEquals(URN_1, one.urn);
-        assertTrue(one.response.isOK());
+        assertEquals(Authorization.AUTHORIZED, one.response.getAuthorization());
         assertNull(two.urn);
         assertNull(two.response);
 
         RouterService.getMessageRouter().handleUDPMessage(crTwo, addr);
         assertEquals(URN_2, two.urn);
-        assertFalse(two.response.isOK());
+        assertEquals(Authorization.UNAUTHORIZED, two.response.getAuthorization());
     }
     
     /** Tests immediate response. */
     public void testImmediateHandleResponse() throws Exception {
-        mgr.request(details_1, one, 0);
-        mgr.request(details_2, two, 0);
+    	LOG.debug("testImmediateHandleResponse");
+        mgr.request(details_1, one);
+        mgr.request(details_2, two);
         RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
         RouterService.getMessageRouter().handleUDPMessage(crTwo, addr);
 
         one = new Observer();
         two = new Observer();
-        mgr.request(details_1, one, 0);
-        mgr.request(details_2, two, 0);
+        mgr.request(details_1, one);
+        mgr.request(details_2, two);
 
         assertEquals(URN_1, one.urn);
-        assertTrue(one.response.isOK());
+        assertEquals(Authorization.AUTHORIZED, one.response.getAuthorization());
         assertEquals(URN_2, two.urn);
-        assertFalse(two.response.isOK());
+        assertEquals(Authorization.UNAUTHORIZED, two.response.getAuthorization());
     }
     
     /** Makes sure that stuff times out. */
     public void testTimeout() throws Exception {
-        mgr.initialize(); // must start timeout thread.
-        mgr.request(details_1, one, 1);
-        mgr.request(details_2, two, 1);
+        mgr.request(details_1, one);
+        mgr.request(details_2, two);
         
         Thread.sleep(5000);
         
         assertEquals(URN_1, one.urn);
-        assertNull(one.response);
+        assertEquals(Authorization.UNKNOWN, one.response.getAuthorization());
         assertEquals(URN_2, two.urn);
-        assertNull(two.response);       
+        assertEquals(Authorization.UNKNOWN, two.response.getAuthorization());       
     }
     
     /** Makes sure that responses without requests aren't processed. */
@@ -189,30 +191,28 @@ public class ContentManagerTest extends BaseTestCase {
     
     /** Makes sure that isVerified works */
     public void testIsVerified() throws Exception {
-        mgr.initialize();
         assertFalse(mgr.isVerified(URN_1));
-        mgr.request(details_1, one, 2000);
+        mgr.request(details_1, one);
         assertFalse(mgr.isVerified(URN_1));
         Thread.sleep(5000);
         assertTrue(mgr.isVerified(URN_1)); // verified by timeout (no response).
         
         assertFalse(mgr.isVerified(URN_2));
-        mgr.request(details_2, two, 2000);
+        mgr.request(details_2, two);
         assertFalse(mgr.isVerified(URN_2));
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_2, true, "True"), addr);
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_2, Authorization.AUTHORIZED, "True"), addr);
         assertTrue(mgr.isVerified(URN_2)); // verified by true response
         
         assertFalse(mgr.isVerified(URN_3));
-        mgr.request(details_3, one, 2000);
+        mgr.request(details_3, one);
         assertFalse(mgr.isVerified(URN_3));        
 
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_3, false, "False"), addr);
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_3, Authorization.UNAUTHORIZED, "False"), addr);
         assertTrue(mgr.isVerified(URN_3)); // verified by false response.
     }
     
     /** Checks blocking requests. */
     public void testBlockingRequest() throws Exception {
-        mgr.initialize();
         
         Thread responder = new ManagedThread() {
             public void managedRun() {
@@ -226,47 +226,21 @@ public class ContentManagerTest extends BaseTestCase {
         responder.start();
         
         long now = System.currentTimeMillis();
-        ContentResponseData rOne =  mgr.request(details_1, 3000);
+        ContentResponseData rOne =  mgr.request(details_1);
         assertNotNull(rOne);
-        assertTrue(rOne.isOK());
+        assertEquals(Authorization.AUTHORIZED, rOne.getAuthorization());
         assertGreaterThan(600, System.currentTimeMillis() - now);
         
         now = System.currentTimeMillis();
-        ContentResponseData rTwo = mgr.request(details_2, 3000);
+        ContentResponseData rTwo = mgr.request(details_2);
         assertNotNull(rTwo);
-        assertFalse(rTwo.isOK());
+        assertEquals(Authorization.UNAUTHORIZED, rTwo.getAuthorization());
         assertGreaterThan(600, System.currentTimeMillis() - now);
         
         now = System.currentTimeMillis();
-        ContentResponseData rThree = mgr.request(details_3, 1000);
-        assertNull(rThree);
+        ContentResponseData rThree = mgr.request(details_3);
+        assertEquals(Authorization.UNKNOWN, rThree.getAuthorization());
         assertGreaterThan(900, System.currentTimeMillis() - now);
-    }
-    
-    public void testVaryingTimeouts() throws Exception {
-        mgr.initialize();
-        mgr.request(details_1, one, 6000);
-        mgr.request(details_2, two, 2000);
-        mgr.request(details_3, three, 10000);
-        
-        assertNull(one.urn);
-        assertNull(two.urn);
-        assertNull(three.urn);
-        
-        Thread.sleep(4000);
-        assertEquals(URN_2, two.urn);
-        assertNull(two.response);
-        assertNull(one.urn);
-        assertNull(three.urn);
-        
-        Thread.sleep(4000);
-        assertEquals(URN_1, one.urn);
-        assertNull(one.response);
-        assertNull(three.urn);
-        
-        Thread.sleep(4000);
-        assertEquals(URN_3, three.urn);
-        assertNull(three.response);
     }
     
     private static void sleep(int milliseconds) {
@@ -285,6 +259,223 @@ public class ContentManagerTest extends BaseTestCase {
             this.urn = urn;
             this.response = response;
         }
+    }
+    
+    public void testSetContentAuthorities() {
+    	ContentManager manager = new ContentManager();
+    	ContentAuthority[] auths = new ContentAuthority[] {
+    			new StubContentAuthority(),
+    			new StubContentAuthority()
+    	};
+    	manager.setContentAuthorities(auths);
+    	
+    	try {
+    		manager.setContentAuthorities(auths);
+    	}
+    	catch (IllegalStateException ise) {
+    		return;
+    	}
+    	fail("IllegalStateException expected");
+    }
+    
+    public void testRequest() {
+    	Map<URN, Authorization> map = new HashMap<URN, Authorization>();
+    	map.put(URN_1, Authorization.AUTHORIZED);
+    	map.put(URN_2, Authorization.UNAUTHORIZED);
+    	
+    	ContentManager manager = createManager(map);
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_2);
+    	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_3);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    }
+    
+    public void testFirstRequestReturnsUnknown() {
+    	Map<URN, Authorization> map1 = new HashMap<URN, Authorization>();
+    	Map<URN, Authorization> map2 = new HashMap<URN, Authorization>();
+    	map2.put(URN_1, Authorization.AUTHORIZED);
+    	map2.put(URN_2, Authorization.UNAUTHORIZED);
+    	
+    	ContentManager manager = createManager(map1, map2);
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_2);
+    	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_3);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    }
+    
+    public void testFirstRequestTimesOut() {
+    	Map<URN, Authorization> map2 = new HashMap<URN, Authorization>();
+    	map2.put(URN_1, Authorization.AUTHORIZED);
+    	map2.put(URN_2, Authorization.UNAUTHORIZED);
+    	
+    	ContentManager manager = createManager(new NotRespondingAuth(),
+    					new ContentAuth(map2));
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_2);
+    	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_3);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	manager.shutdown();
+    }
+    
+    public void testUnknownAndTimeouts() { 
+    	Map<URN, Authorization> map1 = new HashMap<URN, Authorization>();
+    	Map<URN, Authorization> map2 = new HashMap<URN, Authorization>();
+    	map2.put(URN_1, Authorization.AUTHORIZED);
+    	map2.put(URN_2, Authorization.UNAUTHORIZED);
+    	
+    	ContentManager manager = createManager(new ContentAuth(map1), new NotRespondingAuth(),
+    			new ContentAuth(map2));
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_2);
+    	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    	
+    	response = manager.request(details_3);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	manager.shutdown();
+    }
+    
+    public void testLastRequestTimesOut() {
+    	ContentManager manager = createManager(new NotRespondingAuth());
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	
+    	response = manager.request(details_2);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	
+    	response = manager.request(details_3);
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	manager.shutdown();
+    }
+    
+    public void testSingleAuthorityTimeout() {
+    	ContentManager manager = createManager(new NotRespondingAuth(50));
+    	manager.initialize();
+    	long start = System.currentTimeMillis();
+    	ContentResponseData response = manager.request(details_1);
+    	long end = System.currentTimeMillis();
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	assertGreaterThanOrEquals(50, end - start);
+    	assertLessThan(50 + DELTA, end - start);
+    	manager.shutdown();
+    
+    	manager = createManager(new NotRespondingAuth(70));
+    	manager.initialize();
+    	start = System.currentTimeMillis();
+    	response = manager.request(details_2);
+    	end = System.currentTimeMillis();
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	assertGreaterThanOrEquals(70, end - start);
+    	assertLessThan(70 + DELTA, end - start);
+    	manager.shutdown();
+    }
+    
+    public void testAccumlatedTimeouts() {
+    	ContentManager manager = createManager(new NotRespondingAuth(25), new NotRespondingAuth(25));
+    	manager.initialize();
+    	long start = System.currentTimeMillis();
+    	ContentResponseData response = manager.request(details_1);
+    	long end = System.currentTimeMillis();
+    	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
+    	assertGreaterThanOrEquals(25, end - start);
+    	assertLessThan(50 + DELTA, end - start);
+    	manager.shutdown();
+    }
+    
+    private ContentManager createManager(final Map<URN, Authorization>... maps) {
+    	List<ContentAuthority> auths = new ArrayList<ContentAuthority>(maps.length);
+    	for (Map<URN, Authorization> map : maps) {
+    		auths.add(new ContentAuth(map));
+    	}
+    	return createManager(auths.toArray(new ContentAuthority[0]));
+    }
+    
+    private ContentManager createManager(final ContentAuthority... authorities) {
+    	return new ContentManager() {
+    		@Override
+    		protected ContentAuthority[] getDefaultContentAuthorities() {
+    			return authorities;
+    		} 
+    	};
+    }
+    
+    private class ContentAuth extends AbstractContentAuthority {
+
+    	Map<URN, Authorization> authForURN;
+    	
+    	ContentResponseObserver observer;
+    	
+    	public ContentAuth(Map<URN, Authorization> map) {
+    		super(100);
+    		authForURN = map;
+    	}
+    	
+		public void initialize() throws Exception {
+		}
+
+		public void sendAuthorizationRequest(FileDetails details) {
+			URN urn = details.getSHA1Urn();
+			Authorization auth = authForURN.get(urn);
+			if (auth == null) {
+				auth = Authorization.UNKNOWN;
+			}
+			observer.handleResponse(urn, new ContentResponseData(System.currentTimeMillis(), auth, "message"));
+		}
+
+		public void setContentResponseObserver(ContentResponseObserver observer) {
+			this.observer = observer;
+		}
+
+		public void shutdown() {
+			observer = null;
+		}
+    	
+    }
+    
+    private class NotRespondingAuth extends AbstractContentAuthority {
+
+    	public NotRespondingAuth() {
+    		this(5);
+    	}
+    	
+    	public NotRespondingAuth(long timeout) {
+    		super(timeout);
+		}
+    	
+		public void initialize() throws Exception {
+			
+		}
+
+		public void sendAuthorizationRequest(FileDetails details) {
+		}
+
+		public void setContentResponseObserver(ContentResponseObserver observer) {
+
+		}
+
+		public void shutdown() {
+			// TODO Auto-generated method stub
+			
+		}
+    	
     }
     
 }

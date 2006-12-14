@@ -17,6 +17,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.StubContentResponseObserver;
+import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -127,9 +128,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         cm.initialize();
         
         // request the urn so we can use the response.
-        cm.request(u1, new StubContentResponseObserver(), 1000);
+        cm.request(u1, new StubContentResponseObserver());
 
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u1.getSHA1Urn(), false, "False"), addr);
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u1.getSHA1Urn(), Authorization.UNAUTHORIZED, "False"), addr);
         
         waitForLoad();
         assertEquals("unexpected # of shared files", 3, fman.getNumFiles());
@@ -146,7 +147,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test invalid content response.
         fman.validate(fd2);
 
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u2.getSHA1Urn(), false, "False"), addr);
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u2.getSHA1Urn(), Authorization.UNAUTHORIZED, "False"), addr);
 
         assertFalse("shouldn't be shared anymore", fman.isFileShared(f2));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());
@@ -155,7 +156,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test valid content response.
         fman.validate(fd3);
 
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u3.getSHA1Urn(), true, "True"), addr);
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(u3.getSHA1Urn(), Authorization.AUTHORIZED, "True"), addr);
 
         assertTrue("should still be shared", fman.isFileShared(f3));
         assertEquals("wrong # shared files", 2, fman.getNumFiles());

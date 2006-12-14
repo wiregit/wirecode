@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.auth;
 
-import java.net.UnknownHostException;
-
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
@@ -12,7 +10,7 @@ import com.limegroup.gnutella.util.IpPortImpl;
 
 /** A ContentAuthority that sends to a single IpPort. */
 // TODO fberger doc
-public class IpPortContentAuthority implements ContentAuthority {
+public class IpPortContentAuthority extends AbstractContentAuthority {
     
     private IpPort authority;
     
@@ -37,23 +35,17 @@ public class IpPortContentAuthority implements ContentAuthority {
      * You must call initialize prior to sending a message.
      */
     public IpPortContentAuthority(String host, int port, boolean handleResponses) {
+    	super(2000);
         this.host = host;
         this.port = port;
         this.handleResponses = handleResponses;
     }
     
     /** Constructs the authority from the host/port if necessary */
-    public boolean initialize() {
+    public void initialize() throws Exception {
         if (authority == null) {
-            try {
-                authority = new IpPortImpl(host, port);
-            } catch (UnknownHostException uhe) {
-                return false;
-                // ignored.
-            }
+        	authority = new IpPortImpl(host, port);
         }
-            
-        return true;
     }
     
     public IpPort getIpPort() {
@@ -63,7 +55,7 @@ public class IpPortContentAuthority implements ContentAuthority {
 	public void shutdown() {
 	}
 
-	public void sendAuthorizationRequest(FileDetails details, long timeout) {
+	public void sendAuthorizationRequest(FileDetails details) {
 		UDPService.instance().send(new ContentRequest(details), authority);			
 	}
 

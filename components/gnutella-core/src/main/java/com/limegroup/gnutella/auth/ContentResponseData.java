@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.auth;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 
@@ -10,19 +11,56 @@ public class ContentResponseData implements Serializable {
     
     private long created;
     
-    private boolean ok;
+    private Authorization auth;
     
     private String message;
     
+    public static enum Authorization {
+    	UNKNOWN(0),
+    	AUTHORIZED(1),
+    	UNAUTHORIZED(2);
+    	
+    	private final int value;
+    	private final static Authorization[] auths;
+    	
+    	static {
+    		Authorization[] a = values();
+    		auths = new Authorization[a.length];
+    		for (int i = 0; i < a.length; i++) {
+				int index = a[i].value % a.length;
+				if (auths[index] != null) {
+					throw new IllegalStateException("hash collision");
+				}
+				auths[index] = a[i];
+			}
+    	}
+    	
+    	private Authorization(int value) {
+    		this.value = value;
+    	}
+    	
+    	public int getValue() {
+    		return value;
+    	}
+    	
+    	public static Authorization valueOf(int value) {
+    		int index = value % auths.length;
+    		if (auths[index].value == value) {
+    			return auths[index];
+    		}
+    		throw new NoSuchElementException("Not a valid Authorization value");
+    	}
+    }
+    
     /** Constructs a new ContentResponseData with data from the given ContentResponse */
     public ContentResponseData(ContentResponse msg) {
-        this(System.currentTimeMillis(), msg.isOK(), msg.getMessage());
+        this(System.currentTimeMillis(), msg.getAuthorization(), msg.getMessage());
     }
     
     /** Hook for tests to create Responses at different times. */
-    private ContentResponseData(long now, boolean ok, String message) {
+    ContentResponseData(long now, Authorization auth, String message) {
         this.created = now;
-        this.ok = ok;
+        this.auth = auth;
         this.message = message;
     }
     
@@ -30,9 +68,16 @@ public class ContentResponseData implements Serializable {
     	this.created = System.currentTimeMillis();
     }
     
-    /** Returns if this is OK. */
-    public boolean isOK() {
-        return ok;
+    public Authorization getAuthorization() {
+    	return auth;
+    }
+    
+    public boolean isAuthorized() {
+    	return auth != Authorization.UNAUTHORIZED;
+    }
+    
+    public boolean isUnauthorized() {
+    	return auth == Authorization.UNAUTHORIZED;
     }
     
     public String getMessage() {
@@ -46,7 +91,7 @@ public class ContentResponseData implements Serializable {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("OK: ").append(isOK()).append("\n");
+        buffer.append("Authorization: ").append(getAuthorization()).append("\n");
         buffer.append("Message: ").append(getMessage()).append("\n");
         return buffer.toString();
     }

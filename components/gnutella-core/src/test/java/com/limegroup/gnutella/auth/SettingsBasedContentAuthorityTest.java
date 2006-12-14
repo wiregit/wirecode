@@ -6,8 +6,6 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
@@ -22,7 +20,7 @@ public class SettingsBasedContentAuthorityTest extends BaseTestCase {
         return buildTestSuite(SettingsBasedContentAuthorityTest.class);
     }
     
-    public void testInitialize() {
+    public void testInitialize() throws Exception {
         ContentSettings.AUTHORITIES.setValue(new String[] { "yahoo.com", "google.com:82", "askjeeves.com:6346" });
         SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority();
         auth.initialize();
@@ -42,7 +40,7 @@ public class SettingsBasedContentAuthorityTest extends BaseTestCase {
         assertEquals(6346, three.getPort());      
     }
     
-    public void testInitializeDNSFails() {
+    public void testInitializeDNSFails() throws Exception {
         ContentSettings.AUTHORITIES.setValue(new String[] { "notarealdnsnamesodonteventryit.com", "google.com" });
         SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority();
         auth.initialize();
@@ -70,7 +68,7 @@ public class SettingsBasedContentAuthorityTest extends BaseTestCase {
         FileDetails[] ms = new FileDetails[randoms.length];
         for(int i = 0; i < randoms.length; i++) {
             ms[i] = new ContentManagerNetworkTest.URNFileDetails(URN.INVALID);
-            auth.sendAuthorizationRequest(ms[i], 1000);
+            auth.sendAuthorizationRequest(ms[i]);
         }
         
         assertSame(zero.getSent().get(0), ms[0]);

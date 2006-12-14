@@ -13,6 +13,7 @@ import java.util.Vector;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.auth.ContentAuthority;
 import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -152,7 +153,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         
         StubContentAuthority auth = new StubContentAuthority();
-        RouterService.getContentManager().setContentAuthority(auth);
+        RouterService.getContentManager().setContentAuthorities(new ContentAuthority[] {
+        		auth
+        });
         assertEquals(0, auth.getSent().size());
         
         HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
