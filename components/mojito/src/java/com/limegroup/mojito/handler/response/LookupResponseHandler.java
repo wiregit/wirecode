@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.TrieUtils;
-import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.exceptions.DHTBackendException;
@@ -83,7 +81,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    private final Trie<KUID, Entry<Contact, QueryKey>> responses 
+    protected final Trie<KUID, Entry<Contact, QueryKey>> responses 
         = new PatriciaTrie<KUID, Entry<Contact, QueryKey>>(KUID.KEY_ANALYZER);
     
     /** A Map we're using to count the number of hops */
@@ -100,9 +98,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
 
     /** The number of currently active (parallel) searches */
     private int activeSearches = 0;
-    
-    /** The number of responses we have received */
-    private int responseCount = 0;
     
     /** The current hop */
     protected int currentHop = 0;
@@ -217,13 +212,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      */
     public Collection<Contact> getForcedContacts() {
         return Collections.unmodifiableSet(forcedContacts);
-    }
-    
-    /**
-     * Returns the current hop
-     */
-    public int getCurrentHop() {
-        return currentHop;
     }
     
     /*
@@ -725,7 +713,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     }
     
     /** Adds the Contact-QueryKey Tuple to the response Trie */
-    protected void addResponse(Contact node, QueryKey queryKey) {
+    private void addResponse(Contact node, QueryKey queryKey) {
         
         Entry<Contact,QueryKey> entry 
             = new EntryImpl<Contact,QueryKey>(node, queryKey, true);
@@ -738,45 +726,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
             Contact worst = responses.select(furthestId).getKey();
             responses.remove(worst.getNodeID());
         }
-        responseCount++;
-    }
-    
-    /**
-     * Returns the k-closest Contacts sorted by their closeness
-     * to the given lookup key
-     */
-    public Map<Contact, QueryKey> getNearestContacts() {
-        return getContacts(getResultSetSize());
-    }
-    
-    /**
-     * Returns count number of Contacts sorted by their closeness
-     * to the given lookup key
-     */
-    public Map<Contact, QueryKey> getContacts(int count) {
-        if (count < 0) {
-            count = responses.size();
-        }
-        
-        final int maxCount = count;
-        
-        // Use a LinkedHashMap which preserves the insertion order...
-        final Map<Contact, QueryKey> nearest = new LinkedHashMap<Contact, QueryKey>();
-        
-        responses.select(lookupId, new Cursor<KUID, Entry<Contact,QueryKey>>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, QueryKey>> entry) {
-                Entry<Contact, QueryKey> e = entry.getValue();
-                nearest.put(e.getKey(), e.getValue());
-                
-                if (nearest.size() < maxCount) {
-                    return SelectStatus.CONTINUE;
-                }
-                
-                return SelectStatus.EXIT;
-            }
-        });
-        
-        return nearest;
     }
     
     public String toString() {

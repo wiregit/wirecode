@@ -94,7 +94,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     @Override
     protected void finishLookup() {
         long time = getElapsedTime();
-        int hop = getCurrentHop();
         
         Collection<FindValueResponse> responses = getValues();
         
@@ -104,7 +103,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
         
-        setReturnValue(new FindValueResult(context, getLookupID(), responses, time, hop));
+        setReturnValue(new FindValueResult(context, getLookupID(), responses, time, currentHop));
     }
     
     /**
