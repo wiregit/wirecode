@@ -66,6 +66,7 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         details_1 = new URNFileDetails(URN_1);
     }
     
+    @Override
     public void setUp() throws Exception {
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(true);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(true);
@@ -78,7 +79,8 @@ public class ContentManagerNetworkTest extends BaseTestCase {
         assertNull(one.response);
     }
     
-    public void teardown() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         mgr.shutdown();
     }
     
@@ -153,8 +155,9 @@ public class ContentManagerNetworkTest extends BaseTestCase {
     public void testResponseReceived() throws Exception {
     	LOG.debug("testResponseReceived");
         mgr.shutdown();
+        
         mgr = RouterService.getContentManager();
-        mgr.setContentAuthorities(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", 5555)));
+        mgr.setContentAuthorities(new IpPortContentAuthority(new IpPortImpl("127.0.0.1", 5555), true));
         mgr.initialize();
         
 //        Thread.yield();
