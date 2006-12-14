@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.uploader.UploadType;
+
 /**
  * This interface outlines the basic functionality for a class that 
  * performs uploads.
@@ -130,6 +132,12 @@ public interface Uploader extends BandwidthTracker {
      * used.
      */
     public String getCustomIconDescriptor();
+    
+    /**
+     * Returns the kind of upload this is
+     * (shared file, browse host, malformed request, etc..)
+     */
+    public UploadType getUploadType();
 
 }
 

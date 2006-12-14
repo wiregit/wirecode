@@ -37,6 +37,7 @@ import com.limegroup.gnutella.uploader.LimitReachedUploadState;
 import com.limegroup.gnutella.uploader.PushProxyUploadState;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.UploadType;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.limegroup.gnutella.util.IOUtils;
@@ -383,6 +384,7 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
                 // If we started a new file with this request, attempt
                 // to display it in the GUI.
                 if( startedNewFile ) {
+                    setUploadType(uploader);
                     addToGUI(uploader);
                 }
 
@@ -473,21 +475,44 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         }
     }
     
-    /**
-     * Determines whether or no this Uploader should be shown
-     * in the GUI.
-     */
-    private boolean shouldShowInGUI(HTTPUploader uploader) {
-        return uploader.getIndex() != BROWSE_HOST_FILE_INDEX &&
-               uploader.getIndex() != PUSH_PROXY_FILE_INDEX &&
-               uploader.getIndex() != UPDATE_FILE_INDEX &&
-               uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
-               uploader.getIndex() != BAD_URN_QUERY_INDEX &&
-               uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
-               uploader.getIndex() != RESOURCE_INDEX &&
-               uploader.getIndex() != BROWSER_CONTROL_INDEX &&
-               uploader.getMethod() != HTTPRequestMethod.HEAD &&
-               !uploader.isForcedShare();
+    /** Sets the upload type on the uploader. */
+    private void setUploadType(HTTPUploader uploader) {
+        switch(uploader.getIndex()) {
+        case BROWSE_HOST_FILE_INDEX:
+            uploader.setUploadType(UploadType.BROWSE_HOST);
+            break;
+        case PUSH_PROXY_FILE_INDEX:
+            uploader.setUploadType(UploadType.PUSH_PROXY);
+            break;
+        case UPDATE_FILE_INDEX:
+            uploader.setUploadType(UploadType.UPDATE_FILE);
+            break;
+        case MALFORMED_REQUEST_INDEX:
+            uploader.setUploadType(UploadType.MALFORMED_REQUEST);
+            break;
+        case BAD_URN_QUERY_INDEX:
+            uploader.setUploadType(UploadType.INVALID_URN);
+            break;
+        case FILE_VIEW_FILE_INDEX:
+            uploader.setUploadType(UploadType.FILE_VIEW);
+            break;
+        case RESOURCE_INDEX:
+            uploader.setUploadType(UploadType.RESOURCE_FILE);
+            break;
+        case BROWSER_CONTROL_INDEX:
+            uploader.setUploadType(UploadType.BROWSER_CONTROL);
+            break;
+        }
+        
+        if(uploader.getMethod() == HTTPRequestMethod.HEAD)
+            uploader.setUploadType(UploadType.HEAD_REQUEST);
+        
+        if(uploader.getUploadType() == null) {
+            if(uploader.isForcedShare())
+                uploader.setUploadType(UploadType.FORCED_SHARE);
+            else
+                uploader.setUploadType(UploadType.SHARED_FILE);
+        }
 	}
     
     /**
@@ -551,7 +576,7 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
                 break;
         }
         
-        if ( shouldShowInGUI(uploader) ) {
+        if (uploader.getUploadType() != null && !uploader.getUploadType().isInternal() ) {
             FileDesc fd = uploader.getFileDesc();
             if( fd != null && 
               state == Uploader.COMPLETE &&
@@ -561,8 +586,9 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
                 RouterService.getCallback().handleSharedFileUpdate(
                     fd.getFile());
     		}
-            RouterService.getCallback().removeUpload(uploader);
         }
+        
+        RouterService.getCallback().removeUpload(uploader);
     }
     
     /**
@@ -780,8 +806,9 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
         //We are going to notify the gui about the new upload, and let
         //it decide what to do with it - will act depending on it's
         //state
-        if (shouldShowInGUI(uploader)) {
-            RouterService.getCallback().addUpload(uploader);
+        RouterService.getCallback().addUpload(uploader);
+        
+        if (!uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
 			if(fd != null) {
     			fd.incrementAttemptedUploads();

@@ -176,8 +176,11 @@ public final class HTTPUploader implements Uploader {
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
 	 */
 	private HTTPRequestMethod _method;
+    
+    /** The upload type of this uploader. */
+    private UploadType _uploadType;
 
-	/**
+    /**
 	 * Consructor for a "normal" non-push upload.  Note that this can
 	 * be a URN get request.
 	 *
@@ -1299,6 +1302,15 @@ public final class HTTPUploader implements Uploader {
     public String getCustomIconDescriptor() {
     	return null;
     }
+    
+    public UploadType getUploadType() {
+        return _uploadType;
+    }
+
+    public void setUploadType(UploadType type) {
+        _uploadType = type;
+    }
+    
 
 	// overrides Object.toString
 	public String toString() {

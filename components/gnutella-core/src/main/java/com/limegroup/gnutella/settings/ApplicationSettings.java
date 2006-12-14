@@ -181,6 +181,10 @@ public class ApplicationSettings extends LimeProps {
     public static final BooleanSetting CONSOLE_VIEW_ENABLED =
         FACTORY.createBooleanSetting("CONSOLE_VIEW_ENABLED", false);
     
+    /** Whether or not the logging tab is enabled / visible. */
+    public static final BooleanSetting LOGGING_VIEW_ENABLED =
+        FACTORY.createBooleanSetting("LOGGING_VIEW_ENABLED", false);
+    
     /**
 	 * Sets the name of the jar file to load on startup, which is read
 	 * in from the properties file by RunLime.

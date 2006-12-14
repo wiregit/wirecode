@@ -5,6 +5,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.uploader.UploadType;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
@@ -165,4 +166,8 @@ public class BTUploader implements Uploader, TorrentEventListener {
 			return null;
 		return BITTORRENT_UPLOAD;
 	}
+
+    public UploadType getUploadType() {
+        return UploadType.SHARED_FILE;
+    }
 }
