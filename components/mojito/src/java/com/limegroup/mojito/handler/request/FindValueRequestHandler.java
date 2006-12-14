@@ -66,56 +66,56 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Database database = context.getDatabase();
         DHTValueBag bag = database.get(lookup);
 
-        Map<KUID, DHTValueEntity> map = Collections.emptyMap();
-        if (bag != null) {
-            map = bag.getValuesMap();
-        }
-
         boolean empty = false;
         
         // The keys and values we'll return
         Collection<KUID> availableKeys = Collections.emptySet();
         Collection<DHTValueEntity> valuesToResturn = Collections.emptyList();
         
-        synchronized(bag.getValuesLock()) {
-            // The Map should never be empty if it wasn't null
-            if (!map.isEmpty()) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Hit! " + lookup + "\n" + bag);
-                }
-
-                // The keys the remote Node is requesting
-                Collection<KUID> secondaryKeys = request.getSecondaryKeys();
-
-                // Nothing specific requested?
-                if (secondaryKeys.isEmpty()) {
-                    // If there's only one value for this key then send 
-                    // just the value
-                    if (map.size() == 1) {
-                        valuesToResturn = new ArrayList<DHTValueEntity>(map.values());
-
-                        // Otherwise send the keys and the remote Node must
-                        // figure out what it's looking for
-                    } else {
-                        availableKeys = new HashSet<KUID>(map.keySet());
-                    }
+        if (bag != null) {
+            synchronized(bag.getValuesLock()) {
+                Map<KUID, DHTValueEntity> map = bag.getValuesMap();
+                
+                if (map.isEmpty()) {
+                    empty = true;
+                    
                 } else {
-                    // Send all requested values back.
-                    // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                    valuesToResturn = new ArrayList<DHTValueEntity>(secondaryKeys.size());
-                    for (KUID secondaryKey : secondaryKeys) {
-                        DHTValueEntity value = map.get(secondaryKey);
-                        if (value != null) {
-                            valuesToResturn.add(value);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Hit! " + lookup + "\n" + bag);
+                    }
+    
+                    // The keys the remote Node is requesting
+                    Collection<KUID> secondaryKeys = request.getSecondaryKeys();
+    
+                    // Nothing specific requested?
+                    if (secondaryKeys.isEmpty()) {
+                        // If there's only one value for this key then send 
+                        // just the value
+                        if (map.size() == 1) {
+                            valuesToResturn = new ArrayList<DHTValueEntity>(map.values());
+    
+                            // Otherwise send the keys and the remote Node must
+                            // figure out what it's looking for
+                        } else {
+                            availableKeys = new HashSet<KUID>(map.keySet());
+                        }
+                    } else {
+                        // Send all requested values back.
+                        // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
+                        valuesToResturn = new ArrayList<DHTValueEntity>(secondaryKeys.size());
+                        for (KUID secondaryKey : secondaryKeys) {
+                            DHTValueEntity value = map.get(secondaryKey);
+                            if (value != null) {
+                                valuesToResturn.add(value);
+                            }
                         }
                     }
                 }
-
-            } else {
-                empty = true;
             }
+        } else {
+            empty = true;
         }
-        
+
         if (empty) {
             // OK, send Contacts instead!
             findNodeDelegate.handleRequest(message);
