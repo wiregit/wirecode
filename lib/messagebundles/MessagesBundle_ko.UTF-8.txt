@@ -261,6 +261,8 @@ DOWNLOAD_TITLE=다운로드
 UPLOAD_TITLE=업로드
 #### CONSOLE_TITLE=Console
 CONSOLE_TITLE=제어
+#### LOGGING_TITLE=Logging
+#? LOGGING_TITLE=
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows.
@@ -273,8 +275,10 @@ MONITOR_TIP=검색과 업로드를 표시
 CONNECTIONS_TIP=다른 클라이언트에 접속을 나타냄
 #### LIBRARY_TIP=View Repository of Saved Files
 LIBRARY_TIP=다른 이름으로 저장 파일의 장소 표시
-#### CONSOLE_TIP=View Log Messages
+#### CONSOLE_TIP=View Console Messages
 CONSOLE_TIP=로그 메시지를 보여줌
+#### LOGGING_TIP=View Logging Messages
+#? LOGGING_TIP=
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window.
@@ -394,6 +398,12 @@ MENU_NAV_CONSOLE=제어
 MENU_NAV_CONSOLE_MNEMONIC=O
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 MENU_NAV_CONSOLE_ACCESSIBLE=제어 화면 표시
+#### MENU_NAV_LOGGING=Logging
+#? MENU_NAV_LOGGING=
+#### MENU_NAV_LOGGING_MNEMONIC=G
+#? MENU_NAV_LOGGING_MNEMONIC=
+#### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
+#? MENU_NAV_LOGGING_ACCESSIBLE=
 
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=보기 (V)
@@ -441,6 +451,12 @@ MENU_VIEW_CONSOLE=제어
 MENU_VIEW_CONSOLE_MNEMONIC=O
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
 MENU_VIEW_CONSOLE_ACCESSIBLE=제어 윈도우 표시
+#### MENU_VIEW_LOGGING=Logging
+#? MENU_VIEW_LOGGING=
+#### MENU_VIEW_LOGGING_MNEMONIC=G
+#? MENU_VIEW_LOGGING_MNEMONIC=
+#### MENU_VIEW_LOGGING_ACCESSIBLE=Show Logging Window
+#? MENU_VIEW_LOGGING_ACCESSIBLE=
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=스킨을 적용 (A)
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -1404,6 +1420,17 @@ HTML_PAGE_LISTING=파일의 리스트
 #### HTML_PAGE_MAGNET=Magnet Links for Fast Downloads (if you have LimeWire installed)
 HTML_PAGE_MAGNET=민첩한 다운로드를 위한 마그넷 링크 (LimeWire 가 인스톨 되고 있는 경우)
 
+
+###################################################################
+# Key/value pairs for Logging tab.
+###################################################################
+#### LOGGING_COLUMN_ICON=Icon
+#? LOGGING_COLUMN_ICON=
+#### LOGGING_COLUMN_MESSAGE=Message
+#? LOGGING_COLUMN_MESSAGE=
+#### LOGGING_COLUMN_TIME=Time
+#? LOGGING_COLUMN_TIME=
+
 ###################################################################
 # Key/value pairs for ConnectionView.
 ###################################################################
@@ -2125,6 +2152,8 @@ SPLASH_STATUS_MONITOR_WINDOW=모니터 윈도우를 불러오는 중...
 SPLASH_STATUS_CONNECTION_WINDOW=접속 윈도우를 불러오는 중...
 #### SPLASH_STATUS_STATISTICS_WINDOW=Loading Statistics Window...
 SPLASH_STATUS_STATISTICS_WINDOW=누계 윈도우를 불러오는 중...
+#### SPLASH_STATUS_LOGGING_WINDOW=Loading Logging Window...
+#? SPLASH_STATUS_LOGGING_WINDOW=
 #### SPLASH_STATUS_STATUS_WINDOW=Loading Status Window...
 SPLASH_STATUS_STATUS_WINDOW=스테이터스 윈도우를 불러오는 중...
 #### SPLASH_STATUS_PLAYLIST_WINDOW=Loading Playlist Window...

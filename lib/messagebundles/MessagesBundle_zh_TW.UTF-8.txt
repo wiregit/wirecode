@@ -301,6 +301,8 @@ DOWNLOAD_TITLE=下載
 UPLOAD_TITLE=上傳
 #### CONSOLE_TITLE=Console
 CONSOLE_TITLE=主控台
+#### LOGGING_TITLE=Logging
+#? LOGGING_TITLE=
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows.
@@ -317,8 +319,10 @@ CONNECTIONS_TIP=連線到其他客戶端
 #### LIBRARY_TIP=View Repository of Saved Files
 ###$ LIBRARY_TIP=查看 保存的 文件
 LIBRARY_TIP=檢視儲存的檔案
-#### CONSOLE_TIP=View Log Messages
+#### CONSOLE_TIP=View Console Messages
 CONSOLE_TIP=檢視訊息紀錄
+#### LOGGING_TIP=View Logging Messages
+#? LOGGING_TIP=
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window.
@@ -463,6 +467,12 @@ MENU_NAV_CONSOLE=主控台
 MENU_NAV_CONSOLE_MNEMONIC=O
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 MENU_NAV_CONSOLE_ACCESSIBLE=顯示主控台視窗
+#### MENU_NAV_LOGGING=Logging
+#? MENU_NAV_LOGGING=
+#### MENU_NAV_LOGGING_MNEMONIC=G
+#? MENU_NAV_LOGGING_MNEMONIC=
+#### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
+#? MENU_NAV_LOGGING_ACCESSIBLE=
 
 #### MENU_VIEW_TITLE=View
 ###$ MENU_VIEW_TITLE=查看 (V)
@@ -524,6 +534,12 @@ MENU_VIEW_CONSOLE=主控台(O)
 MENU_VIEW_CONSOLE_MNEMONIC=O
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
 MENU_VIEW_CONSOLE_ACCESSIBLE=顯示主控台視窗
+#### MENU_VIEW_LOGGING=Logging
+#? MENU_VIEW_LOGGING=
+#### MENU_VIEW_LOGGING_MNEMONIC=G
+#? MENU_VIEW_LOGGING_MNEMONIC=
+#### MENU_VIEW_LOGGING_ACCESSIBLE=Show Logging Window
+#? MENU_VIEW_LOGGING_ACCESSIBLE=
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 ###$ MENU_VIEW_THEMES_TITLE=皮肤 (A)
 MENU_VIEW_THEMES_TITLE=套用面板(A)
@@ -1666,6 +1682,17 @@ HTML_PAGE_LISTING=檔案清單
 #### HTML_PAGE_MAGNET=Magnet Links for Fast Downloads (if you have LimeWire installed)
 HTML_PAGE_MAGNET=快速下載Magnet連結(如果裝有 LimeWire)
 
+
+###################################################################
+# Key/value pairs for Logging tab.
+###################################################################
+#### LOGGING_COLUMN_ICON=Icon
+#? LOGGING_COLUMN_ICON=
+#### LOGGING_COLUMN_MESSAGE=Message
+#? LOGGING_COLUMN_MESSAGE=
+#### LOGGING_COLUMN_TIME=Time
+#? LOGGING_COLUMN_TIME=
+
 ###################################################################
 # Key/value pairs for ConnectionView.
 ###################################################################
@@ -2515,6 +2542,8 @@ SPLASH_STATUS_CONNECTION_WINDOW=載入連線視窗...
 #### SPLASH_STATUS_STATISTICS_WINDOW=Loading Statistics Window...
 ###$ SPLASH_STATUS_STATISTICS_WINDOW=加载 统计 窗口...
 SPLASH_STATUS_STATISTICS_WINDOW=載入統計視窗...
+#### SPLASH_STATUS_LOGGING_WINDOW=Loading Logging Window...
+#? SPLASH_STATUS_LOGGING_WINDOW=
 #### SPLASH_STATUS_STATUS_WINDOW=Loading Status Window...
 ###$ SPLASH_STATUS_STATUS_WINDOW=加载 状态 窗口...
 SPLASH_STATUS_STATUS_WINDOW=載入狀態視窗...

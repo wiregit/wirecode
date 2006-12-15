@@ -259,6 +259,8 @@ DOWNLOAD_TITLE=डाउनलोड
 UPLOAD_TITLE=अपलोड्स
 #### CONSOLE_TITLE=Console
 #? CONSOLE_TITLE=
+#### LOGGING_TITLE=Logging
+#? LOGGING_TITLE=
 
 ################################################################################
 # Key/value pairs for the tooltips of the main windows.
@@ -271,8 +273,10 @@ MONITOR_TIP=खोज एवं अपलोड देखें.
 CONNECTIONS_TIP=दूसरे क्लैयंट्स को कनेक्शन दिखायें.
 #### LIBRARY_TIP=View Repository of Saved Files
 LIBRARY_TIP=संचित फ़ाइलों के भण्डार को देखो.
-#### CONSOLE_TIP=View Log Messages
+#### CONSOLE_TIP=View Console Messages
 #? CONSOLE_TIP=
+#### LOGGING_TIP=View Logging Messages
+#? LOGGING_TIP=
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window.
@@ -392,6 +396,12 @@ MENU_NAV_LIB_ACCESSIBLE=लाइब्रेरी परदा प्रदर
 #? MENU_NAV_CONSOLE_MNEMONIC=
 #### MENU_NAV_CONSOLE_ACCESSIBLE=Display the Console Screen
 #? MENU_NAV_CONSOLE_ACCESSIBLE=
+#### MENU_NAV_LOGGING=Logging
+#? MENU_NAV_LOGGING=
+#### MENU_NAV_LOGGING_MNEMONIC=G
+#? MENU_NAV_LOGGING_MNEMONIC=
+#### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
+#? MENU_NAV_LOGGING_ACCESSIBLE=
 
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=दृश्य (V)
@@ -439,6 +449,12 @@ MENU_VIEW_LIBRARY_ACCESSIBLE=लाइब्रेरी विन्डो प�
 #? MENU_VIEW_CONSOLE_MNEMONIC=
 #### MENU_VIEW_CONSOLE_ACCESSIBLE=Show Console Window
 #? MENU_VIEW_CONSOLE_ACCESSIBLE=
+#### MENU_VIEW_LOGGING=Logging
+#? MENU_VIEW_LOGGING=
+#### MENU_VIEW_LOGGING_MNEMONIC=G
+#? MENU_VIEW_LOGGING_MNEMONIC=
+#### MENU_VIEW_LOGGING_ACCESSIBLE=Show Logging Window
+#? MENU_VIEW_LOGGING_ACCESSIBLE=
 #### MENU_VIEW_THEMES_TITLE=Apply Skins
 MENU_VIEW_THEMES_TITLE=प्रकरण लागू करो (A)
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
@@ -1402,6 +1418,17 @@ HTML_PAGE_LISTING=केलिए फाइल सूचिमय
 #### HTML_PAGE_MAGNET=Magnet Links for Fast Downloads (if you have LimeWire installed)
 #? HTML_PAGE_MAGNET=
 
+
+###################################################################
+# Key/value pairs for Logging tab.
+###################################################################
+#### LOGGING_COLUMN_ICON=Icon
+#? LOGGING_COLUMN_ICON=
+#### LOGGING_COLUMN_MESSAGE=Message
+#? LOGGING_COLUMN_MESSAGE=
+#### LOGGING_COLUMN_TIME=Time
+#? LOGGING_COLUMN_TIME=
+
 ###################################################################
 # Key/value pairs for ConnectionView.
 ###################################################################
@@ -2123,6 +2150,8 @@ SPLASH_STATUS_MONITOR_WINDOW=मोनिटर विन्डो लोड ह
 SPLASH_STATUS_CONNECTION_WINDOW=कनेक्शन विन्डो लोड हो रही है...
 #### SPLASH_STATUS_STATISTICS_WINDOW=Loading Statistics Window...
 SPLASH_STATUS_STATISTICS_WINDOW=आकड़े की विन्डो लोड हो रही है...
+#### SPLASH_STATUS_LOGGING_WINDOW=Loading Logging Window...
+#? SPLASH_STATUS_LOGGING_WINDOW=
 #### SPLASH_STATUS_STATUS_WINDOW=Loading Status Window...
 SPLASH_STATUS_STATUS_WINDOW=वस्तुस्थिति विन्डो लोड हो रही है...
 #### SPLASH_STATUS_PLAYLIST_WINDOW=Loading Playlist Window...
