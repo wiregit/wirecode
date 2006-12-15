@@ -125,6 +125,10 @@ class PassiveDHTNodeController extends AbstractDHTController{
 
     @Override
     public void stop() {
+        if (!isRunning()) {
+            return;
+        }
+        
         super.stop();
         
         // Delete the previous file
@@ -216,7 +220,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 addPassiveDHTNode(new InetSocketAddress(host, port));
             } else {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Connection is DHT node not connected to the network: "+ c);
+                    LOG.debug("Connection is node not connected to the DHT network: "+ c);
                 }
                 removeLeafDHTNode( host , port );
             }

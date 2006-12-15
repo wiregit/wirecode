@@ -1023,7 +1023,7 @@ public class RouterService {
             
             nodeAssigner.stop();
 
-            dhtManager.stop();
+            shutdownDHT();
             
             getAcceptor().shutdown();
             

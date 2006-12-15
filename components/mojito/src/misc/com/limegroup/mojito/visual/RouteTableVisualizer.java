@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -39,10 +40,11 @@ import edu.uci.ics.jung.visualization.PluggableRenderer;
 import edu.uci.ics.jung.visualization.ShapePickSupport;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.contrib.TreeLayout;
-import edu.uci.ics.jung.visualization.control.CrossoverScalingGraphMousePlugin;
+import edu.uci.ics.jung.visualization.control.LayoutScalingControl;
 import edu.uci.ics.jung.visualization.control.PickingGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.PluggableGraphMouse;
-import edu.uci.ics.jung.visualization.control.ViewScalingGraphMousePlugin;
+import edu.uci.ics.jung.visualization.control.ScalingGraphMousePlugin;
+import edu.uci.ics.jung.visualization.control.ViewScalingControl;
 
 /**
  * A visualizer for the Routing table. This is only experimental!
@@ -140,8 +142,10 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
 
         PluggableGraphMouse graphMouse = new PluggableGraphMouse();
         graphMouse.add(new PickingGraphMousePlugin());
-        graphMouse.add(new ViewScalingGraphMousePlugin());
-        graphMouse.add(new CrossoverScalingGraphMousePlugin());
+        graphMouse.add(new ScalingGraphMousePlugin(
+                new ViewScalingControl(), MouseEvent.CTRL_MASK));
+        graphMouse.add(new ScalingGraphMousePlugin(
+                new LayoutScalingControl(), 0));
         graphMouse.add(new RouteTableGraphMousePlugin(this));
         vv.setGraphMouse(graphMouse);
         

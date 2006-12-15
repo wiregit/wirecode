@@ -101,6 +101,10 @@ class ActiveDHTNodeController extends AbstractDHTController {
 
     @Override
     public void stop() {
+        if (!isRunning()) {
+            return;
+        }
+        
         super.stop();
         
         //Notify our ultrapeers that we disconnected

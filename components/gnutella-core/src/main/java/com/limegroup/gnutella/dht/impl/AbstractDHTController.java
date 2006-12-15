@@ -129,10 +129,6 @@ abstract class AbstractDHTController implements DHTController {
      * 
      */
     public void stop(){
-        if (!isRunning()) {
-            return;
-        }
-        
         running = false;
         
         LOG.debug("Shutting down DHT Controller");
