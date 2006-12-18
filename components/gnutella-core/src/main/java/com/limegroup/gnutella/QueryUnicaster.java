@@ -25,8 +25,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
@@ -175,8 +175,8 @@ public final class QueryUnicaster {
 
 
  	/**
- 	 * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
- 	 */
+     * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
+     */
     private QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable<GUID, QueryBundle>();
@@ -185,14 +185,14 @@ public final class QueryUnicaster {
         _pingList = new Buffer<GUESSEndpoint>(25);
         _querySets = new Hashtable<ReplyHandler, Set<GUID>>();
         _qGuidsToRemove = new Vector<GUID>();
-
+    
         // start service...
-        _querier = new ManagedThread() {
-			public void managedRun() {
-			    queryLoop();
-			}
-		};
-
+        _querier = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
+                queryLoop();
+            }
+        });
+        
         _querier.setName("QueryUnicaster");
         _querier.setDaemon(true);
     }

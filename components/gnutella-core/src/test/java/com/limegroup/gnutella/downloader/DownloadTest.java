@@ -2605,7 +2605,7 @@ public class DownloadTest extends BaseTestCase {
             start();
         }
 
-        public void managedRun() {
+        public void run() {
             DatagramPacket p = new DatagramPacket(new byte[1024],1024);
             Message m = null;
             try {

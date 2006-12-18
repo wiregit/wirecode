@@ -67,7 +67,7 @@ import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -715,7 +715,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     public synchronized void startDownload() {
         Assert.that(dloaderManagerThread == null, "already started" );
-        ThreadFactory.startThread(new Runnable() {
+        ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 try {
                     dloaderManagerThread = Thread.currentThread();

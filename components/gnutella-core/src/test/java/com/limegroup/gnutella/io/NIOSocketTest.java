@@ -13,8 +13,8 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Tests that NIOSocket delegates events correctly.
@@ -268,7 +268,7 @@ public final class NIOSocketTest extends BaseTestCase {
             server.setReuseAddress(true);
             server.bind(new InetSocketAddress(port));
             server.setSoTimeout(30 * 1000);
-            new ManagedThread(new Runnable() {
+            Thread thread = ThreadExecutor.newManagedThread(new Runnable() {
                 public void run() {
                     try {
                         accepted = server.accept();
@@ -279,7 +279,8 @@ public final class NIOSocketTest extends BaseTestCase {
                         server.close();
                     } catch(IOException ignored) {}
                 }
-            }).start();
+            });
+            thread.start();
         }
         
         Stream getStream() throws Exception {
@@ -303,7 +304,7 @@ public final class NIOSocketTest extends BaseTestCase {
         }
         
         void write(final byte[] data) {
-            new ManagedThread(new Runnable() {
+            Thread thread = ThreadExecutor.newManagedThread(new Runnable() {
                 public void run() {
                     try {
                         socket.getOutputStream().write(data);
@@ -312,7 +313,8 @@ public final class NIOSocketTest extends BaseTestCase {
                         fail(iox);
                     }
                 }
-            }).start();
+            });
+            thread.start();
         }
     }
     

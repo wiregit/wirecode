@@ -14,7 +14,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 public class ConnectionDispatcher {
     
@@ -137,7 +137,7 @@ public class ConnectionDispatcher {
     					acceptor.acceptConnection(word, sock);
     				}
     			};
-    			ThreadFactory.startThread(r, "IncomingConnection");
+    			ThreadExecutor.startThread(r, "IncomingConnection");
     		} else
     			acceptor.acceptConnection(word, sock);
     	}

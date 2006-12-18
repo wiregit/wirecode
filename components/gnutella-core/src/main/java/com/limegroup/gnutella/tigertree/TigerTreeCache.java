@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,7 +24,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * @author Gregorio Roper
@@ -40,8 +41,8 @@ public final class TigerTreeCache {
     /**
      * The ProcessingQueue to do the hashing.
      */
-    private static final ProcessingQueue QUEUE = 
-        new ProcessingQueue("TreeHashTread");
+    private static final ExecutorService QUEUE = 
+        ExecutorsHelper.newProcessingQueue("TreeHashTread");
 
     private static final Log LOG =
         LogFactory.getLog(TigerTreeCache.class);
@@ -92,7 +93,7 @@ public final class TigerTreeCache {
             return null;
         if (tree == null) {
             TREE_MAP.put(fd.getSHA1Urn(), BUSH);
-            QUEUE.add(new HashRunner(fd));
+            QUEUE.execute(new HashRunner(fd));
         }
         return tree;
     }

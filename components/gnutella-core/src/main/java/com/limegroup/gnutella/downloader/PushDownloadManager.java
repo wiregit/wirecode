@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -40,13 +41,12 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.DefaultThreadPool;
 import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
-import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -63,8 +63,8 @@ public class PushDownloadManager implements ConnectionAcceptor {
     private static long UDP_PUSH_FAILTIME = 5000;
     
     /** Pool on which blocking HTTP PushProxy requests are handled */
-    private final ThreadPool PUSH_THREAD_POOL =
-        new DefaultThreadPool("PushProxy Requests", 10);
+    private final ExecutorService PUSH_THREAD_POOL =
+        ExecutorsHelper.newFixedSizeThreadPool(10, "PushProxy Requests");
     
     /**
      * number of files that we have sent a udp push for and are waiting a connection.

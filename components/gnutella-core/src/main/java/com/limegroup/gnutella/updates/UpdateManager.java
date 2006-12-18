@@ -18,7 +18,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
@@ -107,7 +107,7 @@ public class UpdateManager {
             return;//so this should never happen
         final Connection c = connection;
         final String myversion = myVersion;
-        ThreadFactory.startThread(new Runnable() {
+        ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 LOG.trace("Getting update file");
                 final String UPDATE = "/update.xml";

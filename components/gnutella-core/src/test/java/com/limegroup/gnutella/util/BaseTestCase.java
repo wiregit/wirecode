@@ -673,15 +673,15 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
         Thread []r = new Thread[conns.length];
         for (int i = 0; i < conns.length; i++) {
             final int index = i;
-            r[i] = new ManagedThread() {
-                public void managedRun() {
+            r[i] = ThreadExecutor.newManagedThread(new Runnable() {
+                public void run() {
                     try {
                         drain(conns[index],TIMEOUT);
                     } catch (Exception bad) {
                         ErrorService.error(bad);
                     }
                 }
-            };
+            });
             r[i].start();
         }
         
@@ -854,16 +854,17 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
         Thread [] drainers = new ManagedThread[connections.length];
         for (int i = 0; i < connections.length; i++) {
             final int index = i;
-            drainers[i] = new ManagedThread() {
-                public void managedRun() {
+            drainers[i] = ThreadExecutor.newManagedThread(new Runnable() {
+                public void run() {
                     try {
                         Message m = 
                             getFirstInstanceOfMessageType(connections[index],type);
                         assertNull(m);
                     } catch (BadPacketException bad) {
                         fail(bad);
+                    }
                 }
-            }};
+            });
             drainers[i].start();
         }
         for(int i = 0;i < drainers.length;i++)

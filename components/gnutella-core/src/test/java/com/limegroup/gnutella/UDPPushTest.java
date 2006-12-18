@@ -22,8 +22,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -328,25 +328,25 @@ public class UDPPushTest extends BaseTestCase {
 	
 	
 	static void requestPush(final RemoteFileDesc rfd) throws Exception{
-		Thread t = new ManagedThread() {
-			public void managedRun() {
+		Thread t = ThreadExecutor.newManagedThread(new Runnable() {
+			public void run() {
 				RouterService.getDownloadManager().getPushManager().sendPush(rfd);
 			}
-		};
+		});
 		t.start();
 		Thread.sleep(100);
 	}
 	
 	static void sendGiv(final Socket sock,final String str) {
-		Thread t = new ManagedThread() {
-            public void managedRun() {
+		Thread t = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
 				try {
 					sock.getOutputStream().write(str.getBytes());
 				}catch(IOException e) {
 					fail(e);
 				}
 			}
-		};
+		});
 		t.start();
 	}
 }

@@ -66,12 +66,11 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.SimpleTimer;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -349,7 +348,7 @@ public class RouterService {
   				_state = StartStatus.PRE_GUI;
   		}
   		
-        ThreadFactory.startThread(new Initializer(), "async gui initializer");
+        ThreadExecutor.startThread(new Initializer(), "async gui initializer");
   	}
   	
   	/**
@@ -528,17 +527,17 @@ public class RouterService {
 	 * Starts a manual GC thread.
 	 */
 	private void startManualGCThread() {
-	    Thread t = new ManagedThread(new Runnable() {
-	        public void run() {
-	            while(true) {
-	                try {
-	                    Thread.sleep(5 * 60 * 1000);
-	                } catch(InterruptedException ignored) {}
-	                LOG.trace("Running GC");
-	                System.gc();
-	                LOG.trace("GC finished, running finalizers");
-	                System.runFinalization();
-	                LOG.trace("Finalizers finished.");
+        Thread t = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
+                while(true) {
+                    try {
+                        Thread.sleep(5 * 60 * 1000);
+                    } catch(InterruptedException ignored) {}
+                    LOG.trace("Running GC");
+                    System.gc();
+                    LOG.trace("GC finished, running finalizers");
+                    System.runFinalization();
+                    LOG.trace("Finalizers finished.");
                 }
             }
         }, "ManualGC");
@@ -1695,7 +1694,7 @@ public class RouterService {
 	  final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        ThreadFactory.startThread(new Runnable() {
+        ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 handler.browseHost(host, port, proxies, canDoFWTransfer);
             }

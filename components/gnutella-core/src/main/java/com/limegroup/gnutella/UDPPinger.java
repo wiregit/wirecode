@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,7 +10,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 
@@ -19,7 +20,7 @@ public class UDPPinger {
     
     private static final Log LOG = LogFactory.getLog(UDPPinger.class);
         
-    protected static final ProcessingQueue QUEUE = new ProcessingQueue("UDPHostRanker");
+    protected static final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("UDPHostRanker");
         
     /**
      * The time to wait before expiring a message listener.
@@ -107,7 +108,7 @@ public class UDPPinger {
             };
         }
         
-        QUEUE.add(new SenderBundle(hosts, listener, canceller, message));
+        QUEUE.execute(new SenderBundle(hosts, listener, canceller, message));
     }
     
     /**

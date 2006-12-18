@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +35,7 @@ import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**
@@ -76,7 +77,7 @@ public class UpdateHandler {
     /**
      * The queue that handles all incoming data.
      */
-    private final ProcessingQueue QUEUE = new ProcessingQueue("UpdateHandler");
+    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("UpdateHandler");
     
     /**
      * The most recent update info for this machine.
@@ -121,7 +122,7 @@ public class UpdateHandler {
      */
     private void initialize() {
         LOG.trace("Initializing UpdateHandler");
-        QUEUE.add(new Runnable() {
+        QUEUE.execute(new Runnable() {
             public void run() {
                 handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
             }
@@ -131,7 +132,7 @@ public class UpdateHandler {
         // at a specified interval.
         RouterService.schedule(new Runnable() {
             public void run() {
-                QUEUE.add(new Poller());
+                QUEUE.execute(new Poller());
             }
         }, UpdateSettings.UPDATE_RETRY_DELAY.getValue(),  0);
     }
@@ -140,7 +141,7 @@ public class UpdateHandler {
      * Sparks off an attempt to download any pending updates.
      */
     public void tryToDownloadUpdates() {
-        QUEUE.add(new Runnable() {
+        QUEUE.execute(new Runnable() {
             public void run() {
                 UpdateInformation updateInfo = _updateInfo;
                 
@@ -159,7 +160,7 @@ public class UpdateHandler {
      */
     public void handleUpdateAvailable(final ReplyHandler rh, final int version) {
         if(version == _lastId) {
-            QUEUE.add(new Runnable() {
+            QUEUE.execute(new Runnable() {
                 public void run() {
                     addSourceIfIdMatches(rh, version);
                 }
@@ -176,7 +177,7 @@ public class UpdateHandler {
      */
     public void handleNewData(final byte[] data) {
         if(data != null) {
-            QUEUE.add(new Runnable() {
+            QUEUE.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
                     handleDataInternal(data, false);
@@ -545,7 +546,7 @@ public class UpdateHandler {
             }
         };
         
-        QUEUE.add(r);
+        QUEUE.execute(r);
     }
     
     /**
@@ -631,7 +632,7 @@ public class UpdateHandler {
             killHopelessUpdates(_updatesToDownload);
             RouterService.schedule( new Runnable() {
                 public void run() {
-                    QUEUE.add(new Poller());
+                    QUEUE.execute(new Poller());
                 }
             },UpdateSettings.UPDATE_RETRY_DELAY.getValue(),0);
         }

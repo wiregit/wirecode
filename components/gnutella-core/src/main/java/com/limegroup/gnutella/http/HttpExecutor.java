@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.http;
 
+import java.util.concurrent.ExecutorService;
+
 import org.apache.commons.httpclient.HttpMethod;
 
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.ThreadPool;
 
 /**
  * Something that executes HTTP requests using the http client library.
@@ -30,7 +31,7 @@ public interface HttpExecutor {
 	public Shutdownable execute(HttpMethod method, 
 			HttpClientListener listener,
 			int timeout,
-			ThreadPool executor);
+			ExecutorService executor);
 	
 	/**
 	 * Tries to execute any of the methods until the HttpClientListener
@@ -42,7 +43,7 @@ public interface HttpExecutor {
 	 */
 	public Shutdownable executeAny(HttpClientListener listener,
 			int timeout,
-			ThreadPool executor,
+			ExecutorService executor,
 			Iterable<? extends HttpMethod> methods,
             Cancellable canceller);
 	

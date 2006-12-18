@@ -6,7 +6,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ThreadExecutor;
  
 public class ContentManagerTest extends BaseTestCase {
     
@@ -167,14 +167,14 @@ public class ContentManagerTest extends BaseTestCase {
     public void testBlockingRequest() throws Exception {
         mgr.initialize();
         
-        Thread responder = new ManagedThread() {
-            public void managedRun() {
+        Thread responder = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
                 ContentManagerTest.sleep(1000);
                 mgr.handleContentResponse(crOne);
                 ContentManagerTest.sleep(1000);
                 mgr.handleContentResponse(crTwo);
             }
-        };
+        });
         responder.setDaemon(true);
         responder.start();
         

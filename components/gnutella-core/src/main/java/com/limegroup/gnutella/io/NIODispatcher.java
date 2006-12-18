@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Dispatcher for NIO.
@@ -83,8 +83,8 @@ public class NIODispatcher implements Runnable {
             failed = true;
         }
         
-        if(!failed) {        
-            dispatchThread = new ManagedThread(this, "NIODispatcher");
+        if(!failed) {
+            dispatchThread = ThreadExecutor.newManagedThread(this, "NIODispatcher");
             dispatchThread.start();
         } else {
             dispatchThread = null;

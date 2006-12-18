@@ -14,7 +14,7 @@ import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 public class ConnectionTest extends BaseTestCase {
     
@@ -134,7 +134,7 @@ public class ConnectionTest extends BaseTestCase {
         public void handleIOException(IOException iox) {}
 
         public void handleAccept(final Socket socket) throws IOException {
-            ThreadFactory.startThread(new Runnable() {
+            ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
                         if(badHandshake) {

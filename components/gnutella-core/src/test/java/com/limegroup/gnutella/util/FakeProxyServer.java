@@ -59,19 +59,19 @@ public class FakeProxyServer extends AssertComparisons {
             ErrorService.error(iox);
         }
 
-        Thread proxyThread = new ManagedThread() {
-            public void managedRun() {
+        Thread proxyThread = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
                 proxyLoop();
             }
-        };
+        });
         proxyThread.setDaemon(true);
         proxyThread.start();
         
-        Thread destThread = new ManagedThread() {
-            public void managedRun() {
+        Thread destThread = ThreadExecutor.newManagedThread(new Runnable() {
+            public void run() {
                 destLoop();
-            }            
-        };
+            }
+        });
         destThread.setDaemon(true);
         destThread.start();
     }

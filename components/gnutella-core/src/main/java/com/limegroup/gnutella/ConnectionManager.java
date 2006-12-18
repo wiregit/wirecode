@@ -33,7 +33,7 @@ import com.limegroup.gnutella.util.IpPortSet;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.SystemUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -287,7 +287,7 @@ public class ConnectionManager implements ConnectionAcceptor {
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c, null);
         // Kick off a thread for the message loop.
-        ThreadFactory.startThread(new OutgoingConnector(c, false), "OutgoingConnector");
+        ThreadExecutor.startThread(new OutgoingConnector(c, false), "OutgoingConnector");
         return c;
     }
 
@@ -302,7 +302,7 @@ public class ConnectionManager implements ConnectionAcceptor {
 								  true);
         // Initialize and loop for messages on another thread.
 
-		ThreadFactory.startThread(outgoingRunner, "OutgoingConnectionThread");
+		ThreadExecutor.startThread(outgoingRunner, "OutgoingConnectionThread");
     }
 
 

@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.nio.channels.IllegalBlockingModeException;
 import java.nio.channels.ServerSocketChannel;
 
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * A ServerSocket that allows asynchronous accepts but is backed
@@ -186,7 +186,7 @@ public class BlockingServerSocketAdapter extends ServerSocket {
      */
     private void startListening() {
         if(observer != null) {
-            ThreadFactory.startThread(new Runnable() {
+            ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     while(!isClosed()) {
                         try {

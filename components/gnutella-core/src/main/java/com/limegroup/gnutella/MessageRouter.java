@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,10 +79,10 @@ import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.FixedsizeHashMap;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -216,8 +217,8 @@ public abstract class MessageRouter {
     /**
      * The processingqueue to add tcpconnectback socket connections to.
      */
-    private static final ProcessingQueue TCP_CONNECT_BACKER =
-        new ProcessingQueue("TCPConnectBack");
+    private static final ExecutorService TCP_CONNECT_BACKER =
+        ExecutorsHelper.newProcessingQueue("TCPConnectBack");
     
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -1345,7 +1346,7 @@ public abstract class MessageRouter {
         if (!shouldServiceRedirect(_tcpConnectBacks,addrToContact))
             return;
 
-        TCP_CONNECT_BACKER.add(new Runnable() {
+        TCP_CONNECT_BACKER.execute(new Runnable() {
             public void run() {
                 Socket sock = null;
                 try {
@@ -2523,7 +2524,7 @@ public abstract class MessageRouter {
         }
 
         /** While the connection is not closed, sends all data delay. */
-        public void managedRun() {
+        public void run() {
             try {
                 while (true) {
 					// Check for any scheduled QRP table propagations

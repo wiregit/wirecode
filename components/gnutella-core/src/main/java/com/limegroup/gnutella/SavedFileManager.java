@@ -5,13 +5,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Singleton that manages saved files.
@@ -33,7 +34,7 @@ public final class SavedFileManager implements Runnable {
     /**
      * The queue that the task runs in.
      */
-    private static final ProcessingQueue QUEUE = new ProcessingQueue("SavedFileLoader");
+    private static final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("SavedFileLoader");
     
     
     /**
@@ -74,7 +75,7 @@ public final class SavedFileManager implements Runnable {
      * Attempts to load the saved files.
      */
     public void run() {
-        QUEUE.add(new Runnable() {
+        QUEUE.execute(new Runnable() {
             public void run() {
                 load();
             }

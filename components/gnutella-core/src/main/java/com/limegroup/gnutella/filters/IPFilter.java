@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -15,7 +16,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Blocks messages and hosts based on IP address.  
@@ -25,7 +26,7 @@ public final class IPFilter extends SpamFilter {
     private volatile IPList badHosts;
     private volatile IPList goodHosts;
     
-    private final ProcessingQueue IP_LOADER = new ProcessingQueue("IpLoader");
+    private final ExecutorService IP_LOADER = ExecutorsHelper.newProcessingQueue("IpLoader");
 
     /** Constructs an IPFilter that automatically loads the content. */
     public IPFilter() {
@@ -63,7 +64,7 @@ public final class IPFilter extends SpamFilter {
      * Refresh the IPFilter's instance.
      */
     public void refreshHosts(final IPFilterCallback callback) {
-        IP_LOADER.add(new Runnable() {
+        IP_LOADER.execute(new Runnable() {
             public void run() {
                 refreshHostsImpl();
                 callback.ipFiltersLoaded();

@@ -189,7 +189,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	public void writeBlock(NECallable<BTPiece> factory) {
 		if (storedException != null)
 			return;
-		QUEUE.invokeLater(new WriteJob(factory),context.getMetaInfo().getURN());
+		QUEUE.execute(new WriteJob(factory),context.getMetaInfo().getURN());
 	}
 	
 	/**
@@ -413,14 +413,14 @@ class VerifyingFolder implements TorrentDiskManager {
 		for (int block : partialBlocks.keySet() ) {
 			if (isCompleteBlock(block, partialBlocks)) {
 				isVerifying = true;
-				VERIFY_QUEUE.invokeLater(new VerifyJob(block),context.getMetaInfo().getURN());
+				VERIFY_QUEUE.execute(new VerifyJob(block),context.getMetaInfo().getURN());
 			}
 		}
 		
 		// if we had to verify anything, enqueue a notification
 		// after we're done.
 		if (isVerifying) {
-			VERIFY_QUEUE.invokeLater(new Runnable(){
+			VERIFY_QUEUE.execute(new Runnable(){
 				public void run() {
 					if (isOpen()) {
 						isVerifying = false;
@@ -474,7 +474,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	public void requestPieceRead(BTInterval in, PieceReadListener c) {
 		if (storedException != null)
 				return;
-		QUEUE.invokeLater(new SendJob(in, c),context.getMetaInfo().getURN());
+		QUEUE.execute(new SendJob(in, c),context.getMetaInfo().getURN());
 	}
 	
 	private class SendJob implements Runnable {
@@ -765,7 +765,7 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 		for (TorrentFile f : l) {
 			for (int i = Math.max(lastSet,f.getBegin()); i <= f.getEnd(); i++) 
-				VERIFY_QUEUE.invokeLater(new VerifyJob(i),context.getMetaInfo().getURN());
+				VERIFY_QUEUE.execute(new VerifyJob(i),context.getMetaInfo().getURN());
 		}
 	}
 

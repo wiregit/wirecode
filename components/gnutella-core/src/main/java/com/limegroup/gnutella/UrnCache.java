@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +25,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -66,7 +67,7 @@ public final class UrnCache {
     /**
      * The ProcessingQueue that Files are hashed in.
      */
-    private final ProcessingQueue QUEUE = new ProcessingQueue("Hasher");
+    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("Hasher");
     
     /**
      * The set of files that are pending hashing to the callbacks that are listening to them.
@@ -122,7 +123,7 @@ public final class UrnCache {
                 pendingHashing.put(file, list);
             }
             list.add(callback);
-            QUEUE.add(new Processor(file));
+            QUEUE.execute(new Processor(file));
         }
     }
     

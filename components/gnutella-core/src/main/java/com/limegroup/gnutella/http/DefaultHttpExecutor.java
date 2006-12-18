@@ -1,22 +1,22 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.DefaultThreadPool;
-import com.limegroup.gnutella.util.ThreadPool;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Default implementation of <tt>HttpExecutor</tt>.
  */
 public class DefaultHttpExecutor implements HttpExecutor {
 
-	private static final DefaultThreadPool POOL = 
-		new DefaultThreadPool("HttpClient pool", true);
+	private static final ExecutorService POOL = 
+        ExecutorsHelper.newThreadPool("HttpClient pool");
 	
 	public Shutdownable execute(HttpMethod method, HttpClientListener listener, int timeout) {
 		return execute(method, listener, timeout, POOL);
@@ -24,14 +24,14 @@ public class DefaultHttpExecutor implements HttpExecutor {
 
 	public Shutdownable execute(final HttpMethod method, final HttpClientListener listener,
 			final int timeout,
-			ThreadPool executor) {
+			ExecutorService executor) {
 		
 		Runnable r = new Runnable() {
 			public void run() {
 				performRequest(method, listener, timeout);		
 			}
 		};
-		executor.invokeLater(r);
+		executor.execute(r);
 		return new Aborter(method);
 	}
 	
@@ -52,11 +52,11 @@ public class DefaultHttpExecutor implements HttpExecutor {
 
 	public Shutdownable executeAny(HttpClientListener listener, 
                         		   int timeout,
-                                   ThreadPool executor, 
+                                   ExecutorService executor, 
                         		   Iterable<? extends HttpMethod> methods,
                                    Cancellable canceller) {
 		MultiRequestor r = new MultiRequestor(listener, timeout, methods, canceller);
-		executor.invokeLater(r);
+		executor.execute(r);
 		return r;
 	}
 	

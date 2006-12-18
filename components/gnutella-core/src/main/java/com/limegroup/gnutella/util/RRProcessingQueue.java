@@ -4,32 +4,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class RRProcessingQueue extends ProcessingQueue {
+/* TODO: Convert to using java.util.concurrent. */
+public class RRProcessingQueue {
 	
 	private static final Log LOG = LogFactory.getLog(RRProcessingQueue.class);
+    
+    /** Factory to get new threads from. */
+    private final ThreadFactory FACTORY;
+    
+    /** The thread doing the processing. */
+    private Thread _runner = null;
 
-	private final Map<Object, NamedQueue> queues = new HashMap<Object, NamedQueue>();
-	private final RoundRobinQueue<NamedQueue> lists = new RoundRobinQueue<NamedQueue>();
-	
+    private final Map<Object, NamedQueue> queues = new HashMap<Object, NamedQueue>();
+    private final RoundRobinQueue<NamedQueue> lists = new RoundRobinQueue<NamedQueue>();
 	private int size;
-	
-	public RRProcessingQueue(String name, boolean managed, int priority) {
-		super(name, managed, priority);
-	}
-
-	public RRProcessingQueue(String name, boolean managed) {
-		super(name, managed);
-	}
 
 	public RRProcessingQueue(String name) {
-		super(name);
+        FACTORY = ExecutorsHelper.daemonThreadFactory(name);
 	}
 
-	public synchronized void invokeLater(Runnable runner, Object queueId) {
+	public synchronized void execute(Runnable runner, Object queueId) {
 		NamedQueue queue = queues.get(queueId);
 		if (queue == null) {
 			queue = new NamedQueue(new LinkedList<Runnable>(), queueId);
@@ -41,14 +40,24 @@ public class RRProcessingQueue extends ProcessingQueue {
 			
 		notifyAndStart();
 	}
-	
-	public synchronized void invokeLater(Runnable r) {
-		invokeLater(r, this);
-	}
-	
-	protected synchronized boolean moreTasks() {
-		return size > 0;
-	}
+    
+    /** Notifies the waiting thread or starts a new one. */
+    protected synchronized void notifyAndStart() {
+        notify();
+        if(_runner == null)
+            startRunner();
+    }
+    
+    /** Starts a new runner. */
+    private synchronized void startRunner() {
+        _runner = FACTORY.newThread(new Processor());
+        _runner.setDaemon(true);
+        _runner.start();
+    }
+
+    protected synchronized boolean moreTasks() {
+        return size > 0;
+    }
 	
 	protected synchronized Runnable next() {
 		Runnable ret = null;
@@ -67,7 +76,6 @@ public class RRProcessingQueue extends ProcessingQueue {
 		}
 		return null;
 	}
-
 	
 	public synchronized int size() {
 		return size;
@@ -106,4 +114,57 @@ public class RRProcessingQueue extends ProcessingQueue {
 			return list.isEmpty() ? null : (Runnable) list.remove(0);
 		}
 	}
+    
+    /** The runnable that processes the queue. */
+    private class Processor implements Runnable {
+        public void run() {
+            try {
+                while(true) {
+                    Runnable next = next();
+                    if(next != null)
+                        next.run();
+
+                    // Ideally this would be in a finally clause -- but if it
+                    // is then we can potentially ignore exceptions that were
+                    // thrown.
+                    synchronized(RRProcessingQueue.this) {
+                        // If something was added before we grabbed the lock,
+                        // process those items immediately instead of waiting
+                        if(moreTasks())
+                            continue;
+                        
+                        // Wait a little bit to see if something new is going
+                        // to come in, so we don't needlessly kill/recreate
+                        // threads.
+                        try {
+                            RRProcessingQueue.this.wait(5 * 1000);
+                        } catch(InterruptedException ignored) {}
+                        
+                        // If something was added and notified us, process it
+                        // instead of exiting.
+                        if(moreTasks())
+                            continue;
+                        // Otherwise, exit
+                        else
+                            break;
+                    }
+                }
+            } finally {
+                // We must restart a new runner if something was added.
+                // It's highly unlikely that something was added between
+                // the try of one synchronized block & the finally of another,
+                // but it technically is possible.
+                // We cannot loop here because we'd lose any exceptions
+                // that may have been thrown.
+                synchronized(RRProcessingQueue.this) {
+                    if(moreTasks())
+                        startRunner();
+                    else
+                        _runner = null;
+                }
+            }
+        }
+    }
+
+    
 }

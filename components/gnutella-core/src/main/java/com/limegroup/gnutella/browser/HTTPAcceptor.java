@@ -14,7 +14,7 @@ import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -139,7 +139,7 @@ public class HTTPAcceptor {
         public void handleAccept(Socket client) {
             if(NetworkUtils.isLocalHost(client)) {                
                 // Dispatch asynchronously.
-                ThreadFactory.startThread(new ConnectionDispatchRunner(client), "ConnectionDispatchRunner");
+                ThreadExecutor.startThread(new ConnectionDispatchRunner(client), "ConnectionDispatchRunner");
             }
         }
     }

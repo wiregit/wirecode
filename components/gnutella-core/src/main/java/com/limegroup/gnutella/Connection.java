@@ -44,7 +44,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Pools;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
@@ -1521,7 +1521,7 @@ public class Connection implements IpPort {
             // so we set it here just incase -- it's no big deal if it gets overwritten
             // later.
             _socket = socket;
-            ThreadFactory.startThread(this, "Handshaking");
+            ThreadExecutor.startThread(this, "Handshaking");
         }
         
         /** Does the handshaking & completes the connection process. */

@@ -22,7 +22,7 @@ import org.cybergarage.upnp.device.DeviceChangeListener;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**
@@ -329,7 +329,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		}
 		
 		// we're good - start a thread to clean up any potentially stale mappings
-        ThreadFactory.startThread(new StaleCleaner(), "Stale Mapping Cleaner");
+        ThreadExecutor.startThread(new StaleCleaner(), "Stale Mapping Cleaner");
 		return port;
 	}
 	

@@ -255,7 +255,7 @@ class ProxyUtils {
         }
         
         public void handleConnect(final Socket s) throws IOException {
-            ThreadFactory.startThread(new Runnable() {
+            ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
                         establishProxy(proxyType, s, addr, timeout);

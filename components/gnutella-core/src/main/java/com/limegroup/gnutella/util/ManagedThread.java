@@ -4,14 +4,13 @@ import com.limegroup.gnutella.ErrorService;
 
 /**
  * A ManagedThread, always reporting errors to the ErrorService.
- *
- * If passing a Runnable, use as:
- * Thread t = new ManagedThread(myRunnable);
- * t.start();
- *
- * If extending, extend the managedRun() method instead of run().
+ * The uncaughtExceptionHandler is set to one that reports to
+ * ErrorService.
  */
 public class ManagedThread extends Thread {
+    
+    private static UncaughtExceptionHandler HANDLER =
+        new ErrorServiceHandler();
     
     /**
      * Constructs a ManagedThread with no target.
@@ -19,6 +18,7 @@ public class ManagedThread extends Thread {
     public ManagedThread() {
         super();
         setPriority(Thread.NORM_PRIORITY);
+        setUncaughtExceptionHandler(HANDLER);
     }
     
     /**
@@ -27,6 +27,7 @@ public class ManagedThread extends Thread {
     public ManagedThread(Runnable r) {
         super(r);
         setPriority(Thread.NORM_PRIORITY);
+        setUncaughtExceptionHandler(HANDLER);
     }
     
     /**
@@ -35,6 +36,7 @@ public class ManagedThread extends Thread {
     public ManagedThread(String name) {
         super(name);
         setPriority(Thread.NORM_PRIORITY);
+        setUncaughtExceptionHandler(HANDLER);
     }
     
     /**
@@ -43,24 +45,12 @@ public class ManagedThread extends Thread {
     public ManagedThread(Runnable r, String name) {
         super(r, name);
         setPriority(Thread.NORM_PRIORITY);
+        setUncaughtExceptionHandler(HANDLER);
     }
     
-    /**
-     * Runs the target, reporting any errors to the ErrorService.
-     */
-    public final void run() {
-        try {
-            managedRun();
-        } catch(Throwable t) {
-            ErrorService.error(t, "Uncaught thread error.");
+    private static class ErrorServiceHandler implements UncaughtExceptionHandler {
+        public void uncaughtException(Thread t, Throwable e) {
+            ErrorService.error(e, "Uncaught thread error: " + t.getName());
         }
-    }
-    
-    /**
-     * If a target exists, runs the target.  Otherwise this method must
-     * be extended to do anything.
-     */
-    protected void managedRun() {
-        super.run();
     }
 }

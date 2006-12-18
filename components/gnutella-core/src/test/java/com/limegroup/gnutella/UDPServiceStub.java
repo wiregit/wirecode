@@ -15,13 +15,14 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * This class allows the creation of a UDPService instances with 
@@ -33,7 +34,7 @@ public final class UDPServiceStub extends UDPService {
 	/**
 	 * The queue that processes packets to send.
 	 */
-	private final ProcessingQueue SEND_QUEUE;
+	private final ExecutorService SEND_QUEUE;
 
 	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
@@ -60,7 +61,7 @@ public final class UDPServiceStub extends UDPService {
 	 */
 	private UDPServiceStub() {	    
 
-        SEND_QUEUE = new ProcessingQueue("UDPServiceStub-Sender");
+        SEND_QUEUE = ExecutorsHelper.newProcessingQueue("UDPServiceStub-Sender");
     }
 
     /** 
@@ -311,7 +312,7 @@ public final class UDPServiceStub extends UDPService {
 
         byte[] data = baos.toByteArray();
         DatagramPacket dg = new DatagramPacket(data, data.length, ip, port);
-        SEND_QUEUE.add(new Sender(dg));
+        SEND_QUEUE.execute(new Sender(dg));
 	}
     
     // the runnable that actually sends the UDP packets.  didn't wany any

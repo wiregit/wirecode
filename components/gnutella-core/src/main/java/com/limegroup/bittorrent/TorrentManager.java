@@ -25,7 +25,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ThreadPool;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * Class which manages active torrents and dispatching of 
@@ -76,14 +76,14 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
     /** Thread pool used to dispatch file manager events. These involve disk IO 
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
-    private ThreadPool threadPool;
+    private SchedulingThreadPool threadPool;
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
 	public void initialize(FileManager fileManager
             , ConnectionDispatcher dispatcher
-            , ThreadPool threadPool) {
+            , SchedulingThreadPool threadPool) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		

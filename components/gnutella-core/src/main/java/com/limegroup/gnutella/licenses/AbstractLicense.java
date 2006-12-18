@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.concurrent.ExecutorService;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,7 +22,7 @@ import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * A base license class, implementing common functionality.
@@ -33,7 +34,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     /**
      * The queue that all license verification attempts are processed in.
      */
-    private static final ProcessingQueue VQUEUE = new ProcessingQueue("LicenseVerifier");
+    private static final ExecutorService VQUEUE = ExecutorsHelper.newProcessingQueue("LicenseVerifier");
     
     private static final long serialVersionUID = 6508972367931096578L;
     
@@ -84,7 +85,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
     public void verify(VerificationListener listener) {
         verified = VERIFYING;
         clear();
-        VQUEUE.add(new Verifier(listener));
+        VQUEUE.execute(new Verifier(listener));
     }
     
     /**

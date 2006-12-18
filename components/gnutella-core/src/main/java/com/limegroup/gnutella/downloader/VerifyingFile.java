@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +21,9 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.ByteArrayCache;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.util.PowerOf2ByteArrayCache;
-import com.limegroup.gnutella.util.ProcessingQueue;
 
 
 /**
@@ -48,9 +52,16 @@ public class VerifyingFile {
     /**
      * The thread that does the actual verification & writing
      */
-    private static final ProcessingQueue QUEUE = new ProcessingQueue("BlockingVF", 
-            true, // managed 
-            Thread.NORM_PRIORITY+1); // a little higher priority than normal
+    private static final ThreadPoolExecutor QUEUE = new ThreadPoolExecutor(
+            0, 1, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+            new ThreadFactory() {
+                public Thread newThread(Runnable r) {
+                    Thread t = new ManagedThread(r, "BlockingVF");
+                    t.setDaemon(true);
+                    t.setPriority(Thread.NORM_PRIORITY+1);
+                    return t;
+                }
+            });
     
     /**
      * If the number of corrupted data gets over this, assume the file will not be recovered
@@ -305,7 +316,7 @@ public class VerifyingFile {
         
         synchronized(VerifyingFile.class) {
             chunksScheduled++;
-            QUEUE.add(new ChunkHandler(temp, request.in));
+            QUEUE.execute(new ChunkHandler(temp, request.in));
         }
         return true;
     }
@@ -495,7 +506,7 @@ public class VerifyingFile {
     }
     
     public static int getNumPendingItems() {
-        return QUEUE.size();
+        return QUEUE.getQueue().size();
     }
     
     /**
@@ -675,7 +686,7 @@ public class VerifyingFile {
         if (previous == null && tree != null && (existingFileSize != -1 ||
                 (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
            ) {
-            QUEUE.add(new EmptyVerifier(existingFileSize));
+            QUEUE.execute(new EmptyVerifier(existingFileSize));
             existingFileSize = -1;
         }
     }
@@ -921,7 +932,7 @@ public class VerifyingFile {
                 // delayed write later on.
                 // NOTE: this should be impossible to happen, but it's happening,
                 //       and its no huge deal, so we're preparing for it.
-                QUEUE.invokeLater(new Runnable() {
+                QUEUE.execute(new Runnable() {
                     public void run() {
                         runDelayedWrites();
                     }
@@ -960,7 +971,7 @@ public class VerifyingFile {
         public void run() {
             LOG.info("clearing cache");
             CACHE.clear();
-            QUEUE.add(new ChunkCacheCleaner());
+            QUEUE.execute(new ChunkCacheCleaner());
         }
     }
     

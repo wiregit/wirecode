@@ -3,6 +3,7 @@ package com.limegroup.bittorrent.tracking;
 import java.util.Collection;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
@@ -14,7 +15,7 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 public class TrackerManager {
 	
@@ -32,7 +33,7 @@ public class TrackerManager {
 	 */
 	private final Collection<Tracker> trackers = new CopyOnWriteArrayList<Tracker>();
 	
-	private final ProcessingQueue requestQueue = new ProcessingQueue("tracker requester");
+	private final ExecutorService requestQueue = ExecutorsHelper.newProcessingQueue("tracker requester");
 	
 	/**
 	 * the next time we'll contact the tracker.
@@ -77,7 +78,7 @@ public class TrackerManager {
 					announceBlocking(t,event);
 				}
 			};
-			requestQueue.invokeLater(announcer);
+			requestQueue.execute(announcer);
 		}
 	}
 	
@@ -145,7 +146,7 @@ public class TrackerManager {
 		};
 		Runnable scheduled = new Runnable() {
 			public void run() {
-				requestQueue.add(announcer);
+				requestQueue.execute(announcer);
 			}
 		};
 		LOG.debug("scheduling new tracker request");

@@ -6,11 +6,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Manages dynamic querying for Ultrapeers.
@@ -45,7 +46,7 @@ public final class QueryDispatcher implements Runnable {
      *
      * Items are added to this only if it's not already processing anything.
      */
-    private final ProcessingQueue PROCESSOR = new ProcessingQueue("QueryDispatcher");
+    private final ExecutorService PROCESSOR = ExecutorsHelper.newProcessingQueue("QueryDispatcher");
     
     /**
      * Whether or not processing is already active.  If it is, we don't start it up again
@@ -80,7 +81,7 @@ public final class QueryDispatcher implements Runnable {
 		    NEW_QUERIES.add(handler);
 		    if(NEW_QUERIES.size() == 1 && !_active) {
 		        _active = true;
-		        PROCESSOR.add(this);
+		        PROCESSOR.execute(this);
             }
 		}
 	}

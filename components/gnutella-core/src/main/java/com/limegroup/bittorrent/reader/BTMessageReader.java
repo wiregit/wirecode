@@ -5,15 +5,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 
+import com.limegroup.bittorrent.BTMessageHandler;
+import com.limegroup.bittorrent.messages.BadBTMessageException;
+import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.gnutella.io.ByteBufferCache;
 import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.util.CircularByteBuffer;
-import com.limegroup.gnutella.util.ThreadPool;
-import com.limegroup.bittorrent.BTMessageHandler;
-import com.limegroup.bittorrent.statistics.BandwidthStat;
-import com.limegroup.bittorrent.messages.BadBTMessageException;
+import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 public class BTMessageReader implements ChannelReadObserver, PieceParseListener {
 	
@@ -45,7 +45,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	 * <tt>ThreadPool</tt> on which its safe to schedule calls
 	 * to handleRead
 	 */
-	private final ThreadPool networkInvoker;
+	private final SchedulingThreadPool networkInvoker;
 	
 	/**
 	 * Cached runnable that drains any data read in the buffer
@@ -62,7 +62,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	 */
 	public BTMessageReader(IOErrorObserver ioxObserver, 
 			BTMessageHandler handler,
-			ThreadPool networkInvoker,
+            SchedulingThreadPool networkInvoker,
 			ByteBufferCache cache) {
 		_in = new CircularByteBuffer(BUFFER_SIZE, cache);
 		this.networkInvoker = networkInvoker;

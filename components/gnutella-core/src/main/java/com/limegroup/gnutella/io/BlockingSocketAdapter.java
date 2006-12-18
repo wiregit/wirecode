@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * A socket that allows asynchronous connections but is backed
@@ -46,7 +46,7 @@ public class BlockingSocketAdapter extends NBSocket {
      */
     public boolean connect(final SocketAddress addr, final int timeout, 
                            final ConnectObserver observer) {
-        ThreadFactory.startThread(new Runnable() {
+        ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 try {
                     connect(addr, timeout);

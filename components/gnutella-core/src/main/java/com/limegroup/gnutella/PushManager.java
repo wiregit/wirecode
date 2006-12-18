@@ -15,7 +15,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Manages state for push upload requests.
@@ -154,7 +154,7 @@ public final class PushManager {
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            ThreadFactory.startThread(new Pusher(data, socket, fwt), "PushUploadThread");
+            ThreadExecutor.startThread(new Pusher(data, socket, fwt), "PushUploadThread");
         }
     }    
 

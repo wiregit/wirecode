@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
 
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Dispatches messages to the MessageRouter.
@@ -14,27 +15,27 @@ class MessageDispatcher {
     private MessageDispatcher() {}
     public static MessageDispatcher instance() { return INSTANCE; }
     
-    private final ProcessingQueue DISPATCH = new ProcessingQueue("MessageDispatch");
+    private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
     
     /**
      * Dispatches a UDP message.
      */
     public void dispatchUDP(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new UDPDispatch(m, addr));
+        DISPATCH.execute(new UDPDispatch(m, addr));
     }
     
     /**
      * Dispatches a Multicast message.
      */
     public void dispatchMulticast(Message m, InetSocketAddress addr) {
-        DISPATCH.add(new MulticastDispatch(m, addr));
+        DISPATCH.execute(new MulticastDispatch(m, addr));
     }
     
     /**
      * Dispatches a TCP message.
      */
     public void dispatchTCP(Message m, ManagedConnection conn) {
-        DISPATCH.add(new TCPDispatch(m, conn));
+        DISPATCH.execute(new TCPDispatch(m, conn));
     }
     
     

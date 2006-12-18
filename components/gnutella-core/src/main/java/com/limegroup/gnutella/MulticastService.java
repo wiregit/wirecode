@@ -13,8 +13,8 @@ import java.net.SocketException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * This class handles Multicast messages.
@@ -86,7 +86,7 @@ public final class MulticastService implements Runnable {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private MulticastService() {
-	    MULTICAST_THREAD = new ManagedThread(this, "MulticastService");
+	    MULTICAST_THREAD = ThreadExecutor.newManagedThread(this, "MulticastService");
 		MULTICAST_THREAD.setDaemon(true);
     }
 	

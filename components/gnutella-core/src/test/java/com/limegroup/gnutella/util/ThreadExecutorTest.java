@@ -1,91 +1,76 @@
 package com.limegroup.gnutella.util;
 
+
 import junit.framework.Test;
 
-public class DefaultThreadPoolTest extends BaseTestCase {
+public class ThreadExecutorTest extends BaseTestCase {
 
-    public DefaultThreadPoolTest(String name) {
+    public ThreadExecutorTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(DefaultThreadPoolTest.class);
-    } 
-
+        return buildTestSuite(ThreadExecutorTest.class);
+    }
+    
     public void testThreadStarts() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name");
         Runner r1 = new Runner();
-        pool.invokeLater(r1);
+        ThreadExecutor.startThread(r1, "Name");
         Thread.sleep(100);
         assertTrue(r1.isRan());
+        assertEquals("Name", r1.getName());
     }
     
     public void testReuseThreads() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name");
         Runner r1 = new Runner();
         Runner r2 = new Runner();
-        pool.invokeLater(r1);
+        ThreadExecutor.startThread(r1, "Name1");
         Thread.sleep(100);
         assertTrue(r1.isRan());
-        pool.invokeLater(r2);
+        assertEquals("Name1", r1.getName());
+        assertEquals("IdleThread", r1.getThread().getName());
+        ThreadExecutor.startThread(r2, "Name2");
         Thread.sleep(100);
         assertTrue(r2.isRan());
         assertSame(r1.getThread(), r2.getThread());
-        assertEquals("Name", r1.getThread().getName());
+        assertEquals("Name2", r2.getName());
     }
     
     public void testThreadLingers() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name");
         Runner r1 = new Runner();
-        pool.invokeLater(r1);
+        ThreadExecutor.startThread(r1, "Name");
         Thread.sleep(100);
         assertTrue(r1.isRan());
         Thread thread = r1.getThread();
+        assertEquals("IdleThread", r1.getThread().getName());
         assertTrue(thread.isAlive());
         Thread.sleep(3500);
         assertTrue(thread.isAlive());
         Thread.sleep(2000);
         assertFalse(thread.isAlive());
-        assertEquals("Name", r1.getThread().getName());
+        assertEquals("IdleThread", r1.getThread().getName());
     }
     
     public void testManyThreadsAtOnce() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name");
         Runner r1 = new Runner(5000);
         Runner r2 = new Runner(5000);
-        pool.invokeLater(r1);
-        pool.invokeLater(r2);
+        ThreadExecutor.startThread(r1, "Name1");
+        ThreadExecutor.startThread(r2, "Name2");
         Thread.sleep(100);
         assertTrue(r1.isRan());
         assertTrue(r2.isRan());
         assertNotSame(r1.getThread(), r2.getThread());
-        assertEquals("Name", r1.getThread().getName());        
-        assertEquals("Name", r2.getThread().getName());
-    }
-    
-    public void testMaxThreadLimit() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name", 1);
-        Runner r1 = new Runner(5000);
-        Runner r2 = new Runner(5000);
-        pool.invokeLater(r1);
-        pool.invokeLater(r2);
-        Thread.sleep(1000);
-        assertTrue(r1.isRan());
-        assertFalse(r2.isRan());
-        Thread.sleep(5000);
-        assertTrue(r2.isRan());
-        assertSame(r1.getThread(), r2.getThread());
-        assertEquals("Name", r1.getThread().getName());
+        assertEquals("Name1", r1.getName());        
+        assertEquals("Name2", r2.getName());
     }
     
     public void testDaemonThread() throws Exception {
-        ThreadPool pool = new DefaultThreadPool("Name");
         Runner r1 = new Runner();
-        pool.invokeLater(r1);
+        ThreadExecutor.startThread(r1, "Name");
         Thread.sleep(100);
         assertTrue(r1.isRan());
         assertTrue(r1.getThread().isDaemon());
-    }
+    }    
     
     private static class Runner implements Runnable {
         private boolean ran;
@@ -122,6 +107,5 @@ public class DefaultThreadPoolTest extends BaseTestCase {
         public String getName() {
             return name;
         }
-    }
-    
+    }    
 }

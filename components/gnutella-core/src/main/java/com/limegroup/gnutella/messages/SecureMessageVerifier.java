@@ -6,27 +6,28 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /** A class that verifies secure messages sequentially. */
 public class SecureMessageVerifier {
     
     private static final Log LOG = LogFactory.getLog(SecureMessageVerifier.class);
 
-    private final ProcessingQueue QUEUE = new ProcessingQueue("SecureMessageVerifier");
+    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("SecureMessageVerifier");
     
     /** The public key. */
     private PublicKey pubKey;
     
     /** Queues this SecureMessage for verification.  The callback will be notified of success or failure. */
     public void verify(SecureMessage sm, SecureMessageCallback smc) {
-        QUEUE.add(new Verifier(sm, smc));
+        QUEUE.execute(new Verifier(sm, smc));
     }
     
     /** Initializes the public key if one isn't set. */

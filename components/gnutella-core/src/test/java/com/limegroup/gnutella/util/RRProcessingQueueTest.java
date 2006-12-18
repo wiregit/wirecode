@@ -24,11 +24,11 @@ public class RRProcessingQueueTest extends BaseTestCase {
     	Runner b2 = new Runner(order);
     	Runner c1 = new Runner(order);
     	
-    	queue.invokeLater(a1, "a");
-    	queue.invokeLater(a2, "a");
-    	queue.invokeLater(b1, "b");
-    	queue.invokeLater(b2, "b");
-    	queue.invokeLater(c1, "c");
+    	queue.execute(a1, "a");
+    	queue.execute(a2, "a");
+    	queue.execute(b1, "b");
+    	queue.execute(b2, "b");
+    	queue.execute(c1, "c");
     	assertEquals(5, queue.size());
     	
     	try {

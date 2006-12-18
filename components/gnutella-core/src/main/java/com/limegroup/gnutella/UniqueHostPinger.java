@@ -31,7 +31,7 @@ public class UniqueHostPinger extends UDPPinger {
      * after sending all currently queued messages.
      */
     void resetData() {
-        QUEUE.add(new Runnable(){
+        QUEUE.execute(new Runnable(){
             public void run() {
                 _recent.clear();
             }

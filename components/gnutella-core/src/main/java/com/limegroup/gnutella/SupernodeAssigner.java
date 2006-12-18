@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * This class determines whether or not this node has all of the necessary
@@ -197,7 +197,7 @@ public final class SupernodeAssigner {
 						RouterService.getConnectionManager().tryToBecomeAnUltrapeer(demotes);
 					}
 				};
-            ThreadFactory.startThread(ultrapeerRunner, "UltrapeerAttemptThread");
+            ThreadExecutor.startThread(ultrapeerRunner, "UltrapeerAttemptThread");
 		}
 	}
 	

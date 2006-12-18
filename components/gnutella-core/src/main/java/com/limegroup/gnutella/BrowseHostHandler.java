@@ -25,7 +25,7 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -449,7 +449,7 @@ public class BrowseHostHandler {
         }
         if (prd != null) {
             final PushRequestDetails finalPRD = prd;
-            ThreadFactory.startThread(new Runnable() {
+            ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
                         finalPRD.bhh.browseExchange(socket);

@@ -25,7 +25,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**
@@ -382,7 +382,7 @@ public class ManagedConnectionTest extends ServerSideTestCase {
         }
 
         public void handleAccept(final Socket socket) throws IOException {
-            ThreadFactory.startThread(new Runnable() {
+            ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
                         if (badHandshake) {

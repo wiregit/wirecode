@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +21,7 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings
@@ -50,12 +51,12 @@ public class SimppManager {
 
     private String _propsStream;
 
-    private final ProcessingQueue _processingQueue;
+    private final ExecutorService _processingQueue;
     
     private SimppManager() {
         boolean problem = false;
         RandomAccessFile raf = null;
-        _processingQueue = new ProcessingQueue("Simpp Handling Queue");
+        _processingQueue = ExecutorsHelper.newProcessingQueue("Simpp Handling Queue");
         try {
             File file = 
                 new File(CommonUtils.getUserSettingsDir(), SIMPP_FILE);
@@ -179,7 +180,7 @@ public class SimppManager {
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
             }
         };
-        _processingQueue.add(simppHandler);
+        _processingQueue.execute(simppHandler);
     }
     
     /**

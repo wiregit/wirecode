@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.URN;
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.disk.DiskManagerListener;
@@ -21,16 +20,17 @@ import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SyncWrapper;
-import com.limegroup.gnutella.util.ThreadPool;
 
 
 /**
@@ -50,8 +50,8 @@ BTLinkListener {
 	/**
 	 * A shared processing queue for disk-related tasks.
 	 */
-	private static final ThreadPool DEFAULT_DISK_INVOKER = 
-		new ProcessingQueue("ManagedTorrent");
+	private static final ExecutorService DEFAULT_DISK_INVOKER = 
+		ExecutorsHelper.newProcessingQueue("ManagedTorrent");
 	
 	/** 
 	 * the executor of tasks involving network io. 
@@ -63,7 +63,7 @@ BTLinkListener {
 	 * the moving of files to the complete location, and other tasks
 	 * involving disk io.
 	 */
-	private ThreadPool diskInvoker = DEFAULT_DISK_INVOKER;
+	private ExecutorService diskInvoker = DEFAULT_DISK_INVOKER;
 	
 	/**
 	 * The list of known good TorrentLocations that we are not connected 
@@ -186,7 +186,7 @@ BTLinkListener {
 			throw new IllegalStateException();
 		dispatchEvent(TorrentEvent.Type.STARTING);
 		
-		diskInvoker.invokeLater(new Runnable() {
+		diskInvoker.execute(new Runnable() {
 			public void run() {
 				
 				if (state.get() != TorrentState.QUEUED) // something happened, do not start.
@@ -311,7 +311,7 @@ BTLinkListener {
 					} catch (IOException ignored){}
 				}
 			};
-			diskInvoker.invokeLater(saver);
+			diskInvoker.execute(saver);
 		}
 		
 		// shutdown various components
@@ -459,7 +459,7 @@ BTLinkListener {
 	 * @see com.limegroup.bittorrent.DiskManagerListener#verificationComplete()
 	 */
 	public void verificationComplete() {
-		diskInvoker.invokeLater(new Runnable() {
+		diskInvoker.execute(new Runnable() {
 			public void run() {
 				if (state.get() != TorrentState.VERIFYING) 
 					return;
@@ -490,7 +490,7 @@ BTLinkListener {
 		
 		if (_folder.isComplete()) {
 			LOG.info("file is complete");
-			diskInvoker.invokeLater(new Runnable(){
+			diskInvoker.execute(new Runnable(){
 				public void run(){
 					if (isDownloading())
 						completeTorrentDownload();

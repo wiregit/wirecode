@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +34,8 @@ import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
+import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.MultiCollection;
-import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.util.StringTrie;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -92,7 +93,7 @@ public abstract class FileManager {
     /** A type-safe empty LimeXMLDocument list. */
     public static final List<LimeXMLDocument> EMPTY_DOCUMENTS = Collections.emptyList();
     
-    private static final ProcessingQueue LOADER = new ProcessingQueue("FileManagerLoader");
+    private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
 
      
     /** List of event listeners for FileManagerEvents. */
@@ -617,7 +618,7 @@ public abstract class FileManager {
         if(LOG.isDebugEnabled())
             LOG.debug("Starting new library revision: " + currentRevision);
         
-        LOADER.add(new Runnable() {
+        LOADER.execute(new Runnable() {
             public void run() {
                 loadStarted(currentRevision);
                 loadSettingsInternal(currentRevision);

@@ -27,7 +27,7 @@ import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**
@@ -583,7 +583,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             if (client instanceof NIOMultiplexor) // supports non-blocking reads
                 ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(client, allowedProtocol));
             else
-                ThreadFactory.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");
+                ThreadExecutor.startThread(new BlockingConnectionDispatcher(client, allowedProtocol), "ConnectionDispatchRunner");
         }
     }
     

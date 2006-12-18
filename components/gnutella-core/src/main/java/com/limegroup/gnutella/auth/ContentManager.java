@@ -17,7 +17,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Keeps track of content requests & responses.
@@ -299,7 +299,7 @@ public class ContentManager {
      * thread because looking up the DNS name can block.
      */
     protected void startProcessingThread() {
-        Thread timeouter = new ManagedThread(new Runnable() {
+        Thread timeouter = ThreadExecutor.newManagedThread(new Runnable() {
             public void run() {
                 // if no existing authority, try and make one.
                 if(authority == null)

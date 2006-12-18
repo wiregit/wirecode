@@ -90,7 +90,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun()  {
+            public void run()  {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -137,7 +137,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun() {
+            public void run() {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -183,7 +183,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun() {
+            public void run() {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -417,7 +417,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Close the writer while the reader is blocked
         class Inner extends ManagedThread {
 
-            public void managedRun() {
+            public void run() {
                 try {
                     // Let reader lock up on block read
                     Thread.sleep(500);
@@ -480,7 +480,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun() {
+            public void run() {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -540,7 +540,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun() {
+            public void run() {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -599,7 +599,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void managedRun() {
+            public void run() {
                 yield();
                 try {
                     UDPConnection uconn2 = 
@@ -647,7 +647,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         public ConnStarter() {
         }
 
-        public void managedRun() {
+        public void run() {
             yield();
             try {
                 uconn2 = 

@@ -24,7 +24,7 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -150,7 +150,7 @@ public final class ConnectionChecker implements Runnable {
         // Only create a new thread if one isn't alive.
         if(startThread) {
             LOG.debug("Starting a new connection-checker thread");
-            ThreadFactory.startThread(checker, "check for live connection");
+            ThreadExecutor.startThread(checker, "check for live connection");
         }
         
         return checker;

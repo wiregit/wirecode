@@ -144,7 +144,7 @@ public class UStandalone extends ActivityCallbackStub
 			this.numBytes = numBytes;
 		}
 
-		public void managedRun() {
+		public void run() {
 			int rval;
 			LOG.debug("Begin read");
 
@@ -230,7 +230,7 @@ public class UStandalone extends ActivityCallbackStub
 			this.numBlocks = numBlocks;
 		}
 
-		public void managedRun() {
+		public void run() {
 			LOG.debug("Begin read");
 
 			byte bdata[] = new byte[512];

@@ -148,7 +148,7 @@ public class UDPScheduler extends ManagedThread {
         /**
          *  Process incoming event updates by interacting with the main thread.
          */
-        public void managedRun() {
+        public void run() {
             UDPTimerEvent evt;
             List<UDPTimerEvent> localListSchedule;
             List<UDPTimerEvent> localListRegister;
@@ -214,7 +214,7 @@ public class UDPScheduler extends ManagedThread {
 	 *  Wait for scheduled events on UDPTimerEvent, 
      *  run them and reschedule
      */
- 	public void managedRun() {
+ 	public void run() {
 		long  waitTime;
 	
         // Specify that an interrupt is okay

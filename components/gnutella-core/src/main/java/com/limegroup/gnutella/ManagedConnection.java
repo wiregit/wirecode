@@ -70,7 +70,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.ThreadFactory;
+import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -1313,7 +1313,7 @@ public class ManagedConnection extends Connection
         
         public BlockingRunner(MessageQueue queue) {
             this.queue = queue;
-            ThreadFactory.startThread(this, "OutputRunner");
+            ThreadExecutor.startThread(this, "OutputRunner");
         }
 
         public void send(Message m) {
