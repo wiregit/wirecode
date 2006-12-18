@@ -17,10 +17,15 @@ import com.limegroup.gnutella.settings.ContentSettings;
 
 class ContentResponseHandler implements MessageHandler {
 
-	private ContentResponseObserver observer;
+	private ContentAuhorityResponseObserver observer;
+	private ContentAuthority authority;
 	
-	public ContentResponseHandler(ContentResponseObserver observer) {
+	public ContentResponseHandler(ContentAuthority authority, ContentAuhorityResponseObserver observer) {
+		this.authority = authority;
 		this.observer = observer;
+		if (authority == null) {
+			throw new NullPointerException("authority must not be null");
+		}
 		if (observer == null) {
 			throw new NullPointerException("observer must not be null");
 		}
@@ -48,7 +53,7 @@ class ContentResponseHandler implements MessageHandler {
 	private void handleContentResponse(ContentResponse response) {
 		URN urn = response.getURN();
 		if (urn != null) {
-			observer.handleResponse(urn, new ContentResponseData(response));
+			observer.handleResponse(authority, urn, new ContentResponseData(response));
 		}
 	}
 	

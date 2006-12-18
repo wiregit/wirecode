@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.swing.text.AbstractDocument.Content;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +31,7 @@ public class ContentManagerTest extends BaseTestCase {
 
 	private static final Log LOG = LogFactory.getLog(ContentManagerTest.class); 
 	
-	private static final int DELTA = 20;
+	private static final int DELTA = 25;
 	
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";
@@ -68,6 +72,7 @@ public class ContentManagerTest extends BaseTestCase {
     	
     }
     
+    @Override
     public void setUp() throws Exception {
     	URN_1 = URN.createSHA1Urn(S_URN_1);
     	details_1 = new ContentManagerNetworkTest.URNFileDetails(URN_1);
@@ -103,7 +108,8 @@ public class ContentManagerTest extends BaseTestCase {
     	addr = new InetSocketAddress(address, 10000);
     }
     
-    public void teardown() throws Exception {
+    @Override
+    public void tearDown() throws Exception {
         mgr.shutdown();
     }
     
@@ -255,9 +261,10 @@ public class ContentManagerTest extends BaseTestCase {
         private URN urn;
         private ContentResponseData response;
         
-        public void handleResponse(URN urn, ContentResponseData response) {
+        public synchronized void handleResponse(URN urn, ContentResponseData response) {
             this.urn = urn;
             this.response = response;
+            notify();
         }
     }
     
@@ -400,6 +407,39 @@ public class ContentManagerTest extends BaseTestCase {
     	manager.shutdown();
     }
     
+    /**
+     * The first authority answers after its timeout into the second one's
+     * timeout period with the repsonse "UNKNOWN". The expected result is
+     * the second one's repsonse "UNAUTHORIZED".
+     */
+    public void testFirstAnswersAfterTimeout() {
+    	ContentManager manager = createManagerWithTimeouts();
+    	manager.initialize();
+    	
+    	ContentResponseData response = manager.request(details_2);
+    	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    }
+    
+    
+    public void testFirstAnswerAfterTimeoutUnitialized() throws InterruptedException {
+    	ContentManager manager = createManagerWithTimeouts();
+    	synchronized (one) {
+    		manager.request(details_2, one);
+    		manager.initialize();
+    		one.wait();
+    	}
+    	assertEquals(Authorization.UNAUTHORIZED, one.response.getAuthorization());
+    }
+    
+    private ContentManager createManagerWithTimeouts() {
+    	Map<URN, Authorization> map1 = new HashMap<URN, Authorization>();
+    	Map<URN, Authorization> map2 = new HashMap<URN, Authorization>();
+    	map2.put(URN_1, Authorization.AUTHORIZED);
+    	map2.put(URN_2, Authorization.UNAUTHORIZED);
+    	return createManager(new RespondingAfterTimeoutAuth(10, 100, map1),
+    			new RespondingAfterTimeoutAuth(500, 200, map2));
+    }
+    
     private ContentManager createManager(final Map<URN, Authorization>... maps) {
     	List<ContentAuthority> auths = new ArrayList<ContentAuthority>(maps.length);
     	for (Map<URN, Authorization> map : maps) {
@@ -421,15 +461,17 @@ public class ContentManagerTest extends BaseTestCase {
 
     	Map<URN, Authorization> authForURN;
     	
-    	ContentResponseObserver observer;
+    	ContentAuhorityResponseObserver observer;
     	
-    	public ContentAuth(Map<URN, Authorization> map) {
-    		super(100);
+    	public ContentAuth(long timeout, Map<URN, Authorization> map) {
+    		super(timeout);
     		authForURN = map;
     	}
     	
-		public void initialize() throws Exception {
-		}
+    	public ContentAuth(Map<URN, Authorization> map) {
+    		this(100, map);
+    	}
+    	
 
 		public void sendAuthorizationRequest(FileDetails details) {
 			URN urn = details.getSHA1Urn();
@@ -437,17 +479,13 @@ public class ContentManagerTest extends BaseTestCase {
 			if (auth == null) {
 				auth = Authorization.UNKNOWN;
 			}
-			observer.handleResponse(urn, new ContentResponseData(System.currentTimeMillis(), auth, "message"));
+			observer.handleResponse(this, urn, new ContentResponseData(System.currentTimeMillis(), auth, "message"));
 		}
 
-		public void setContentResponseObserver(ContentResponseObserver observer) {
+		public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
 			this.observer = observer;
 		}
 
-		public void shutdown() {
-			observer = null;
-		}
-    	
     }
     
     private class NotRespondingAuth extends AbstractContentAuthority {
@@ -460,22 +498,40 @@ public class ContentManagerTest extends BaseTestCase {
     		super(timeout);
 		}
     	
-		public void initialize() throws Exception {
-			
-		}
-
 		public void sendAuthorizationRequest(FileDetails details) {
 		}
 
-		public void setContentResponseObserver(ContentResponseObserver observer) {
+		public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
 
 		}
 
-		public void shutdown() {
-			// TODO Auto-generated method stub
-			
-		}
-    	
     }
     
+    /**
+     * Replies after a delay to requests.
+     */
+    private class RespondingAfterTimeoutAuth extends ContentAuth {
+    	
+    	private Timer timer = new Timer("RespondingAfterTimeoutAuth Timer", true);
+    	
+    	private final long replyAfter;
+    	
+		public RespondingAfterTimeoutAuth(long timeout, long replyAfter, Map<URN, Authorization> map) { 
+			super(timeout, map);
+			this.replyAfter = replyAfter;
+		}
+
+		public void sendAuthorizationRequest(final FileDetails details) {
+			timer.schedule(new TimerTask() { 
+				public void run() {
+					RespondingAfterTimeoutAuth.super.sendAuthorizationRequest(details);
+				}
+			}, replyAfter);
+		}
+		
+		@Override
+		public String toString() {
+			return "RespondingAfterTimeoutAuth: " + replyAfter;
+		} 
+    }
 }

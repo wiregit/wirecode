@@ -57,7 +57,7 @@ public class ContentManager {
     /** The content authority. */
     private volatile ContentAuthority[] authorities = null;
     
-    private ContentResponseObserver responseObserver = new ContentResponseHandler();
+    private ContentAuhorityResponseObserver responseObserver = new ContentResponseHandler();
     
     private Timer timeoutTimer;
     
@@ -265,9 +265,9 @@ public class ContentManager {
 		
     }
 
-    private class ContentResponseHandler implements ContentResponseObserver {
+    private class ContentResponseHandler implements ContentAuhorityResponseObserver {
 
-		public void handleResponse(URN urn, ContentResponseData response) {
+		public void handleResponse(ContentAuthority authority, URN urn, ContentResponseData response) {
 	        // Only process if we requested this msg.
 	        // (Don't allow arbitrary responses to be processed)
 			if (LOG.isDebugEnabled()) {
@@ -275,23 +275,38 @@ public class ContentManager {
 			}
 			TimeoutTask task = null;
 			synchronized (OBSERVERS) {
-				task = OBSERVERS.remove(urn);
+				task = OBSERVERS.get(urn);
 				if (task == null) {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Could not find task for urn: " + urn);
 					}
 					return;
 				}
-				if (!task.cancel()) {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("could not cancel task");
-					}
-				}
 				if (response.getAuthorization() == Authorization.UNKNOWN) {
-					// the answer unknown is like an early timeout event
-					// so run the task to query the next authority if possible
-					task.run();
+					// check if originating authority is the one from the current
+					// request and not an earlier one that responed after its
+					// timeout
+					if (authority == authorities[task.index - 1]) {
+						if (!task.cancel()) {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("could not cancel task");
+							}
+						}
+						// the answer unknown is like an early timeout event
+						// so run the task to query the next authority if possible
+						task.timeoutAndScheduleNext();
+					}
+					else {
+						OBSERVERS.put(urn, task);
+					}
 					return;
+				}
+				else {
+					if (!task.cancel()) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("could not cancel task");
+						}
+					}
 				}
 			}
 			// notify listeners outside of lock, safe since task is only available in this thread
@@ -313,14 +328,16 @@ public class ContentManager {
 				setDefaultContentAuthorities();
 				assert(authorities != null);
 				assert(authorities.length > 0);
-				long timeout = authorities[0].getTimeout();
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("authorities set");
 				}
+				long timeout = authorities[0].getTimeout();
 				synchronized (OBSERVERS) {
 					for (TimeoutTask task : taskList) {
-						timeoutTimer.schedule(task, timeout);
-						sendAuthorizationRequest(0, task.details);
+						if (!task.isCancelled()) {
+							timeoutTimer.schedule(task, timeout);
+							sendAuthorizationRequest(0, task.details);
+						}
 					}
 					taskList.clear();
 				}
@@ -333,7 +350,9 @@ public class ContentManager {
     	List<ContentResponseObserver> observers;
         
         final FileDetails details;
-        private final int index;
+        final int index;
+        
+        private boolean cancelledOrRun = false;
         
         public TimeoutTask(int index, FileDetails details, ContentResponseObserver observer) {
         	this(index, details, createList(observer));
@@ -347,6 +366,17 @@ public class ContentManager {
         
 		@Override
 		public void run() {
+			timeoutAndScheduleNext();
+		}
+		
+		public synchronized boolean isCancelled() {
+			return cancelledOrRun;
+		}
+
+		public synchronized void timeoutAndScheduleNext() {
+			if (!cancelledOrRun) {
+				cancelledOrRun = true;
+			}
 			synchronized (OBSERVERS) {
 				if (canRequestFromOtherAuthority()) {
 					long timeout = getTimeout();
@@ -367,6 +397,12 @@ public class ContentManager {
 				LOG.debug("timeout for urn: " + details.getSHA1Urn());
 			}
 			handleResponse(new ContentResponseData(System.currentTimeMillis(), Authorization.UNKNOWN, "No authority knows this file"));
+		}
+		
+		@Override
+		public synchronized boolean cancel() {
+			cancelledOrRun = true;
+			return super.cancel();
 		}
 		
 		public void handleResponse(ContentResponseData data) {

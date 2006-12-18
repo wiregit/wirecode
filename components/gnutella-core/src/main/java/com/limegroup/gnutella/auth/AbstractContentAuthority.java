@@ -12,4 +12,16 @@ public abstract class AbstractContentAuthority implements ContentAuthority {
 	public long getTimeout() {
 		return timeout;
 	}
+	
+	/**
+	 * Does nothing.
+	 */
+	public void initialize() throws Exception {
+	}
+	
+	/**
+	 * Does nothing.
+	 */
+	public void shutdown() {
+	}
 }

@@ -15,17 +15,19 @@ public interface ContentAuthority {
     
     /** 
      * Initializes this authority. This is allowed to block. 
-     * Returns true if initialization succeeded, false otherwise.
+     * 
+     * @throws Exception if initialization fails
      */
     public void initialize() throws Exception;
     
     public void shutdown();
-    
-    public void setContentResponseObserver(ContentResponseObserver observer);
+    /**
+     * Sets the observer that is notified of authorization replies.
+     */
+    public void setContentResponseObserver(ContentAuhorityResponseObserver observer);
     
     /** Sends a message through this authority. This should not block. */
     public void sendAuthorizationRequest(FileDetails details);
-    
     /**
      * Returns the timeout in in milliseconds it makes sense to wait for
      * this authority to reply to an authorization request.
