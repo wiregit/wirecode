@@ -385,7 +385,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      */
     protected final boolean handleNodeResponse(FindNodeResponse response) throws IOException{
         Contact sender = response.getContact();
-        Collection<Contact> nodes = response.getNodes();
+        Collection<? extends Contact> nodes = response.getNodes();
         for(Contact node : nodes) {
             
             if (!ContactUtils.isValidContact(sender, node)) {

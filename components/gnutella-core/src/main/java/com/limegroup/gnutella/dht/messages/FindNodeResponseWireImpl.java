@@ -13,7 +13,7 @@ public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeRespon
         super(delegate);
     }
 
-    public Collection<Contact> getNodes() {
+    public Collection<? extends Contact> getNodes() {
         return delegate.getNodes();
     }
 

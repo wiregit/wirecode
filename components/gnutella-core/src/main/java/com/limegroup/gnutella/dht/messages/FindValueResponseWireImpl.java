@@ -17,7 +17,7 @@ public class FindValueResponseWireImpl extends AbstractMessageWire<FindValueResp
         return delegate.getKeys();
     }
 
-    public Collection<DHTValueEntity> getValues() {
+    public Collection<? extends DHTValueEntity> getValues() {
         return delegate.getValues();
     }
 

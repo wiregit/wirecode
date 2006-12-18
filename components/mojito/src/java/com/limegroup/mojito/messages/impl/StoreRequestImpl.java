@@ -40,16 +40,15 @@ public class StoreRequestImpl extends AbstractRequestMessage
 
     private QueryKey queryKey;
     
-    private Collection<DHTValueEntity> values;
+    private Collection<? extends DHTValueEntity> values;
     
-    @SuppressWarnings("unchecked")
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
             QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.queryKey = queryKey;
-        this.values = (Collection<DHTValueEntity>)values;
+        this.values = values;
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
@@ -64,7 +63,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
         return queryKey;
     }
 
-    public Collection<DHTValueEntity> getDHTValues() {
+    public Collection<? extends DHTValueEntity> getDHTValues() {
         return values;
     }
 

@@ -57,7 +57,6 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         this.networkStats = context.getNetworkStats();
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void request(RequestMessage message) throws IOException {
         
@@ -83,7 +82,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             return;
         }
         
-        Collection<DHTValueEntity> values = request.getDHTValues();
+        Collection<? extends DHTValueEntity> values = request.getDHTValues();
         
         List<Entry<KUID,Status>> status 
             = new ArrayList<Entry<KUID,Status>>(values.size());
@@ -114,10 +113,10 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             
             if (database.store(value)) {
                 networkStats.STORE_REQUESTS_OK.incrementStat();
-                status.add(new EntryImpl(valueId, Status.SUCCEEDED));
+                status.add(new EntryImpl<KUID,StoreResponse.Status>(valueId, Status.SUCCEEDED));
             } else {
                 networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                status.add(new EntryImpl(valueId, Status.FAILED));
+                status.add(new EntryImpl<KUID,StoreResponse.Status>(valueId, Status.FAILED));
             }
         }
         

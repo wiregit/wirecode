@@ -31,34 +31,33 @@ import com.limegroup.mojito.routing.Contact;
  */
 public class StoreResult implements Result {
     
-    private final Collection<Contact> nodes;
+    private final Collection<? extends Contact> nodes;
     
-    private final Collection<DHTValueEntity> values;
+    private final Collection<? extends DHTValueEntity> values;
 
-    private final Collection<DHTValueEntity> failed;
+    private final Collection<? extends DHTValueEntity> failed;
     
-    @SuppressWarnings("unchecked")
     public StoreResult(Collection<? extends Contact> nodes, 
             Collection<? extends DHTValueEntity> values, 
             Collection<? extends DHTValueEntity> failed) {
         
-        this.nodes = (Collection<Contact>)nodes;
-        this.values = (Collection<DHTValueEntity>)values;
-        this.failed = (Collection<DHTValueEntity>)failed;
+        this.nodes = nodes;
+        this.values = values;
+        this.failed = failed;
     }
     
     /**
      * Returns a Collection Nodes where the DHTValue(s) were
      * stored
      */
-    public Collection<Contact> getNodes() {
+    public Collection<? extends Contact> getNodes() {
         return nodes;
     }
     
     /**
      * Returns a Collection of DHTValue(s) that were stored
      */
-    public Collection<DHTValueEntity> getValues() {
+    public Collection<? extends DHTValueEntity> getValues() {
         return values;
     }
     
@@ -66,7 +65,7 @@ public class StoreResult implements Result {
      * Returns a Collection of DHTValue(s) that couldn't
      * be stored on the DHT
      */
-    public Collection<DHTValueEntity> getFailed() {
+    public Collection<? extends DHTValueEntity> getFailed() {
         return failed;
     }
     
@@ -89,7 +88,7 @@ public class StoreResult implements Result {
             buffer.append("  ").append(i++).append(": ").append(value).append("\n");
         }
         
-        Collection<DHTValueEntity> failed = getFailed();
+        Collection<? extends DHTValueEntity> failed = getFailed();
         if (!failed.isEmpty()) {
             buffer.append("FAILED:").append("\n");
             i = 0;

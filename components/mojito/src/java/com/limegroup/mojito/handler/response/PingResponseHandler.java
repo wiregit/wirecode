@@ -67,7 +67,6 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         this(context, null, pinger);
     }
     
-    @SuppressWarnings("unchecked")
     public PingResponseHandler(Context context, Contact sender, PingIterator pinger) {
         super(context);
         

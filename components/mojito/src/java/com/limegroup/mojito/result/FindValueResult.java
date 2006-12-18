@@ -50,13 +50,12 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
     
     private final KUID lookupId;
     
-    private final Collection<FindValueResponse> responses;
+    private final Collection<? extends FindValueResponse> responses;
     
     private final long time;
     
     private final int hop;
     
-    @SuppressWarnings("unchecked")
     public FindValueResult(Context context, 
     		KUID lookupId, 
                 Collection<? extends FindValueResponse> values, 
@@ -64,7 +63,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
         
         this.context = context;
         this.lookupId = lookupId;
-        this.responses = (Collection<FindValueResponse>)values;
+        this.responses = values;
         this.time = time;
         this.hop = hop;
     }
@@ -137,10 +136,14 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
      */
     private class ValuesIterator implements Iterator<Future<DHTValueEntity>> {
         
-        private Iterator<FindValueResponse> resps = responses.iterator();
+        private Iterator<? extends FindValueResponse> resps = responses.iterator();
         
-        @SuppressWarnings("unchecked")
-        private Iterator<Future<DHTValueEntity>> values = Collections.EMPTY_LIST.iterator();
+        private Iterator<Future<DHTValueEntity>> values;
+        
+        public ValuesIterator() {
+            Iterable<Future<DHTValueEntity>> it = Collections.emptyList();
+            values = it.iterator();
+        }
         
         public boolean hasNext() {
             return resps.hasNext() || values.hasNext();
@@ -174,7 +177,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
         
         private Iterator<KUID> keys;
         
-        private Iterator<DHTValueEntity> values;
+        private Iterator<? extends DHTValueEntity> values;
         
         private ContactValuesIterator(FindValueResponse response) {
             this.node = response.getContact();
@@ -232,7 +235,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
         }
 
         public DHTValueEntity get() throws InterruptedException, ExecutionException {
-            Collection<DHTValueEntity> values = future.get().getValues();
+            Collection<? extends DHTValueEntity> values = future.get().getValues();
             if (values.size() > 1) {
                 throw new IllegalStateException("Expected none or one DHTValue: " + values);
             }
@@ -243,7 +246,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
 
         public DHTValueEntity get(long timeout, TimeUnit unit) 
                 throws InterruptedException, ExecutionException, TimeoutException {
-            Collection<DHTValueEntity> values = future.get(timeout, unit).getValues();
+            Collection<? extends DHTValueEntity> values = future.get(timeout, unit).getValues();
             if (values.size() > 1) {
                 throw new IllegalStateException("Expected none or one DHTValue: " + values);
             }

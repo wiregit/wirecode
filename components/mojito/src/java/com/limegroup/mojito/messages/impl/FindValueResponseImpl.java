@@ -40,11 +40,10 @@ public class FindValueResponseImpl extends AbstractLookupResponse
 
     private Collection<KUID> keys;
     
-    private Collection<DHTValueEntity> values;
+    private Collection<? extends DHTValueEntity> values;
     
     private float requestLoad;
 
-    @SuppressWarnings("unchecked")
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<KUID> keys,
@@ -52,7 +51,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
         
         this.keys = keys;
-        this.values = (Collection<DHTValueEntity>)values;
+        this.values = values;
         this.requestLoad = requestLoad;
     }
 
@@ -69,7 +68,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         return keys;
     }
     
-    public Collection<DHTValueEntity> getValues() {
+    public Collection<? extends DHTValueEntity> getValues() {
         return values;
     }
     

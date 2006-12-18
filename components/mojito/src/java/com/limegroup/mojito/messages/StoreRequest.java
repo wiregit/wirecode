@@ -39,5 +39,5 @@ public interface StoreRequest extends RequestMessage {
      * A Collection of DHTValue(s) we're supposed to
      * store at our Node
      */
-    public Collection<DHTValueEntity> getDHTValues();
+    public Collection<? extends DHTValueEntity> getDHTValues();
 }

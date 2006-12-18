@@ -38,15 +38,14 @@ import com.limegroup.mojito.routing.Contact;
 public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
-    private Collection<Entry<KUID, Status>> status;
+    private Collection<? extends Entry<KUID, Status>> status;
 
-    @SuppressWarnings("unchecked")
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<? extends Entry<KUID, Status>> status) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId);
 
-        this.status = (Collection<Entry<KUID, Status>>)status;
+        this.status = status;
     }
 
     public StoreResponseImpl(Context context, SocketAddress src, 
@@ -60,7 +59,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
         out.writeStoreStatus(status);
     }
 
-    public Collection<Entry<KUID, Status>> getStatus() {
+    public Collection<? extends Entry<KUID, Status>> getStatus() {
         return status;
     }
     

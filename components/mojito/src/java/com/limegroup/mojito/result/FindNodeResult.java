@@ -35,9 +35,9 @@ public class FindNodeResult implements Result {
     
     private final KUID lookupId;
     
-    private final Map<Contact, QueryKey> nodes;
+    private final Map<? extends Contact, ? extends QueryKey> nodes;
     
-    private final Collection<Contact> collisions;
+    private final Collection<? extends Contact> collisions;
     
     private final long time;
     
@@ -45,15 +45,14 @@ public class FindNodeResult implements Result {
     
     private final int failures;
     
-    @SuppressWarnings("unchecked")
     public FindNodeResult(KUID lookupId, 
             Map<? extends Contact, ? extends QueryKey> nodes, 
             Collection<? extends Contact> collisions,
             long time, int hop, int failures) {
     	
         this.lookupId = lookupId;
-        this.nodes = (Map<Contact, QueryKey>)nodes;
-        this.collisions = (Collection<Contact>)collisions;
+        this.nodes = nodes;
+        this.collisions = collisions;
         this.time = time;
         this.hop = hop;
         this.failures = failures;
@@ -76,14 +75,14 @@ public class FindNodeResult implements Result {
     /**
      * Returns a Map of Contacts and their QueryKeys
      */
-    public Map<Contact, QueryKey> getNodes() {
+    public Map<? extends Contact, ? extends QueryKey> getNodes() {
         return nodes;
     }
     
     /**
      * 
      */
-    public Collection<Contact> getCollisions() {
+    public Collection<? extends Contact> getCollisions() {
         return collisions;
     }
     
@@ -106,7 +105,7 @@ public class FindNodeResult implements Result {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
         int i = 0;
-        for (Entry<Contact, QueryKey> entry : nodes.entrySet()) {
+        for (Entry<? extends Contact, ? extends QueryKey> entry : nodes.entrySet()) {
             buffer.append(i++).append(": ").append(entry.getKey())
                 .append(", qk=").append(entry.getValue()).append("\n");
         }

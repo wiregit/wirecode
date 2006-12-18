@@ -157,14 +157,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             // Use only alive Contacts from the RouteTable
             handler.setSelectAliveNodesOnly(true);
             
-            Map<Contact,QueryKey> nodes = null;
+            Map<? extends Contact, ? extends QueryKey> nodes = null;
             try {
                 nodes = handler.call().getNodes();
             } catch (InterruptedException e) {
                 throw new DHTException(e);
             }
             
-            for (Entry<Contact,QueryKey> entry : nodes.entrySet()) {
+            for (Entry<? extends Contact,? extends QueryKey> entry : nodes.entrySet()) {
                 Contact node = entry.getKey();
                 QueryKey queryKey = entry.getValue();
                 processList.add(new StoreProcess(node, queryKey));
@@ -179,7 +179,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     @Override
     protected synchronized void response(ResponseMessage message, long time) throws IOException {
         StoreResponse response = (StoreResponse)message;
-        Collection<Entry<KUID,Status>> status = response.getStatus();
+        Collection<? extends Entry<KUID,Status>> status = response.getStatus();
         
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
@@ -323,7 +323,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /**
          * Handles a response and returns true if done
          */
-        public boolean response(Collection<Entry<KUID, Status>> status) throws IOException {
+        public boolean response(Collection<? extends Entry<KUID, Status>> status) throws IOException {
             // value is null on this first iteration
             if (value != null) {
                 
@@ -422,7 +422,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             
             FindNodeResponse response = (FindNodeResponse)message;
             
-            Collection<Contact> nodes = response.getNodes();
+            Collection<? extends Contact> nodes = response.getNodes();
             for(Contact node : nodes) {
                 
                 if (!ContactUtils.isValidContact(response.getContact(), node)) {

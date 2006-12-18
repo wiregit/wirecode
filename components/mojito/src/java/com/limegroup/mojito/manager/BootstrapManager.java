@@ -217,7 +217,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             }
             
             // Make sure we found some Nodes
-            Map<Contact, QueryKey> nodes = result.getNodes();
+            Map<? extends Contact, ? extends QueryKey> nodes = result.getNodes();
             if (nodes == null || nodes.isEmpty()) {
                 return false;
             }
@@ -249,7 +249,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             // Ping all Contacts that have our Node ID. If any
             // of them responds then change our Node ID and
             // try again!
-            Collection<Contact> collsions = result.getCollisions();
+            Collection<? extends Contact> collsions = result.getCollisions();
             if (!collsions.isEmpty()) {
                 try {
                     PingResult pong = context.collisionPing(

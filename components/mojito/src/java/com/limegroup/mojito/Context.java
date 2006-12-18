@@ -889,7 +889,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** 
      * Sends a special collision test Ping to the given Node 
      */
-    public DHTFuture<PingResult> collisionPing(Set<Contact> nodes) {
+    public DHTFuture<PingResult> collisionPing(Set<? extends Contact> nodes) {
         return pingManager.collisionPing(nodes);
     }
     

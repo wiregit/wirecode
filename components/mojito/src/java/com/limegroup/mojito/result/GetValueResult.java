@@ -32,20 +32,19 @@ public class GetValueResult implements Result {
     
     private final Contact node;
     
-    private final Collection<DHTValueEntity> values;
+    private final Collection<? extends DHTValueEntity> values;
     
-    @SuppressWarnings("unchecked")
     public GetValueResult(Contact node,
             Collection<? extends DHTValueEntity> values) {
         this.node = node;
-        this.values = (Collection<DHTValueEntity>)values;
+        this.values = values;
     }
     
     public Contact getContact() {
         return node;
     }
     
-    public Collection<DHTValueEntity> getValues() {
+    public Collection<? extends DHTValueEntity> getValues() {
         return values;
     }
     

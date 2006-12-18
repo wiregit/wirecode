@@ -87,5 +87,5 @@ public interface StoreResponse extends ResponseMessage {
     /**
      * Returns a Collection of KUID-Status Tuples.
      */
-    public Collection<Entry<KUID, Status>> getStatus();
+    public Collection<? extends Entry<KUID, Status>> getStatus();
 }

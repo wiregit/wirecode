@@ -129,7 +129,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         
         
         Collection<KUID> keys = response.getKeys();
-        Collection<DHTValueEntity> values = response.getValues();
+        Collection<? extends DHTValueEntity> values = response.getValues();
         
         if (keys.isEmpty() && values.isEmpty()) {
             if (LOG.isWarnEnabled()) {

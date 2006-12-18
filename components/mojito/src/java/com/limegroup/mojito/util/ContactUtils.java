@@ -137,9 +137,8 @@ public final class ContactUtils {
      * Checks whether or not 'node' is the local Node and
      * triggers Node ID collision verification respectively.
      */
-    @SuppressWarnings("unchecked")
     public static boolean isLocalContact(Context context, Contact node, 
-            Collection collisions) {
+            Collection<Contact> collisions) {
         
         if (context.isLocalNodeID(node.getNodeID())) {
             // If same address then just skip it

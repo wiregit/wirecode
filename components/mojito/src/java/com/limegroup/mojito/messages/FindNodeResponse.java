@@ -40,5 +40,5 @@ public interface FindNodeResponse extends LookupResponse {
      * Returns the k-closest (or less) Node's to the
      * KUID we were looking for
      */
-    public Collection<Contact> getNodes();
+    public Collection<? extends Contact> getNodes();
 }

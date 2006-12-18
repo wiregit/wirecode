@@ -13,7 +13,7 @@ public class StoreResponseWireImpl extends AbstractMessageWire<StoreResponse>
         super(delegate);
     }
 
-    public Collection<Entry<KUID, Status>> getStatus() {
+    public Collection<? extends Entry<KUID, Status>> getStatus() {
         return delegate.getStatus();
     }
 }

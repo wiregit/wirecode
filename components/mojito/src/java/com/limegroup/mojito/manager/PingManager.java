@@ -90,7 +90,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Node
      */
-    public DHTFuture<PingResult> ping(Set<Contact> nodes) {
+    public DHTFuture<PingResult> ping(Set<? extends Contact> nodes) {
         PingIterator pinger = new PingIteratorFactory.ContactPinger(nodes);
         return ping(null, null, pinger);
     }
@@ -106,7 +106,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * 
      */
-    public DHTFuture<PingResult> collisionPing(Set<Contact> nodes) {
+    public DHTFuture<PingResult> collisionPing(Set<? extends Contact> nodes) {
         return collisionPing(null, nodes);
     }
     
@@ -114,7 +114,7 @@ public class PingManager extends AbstractManager<PingResult> {
      * Sends a special ping to the given Node to test if there
      * is a Node ID collision
      */
-    private DHTFuture<PingResult> collisionPing(SocketAddress key, Set<Contact> nodes) {
+    private DHTFuture<PingResult> collisionPing(SocketAddress key, Set<? extends Contact> nodes) {
         Contact sender = ContactUtils.createCollisionPingSender(context.getLocalNode());
         PingIterator pinger = new PingIteratorFactory.CollisionPinger(context, sender, nodes);
         return ping(sender, key, pinger);

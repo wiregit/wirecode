@@ -13,7 +13,7 @@ public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest>
         super(delegate);
     }
 
-    public Collection<DHTValueEntity> getDHTValues() {
+    public Collection<? extends DHTValueEntity> getDHTValues() {
         return delegate.getDHTValues();
     }
 

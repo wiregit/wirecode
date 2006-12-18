@@ -51,13 +51,12 @@ class PingIteratorFactory {
      */
     static class ContactPinger implements PingIterator {
         
-        final Iterator<Contact> nodes;
+        final Iterator<? extends Contact> nodes;
         
         public ContactPinger(Contact node) {
             this(Collections.singleton(node));
         }
         
-        @SuppressWarnings("unchecked")
         public ContactPinger(Set<? extends Contact> nodes) {
             if (nodes == null) {
                 throw new NullPointerException("Set<Contact> is null");
@@ -69,7 +68,7 @@ class PingIteratorFactory {
                 }
             }
             
-            this.nodes = ((Set<Contact>)nodes).iterator();
+            this.nodes = nodes.iterator();
         }
         
         public boolean hasNext() {
@@ -99,7 +98,6 @@ class PingIteratorFactory {
             this(context, sender, Collections.singleton(node));
         }
         
-        @SuppressWarnings("unchecked")
         public CollisionPinger(Context context, Contact sender, 
                 Set<? extends Contact> nodes) {
             super(nodes);
@@ -150,13 +148,12 @@ class PingIteratorFactory {
      */
     static class SocketAddressPinger implements PingIterator {
         
-        private final Iterator<SocketAddress> hosts;
+        private final Iterator<? extends SocketAddress> hosts;
         
         public SocketAddressPinger(SocketAddress host) {
             this(Collections.singleton(host));
         }
         
-        @SuppressWarnings("unchecked")
         public SocketAddressPinger(Set<? extends SocketAddress> hosts) {
             if (hosts == null) {
                 throw new NullPointerException("Set<SocketAddress> is null");
@@ -168,7 +165,7 @@ class PingIteratorFactory {
                 }
             }
             
-            this.hosts = ((Set<SocketAddress>)hosts).iterator();
+            this.hosts = hosts.iterator();
         }
         
         public boolean hasNext() {
@@ -189,19 +186,17 @@ class PingIteratorFactory {
      */
     static class EntryPinger implements PingIterator {
         
-        private final Iterator<Entry<KUID, SocketAddress>> entries;
+        private final Iterator<? extends Entry<KUID, ? extends SocketAddress>> entries;
         
         public EntryPinger(KUID nodeId, SocketAddress address) {
             this(Collections.singleton(
                     new EntryImpl<KUID, SocketAddress>(nodeId, address)));
         }
         
-        @SuppressWarnings("unchecked")
         public EntryPinger(Entry<KUID, ? extends SocketAddress> entry) {
-            this(Collections.singleton((Entry<KUID, SocketAddress>)entry));
+            this(Collections.singleton((Entry<KUID, ? extends SocketAddress>)entry));
         }
         
-        @SuppressWarnings("unchecked")
         public EntryPinger(Set<? extends Entry<KUID, ? extends SocketAddress>> entries) {
             if (entries == null) {
                 throw new NullPointerException("Set<Entry<KUID, SocketAddress>> is null");
@@ -217,7 +212,7 @@ class PingIteratorFactory {
                 }
             }
             
-            this.entries = ((Set<Entry<KUID, SocketAddress>>)entries).iterator();
+            this.entries = entries.iterator();
         }
         
         public boolean hasNext() {
@@ -227,7 +222,7 @@ class PingIteratorFactory {
         public boolean pingNext(Context context, PingResponseHandler responseHandler) 
                 throws IOException {
             
-            Entry<KUID, SocketAddress> entry = entries.next();
+            Entry<KUID, ? extends SocketAddress> entry = entries.next();
             
             KUID nodeId = entry.getKey();
             SocketAddress dst = entry.getValue();
