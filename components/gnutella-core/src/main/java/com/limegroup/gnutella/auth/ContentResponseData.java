@@ -11,7 +11,7 @@ public class ContentResponseData implements Serializable {
     
     private long created;
     
-    private Authorization auth;
+    protected Authorization auth;
     
     private String message;
     
@@ -55,6 +55,10 @@ public class ContentResponseData implements Serializable {
     /** Constructs a new ContentResponseData with data from the given ContentResponse */
     public ContentResponseData(ContentResponse msg) {
         this(System.currentTimeMillis(), msg.getAuthorization(), msg.getMessage());
+    }
+    
+    public ContentResponseData(Authorization auth, String message) {
+    	this(System.currentTimeMillis(), auth, message);
     }
     
     /** Hook for tests to create Responses at different times. */

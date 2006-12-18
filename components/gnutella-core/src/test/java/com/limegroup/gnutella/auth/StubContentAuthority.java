@@ -31,7 +31,7 @@ public class StubContentAuthority implements ContentAuthority {
 		return 0;
 	}
 
-	public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
+	public void setContentResponseObserver(ContentAuthorityResponseObserver observer) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -2,6 +2,6 @@ package com.limegroup.gnutella.auth;
 
 import com.limegroup.gnutella.URN;
 
-public interface ContentAuhorityResponseObserver {
+public interface ContentAuthorityResponseObserver {
 	void handleResponse(ContentAuthority authority, URN urn, ContentResponseData response);
 }

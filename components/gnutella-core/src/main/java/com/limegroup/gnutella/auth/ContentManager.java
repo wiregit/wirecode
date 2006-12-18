@@ -57,7 +57,7 @@ public class ContentManager {
     /** The content authority. */
     private volatile ContentAuthority[] authorities = null;
     
-    private ContentAuhorityResponseObserver responseObserver = new ContentResponseHandler();
+    private ContentAuthorityResponseObserver responseObserver = new ContentResponseHandler();
     
     private Timer timeoutTimer;
     
@@ -265,7 +265,7 @@ public class ContentManager {
 		
     }
 
-    private class ContentResponseHandler implements ContentAuhorityResponseObserver {
+    private class ContentResponseHandler implements ContentAuthorityResponseObserver {
 
 		public void handleResponse(ContentAuthority authority, URN urn, ContentResponseData response) {
 	        // Only process if we requested this msg.

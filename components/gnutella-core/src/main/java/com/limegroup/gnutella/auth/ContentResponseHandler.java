@@ -17,10 +17,10 @@ import com.limegroup.gnutella.settings.ContentSettings;
 
 class ContentResponseHandler implements MessageHandler {
 
-	private ContentAuhorityResponseObserver observer;
+	private ContentAuthorityResponseObserver observer;
 	private ContentAuthority authority;
 	
-	public ContentResponseHandler(ContentAuthority authority, ContentAuhorityResponseObserver observer) {
+	public ContentResponseHandler(ContentAuthority authority, ContentAuthorityResponseObserver observer) {
 		this.authority = authority;
 		this.observer = observer;
 		if (authority == null) {

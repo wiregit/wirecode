@@ -74,7 +74,7 @@ public class SettingsBasedContentAuthority extends AbstractContentAuthority {
 		authorities[idx].sendAuthorizationRequest(details);	
 	}
 
-	public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
+	public void setContentResponseObserver(ContentAuthorityResponseObserver observer) {
 		if (observer != null) { 
 			RouterService.getMessageRouter().setUDPMessageHandler(ContentResponse.class, new ContentResponseHandler(this, observer));
 		}

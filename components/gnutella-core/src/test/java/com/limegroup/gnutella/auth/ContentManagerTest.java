@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.text.AbstractDocument.Content;
+import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.RouterService;
@@ -461,7 +459,7 @@ public class ContentManagerTest extends BaseTestCase {
 
     	Map<URN, Authorization> authForURN;
     	
-    	ContentAuhorityResponseObserver observer;
+    	ContentAuthorityResponseObserver observer;
     	
     	public ContentAuth(long timeout, Map<URN, Authorization> map) {
     		super(timeout);
@@ -482,7 +480,7 @@ public class ContentManagerTest extends BaseTestCase {
 			observer.handleResponse(this, urn, new ContentResponseData(System.currentTimeMillis(), auth, "message"));
 		}
 
-		public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
+		public void setContentResponseObserver(ContentAuthorityResponseObserver observer) {
 			this.observer = observer;
 		}
 
@@ -501,7 +499,7 @@ public class ContentManagerTest extends BaseTestCase {
 		public void sendAuthorizationRequest(FileDetails details) {
 		}
 
-		public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
+		public void setContentResponseObserver(ContentAuthorityResponseObserver observer) {
 
 		}
 

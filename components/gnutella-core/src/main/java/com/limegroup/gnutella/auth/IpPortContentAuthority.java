@@ -59,7 +59,7 @@ public class IpPortContentAuthority extends AbstractContentAuthority {
 		UDPService.instance().send(new ContentRequest(details), authority);			
 	}
 
-	public void setContentResponseObserver(ContentAuhorityResponseObserver observer) {
+	public void setContentResponseObserver(ContentAuthorityResponseObserver observer) {
 		if (handleResponses && observer != null) {
 			RouterService.getMessageRouter().setUDPMessageHandler(ContentResponse.class, new ContentResponseHandler(this, observer));
 		}

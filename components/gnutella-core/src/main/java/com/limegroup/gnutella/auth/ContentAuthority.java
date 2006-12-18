@@ -24,7 +24,7 @@ public interface ContentAuthority {
     /**
      * Sets the observer that is notified of authorization replies.
      */
-    public void setContentResponseObserver(ContentAuhorityResponseObserver observer);
+    public void setContentResponseObserver(ContentAuthorityResponseObserver observer);
     
     /** Sends a message through this authority. This should not block. */
     public void sendAuthorizationRequest(FileDetails details);
