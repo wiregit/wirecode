@@ -147,6 +147,7 @@ public class LimeDHTManager implements DHTManager {
             if(controller.isRunning() 
                     && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                 controller.stop();
+                controller = new NullDHTController();
             }
             return;
         } 
