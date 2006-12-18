@@ -68,13 +68,13 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
      * The remote Node wehere to store the Value(s). 
      * Can be null.
      */
-    private Contact node;
+    private final Contact node;
     
     /** The QueryKey we have to use. Can be null. */
     private QueryKey queryKey;
     
     /** The Value(s) we're going to store */
-    private Collection<DHTValueEntity> values;
+    private Collection<? extends DHTValueEntity> values;
     
     /** A list of StoreProcesses. One StoreProcess per Contact */
     private List<StoreProcess> processList = new ArrayList<StoreProcess>();
@@ -86,15 +86,14 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private Map<KUID, StoreProcess> activeProcesses = new HashMap<KUID, StoreProcess>();
     
     /** The number of parallel stores */
-    private int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
+    private final int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
-    @SuppressWarnings("unchecked")
     public StoreResponseHandler(Context context, 
             Collection<? extends DHTValueEntity> values) {
         this(context, null, null, values);
     }
 
-    @SuppressWarnings("unchecked")
+    
     public StoreResponseHandler(Context context, Contact node, 
             QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
         super(context);
@@ -103,7 +102,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         this.node = node;
         this.queryKey = queryKey;
-        this.values = (Collection<DHTValueEntity>)values;
+        this.values = values;
         
         if (!isSingleNodeStore()) {
             for (DHTValueEntity value : values) {
@@ -117,13 +116,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
     }
-
-    /**
-     * Returns the Collection of DHTValues
-     */
-    public Collection<DHTValueEntity> getValues() {
-        return values;
-    }
     
     /**
      * Returns true if this handler is storing the DHTValues
@@ -133,7 +125,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         return node != null;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     protected synchronized void start() throws DHTException {
         super.start();
@@ -155,7 +146,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 throw new IllegalStateException("QueryKey is null");
             }
             
-            processList.add(new StoreProcess(node, queryKey, values));
+            processList.add(new StoreProcess(node, queryKey));
             
         } else {
             // Do a lookup for the k-closest Nodes where we're
@@ -176,7 +167,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             for (Entry<Contact,QueryKey> entry : nodes.entrySet()) {
                 Contact node = entry.getKey();
                 QueryKey queryKey = entry.getValue();
-                processList.add(new StoreProcess(node, queryKey, values));
+                processList.add(new StoreProcess(node, queryKey));
             }
             
         }
@@ -204,9 +195,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         
-        if (activeProcesses.get(nodeId).timeout(nodeId, dst, message, time)) {
-            activeProcesses.remove(nodeId);
-        }
+        activeProcesses.remove(nodeId).timeout(nodeId, dst, message, time); 
         
         sendNextAndExitIfDone();
     }
@@ -215,9 +204,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     protected synchronized void error(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         
-        StoreProcess state = activeProcesses.get(nodeId);
-        if (state != null && state.error(e)) {
-            activeProcesses.remove(nodeId);
+        StoreProcess state = activeProcesses.remove(nodeId);
+        if (state != null ) {
+            state.error(e);
         }
         
         sendNextAndExitIfDone();
@@ -284,19 +273,19 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private class StoreProcess {
         
         /** The Node to where to store the values */
-        private Contact node;
+        private final Contact node;
         
         /** The QueryKey for the Node */
-        private QueryKey queryKey;
+        private final QueryKey queryKey;
         
         /** The Values to store */
-        private Iterator<DHTValueEntity> it;
+        private final Iterator<? extends DHTValueEntity> it;
         
         /** The value that is currently beeing stored */
         private DHTValueEntity value = null;
         
         /** A List of values that couldn't be stored */
-        private List<DHTValueEntity> failed = new ArrayList<DHTValueEntity>();
+        private final List<DHTValueEntity> failed = new ArrayList<DHTValueEntity>();
         
         /*  */
         private KUID nodeId;
@@ -307,27 +296,25 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /** A reference to an Exception that iterrupted this store process */
         private Exception exception;
         
-        @SuppressWarnings("unchecked")
-        private StoreProcess(Contact node, QueryKey queryKey, 
-                Collection<? extends DHTValueEntity> values) {
+        private StoreProcess(Contact node, QueryKey queryKey) {
             this.node = node;
             this.queryKey = queryKey;
             
+            Iterable<? extends DHTValueEntity> it = values;
             if (context.isLocalNode(node)) {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Skipping local Node");
                 }
                 
-                values = Collections.emptyList();
+                 it = Collections.emptyList();
             }
             
-            this.it = (Iterator<DHTValueEntity>)values.iterator();
+            this.it = it.iterator();
         }
         
         /**
          * Starts the store process at the given Node
          */
-        @SuppressWarnings("unchecked")
         public boolean start() throws IOException {
             // We start by saying we've received a fictive response
             return !response(null);
@@ -336,7 +323,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /**
          * Handles a response and returns true if done
          */
-        public boolean response(Collection<? extends Entry<KUID, Status>> status) throws IOException {
+        public boolean response(Collection<Entry<KUID, Status>> status) throws IOException {
             // value is null on this first iteration
             if (value != null) {
                 
@@ -372,21 +359,19 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /**
          * Handles a timeout and returns true if done
          */
-        public boolean timeout(KUID nodeId, SocketAddress dst, 
+        public void timeout(KUID nodeId, SocketAddress dst, 
                 RequestMessage message, long timeout) throws IOException {
             this.nodeId = nodeId;
             this.dst = dst;
             this.message = message;
             this.timeout = timeout;
-            return true;
         }
         
         /**
-         * Handles an error and returns true if done
+         * Handles an error
          */
-        public boolean error(Exception e) {
+        public void error(Exception e) {
             this.exception = e;
-            return true;
         }
         
         /**

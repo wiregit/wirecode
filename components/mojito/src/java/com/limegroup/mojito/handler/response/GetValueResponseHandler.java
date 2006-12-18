@@ -41,11 +41,11 @@ import com.limegroup.mojito.routing.Contact;
  */
 public class GetValueResponseHandler extends AbstractResponseHandler<GetValueResult> {
         
-    private Contact node;
+    private final Contact node;
     
-    private KUID valueId;
+    private final KUID valueId;
     
-    private Collection<KUID> nodeIds;
+    private final Collection<KUID> nodeIds;
     
     public GetValueResponseHandler(Context context, 
             Contact node, KUID valueId, Collection<KUID> nodeIds) {
