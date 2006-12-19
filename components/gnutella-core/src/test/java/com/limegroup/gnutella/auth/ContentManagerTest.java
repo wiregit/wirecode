@@ -142,7 +142,10 @@ public class ContentManagerTest extends BaseTestCase {
     
     /** Makes sure that handleResponse is called rightly. */
     public void testHandleResponseCalled() throws Exception {
-    	LOG.debug("responseCalled");
+        // sleep a little to ensure manager is initialized and 
+        // message handler installed
+        sleep(100);
+    	
         mgr.request(details_1, one);
         mgr.request(details_2, two);
         assertNull(one.urn);
@@ -163,7 +166,10 @@ public class ContentManagerTest extends BaseTestCase {
     
     /** Tests immediate response. */
     public void testImmediateHandleResponse() throws Exception {
-    	LOG.debug("testImmediateHandleResponse");
+        // sleep a little to ensure manager is initialized and 
+        // message handler installed
+        sleep(100);
+    	
         mgr.request(details_1, one);
         mgr.request(details_2, two);
         RouterService.getMessageRouter().handleUDPMessage(crOne, addr);

@@ -59,7 +59,7 @@ public class ContentManager {
         if (timeoutTimer != null) {
         	throw new IllegalStateException("manager already initialized");
         }
-        timeoutTimer = new Timer("ContentProcessor " + this, true);
+        timeoutTimer = new Timer("ContentProcessor", true);
         timeoutTimer.schedule(new InitializerTask(), 0);
     }
     
@@ -267,8 +267,6 @@ public class ContentManager {
     private class ContentResponseHandler implements ContentAuthorityResponseObserver {
 
 		public void handleResponse(ContentAuthority authority, URN urn, ContentResponseData response) {
-	        // Only process if we requested this msg.
-	        // (Don't allow arbitrary responses to be processed)
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("received response: " + urn + " " + response);
 			}
@@ -286,6 +284,8 @@ public class ContentManager {
 				if (task == null) {
 					// unknown response that came too late or was never requested
 					// do nothing
+					// TODO fberger we might still want to store it if
+					// we have a timed out request for it...
 					return;
 				}
 				else {
