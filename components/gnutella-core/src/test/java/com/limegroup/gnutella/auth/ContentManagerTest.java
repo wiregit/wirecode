@@ -456,9 +456,13 @@ public class ContentManagerTest extends BaseTestCase {
     /** Makes sure that isVerified works */
     public void testIsVerified() throws Exception {
         assertFalse(mgr.isVerified(URN_1));
-        mgr.request(details_1, one);
-        assertFalse(mgr.isVerified(URN_1));
-        Thread.sleep(5000);
+        synchronized (one) {
+        	mgr.request(details_1, one);
+        	assertFalse(mgr.isVerified(URN_1));
+        	while (one.response == null) {
+        		one.wait();
+        	}
+        }
         assertTrue(mgr.isVerified(URN_1)); // verified by timeout (no response).
         
         assertFalse(mgr.isVerified(URN_2));
@@ -477,11 +481,14 @@ public class ContentManagerTest extends BaseTestCase {
     
     /** Makes sure that stuff times out. */
     public void testTimeout() throws Exception {
-        mgr.request(details_1, one);
-        mgr.request(details_2, two);
         
-        Thread.sleep(5000);
-        
+    	synchronized (two) {
+    		mgr.request(details_1, one);
+    		mgr.request(details_2, two);
+    		while (two.response == null) {
+    			two.wait();
+    		}
+    	}
         assertEquals(URN_1, one.urn);
         assertEquals(Authorization.UNKNOWN, one.response.getAuthorization());
         assertEquals(URN_2, two.urn);
