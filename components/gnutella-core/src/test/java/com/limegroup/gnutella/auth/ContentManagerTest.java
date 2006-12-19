@@ -29,7 +29,7 @@ public class ContentManagerTest extends BaseTestCase {
 
 	private static final Log LOG = LogFactory.getLog(ContentManagerTest.class); 
 	
-	private static final int DELTA = 25;
+	private static final int DELTA = 30;
 	
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";
@@ -344,14 +344,14 @@ public class ContentManagerTest extends BaseTestCase {
     }
     
     public void testSingleAuthorityTimeout() {
-    	ContentManager manager = createManager(new NotRespondingAuth(50));
+    	ContentManager manager = createManager(new NotRespondingAuth(100));
     	manager.initialize();
     	long start = System.currentTimeMillis();
     	ContentResponseData response = manager.request(details_1);
     	long end = System.currentTimeMillis();
     	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
-    	assertGreaterThanOrEquals(50, end - start);
-    	assertLessThan(50 + DELTA, end - start);
+    	assertGreaterThanOrEquals(100, end - start);
+    	assertLessThan(100 + DELTA, end - start);
     	manager.shutdown();
     
     	manager = createManager(new NotRespondingAuth(70));
@@ -366,14 +366,14 @@ public class ContentManagerTest extends BaseTestCase {
     }
     
     public void testAccumlatedTimeouts() {
-    	ContentManager manager = createManager(new NotRespondingAuth(25), new NotRespondingAuth(25));
+    	ContentManager manager = createManager(new NotRespondingAuth(100), new NotRespondingAuth(100));
     	manager.initialize();
     	long start = System.currentTimeMillis();
     	ContentResponseData response = manager.request(details_1);
     	long end = System.currentTimeMillis();
     	assertEquals(Authorization.UNKNOWN, response.getAuthorization());
-    	assertGreaterThanOrEquals(25, end - start);
-    	assertLessThan(50 + DELTA, end - start);
+    	assertGreaterThanOrEquals(100, end - start);
+    	assertLessThan(200 + DELTA, end - start);
     	manager.shutdown();
     }
     

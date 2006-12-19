@@ -10,9 +10,12 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.text.AbstractDocument.Content;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData.Authorization;
@@ -25,31 +28,16 @@ public class ContentManager {
     
     private static final Log LOG = LogFactory.getLog(ContentManager.class);
     
-    /** Map of SHA1 to Observers listening for responses to the SHA1. */
+    /**
+     * Map of SHA1 to TimeoutTasks.
+     * 
+     * Invariant: A task is in the map iff it is not yet run and not cancelled.
+     */
     private final Map<URN, TimeoutTask> OBSERVERS =
         Collections.synchronizedMap(new HashMap<URN, TimeoutTask>());
     
     /** Set of URNs that have failed requesting. */
     private final Set<URN> TIMEOUTS = Collections.synchronizedSet(new HashSet<URN>());
-    
-    /* 
-     * LOCKING OF THE ABOVE:
-     * 
-     * OBSERVERS may NOT be locked if RESPONDERS, TIMEOUTS or REQUESTED is locked.
-     * RESPONDERS may NOT be locked if TIMEOUTS or REQUESTED is locked.
-     * TIMEOUTS may be locked at any time.
-     * REQUESTED may be locked at any time.
-     * 
-     * In other words, locking order goes:
-     *  synchronized(OBSERVERS) {
-     *      ...
-     *      synchronized(RESPONDERS) {
-     *          ...
-     *          synchronized(TIMEOUTS) { ... }
-     *          synchronized(REQUESTED) { ... }
-     *      }
-     *  }
-     */
     
     /** The ContentCache. */
     private final ContentCache CACHE = new ContentCache();
@@ -57,11 +45,11 @@ public class ContentManager {
     /** The content authority. */
     private volatile ContentAuthority[] authorities = null;
     
-    private ContentAuthorityResponseObserver responseObserver = new ContentResponseHandler();
+    private final ContentAuthorityResponseObserver responseObserver = new ContentResponseHandler();
     
-    private Timer timeoutTimer;
+    private volatile Timer timeoutTimer;
     
-    private List<TimeoutTask> taskList = new ArrayList<TimeoutTask>();
+    private static final long DEFAULT_TIMEOUT = 5 * 1000;
     
     /**
      * Initializes this content manager.
@@ -71,7 +59,7 @@ public class ContentManager {
         if (timeoutTimer != null) {
         	throw new IllegalStateException("manager already initialized");
         }
-        timeoutTimer = new Timer("ContentProcessor", true);
+        timeoutTimer = new Timer("ContentProcessor " + this, true);
         timeoutTimer.schedule(new InitializerTask(), 0);
     }
     
@@ -79,17 +67,19 @@ public class ContentManager {
      * Shuts down this ContentManager.
      */
     public void shutdown() {
-        Timer timer = timeoutTimer;
-        if (timer != null) {
-        	timer.cancel();
-        }
-        timeoutTimer = null;
-        if (authorities != null) {
-        	for (ContentAuthority auth : authorities) {
-        		auth.shutdown();
-        	}
-        }
-        authorities = null;
+    	synchronized (OBSERVERS) {
+    		Timer timer = timeoutTimer;
+    		if (timer != null) {
+    			timer.cancel();
+    		}
+    		timeoutTimer = null;
+    		if (authorities != null) {
+    			for (ContentAuthority auth : authorities) {
+    				auth.shutdown();
+    			}
+    		}
+    		authorities = null;
+    	}
         CACHE.writeToDisk();
     }
     
@@ -99,7 +89,8 @@ public class ContentManager {
     }
     
     /**
-     *  Sets the chain of content authorities. 
+     *  Sets the chain of content authorities. This call initializes the
+     *  authorities and can block therefore. 
      */
     public void setContentAuthorities(ContentAuthority... auths) {
     	if (authorities != null) {
@@ -119,7 +110,9 @@ public class ContentManager {
     	if (list.isEmpty()) {
     		throw new IllegalArgumentException("No authority could be initialized");
     	}
-    	authorities = list.toArray(new ContentAuthority[list.size()]);
+    	synchronized (OBSERVERS) {
+    		authorities = list.toArray(new ContentAuthority[list.size()]);
+    	}
     }
     
     /**
@@ -193,8 +186,12 @@ public class ContentManager {
      */
     protected void scheduleRequest(FileDetails details, ContentResponseObserver observer) {
         URN urn = details.getSHA1Urn();
+        if (urn == null) {
+        	throw new IllegalArgumentException("urn of details is null");
+        }
+        TimeoutTask task = null;
         synchronized (OBSERVERS) {
-        	TimeoutTask task = OBSERVERS.get(urn);
+        	task = OBSERVERS.get(urn);
         	if (task != null) {
         		task.observers.add(observer);
         		return;
@@ -202,15 +199,13 @@ public class ContentManager {
         	else {
         		task = new TimeoutTask(1, details, observer);
         		OBSERVERS.put(urn, task);
-        		if (!hasAuthorities()) {
-        			taskList.add(task);
-        			if(LOG.isDebugEnabled())
-        	            LOG.debug("Not sending request. No authority yet. " + urn);
+        		if (hasAuthorities()) {
+                	long timeout = authorities[0].getTimeout();
+                	timeoutTimer.schedule(task, timeout);
+                	sendAuthorizationRequest(0, details);
         		}
-        		else {
-        			long timeout = authorities[0].getTimeout();
-        			timeoutTimer.schedule(task, timeout);
-        			sendAuthorizationRequest(0, details);
+        		else if (LOG.isDebugEnabled()) {
+        			LOG.debug("Not sending request. No authority yet. " + urn);
         		}
         	}
         }
@@ -222,7 +217,8 @@ public class ContentManager {
     
     private void sendAuthorizationRequest(int authIndex, FileDetails details) {
     	if(LOG.isDebugEnabled())
-            LOG.debug("Sending request for URN: " + details.getSHA1Urn() + " to authority: " + authorities[authIndex]);
+            LOG.debug("Sending request for URN: " + details.getSHA1Urn() 
+            		+ " to authority: " + authorities[authIndex]);
     	authorities[authIndex].sendAuthorizationRequest(details);
     }
     
@@ -238,10 +234,11 @@ public class ContentManager {
     private void setDefaultContentAuthorities() {
         ContentAuthority[] auths = getDefaultContentAuthorities();
         setContentAuthorities(auths);
-        // if we have an authority to set, grab all pre-requested items,
-        // set the authority (so newly requested ones will immediately send to it),
-        // and then send off those requested.
-        // note that the timeouts on processing older requests will be lagging slightly.
+    }
+    
+    private static long getTimeout(ContentAuthority authority) {
+    	long timeout = authority.getTimeout();
+    	return timeout > 0 ? timeout : DEFAULT_TIMEOUT;
     }
     
     /** A blocking ContentResponseObserver. */
@@ -275,48 +272,54 @@ public class ContentManager {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("received response: " + urn + " " + response);
 			}
-			TimeoutTask task = null;
+			if (response.getAuthorization() == Authorization.UNKNOWN) {
+				handleUnknownResponse(authority, urn, response);
+			}
+			else {
+				handleKnownResponse(authority, urn, response);
+			}
+		}
+		
+		private void handleUnknownResponse(ContentAuthority authority, URN urn, ContentResponseData response) {
 			synchronized (OBSERVERS) {
-				task = OBSERVERS.get(urn);
+				TimeoutTask task = OBSERVERS.get(urn);
 				if (task == null) {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Could not find task for urn: " + urn);
-					}
+					// unknown response that came too late or was never requested
+					// do nothing
 					return;
 				}
-				if (response.getAuthorization() == Authorization.UNKNOWN) {
-					// check if originating authority is the one from the current
-					// request and not an earlier one that responed after its
-					// timeout
+				else {
+					// check if the response's originating authority is the one
+					// from the current request and not an earlier one that 
+					// responed after its timeout
 					if (authority == authorities[task.index - 1]) {
-						if (!task.cancel()) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("could not cancel task");
-							}
-						}
 						// the answer unknown is like an early timeout event
 						// so run the task to query the next authority if possible
 						task.timeoutAndScheduleNext();
 					}
-					else {
-						OBSERVERS.put(urn, task);
-					}
-					return;
-				}
-				else {
-					if (!task.cancel()) {
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("could not cancel task");
-						}
-					}
 				}
 			}
-			// notify listeners outside of lock, safe since task is only available in this thread
-			CACHE.addResponse(urn, response);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Notifying observers");
+		}
+		
+		private void handleKnownResponse(ContentAuthority authority, URN urn, ContentResponseData response) {
+			TimeoutTask task = OBSERVERS.remove(urn);
+			if (task != null) {
+				CACHE.addResponse(urn, response);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Notifying observers");
+				}
+				task.handleResponse(response);
 			}
-			task.handleResponse(response);
+			else {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Could not find task for urn: " + urn);
+				}
+				// if there is a timed out request for this response
+				// cache the response for future lookups
+				if (TIMEOUTS.remove(urn)) {
+					CACHE.addResponse(urn, response);
+				}
+			}
 		}
     }
     	
@@ -326,22 +329,20 @@ public class ContentManager {
     private class InitializerTask extends TimerTask {
 		@Override
 		public void run() {
-			if (authorities == null) {
+			synchronized (OBSERVERS) {
+				Assert.that(authorities == null);
 				setDefaultContentAuthorities();
-				assert(authorities != null);
-				assert(authorities.length > 0);
+				Assert.that(authorities != null);
+				Assert.that(authorities.length > 0);
+				Assert.that(authorities[0] != null);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("authorities set");
 				}
-				long timeout = authorities[0].getTimeout();
-				synchronized (OBSERVERS) {
-					for (TimeoutTask task : taskList) {
-						if (!task.isCancelled()) {
-							timeoutTimer.schedule(task, timeout);
-							sendAuthorizationRequest(0, task.details);
-						}
-					}
-					taskList.clear();
+				long timeout = getTimeout(authorities[0]);
+				// send queued up requests
+				for (TimeoutTask task : OBSERVERS.values()) {
+					timeoutTimer.schedule(task, timeout);
+					sendAuthorizationRequest(0, task.details);
 				}
 			}
 		}
@@ -354,7 +355,7 @@ public class ContentManager {
         final FileDetails details;
         final int index;
         
-        private boolean cancelledOrRun = false;
+        final URN urn; 
         
         public TimeoutTask(int index, FileDetails details, ContentResponseObserver observer) {
         	this(index, details, createList(observer));
@@ -364,6 +365,7 @@ public class ContentManager {
         	this.index = index;
         	this.details = details;
         	this.observers = observers;
+        	this.urn = details.getSHA1Urn();
         }
         
 		@Override
@@ -371,17 +373,14 @@ public class ContentManager {
 			timeoutAndScheduleNext();
 		}
 		
-		public synchronized boolean isCancelled() {
-			return cancelledOrRun;
-		}
-
-		public synchronized void timeoutAndScheduleNext() {
-			if (!cancelledOrRun) {
-				cancelledOrRun = true;
-			}
+		public void timeoutAndScheduleNext() {
 			synchronized (OBSERVERS) {
+				if (OBSERVERS.remove(urn) != this) {
+					// task not in map, means it has been cancelled
+					return;
+				}
 				if (canRequestFromOtherAuthority()) {
-					long timeout = getTimeout();
+					long timeout = getTimeout(authorities[index]);
 					TimeoutTask task = new TimeoutTask(index + 1, details, observers);
 					OBSERVERS.put(details.getSHA1Urn(), task);
 					timeoutTimer.schedule(task, timeout);
@@ -389,8 +388,6 @@ public class ContentManager {
 					return;
 				}
 				else {
-					URN urn = details.getSHA1Urn();
-					OBSERVERS.remove(urn);
 					TIMEOUTS.add(urn);
 				}
 			}
@@ -401,14 +398,7 @@ public class ContentManager {
 			handleResponse(new ContentResponseData(System.currentTimeMillis(), Authorization.UNKNOWN, "No authority knows this file"));
 		}
 		
-		@Override
-		public synchronized boolean cancel() {
-			cancelledOrRun = true;
-			return super.cancel();
-		}
-		
 		public void handleResponse(ContentResponseData data) {
-			URN urn = details.getSHA1Urn();
 			for (ContentResponseObserver observer : observers) {
 				observer.handleResponse(urn, data);
 			}
@@ -417,12 +407,6 @@ public class ContentManager {
 		public boolean canRequestFromOtherAuthority() {
 			return index < authorities.length;
 		}
-		
-		public long getTimeout() {
-			long timeout = authorities[index].getTimeout();
-			return timeout != 0 ? timeout : 15 * 1000; 
-		}
-
     }
     
 	private static List<ContentResponseObserver> createList(ContentResponseObserver observer) {
