@@ -111,26 +111,32 @@ public class ContentManagerTest extends BaseTestCase {
         mgr.shutdown();
     }
     
-
     /**
      * Makes sure that content messages add responses.
      * 
      * @throws Exception
      */
     public void testResponseStored() throws Exception {
-    	
-    	mgr.request(details_1, one);
-    	RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
-        assertNotNull(mgr.getResponse(URN_1));
-        assertNull(mgr.getResponse(URN_2));
 
-        ContentResponseData res = mgr.getResponse(URN_1);
-        assertEquals(Authorization.AUTHORIZED, res.getAuthorization());
+//    	synchronized (one) {
+    		mgr.request(details_1, one);
+    		RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
+//    		while (one.response == null) {
+//    			one.wait();
+//    		}
+    		assertNotNull(mgr.getResponse(URN_1));
+    		assertNull(mgr.getResponse(URN_2));
+//    	}    		
 
-        mgr.request(details_2, two);
-        RouterService.getMessageRouter().handleUDPMessage(crTwo, addr);
-        assertNotNull(mgr.getResponse(URN_2));
-        res = mgr.getResponse(URN_2);
+//    	synchronized (two) {
+    		mgr.request(details_2, two);
+    		RouterService.getMessageRouter().handleUDPMessage(crTwo, addr);
+//    		while (two.response == null) {
+//    			two.wait();
+//    		}
+//    	}
+    	assertNotNull(mgr.getResponse(URN_2));
+        ContentResponseData res = mgr.getResponse(URN_2);
         assertEquals(Authorization.UNAUTHORIZED, res.getAuthorization());
     }
     
@@ -174,45 +180,11 @@ public class ContentManagerTest extends BaseTestCase {
         assertEquals(Authorization.UNAUTHORIZED, two.response.getAuthorization());
     }
     
-    /** Makes sure that stuff times out. */
-    public void testTimeout() throws Exception {
-        mgr.request(details_1, one);
-        mgr.request(details_2, two);
-        
-        Thread.sleep(5000);
-        
-        assertEquals(URN_1, one.urn);
-        assertEquals(Authorization.UNKNOWN, one.response.getAuthorization());
-        assertEquals(URN_2, two.urn);
-        assertEquals(Authorization.UNKNOWN, two.response.getAuthorization());       
-    }
-    
+
     /** Makes sure that responses without requests aren't processed. */
     public void testResponseWithoutRequest() throws Exception {
     	RouterService.getMessageRouter().handleUDPMessage(crOne, addr);
         assertNull(mgr.getResponse(URN_1));
-    }
-    
-    /** Makes sure that isVerified works */
-    public void testIsVerified() throws Exception {
-        assertFalse(mgr.isVerified(URN_1));
-        mgr.request(details_1, one);
-        assertFalse(mgr.isVerified(URN_1));
-        Thread.sleep(5000);
-        assertTrue(mgr.isVerified(URN_1)); // verified by timeout (no response).
-        
-        assertFalse(mgr.isVerified(URN_2));
-        mgr.request(details_2, two);
-        assertFalse(mgr.isVerified(URN_2));
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_2, Authorization.AUTHORIZED, "True"), addr);
-        assertTrue(mgr.isVerified(URN_2)); // verified by true response
-        
-        assertFalse(mgr.isVerified(URN_3));
-        mgr.request(details_3, one);
-        assertFalse(mgr.isVerified(URN_3));        
-
-        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_3, Authorization.UNAUTHORIZED, "False"), addr);
-        assertTrue(mgr.isVerified(URN_3)); // verified by false response.
     }
     
     /** Checks blocking requests. */
@@ -416,6 +388,7 @@ public class ContentManagerTest extends BaseTestCase {
     	
     	ContentResponseData response = manager.request(details_2);
     	assertEquals(Authorization.UNAUTHORIZED, response.getAuthorization());
+    	manager.shutdown();
     }
     
     
@@ -427,6 +400,40 @@ public class ContentManagerTest extends BaseTestCase {
     		one.wait();
     	}
     	assertEquals(Authorization.UNAUTHORIZED, one.response.getAuthorization());
+    	manager.shutdown();
+    }
+
+    public void testSameRequestTwice() {
+    	ContentManager manager = createManagerWithTimeouts();
+    	manager.initialize();
+    	manager.request(details_1, one);
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, one.response.getAuthorization());
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	manager.shutdown();
+    }
+    
+    public void testSameRequestTwiceUninitialized() throws InterruptedException {
+    	ContentManager manager = createManagerWithTimeouts();
+    	manager.request(details_2, one);
+    	synchronized (two) {
+    		manager.request(details_2, two);
+    		manager.initialize();
+    		two.wait();
+    	}
+    	assertEquals(Authorization.UNAUTHORIZED, one.response.getAuthorization());
+    	assertEquals(Authorization.UNAUTHORIZED, two.response.getAuthorization());
+    	manager.shutdown();
+    }
+    
+    public void testSameRequestTwiceHalfInitialized() {
+    	ContentManager manager = createManagerWithTimeouts();
+    	manager.request(details_1, one);
+    	manager.initialize();
+    	ContentResponseData response = manager.request(details_1);
+    	assertEquals(Authorization.AUTHORIZED, one.response.getAuthorization());
+    	assertEquals(Authorization.AUTHORIZED, response.getAuthorization());
+    	manager.shutdown();
     }
     
     private ContentManager createManagerWithTimeouts() {
@@ -436,6 +443,49 @@ public class ContentManagerTest extends BaseTestCase {
     	map2.put(URN_2, Authorization.UNAUTHORIZED);
     	return createManager(new RespondingAfterTimeoutAuth(10, 100, map1),
     			new RespondingAfterTimeoutAuth(500, 200, map2));
+    }
+    
+    public void testInitializeShutdown() {
+    	ContentManager manager = new ContentManager();
+    	manager.initialize();
+    	manager.shutdown();
+    	manager.initialize();
+    	manager.shutdown();
+    }
+    
+    /** Makes sure that isVerified works */
+    public void testIsVerified() throws Exception {
+        assertFalse(mgr.isVerified(URN_1));
+        mgr.request(details_1, one);
+        assertFalse(mgr.isVerified(URN_1));
+        Thread.sleep(5000);
+        assertTrue(mgr.isVerified(URN_1)); // verified by timeout (no response).
+        
+        assertFalse(mgr.isVerified(URN_2));
+        mgr.request(details_2, two);
+        assertFalse(mgr.isVerified(URN_2));
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_2, Authorization.AUTHORIZED, "True"), addr);
+        assertTrue(mgr.isVerified(URN_2)); // verified by true response
+        
+        assertFalse(mgr.isVerified(URN_3));
+        mgr.request(details_3, one);
+        assertFalse(mgr.isVerified(URN_3));        
+
+        RouterService.getMessageRouter().handleUDPMessage(new ContentResponse(URN_3, Authorization.UNAUTHORIZED, "False"), addr);
+        assertTrue(mgr.isVerified(URN_3)); // verified by false response.
+    }
+    
+    /** Makes sure that stuff times out. */
+    public void testTimeout() throws Exception {
+        mgr.request(details_1, one);
+        mgr.request(details_2, two);
+        
+        Thread.sleep(5000);
+        
+        assertEquals(URN_1, one.urn);
+        assertEquals(Authorization.UNKNOWN, one.response.getAuthorization());
+        assertEquals(URN_2, two.urn);
+        assertEquals(Authorization.UNKNOWN, two.response.getAuthorization());       
     }
     
     private ContentManager createManager(final Map<URN, Authorization>... maps) {

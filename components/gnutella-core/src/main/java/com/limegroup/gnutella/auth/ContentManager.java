@@ -83,11 +83,13 @@ public class ContentManager {
         if (timer != null) {
         	timer.cancel();
         }
+        timeoutTimer = null;
         if (authorities != null) {
         	for (ContentAuthority auth : authorities) {
         		auth.shutdown();
         	}
         }
+        authorities = null;
         CACHE.writeToDisk();
     }
     
