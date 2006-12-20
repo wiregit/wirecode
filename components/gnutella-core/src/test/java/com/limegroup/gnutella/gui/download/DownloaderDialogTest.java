@@ -8,8 +8,9 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.GUIBaseTestCase;
 
-public class DownloaderDialogTest extends BaseTestCase {
+public class DownloaderDialogTest extends GUIBaseTestCase {
 
 	private MockDownloaderFactory factory;
 
@@ -26,11 +27,6 @@ public class DownloaderDialogTest extends BaseTestCase {
         return buildTestSuite(DownloaderDialogTest.class); 
     } 
     
-	public static void globalSetUp() throws Exception {
-		File guiDir = getGUIDir();
-		System.setProperty("user.dir", guiDir.getAbsolutePath());
-	}
-
 	public void testCreateUniqueFilenameDownloader() throws Exception {
 		File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "limedownload.txt");
 		file.createNewFile();

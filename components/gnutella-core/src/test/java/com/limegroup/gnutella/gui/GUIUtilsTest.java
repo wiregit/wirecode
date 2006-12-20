@@ -1,14 +1,13 @@
 package com.limegroup.gnutella.gui;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.GUIBaseTestCase;
 
-public class GUIUtilsTest extends BaseTestCase {
+public class GUIUtilsTest extends GUIBaseTestCase {
 
 	public GUIUtilsTest(String name) {
 		super(name);
@@ -18,11 +17,6 @@ public class GUIUtilsTest extends BaseTestCase {
         return buildTestSuite(GUIUtilsTest.class);
     }
 
-	public static void globalSetUp() throws Exception {
-		File guiDir = getGUIDir();
-		System.setProperty("user.dir", guiDir.getAbsolutePath());
-	}
-	
 	/**
 	 * Can only be run for one locale, since GUIUtils caches the
 	 * NumberFormat instance which are initialized when the class
