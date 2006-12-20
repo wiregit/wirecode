@@ -34,7 +34,9 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
+import com.limegroup.gnutella.util.GenericsUtils.ScanMode;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.concurrent.DHTFuture;
@@ -144,6 +146,12 @@ public class RouteTableImpl implements RouteTable {
     private void readObject(ObjectInputStream in) 
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        
+        GenericsUtils.scanForMap(bucketTrie
+                , KUID.class
+                , Bucket.class
+                , ScanMode.REMOVE);
+        
         listeners = new CopyOnWriteArrayList<RouteTableListener>();
     }
     
