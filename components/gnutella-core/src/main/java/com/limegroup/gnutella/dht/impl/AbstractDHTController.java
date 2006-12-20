@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
@@ -119,6 +120,7 @@ abstract class AbstractDHTController implements DHTController {
             dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
         } catch (IOException err) {
             LOG.error(err);
+            ErrorService.error(err);
         }
     }
     
@@ -201,7 +203,7 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public boolean isBootstrapped() {
-	return dht.isBootstrapped();
+        return dht.isBootstrapped();
     }
 
     public boolean isWaitingForNodes() {

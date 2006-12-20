@@ -73,6 +73,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                 Contact.DEFAULT_FLAG,
                 State.UNKNOWN);
         rt.add(node);
+        controller.start();
         controller.stop();
         controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
         context = (Context) controller.getMojitoDHT();

@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -58,19 +57,14 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 
                 RouteTable routeTable = (RouteTable)in.readObject();
                 Database database = (Database)in.readObject();
-                
+
                 synchronized (dht) {
                     dht.setRouteTable(routeTable);
                     dht.setDatabase(database);
                 }
-                
-            } catch (FileNotFoundException e) {
-                LOG.error("FileNotFoundException", e);
-            } catch (ClassNotFoundException e) {
-                LOG.error("ClassNotFoundException", e);
-            } catch (IOException e) {
-                LOG.error("IOException", e);
-            } finally {
+            } catch (Throwable ignored) {}
+            
+            finally {
                 IOUtils.close(in);
             }
         }
@@ -122,9 +116,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
                     out.writeObject(dht.getDatabase());
                 }
                 out.flush();
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-            } finally {
+            } catch (IOException ignored) {} 
+            
+            finally {
                 IOUtils.close(out);
             }
         }

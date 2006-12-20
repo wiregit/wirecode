@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,13 +74,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 while((node = (Contact)ois.readObject()) != null){
                     limeDHTRouteTable.add(node);
                 }
-            } catch (ClassNotFoundException e) {
-                LOG.error("ClassNotFoundException", e);
-            } catch (FileNotFoundException e) {
-                LOG.error("FileNotFoundException", e);
-            } catch (IOException e) {
-                LOG.error("IOException", e);
-            } finally {
+            } catch (Throwable ignored){}
+            finally {
                 IOUtils.close(in);
             }
         }
@@ -159,9 +153,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 // EOF Terminator
                 oos.writeObject(null);
                 
-            } catch (IOException err) {
-                LOG.error("IOException", err);
-            } finally {
+            } catch (IOException ignored) {} 
+            
+            finally {
                 IOUtils.close(out);
             }
         }

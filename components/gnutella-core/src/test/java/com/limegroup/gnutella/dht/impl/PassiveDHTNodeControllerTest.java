@@ -69,6 +69,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         RouteTable rt = context.getRouteTable();
         //fill the routing table a bit
         fillRoutingTable(rt, 2*numPersistedNodes);
+        controller.start();
         controller.stop();
         //now nodeID should have changed and we should have persisted SOME nodes
         controller = new PassiveDHTNodeController(0, 0, dispatcherStub);

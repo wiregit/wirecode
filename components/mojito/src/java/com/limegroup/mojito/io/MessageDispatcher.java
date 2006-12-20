@@ -467,7 +467,7 @@ public abstract class MessageDispatcher {
     /**
      * Handles a DHTMessage as read from Network
      */
-    protected void handleMessage(DHTMessage message) throws IOException {
+    protected void handleMessage(DHTMessage message) {
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();

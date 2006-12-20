@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
@@ -292,7 +293,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
             int index = hostString.indexOf(":");
             if(index < 0 || index == hostString.length()-1) {
                 if (LOG.isErrorEnabled()) {
-                    LOG.error(new UnknownHostException("invalid host: " + hostString));
+                    LOG.error(new UnknownHostException("invalid SIMPP host: " + hostString));
                 }
                 
                 continue;
@@ -303,7 +304,9 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                 int port = Integer.parseInt(hostString.substring(index+1).trim());
                 list.add(new InetSocketAddress(host, port));
             } catch(NumberFormatException nfe) {
-                LOG.error(new UnknownHostException("invalid host: " + hostString));
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(new UnknownHostException("invalid host: " + hostString));
+                }
             }
         }
 
@@ -360,6 +363,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                     }
                 } else {
                     LOG.error("ExecutionException", e);
+                    ErrorService.error(e);
                     stop();
                 }
             }
@@ -413,9 +417,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                         bootstrap();
                         break;
                     default:
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error("Unknown result type: " + type);
-                        }
+                        //ignore other results
                         break;
                 }
             }
@@ -424,6 +426,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         public void handleFutureFailure(ExecutionException e) {
             synchronized (lock) {
                 LOG.error("ExecutionException", e);
+                ErrorService.error(e);
                 stop();
             }
         }

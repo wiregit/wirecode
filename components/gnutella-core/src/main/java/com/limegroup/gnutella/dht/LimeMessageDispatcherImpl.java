@@ -157,11 +157,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         DHTMessage dhtMessage = (DHTMessage)msg;
         ((RemoteContact)dhtMessage.getContact()).fixSourceAndContactAddress(addr);
         
-        try {
-            handleMessage(dhtMessage);
-        } catch (IOException err) {
-            LOG.error("IOException", err);
-        }
+        handleMessage(dhtMessage);
     }
     
     @Override
