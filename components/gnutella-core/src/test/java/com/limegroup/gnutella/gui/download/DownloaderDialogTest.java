@@ -25,6 +25,11 @@ public class DownloaderDialogTest extends BaseTestCase {
     public static Test suite() { 
         return buildTestSuite(DownloaderDialogTest.class); 
     } 
+    
+	public static void globalSetUp() throws Exception {
+		File guiDir = getGUIDir();
+		System.setProperty("user.dir", guiDir.getAbsolutePath());
+	}
 
 	public void testCreateUniqueFilenameDownloader() throws Exception {
 		File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "limedownload.txt");
