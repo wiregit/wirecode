@@ -58,7 +58,7 @@ public class SystemUtils {
      */
     public static boolean supportsIdleTime() {
         if(isLoaded) {
-            if(CommonUtils.isWindows2000orXP())
+            if(CommonUtils.isGoodWindows())
                 return true;
             else if(CommonUtils.isMacOSX())
                 return true;

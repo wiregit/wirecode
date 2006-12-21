@@ -102,16 +102,16 @@ public final class CommonUtils {
 	 * Variable for whether or not we're on Windows XP.
 	 */
 	private static boolean _isWindowsXP = false;
+        
+        /** 
+         * Variable for whether or not we're on Windows Vista.
+         */
+        private static boolean _isWindowsVista;
 
 	/** 
 	 * Variable for whether or not we're on Windows NT, 2000, or XP.
 	 */
 	private static boolean _isWindowsNTor2000orXP = false;
-
-	/** 
-	 * Variable for whether or not we're on 2000 or XP.
-	 */
-	private static boolean _isWindows2000orXP = false;
 
 	/** 
 	 * Variable for whether or not we're on Windows 95.
@@ -220,7 +220,6 @@ public final class CommonUtils {
 	private static void setOperatingSystems() {
 		_isWindows = false;
 		_isWindowsNTor2000orXP = false;
-		_isWindows2000orXP = false;
 		_isWindowsNT = false;
 		_isWindowsXP = false;
 		_isWindows95 = false;
@@ -240,13 +239,12 @@ public final class CommonUtils {
 			os.indexOf("windows 2000")!= -1 ||
 			os.indexOf("windows xp")!= -1)
 			_isWindowsNTor2000orXP = true;
-		if (os.indexOf("windows 2000")!= -1 ||
-			os.indexOf("windows xp")!= -1)
-			_isWindows2000orXP = true;
 		if (os.indexOf("windows nt") != -1) 
 			_isWindowsNT = true;
 		if (os.indexOf("windows xp") != -1) 
 			_isWindowsXP = true;
+                if (os.indexOf("windows vista") != -1)
+                    _isWindowsVista = true;
 		if(os.indexOf("windows 95") != -1)
 		   _isWindows95 = true;
 		if(os.indexOf("windows 98") != -1)
@@ -491,17 +489,6 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the OS is 2000 or XP.
-	 *
-	 * @return <tt>true</tt> if the application is running on 2000 or XP,
-	 *  <tt>false</tt> otherwise
-	 */
-	public static boolean isWindows2000orXP() {
-		return _isWindows2000orXP;
-	}
-
-
-	/**
 	 * Returns whether or not the OS is WinXP.
 	 *
 	 * @return <tt>true</tt> if the application is running on WinXP,
@@ -510,6 +497,21 @@ public final class CommonUtils {
 	public static boolean isWindowsXP() {
 		return _isWindowsXP;
 	}
+        
+        /**
+         * @return true if the application is running on Windows Vista
+         */
+        public static boolean isWindowsVista() {
+            return _isWindowsVista;
+        }
+        
+        /**
+         * @return true if the application is running on a windows with
+         * the 10 socket limit.
+         */
+        public static boolean isSocketChallengedWindows() {
+            return isWindowsVista() || isWindowsXP();
+        }
 
     /**
      * Returns whether or not the OS is OS/2.

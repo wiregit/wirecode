@@ -189,7 +189,7 @@ public final class ConnectionChecker implements Runnable {
                 // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
                     LOG.debug("Failed connection check more than twice.");
-                    if (_triedSP2Workaround || !CommonUtils.isWindowsXP()) {
+                    if (_triedSP2Workaround || !CommonUtils.isSocketChallengedWindows()) {
                         RouterService.getConnectionManager().noInternetConnection();
                         return;
                     } else {

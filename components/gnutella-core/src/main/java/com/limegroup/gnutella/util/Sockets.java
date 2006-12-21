@@ -13,7 +13,7 @@ import com.limegroup.gnutella.io.ConnectObserver;
 public class Sockets {
     
     private final static SocketController CONTROLLER =
-        CommonUtils.isWindowsXP() ?
+        CommonUtils.isSocketChallengedWindows() ?
                 new LimitedSocketController(4) :
                 new SimpleSocketController();
         
