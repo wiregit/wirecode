@@ -512,6 +512,14 @@ public final class CommonUtils {
         public static boolean isSocketChallengedWindows() {
             return isWindowsVista() || isWindowsXP();
         }
+        
+        /**
+         * @return true if the application is running on a windows 
+         * that supports native theme.
+         */
+        public static boolean isNativeThemeWindows() {
+        	return isWindowsVista() || isWindowsXP();
+        }
 
     /**
      * Returns whether or not the OS is OS/2.
