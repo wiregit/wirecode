@@ -5,7 +5,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /** A factory for ExecutorService, ThreadFactory and ScheduledExecutorService. */
@@ -24,11 +23,12 @@ public class ExecutorsHelper {
      * the given name.
      */
     public static ExecutorService newProcessingQueue(String name) {
-        return Executors.unconfigurableExecutorService(
-                new ThreadPoolExecutor(0, 1,
-                        5L, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<Runnable>(),
-                        daemonThreadFactory(name)));
+        ThreadPoolExecutor tpe =  new ThreadPoolExecutor(1, 1,
+                5L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                daemonThreadFactory(name));
+        tpe.allowCoreThreadTimeOut(true);
+        return Executors.unconfigurableExecutorService(tpe);
     }
     
     /**
@@ -67,11 +67,12 @@ public class ExecutorsHelper {
      * until an executing item is finished and then be processed.
      */
     public static ExecutorService newFixedSizeThreadPool(int size, String name) {
-        return Executors.unconfigurableExecutorService(
-                new ThreadPoolExecutor(0, size,
-                        5L, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<Runnable>(),
-                        daemonThreadFactory(name)));
+        ThreadPoolExecutor tpe =  new ThreadPoolExecutor(1, size,
+                5L, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                daemonThreadFactory(name));
+        tpe.allowCoreThreadTimeOut(true);
+        return Executors.unconfigurableExecutorService(tpe);
     }
     
     
