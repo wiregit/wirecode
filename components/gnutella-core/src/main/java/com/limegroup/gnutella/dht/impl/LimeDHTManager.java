@@ -4,7 +4,6 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
@@ -12,12 +11,18 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ThreadPool;
 import com.limegroup.mojito.MojitoDHT;
 import com.limegroup.mojito.settings.ContextSettings;
 
 /**
  * This DHT manager starts either an active or a passive DHT controller.
  * It also handles switching from one mode to the other.
+ * 
+ * This class offloads blocking operations to a threadpool
+ * so that it never blocks on critical threads such as MessageDispatcher.
+ * This may potentially create unstable transitional states, but they eventually
+ * get corrected by the NodeAssigner. 
  * 
  */
 public class LimeDHTManager implements DHTManager {
@@ -43,6 +48,17 @@ public class LimeDHTManager implements DHTManager {
     private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners = 
         new CopyOnWriteArrayList<DHTEventListener>();
     
+    /** 
+     * Thread pool used to execute blocking DHT methods, such
+     * as stopping or starting a Mojito instance (which perform 
+     * network and disk I/O). 
+     * */
+    private ThreadPool threadPool;
+    
+    public LimeDHTManager(ThreadPool threadPool) {
+        this.threadPool = threadPool;
+    }
+    
     public synchronized void start(boolean activeMode) {
     	
     	//controller already running in the correct mode?
@@ -62,17 +78,30 @@ public class LimeDHTManager implements DHTManager {
         controller.start();
     }
     
-    public synchronized void addActiveDHTNode(SocketAddress hostAddress) {
-        controller.addActiveDHTNode(hostAddress);
+    public void addActiveDHTNode(final SocketAddress hostAddress) {
+        threadPool.invokeLater(new Runnable() {
+            public void run() {
+                synchronized(LimeDHTManager.this) {
+                    controller.addActiveDHTNode(hostAddress);
+                }
+            }
+        });
     }
     
-    public synchronized void addPassiveDHTNode(SocketAddress hostAddress) {
-        controller.addPassiveDHTNode(hostAddress);
+    public void addPassiveDHTNode(final SocketAddress hostAddress) {
+        threadPool.invokeLater(new Runnable() {
+            public void run() {
+                synchronized(LimeDHTManager.this) {
+                    controller.addPassiveDHTNode(hostAddress);
+                }
+            }
+        });
     }
 
     public void addressChanged() {
-        // Do this in a different thread as there are some blocking ops.
-        RouterService.schedule(new Runnable() {
+        // Do this in a different thread as there are some blocking
+        //disk and network ops.
+        threadPool.invokeLater(new Runnable() {
             public void run() {
                 synchronized(LimeDHTManager.this) {
                     if(!controller.isRunning()) {
@@ -82,7 +111,7 @@ public class LimeDHTManager implements DHTManager {
                     controller.start();
                 }
             }
-        }, 0, 0);
+        });
     }
     
     public synchronized List<IpPort> getActiveDHTNodes(int maxNodes){
@@ -141,18 +170,34 @@ public class LimeDHTManager implements DHTManager {
      * The nodeAssigner will take care of restarting this DHT node if 
      * it still qualifies.
      * 
+     * If this event is not related to disconnection from the network, it
+     * is forwarded to the controller for proper handling.
+     * 
      */
-    public synchronized void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    public void handleConnectionLifecycleEvent(final ConnectionLifecycleEvent evt) {
+        Runnable r;
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
-            if(controller.isRunning() 
-                    && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-                controller.stop();
-                controller = new NullDHTController();
-            }
-            return;
-        } 
-
-        controller.handleConnectionLifecycleEvent(evt);
+            r = new Runnable() {
+                public void run() {
+                    synchronized(LimeDHTManager.this) {
+                        if(controller.isRunning() 
+                                && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+                            controller.stop();
+                            controller = new NullDHTController();
+                        }
+                    }
+                }
+            };
+        } else {
+            r = new Runnable() {
+                public void run() {
+                    synchronized(LimeDHTManager.this) {
+                        controller.handleConnectionLifecycleEvent(evt);
+                    }
+                }
+            };
+        }
+        threadPool.invokeLater(r);
     }
     
     public int getVendor() {

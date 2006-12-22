@@ -129,7 +129,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         
         synchronized (lock) {
             
-            if (getMojitoDHT().isBootstrapped()) {
+            if (!getMojitoDHT().isRunning() || getMojitoDHT().isBootstrapped()) {
                 return;
             }
             
@@ -426,7 +426,11 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         public void handleFutureFailure(ExecutionException e) {
             synchronized (lock) {
                 LOG.error("ExecutionException", e);
-                ErrorService.error(e);
+                
+                if (!(e.getCause() instanceof DHTException)) {
+                    ErrorService.error(e);
+                }
+
                 stop();
             }
         }

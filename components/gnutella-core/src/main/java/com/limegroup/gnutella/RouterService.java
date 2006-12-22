@@ -242,7 +242,8 @@ public class RouterService {
     /**
      * Initialize the class that manages the DHT.
      */
-    private static DHTManager dhtManager = new LimeDHTManager();
+    private static DHTManager dhtManager = 
+        new LimeDHTManager(getSchedulingThreadPool());
     
     private static MessageDispatcher messageDispatcher;
     

@@ -251,6 +251,10 @@ public class DHTNodeFetcher {
             return;
         }
         
+        if(!isRunning()) {
+            return;
+        }
+        
         PingReply reply = (PingReply) m;
         List<IpPort> list = reply.getPackedDHTIPPorts();
 
