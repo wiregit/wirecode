@@ -1,5 +1,11 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.ByteSetting;
+import org.limewire.setting.CharArraySetting;
+import org.limewire.setting.FloatSetting;
+import org.limewire.setting.IntSetting;
+
 
 /**
  * Settings for searches.
@@ -322,7 +328,7 @@ public final class SearchSettings extends LimeProps {
      * from making dynamic querying too agressive. 
      */
     public static final FloatSetting QUERY_SPAM_CUTOFF =
-        FACTORY.createSettableFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
+        FACTORY.createRemoteFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
                 "SpamManager.displayTreshold",0.1f,1.0f);
 
     /**
@@ -330,13 +336,13 @@ public final class SearchSettings extends LimeProps {
      * the dynamic querying mechanism
      */
     public static final FloatSetting SPAM_RESULT_RATIO =
-	FACTORY.createSettableFloatSetting("SPAM_RESULT_RATIO", 0.3f,
+	FACTORY.createRemoteFloatSetting("SPAM_RESULT_RATIO", 0.3f,
 		"SpamManager.resultRatio",0.2f,1.0f);
     
 	/**
      * Do not issue query keys more than this often
      */
     public static final IntSetting QUERY_KEY_DELAY = 
-        FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,
+        FACTORY.createRemoteIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
 }

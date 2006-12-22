@@ -4,8 +4,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.settings.Settings;
-import com.limegroup.gnutella.settings.SettingsHandler;
+import org.limewire.setting.Settings;
+import org.limewire.setting.SettingsHandler;
+
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**

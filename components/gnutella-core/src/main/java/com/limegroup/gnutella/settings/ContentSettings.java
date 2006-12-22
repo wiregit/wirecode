@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.StringArraySetting;
+
 /** Settings related to content management. */
 public class ContentSettings extends LimeProps {    
     private ContentSettings() {}
@@ -8,11 +11,11 @@ public class ContentSettings extends LimeProps {
     
     /** The list of default content authorities. */
     public static final StringArraySetting AUTHORITIES =
-        FACTORY.createSettableStringArraySetting("CONTENT_AUTHORITIES", new String[0], "content.authorities");
+        FACTORY.createRemoteStringArraySetting("CONTENT_AUTHORITIES", new String[0], "content.authorities");
     
     /** Whether or not we want to use content management. */
     public static final BooleanSetting CONTENT_MANAGEMENT_ACTIVE =
-        FACTORY.createSettableBooleanSetting("CONTENT_MANAGEMENT_ACTIVE", false, "content.managementActive");
+        FACTORY.createRemoteBooleanSetting("CONTENT_MANAGEMENT_ACTIVE", false, "content.managementActive");
     
     /**
      * Whether or not the user is enabling management.

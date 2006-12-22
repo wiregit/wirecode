@@ -2,6 +2,11 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FileSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringSetting;
+
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -57,5 +62,5 @@ public class BugSettings extends LimeProps {
      * Setting for the last version that should send bugs.
      */
     public static final StringSetting LAST_ACCEPTABLE_VERSION =
-        FACTORY.createSettableStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
+        FACTORY.createRemoteStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
 }

@@ -19,6 +19,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
+import org.limewire.setting.SettingsHandler;
 
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.AcceptObserver;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
 
 

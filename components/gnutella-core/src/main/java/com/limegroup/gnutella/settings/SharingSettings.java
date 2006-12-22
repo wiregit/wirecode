@@ -6,6 +6,12 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FileSetSetting;
+import org.limewire.setting.FileSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.Setting;
+import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
@@ -301,13 +307,13 @@ public class SharingSettings extends LimeProps {
 	 * The Creative Commons explanation URL
 	 */
 	public static final StringSetting CREATIVE_COMMONS_INTRO_URL = 
-		FACTORY.createSettableStringSetting
+		FACTORY.createRemoteStringSetting
 		("CREATIVE_COMMONS_URL","http://creativecommons.org/about/licenses/how1","creativeCommonsURL");
 	
 	/**
 	 * The Creative Commons verification explanation URL
 	 */
 	public static final StringSetting CREATIVE_COMMONS_VERIFICATION_URL = 
-		FACTORY.createSettableStringSetting
+		FACTORY.createRemoteStringSetting
 		("CREATIVE_COMMONS_VERIFICATION_URL","http://creativecommons.org/technology/embedding#2","creativeCommonsVerificationURL");
 }

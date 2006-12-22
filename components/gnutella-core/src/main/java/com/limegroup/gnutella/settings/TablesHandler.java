@@ -3,6 +3,11 @@ package com.limegroup.gnutella.settings;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.Setting;
+import org.limewire.setting.SettingsFactory;
+
 /**
  * Handles preferences for tables.  Stored settings include
  * the table header's width, order and visibility.
@@ -10,7 +15,7 @@ import java.util.Map;
  * because they are accessed less-frequently and must be slightly
  * more mutable than other settings classes.
  */
-public final class TablesHandler extends AbstractSettings {
+public final class TablesHandler extends AbstractLimeWireSettings {
 
     private static final TablesHandler INSTANCE =
         new TablesHandler();

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.simpp;
 
-import com.limegroup.gnutella.settings.IntSetting;
+import org.limewire.setting.IntSetting;
+
 import com.limegroup.gnutella.settings.LimeProps;
 
 class SimppManagerTestSettings extends LimeProps {
@@ -12,7 +13,7 @@ class SimppManagerTestSettings extends LimeProps {
      * A test SIMPP setting.
      */
     public static final IntSetting TEST_UPLOAD_SETTING = 
-        FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING", DEFAULT_SETTING, 
+        FACTORY.createRemoteIntSetting("TEST_UPLOAD_SETTING", DEFAULT_SETTING, 
                                          "test_upload", MIN_SETTING, MAX_SETTING);
     
 }

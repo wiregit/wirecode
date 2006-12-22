@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringSetSetting;
+
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -12,21 +16,21 @@ public class UpdateSettings extends LimeProps {
      * Delay for showing message updates, in milliseconds.
      */
     public static final LongSetting UPDATE_DELAY =
-        FACTORY.createSettableLongSetting("UPDATE_DELAY", 24*60*60*1000,
+        FACTORY.createRemoteLongSetting("UPDATE_DELAY", 24*60*60*1000,
             "updateDelay", 7*60*60*1000, 5*24*60*60*1000);
             
     /**
      * Delay for downloading updates, in milliseconds.
      */
     public static final LongSetting UPDATE_DOWNLOAD_DELAY =
-        FACTORY.createSettableLongSetting("UPDATE_DOWNLOAD_DELAY", 60*60*1000,
+        FACTORY.createRemoteLongSetting("UPDATE_DOWNLOAD_DELAY", 60*60*1000,
             "updateDownloadDelay", 30*60*1000, 77*60*60*1000);
     
     /**
      * How often to retry download any updates, in milliseconds.
      */
     public static final LongSetting UPDATE_RETRY_DELAY = 
-        FACTORY.createSettableLongSetting("UPDATE_RETRY_DELAY",30 * 60 * 1000,
+        FACTORY.createRemoteLongSetting("UPDATE_RETRY_DELAY",30 * 60 * 1000,
                 "updateRetryDelay", 15 * 60 * 1000, 2 * 60 * 60 * 1000); 
     
     /**
@@ -34,14 +38,14 @@ public class UpdateSettings extends LimeProps {
      * give up.
      */
     public static final IntSetting UPDATE_GIVEUP_FACTOR =
-        FACTORY.createSettableIntSetting("UPDATE_GIVEUP_FACTOR", 5, 
+        FACTORY.createRemoteIntSetting("UPDATE_GIVEUP_FACTOR", 5, 
                 "updateGiveUpFactor", 2, 50);
     
     /**
      * If we try downloading a given update more than this many times, we may give up.
      */
     public static final IntSetting UPDATE_MIN_ATTEMPTS =
-        FACTORY.createSettableIntSetting("UPDATE_MIN_ATTEMPTS", 500,
+        FACTORY.createRemoteIntSetting("UPDATE_MIN_ATTEMPTS", 500,
                 "updateMinAttempts", 50, 2000);
             
     /**

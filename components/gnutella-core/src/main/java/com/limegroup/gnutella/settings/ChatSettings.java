@@ -1,6 +1,8 @@
 
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+
 /**
  * Settings for chat
  */

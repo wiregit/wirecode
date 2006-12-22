@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FloatSetting;
+import org.limewire.setting.IntSetting;
+
 /**
  * Settings for uploads.
  */
@@ -64,22 +68,22 @@ public final class UploadSettings extends LimeProps {
      * settings whether to expire the different types of meshes
      */
     public static final BooleanSetting EXPIRE_LEGACY =
-        FACTORY.createSettableBooleanSetting("EXPIRE_LEGACY",true,"AlternateLocation.expireLegacy");
+        FACTORY.createRemoteBooleanSetting("EXPIRE_LEGACY",true,"AlternateLocation.expireLegacy");
     public static final BooleanSetting EXPIRE_PING =
-        FACTORY.createSettableBooleanSetting("EXPIRE_PING",true,"AlternateLocation.expirePing");
+        FACTORY.createRemoteBooleanSetting("EXPIRE_PING",true,"AlternateLocation.expirePing");
     public static final BooleanSetting EXPIRE_RESPONSE =
-        FACTORY.createSettableBooleanSetting("EXPIRE_RESPONSES",true,"AlternateLocation.expireResponse");
+        FACTORY.createRemoteBooleanSetting("EXPIRE_RESPONSES",true,"AlternateLocation.expireResponse");
     
     /**
      * settings for the number of times each altloc should be given out
      * (larger == more times)
      */
     public static final FloatSetting LEGACY_BIAS =
-        FACTORY.createSettableFloatSetting("LEGACY_BIAS",1f,"AlternateLocation.legacyBias",0.0f,100.0f);
+        FACTORY.createRemoteFloatSetting("LEGACY_BIAS",1f,"AlternateLocation.legacyBias",0.0f,100.0f);
     public static final FloatSetting PING_BIAS =
-        FACTORY.createSettableFloatSetting("PING_BIAS",1f,"AlternateLocation.pingBias",0.0f,100.0f);
+        FACTORY.createRemoteFloatSetting("PING_BIAS",1f,"AlternateLocation.pingBias",0.0f,100.0f);
     public static final FloatSetting RESPONSE_BIAS = // send altlocs in responses more often by default
-        FACTORY.createSettableFloatSetting("RESPONSE_BIAS",3f,"AlternateLocation.responseBias",0.0f,100.0f);
+        FACTORY.createRemoteFloatSetting("RESPONSE_BIAS",3f,"AlternateLocation.responseBias",0.0f,100.0f);
     
 
     /**
@@ -87,17 +91,17 @@ public final class UploadSettings extends LimeProps {
      * (smaller == faster)
      */
     public static final FloatSetting LEGACY_EXPIRATION_DAMPER =
-        FACTORY.createSettableFloatSetting("LEGACY_DAMPER",
+        FACTORY.createRemoteFloatSetting("LEGACY_DAMPER",
                 (float)Math.E/2,"AlternateLocation.legacyDamper",
                 (float)Math.E/100,
                 (float)Math.E-0.1f);
     public static final FloatSetting PING_EXPIRATION_DAMPER =
-        FACTORY.createSettableFloatSetting("PING_DAMPER",
+        FACTORY.createRemoteFloatSetting("PING_DAMPER",
                     (float)Math.E/2,"AlternateLocation.pingDamper",
                     (float)Math.E/100,
                     (float)Math.E-0.1f);
     public static final FloatSetting RESPONSE_EXPIRATION_DAMPER =
-        FACTORY.createSettableFloatSetting("RESPONSE_DAMPER",
+        FACTORY.createRemoteFloatSetting("RESPONSE_DAMPER",
                 (float)Math.E/2,"AlternateLocation.responseDamper",
                 (float)Math.E/100,
                 (float)Math.E-0.1f);
@@ -106,6 +110,6 @@ public final class UploadSettings extends LimeProps {
      * How much to throttle the Thex upload speed.
      */
     public static final IntSetting THEX_UPLOAD_SPEED =
-        FACTORY.createSettableIntSetting("THEX_UPLOAD_SPEED",512,
+        FACTORY.createRemoteIntSetting("THEX_UPLOAD_SPEED",512,
                 "THEXUploadState.ThexUploadSpeed",256,4*1024);
 }

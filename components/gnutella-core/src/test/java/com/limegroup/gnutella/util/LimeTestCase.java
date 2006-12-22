@@ -13,6 +13,7 @@ import java.util.Set;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.SettingsHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -34,7 +35,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 

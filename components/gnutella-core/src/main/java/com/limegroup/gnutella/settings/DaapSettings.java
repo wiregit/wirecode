@@ -1,6 +1,11 @@
 
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.PasswordSetting;
+import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.util.MacOSXUtils;

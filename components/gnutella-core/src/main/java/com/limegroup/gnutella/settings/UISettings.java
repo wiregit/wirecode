@@ -3,6 +3,9 @@ package com.limegroup.gnutella.settings;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**

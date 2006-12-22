@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+
 /**
  * Settings for pings and pongs, pong caching and such.
  */

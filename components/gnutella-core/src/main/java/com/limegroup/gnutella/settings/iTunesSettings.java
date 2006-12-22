@@ -1,6 +1,10 @@
 
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
+
 /**
  * Settings for iTunes
  */

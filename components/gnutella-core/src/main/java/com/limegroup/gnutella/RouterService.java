@@ -27,6 +27,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
+import org.limewire.setting.SettingsHandler;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -60,10 +61,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.SimppSettingsManager;
-import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -394,24 +392,11 @@ public class RouterService {
     	    if ( isLoaded() )
     	        return;
     	        
+            LimeCoreGlue.install();
             preGuiInit();
             _state = StartStatus.STARTING;
     
-    		// Now, link all the pieces together, starting the various threads.
-
-            //Note: SimppManager and SimppSettingsManager must go first to make
-            //sure all the settings are created with the simpp values. Other
-            //components may rely on the settings, so they must have the right
-            //values when they are being initialized.
-            LOG.trace("START SimppManager.instance");
-            callback.componentLoading("SIMPP_MANAGER");
-            SimppManager.instance();//initialize
-            LOG.trace("STOP SimppManager.instance");
-            
-            LOG.trace("START SimppSettingsManager.instance");
-            SimppSettingsManager.instance();
-            LOG.trace("STOP SimppSettingsManager.instance");
-            
+    		// Now, link all the pieces together, starting the various threads.            
             LOG.trace("START ContentManager");
             contentManager.initialize();
             LOG.trace("STOP ContentManager");
