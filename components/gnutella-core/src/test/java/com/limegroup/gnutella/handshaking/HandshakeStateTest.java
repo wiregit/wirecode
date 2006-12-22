@@ -5,9 +5,9 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class HandshakeStateTest extends BaseTestCase {
+public class HandshakeStateTest extends LimeTestCase {
     
     public HandshakeStateTest(String name) {
         super(name);

@@ -18,11 +18,12 @@ import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**

@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.DownloadManager;
@@ -30,8 +32,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -42,7 +43,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * 3) Wakes up from the GAVE_UP state when a new, valid query comes in.
  */
 public class RequeryDownloadTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends com.limegroup.gnutella.util.LimeTestCase {
 
     /** The main test fixture.  Contains the incomplete file and hash below. */
     private DownloadManager _mgr; 
@@ -245,7 +246,7 @@ public class RequeryDownloadTest
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
         // since filename is the first thing ever submitted it should always
         // query for allFiles[0].getFileName()
-        String qString =StringUtils.createQueryString(_filename);
+        String qString =QueryUtils.createQueryString(_filename);
         assertEquals("should have queried for filename", qString, 
                      qr.getQuery());
         assertNotNull("should have some requested urn types", 

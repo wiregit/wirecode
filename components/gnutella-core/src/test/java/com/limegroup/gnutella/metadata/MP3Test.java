@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.metadata;
 
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.CommonUtils;
 /**
  * Test MP3Info class
  *
@@ -11,7 +12,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * @author  cHANCE mOORE, ctmoore@gottapee.com - 30 July 2002
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789
-public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
+public class MP3Test extends com.limegroup.gnutella.util.LimeTestCase {
 	
 	private static final int runs = 900;
 	

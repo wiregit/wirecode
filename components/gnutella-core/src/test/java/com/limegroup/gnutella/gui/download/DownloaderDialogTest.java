@@ -7,9 +7,9 @@ import junit.framework.Test;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class DownloaderDialogTest extends BaseTestCase {
+public class DownloaderDialogTest extends LimeTestCase {
 
 	private MockDownloaderFactory factory;
 

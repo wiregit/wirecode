@@ -17,7 +17,7 @@ import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
-public class ProxyTest extends BaseTestCase {
+public class ProxyTest extends LimeTestCase {
 
     private static final int PROXY_PORT = 9990;
 

@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.util;
 
+
 import junit.framework.Test;
 
 /**
  * Unit tests for ApproximateMatcher
  */
-public class ApproximateMatcherTest extends BaseTestCase {
+public class ApproximateMatcherTest extends LimeTestCase {
 
     ApproximateMatcher matcher=null;
         

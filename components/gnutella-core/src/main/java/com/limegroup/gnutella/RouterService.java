@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -18,6 +19,15 @@ import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.concurrent.SimpleTimer;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.SecureMessageVerifier;
+import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentManager;
@@ -42,7 +52,6 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.SecureMessageVerifier;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -63,14 +72,8 @@ import com.limegroup.gnutella.udpconnect.UDPSelectorProvider;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
-import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
@@ -199,7 +202,8 @@ public class RouterService {
     private static AltLocManager altManager = AltLocManager.instance();
     
     /** Variable for the <tt>SecureMessageVerifier</tt> that verifies secure messages. */
-    private static SecureMessageVerifier secureMessageVerifier = new SecureMessageVerifier();    
+    private static SecureMessageVerifier secureMessageVerifier =
+        new SecureMessageVerifier(new File(LimeWireUtils.getUserSettingsDir(), "secureMessage.key"));    
     
     /** The content manager */
     private static ContentManager contentManager = new ContentManager();
@@ -762,7 +766,7 @@ public class RouterService {
      * @param period the delay between executions, in milliseconds
      * @exception IllegalStateException this is cancelled
      * @exception IllegalArgumentException delay or period negative
-     * @see com.limegroup.gnutella.util.SimpleTimer#schedule(java.lang.Runnable,long,long)
+     * @see org.limewire.concurrent.SimpleTimer#schedule(java.lang.Runnable,long,long)
      */
     public static TimerTask schedule(Runnable task, long delay, long period) {
         return SimpleTimer.sharedTimer().schedule(task, delay, period);

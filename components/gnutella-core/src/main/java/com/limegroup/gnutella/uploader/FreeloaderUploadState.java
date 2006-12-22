@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -35,7 +35,7 @@ public class FreeloaderUploadState extends UploadState {
 		String str;
 		str = "HTTP/1.1 200 OK \r\n";
 		os.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		os.write(str.getBytes());
 		str = "Content-Type: text/html\r\n";
 		os.write(str.getBytes());

@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -14,12 +15,11 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Tests backwards compatibility with old downloads.dat files.
  */
-public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         
     private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
     

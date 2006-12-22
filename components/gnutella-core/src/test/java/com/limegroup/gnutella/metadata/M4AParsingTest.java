@@ -2,15 +2,16 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * test for the parsing of M4A file's metadata
  */
-public class M4AParsingTest extends BaseTestCase {
+public class M4AParsingTest extends LimeTestCase {
 	
 	static String _path = "com"+File.separator+"limegroup"+
 					File.separator+"gnutella"+File.separator+"metadata"+File.separator;

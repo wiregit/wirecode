@@ -1,19 +1,20 @@
 package com.limegroup.gnutella;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LeafConnectionManager;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 
 /**
  * Tests the <tt>Pinger</tt> class that periodically sends pings to gather new
  * host data.
  */
-public final class PingerTest extends BaseTestCase {
+public final class PingerTest extends LimeTestCase {
 
 
     public PingerTest(String name) {

@@ -3,17 +3,19 @@ package com.limegroup.gnutella.xml;
 import java.io.File;
 import java.util.Iterator;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Expand;
 
 
 /**
  * Unit tests for LimeXMLSchema
  */
-public class LimeXMLSchemaTest extends BaseTestCase {
+public class LimeXMLSchemaTest extends LimeTestCase {
             
 	public LimeXMLSchemaTest(String name) {
 		super(name);
@@ -30,7 +32,7 @@ public class LimeXMLSchemaTest extends BaseTestCase {
 	public void setUp() throws Exception {
 	    Expand.expandFile(
             CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
-            CommonUtils.getUserSettingsDir()
+            LimeWireUtils.getUserSettingsDir()
         );
     }
 	

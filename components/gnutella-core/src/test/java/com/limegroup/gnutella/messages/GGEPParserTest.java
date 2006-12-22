@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class GGEPParserTest extends BaseTestCase {
+public class GGEPParserTest extends LimeTestCase {
     
     public GGEPParserTest(String name) {
         super(name);

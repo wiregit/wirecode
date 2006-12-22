@@ -2,7 +2,8 @@ package com.limegroup.gnutella.version;
 
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import org.limewire.util.OSUtils;
+
 
 /**
  * An abstraction for representing an operating system.
@@ -91,21 +92,21 @@ class OS {
      * "*" is also allowed, representing all OSes.
      */
     private boolean accept(String s) {
-        String os = CommonUtils.getOS().toLowerCase();
+        String os = OSUtils.getOS().toLowerCase();
         if(s.equals(os))
             return true;
         
         if("windows".equals(s))
-            return CommonUtils.isWindows();
+            return OSUtils.isWindows();
         else if("mac".equals(s))
-            return CommonUtils.isAnyMac();
+            return OSUtils.isAnyMac();
         else if("linux".equals(s))
-            return CommonUtils.isLinux();
+            return OSUtils.isLinux();
         else if("unix".equals(s))
-            return CommonUtils.isUnix() && !CommonUtils.isLinux();
+            return OSUtils.isUnix() && !OSUtils.isLinux();
         else if("other".equals(s))
-            return !CommonUtils.isWindows() && !CommonUtils.isAnyMac() &&
-                   !CommonUtils.isUnix() && !CommonUtils.isLinux();
+            return !OSUtils.isWindows() && !OSUtils.isAnyMac() &&
+                   !OSUtils.isUnix() && !OSUtils.isLinux();
         else if("*".equals(s))
             return true;
         

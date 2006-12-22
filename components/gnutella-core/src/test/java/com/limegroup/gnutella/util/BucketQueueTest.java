@@ -10,7 +10,7 @@ import com.limegroup.gnutella.Endpoint;
 /**
  * Unit tests for BucketQueue
  */
-public class BucketQueueTest extends BaseTestCase {
+public class BucketQueueTest extends LimeTestCase {
             
 	public BucketQueueTest(String name) {
 		super(name);

@@ -6,9 +6,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import org.limewire.io.ByteOrder;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.connection.WriteBufferChannel;
 
@@ -19,7 +20,7 @@ import com.limegroup.gnutella.util.CircularByteBuffer;
  * Tests some of the functionality of the Circular buffer.  
  *
  */
-public class CircularByteBufferTest extends BaseTestCase {
+public class CircularByteBufferTest extends LimeTestCase {
 
     public CircularByteBufferTest(String name) {
         super(name);

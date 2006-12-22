@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.version;
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -13,6 +14,12 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.io.IpPort;
+import org.limewire.security.SignatureVerifier;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadManager;
@@ -29,14 +36,9 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ExecutorsHelper;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Manager for version updates.
@@ -237,14 +239,14 @@ public class UpdateHandler {
         _lastBytes = data;
         
         if(!fromDisk) {
-            FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
+            FileUtils.verySafeSave(LimeWireUtils.getUserSettingsDir(), FILENAME, data);
             CapabilitiesVM.reconstructInstance();
             RouterService.getConnectionManager().sendUpdatedCapabilities();
         }
 
         Version limeV;
         try {
-            limeV = new Version(CommonUtils.getLimeWireVersion());
+            limeV = new Version(LimeWireUtils.getLimeWireVersion());
         } catch(VersionFormatException vfe) {
             LOG.warn("Invalid LimeWire version", vfe);
             return;
@@ -263,7 +265,7 @@ public class UpdateHandler {
         
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
                     ApplicationSettings.getLanguage(),
-                    CommonUtils.isPro(),
+                    LimeWireUtils.isPro(),
                     style,
                     javaV);
 
@@ -611,14 +613,14 @@ public class UpdateHandler {
      * Simple accessor for the stored file.
      */
     private File getStoredFile() {
-        return new File(CommonUtils.getUserSettingsDir(), FILENAME);
+        return new File(LimeWireUtils.getUserSettingsDir(), FILENAME);
     }
     
     /**
      * Simple accessor for the key file.
      */
     private File getKeyFile() {
-        return new File(CommonUtils.getUserSettingsDir(), KEY);
+        return new File(LimeWireUtils.getUserSettingsDir(), KEY);
     }
     
 

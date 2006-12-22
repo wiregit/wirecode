@@ -42,6 +42,8 @@ import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
 
 import com.jcraft.jogg.Packet;
 import com.jcraft.jogg.Page;
@@ -49,8 +51,6 @@ import com.jcraft.jogg.StreamState;
 import com.jcraft.jogg.SyncState;
 import com.jcraft.jorbis.Comment;
 import com.jcraft.jorbis.Info;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.FileUtils;
 
 
 public class JOrbisComment {

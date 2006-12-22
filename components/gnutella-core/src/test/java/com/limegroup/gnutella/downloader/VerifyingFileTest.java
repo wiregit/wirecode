@@ -7,16 +7,17 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class VerifyingFileTest extends BaseTestCase {
+public class VerifyingFileTest extends LimeTestCase {
     
     public VerifyingFileTest(String s) {
         super(s);

@@ -20,6 +20,12 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.io.ByteOrder;
+import org.limewire.util.FileUtils;
+import org.limewire.util.I18NConvert;
+import org.limewire.util.OSUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
@@ -29,15 +35,11 @@ import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Function;
-import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.IntSet;
-import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.MultiCollection;
 import com.limegroup.gnutella.util.StringTrie;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -75,14 +77,14 @@ public abstract class FileManager {
         PROGRAM_SHARE = forceShare;
         
         forceShare = 
-            new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+            new File(LimeWireUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
         
         forceShare = 
-            new File(CommonUtils.getUserSettingsDir(), ".AppSpecialShare").getAbsoluteFile();
+            new File(LimeWireUtils.getUserSettingsDir(), ".AppSpecialShare").getAbsoluteFile();
         forceShare.mkdir();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
@@ -1809,7 +1811,7 @@ public abstract class FileManager {
             return true;
         
         //  check for OS-specific directories:
-        if (CommonUtils.isWindows()) {
+        if (OSUtils.isWindows()) {
             //  check for "Documents and Settings"
             if (file.getName().equals("Documents and Settings"))
                 return true;
@@ -1835,7 +1837,7 @@ public abstract class FileManager {
                 return true;
         }
         
-        if (CommonUtils.isMacOSX()) {
+        if (OSUtils.isMacOSX()) {
             //  check for /Users
             if (file.getName().equals("Users"))
                 return true;
@@ -1877,7 +1879,7 @@ public abstract class FileManager {
                 return true;
         }
         
-        if (CommonUtils.isPOSIX()) {
+        if (OSUtils.isPOSIX()) {
             //  check for /bin
             if (file.getName().equals("bin"))
                 return true;

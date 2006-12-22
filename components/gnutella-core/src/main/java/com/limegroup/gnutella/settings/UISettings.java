@@ -3,7 +3,7 @@ package com.limegroup.gnutella.settings;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Settings to deal with UI.
@@ -28,7 +28,7 @@ public final class UISettings extends LimeProps {
      * Setting for the magnetmix button.
      */
     public static final BooleanSetting MAGNETMIX_BUTTON = 
-        FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON", !CommonUtils.isPro() && !isResolutionLow());
+        FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON", !LimeWireUtils.isPro() && !isResolutionLow());
                                      
     /**
      * Setting for using small icons.

@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -23,7 +25,6 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  *  Tests that an Ultrapeer correctly handles out-of-band queries.  Essentially 

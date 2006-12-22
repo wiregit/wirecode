@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 
 /**
  * Utility class that supplies commonly used data sets that each

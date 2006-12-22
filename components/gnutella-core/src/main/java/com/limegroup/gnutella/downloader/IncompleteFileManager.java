@@ -18,16 +18,17 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.Base32;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.FileUtils;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -222,7 +223,7 @@ public class IncompleteFileManager implements Serializable {
      */
     private static File canonicalize(File f) throws IOException {
         f = f.getAbsoluteFile();
-        if(CommonUtils.isWindows())
+        if(OSUtils.isWindows())
             return f;
         else
             return f.getCanonicalFile();

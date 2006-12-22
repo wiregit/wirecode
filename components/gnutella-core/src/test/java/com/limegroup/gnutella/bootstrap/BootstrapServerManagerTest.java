@@ -5,20 +5,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.EncodingUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Unit tests for BootstrapServerManager.
  */
-public class BootstrapServerManagerTest extends BaseTestCase {
+public class BootstrapServerManagerTest extends LimeTestCase {
     public BootstrapServerManagerTest(String name) {
         super(name);
     }
@@ -32,7 +33,7 @@ public class BootstrapServerManagerTest extends BaseTestCase {
     final static int SERVER_PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
     final static String COMMON_PARAMS="client=LIME&version="
-        +EncodingUtils.encode(CommonUtils.getLimeWireVersion());
+        +EncodingUtils.encode(LimeWireUtils.getLimeWireVersion());
 
     /** Our backend. */
     TestBootstrapServerManager bman;

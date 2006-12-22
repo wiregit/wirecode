@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.FileUtils;
+import org.limewire.util.FileUtils;
+
 
 /**
  * Class for an Array of Files setting.

@@ -11,9 +11,9 @@ import org.apache.commons.httpclient.URI;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class CCLicenseTest extends BaseTestCase {
+public final class CCLicenseTest extends LimeTestCase {
     
     private static final String RDF_GOOD = 
 "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +

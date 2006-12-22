@@ -6,9 +6,10 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Settings for sharing

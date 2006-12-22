@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+
 import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NameValue;
 
 /** 

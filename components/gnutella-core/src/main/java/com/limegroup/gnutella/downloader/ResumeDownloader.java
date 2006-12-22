@@ -9,7 +9,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.QueryUtils;
 
 /**
  * A ManagedDownloader that tries to resume a specific incomplete file.  The
@@ -152,7 +152,7 @@ public class ResumeDownloader extends ManagedDownloader
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
         // Extract a query string from our filename.
-        String queryName = StringUtils.createQueryString(getDefaultFileName());
+        String queryName = QueryUtils.createQueryString(getDefaultFileName());
 
         if (downloadSHA1 != null)
             // TODO: we should be sending the URN with the query, but

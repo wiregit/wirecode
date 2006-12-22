@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.limewire.io.IOUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.LeafHeaders;
@@ -20,7 +22,6 @@ import com.limegroup.gnutella.messages.vendor.TCPConnectBackRedirect;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackRedirect;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  *  Tests that an Ultrapeer correctly handles connect back redirect messages.

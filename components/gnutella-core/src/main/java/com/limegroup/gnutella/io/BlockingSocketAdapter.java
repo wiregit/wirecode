@@ -5,7 +5,8 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.util.ThreadExecutor;
+import org.limewire.concurrent.ThreadExecutor;
+
 
 /**
  * A socket that allows asynchronous connections but is backed

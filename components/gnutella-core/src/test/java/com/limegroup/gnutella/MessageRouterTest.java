@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -23,11 +25,10 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -35,7 +36,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 /**
  * This class tests the <tt>MessageRouter</tt>.
  */
-public final class MessageRouterTest extends BaseTestCase {
+public final class MessageRouterTest extends LimeTestCase {
 
     /**
      * Handle to the <tt>MessageRouter</tt> for all tests to use

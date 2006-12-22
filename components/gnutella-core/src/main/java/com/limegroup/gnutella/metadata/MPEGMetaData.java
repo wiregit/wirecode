@@ -6,8 +6,8 @@ import java.io.RandomAccessFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Constructs metadata for an MPEG 1 & 2 video file.

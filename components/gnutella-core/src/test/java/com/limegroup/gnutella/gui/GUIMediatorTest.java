@@ -3,9 +3,9 @@ package com.limegroup.gnutella.gui;
 import java.util.Locale;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class GUIMediatorTest extends BaseTestCase {
+public class GUIMediatorTest extends LimeTestCase {
 
 	public GUIMediatorTest(String name) {
 		super(name);

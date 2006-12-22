@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.Base32;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -25,7 +26,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;

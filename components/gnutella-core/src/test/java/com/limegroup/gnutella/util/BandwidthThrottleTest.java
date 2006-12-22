@@ -11,7 +11,7 @@ import junit.framework.Test;
 /**
  * Tests BandwidthThrottle and ThrottledOutputStream.
  */
-public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class BandwidthThrottleTest extends com.limegroup.gnutella.util.LimeTestCase {
     public BandwidthThrottleTest(String name) {
         super(name);
     }

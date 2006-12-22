@@ -7,10 +7,11 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class TestFile {
     private static final int A_INT=0x4F1BBCDC;

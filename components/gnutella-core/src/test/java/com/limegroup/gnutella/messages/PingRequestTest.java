@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
@@ -14,9 +16,8 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public PingRequestTest(String name) {
         super(name);
     }

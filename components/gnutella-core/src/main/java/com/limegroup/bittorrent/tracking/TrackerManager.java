@@ -8,14 +8,14 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.service.MessageService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.util.ExecutorsHelper;
 
 public class TrackerManager {
 	

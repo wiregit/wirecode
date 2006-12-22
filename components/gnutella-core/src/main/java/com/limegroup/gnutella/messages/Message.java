@@ -3,8 +3,9 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.ByteOrder;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 
 /**

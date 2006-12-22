@@ -8,9 +8,9 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.io.IOState;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ReadHandshakeStateTest extends BaseTestCase {
+public class ReadHandshakeStateTest extends LimeTestCase {
     
     public ReadHandshakeStateTest(String name) {
         super(name);

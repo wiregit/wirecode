@@ -4,12 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+
 import junit.framework.Test;
 
 /**
  * Unit tests for FixedsizeForgetfulHashSetTest
  */
-public class FixedsizeForgetfulHashSetTest extends BaseTestCase {
+public class FixedsizeForgetfulHashSetTest extends LimeTestCase {
             
     public FixedsizeForgetfulHashSetTest(String name) {
         super(name);

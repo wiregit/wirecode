@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -13,15 +14,18 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IPPortCombo;
+import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.IPPortCombo;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 
 /**
@@ -366,7 +370,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         if (version > 0) {
             byte [] host = new byte[6];
             dais.readFully(host);
-            addr = IPPortCombo.getCombo(host);
+            try {
+                addr = IPPortCombo.getCombo(host);
+            } catch(InvalidDataException ide) {
+                throw new BadPacketException(ide);
+            }
             if (addr.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
                 addr = null;
                 version = 0;
@@ -376,7 +384,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         byte [] tmp = new byte[6];
         for (int i = 0; i < number; i++) {
             dais.readFully(tmp);
-            proxies.add(IPPortCombo.getCombo(tmp));
+            try {
+                proxies.add(IPPortCombo.getCombo(tmp));
+            } catch(InvalidDataException ide) {
+                throw new BadPacketException(ide);
+            }
         }
         
         /** this adds the read set to the existing proxies */

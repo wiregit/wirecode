@@ -3,9 +3,10 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.limewire.io.ByteOrder;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -13,7 +14,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 /** Tests the important MessagesSupportedVendorMessage.
  */
 public class CapabilitiesVMTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends com.limegroup.gnutella.util.LimeTestCase {
     public CapabilitiesVMTest(String name) {
         super(name);
     }

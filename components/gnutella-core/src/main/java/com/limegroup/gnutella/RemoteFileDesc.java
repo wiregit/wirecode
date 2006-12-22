@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,17 +18,17 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.SecureMessage;
+import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

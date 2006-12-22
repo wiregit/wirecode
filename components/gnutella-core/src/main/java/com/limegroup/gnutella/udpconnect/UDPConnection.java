@@ -8,12 +8,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  *  Create a reliable udp connection interface.

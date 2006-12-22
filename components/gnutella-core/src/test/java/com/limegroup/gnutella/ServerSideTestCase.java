@@ -4,16 +4,18 @@ import java.io.File;
 import java.net.InetAddress;
 import java.util.Properties;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  *  Common code to test an Ultrapeer.  Allows you to control how many 
@@ -30,7 +32,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  *                                            numUPs, setUpQRPTables
  *  You CAN  implement the following methods: setSettings
  */
-public abstract class ServerSideTestCase extends BaseTestCase {
+public abstract class ServerSideTestCase extends LimeTestCase {
 
     /**
      * Simple IP so a blank one isn't used.
@@ -93,8 +95,8 @@ public abstract class ServerSideTestCase extends BaseTestCase {
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);

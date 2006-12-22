@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -14,8 +18,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether Meta-Queries are correctly answered, etc.
@@ -42,27 +44,27 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
+        FileUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
         mp3 = 
         CommonUtils.getResourceFile("com/limegroup/gnutella/ByteOrderTest.java");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "meta audio.mp3"));
+        FileUtils.copy(mp3, new File(_sharedDir, "meta audio.mp3"));
         mp3 = 
         CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "meta video.wmv"));
+        FileUtils.copy(mp3, new File(_sharedDir, "meta video.wmv"));
         mp3 = 
         CommonUtils.getResourceFile("com/limegroup/gnutella/Base32Test.java");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "meta doc.txt"));
+        FileUtils.copy(mp3, new File(_sharedDir, "meta doc.txt"));
         mp3 = 
         CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "meta image.png"));
+        FileUtils.copy(mp3, new File(_sharedDir, "meta image.png"));
         mp3 = 
         CommonUtils.getResourceFile("com/limegroup/gnutella/MediaTypeTest.java");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
+        FileUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
     }   
     
     //////////////////////////////////////////////////////////////////

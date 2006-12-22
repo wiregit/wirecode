@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 /**
  * Tests the utility class for xml queries.  This performs such functions as
  * the all-important match method.
  */
-public class LimeXMLUtilsTest extends BaseTestCase {
+public class LimeXMLUtilsTest extends LimeTestCase {
 
     public LimeXMLUtilsTest(String name) {
         super(name);

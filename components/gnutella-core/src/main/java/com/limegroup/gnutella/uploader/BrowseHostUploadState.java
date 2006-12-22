@@ -9,7 +9,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * An implementaiton of the UploadState interface
@@ -60,7 +60,7 @@ public final class BrowseHostUploadState extends UploadState {
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
 		ostream.write(str.getBytes());

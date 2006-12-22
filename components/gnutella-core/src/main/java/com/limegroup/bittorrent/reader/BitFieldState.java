@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.reader;
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -7,13 +8,13 @@ import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.BufferByteArrayOutputStream;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 
 /**
  * State that parses the Bitfield message. 

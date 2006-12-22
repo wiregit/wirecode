@@ -8,7 +8,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
-public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static Acceptor acceptThread;
 

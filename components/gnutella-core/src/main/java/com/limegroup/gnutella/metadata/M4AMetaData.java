@@ -9,9 +9,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+
 import com.limegroup.gnutella.util.CountingInputStream;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Limited metadata parsing of m4a files.  This is based on code published

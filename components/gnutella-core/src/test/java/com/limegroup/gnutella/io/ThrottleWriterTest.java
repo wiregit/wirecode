@@ -7,12 +7,12 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.WriteBufferChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that ThrottleWriter throttles data correctly.
  */
-public final class ThrottleWriterTest extends BaseTestCase {
+public final class ThrottleWriterTest extends LimeTestCase {
     
     private FakeThrottle THROTTLE = new FakeThrottle();
     private WriteBufferChannel SINK = new WriteBufferChannel(1024 * 1024);

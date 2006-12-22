@@ -1,9 +1,14 @@
 package com.limegroup.gnutella.util;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.io.ConnectObserver;
 
@@ -13,7 +18,7 @@ import com.limegroup.gnutella.io.ConnectObserver;
 public class Sockets {
     
     private final static SocketController CONTROLLER =
-        CommonUtils.isWindowsXP() ?
+        OSUtils.isWindowsXP() ?
                 new LimitedSocketController(4) :
                 new SimpleSocketController();
         

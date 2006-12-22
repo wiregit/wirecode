@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -17,8 +18,12 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.Base32;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;
 import com.limegroup.gnutella.GUID;
@@ -42,11 +47,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.IntWrapper;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ExecutorsHelper;
 import com.limegroup.gnutella.util.MultiShutdownable;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**

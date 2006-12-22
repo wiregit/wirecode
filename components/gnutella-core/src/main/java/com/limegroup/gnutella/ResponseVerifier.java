@@ -6,11 +6,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.limegroup.gnutella.util.MultiIterable;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

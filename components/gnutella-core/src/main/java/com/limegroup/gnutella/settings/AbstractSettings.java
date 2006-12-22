@@ -3,7 +3,7 @@ package com.limegroup.gnutella.settings;
 import java.io.File;
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -32,7 +32,7 @@ public abstract class AbstractSettings implements Settings {
      * Basic constructor that creates the FACTORY and PROPS_FILE.
      */
     protected AbstractSettings(String fileName, String header) {
-        File settingsDir = CommonUtils.getUserSettingsDir();
+        File settingsDir = LimeWireUtils.getUserSettingsDir();
         PROPS_FILE = new File(settingsDir, fileName);
         FACTORY = new SettingsFactory(PROPS_FILE, header);
         SettingsHandler.addSettings(this);

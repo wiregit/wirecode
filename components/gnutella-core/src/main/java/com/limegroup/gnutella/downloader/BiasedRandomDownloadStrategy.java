@@ -4,9 +4,9 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.SystemUtils;
 
 /** 
  * This SelectionStrategy sometimes selects the first available chunk and

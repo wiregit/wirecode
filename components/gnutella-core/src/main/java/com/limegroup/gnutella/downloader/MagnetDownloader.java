@@ -29,8 +29,8 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.util.QueryUtils;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
@@ -226,7 +226,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         HttpClient client = HttpClientManager.getNewClient();
         HttpMethod head = new HeadMethod(url.toExternalForm());
         head.addRequestHeader("User-Agent",
-                              CommonUtils.getHttpServer());
+                              LimeWireUtils.getHttpServer());
         try {
             client.executeMethod(head);
             //Extract Content-length, but only if the response was 200 OK.
@@ -257,11 +257,11 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         MagnetOptions magnet = getMagnet();
 		String textQuery = magnet.getQueryString();
         if (textQuery != null) {
-            String q = StringUtils.createQueryString(textQuery);
+            String q = QueryUtils.createQueryString(textQuery);
             return QueryRequest.createQuery(q);
         }
         else {
-            String q = StringUtils.createQueryString(getSaveFile().getName());
+            String q = QueryUtils.createQueryString(getSaveFile().getName());
             return QueryRequest.createQuery(q);
         }
     }

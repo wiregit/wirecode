@@ -1,18 +1,19 @@
 package com.limegroup.gnutella.connection;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the class that checks whether or not the user has a live internet 
  * connection.
  */
-public class ConnectionCheckerTest extends BaseTestCase {
+public class ConnectionCheckerTest extends LimeTestCase {
 
     private final static TestManager MANAGER = new TestManager();
     

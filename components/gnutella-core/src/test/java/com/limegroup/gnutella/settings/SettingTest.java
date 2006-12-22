@@ -6,16 +6,17 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.limewire.util.OSUtils;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the setting for character arrays.
  */
-public class SettingTest extends BaseTestCase {
+public class SettingTest extends LimeTestCase {
     
     private static final long EXPIRY_INTERVAL = 15 * 24 * 60 * 60 * 1000l; //15 days
     private static final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
@@ -117,7 +118,7 @@ public class SettingTest extends BaseTestCase {
         String testFilePath2;
         File[] testFileArray;
         
-        if(CommonUtils.isUnix() || CommonUtils.isMacOSX()) {
+        if(OSUtils.isUnix() || OSUtils.isMacOSX()) {
             testFilePath = "/mickey-mouse.com";
             testFilePath2 = "/temp/turkey.txt";
             testFileArray = new File[] { 

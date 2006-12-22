@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.guess;
 
+
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -9,6 +10,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
+import org.limewire.security.QueryKey;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -17,8 +21,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
 
 /** Utility class for sending GUESS queries.
  */

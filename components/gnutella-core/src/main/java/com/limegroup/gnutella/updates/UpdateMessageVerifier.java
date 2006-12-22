@@ -9,11 +9,11 @@ import java.security.PublicKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.security.SignatureVerifier;
+import org.limewire.service.ErrorService;
+import org.limewire.util.Base32;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Provides static methods, which accept an InputStream and use the 
@@ -50,7 +50,7 @@ public class UpdateMessageVerifier {
         ObjectInputStream ois = null;
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(),"public.key");
+                new File(LimeWireUtils.getUserSettingsDir(),"public.key");
             fis = new FileInputStream(file);
             ois = new ObjectInputStream(fis);
             pubKey = (PublicKey)ois.readObject();

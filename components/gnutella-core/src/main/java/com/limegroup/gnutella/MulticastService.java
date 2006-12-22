@@ -10,11 +10,13 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * This class handles Multicast messages.

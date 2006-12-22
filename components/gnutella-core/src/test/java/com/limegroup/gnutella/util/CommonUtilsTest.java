@@ -4,12 +4,17 @@ import java.io.File;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.OSUtils;
+import org.limewire.util.PrivilegedAccessor;
+
+
 import junit.framework.Test;
 
 /**
  * Tests certain features of CommonUtils
  */
-public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class CommonUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public CommonUtilsTest(String name) {
         super(name);
@@ -20,35 +25,35 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }  
     
     public void testMajorRevisionMethod() {
-        int majorVersion = CommonUtils.getMajorVersionNumber();
+        int majorVersion = LimeWireUtils.getMajorVersionNumber();
         assertEquals(2,majorVersion);
-        majorVersion = CommonUtils.getMajorVersionNumberInternal("3.7.7");
+        majorVersion = LimeWireUtils.getMajorVersionNumberInternal("3.7.7");
         assertEquals(3,majorVersion);
-        majorVersion = CommonUtils.getMajorVersionNumberInternal("14.7.7");
+        majorVersion = LimeWireUtils.getMajorVersionNumberInternal("14.7.7");
         assertEquals(14,majorVersion);
-        majorVersion = CommonUtils.getMajorVersionNumberInternal("13.34.7");
+        majorVersion = LimeWireUtils.getMajorVersionNumberInternal("13.34.7");
         assertEquals(13,majorVersion);
-        majorVersion = CommonUtils.getMajorVersionNumberInternal(".34.7");
+        majorVersion = LimeWireUtils.getMajorVersionNumberInternal(".34.7");
         assertEquals(2,majorVersion);
-        majorVersion = CommonUtils.getMajorVersionNumberInternal("2.7.13");
+        majorVersion = LimeWireUtils.getMajorVersionNumberInternal("2.7.13");
         assertEquals("unexpected major version number",2, majorVersion); 
     }
 
     public void testMinorRevisionMethod() {
-        int minorVersion = CommonUtils.getMinorVersionNumber();
+        int minorVersion = LimeWireUtils.getMinorVersionNumber();
         assertEquals(7,minorVersion);
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("3.8.7");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("3.8.7");
         assertEquals(8,minorVersion);
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("14.13.7");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("14.13.7");
         assertEquals(13,minorVersion);
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("2.34.7");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("2.34.7");
         assertEquals(34,minorVersion);        
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("..7");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("..7");
         assertEquals(7,minorVersion);        
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("2..7");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("2..7");
         assertEquals(7,minorVersion);    
 
-        minorVersion = CommonUtils.getMinorVersionNumberInternal("2.7.13");
+        minorVersion = LimeWireUtils.getMinorVersionNumberInternal("2.7.13");
         assertEquals("unexpected minor version number",7, minorVersion); 
     }
 
@@ -81,23 +86,23 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 	 */
 	public void testCommonUtilsConvertFileName() throws Exception {
 		char[] illegalChars = 
-			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
 												"ILLEGAL_CHARS_ANY_OS");
 
 		char[] illegalCharsUnix = 
-			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
 												"ILLEGAL_CHARS_UNIX");
 
 		char[] illegalCharsWindows = 
-			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
+			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
 												"ILLEGAL_CHARS_WINDOWS");
 
 		runCharTest(illegalChars);
 		
-		if(CommonUtils.isUnix()) {
+		if(OSUtils.isUnix()) {
 			runCharTest(illegalCharsUnix);
 		}
-		if(CommonUtils.isWindows()) {
+		if(OSUtils.isWindows()) {
 			runCharTest(illegalCharsWindows);
 		}
 

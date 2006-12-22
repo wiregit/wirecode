@@ -5,7 +5,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 
 /**
  * Class for a password setting.

@@ -22,13 +22,17 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
+import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -61,13 +65,8 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.util.ApproximateMatcher;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.GenericsUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
+import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -1235,7 +1234,7 @@ public class ManagedDownloader extends AbstractDownloader
     protected synchronized QueryRequest newRequery(int numRequeries)
       throws CantResumeException {
 		    
-        String queryString = StringUtils.createQueryString(getDefaultFileName());
+        String queryString = QueryUtils.createQueryString(getDefaultFileName());
         if(queryString == null || queryString.equals(""))
             throw new CantResumeException(getSaveFile().getName());
         else
@@ -1352,8 +1351,8 @@ public class ManagedDownloader extends AbstractDownloader
         //last.  Allow 10% edit difference in filenames or 6 characters,
         //whichever is smaller.
         int allowedDifferences=Math.round(Math.min(
-             0.10f*((StringUtils.ripExtension(one)).length()),
-             0.10f*((StringUtils.ripExtension(two)).length())));
+             0.10f*((QueryUtils.ripExtension(one)).length()),
+             0.10f*((QueryUtils.ripExtension(two)).length())));
         allowedDifferences=Math.min(allowedDifferences, 6);
 
         synchronized (matcher) {
@@ -1850,7 +1849,7 @@ public class ManagedDownloader extends AbstractDownloader
             if (size<=0)
                 return null;
             //Copy first block, returning if nothing was copied.
-            if (CommonUtils.copy(incompleteFile, size, file)<=0) 
+            if (FileUtils.copy(incompleteFile, size, file)<=0) 
                 return null;
             return file;
         }

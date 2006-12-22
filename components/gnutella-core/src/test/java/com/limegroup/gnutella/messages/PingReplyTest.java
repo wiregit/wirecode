@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,18 +13,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.security.QueryKey;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     /**
      * A non blank IP

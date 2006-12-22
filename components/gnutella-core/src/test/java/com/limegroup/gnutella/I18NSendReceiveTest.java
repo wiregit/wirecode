@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.util.FileUtils;
+import org.limewire.util.I18NConvert;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -20,15 +23,13 @@ import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 public class I18NSendReceiveTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static Connection CONN_1;
     private static final int TEST_PORT = 6667;
@@ -100,7 +101,7 @@ public class I18NSendReceiveTest
                 buf.flush();
                 buf.close();
             }
-            CommonUtils.copy(f, new File(_sharedDir, FILES[i]));
+            FileUtils.copy(f, new File(_sharedDir, FILES[i]));
         }
 
     }

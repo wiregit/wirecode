@@ -9,13 +9,14 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorCallback;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
@@ -28,7 +29,6 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**

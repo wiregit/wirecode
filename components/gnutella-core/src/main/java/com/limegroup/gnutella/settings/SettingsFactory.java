@@ -13,9 +13,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.util.FileUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.service.MessageService;
+import org.limewire.util.FileUtils;
+
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To

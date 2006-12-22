@@ -4,15 +4,16 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that Throttle does its thing.
  */
-public final class NBThrottleTest extends BaseTestCase {
+public final class NBThrottleTest extends LimeTestCase {
 
     private final int TICKS_PER_SECOND = 10;
     private final float RATE = 3 * 1024; // 3KB/s

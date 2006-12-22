@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.Vector;
 
+import org.limewire.service.ErrorCallback;
+
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;

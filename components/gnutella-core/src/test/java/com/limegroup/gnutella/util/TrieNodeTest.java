@@ -8,7 +8,7 @@ import junit.framework.Test;
 /**
  * Tests TrieNode.
  */
-public class TrieNodeTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class TrieNodeTest extends com.limegroup.gnutella.util.LimeTestCase {
     public TrieNodeTest(String name) {
         super(name);
     }

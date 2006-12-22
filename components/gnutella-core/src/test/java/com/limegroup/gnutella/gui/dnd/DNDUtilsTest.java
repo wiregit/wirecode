@@ -9,11 +9,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import org.limewire.util.OSUtils;
+
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EncodingUtils;
 
-public class DNDUtilsTest extends BaseTestCase {
+public class DNDUtilsTest extends LimeTestCase {
 
 	private List<File> files;
 	
@@ -39,7 +40,7 @@ public class DNDUtilsTest extends BaseTestCase {
 		File file = new File("C:\\test\\file with spaces");
 		assertEquals(file, DNDUtils.getFiles(new FileTransferable(Collections.singletonList(file)))[0]);
 		// use uri flavor
-		if (CommonUtils.isWindows()) {
+		if (OSUtils.isWindows()) {
 			assertEquals(file, DNDUtils.getFiles(new URITransferable(file.toURI().toString()))[0]);
 		}
 		else { 

@@ -6,14 +6,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Tests the public methods of the UrnCache class.
  */
-public final class UrnCacheTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class UrnCacheTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     /**
      * File where urns (currently SHA1 urns) get persisted to

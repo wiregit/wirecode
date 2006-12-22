@@ -7,14 +7,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;
     
@@ -62,7 +64,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
      * Tests the FileDesc construcotor for valid arguments
      */
     public void testValidConstructorArguments() throws Exception {
-        File current = CommonUtils.getCurrentDirectory();
+        File current = LimeWireUtils.getCurrentDirectory();
         File parDir = current.getParentFile(); 
         File[] allFiles = parDir.listFiles(); 
         List fileList = new ArrayList(); 

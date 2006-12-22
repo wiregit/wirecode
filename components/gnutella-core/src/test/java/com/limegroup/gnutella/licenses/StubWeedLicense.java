@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
 
 class StubWeedLicense extends WeedLicense {
     

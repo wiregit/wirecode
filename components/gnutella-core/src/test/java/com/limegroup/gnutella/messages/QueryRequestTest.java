@@ -9,21 +9,22 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.limewire.security.QueryKey;
+import org.limewire.util.OSUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
  */
-public final class QueryRequestTest extends BaseTestCase {
+public final class QueryRequestTest extends LimeTestCase {
     
     private final String XML_STRING =
            "<?xml version=\"1.0\"?>" +
@@ -1060,9 +1061,9 @@ public final class QueryRequestTest extends BaseTestCase {
             assertFalse(query.desiresVideo());
             assertFalse(query.desiresDocuments());
             assertFalse(query.desiresImages());
-            assertEquals(CommonUtils.isWindows(), 
+            assertEquals(OSUtils.isWindows(), 
                          query.desiresWindowsPrograms());
-            assertEquals(CommonUtils.isLinux() || CommonUtils.isAnyMac(),
+            assertEquals(OSUtils.isLinux() || OSUtils.isAnyMac(),
                          query.desiresLinuxOSXPrograms());
         }
 

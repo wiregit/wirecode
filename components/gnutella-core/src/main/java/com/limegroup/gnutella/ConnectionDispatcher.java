@@ -9,12 +9,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 public class ConnectionDispatcher {
     

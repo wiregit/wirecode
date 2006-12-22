@@ -8,12 +8,12 @@ import java.io.ObjectOutputStream;
 import junit.framework.Test;
 
 import org.apache.commons.httpclient.URI;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class WeedLicenseTest extends BaseTestCase {
+public final class WeedLicenseTest extends LimeTestCase {
     
 	public WeedLicenseTest(String name) {
 		super(name);

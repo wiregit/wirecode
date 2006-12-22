@@ -3,14 +3,16 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class OGGWritingTest extends BaseTestCase {
+public class OGGWritingTest extends LimeTestCase {
 
     private static String TEST_NAME = "testfile12341234.ogg";
     private static File TEST_FILE;
@@ -35,7 +37,7 @@ public class OGGWritingTest extends BaseTestCase {
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);
         TEST_FILE.delete();
-        CommonUtils.copy(f, TEST_FILE);
+        FileUtils.copy(f, TEST_FILE);
         assertTrue(TEST_FILE.exists());
         TEST_FILE.deleteOnExit();
     }

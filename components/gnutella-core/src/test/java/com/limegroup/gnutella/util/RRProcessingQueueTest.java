@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+
 import junit.framework.Test;
 
-public class RRProcessingQueueTest extends BaseTestCase {
+public class RRProcessingQueueTest extends LimeTestCase {
     public RRProcessingQueueTest(String name) {
         super(name);
     }

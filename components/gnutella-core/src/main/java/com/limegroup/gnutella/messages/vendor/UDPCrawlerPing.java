@@ -1,7 +1,8 @@
 
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 

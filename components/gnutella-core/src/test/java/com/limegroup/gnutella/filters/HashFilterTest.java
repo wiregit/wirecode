@@ -3,16 +3,17 @@ package com.limegroup.gnutella.filters;
 
 import java.io.IOException;
 
+import org.limewire.service.ErrorService;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class HashFilterTest extends BaseTestCase {
+public class HashFilterTest extends LimeTestCase {
     
     public HashFilterTest(String name){
         super(name);

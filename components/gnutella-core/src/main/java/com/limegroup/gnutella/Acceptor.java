@@ -15,6 +15,10 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.MessageService;
 
 import com.limegroup.gnutella.io.AbstractChannelInterestRead;
 import com.limegroup.gnutella.io.AcceptObserver;
@@ -25,9 +29,6 @@ import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**

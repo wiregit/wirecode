@@ -6,8 +6,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+
 
 public class RIFFMetaData extends VideoMetaData {
 

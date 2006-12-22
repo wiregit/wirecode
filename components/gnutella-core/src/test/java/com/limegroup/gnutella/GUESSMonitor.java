@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.guess.GUESSStatistics;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /** Starts a BackEnd (which should have a .props file configured to be an
  *  Ultrapeer) and any time it gets a pong from a GUESS Ultrapeer, it sends
@@ -26,7 +27,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  *  underneath it.
  *  If you run main, this will stop when you enter anything and press RETURN.
  */
-public class GUESSMonitor extends BaseTestCase {
+public class GUESSMonitor extends LimeTestCase {
 
     public final static String INSTRUCTIONS = 
         "? - Help; verbose - switch verbose on/off; connect - start the " +

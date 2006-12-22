@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.messages;
 
+import org.limewire.io.InvalidDataException;
+
 /** 
  * An exception for reading bad data from the network. 
  * This is generally non-fatal.
  */
-public class BadPacketException extends Exception {
+public class BadPacketException extends InvalidDataException {
     public BadPacketException() { }
     public BadPacketException(String msg) { super(msg); }
-    public BadPacketException(Exception cause) { super(cause); }
+    public BadPacketException(Throwable cause) { super(cause); }
 
     /** 
      * Reusable exception for efficiency that can be statically

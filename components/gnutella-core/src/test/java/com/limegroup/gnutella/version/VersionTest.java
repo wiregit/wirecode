@@ -2,9 +2,9 @@ package com.limegroup.gnutella.version;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class VersionTest extends BaseTestCase {
+public final class VersionTest extends LimeTestCase {
 
 	public VersionTest(String name) {
 		super(name);

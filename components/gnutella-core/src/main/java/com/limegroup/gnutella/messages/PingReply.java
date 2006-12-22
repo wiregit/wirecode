@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,22 +13,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.QueryKey;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
@@ -144,11 +147,11 @@ public class PingReply extends Message implements Serializable, IpPort {
     // such as the vendor GGEP extension
     static {
         // set 'LIME'
-        System.arraycopy(CommonUtils.QHD_VENDOR_NAME.getBytes(),
+        System.arraycopy(LimeWireUtils.QHD_VENDOR_NAME.getBytes(),
                          0, CACHED_VENDOR, 0,
-                         CommonUtils.QHD_VENDOR_NAME.getBytes().length);
-        CACHED_VENDOR[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
-                                         CommonUtils.getMinorVersionNumber());
+                         LimeWireUtils.QHD_VENDOR_NAME.getBytes().length);
+        CACHED_VENDOR[4] = convertToGUESSFormat(LimeWireUtils.getMajorVersionNumber(),
+                                         LimeWireUtils.getMinorVersionNumber());
     }
 
     /**
@@ -800,7 +803,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
                     packedIPs = NetworkUtils.unpackIps(data);
                 } catch(BadGGEPPropertyException bad) {
-                } catch(BadPacketException bpe) {}
+                } catch(InvalidDataException bpe) {}
             }
             
             if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
@@ -844,8 +847,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         if (isGUESSCapable && isUltrapeer) {
             // indicate guess support
             byte[] vNum = {
-                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
-                                     CommonUtils.getGUESSMinorVersionNumber())};
+                convertToGUESSFormat(LimeWireUtils.getGUESSMajorVersionNumber(),
+                                     LimeWireUtils.getGUESSMinorVersionNumber())};
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
         }
         
@@ -924,8 +927,8 @@ public class PingReply extends Message implements Serializable, IpPort {
     private static void addUltrapeerExtension(GGEP ggep) {
         byte[] payload = new byte[3];
         // put version
-        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
-                                          CommonUtils.getUPMinorVersionNumber()
+        payload[0] = convertToGUESSFormat(LimeWireUtils.getUPMajorVersionNumber(),
+                                          LimeWireUtils.getUPMinorVersionNumber()
                                           );
         payload[1] = (byte) RouterService.getNumFreeLimeWireLeafSlots();
         payload[2] = (byte) RouterService.getNumFreeLimeWireNonLeafSlots();

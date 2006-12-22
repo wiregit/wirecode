@@ -5,10 +5,10 @@ import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class PowerOfTwoSettingTest extends BaseTestCase {
+public class PowerOfTwoSettingTest extends LimeTestCase {
 
     private static final long BIG_POWER_OF_TWO = 1L << 62;
     

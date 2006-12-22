@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.connection;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Response;
@@ -11,14 +13,13 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that the composite queue correctly expires messages & prioritizes
  * things correctly.
  */
-public class CompositeQueueTest extends BaseTestCase {
+public class CompositeQueueTest extends LimeTestCase {
     
     private CompositeQueue QUEUE = new CompositeQueue(3000, 100, 1000, 1);
 	

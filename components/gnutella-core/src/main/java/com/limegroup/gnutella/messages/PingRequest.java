@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;

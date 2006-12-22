@@ -3,6 +3,8 @@ package com.limegroup.gnutella.search;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -10,15 +12,14 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.TestResultCounter;
 
 /**
  * This class tests the dispatching of dynamic queries for ourselves 
  * (as Ultrapeer) and on behalf of our leaves.
  */
-public class QueryDispatcherTest extends BaseTestCase {
+public class QueryDispatcherTest extends LimeTestCase {
 
 	public QueryDispatcherTest(String name) {
 		super(name);

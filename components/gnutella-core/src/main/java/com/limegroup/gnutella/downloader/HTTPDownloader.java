@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -18,6 +19,10 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.AssertFailure;
@@ -62,11 +67,7 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
 /**

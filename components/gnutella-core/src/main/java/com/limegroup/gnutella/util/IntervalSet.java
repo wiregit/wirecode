@@ -9,8 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.limewire.io.ByteOrder;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.downloader.Interval;
 
 /**

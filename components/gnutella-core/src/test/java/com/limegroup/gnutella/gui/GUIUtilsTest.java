@@ -3,9 +3,9 @@ package com.limegroup.gnutella.gui;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class GUIUtilsTest extends BaseTestCase {
+public class GUIUtilsTest extends LimeTestCase {
 
 	public GUIUtilsTest(String name) {
 		super(name);

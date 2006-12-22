@@ -10,6 +10,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.choking.Choker;
 import com.limegroup.bittorrent.choking.ChokerFactory;
@@ -25,10 +29,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ExecutorsHelper;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 import com.limegroup.gnutella.util.SyncWrapper;
 

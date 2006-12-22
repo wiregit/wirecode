@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -17,13 +19,12 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * tests the server side handling of head pings through UDP.
  */
-public class ServerSideHeadTest extends BaseTestCase {
+public class ServerSideHeadTest extends LimeTestCase {
 	
 	public ServerSideHeadTest(String name) {
 		super(name);

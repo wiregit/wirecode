@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.util.Properties;
 
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
@@ -16,11 +19,9 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.stubs.FileDescStub;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
-public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     public VendorMessageTest(String name) {
         super(name);
     }

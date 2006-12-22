@@ -7,6 +7,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Set;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -17,7 +20,6 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
 /**

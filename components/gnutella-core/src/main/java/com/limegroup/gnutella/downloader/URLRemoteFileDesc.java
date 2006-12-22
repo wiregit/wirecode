@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

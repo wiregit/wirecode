@@ -8,13 +8,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.bitzi.util.Base32;
+import org.limewire.util.Base32;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.MultiCollection;
 
 /**
@@ -246,7 +247,7 @@ public class TorrentFileSystem implements Serializable {
 		File parent = _incompleteFile.getParentFile();
 		boolean success = _incompleteFile.renameTo(_completeFile);
 		if (!success) {
-			success = CommonUtils.copy(_incompleteFile, _completeFile);
+			success = FileUtils.copy(_incompleteFile, _completeFile);
 			if (success)
 				_incompleteFile.delete();
 		}

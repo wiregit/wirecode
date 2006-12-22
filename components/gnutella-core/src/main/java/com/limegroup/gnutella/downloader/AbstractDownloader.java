@@ -8,6 +8,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
@@ -18,8 +21,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
 
 public abstract class AbstractDownloader implements Downloader, Serializable {
 

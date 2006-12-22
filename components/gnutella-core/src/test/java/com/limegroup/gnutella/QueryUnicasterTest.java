@@ -15,9 +15,10 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.security.QueryKey;
+import org.limewire.security.QueryKeyGenerator;
+import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.guess.QueryKeyGenerator;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -28,9 +29,8 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase {
     private static final Log LOG = LogFactory.getLog(QueryUnicasterTest.class);
     
 	/**

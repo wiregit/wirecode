@@ -18,13 +18,13 @@ import java.util.Set;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.limewire.service.ErrorService;
+import org.limewire.util.GenericsUtils;
 
 import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.util.GenericsUtils;
 
 /**
  * Contains information usually parsed in a .torrent file

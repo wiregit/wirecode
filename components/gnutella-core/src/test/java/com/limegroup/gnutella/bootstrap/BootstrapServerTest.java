@@ -7,7 +7,7 @@ import junit.framework.Test;
 /**
  * Unit tests for BootstrapServerTest.
  */
-public class BootstrapServerTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class BootstrapServerTest extends com.limegroup.gnutella.util.LimeTestCase {
     public BootstrapServerTest(String name) {
         super(name);
     }

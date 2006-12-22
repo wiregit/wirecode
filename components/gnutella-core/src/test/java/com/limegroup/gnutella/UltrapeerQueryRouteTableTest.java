@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -11,8 +13,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 
@@ -22,7 +23,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  *
  * ULTRAPEER_1  ----  ULTRAPEER_2
  */
-public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
+public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
     private static ActivityCallback CALLBACK;        
     private static MetaFileManager FMAN;    

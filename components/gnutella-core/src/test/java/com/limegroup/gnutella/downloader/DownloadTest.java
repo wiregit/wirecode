@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,10 +24,14 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.IpPortSet;
+import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
@@ -57,19 +62,15 @@ import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
  */
-public class DownloadTest extends BaseTestCase {
+public class DownloadTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(DownloadTest.class);
     

@@ -13,8 +13,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Random;
 
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.guess.QueryKeyGenerator;
+import org.limewire.io.IOUtils;
+import org.limewire.security.QueryKey;
+import org.limewire.security.QueryKeyGenerator;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -23,7 +25,6 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.IOUtils;
 
 /** Simulates a 'network' of unicast enabled clients.  The clients don't search,
  *  but they always respond to queries.

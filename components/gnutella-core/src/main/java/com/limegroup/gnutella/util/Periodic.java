@@ -2,6 +2,9 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.Future;
 
+import org.limewire.concurrent.SchedulingThreadPool;
+
+
 /**
  * A utility to schedule, reschedule and cancel the execution of 
  * a task.

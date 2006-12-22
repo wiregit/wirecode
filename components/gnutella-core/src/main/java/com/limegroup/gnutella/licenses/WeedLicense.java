@@ -5,10 +5,10 @@ import java.net.URL;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.limewire.service.ErrorService;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 

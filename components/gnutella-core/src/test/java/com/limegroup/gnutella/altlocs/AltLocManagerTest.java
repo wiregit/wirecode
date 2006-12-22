@@ -4,9 +4,9 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class AltLocManagerTest extends BaseTestCase {
+public class AltLocManagerTest extends LimeTestCase {
 
     public AltLocManagerTest(String name) {
         super(name);

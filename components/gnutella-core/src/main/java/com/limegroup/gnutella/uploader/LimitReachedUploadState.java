@@ -11,7 +11,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -79,7 +79,7 @@ public class LimitReachedUploadState extends UploadState {
 		String str;
 		str = "HTTP/1.1 503 Service Unavailable\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());

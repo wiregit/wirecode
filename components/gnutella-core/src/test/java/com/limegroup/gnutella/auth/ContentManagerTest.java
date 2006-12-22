@@ -1,14 +1,15 @@
 package com.limegroup.gnutella.auth;
 
+import org.limewire.concurrent.ThreadExecutor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.ThreadExecutor;
+import com.limegroup.gnutella.util.LimeTestCase;
  
-public class ContentManagerTest extends BaseTestCase {
+public class ContentManagerTest extends LimeTestCase {
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     private static final String S_URN_2 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB";

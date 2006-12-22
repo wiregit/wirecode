@@ -10,7 +10,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
-public class LimitedSocketControllerTest extends BaseTestCase {
+public class LimitedSocketControllerTest extends LimeTestCase {
     
     private static final int TIMEOUT = 30000;
     

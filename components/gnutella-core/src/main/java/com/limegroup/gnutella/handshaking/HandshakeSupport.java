@@ -6,11 +6,12 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HeaderSupport;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.StringSetting;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 class HandshakeSupport extends HeaderSupport {
 

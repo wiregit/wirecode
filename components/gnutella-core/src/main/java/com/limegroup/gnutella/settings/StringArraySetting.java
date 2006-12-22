@@ -3,7 +3,8 @@ package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.StringUtils;
+import org.limewire.util.StringUtils;
+
 
 /**
  * Class for an Array of Strings setting.

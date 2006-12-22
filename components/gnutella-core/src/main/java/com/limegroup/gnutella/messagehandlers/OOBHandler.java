@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messagehandlers;
 
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
@@ -19,7 +21,6 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.util.IpPort;
 
 public class OOBHandler implements MessageHandler, Runnable {
     

@@ -3,7 +3,9 @@ package com.limegroup.gnutella;
 import java.util.Comparator;
 import java.util.Random;
 
-import com.limegroup.gnutella.util.NetworkUtils;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.NetworkUtils;
+
 
 /**
  * A 16-bit globally unique ID.  Immutable.<p>

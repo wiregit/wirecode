@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -41,7 +41,7 @@ public class UnavailableRangeUploadState extends UploadState {
 		String str;
 		str = "HTTP/1.1 416 Requested Range Unavailable\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());

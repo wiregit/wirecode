@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;

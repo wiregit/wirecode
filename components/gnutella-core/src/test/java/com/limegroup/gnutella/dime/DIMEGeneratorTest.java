@@ -8,7 +8,7 @@ import junit.framework.Test;
 /**
  * Tests for DIMEGenerator.
  */
-public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class DIMEGeneratorTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 	/**
 	 * Constructs a new test instance for responses.

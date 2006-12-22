@@ -10,6 +10,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
@@ -19,17 +21,16 @@ import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.MessageTestUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnectionManager;
 
 
 /**
  * Tests the functionality of the <tt>HandshakeResponse</tt> class.
  */
-public final class HandshakeResponseTest extends BaseTestCase {
+public final class HandshakeResponseTest extends LimeTestCase {
 
     private static HandshakeResponse ULTRAPEER_HEADERS;
 
@@ -665,7 +666,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertTrue("Ultrapeer query routing should be enabled",
                    hr.isUltrapeerQueryRoutingConnection());
         assertEquals("unexpected user agent", 
-                     CommonUtils.getHttpServer(), hr.getUserAgent());
+                     LimeWireUtils.getHttpServer(), hr.getUserAgent());
 
         assertTrue("should be a high-degree connection", 
             hr.isHighDegreeConnection());

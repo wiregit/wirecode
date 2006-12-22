@@ -15,9 +15,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
+import org.limewire.util.AssertComparisons;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -27,10 +29,8 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.AssertComparisons;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.RoundRobinQueue;
 
 /**

@@ -1,6 +1,9 @@
 package com.limegroup.gnutella;
 
+
 import java.io.IOException;
+
+import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -8,7 +11,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
-import com.limegroup.gnutella.util.IpPort;
 
 /**
  * An interface for those things that handle replies and thus are placed

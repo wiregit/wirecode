@@ -14,9 +14,11 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.QueryKey;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -25,8 +27,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master

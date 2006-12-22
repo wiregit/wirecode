@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -21,7 +23,6 @@ import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether leaves request redirects properly.  

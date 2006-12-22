@@ -5,14 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests how the availability of upload slots affects responses, as well
@@ -48,11 +50,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);
     	someFileMatches.add(APP_TXT);
-    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);
-    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
-    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
-    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
-    	CommonUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestSuite.java"), appTorrentFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestSuite.java"), appTorrentFile);
         RouterService.getFileManager().addFileAlways(textFile);
         RouterService.getFileManager().addFileAlways(torrentFile);
         RouterService.getFileManager().addFileAlways(userTorrentFile);

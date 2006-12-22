@@ -7,12 +7,12 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for RequeryFilter
  */
-public class RequeryFilterTest extends BaseTestCase {
+public class RequeryFilterTest extends LimeTestCase {
         
 	public RequeryFilterTest(String name) {
 		super(name);

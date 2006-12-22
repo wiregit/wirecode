@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.StringUtils;
+
 import com.limegroup.bittorrent.bencoding.BEncoder;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * A struct-like class which contains typesafe representations

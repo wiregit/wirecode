@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPConstants;
 

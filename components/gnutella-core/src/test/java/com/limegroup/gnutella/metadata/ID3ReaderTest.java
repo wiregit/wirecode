@@ -4,13 +4,14 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ID3ReaderTest extends BaseTestCase {
+public class ID3ReaderTest extends LimeTestCase {
 
     private static File TEST_FILE;
 

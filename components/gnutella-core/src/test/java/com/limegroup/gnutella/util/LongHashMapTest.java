@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.util;
 
+
 import junit.framework.Test;
 
-public class LongHashMapTest extends BaseTestCase {
+public class LongHashMapTest extends LimeTestCase {
 
     public LongHashMapTest(String name) {
         super(name);

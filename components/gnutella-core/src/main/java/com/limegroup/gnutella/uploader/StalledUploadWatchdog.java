@@ -4,11 +4,11 @@ import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.Periodic;
 
 /**

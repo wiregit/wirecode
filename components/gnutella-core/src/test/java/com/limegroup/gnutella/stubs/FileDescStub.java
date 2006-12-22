@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 

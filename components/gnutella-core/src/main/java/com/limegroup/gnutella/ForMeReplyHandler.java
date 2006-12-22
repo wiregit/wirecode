@@ -10,14 +10,16 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessageCallback;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.SecureMessage;
-import com.limegroup.gnutella.messages.SecureMessageCallback;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -26,7 +28,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.limegroup.gnutella.util.IntWrapper;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;

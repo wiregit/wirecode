@@ -14,11 +14,11 @@ import java.util.Map;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 
 /**

@@ -6,12 +6,12 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for GreedyQueryFilter
  */
-public class GreedyQueryFilterTest extends BaseTestCase {
+public class GreedyQueryFilterTest extends LimeTestCase {
     
     SpamFilter filter=new GreedyQueryFilter();
     Message msg = null;

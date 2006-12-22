@@ -8,12 +8,12 @@ import java.io.Writer;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the HTTPUtils class.
  */
-public final class HttpUtilsTest extends BaseTestCase {
+public final class HttpUtilsTest extends LimeTestCase {
 
 	/**
 	 * Constructs a new HttpUtilsTest.

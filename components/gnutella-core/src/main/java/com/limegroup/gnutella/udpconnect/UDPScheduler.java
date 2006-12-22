@@ -3,7 +3,8 @@ package com.limegroup.gnutella.udpconnect;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.limegroup.gnutella.util.ManagedThread;
+import org.limewire.concurrent.ManagedThread;
+
 
 /** 
  *  Manage the timing of messages within UDPConnection processing. To use the

@@ -1,19 +1,27 @@
 package com.limegroup.gnutella.messages.vendor;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -32,9 +40,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.MultiRRIterator;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,
@@ -217,7 +223,7 @@ public class HeadPong extends VendorMessage {
     		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
     			_altLocs= readLocs(dais);
 		} catch(IOException oops) {
-			throw new BadPacketException(oops.getMessage());
+			throw new BadPacketException(oops);
 		}
 	}
 	
@@ -512,20 +518,35 @@ public class HeadPong extends VendorMessage {
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
 		Set<PushEndpoint> ret = new HashSet<PushEndpoint>();
-		ret.addAll(NetworkUtils.unpackPushEPs(new ByteArrayInputStream(altlocs)));
+		ret.addAll(unpackPushEPs(new ByteArrayInputStream(altlocs)));
 		return ret;
 	}
+
+    private static List<PushEndpoint> unpackPushEPs(InputStream is)
+      throws BadPacketException, IOException {
+        List<PushEndpoint> ret = new LinkedList<PushEndpoint>();
+        DataInputStream dais = new DataInputStream(is);
+        while (dais.available() > 0) 
+            ret.add(PushEndpoint.fromBytes(dais));
+        
+        return Collections.unmodifiableList(ret);
+    }
+    
 	
 	/**
 	 * reads non-firewalled alternate locations from an input stream
 	 */
 	private final Set<IpPort> readLocs(DataInputStream dais) 
-		throws IOException, BadPacketException {
+      throws IOException, BadPacketException {
 		int size = dais.readUnsignedShort();
 		byte [] altlocs = new byte[size];
 		dais.readFully(altlocs);
 		Set<IpPort> ret = new HashSet<IpPort>();
-		ret.addAll(NetworkUtils.unpackIps(altlocs));
+        try {
+            ret.addAll(NetworkUtils.unpackIps(altlocs));
+        } catch(InvalidDataException ide) {
+            throw new BadPacketException(ide);
+        }
 		return ret;
 	}
 	

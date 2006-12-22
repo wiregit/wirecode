@@ -5,15 +5,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestResultCounter;
 
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.util.TestResultCounter;
 /**
  * Tests the functionality of the <tt>QueryHandlerTest</tt> class.
  */
-public final class ProbeQueryTest extends BaseTestCase {
+public final class ProbeQueryTest extends LimeTestCase {
 
     /**
      * Cached method for creating the probe lists.

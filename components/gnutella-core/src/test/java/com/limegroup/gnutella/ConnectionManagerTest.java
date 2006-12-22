@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.OutputRunner;
@@ -13,14 +15,13 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
  * of right events.  
  */
-public class ConnectionManagerTest extends BaseTestCase {
+public class ConnectionManagerTest extends LimeTestCase {
 
     private static TestHostCatcher CATCHER;
 

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class UpdateFileState extends UploadState {
     
@@ -28,7 +28,7 @@ public class UpdateFileState extends UploadState {
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
         //If any of this throws an exception, we will not send the headers.
-        File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
+        File f = new File(LimeWireUtils.getUserSettingsDir(),"update.xml");
         RandomAccessFile raf = new RandomAccessFile(f,"r");
         int len = (int)raf.length();//not a very long file so no risk
         updateContents = new byte[len];
@@ -38,7 +38,7 @@ public class UpdateFileState extends UploadState {
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
 		ostream.write(str.getBytes());
-		str = "User-Agent: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "User-Agent: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
         str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
         ostream.write(str.getBytes());

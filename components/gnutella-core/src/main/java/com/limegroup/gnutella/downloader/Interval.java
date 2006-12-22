@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.Serializable;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 ;
 
 /** The open interval [low, high] inclusive on the both ends. */

@@ -3,12 +3,14 @@
  */
 package com.limegroup.bittorrent.handshaking;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
 
 import com.limegroup.bittorrent.BTConnection;
 import com.limegroup.bittorrent.ManagedTorrent;
@@ -19,7 +21,6 @@ import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.InterestScatteringByteChannel;
 import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.util.IpPort;
 
 abstract class BTHandshaker implements  
 ChannelWriter, ChannelReadObserver, IpPort {

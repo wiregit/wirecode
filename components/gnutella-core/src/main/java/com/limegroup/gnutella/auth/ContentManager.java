@@ -11,13 +11,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Keeps track of content requests & responses.

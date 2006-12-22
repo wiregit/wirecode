@@ -3,6 +3,9 @@ package com.limegroup.gnutella.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.UnmodifiableIterator;
+
+
 /** 
  * A discrete-case priority queue.  Designed to be a replacement for BinaryHeap
  * for the special case when there are only a small number of positive

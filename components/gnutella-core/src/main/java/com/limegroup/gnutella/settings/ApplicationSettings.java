@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.settings;
 import java.io.File;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import org.limewire.util.OSUtils;
+
 
 /**
  * Settings for LimeWire application
@@ -120,7 +121,7 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting MINIMIZE_TO_TRAY =
         FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
-            CommonUtils.supportsTray());   
+            OSUtils.supportsTray());   
     
     /**
      * A flag for whether or not to display the system
@@ -135,7 +136,7 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting SHUTDOWN_AFTER_TRANSFERS =
         FACTORY.createBooleanSetting("SHUTDOWN_AFTER_TRANSFERS", 
-            CommonUtils.isMacOSX() ? false : !CommonUtils.supportsTray());
+            OSUtils.isMacOSX() ? false : !OSUtils.supportsTray());
     
     /**
 	 * The language to use for the application.
@@ -208,7 +209,7 @@ public class ApplicationSettings extends LimeProps {
      * Setting for whether or not to create an additional manual GC thread.
      */
     public static final BooleanSetting AUTOMATIC_MANUAL_GC =
-        FACTORY.createBooleanSetting("AUTOMATIC_MANUAL_GC", CommonUtils.isMacOSX());
+        FACTORY.createBooleanSetting("AUTOMATIC_MANUAL_GC", OSUtils.isMacOSX());
 
     /**
      * the default locale to use if not specified
@@ -225,7 +226,7 @@ public class ApplicationSettings extends LimeProps {
      */
     public static final BooleanSetting MAGNET_CLIPBOARD_LISTENER
         = FACTORY.createBooleanSetting("MAGNET_CLIPBOARD_LISTENER", 
-                !CommonUtils.isWindows() && !CommonUtils.isAnyMac());
+                !OSUtils.isWindows() && !OSUtils.isAnyMac());
     
     /**
      * Whether LimeWire should handle magnets.

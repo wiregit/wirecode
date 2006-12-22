@@ -1,22 +1,24 @@
 
 package com.limegroup.gnutella.altlocs;
 
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortForSelf;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortForSelf;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * An alternate location that is directly reachable, i.e. not firewalled.

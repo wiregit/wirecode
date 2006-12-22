@@ -5,13 +5,14 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import org.limewire.util.PrivilegedAccessor;
+
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the class that makes sure the user has a valid save directory.
  */
-public class SaveDirectoryHandlerTest extends BaseTestCase {
+public class SaveDirectoryHandlerTest extends LimeTestCase {
 
     public SaveDirectoryHandlerTest(String name) {
         super(name);

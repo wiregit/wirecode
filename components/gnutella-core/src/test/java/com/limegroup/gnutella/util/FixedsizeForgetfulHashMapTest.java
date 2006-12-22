@@ -4,12 +4,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 import junit.framework.Test;
 
 /**
  * Unit tests for FixedsizeForgetfulHashMap
  */
-public class FixedsizeForgetfulHashMapTest extends BaseTestCase {
+public class FixedsizeForgetfulHashMapTest extends LimeTestCase {
             
 	public FixedsizeForgetfulHashMapTest(String name) {
 		super(name);

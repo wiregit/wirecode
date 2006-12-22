@@ -15,13 +15,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
+
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Utility class that constructs a LimeWire backend for testing
@@ -38,7 +41,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * and user preference directories will be switched to harmless test
  * directories, saving us from having to save and restore important files.
  */
-public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
+public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 
     /** Extensions of files that the backend automatically shares */
     public static final String SHARED_EXTENSION = "tmp";

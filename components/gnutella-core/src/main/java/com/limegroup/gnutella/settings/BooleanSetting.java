@@ -2,10 +2,13 @@ package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
 
+import org.limewire.service.Switch;
+
+
 /**
  * Class for a boolean setting.
  */
-public final class BooleanSetting extends Setting {
+public final class BooleanSetting extends Setting implements Switch {
     
     /** Curernve value of settings */
     private boolean value;

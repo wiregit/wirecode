@@ -26,14 +26,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import org.limewire.io.IOUtils;
+import org.limewire.io.Pools;
+import org.limewire.util.I18NConvert;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.Pools;
 
 /**
  * Contains utility methods

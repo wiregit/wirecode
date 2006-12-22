@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class PushRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public PushRequestTest(String name) {
         super(name);
     }

@@ -16,6 +16,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -25,7 +27,6 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -38,7 +39,6 @@ import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.NotView;
 import com.limegroup.gnutella.util.RRProcessingQueue;
-import com.limegroup.gnutella.util.SystemUtils;
 
 /**
  * A default implementation of <tt>TorrentDiskManager</tt>

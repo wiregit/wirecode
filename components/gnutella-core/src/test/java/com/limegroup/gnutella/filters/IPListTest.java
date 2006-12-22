@@ -3,7 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class IPListTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
     public IPListTest(String name) {
         super(name);
     }

@@ -1,7 +1,8 @@
 
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import org.limewire.util.OSUtils;
+
 import com.limegroup.gnutella.util.MacOSXUtils;
 
 /**
@@ -128,7 +129,7 @@ public class DaapSettings extends LimeProps {
      */
     private static String getPossessiveUserName() {
         String name = System.getProperty("user.name", "Unknown");
-        if(CommonUtils.isCocoaFoundationAvailable()) {
+        if(OSUtils.isCocoaFoundationAvailable()) {
             String n = MacOSXUtils.getUserName();
             if(n != null)
                 name = n;

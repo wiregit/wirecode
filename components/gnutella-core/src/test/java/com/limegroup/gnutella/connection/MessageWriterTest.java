@@ -12,13 +12,13 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that MessageWriter deflates data written to it correctly,
  * passing it on to the source channel.
  */
-public final class MessageWriterTest extends BaseTestCase {
+public final class MessageWriterTest extends LimeTestCase {
 
     private static final byte[] IP = new byte[] { 1, 1, 1, 1 };
     

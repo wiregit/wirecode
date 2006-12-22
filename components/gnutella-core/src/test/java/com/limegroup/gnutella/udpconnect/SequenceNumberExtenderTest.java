@@ -2,12 +2,12 @@ package com.limegroup.gnutella.udpconnect;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the SequenceNumberExtender class.
  */
-public final class SequenceNumberExtenderTest extends BaseTestCase {
+public final class SequenceNumberExtenderTest extends LimeTestCase {
 
 	/*
 	 * Constructs the test.

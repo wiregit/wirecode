@@ -7,7 +7,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 
 /** Tests TCP/UDP ConnectBackVendorMessage
  */
-public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static final int UDP_VERSION = 
         UDPConnectBackVendorMessage.VERSION;

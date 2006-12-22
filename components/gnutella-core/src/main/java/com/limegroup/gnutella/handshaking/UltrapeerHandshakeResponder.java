@@ -2,9 +2,10 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.statistics.HandshakingStat;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A very simple responder to be used by ultrapeers during the

@@ -1,11 +1,14 @@
 
 package com.limegroup.gnutella.uploader;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -16,7 +19,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.IpPort;
 
 /**
  * an Upload State.  has some utility methods all upload states can use.

@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
@@ -14,12 +16,11 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
-public class HostCatcherTest extends BaseTestCase {  
+public class HostCatcherTest extends LimeTestCase {  
     private HostCatcher hc;
 
     public HostCatcherTest(String name) {

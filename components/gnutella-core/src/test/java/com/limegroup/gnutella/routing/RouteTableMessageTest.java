@@ -8,12 +8,12 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for RouteTableMessage
  */
-public class RouteTableMessageTest extends BaseTestCase {
+public class RouteTableMessageTest extends LimeTestCase {
         
 	public RouteTableMessageTest(String name) {
 		super(name);

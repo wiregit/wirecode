@@ -8,14 +8,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * An implementaiton of the UploadState interface
@@ -91,7 +91,7 @@ public final class PushProxyUploadState extends UploadState {
         String str;
 		str = "HTTP/1.1 202 Push Proxy: Message Sent\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
 		ostream.write(str.getBytes());

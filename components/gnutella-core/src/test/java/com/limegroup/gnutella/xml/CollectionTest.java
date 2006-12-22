@@ -11,16 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NameValue;
 
 
-public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     FileDesc[] files = new FileDesc[3];
     final String fileLocation = "com/limegroup/gnutella/xml/";

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -14,9 +15,15 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.service.ErrorService;
+import org.limewire.util.Base32;
+import org.limewire.util.OSUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -27,10 +34,6 @@ import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -366,7 +369,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         writer.write("HTTP/1.1 410 gobbledygook");
         writer.flush();
         // there is something going on with timeouts here....
-        if (CommonUtils.isMacOSX() || CommonUtils.isWindows())
+        if (OSUtils.isMacOSX() || OSUtils.isWindows())
             Thread.sleep(300);
         httpSock.close();
 

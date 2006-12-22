@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IPPortCombo;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CountingConnection;
@@ -29,7 +32,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
@@ -38,14 +40,13 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
-public class UDPCrawlerMessagesTest extends BaseTestCase {
+public class UDPCrawlerMessagesTest extends LimeTestCase {
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
@@ -502,7 +503,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
  		assertEquals(7,tok.countTokens());
  		
  		while(tok.hasMoreTokens())
- 			assertEquals(CommonUtils.getHttpServer(),tok.nextToken());
+ 			assertEquals(LimeWireUtils.getHttpServer(),tok.nextToken());
  		
  	}
     

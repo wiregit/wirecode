@@ -8,8 +8,9 @@ import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.io.ByteBufferCache;
 
 /**

@@ -9,11 +9,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * this class is a subclass of Chat, also implementing
@@ -74,7 +75,7 @@ public class InstantMessenger implements Chatter {
 		// any number of '\r\n' terminated header strings, 
 		// followed by a singe '\r\n'
         _out.write("CHAT CONNECT/0.1\r\n");
-        _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
+        _out.write("User-Agent: "+LimeWireUtils.getVendor()+"\r\n");
         _out.write("\r\n");
 		_out.flush();
 		// next we expect to read 'CHAT/0.1 200 OK' followed 

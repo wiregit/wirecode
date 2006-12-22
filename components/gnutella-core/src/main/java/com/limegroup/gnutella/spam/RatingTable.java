@@ -15,13 +15,13 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.GenericsUtils;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class RatingTable {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
@@ -295,6 +295,6 @@ public class RatingTable {
 	}
     
 	private static File getSpamDat() {
-	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
+	    return new File(LimeWireUtils.getUserSettingsDir(),"spam.dat");
 	}
 }

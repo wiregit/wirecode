@@ -13,10 +13,14 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.security.QueryKey;
+import org.limewire.service.ErrorService;
+import org.limewire.util.I18NConvert;
+import org.limewire.util.OSUtils;
+import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
@@ -24,14 +28,10 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
@@ -968,9 +968,9 @@ public class QueryRequest extends Message implements Serializable{
         else if (type.getDescriptionKey() == MediaType.DOCUMENTS)
             metaFlag |= DOC_MASK;
         else if (type.getDescriptionKey() == MediaType.PROGRAMS) {
-            if (CommonUtils.isLinux() || CommonUtils.isAnyMac())
+            if (OSUtils.isLinux() || OSUtils.isAnyMac())
                 metaFlag |= LIN_PROG_MASK;
-            else if (CommonUtils.isWindows())
+            else if (OSUtils.isWindows())
                 metaFlag |= WIN_PROG_MASK;
             else // Other OS, search any type of programs
                 metaFlag |= (LIN_PROG_MASK|WIN_PROG_MASK);

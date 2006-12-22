@@ -15,14 +15,14 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ExecutorsHelper;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A base license class, implementing common functionality.
@@ -107,7 +107,7 @@ abstract class AbstractLicense implements NamedLicense, Serializable, Cloneable 
         
         HttpClient client = HttpClientManager.getNewClient();
         GetMethod get = new GetMethod(url);
-        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         try {
             HttpClientManager.executeMethodRedirecting(client, get);
             return get.getResponseBodyAsString();

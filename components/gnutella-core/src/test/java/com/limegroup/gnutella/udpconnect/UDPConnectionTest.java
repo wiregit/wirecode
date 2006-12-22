@@ -6,24 +6,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPServiceStub;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Put full UDPConnection system through various tests.
  */
-public final class UDPConnectionTest extends BaseTestCase {
+public final class UDPConnectionTest extends LimeTestCase {
 
 	/*
 	 * Constructs the test.

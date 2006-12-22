@@ -21,13 +21,13 @@ import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.UDPServiceStub;
-import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Tests that NIOSocket delegates events correctly.
  */
-public final class UDPConnectNIOTest extends BaseTestCase {
+public final class UDPConnectNIOTest extends LimeTestCase {
     
     private static final int PORT_1 = 6346;
     private static final int PORT_2 = 6348;

@@ -3,8 +3,9 @@ package com.limegroup.gnutella;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 
+import org.limewire.concurrent.ExecutorsHelper;
+
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Dispatches messages to the MessageRouter.

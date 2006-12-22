@@ -10,16 +10,17 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.ThreadExecutor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that NIOSocket delegates events correctly.
  */
-public final class NIOSocketTest extends BaseTestCase {
+public final class NIOSocketTest extends LimeTestCase {
     
     private static final int PORT = 9999;
 

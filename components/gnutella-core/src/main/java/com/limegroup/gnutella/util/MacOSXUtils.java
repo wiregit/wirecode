@@ -172,7 +172,7 @@ public class MacOSXUtils {
      */
     private static String getAppDir() {
         String appDir = "/Applications/LimeWire/";
-        String path = CommonUtils.getCurrentDirectory().getPath();
+        String path = LimeWireUtils.getCurrentDirectory().getPath();
         int app = path.indexOf("LimeWire.app");
         if(app != -1)
             appDir = path.substring(0, app);

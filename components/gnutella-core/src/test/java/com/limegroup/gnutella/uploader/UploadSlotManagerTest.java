@@ -4,9 +4,9 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class UploadSlotManagerTest extends BaseTestCase {
+public class UploadSlotManagerTest extends LimeTestCase {
 	public UploadSlotManagerTest(String name){
 		super(name);
 	}

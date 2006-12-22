@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
@@ -33,14 +35,13 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * this class tests the handling of udp head requests and responses.
  */
-public class HeadTest extends BaseTestCase {
+public class HeadTest extends LimeTestCase {
 
 	/**
 	 * keep a file manager which shares one complete file and one incomplete file

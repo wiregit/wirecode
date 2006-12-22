@@ -11,6 +11,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -25,7 +28,6 @@ import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
 
 /**

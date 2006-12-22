@@ -3,16 +3,17 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class handles testing all methods of the urn class.  This test
  * needs to be run from either the core directory or the directory above
  * the core directory.
  */
-public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
 	
 	private static final String [] VALID_URNS = {
 		"urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB",

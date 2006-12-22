@@ -12,13 +12,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.security.QueryKey;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -31,8 +35,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -68,7 +70,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
-        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
     }   
     

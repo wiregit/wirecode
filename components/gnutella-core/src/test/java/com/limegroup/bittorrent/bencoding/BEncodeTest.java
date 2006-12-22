@@ -9,12 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class BEncodeTest extends BaseTestCase {
+public class BEncodeTest extends LimeTestCase {
 
     public BEncodeTest(String name) {
         super(name);

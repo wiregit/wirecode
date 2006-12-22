@@ -3,10 +3,10 @@ package com.limegroup.gnutella.io;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class TimeoutControllerTest extends BaseTestCase {
+public class TimeoutControllerTest extends LimeTestCase {
     
     public TimeoutControllerTest(String name) {
         super(name);

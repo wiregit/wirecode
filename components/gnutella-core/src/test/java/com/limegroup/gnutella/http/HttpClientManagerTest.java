@@ -8,12 +8,12 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests various things of HttpClient / HttpClientManager.
  */
-public class HttpClientManagerTest extends BaseTestCase {
+public class HttpClientManagerTest extends LimeTestCase {
     
     private TestBootstrapServer s1;
     private TestBootstrapServer s2;

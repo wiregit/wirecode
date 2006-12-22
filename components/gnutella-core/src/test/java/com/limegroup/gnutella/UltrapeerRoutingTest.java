@@ -20,7 +20,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -37,7 +37,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *                              |
  *                             LEAF
  */
-public final class UltrapeerRoutingTest extends BaseTestCase {
+public final class UltrapeerRoutingTest extends LimeTestCase {
 
     /**
      * Simple non blank IP.

@@ -18,9 +18,9 @@ import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.io.NIOMultiplexor;
 import com.limegroup.gnutella.io.ReadObserver;
 import com.limegroup.gnutella.io.WriteObserver;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class AsyncIncomingHandshakerTest extends BaseTestCase {
+public class AsyncIncomingHandshakerTest extends LimeTestCase {
     
     public AsyncIncomingHandshakerTest(String name) {
         super(name);

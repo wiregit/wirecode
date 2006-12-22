@@ -3,7 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A stub implementation of the UploadState interface
@@ -19,7 +19,7 @@ public final class BrowserControlUploadState extends UploadState {
         String str;
 		str = "HTTP/1.1 404 Feature Not Active\r\n";
 		ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 	}
 

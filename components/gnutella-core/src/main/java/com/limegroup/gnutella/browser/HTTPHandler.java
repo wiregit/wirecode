@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  *  Handle a pure HTTP request
@@ -88,7 +88,7 @@ public class HTTPHandler {
 		String str;
 		str = "HTTP/1.1 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: "+CommonUtils.getVendor()+"\r\n";
+		str = "Server: "+LimeWireUtils.getVendor()+"\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-type:" + mimeType + "\r\n";
 		_ostream.write(str.getBytes());

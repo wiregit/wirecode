@@ -7,10 +7,10 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /** Keeps track of who needs a push, and who should be notified of of success or failure. */
 public class PushList {

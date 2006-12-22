@@ -10,8 +10,8 @@ import java.nio.channels.SelectionKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.DownloadSettings;
 

@@ -12,9 +12,9 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.io.TransportListener;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class UDPMultiplexorTest extends BaseTestCase {
+public class UDPMultiplexorTest extends LimeTestCase {
 
 
     public UDPMultiplexorTest(String name) {

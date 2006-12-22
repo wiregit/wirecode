@@ -6,9 +6,9 @@ import java.io.InterruptedIOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;

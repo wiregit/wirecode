@@ -3,7 +3,8 @@ package com.limegroup.gnutella.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 
 /** For implementation details, please see:
  *  http://www.acm.org/sigcomm/sigcomm97/papers/p062.pdf 

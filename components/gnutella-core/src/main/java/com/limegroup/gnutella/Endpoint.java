@@ -1,11 +1,14 @@
 package com.limegroup.gnutella;
 
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.StringUtils;
+
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size

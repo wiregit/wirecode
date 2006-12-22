@@ -6,12 +6,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+
 import junit.framework.Test;
 
 
 
 
-public class MultiIteratorTest extends BaseTestCase {
+public class MultiIteratorTest extends LimeTestCase {
 	
 	public MultiIteratorTest(String name) {
 		super(name);

@@ -4,7 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;

@@ -6,10 +6,10 @@ import java.io.ObjectInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Data;
-import com.limegroup.gnutella.util.IOUtils;
 
 public final class StaticMessages {
     
@@ -24,7 +24,7 @@ public final class StaticMessages {
     private static QueryReply readUpdateReply() {
         ObjectInputStream in = null;
         try {
-            in = new ObjectInputStream(new FileInputStream(new File(CommonUtils.getUserSettingsDir(), "data.ser")));
+            in = new ObjectInputStream(new FileInputStream(new File(LimeWireUtils.getUserSettingsDir(), "data.ser")));
             byte[] payload = ((Data) in.readObject()).data;
             return new QueryReply(new byte[16], (byte) 1, (byte) 0, payload);
         } catch (Throwable t) {

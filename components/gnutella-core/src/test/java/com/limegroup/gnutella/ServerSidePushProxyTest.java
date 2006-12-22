@@ -11,9 +11,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.Base32;
+
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -24,7 +26,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For

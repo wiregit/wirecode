@@ -20,13 +20,14 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.limegroup.gnutella.util.GenericsUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * This class contains a systemwide File creation time cache that persists these
@@ -58,7 +59,7 @@ public final class CreationTimeCache {
      * File where creation times for files are stored.
      */
     private static final File CTIME_CACHE_FILE = 
-        new File(CommonUtils.getUserSettingsDir(), "createtimes.cache");
+        new File(LimeWireUtils.getUserSettingsDir(), "createtimes.cache");
 
     /**
      * CreationTimeCache instance variable.  

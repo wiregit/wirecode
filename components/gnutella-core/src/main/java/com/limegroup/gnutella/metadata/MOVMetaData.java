@@ -11,7 +11,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import com.limegroup.gnutella.util.Pools;
+import org.limewire.io.Pools;
+
 
 /**
  * A metadata parser for files that are using the QuickTime File Format

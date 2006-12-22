@@ -5,12 +5,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.limewire.util.PrivilegedAccessor;
+
+
 import junit.framework.Test;
 
 /**
  * Unit tests for BinaryHeap
  */
-public class BinaryHeapTest extends BaseTestCase {
+public class BinaryHeapTest extends LimeTestCase {
     
     private List FINALIZED = new ArrayList();
             

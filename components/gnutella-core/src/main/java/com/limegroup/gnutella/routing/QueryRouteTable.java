@@ -8,14 +8,15 @@ import java.util.Set;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import org.limewire.io.IOUtils;
+import org.limewire.io.Pools;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.Pools;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

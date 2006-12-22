@@ -6,11 +6,12 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/8".
  *  Used to ask a host that you are connected to to try and connect back to a
