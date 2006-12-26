@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="limewire-component-common" basedir="." default="compile-src">
+
+	<description>
+	LimeWire component 'common'.
+	This component is required for every other component and contains
+	the most common functionality shared by every component.
+	</description>
+	
+	<property name="limewire.home"
+			  location="${basedir}/../.."/>
+	<property name="limewire.components.home"
+		      location="${limewire.home}/components"/>
+	<property name="limewire.lib"
+			  location="${limewire.home}/lib"/>
+	<property name="limewire.lib.jars"
+			  location="${limewire.lib}/jars"/>
+	<property name="limewire.lib.native"
+			  location="${limewire.lib}/native"/>
+	<property name="limewire.library.path"
+			  value="${limewire.lib.native}/windows${path.separator}${limewire.lib.native}/osx${path.separator}${limewire.lib.native}"/>
+		
+	<property name="limewire.components.common.home"
+		      location="${limewire.components.home}/common"/>
+	<property name="limewire.components.common.src"
+			  location="${limewire.components.common.home}/src/main"/>	
+	<property name="limewire.components.common.tests"
+			  location="${limewire.components.common.home}/src/test"/>
+	
+	<property name="build.limewire.components.common.home"
+		      location="${limewire.components.common.home}/build"/>
+	<property name="build.limewire.components.common.classes"
+			  location="${build.limewire.components.common.home}/classes"/>	
+	<property name="build.limewire.components.common.tests"
+			  location="${build.limewire.components.common.home}/tests"/>
+	
+	<property name="tests.limewire.components.common.home"
+		      location="${limewire.components.common.home}/testData"/>
+    <property name="tests.limewire.components.common.xml"
+    		  location="${tests.limewire.components.common.home}/xml"/>
+    <property name="tests.limewire.components.common.html"
+    		  location="${tests.limewire.components.common.home}/html"/>
+	
+	<property name="compile.debug"			value="true"/>
+	<property name="compile.deprecation"	value="true"/>
+	<property name="compile.optimize"		value="false"/>
+	<property name="compile.source"			value="1.5"/>
+	<property name="compile.target"			value="1.5"/>
+	
+	<path id="build.limewire.components.common.classpath">
+		<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+		<pathelement location="${limewire.lib.jars}/icu4j.jar"/>
+	</path>
+	
+	<path id="build.limewire.components.common.tests.classpath">
+		<path refid="build.limewire.components.common.classpath"/>
+		<pathelement location="${build.limewire.components.common.classes}"/>
+		<pathelement location="${limewire.lib.jars}/tests/junit.jar"/>
+	</path>
+	
+	<path id="tests.limewire.components.common.classpath">
+		<path refid="build.limewire.components.common.classpath"/>
+		<pathelement location="${build.limewire.components.common.classes}"/>
+		<pathelement location="${build.limewire.components.common.tests}"/>
+	</path>	
+	
+	<target name="clean" depends="clean-testData, clean-build"/>
+	
+	<target name="compile-src" depends="build-init">
+		<mkdir dir="${build.limewire.components.common.classes}"/>
+		<javac destdir		="${build.limewire.components.common.classes}"
+ 			   debug	    ="${compile.debug}"
+			   deprecation  ="${compile.deprecation}"
+	           optimize     ="${compile.optimize}"
+			   encoding     ="UTF-8"
+	           source		="${compile.source}"
+	           target       ="${compile.target}"
+	           sourcepath   =""
+	     >
+			<src>
+				<pathelement location="${limewire.components.common.src}"/>
+		    </src>
+			<classpath refid="build.limewire.components.common.classpath"/>
+		 </javac>
+	</target>
+	<target name="clean-src">
+		<delete dir="${build.limewire.components.common.classes}" />
+	</target>
+	
+	<target name="compile-tests" depends="compile-src">
+		<mkdir dir="${build.limewire.components.common.tests}"/>
+		<javac destdir		="${build.limewire.components.common.tests}"
+ 			   debug	    ="${compile.debug}"
+			   deprecation  ="${compile.deprecation}"
+	           optimize     ="${compile.optimize}"
+			   encoding     ="UTF-8"
+	           source		="${compile.source}"
+	           target       ="${compile.target}"
+	           sourcepath   =""
+	     >
+			<src>
+				<pathelement location="${limewire.components.common.tests}"/>
+		    </src>
+			<classpath refid="build.limewire.components.common.tests.classpath"/>
+		 </javac>
+	</target>
+	<target name="clean-tests">
+		<delete dir="${build.limewire.components.common.tests}" />
+	</target>
+	<target name="clean-testData">
+		<delete dir="${tests.limewire.components.common.home}" />
+	</target>
+	
+	<target name="test" if="class" depends="clean-testData, tests-init, compile-tests">
+		<run-tests-batchunit 
+			haltonerror="true"
+			haltonfailure="true"
+			unit="org/limewire/${class}.class"/>
+		<antcall target="tests2html"/>
+	</target>
+	
+	<target name="test-package" if="package" depends="clean-testData, tests-init, compile-tests">
+		<run-tests-batchunit 
+			haltonerror="false"
+			haltonfailure="false"
+			unit="org/limewire/${package}/*Test.class"/>
+		<antcall target="tests2html"/>
+	</target>
+	
+	<target name="test-all" depends="clean-testData, tests-init, compile-tests">
+		<run-tests-batchunit 
+			haltonerror="false"
+			haltonfailure="false"
+			unit="**/*Test.class"/>
+		<antcall target="tests2html"/>
+	</target>
+	
+	 <macrodef name="run-tests-batchunit">
+	    <attribute name="unit"/>
+	    <attribute name="haltOnFailure"/>
+	    <attribute name="haltOnError"/>
+	    <sequential>
+	    	<junit printsummary="withOutAndErr"
+	    	       haltonfailure="@{haltOnFailure}"
+	    		   haltonerror="@{haltOnError}"
+	    		   failureproperty="testfailed"
+	    	       showoutput="true"
+	    	       fork="on"
+	    	>
+	    		<jvmarg value="-Djava.library.path=${limewire.library.path}"/>
+	    		<jvmarg value="-Djunit.test.method=${method}"/>
+	    		<jvmarg value="-Djunit.test.times=${times}"/>
+	    		<jvmarg value="-Xmx512M"/>
+	    		
+	    		<classpath refid="tests.limewire.components.common.classpath"/>
+	    		
+	    		<formatter type="xml"/>
+	    		<formatter type="plain" usefile="false"/>
+	    		
+	    		<batchtest fork="false"
+	    				   todir="${tests.limewire.components.common.xml}">
+	    			<fileset dir="${build.limewire.components.common.tests}"
+	    					 includes="@{unit}" 
+	    		    />
+	    		</batchtest>
+			</junit>
+		</sequential>
+	</macrodef>
+	
+    <target name="tests2html">
+        <junitreport todir="${tests.limewire.components.common.xml}">
+        	<fileset dir="${tests.limewire.components.common.xml}">
+			    <include name="TEST-*.xml"/>
+			</fileset>
+        	<report format="frames" todir="${tests.limewire.components.common.html}"/>
+       </junitreport>
+    </target>
+	
+	<target name="build-init">
+		<mkdir dir="${build.limewire.components.common.home}" />
+	</target>
+	
+	<target name="tests-init">
+		<mkdir dir="${tests.limewire.components.common.home}" />
+		<mkdir dir="${tests.limewire.components.common.html}" />
+		<mkdir dir="${tests.limewire.components.common.xml}" />
+	</target>
+	
+	<target name="clean-build">
+		<delete dir="${build.limewire.components.common.home}" />
+	</target>
+	
+</project>

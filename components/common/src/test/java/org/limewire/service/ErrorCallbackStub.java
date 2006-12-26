@@ -9,12 +9,12 @@ public class ErrorCallbackStub implements ErrorCallback {
     public int exceptions = 0;
     
     public void error(Throwable t) {
-        t.printStackTrace();
+      //  t.printStackTrace();
         exceptions++;
     }
     
     public void error(Throwable t, String detail) {
-        t.printStackTrace();
+      //  t.printStackTrace();
         exceptions++;
     }
 }   
