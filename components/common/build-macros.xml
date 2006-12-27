@@ -187,10 +187,15 @@
 	
 	<macrodef name="do.test-all">
 	    <attribute name="component"/>
+	    <element name="testLocations"     optional="true"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-	        <do.run-tests-batchunit unit="**/*Test.class" component="@{component}"/>
+	        <do.run-tests-batchunit unit="**/*Test.class" component="@{component}">
+	        	<testPathLocations>
+	        	   <testLocations/>
+	            </testPathLocations>
+	        </do.run-tests-batchunit>
 	        <do.tests2html          component="@{component}"/>
 	    </sequential>
 	</macrodef>
@@ -201,18 +206,21 @@
 	    <attribute name="haltOnFailure"   default="false"/>
 	    <attribute name="haltOnError"	  default="false"/>
 	    <attribute name="nativePathRefId" default="limewire.library.path"/>
+	    <element name="testPathLocations"     optional="true"/>
 	    <sequential>
-	    	<junit printsummary="withOutAndErr"
+	        <junit printsummary="withOutAndErr"
 	    	       haltonfailure="@{haltOnFailure}"
 	    		   haltonerror="@{haltOnError}"
 	    		   failureproperty="testfailed"
 	    	       showoutput="true"
 	    	       fork="on"
 	    	>
-	    		<jvmarg value="-Djava.library.path=${@{nativePathRefId}}"/>
-	    		<jvmarg value="-Djunit.test.method=${method}"/>
-	    		<jvmarg value="-Djunit.test.times=${times}"/>
-	    		<jvmarg value="-Xmx512M"/>
+	            <!-- TODO: does setting library path actually do anything? -->
+	            <sysproperty key="java.library.path"       value="${@{nativePathRefId}}"/>
+	    		<sysproperty key="junit.test.method"       value="${method}"/>
+	    		<sysproperty key="just.test.times"         value="${times}"/>
+	    	    <sysproperty key="junit.test.hidetestname" value="${hidetestname}"/>
+	    		<!--<sysproperty value="-Xmx512M"/>-->
 	    		
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
 	    		
@@ -221,9 +229,10 @@
 	    		
 	    		<batchtest fork="false"
 	    				   todir="${tests.limewire.components.@{component}.xml}">
-	    			<fileset dir="${build.limewire.components.@{component}.tests}"
-	    					 includes="@{unit}" 
-	    		    />
+	    			<fileset dir="${build.limewire.components.@{component}.tests}">
+	    			    <include name="@{unit}"/>
+	    		    </fileset>
+	    		    <testPathLocations/>
 	    		</batchtest>
 			</junit>
 		</sequential>

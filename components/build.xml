@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="lw-components" basedir="." default="compile-src">
+
+	<description>
+	    Catch-all buildfile for every component.
+	</description>
+    
+	<property name="limewire.home" location="${basedir}/.."/>
+	
+    <import file="common/build-macros.xml" />
+    <import file="common/build.xml" />
+    <import file="collection/build.xml"/>
+    <import file="security/build.xml"/>
+    <import file="io/build.xml"/>
+    <import file="setting/build.xml"/>
+    
+    <target name="initialize" depends="lw-setting.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize">
+        <do.setup-properties component="all">
+			<tests-classpath>
+            	<path refid="tests.limewire.components.common.classpath"/>
+	            <path refid="tests.limewire.components.collection.classpath"/>
+	            <path refid="tests.limewire.components.security.classpath"/>
+		        <path refid="tests.limewire.components.io.classpath"/>
+		        <path refid="tests.limewire.components.setting.classpath"/>
+		    </tests-classpath>
+        </do.setup-properties>
+    </target>
+	
+	<target name="clean" depends="lw-setting.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean">
+	    <do.clean component="all"/>
+    </target>
+    
+    <target name="compile" depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile">
+        <mkdir dir="${build.limewire.components.all.classes}"/>
+        <mkdir dir="${build.limewire.components.all.tests}"/>
+	</target>
+	
+	<target name="compile-src" depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src">
+        <mkdir dir="${build.limewire.components.all.classes}"/>
+	</target>
+    
+	<target name="clean-src" depends="lw-setting.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src">
+		<do.clean-src component="all"/>
+	</target>
+	
+	<target name="compile-tests" depends="compile-src">
+        <mkdir dir="${build.limewire.components.all.tests}"/>
+	</target>
+    
+	<target name="clean-tests" depends="initialize">
+	    <do.clean-tests component="all"/>
+	</target>
+	
+	<target name="test" if="class, component" depends="compile">
+	    <do.test component="${component}" class="${class}"/>
+	</target>
+	
+	<target name="test-package" if="package, component" depends="compile">
+	    <do.test-package component="${component}" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="compile">
+	    <do.test-all component="all">
+	        <testLocations>
+		        <fileset dir="${build.limewire.components.common.tests}" includes="**/*Test.class"/>
+		        <fileset dir="${build.limewire.components.collection.tests}" includes="**/*Test.class"/>
+		        <fileset dir="${build.limewire.components.security.tests}" includes="**/*Test.class"/>
+		        <fileset dir="${build.limewire.components.io.tests}" includes="**/*Test.class"/>
+		        <fileset dir="${build.limewire.components.setting.tests}" includes="**/*Test.class"/>
+	         </testLocations>
+	    </do.test-all>
+	</target>
+	
+</project>

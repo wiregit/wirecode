@@ -167,7 +167,8 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
 	 */
 	public void runBare() throws Throwable {
         _currentTestName = getName();
-        System.out.println("Running test: " + _currentTestName);
+        if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}"))
+            System.out.println("Running test: " + _currentTestName);
         assertNotNull(_currentTestName);
         try {
             preSetUp();
