@@ -187,12 +187,23 @@ public class NetworkUtilsTest extends BaseTestCase {
      * Tests the isMe method.
      */
     public void testIsMe() throws Exception {
-        assertTrue("localhost should be me",
-            NetworkUtils.isMe("localhost", 6346));
+        stubProvider.setLocalPort(6346);
+        assertTrue(NetworkUtils.isMe("localhost", 6346));
+        assertTrue(NetworkUtils.isMe("127.1.2.1", 6346));            
+        assertTrue(NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
+        
+        stubProvider.setLocalPort(6345);
+        assertFalse(NetworkUtils.isMe("localhost", 6346));
+        assertFalse(NetworkUtils.isMe("127.1.2.1", 6346));            
+        assertFalse(NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
+        
+        stubProvider.setLocalPort(6346);
+        stubProvider.setLocalAddress(new byte[] {(byte)123, (byte)132, (byte)231, 0});
+        assertTrue(NetworkUtils.isMe("123.132.231.0", 6346));        
+        assertTrue(NetworkUtils.isMe(new byte[] {(byte)123, (byte)132, (byte)231, 0}, 6346));
 
-            NetworkUtils.isMe("127.1.2.1", 6346);
-            
-        assertTrue("localhost bytes should be me",
-            NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
+        assertFalse(NetworkUtils.isMe("123.132.231.1", 6346));        
+        assertFalse(NetworkUtils.isMe(new byte[] {(byte)123, (byte)132, (byte)231, 1}, 6346));
+        
     }
 }
