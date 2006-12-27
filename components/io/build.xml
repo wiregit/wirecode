@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="lw-io" basedir="." default="compile-src">
+
+	<description>
+		LimeWire component 'io'.
+	    This component contains utility classes for dealing with I/O.
+	</description>
+	
+    <import file="../common/build-macros.xml"/>
+    <import file="../common/build.xml"/>
+    
+    <target name="initialize" depends="lw-common.initialize">
+        <do.setup-properties component="io">
+			<src-classpath>
+				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+			    <pathelement location="${limewire.lib.jars}/commons-pool.jar"/>
+			    <path refid="build.limewire.components.common.buildpath"/>
+			</src-classpath>
+        </do.setup-properties>
+    </target>
+	
+	<target name="clean" depends="lw-common.clean">
+	    <do.clean component="io"/>
+	</target>
+    
+    <target name="compile" depends="lw-common.compile">
+    	<do.compile component="io"/>
+    </target>
+	
+	<target name="compile-src" depends="lw-common.compile-src">
+	    <do.compile-src component="io"/>
+	</target>
+    
+	<target name="clean-src" depends="lw-common.clean-src">
+	    <do.clean-src component="io"/>
+	</target>
+	
+	<target name="compile-tests" depends="lw-common.compile-tests">
+	    <do.compile-tests component="io"/>
+	</target>
+	<target name="clean-tests" depends="lw-common.clean-tests">
+	    <do.clean-tests component="io"/>
+	</target>
+	
+	<target name="test" if="class" depends="compile">
+	    <do.test component="io" class="${class}"/>
+	</target>
+	
+	<target name="test-package" if="package" depends="compile">
+	    <do.test-package component="io" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="compile">
+	    <do.test-all component="io"/>
+	</target>
+	
+</project>

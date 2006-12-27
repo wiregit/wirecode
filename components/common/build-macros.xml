@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="build-macros" basedir=".">
+
+	<description>
+	    A collection of macros for other build files to use.
+	</description>
+    
+	<property name="limewire.home"
+			  location="${basedir}/../.."/>
+	<property name="limewire.lib"
+			  location="${limewire.home}/lib"/>
+	<property name="limewire.lib.jars"
+			  location="${limewire.lib}/jars"/>
+	<property name="limewire.lib.native"
+			  location="${limewire.lib}/native"/>
+	<property name="limewire.library.path"
+			  value="${limewire.lib.native}/windows${path.separator}${limewire.lib.native}/osx${path.separator}${limewire.lib.native}"/>
+	<property name="limewire.components.home"
+		      location="${limewire.home}/components"/>
+    
+	<property name="compile.debug"			value="true"/>
+	<property name="compile.deprecation"	value="true"/>
+	<property name="compile.optimize"		value="false"/>
+	<property name="compile.source"			value="1.5"/>
+	<property name="compile.target"			value="1.5"/>
+    
+    <macrodef name="do.setup-properties">
+    	<attribute name="component"/>
+        <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
+        <element name="src-classpath" optional="true" description="Additional paths for building source"/>
+        <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
+        <attribute name="common-testpath-refid" default="tests.limewire.components.common.classpath"/>
+        <sequential>
+        	<property name="limewire.components.@{component}.home"
+        		      location="${limewire.components.home}/@{component}"/>
+        	<property name="limewire.components.@{component}.src"
+        			  location="${limewire.components.@{component}.home}/src/main"/>	
+        	<property name="limewire.components.@{component}.tests"
+        			  location="${limewire.components.@{component}.home}/src/test"/>
+        	
+        	<property name="build.limewire.components.@{component}.home"
+        		      location="${limewire.components.@{component}.home}/build"/>
+        	<property name="build.limewire.components.@{component}.classes"
+        			  location="${build.limewire.components.@{component}.home}/classes"/>	
+        	<property name="build.limewire.components.@{component}.tests"
+        			  location="${build.limewire.components.@{component}.home}/tests"/>
+        	
+        	<property name="tests.limewire.components.@{component}.home"
+        		      location="${limewire.components.@{component}.home}/testData"/>
+            <property name="tests.limewire.components.@{component}.xml"
+            		  location="${tests.limewire.components.@{component}.home}/xml"/>
+            <property name="tests.limewire.components.@{component}.html"
+            		  location="${tests.limewire.components.@{component}.home}/html"/>
+       	
+        	<path id="build.limewire.components.@{component}.classpath">
+        	    <src-classpath/>
+        	</path>
+            
+            <path id="build.limewire.components.@{component}.buildpath">
+                <path refid="build.limewire.components.@{component}.classpath"/>
+                <pathelement location="${build.limewire.components.@{component}.classes}"/>
+            </path>
+            
+    	    <path id="build.limewire.components.@{component}.tests.classpath">
+	        	<path refid="build.limewire.components.@{component}.buildpath"/>
+    	        <path refid="@{common-testpath-refid}"/> <!-- always requires common tests -->
+    	        <pathelement location="@{junit}"/>
+    	    </path>
+        	
+        	<path id="tests.limewire.components.@{component}.classpath">
+        		<path refid="build.limewire.components.@{component}.tests.classpath"/>
+        		<pathelement location="${build.limewire.components.@{component}.tests}"/>
+        	    <tests-classpath/>
+        	</path>	
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="do.clean">
+    	<attribute name="component"/>
+		<sequential>
+        	<do.clean-testData component="@{component}"/>
+		    <do.clean-build    component="@{component}"/>
+		</sequential>
+	</macrodef>
+    
+    <macrodef name="do.compile">
+        <attribute name="component"/>
+        <sequential>
+            <do.compile-src   component="@{component}"/>
+            <do.compile-tests component="@{component}"/>
+        </sequential>
+    </macrodef>
+	
+	<macrodef name="do.compile-src">
+	    <attribute name="component"/>
+	    <sequential>
+	        <do.build-init component="@{component}"/>
+			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
+			<javac destdir		="${build.limewire.components.@{component}.classes}"
+ 				   debug	    ="${compile.debug}"
+				   deprecation  ="${compile.deprecation}"
+	 	           optimize     ="${compile.optimize}"
+				   encoding     ="UTF-8"
+		           source		="${compile.source}"
+	  	           target       ="${compile.target}"
+	 	           sourcepath   =""
+	 	    >
+				<src>
+					<pathelement location="${limewire.components.@{component}.src}"/>
+			    </src>
+				<classpath refid="build.limewire.components.@{component}.classpath"/>
+			</javac>
+	    </sequential>
+	</macrodef>
+    
+    <macrodef name="do.clean-src">
+        <attribute name="component"/>
+        <sequential>
+			<delete dir="${build.limewire.components.@{component}.classes}" />
+        </sequential>
+    </macrodef>
+	
+	<macrodef name="do.compile-tests">
+	    <attribute name="component"/>
+		<sequential>
+			<mkdir dir="${build.limewire.components.@{component}.tests}"/>
+			<javac destdir		="${build.limewire.components.@{component}.tests}"
+ 				   debug	    ="${compile.debug}"
+				   deprecation  ="${compile.deprecation}"
+	   	   		   optimize     ="${compile.optimize}"
+				   encoding     ="UTF-8"
+	    	       source		="${compile.source}"
+	        	   target       ="${compile.target}"
+	        	   sourcepath   =""
+	   		>
+				<src>
+					<pathelement location="${limewire.components.@{component}.tests}"/>
+			    </src>
+				<classpath refid="build.limewire.components.@{component}.tests.classpath"/>
+			 </javac>
+		</sequential>
+	</macrodef>
+    
+	<macrodef name="do.clean-tests">
+	    <attribute name="component"/>
+	    <sequential>
+			<delete dir="${build.limewire.components.@{component}.tests}" />
+	    </sequential>
+	</macrodef>
+    
+	<macrodef name="do.clean-testData">
+	    <attribute name="component"/>
+	    <sequential>
+			<delete dir="${tests.limewire.components.@{component}.home}" />
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="do.test">
+	    <attribute name="component"/>
+	    <attribute name="class"/>
+	    <sequential>
+	    	<do.clean-testData component="@{component}"/>
+	        <do.tests-init     component="@{component}"/>
+			<do.run-tests-batchunit 
+			             	haltonerror="true"
+							haltonfailure="true"
+							unit="org/limewire/${class}.class"
+			    			component="@{component}"
+			/>
+			<do.tests2html     component="@{component}"/>
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="do.test-package">
+	    <attribute name="component"/>
+	    <attribute name="package"/>
+	    <sequential>
+	        <do.clean-testData      component="@{component}"/>
+	        <do.tests-init          component="@{component}"/>
+			<do.run-tests-batchunit unit="org/limewire/${package}/*Test.class"
+									component="@{component}"
+			/>
+	        <do.tests2html          component="@{component}"/>
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="do.test-all">
+	    <attribute name="component"/>
+	    <sequential>
+	        <do.clean-testData      component="@{component}"/>
+	        <do.tests-init          component="@{component}"/>
+	        <do.run-tests-batchunit unit="**/*Test.class" component="@{component}"/>
+	        <do.tests2html          component="@{component}"/>
+	    </sequential>
+	</macrodef>
+	
+	 <macrodef name="do.run-tests-batchunit">
+	    <attribute name="component"/>
+	    <attribute name="unit"/>
+	    <attribute name="haltOnFailure"   default="false"/>
+	    <attribute name="haltOnError"	  default="false"/>
+	    <attribute name="nativePathRefId" default="limewire.library.path"/>
+	    <sequential>
+	    	<junit printsummary="withOutAndErr"
+	    	       haltonfailure="@{haltOnFailure}"
+	    		   haltonerror="@{haltOnError}"
+	    		   failureproperty="testfailed"
+	    	       showoutput="true"
+	    	       fork="on"
+	    	>
+	    		<jvmarg value="-Djava.library.path=${@{nativePathRefId}}"/>
+	    		<jvmarg value="-Djunit.test.method=${method}"/>
+	    		<jvmarg value="-Djunit.test.times=${times}"/>
+	    		<jvmarg value="-Xmx512M"/>
+	    		
+	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
+	    		
+	    		<formatter type="xml"/>
+	    		<formatter type="plain" usefile="false"/>
+	    		
+	    		<batchtest fork="false"
+	    				   todir="${tests.limewire.components.@{component}.xml}">
+	    			<fileset dir="${build.limewire.components.@{component}.tests}"
+	    					 includes="@{unit}" 
+	    		    />
+	    		</batchtest>
+			</junit>
+		</sequential>
+	</macrodef>
+	
+    <macrodef name="do.tests2html">
+        <attribute name="component"/>
+        <sequential>
+	        <junitreport todir="${tests.limewire.components.@{component}.xml}">
+	        	<fileset dir="${tests.limewire.components.@{component}.xml}">
+				    <include name="TEST-*.xml"/>
+				</fileset>
+	        	<report format="frames" todir="${tests.limewire.components.@{component}.html}"/>
+	       </junitreport>
+        </sequential>
+    </macrodef>
+	
+	<macrodef name="do.build-init">
+	    <attribute name="component"/>
+	    <sequential>
+	    	<mkdir dir="${build.limewire.components.@{component}.home}" />
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="do.tests-init">
+	    <attribute name="component"/>
+	    <sequential>
+			<mkdir dir="${tests.limewire.components.@{component}.home}" />
+			<mkdir dir="${tests.limewire.components.@{component}.html}" />
+			<mkdir dir="${tests.limewire.components.@{component}.xml}" />
+	    </sequential>
+	</macrodef>
+	
+	<macrodef name="do.clean-build">
+	    <attribute name="component"/>
+		<sequential>
+			<delete dir="${build.limewire.components.@{component}.home}" />
+		</sequential>
+	</macrodef>
+    
+	
+</project>
