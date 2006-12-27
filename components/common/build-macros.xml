@@ -138,7 +138,15 @@
 					<pathelement location="${limewire.components.@{component}.tests}"/>
 			    </src>
 				<classpath refid="build.limewire.components.@{component}.tests.classpath"/>
-			 </javac>
+			</javac>
+		    
+		    <!-- copy any required resources too -->
+		   	<copy todir="${build.limewire.components.@{component}.tests}">
+		   		<fileset dir="${limewire.components.@{component}.tests}">
+		   	    	<exclude name="**/*.java"/>
+		   		    <exclude name="**/*.class"/>
+		   		</fileset>
+			</copy>
 		</sequential>
 	</macrodef>
     

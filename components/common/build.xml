@@ -18,6 +18,7 @@
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/icu4j.jar"/>
+				<pathelement location="${limewire.lib.jars}/i18n.jar"/>
 			</src-classpath>
         </do.setup-properties>
     </target>

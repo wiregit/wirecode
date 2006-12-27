@@ -535,7 +535,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         SortedMap<String, String> sortedControl = new TreeMap<String, String>();
         PatriciaTrie<String, String> trie = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
-        File hamlet = CommonUtils.getResourceFile("com/limegroup/wire/collection/hamlet.txt");
+        File hamlet = CommonUtils.getResourceFile("org/limewire/collection/hamlet.txt");
         BufferedReader reader = new BufferedReader(new FileReader(hamlet));
         String read = null;
         while( (read = reader.readLine()) != null) {

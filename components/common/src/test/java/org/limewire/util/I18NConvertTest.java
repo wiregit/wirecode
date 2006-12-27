@@ -25,7 +25,7 @@ public class I18NConvertTest extends BaseTestCase {
     private AbstractI18NConverter _instanceICU;
     
     private static final String fileName =
-        "com/limegroup/gnutella/util/i18ntest.txt";
+        "org/limewire/util/i18ntest.txt";
 
     public I18NConvertTest(String name) {
         super(name);
