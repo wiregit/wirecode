@@ -66,6 +66,13 @@
     <target name="clean-dist" depends="initialize">
         <do.clean-dist component="setting"/>
     </target>
-	
+    
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="setting"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="setting"/>
+    </target>
 	
 </project>

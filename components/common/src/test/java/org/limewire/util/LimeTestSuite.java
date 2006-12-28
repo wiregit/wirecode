@@ -26,14 +26,18 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
     
     private TestResult _testResult = null;
     private boolean _beforeTests = false;
-    private static Class _testClass;
+    private final Class _testClass;
     private static final String preTestName = "globalSetUp";
     private static final String postTestName = "globalTearDown";
     
     /**
      * Constructors...
      */
-    LimeTestSuite() { super(); }
+    LimeTestSuite(boolean singleTest, Class testClass) {
+        super();
+        _testClass = testClass;
+    }
+    
     LimeTestSuite(Class a, String b) {
         super(a, b);
         _testClass = a;
@@ -41,14 +45,6 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
     LimeTestSuite(Class a) {
         super(a);
         _testClass = a;
-    }
-    
-    /**
-     * Allows the test class to be changed.
-     * Required when forcing a single test to be run from a TestCase.
-     */
-    public static void setTestClass(Class cls) {
-        _testClass = cls;
     }
          
     /**
@@ -73,6 +69,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
             } catch(Throwable t2) {
                 error(t2);
             }
+            ///CLOVER:FLUSH 
             return;
         }
         
@@ -86,6 +83,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
             } catch(TestFailedException tfe2) {
                 // oh well.
             }
+            ///CLOVER:FLUSH
             return;
         }        
         
@@ -108,6 +106,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
                 error(t);
             }                
         }
+        ///CLOVER:FLUSH
     }
     
     public void runStaticMethod(String name) throws TestFailedException {

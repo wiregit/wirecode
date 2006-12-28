@@ -70,5 +70,11 @@
         <do.clean-dist component="security"/>
     </target>
 	
-	
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="security"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="security"/>
+    </target>
 </project>

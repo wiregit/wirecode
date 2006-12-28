@@ -18,6 +18,8 @@
 			  value="${limewire.lib.native}/windows${path.separator}${limewire.lib.native}/osx${path.separator}${limewire.lib.native}"/>
 	<property name="limewire.components.home"
 		      location="${limewire.home}/components"/>
+    <property name="cloverjar"
+    		  location="${ant.library.dir}/clover.jar"/>
     
 	<property name="compile.debug"			value="true"/>
 	<property name="compile.deprecation"	value="true"/>
@@ -53,6 +55,13 @@
             <property name="tests.limewire.components.@{component}.html"
             		  location="${tests.limewire.components.@{component}.home}/html"/>
             
+            <property name="clover.limewire.components.@{component}.home"
+			          location="${limewire.components.@{component}.home}/clover"/>
+            <property name="clover.limewire.components.@{component}.db"
+			          location="${clover.limewire.components.@{component}.home}/clover.db"/>
+            <property name="clover.limewire.components.@{component}.html"
+			          location="${clover.limewire.components.@{component}.home}/html"/>
+            
             <property name="dist.limewire.components.@{component}.home"
                       location="${limewire.components.@{component}.home}/dist"/>
             <property name="dist.limewire.components.@{component}.javadoc"
@@ -76,6 +85,7 @@
     	    </path>
         	
         	<path id="tests.limewire.components.@{component}.classpath">
+        	    <pathelement location="${cloverjar}"/>
         		<path refid="build.limewire.components.@{component}.tests.classpath"/>
         		<pathelement location="${build.limewire.components.@{component}.tests}"/>
         	    <tests-classpath/>
@@ -89,6 +99,7 @@
         	<do.clean-testData component="@{component}"/>
 		    <do.clean-build    component="@{component}"/>
 			<do.clean-dist     component="@{component}"/>
+		    <do.clean-clover   component="@{component}"/>
 		</sequential>
 	</macrodef>
     
@@ -271,7 +282,8 @@
 	    		   haltonerror="@{haltOnError}"
 	    		   failureproperty="testfailed"
 	    	       showoutput="true"
-	    	       fork="on"
+	    	       fork="true"
+	           	   forkmode="once"
 	    	>
 	            <sysproperty key="java.library.path"       value="${@{nativePathRefId}}"/>
 	    		<sysproperty key="junit.test.method"       value="${method}"/>
@@ -284,8 +296,7 @@
 	    		<formatter type="xml"/>
 	    		<formatter type="plain" usefile="false"/>
 	    		
-	    		<batchtest fork="false"
-	    				   todir="${tests.limewire.components.@{component}.xml}">
+	    		<batchtest todir="${tests.limewire.components.@{component}.xml}">
 	    			<fileset dir="${build.limewire.components.@{component}.tests}">
 	    			    <include name="@{unit}"/>
 	    		    </fileset>
@@ -344,5 +355,63 @@
         </sequential>
     </macrodef>
     
+    <macrodef name="do.clean-clover" description="Erases clover data.">
+    	<attribute name="component"/>
+        <sequential>
+            <delete dir="${clover.limewire.components.@{component}.home}"/>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="do.clover-setup" description="Sets up clover.">
+    	<attribute name="component"/>
+        <element name="locations" optional="true"/>
+        <attribute name="defaultfileset" default="${limewire.components.@{component}.src}"/>
+        <sequential>
+	        <antcall target="clover-guard"/>
+            <taskdef resource="clovertasks"/>
+            <mkdir dir="${clover.limewire.components.@{component}.home}"/>
+            <echo message="Wanting to do only: ${limewire.components.@{component}.src}"/>
+            <clover-setup initString="${clover.limewire.components.@{component}.db}">
+            	<fileset dir="@{defaultfileset}"/>
+                <locations/>
+            </clover-setup>
+        </sequential>
+    </macrodef>
+    
+    <target name="clover-check" description="Checks to see if clover is installed and sets a property if so.">
+        <available property="clover.installed" classname="com.cenqua.clover.CloverInstr" />
+    </target>
+    
+    <target name="clover-guard" description="Fails if clover isn't setup." 
+            depends="clover-check" unless="clover.installed">
+        <fail message="Clover is not installed, the build cannot continue."/>
+    </target>
+    
+    <macrodef name="do.clover2html">
+        <attribute name="component"/>
+        <sequential>
+            <antcall target="clover-guard"/>
+            <tstamp>
+	            <format property="clover.time" pattern="EEE, MMM d, yyyy hh:mm a"/>
+            </tstamp>
+            <clover-report>
+                <current outfile="${clover.limewire.components.@{component}.html}"
+                		 title="LimeWire - ${clover.time}">
+	                <format type="html"/>
+                </current>
+            </clover-report>
+        </sequential>
+    </macrodef>
+    
+    <target name="clean"/> <!-- Must write a real target for this when importing. -->
+    <target name="with.clover"/> <!-- Must write a real target for this when importing -->
+    <target name="initialize"/> <!-- Must write a real target for this when importing -->
+    <target name="test-all"/> <!-- Must write a real target for this when importing -->
+    <target name="clover2html"/> <!-- Must write a real target for this when importing -->
+    
+    <target name="clover-all" depends="initialize, clean, with.clover">
+        <antcall target="test-all" inheritRefs="true" />
+		<antcall target="clover2html" inheritRefs="true" />
+    </target>
 	
 </project>

@@ -103,4 +103,20 @@
         <do.clean-dist component="all"/>
     </target>
     
+    <target name="with.clover" depends="initialize">
+        <!-- point the defaultfileset to somewhere where no files are -->
+        <do.clover-setup component="all" defaultfileset="${limewire.components.all.home}">
+	        <locations>
+	            <fileset dir="${limewire.components.common.src}" />
+    	        <fileset dir="${limewire.components.collection.src}"/>
+    	        <fileset dir="${limewire.components.security.src}" />
+    	        <fileset dir="${limewire.components.io.src}" />
+    	    	<fileset dir="${limewire.components.setting.src}" />	            
+			</locations>
+	    </do.clover-setup>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="all"/>
+    </target>
 </project>

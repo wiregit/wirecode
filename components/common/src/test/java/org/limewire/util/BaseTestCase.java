@@ -9,25 +9,20 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.limewire.service.ErrorCallback;
-import org.limewire.service.ErrorService;
-import org.limewire.util.AssertComparisons;
-import org.limewire.util.LimeTestSuite;
-import org.limewire.util.PrivilegedAccessor;
-import org.limewire.util.SystemUtils;
-import org.limewire.util.UnexpectedExceptionError;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
+
 
 public abstract class BaseTestCase extends AssertComparisons implements ErrorCallback {
     
-    protected static Class _testClass;
-    private   static Timer _testKillerTimer = new Timer(true);
-    protected static String _currentTestName;
+    protected volatile static Class _testClass;
+    private   final static Timer _testKillerTimer = new Timer(true);
+    protected volatile static String _currentTestName;
     protected Thread _testThread;
     protected TestResult _testResult;
     protected TimerTask _testKiller;
@@ -43,6 +38,11 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
     		} catch (InterruptedException ignore){}
     	}
     };
+    
+    static {
+        INTERRUPT_FIXER.setDaemon(true);
+        INTERRUPT_FIXER.start();
+    }
     
     /**
      * The base constructor.
@@ -129,8 +129,7 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      */
     public static TestSuite buildTestSuite(Class cls, String[] tests) {
         _testClass = cls;
-        TestSuite suite = new LimeTestSuite();
-        LimeTestSuite.setTestClass(cls);
+        TestSuite suite = new LimeTestSuite(false, cls);
         for (int ii = 0; ii < tests.length; ii++) {
             if (!tests[ii].startsWith("test"))
                 tests[ii]="test"+tests[ii];
@@ -211,8 +210,6 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      * Called statically before any settings.
      */
     public static void beforeAllTestsSetUp() throws Throwable {
-    	INTERRUPT_FIXER.setDaemon(true);
-    	INTERRUPT_FIXER.start();
         // SystemUtils must pretend to not be loaded, so the idle
         // time isn't counted.
         // For tests that are testing SystemUtils specifically, they can
@@ -228,13 +225,6 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      */
     public void postTearDown() {
         stopTestTimer();
-    }
-    
-    /**
-     * Runs after all tests are completed.
-     */
-    public static void afterAllTestsTearDown() throws Throwable {
-        INTERRUPT_FIXER.interrupt();
     }
     
     /**
