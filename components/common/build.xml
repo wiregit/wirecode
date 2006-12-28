@@ -42,6 +42,7 @@
 	<target name="compile-tests" depends="compile-src">
 	    <do.compile-tests component="common"/>
 	</target>
+    
 	<target name="clean-tests" depends="initialize">
 	    <do.clean-tests component="common"/>
 	</target>
@@ -57,5 +58,17 @@
 	<target name="test-all" depends="compile">
 	    <do.test-all component="common"/>
 	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="common"/>
+    </target>
+    
+	<target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="common"/>
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="common"/>
+    </target>
 	
 </project>

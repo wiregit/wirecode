@@ -71,5 +71,36 @@
 	         </testLocations>
 	    </do.test-all>
 	</target>
-	
+	    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="all" basedir="" excludes="**">
+			<more-jar-elements>
+			    <fileset dir="${build.limewire.components.common.classes}" />
+    	        <fileset dir="${build.limewire.components.collection.classes}"/>
+    	        <fileset dir="${build.limewire.components.security.classes}" />
+    	        <fileset dir="${build.limewire.components.io.classes}" />
+    	    	<fileset dir="${build.limewire.components.setting.classes}" />	        	
+			</more-jar-elements>
+        </do.jar>
+    </target>
+    
+	<target name="javadoc" depends="initialize">
+	    <do.javadoc component="all"
+	    			classpathrefid="tests.limewire.components.all.classpath"
+				    windowtitle="LimeWire Components"
+	        		sourcepath="">
+	        <more-javadoc-elements>
+	            <fileset dir="${limewire.components.common.src}" />
+    	        <fileset dir="${limewire.components.collection.src}"/>
+    	        <fileset dir="${limewire.components.security.src}" />
+    	        <fileset dir="${limewire.components.io.src}" />
+    	    	<fileset dir="${limewire.components.setting.src}" />
+	        </more-javadoc-elements>
+	    </do.javadoc>
+	</target>
+	    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="all"/>
+    </target>
+    
 </project>

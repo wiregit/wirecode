@@ -54,5 +54,18 @@
 	<target name="test-all" depends="compile">
 	    <do.test-all component="setting"/>
 	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="setting"/>
+    </target>
+    
+	<target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="setting"/>
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="setting"/>
+    </target>
+	
 	
 </project>
