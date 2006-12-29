@@ -25,42 +25,69 @@
 		        <path refid="tests.limewire.components.setting.classpath"/>
 		    </tests-classpath>
         </do.setup-properties>
+        
+        <!-- setup a special property for the buildpath of each component combined. -->
+        <path id="build.limewire.components.classes">
+            <pathelement location="${build.limewire.components.common.classes}"/>
+            <pathelement location="${build.limewire.components.collection.classes}"/>
+            <pathelement location="${build.limewire.components.security.classes}"/>
+            <pathelement location="${build.limewire.components.io.classes}"/>
+            <pathelement location="${build.limewire.components.setting.classes}"/>            
+        </path>
     </target>
 	
-	<target name="clean" depends="lw-setting.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean">
+	<target name="clean"
+	        description="Cleans all generated data in every component."
+	        depends="lw-setting.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean">
 	    <do.clean component="all"/>
     </target>
     
-    <target name="compile" depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile">
+    <target name="compile"
+            description="Compiles the source and tests of every component."
+            depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile">
         <mkdir dir="${build.limewire.components.all.classes}"/>
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
 	
-	<target name="compile-src" depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src">
+	<target name="compile-src"
+	        description="Compiles only the source code of every component."
+	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src">
         <mkdir dir="${build.limewire.components.all.classes}"/>
 	</target>
     
-	<target name="clean-src" depends="lw-setting.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src">
+	<target name="clean-src"
+	        description="Cleans files generated from compiling the source code of every component."
+	        depends="lw-setting.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src">
 		<do.clean-src component="all"/>
 	</target>
 	
-	<target name="compile-tests" depends="compile-src">
+	<target name="compile-tests"
+	        description="Compiles the tests of every component (and the source if necessary)"
+	        depends="compile-src">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     
-	<target name="clean-tests" depends="initialize">
+	<target name="clean-tests"
+	        description="Cleans data generated from compiling and running the tests of every component."
+	        depends="initialize">
 	    <do.clean-tests component="all"/>
 	</target>
 	
-	<target name="test" if="class, component" depends="compile">
+	<target name="test"
+            description="Runs a single test from one component. Requires: -Dclass=X and -Dcomponent=X."
+            if="class, component" depends="compile">
 	    <do.test component="${component}" class="${class}"/>
 	</target>
 	
-	<target name="test-package" if="package, component" depends="compile">
+	<target name="test-package"
+            description="Runs all tests in a package of one component.  Requires: -Dpackage=X -Dcomponent=X."
+            if="package, component" depends="compile">
 	    <do.test-package component="${component}" package="${package}"/>
 	</target>
 	
-	<target name="test-all" depends="compile">
+	<target name="test-all" 
+            description="Runs every test in every component."
+            depends="compile">
 	    <do.test-all component="all">
 	        <testLocations>
 		        <fileset dir="${build.limewire.components.common.tests}" includes="**/*Test.class"/>
@@ -72,7 +99,9 @@
 	    </do.test-all>
 	</target>
 	    
-    <target name="jar" depends="initialize, compile-src">
+    <target name="jar"
+            description="Creates a jar file of the compiled source of every component."
+            depends="initialize, compile-src">
         <do.jar component="all" basedir="" excludes="**">
 			<more-jar-elements>
 			    <fileset dir="${build.limewire.components.common.classes}" />
@@ -84,7 +113,9 @@
         </do.jar>
     </target>
     
-	<target name="javadoc" depends="initialize">
+	<target name="javadoc"
+            description="Generates a javadoc of every component's source."
+            depends="initialize">
 	    <do.javadoc component="all"
 	    			classpathrefid="tests.limewire.components.all.classpath"
 				    windowtitle="LimeWire Components"
@@ -99,11 +130,15 @@
 	    </do.javadoc>
 	</target>
 	    
-    <target name="clean-dist" depends="initialize">
+    <target name="clean-dist"
+            description="Cleans all generated distribution files."
+            depends="initialize">
         <do.clean-dist component="all"/>
     </target>
     
-    <target name="with.clover" depends="initialize">
+    <target name="with.clover"
+            description="Instructs the build to use clover's instrumenting."
+            depends="initialize">
         <!-- point the defaultfileset to somewhere where no files are -->
         <do.clover-setup component="all" defaultfileset="${limewire.components.all.home}">
 	        <locations>
@@ -116,7 +151,9 @@
 	    </do.clover-setup>
 	</target>
     
-    <target name="clover2html" depends="initialize">
+    <target name="clover2html"
+            description="Converts clover's generated data into HTML reports."
+            depends="initialize">
         <do.clover2html component="all"/>
     </target>
 </project>

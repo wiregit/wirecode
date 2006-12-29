@@ -378,12 +378,13 @@
         </sequential>
     </macrodef>
     
-    <target name="clover-check" description="Checks to see if clover is installed and sets a property if so.">
+    <!-- Checks to see if clover is installed and sets a property if so -->
+    <target name="clover-check">
         <available property="clover.installed" classname="com.cenqua.clover.CloverInstr" />
     </target>
     
-    <target name="clover-guard" description="Fails if clover isn't setup." 
-            depends="clover-check" unless="clover.installed">
+    <!-- Fails if clover isn't setup. -->
+    <target name="clover-guard" depends="clover-check" unless="clover.installed">
         <fail message="Clover is not installed, the build cannot continue."/>
     </target>
     

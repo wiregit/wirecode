@@ -1,9 +1,0 @@
-#!/bin/sh
-
-
-# NOTE:  If you are using cygwin on Windows, the colon below 
-#        should be a semi-colon
-CLASSPATH=".:lib/collections.jar:lib/xerces.jar:lib/MRJToolkitStubs.jar"
-export CLASSPATH
-
-ant
