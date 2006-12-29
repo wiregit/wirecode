@@ -32,6 +32,7 @@
         <attribute name="junit" default="${limewire.lib.jars}/tests/junit.jar"/>
         <element name="src-classpath" optional="true" description="Additional paths for building source"/>
         <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
+        <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
         <attribute name="common-testpath-refid" default="tests.limewire.components.common.classpath"/>
         <sequential>
         	<property name="limewire.components.@{component}.home"
@@ -82,6 +83,7 @@
 	        	<path refid="build.limewire.components.@{component}.buildpath"/>
     	        <path refid="@{common-testpath-refid}"/> <!-- always requires common tests -->
     	        <pathelement location="@{junit}"/>
+    	        <build-tests-classpath/>
     	    </path>
         	
         	<path id="tests.limewire.components.@{component}.classpath">
@@ -113,6 +115,8 @@
 	
 	<macrodef name="do.compile-src" description="Compiles only the source code.">
 	    <attribute name="component"/>
+	    <element name="more-src-paths" optional="true"/>
+	    <attribute name="excludes" default=""/>
 	    <sequential>
 	        <do.build-init component="@{component}"/>
 			<mkdir dir="${build.limewire.components.@{component}.classes}"/>
@@ -124,9 +128,12 @@
 		           source		="${compile.source}"
 	  	           target       ="${compile.target}"
 	 	           sourcepath   =""
+			       excludes     ="@{excludes}" 
 	 	    >
+			    <compilerarg value="-Xlint:unchecked"/>
 				<src>
 					<pathelement location="${limewire.components.@{component}.src}"/>
+				    <more-src-paths/>
 			    </src>
 				<classpath refid="build.limewire.components.@{component}.classpath"/>
 			</javac>
@@ -142,13 +149,15 @@
 	
 	<macrodef name="do.compile-tests" description="Compiles test code and copies resources tests use.">
 	    <attribute name="component"/>
+	    <attribute name="resourcedir" default="${limewire.components.@{component}.tests}"/>
+	    <attribute name="excludes" default="" description="Pattern to exclude from resourcedir"/>
 		<sequential>
 			<mkdir dir="${build.limewire.components.@{component}.tests}"/>
 			<javac destdir		="${build.limewire.components.@{component}.tests}"
  				   debug	    ="${compile.debug}"
 				   deprecation  ="${compile.deprecation}"
 	   	   		   optimize     ="${compile.optimize}"
-				   encoding     ="UTF-8"
+				   encoding     ="ISO-8859-1"
 	    	       source		="${compile.source}"
 	        	   target       ="${compile.target}"
 	        	   sourcepath   =""
@@ -161,9 +170,10 @@
 		    
 		    <!-- copy any required resources too -->
 		   	<copy todir="${build.limewire.components.@{component}.tests}">
-		   		<fileset dir="${limewire.components.@{component}.tests}">
+		   		<fileset dir="@{resourcedir}">
 		   	    	<exclude name="**/*.java"/>
 		   		    <exclude name="**/*.class"/>
+		   		    <exclude name="@{excludes}"/>
 		   		</fileset>
 			</copy>
 		</sequential>
@@ -186,14 +196,15 @@
 	<macrodef name="do.test" description="Runs a single test class.">
 	    <attribute name="component"/>
 	    <attribute name="class"/>
+	    <attribute name="path" default="org/limewire"/>
 	    <sequential>
 	    	<do.clean-testData component="@{component}"/>
 	        <do.tests-init     component="@{component}"/>
 			<do.run-tests-batchunit 
-			             	haltonerror="true"
-							haltonfailure="true"
-							unit="org/limewire/${class}.class"
-			    			component="@{component}"
+			                   haltonerror="true"
+						       haltonfailure="true"
+						       unit="@{path}/${class}.class"
+   			    			   component="@{component}"
 			/>
 			<do.tests2html     component="@{component}"/>
 	    </sequential>
@@ -202,11 +213,14 @@
 	<macrodef name="do.test-package" description="Runs all tests in a single package.">
 	    <attribute name="component"/>
 	    <attribute name="package"/>
+	    <attribute name="path" default="org/limewire"/>
+	    <attribute name="forkmode" default="once"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-			<do.run-tests-batchunit unit="org/limewire/${package}/*Test.class"
+			<do.run-tests-batchunit unit="@{path}/${package}/*Test.class"
 									component="@{component}"
+			    					forkmode="@{forkmode}"
 			/>
 	        <do.tests2html          component="@{component}"/>
 	    </sequential>
@@ -215,10 +229,14 @@
 	<macrodef name="do.test-all" description="Runs all tests.">
 	    <attribute name="component"/>
 	    <element name="testLocations"     optional="true"/>
+	    <attribute name="forkmode" default="once"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-	        <do.run-tests-batchunit unit="**/*Test.class" component="@{component}">
+	        <do.run-tests-batchunit unit="**/*Test.class"
+	            					component="@{component}"
+	            					forkmode="@{forkmode}"
+	        >
 	        	<testPathLocations>
 	        	   <testLocations/>
 	            </testPathLocations>
@@ -276,6 +294,7 @@
 	    <attribute name="haltOnError"	    default="false"/>
 	    <attribute name="nativePathRefId"   default="limewire.library.path"/>
 	    <element   name="testPathLocations" optional="true"/>
+	    <attribute name="forkmode"			default="once"/>
 	    <sequential>
 	        <junit printsummary="withOutAndErr"
 	    	       haltonfailure="@{haltOnFailure}"
@@ -283,7 +302,7 @@
 	    		   failureproperty="testfailed"
 	    	       showoutput="true"
 	    	       fork="true"
-	           	   forkmode="once"
+	           	   forkmode="@{forkmode}"
 	    	>
 	            <sysproperty key="java.library.path"       value="${@{nativePathRefId}}"/>
 	    		<sysproperty key="junit.test.method"       value="${method}"/>
@@ -308,11 +327,13 @@
 	
     <macrodef name="do.tests2html" description="Converts test XML output to HTML reports.">
         <attribute name="component"/>
+        <element name="more-xml-locations" optional="true"/>
         <sequential>
 	        <junitreport todir="${tests.limewire.components.@{component}.xml}">
 	        	<fileset dir="${tests.limewire.components.@{component}.xml}">
 				    <include name="TEST-*.xml"/>
 				</fileset>
+	            <more-xml-locations/>
 	        	<report format="frames" todir="${tests.limewire.components.@{component}.html}"/>
 	       </junitreport>
         </sequential>
@@ -370,7 +391,6 @@
 	        <antcall target="clover-guard"/>
             <taskdef resource="clovertasks"/>
             <mkdir dir="${clover.limewire.components.@{component}.home}"/>
-            <echo message="Wanting to do only: ${limewire.components.@{component}.src}"/>
             <clover-setup initString="${clover.limewire.components.@{component}.db}">
             	<fileset dir="@{defaultfileset}"/>
                 <locations/>

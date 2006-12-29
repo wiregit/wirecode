@@ -168,7 +168,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 		this(guid,proxies,features,version,null);
 	}
 	
-	public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version,IpPort addr) {
+    @SuppressWarnings("unchecked")
+    public PushEndpoint(byte [] guid, Collection<? extends IpPort> proxies,int features,int version,IpPort addr) {
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
 		_clientGUID=guid;

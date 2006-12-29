@@ -34,6 +34,15 @@
             <pathelement location="${build.limewire.components.io.classes}"/>
             <pathelement location="${build.limewire.components.setting.classes}"/>            
         </path>
+        
+        <!-- and another special property for the buildpatch of each component's tests combined -->
+        <path id="build.limewire.components.tests">
+            <pathelement location="${build.limewire.components.common.tests}"/>
+            <pathelement location="${build.limewire.components.collection.tests}"/>
+            <pathelement location="${build.limewire.components.security.tests}"/>
+            <pathelement location="${build.limewire.components.io.tests}"/>
+            <pathelement location="${build.limewire.components.setting.tests}"/>            
+        </path>        
     </target>
 	
 	<target name="clean"

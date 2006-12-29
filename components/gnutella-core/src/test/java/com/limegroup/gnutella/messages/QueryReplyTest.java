@@ -1244,6 +1244,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     }
     
     /** SPI that stores things statically because there's no other reference to it anywhere. */
+    @SuppressWarnings("deprecation")
     public static class FakeSignatureSpi extends SignatureSpi {
         private static byte[] update1;
         private static int off1;
@@ -1252,7 +1253,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         private static byte[] update2;
         private static int off2;
         private static int len2;
-        
+
+        @SuppressWarnings("deprecation")
         protected Object engineGetParameter(String arg0) throws InvalidParameterException {
             return null;
         }
@@ -1269,6 +1271,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         protected void engineInitVerify(PublicKey arg0) throws InvalidKeyException {
         }
 
+        @SuppressWarnings("deprecation")
         protected void engineSetParameter(String arg0, Object arg1) throws InvalidParameterException {
         }
 
