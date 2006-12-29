@@ -9,7 +9,7 @@
 
 // Determines if this copy of Windows has Windows Firewall
 // Returns true if it does, false if not or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallPresentNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallPresent();
 }
 bool WindowsFirewallPresent() {
@@ -22,7 +22,7 @@ bool WindowsFirewallPresent() {
 
 // Determines if Windows Firewall is off or on
 // Returns true if the firewall is on, false if it's off or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallEnabledNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallEnabled();
 }
 bool WindowsFirewallEnabled() {
@@ -39,7 +39,7 @@ bool WindowsFirewallEnabled() {
 
 // Determines if the Exceptions not allowed check box in Windows Firewall is checked
 // Returns true if the exceptions not allowed box is checked, false if it's not checked or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallExceptionsNotAllowedNative(JNIEnv *e, jclass c) {
 	return WindowsFirewallExceptionsNotAllowed();
 }
 bool WindowsFirewallExceptionsNotAllowed() {
@@ -57,7 +57,7 @@ bool WindowsFirewallExceptionsNotAllowed() {
 // Takes a program path and file name, like "C:\Folder\Program.exe"
 // Determines if it's listed in Windows Firewall
 // Returns true if is listed, false if it's not or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallIsProgramListedNative(JNIEnv *e, jclass c, jstring path) {
 	return WindowsFirewallIsProgramListed(GetJavaString(e, path));
 }
 bool WindowsFirewallIsProgramListed(LPCTSTR path) {
@@ -75,7 +75,7 @@ bool WindowsFirewallIsProgramListed(LPCTSTR path) {
 // Takes a program path and file name like "C:\Folder\Program.exe"
 // Determines if the listing for that program in Windows Firewall is checked or unchecked
 // Returns true if it is enabled, false if it's not or there was an error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallIsProgramEnabledNative(JNIEnv *e, jclass c, jstring path) {
 	return WindowsFirewallIsProgramEnabled(GetJavaString(e, path));
 }
 bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
@@ -93,7 +93,7 @@ bool WindowsFirewallIsProgramEnabled(LPCTSTR path) {
 // Takes a path like "C:\Folder\Program.exe" and a name like "My Program"
 // Adds the program's listing in Windows Firewall to make sure it is listed and checked
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring path, jstring name) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallAddNative(JNIEnv *e, jclass c, jstring path, jstring name) {
 	return WindowsFirewallAdd(GetJavaString(e, path), GetJavaString(e, name));
 }
 bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
@@ -110,7 +110,7 @@ bool WindowsFirewallAdd(LPCTSTR path, LPCTSTR name) {
 // Takes a path and file name like "C:\Folder\Program.exe"
 // Removes the program's listing from the Windows Firewall exceptions list
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_firewallRemoveNative(JNIEnv *e, jclass c, jstring path) {
 	return WindowsFirewallRemove(GetJavaString(e, path));
 }
 bool WindowsFirewallRemove(LPCTSTR path) {

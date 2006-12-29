@@ -12,7 +12,7 @@
 extern CSystemUtilities Handle;
 
 // Returns the path of this running program, like "C:\Folder\Program.exe", or blank if error
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
+JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_getRunningPathNative(JNIEnv *e, jclass c) {
 	return MakeJavaString(e, GetRunningPath());
 }
 CString GetRunningPath() {
@@ -26,7 +26,7 @@ CString GetRunningPath() {
 // Takes a special folder name, like "ApplicationData"
 // Looks up the full path to that folder for the current user as the user has customized it
 // Returns the path like "C:\Documents and Settings\UserName\Application Data", or blank on error
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name) {
+JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_getSpecialPathNative(JNIEnv *e, jclass c, jstring name) {
 	return MakeJavaString(e, GetSpecialPath(GetJavaString(e, name)));
 }
 CString GetSpecialPath(LPCTSTR name) {
@@ -50,10 +50,10 @@ CString GetSpecialPath(LPCTSTR name) {
 
 // Takes a path to a file like "C:\Folder\Song.mp3" or a Web address like "http://www.site.com/"
 // Opens it with the default program or the default Web browser
-JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url) {
+JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openURLNative(JNIEnv *e, jclass c, jstring url) {
 	Run(GetJavaString(e, url));
 }
-JNIEXPORT void JNICALL Java_com_limegroup_gnutella_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT void JNICALL Java_org_limewire_util_SystemUtils_openFileNative(JNIEnv *e, jclass c, jstring path) {
 	Run(GetJavaString(e, path));
 }
 void Run(LPCTSTR path) {
@@ -65,7 +65,7 @@ void Run(LPCTSTR path) {
 // Takes a path to a file on the disk, like "C:\Folder\file.ext", or a whole folder like "C:\Folder" without a trailing slash
 // Moves it to the Windows Recycle Bin
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_recycleNative(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_recycleNative(JNIEnv *e, jclass c, jstring path) {
 	return Recycle(GetJavaString(e, path));
 }
 bool Recycle(LPCTSTR path) {
@@ -97,7 +97,7 @@ bool Recycle(LPCTSTR path) {
 // Takes a path to a file on the disk, like "C:\Folder\file.txt"
 // Removes its read-only setting
 // Returns the result from _chmod
-JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring path) {
+JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setFileWriteable(JNIEnv *e, jclass c, jstring path) {
 	return SetFileWritable(GetJavaString(e, path));
 }
 int SetFileWritable(LPCTSTR path) {
@@ -107,7 +107,7 @@ int SetFileWritable(LPCTSTR path) {
 }
 
 // Returns the tick count when the user last moved the mouse or pressed a key, or 0 on error
-JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime(JNIEnv *e, jclass c) {
+JNIEXPORT jlong JNICALL Java_org_limewire_util_SystemUtils_idleTime(JNIEnv *e, jclass c) {
 	return GetIdleTime();
 }
 DWORD GetIdleTime() {
@@ -142,7 +142,7 @@ DWORD GetIdleTime() {
 // icon is the path to a Windows .exe or .ico file on the disk that contains the icons
 // Gets the window handle, and uses it to set the icon
 // Returns blank on success, or a text message about what didn't work
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
+JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_setWindowIconNative(JNIEnv *e, jclass c, jobject frame, jstring bin, jstring icon) {
 	return MakeJavaString(e, SetWindowIcon(e, c, frame, GetJavaString(e, bin), GetJavaString(e, icon)));
 }
 
@@ -190,13 +190,13 @@ void GetIcons(LPCTSTR icon) {
 }
 
 // Sets the window to be topmost.
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setWindowTopMostNative(JNIEnv *e, jclass c, jobject frame, jstring bin) {
+JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_setWindowTopMostNative(JNIEnv *e, jclass c, jobject frame, jstring bin) {
 	CString message;
 	SetWindowTopMost(e, c, frame,  GetJavaString(e, bin), &message);
 	return MakeJavaString(e, message);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_flushIconCacheNative(JNIEnv *e, jclass c) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_flushIconCacheNative(JNIEnv *e, jclass c) {
 	return FlushIconCache(e);
 }
 

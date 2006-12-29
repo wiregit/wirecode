@@ -11,7 +11,7 @@
 // Takes a root key handle name, a key path, and a registry variable name
 // Gets the information from the registry
 // Returns the number, or 0 if not found or any error
-JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
+JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_registryReadNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
 	return RegistryReadNumber(e, RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name));
 }
 int RegistryReadNumber(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
@@ -44,7 +44,7 @@ int RegistryReadNumber(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 // Takes a root key handle name, a key path, and a registry variable name
 // Gets the information from the registry
 // Returns the text, blank if not found or any error
-JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
+JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name) {
 	return MakeJavaString(e, RegistryReadText(e, RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name)));
 }
 CString RegistryReadText(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
@@ -86,7 +86,7 @@ CString RegistryReadText(JNIEnv *e, HKEY root, LPCTSTR path, LPCTSTR name) {
 // Takes a root key handle name, a key path, a registry variable name, and an integer
 // Stores the information in the registry
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value) {
 	return RegistryWriteNumber(RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name), value);
 }
 bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value) {
@@ -110,7 +110,7 @@ bool RegistryWriteNumber(HKEY root, LPCTSTR path, LPCTSTR name, int value) {
 // Takes a root key handle name, a key path, a registry variable name, and value text
 // Stores the information in the registry
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value) {
 	return RegistryWriteText(RegistryName(GetJavaString(e, root)), GetJavaString(e, path), GetJavaString(e, name), GetJavaString(e, value));
 }
 bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value) {
@@ -134,7 +134,7 @@ bool RegistryWriteText(HKEY root, LPCTSTR path, LPCTSTR name, LPCTSTR value) {
 // Takes a root key handle name or open base key, and the path to a key beneath it
 // Deletes the key from the registry, including its subkeys
 // Returns false on error
-JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path) {
+JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path) {
 	return RegistryDelete(RegistryName(GetJavaString(e, root)), GetJavaString(e, path));
 }
 bool RegistryDelete(HKEY base, LPCTSTR path) {

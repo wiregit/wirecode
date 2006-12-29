@@ -10,11 +10,11 @@ extern "C" {
 #endif
 
 	// Functions in Registry.cpp
-	JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
-	JNIEXPORT jstring JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
-	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value);
-	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value);
-	JNIEXPORT jboolean JNICALL Java_com_limegroup_gnutella_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path);
+	JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_registryReadNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
+	JNIEXPORT jstring JNICALL Java_org_limewire_util_SystemUtils_registryReadTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name);
+	JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryWriteNumberNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jint value);
+	JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryWriteTextNative(JNIEnv *e, jclass c, jstring root, jstring path, jstring name, jstring value);
+	JNIEXPORT jboolean JNICALL Java_org_limewire_util_SystemUtils_registryDeleteNative(JNIEnv *e, jclass c, jstring root, jstring path);
 
 #ifdef __cplusplus
 }

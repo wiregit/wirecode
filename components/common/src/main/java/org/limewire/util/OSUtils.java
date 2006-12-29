@@ -12,83 +12,68 @@ public class OSUtils {
     /** 
      * Variable for whether or not we're on Windows.
      */
-    private static boolean _isWindows = false;
+    private static boolean _isWindows;
 
     /** 
      * Variable for whether or not we're on Windows NT.
      */
-    private static boolean _isWindowsNT = false;
+    private static boolean _isWindowsNT;
 
     /** 
      * Variable for whether or not we're on Windows XP.
      */
-    private static boolean _isWindowsXP = false;
+    private static boolean _isWindowsXP;
 
     /** 
      * Variable for whether or not we're on Windows NT, 2000, or XP.
      */
-    private static boolean _isWindowsNTor2000orXP = false;
+    private static boolean _isWindowsNTor2000orXP;
 
     /** 
      * Variable for whether or not we're on 2000 or XP.
      */
-    private static boolean _isWindows2000orXP = false;
+    private static boolean _isWindows2000orXP;
 
     /** 
      * Variable for whether or not we're on Windows 95.
      */
-    private static boolean _isWindows95 = false;
+    private static boolean _isWindows95;
 
     /** 
      * Variable for whether or not we're on Windows 98.
      */
-    private static boolean _isWindows98 = false;
+    private static boolean _isWindows98;
 
     /** 
      * Variable for whether or not we're on Windows Me.
      */
-    private static boolean _isWindowsMe = false;
+    private static boolean _isWindowsMe;
 
     /** 
      * Variable for whether or not the operating system allows the 
      * application to be reduced to the system tray.
      */
-    private static boolean _supportsTray = false;
+    private static boolean _supportsTray;
 
     /** 
      * Variable for whether or not we're on MacOSX.
      */
-    private static boolean _isMacOSX = false;
+    private static boolean _isMacOSX;
 
     /** 
      * Variable for whether or not we're on Linux.
      */
-    private static boolean _isLinux = false;
+    private static boolean _isLinux;
 
     /** 
      * Variable for whether or not we're on Solaris.
      */
-    private static boolean _isSolaris = false;
+    private static boolean _isSolaris;
 
     /**
      * Variable for whether or not we're on OS/2.
      */
-    private static boolean _isOS2 = false;
-    
-
-    /**
-     * Returns the operating system.
-     */
-    public static String getOS() {
-    	return System.getProperty("os.name");
-    }
-
-    /**
-     * Returns the operating system version.
-     */
-    public static String getOSVersion() {
-    	return System.getProperty("os.version");
-    }
+    private static boolean _isOS2;
 
     /**
      * Sets the operating system variables.
@@ -106,7 +91,6 @@ public class OSUtils {
     	_isLinux = false;
     	_isOS2 = false;
     	_isMacOSX = false;
-    
     
     	String os = System.getProperty("os.name").toLowerCase(Locale.US);
     
@@ -129,15 +113,33 @@ public class OSUtils {
     	   _isWindows98 = true;
     	if(os.indexOf("windows me") != -1)
     	   _isWindowsMe = true;
+        
     	_isSolaris = os.indexOf("solaris") != -1;
     	_isLinux   = os.indexOf("linux")   != -1;
         _isOS2     = os.indexOf("os/2")    != -1;
-        if(_isWindows || _isLinux) _supportsTray=true;
+        
+        if(_isWindows || _isLinux)
+            _supportsTray = true;
+        
     	if(os.startsWith("mac os")) {
     		if(os.endsWith("x")) {
     			_isMacOSX = true;
     		}
     	}
+    }    
+
+    /**
+     * Returns the operating system.
+     */
+    public static String getOS() {
+        return System.getProperty("os.name");
+    }
+
+    /**
+     * Returns the operating system version.
+     */
+    public static String getOSVersion() {
+        return System.getProperty("os.version");
     }
 
     /**
