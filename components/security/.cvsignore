@@ -2,3 +2,5 @@ build
 .classpath
 .project
 testData
+target
+.settings
