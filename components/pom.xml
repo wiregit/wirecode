@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.limewire</groupId>
+  <artifactId>default</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <url>http://limewire.org</url>
+  <name>LimeWire Default Project</name>
+
+  <properties>
+    <limewire.version>4.13.1-SNAPSHOT</limewire.version>
+  </properties>
+
+  <modules>
+    <module>common</module>
+    <module>core</module>
+    <module>collection</module>
+    <module>io</module>
+    <module>security</module>
+    <module>setting</module>
+  </modules>
+
+<!--   <repositories> -->
+<!--     <repository> -->
+<!--       <id>limewire</id> -->
+<!--       <name>LimeWire Repository</name> -->
+<!--       <layout>default</layout> -->
+<!--       <url>http://limewire.org/repository</url> -->
+<!--       <snapshots> -->
+<!--         <enabled>true</enabled> -->
+<!--       </snapshots> -->
+<!--     </repository> -->
+<!--   </repositories> -->
+
+  <dependencies> 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>${basedir}/src/main</sourceDirectory>
+    <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
+    <plugins>
+      <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-compiler-plugin</artifactId>
+		<configuration>
+		  <source>1.5</source>
+		  <target>1.5</target>
+	    </configuration>
+     </plugin>
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <configuration>
+          <downloadSources>true</downloadSources>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <outputDirectory>target/site</outputDirectory>
+  </reporting>
+
+</project>
