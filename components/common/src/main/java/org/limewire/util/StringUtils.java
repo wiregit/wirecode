@@ -16,12 +16,20 @@ public class StringUtils {
     /**
      * Collator used for internationalization.
      */
-    private final static Collator COLLATOR;
+    private volatile static Collator COLLATOR;
     
     static {
         COLLATOR = Collator.getInstance(Locale.getDefault());
         COLLATOR.setDecomposition(Collator.FULL_DECOMPOSITION);
         COLLATOR.setStrength(Collator.PRIMARY);
+    }
+    
+    /** Updates the locale that string-matching will use. */
+    public static void setLocale(Locale locale) {
+        Collator later = Collator.getInstance(locale);
+        later.setDecomposition(Collator.FULL_DECOMPOSITION);
+        later.setStrength(Collator.PRIMARY);
+        COLLATOR = later;
     }
 
     
