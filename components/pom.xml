@@ -14,11 +14,13 @@
 
   <modules>
     <module>common</module>
-    <module>core</module>
+    <module>../core</module>
     <module>collection</module>
+    <module>../gui</module>
     <module>io</module>
     <module>security</module>
     <module>setting</module>
+    <module>../tests</module>
   </modules>
 
 <!--   <repositories> -->
@@ -38,13 +40,29 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
-      <scope>test</scope>
+<!--       <scope>test</scope> -->
     </dependency>
   </dependencies>
 
   <build>
-    <sourceDirectory>${basedir}/src/main</sourceDirectory>
-    <testSourceDirectory>${basedir}/src/test</testSourceDirectory>
+    <sourceDirectory>src/main</sourceDirectory>
+    <testSourceDirectory>src/test</testSourceDirectory>
+	<resources>
+      <resource>
+        <directory>src/main</directory>
+		<excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test</directory>
+		<excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
 	    <groupId>org.apache.maven.plugins</groupId>
@@ -53,6 +71,15 @@
 		  <source>1.5</source>
 		  <target>1.5</target>
 	    </configuration>
+     </plugin>
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+        </configuration>
      </plugin>
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
