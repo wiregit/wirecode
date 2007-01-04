@@ -4,3 +4,5 @@ build
 testData
 target
 .settings
+bin
+eclipse
