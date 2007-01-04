@@ -35,6 +35,7 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.RandomOrderHashSet;
 
 
 /**
@@ -136,12 +137,14 @@ public class HostCatcher {
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
-    private final Set<ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = new HashSet<ExtendedEndpoint>();
+    private final Set<ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
+        new RandomOrderHashSet<ExtendedEndpoint>(200);
     
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Set<ExtendedEndpoint> FREE_LEAF_SLOTS_SET = new HashSet<ExtendedEndpoint>();
+    private final Set<ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
+        new RandomOrderHashSet<ExtendedEndpoint>(200);
     
     /**
      * map of locale (string) to sets (of endpoints).
@@ -537,7 +540,7 @@ public class HostCatcher {
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
             if(pr.hasFreeLeafSlots()) {
-                addToFixedSizeSet(endpoint, FREE_LEAF_SLOTS_SET);
+                addToFreeSlotSet(endpoint, FREE_LEAF_SLOTS_SET);
                 // Return now if the pong is not also advertising free 
                 // ultrapeer slots.
                 if(!pr.hasFreeUltrapeerSlots()) {
@@ -551,7 +554,7 @@ public class HostCatcher {
                || //or if the locales match and it has free locale pref. slots
                (ApplicationSettings.LANGUAGE.getValue()
                 .equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
-                addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
+                addToFreeSlotSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
                 return true;
             } 
             
@@ -570,18 +573,14 @@ public class HostCatcher {
     
     /**
      * Utility method for adding the specified host to the specified 
-     * <tt>Set</tt>, fixing the size of the set at the pre-defined limit for
-     * the number of hosts with free slots to store.
+     * <tt>Set</tt> of hosts with free slots. 
      * 
      * @param host the host to add
      * @param hosts the <tt>Set</tt> to add it to
      */
-    private void addToFixedSizeSet(ExtendedEndpoint host, Set<? super ExtendedEndpoint> hosts) {
+    private void addToFreeSlotSet(ExtendedEndpoint host, Set<? super ExtendedEndpoint> hosts) {
         synchronized(this) {
-            // Don't allow the free slots host to expand infinitely.
-            if(hosts.add(host) && hosts.size() > 200) {
-                hosts.remove(hosts.iterator().next());
-            }
+            hosts.add(host);
             
             // Also add it to the list of permanent hosts stored on disk.
             addPermanent(host);
