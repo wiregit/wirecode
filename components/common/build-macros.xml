@@ -39,7 +39,7 @@
         	<property name="limewire.components.@{component}.src"
         			  location="${limewire.components.@{component}.home}/src/main/java"/>	
         	<property name="limewire.components.@{component}.tests"
-        			  location="${limewire.components.@{component}.home}/src/test"/>
+        			  location="${limewire.components.@{component}.home}/src/test/java"/>
         	
         	<property name="build.limewire.components.@{component}.home"
         		      location="${limewire.components.@{component}.home}/build"/>
