@@ -9,12 +9,10 @@
 	</description>
 	
     <import file="build-macros.xml" />
+    <import file="../test-util/build.xml"/>
     
-    <target name="initialize">
-        <!-- the strange use of the blank classpath-refid is to prevent the macro
-             from recursively adding the test's classpath to itself -->
-        <path id="blank"/>
-        <do.setup-properties component="common" common-testpath-refid="blank">
+    <target name="initialize" depends="lw-test-util.initialize">
+        <do.setup-properties component="common">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
 				<pathelement location="${limewire.lib.jars}/icu4j.jar"/>
@@ -23,11 +21,11 @@
         </do.setup-properties>
     </target>
 	
-	<target name="clean" depends="initialize">
+	<target name="clean" depends="initialize, lw-test-util.clean-src">
 	    <do.clean component="common"/>
 	</target>
     
-    <target name="compile" depends="initialize">
+    <target name="compile" depends="initialize, lw-test-util.compile-src">
     	<do.compile component="common"/>
     </target>
 	
@@ -39,11 +37,11 @@
 	    <do.clean-src component="common"/>
 	</target>
 	
-	<target name="compile-tests" depends="initialize, compile-src">
+	<target name="compile-tests" depends="initialize, compile-src, lw-test-util.compile-src">
 	    <do.compile-tests component="common"/>
 	</target>
     
-	<target name="clean-tests" depends="initialize">
+	<target name="clean-tests" depends="initialize, lw-test-util.clean-src">
 	    <do.clean-tests component="common"/>
 	</target>
 	

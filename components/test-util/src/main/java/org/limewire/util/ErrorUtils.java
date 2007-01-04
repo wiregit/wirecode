@@ -26,8 +26,7 @@ public class ErrorUtils {
                                             new Object[] { errorCallbackDelegate },
                                             new Class[] { errorCallbackClass } );
         } catch (Throwable t) {
-            // Oh well -- the environment isn't set up right, nothing we can do.
-            t.printStackTrace();
+            System.err.println("WARNING: Could not setup ErrorCallback within ErrorService.");
             return false;
         }
         

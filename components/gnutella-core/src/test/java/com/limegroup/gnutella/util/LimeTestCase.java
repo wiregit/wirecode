@@ -12,11 +12,13 @@ import java.util.Set;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.Connection;
@@ -38,7 +40,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
-public abstract class LimeTestCase extends BaseTestCase {
+public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
     protected static File _baseDir;
     protected static File _sharedDir;
@@ -166,6 +168,13 @@ public abstract class LimeTestCase extends BaseTestCase {
     public static void beforeAllTestsSetUp() throws Throwable {        
         setupUniqueDirectories();
         setupSettings();
+        // SystemUtils must pretend to not be loaded, so the idle
+        // time isn't counted.
+        // For tests that are testing SystemUtils specifically, they can
+        // set loaded to true.
+        SystemUtils.getIdleTime(); // make it loaded.
+        // then unload it.
+        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
     }
     
     /**

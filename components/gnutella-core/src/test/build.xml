@@ -30,9 +30,6 @@
                 <fileset dir="${limewire.components.tests.home}/lib" includes="*.jar"/>
                 <path refid="build.limewire.components.classes"/>
             </src-classpath>
-            <build-tests-classpath>
-                <path refid="build.limewire.components.tests"/>
-            </build-tests-classpath>
 			<tests-classpath>
             	<path refid="tests.limewire.components.all.classpath"/>
 			    <pathelement location="${limewire.lib.messagebundles}"/>

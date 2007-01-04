@@ -33,7 +33,6 @@
         <element name="src-classpath" optional="true" description="Additional paths for building source"/>
         <element name="tests-classpath" optional="true" description="Additional paths for running tests"/>
         <element name="build-tests-classpath" optional="true" description="Additional paths for building tests"/>
-        <attribute name="common-testpath-refid" default="tests.limewire.components.common.classpath"/>
         <sequential>
         	<property name="limewire.components.@{component}.home"
         		      location="${limewire.components.home}/@{component}"/>
@@ -81,7 +80,7 @@
             
     	    <path id="build.limewire.components.@{component}.tests.classpath">
 	        	<path refid="build.limewire.components.@{component}.buildpath"/>
-    	        <path refid="@{common-testpath-refid}"/> <!-- always requires common tests -->
+    	        <path refid="build.limewire.components.test-util.buildpath"/>
     	        <pathelement location="@{junit}"/>
     	        <build-tests-classpath/>
     	    </path>
@@ -304,10 +303,11 @@
 	    	       fork="true"
 	           	   forkmode="@{forkmode}"
 	    	>
-	            <sysproperty key="java.library.path"       value="${@{nativePathRefId}}"/>
-	    		<sysproperty key="junit.test.method"       value="${method}"/>
-	    		<sysproperty key="just.test.times"         value="${times}"/>
-	    	    <sysproperty key="junit.test.hidetestname" value="${hidetestname}"/>
+	            <sysproperty key="java.library.path"      		 value="${@{nativePathRefId}}"/>
+	    		<sysproperty key="junit.test.method"      		 value="${method}"/>
+	    		<sysproperty key="just.test.times"        		 value="${times}"/>
+	    	    <sysproperty key="junit.test.hidetestname"		 value="${hidetestname}"/>
+	            <sysproperty key="junit.test.ignoreErrorService" value="${ignoreErrorService}"/>
 	            <jvmarg value="-Xmx512M"/>
 	    		
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>

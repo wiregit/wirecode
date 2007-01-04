@@ -8,7 +8,6 @@ import java.util.Random;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
-import org.limewire.security.StubSecureMessageCallback;
 
 import junit.framework.Test;
 
