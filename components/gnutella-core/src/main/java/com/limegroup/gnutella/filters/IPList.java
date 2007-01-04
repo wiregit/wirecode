@@ -37,6 +37,9 @@ import com.limegroup.gnutella.util.Trie.Cursor;
  */
 public class IPList {
     
+    /** A null IP, to use as a comparison when adding. */
+    private static final IP NULL_IP = new IP("*.*.*.*");
+    
     /** The list of IPs. */
     private Trie<IP, IP> ips = new PatriciaTrie<IP, IP>(new IPKeyAnalyzer());
 
@@ -63,6 +66,16 @@ public class IPList {
         try {
             ip = new IP(ipStr);
         } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        // SPECIAL-CASE:
+        // If the IP we're adding is the 'null' key (0.0.0.0/0.0.0.0)
+        // then we must clear the trie.  The AddFilter trick will not
+        // work in this case.
+        if(ip.equals(NULL_IP)) {
+            ips.clear();
+            ips.put(ip, ip);
             return;
         }
                 

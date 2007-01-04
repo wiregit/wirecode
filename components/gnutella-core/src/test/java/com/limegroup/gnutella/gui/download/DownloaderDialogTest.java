@@ -7,7 +7,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.GUIBaseTestCase;
 
 public class DownloaderDialogTest extends GUIBaseTestCase {
