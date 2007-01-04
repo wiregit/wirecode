@@ -7,13 +7,13 @@ import java.util.Iterator;
  * A variant of <tt>FixedSizeArrayHashSet</tt> that allows iterations over
  * its elements in random order. 
  */
-public class RandomOrderHashSet<T> extends FixedSizeArrayHashSet<T> {
+public class RandomOrderHashSet extends FixedSizeArrayHashSet {
 
-    public RandomOrderHashSet(Collection<? extends T> c) {
+    public RandomOrderHashSet(Collection c) {
         super(c);
     }
     
-    public RandomOrderHashSet(int capacity, Collection<? extends T> c) {
+    public RandomOrderHashSet(int capacity, Collection c) {
         super(capacity, c);
     }
 
@@ -25,19 +25,19 @@ public class RandomOrderHashSet<T> extends FixedSizeArrayHashSet<T> {
         super(initialCapacity);
     }
 
-    public Iterator<T> iterator() {
+    public Iterator iterator() {
         return new RandomIterator();
     }
     
-    private class RandomIterator extends UnmodifiableIterator<T> {
-        private final Iterator<Integer> sequence = new RandomSequence(size()).iterator();
+    private class RandomIterator extends UnmodifiableIterator {
+        private final Iterator sequence = new RandomSequence(size()).iterator();
         
         public boolean hasNext() {
             return sequence.hasNext();
         }
         
-        public T next() {
-            return get(sequence.next());
+        public Object next() {
+            return get(((Integer)sequence.next()).intValue());
         }
     }
 }

@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.FixedSizeArrayHashSet;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -137,12 +138,12 @@ public class HostCatcher {
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
-    private final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
+    private final Set FREE_ULTRAPEER_SLOTS_SET = new FixedSizeArrayHashSet(200);
     
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Set FREE_LEAF_SLOTS_SET = new HashSet();
+    private final Set FREE_LEAF_SLOTS_SET = new FixedSizeArrayHashSet(200);
     
     /**
      * map of locale (string) to sets (of endpoints).
@@ -584,9 +585,7 @@ public class HostCatcher {
         
         synchronized(this) {
             // Don't allow the free slots host to expand infinitely.
-            if(hosts.add(host) && hosts.size() > 200) {
-                hosts.remove(hosts.iterator().next());
-            }
+            hosts.add(host);
             
             // Also add it to the list of permanent hosts stored on disk.
             addPermanent(host);

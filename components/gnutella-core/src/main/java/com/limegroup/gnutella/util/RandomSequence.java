@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
  * Logic: http://en.wikipedia.org/wiki/Linear_congruential_generator
  * Thx to Cyclonus for the pow2 hint
  */
-public class RandomSequence implements Iterable<Integer> {
+public class RandomSequence {
     private final int end, pow2, a;
     private int seed;
     
@@ -34,21 +34,21 @@ public class RandomSequence implements Iterable<Integer> {
         return seed;
     }
     
-    public Iterator<Integer> iterator() {
+    public Iterator iterator() {
         return new RandomIterator();
     }
     
-    private class RandomIterator extends  UnmodifiableIterator<Integer> {
+    private class RandomIterator extends  UnmodifiableIterator {
         private int given;
         public boolean hasNext() {
             return given < end;
         }
         
-        public Integer next() {
+        public Object next() {
             if (!hasNext())
                 throw new NoSuchElementException();
             given++;
-            return nextInt();
+            return new Integer(nextInt());
         }
     }
 }
