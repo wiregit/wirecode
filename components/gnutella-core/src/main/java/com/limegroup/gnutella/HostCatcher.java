@@ -992,26 +992,26 @@ public class HostCatcher {
     private ExtendedEndpoint preferenceWithLocale(Set<ExtendedEndpoint> base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
-
+        ExtendedEndpoint ret = null;
         // preference a locale host if we haven't matched any locales yet
         if(!RouterService.getConnectionManager().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
                 Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
-                for(Iterator<ExtendedEndpoint> i = base.iterator(); i.hasNext(); ) {
-                    ExtendedEndpoint next = i.next();
-                    if(locales.contains(next)) {
-                        i.remove();
-                        locales.remove(next);
-                        return next;
+                for(ExtendedEndpoint e : base) {
+                    if(locales.contains(e)) {
+                        locales.remove(e);
+                        ret = e;
+                        break;
                     }
                 }
             }
         }
         
-        Iterator<ExtendedEndpoint> iter = base.iterator();
-        ExtendedEndpoint ee = iter.next();
-        iter.remove();
-        return ee;
+        if (ret == null) 
+            ret = base.iterator().next();
+        
+        base.remove(ret);
+        return ret;
     }
 
     /**
