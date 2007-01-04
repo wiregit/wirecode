@@ -27,7 +27,7 @@ public class SystemUtils {
                 System.loadLibrary("SystemUtilities");
             } else if(CommonUtils.isWindows()) {
                 System.loadLibrary("GenericWindowsUtils");
-                if(CommonUtils.isWindows2000orXP()) {
+                if(CommonUtils.isGoodWindows()) {
                     System.loadLibrary("WindowsV5PlusUtils");
                 }
                 System.loadLibrary("WindowsFirewall");
@@ -63,7 +63,7 @@ public class SystemUtils {
      */
     public static boolean supportsIdleTime() {
         if(isLoaded) {
-            if(CommonUtils.isWindows2000orXP())
+            if(CommonUtils.isGoodWindows())
                 return true;
             else if(CommonUtils.isMacOSX())
                 return true;
