@@ -14,11 +14,8 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.limewire.service.ErrorCallback;
-import org.limewire.service.ErrorService;
 
-
-public abstract class BaseTestCase extends AssertComparisons implements ErrorCallback {
+public abstract class BaseTestCase extends AssertComparisons {
     
     protected volatile static Class _testClass;
     private   final static Timer _testKillerTimer = new Timer(true);
@@ -202,21 +199,8 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
      */
     public void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
-        ErrorService.setErrorCallback(this);
+        setupErrorService();
         setupTestTimer();
-    }
-    
-    /**
-     * Called statically before any settings.
-     */
-    public static void beforeAllTestsSetUp() throws Throwable {
-        // SystemUtils must pretend to not be loaded, so the idle
-        // time isn't counted.
-        // For tests that are testing SystemUtils specifically, they can
-        // set loaded to true.
-        SystemUtils.getIdleTime(); // make it loaded.
-        // then unload it.
-        PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
     }
     
     /**
@@ -318,5 +302,28 @@ public abstract class BaseTestCase extends AssertComparisons implements ErrorCal
     		}
     	};
     }
+    
+    /**
+     * Sets up ErrorService's callback to a dynamic proxy that 
+     * forwards the calls to this class.  This ass-backwards way
+     * of setting up ErrorService must be used because this class
+     * doesn't have compile-time access to ErrorService nor ErrorCallback.
+     *
+     */
+    private void setupErrorService()  {
+        try {
+            Class errorCallbackClass = Class.forName("org.limewire.service.ErrorCallback");
+            Object errorCallbackDelegate = DuckType.implement(errorCallbackClass, this);
+            Class errorServiceClass = Class.forName("org.limewire.service.ErrorService");
+            PrivilegedAccessor.invokeMethod(errorServiceClass,
+                                            "setErrorCallback",
+                                            new Object[] { errorCallbackDelegate },
+                                            new Class[] { errorCallbackClass } );
+        } catch (Throwable t) {
+            // Oh well -- the environment isn't set up right, nothing we can do.
+            t.printStackTrace();
+        }
+    }
+    
 }       
 
