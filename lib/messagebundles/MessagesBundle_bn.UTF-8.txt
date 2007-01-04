@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Defaultএ ফিরে যান
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=সকল Settings, Factory Defaultsএ ফিরিযে নিন
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=এই option সম্পর্কে আরও জানুন...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

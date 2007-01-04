@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=डिफल्ट लागु गर
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=सबै सेटिन्गहरु फ्याक्तोरी डिफल्टमा उल्ताऊ
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=यस विकल्प बारे अझ जान...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

@@ -112,6 +112,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=초기설정으로 복원
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=모든 설정을 초기 상태로 되돌림
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=이 옵션에 대해서 더 배우기...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

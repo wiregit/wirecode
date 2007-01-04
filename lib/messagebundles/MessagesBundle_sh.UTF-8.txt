@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Standardna pode�avanja
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Vrati sva pode�avanja u stanje koje je podesio proizvo�a�
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=Saznaj vi�e o ovome...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

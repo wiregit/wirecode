@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Tosaigh aris le na rialacha c�anna n� nuair
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Tosaigh aris le na defaults on mhonarca.
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=Foghlaim nios mo faoin rud seo
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

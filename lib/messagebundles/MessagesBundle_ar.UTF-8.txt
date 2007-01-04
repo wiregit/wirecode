@@ -110,6 +110,8 @@ OPTIONS_RESTART_REQUIRED=واحدة أو أكثر من الخيارات سيظه
 #? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=ƚҝ ȡ䓭ۤ͠ 摇 ȡϭȑ...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

@@ -112,6 +112,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Obnoviť pôvodné
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Vrátiť všetky nadstavenia na pôvodné
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=Zistiť viac o tejto voľbe...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

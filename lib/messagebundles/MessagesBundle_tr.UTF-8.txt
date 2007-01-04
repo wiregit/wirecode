@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=Varsay�lanlar� Geri Kazan
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=T�m ayarlar� Fabrika ayarlar�na d�nd�
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=Bu se�enek hakk�nda daha fazla bilgi edin...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

@@ -125,6 +125,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=還原預設值
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=將所有設定還原至出廠預設狀態
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=更多關於這個選項的說明...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

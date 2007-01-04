@@ -113,6 +113,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=初期設定に復元
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=すべての設定を初期状態に戻す
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 #? OPTIONS_LEARN_MORE_LABEL=
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".

@@ -110,6 +110,8 @@ OPTIONS_BUTTON_REVERT_TO_DEFAULT=ਡਿਫ਼ੌਲਟ ਓਪਸ਼ੰਜ਼ ਅਪਨਾ
 OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=ਸਾਰੀ ਸੈੱਟਿੰਗਾਂ ਨੂੰ ਸ਼ੁਰੁਆਤੀ ਡਿਫ਼ੌਲਟ ਵੰਗ ਕਰੋ
 #### OPTIONS_LEARN_MORE_LABEL=Learn more about this option...
 OPTIONS_LEARN_MORE_LABEL=ਓਪਸ਼ੰਜ਼ ਬਾਰੇ ਹੋਰ ਜਾਨਕਾਰੀ...
+#### OPTIONS_SEARCH_HERE=Search here
+#? OPTIONS_SEARCH_HERE=
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no".
