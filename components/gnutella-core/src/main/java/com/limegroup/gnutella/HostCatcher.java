@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -997,7 +996,7 @@ public class HostCatcher {
     private ExtendedEndpoint preferenceWithLocale(Set base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
-
+        ExtendedEndpoint ret = null;
         // preference a locale host if we haven't matched any locales yet
         if(!RouterService.getConnectionManager().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
@@ -1005,18 +1004,19 @@ public class HostCatcher {
                 for(Iterator i = base.iterator(); i.hasNext(); ) {
                     Object next = i.next();
                     if(locales.contains(next)) {
-                        i.remove();
+                        ret = (ExtendedEndpoint)next;
                         locales.remove(next);
-                        return (ExtendedEndpoint)next;
+                        break;
                     }
                 }
             }
         }
         
-        Iterator iter = base.iterator();
-        ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
-        iter.remove();
-        return ee;
+        if (ret == null) 
+            ret = (ExtendedEndpoint) base.iterator().next();
+        
+        base.remove(ret);
+        return ret;
     }
 
     /**

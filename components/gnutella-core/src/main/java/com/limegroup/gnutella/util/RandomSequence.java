@@ -17,8 +17,15 @@ public class RandomSequence {
     private int seed;
     
     public RandomSequence(int end) {
-        assert end >= 2;
         this.end = end;
+        
+        // empty or single-element sequence
+        if (end <= 1) {
+            pow2 = 0; 
+            a = 0;
+            return;
+        }
+        
         int pow = 1;
         while (pow < end)
             pow <<= 1;
@@ -28,6 +35,12 @@ public class RandomSequence {
     }
     
     public int nextInt() {
+        if (end < 1)
+            throw new NoSuchElementException();
+        
+        if (end == 1)
+            return 0;
+        
         do {
             seed = (a * seed + 3 ) % pow2;
         } while (seed >= end);
