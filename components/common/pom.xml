@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>  
   <parent>
     <groupId>org.limewire</groupId>
-    <artifactId>default</artifactId>
+    <artifactId>components</artifactId>
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-
+ 
   <artifactId>common</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
@@ -29,5 +29,33 @@
       <artifactId>icu4j</artifactId>
       <version>3.4.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>test-util</artifactId>
+      <version>${limewire.version}</version>
+	  <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+	    <!-- test-util requires classes from common during runtime
+             that are loaded through relfection. Unfortunatelly the 
+			 surefire classloader isolates classes in the current
+             project from being accessed by dependent jars.
+
+			 Setting the classpath below does NOT work.  -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <forkMode>once</forkMode>
+          <argLine>-enableassertions -classpath ${project.build.outputDirectory}</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

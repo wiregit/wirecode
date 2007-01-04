@@ -2,25 +2,47 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.limewire</groupId>
-  <artifactId>default</artifactId>
+  <artifactId>components</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
   <url>http://limewire.org</url>
-  <name>LimeWire Default Project</name>
+  <name>LimeWire Components</name>
 
   <properties>
     <limewire.version>4.13.1-SNAPSHOT</limewire.version>
   </properties>
 
+  <organization>
+    <name>Lime Wire LLC</name>
+    <url>http://limewire.org</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License Version 2</name> 
+      <url>http://www.gnu.org/licenses/gpl.txt</url> 
+      <distribution>repo</distribution> 
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://www.limewire.org/jira/secure/Dashboard.jspa</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:cvs:pserver:guest@cvs.limewire.org:/cvs/components</connection>
+    <tag>HEAD</tag>
+    <url>https://www.limewire.org/fisheye/viewrep/limecvs/</url>
+  </scm>
+
   <modules>
     <module>common</module>
-    <module>../core</module>
     <module>collection</module>
-    <module>../gui</module>
     <module>io</module>
     <module>security</module>
     <module>setting</module>
-    <module>../tests</module>
+    <module>test-util</module>
   </modules>
 
 <!--   <repositories> -->
@@ -34,15 +56,6 @@
 <!--       </snapshots> -->
 <!--     </repository> -->
 <!--   </repositories> -->
-
-  <dependencies> 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-<!--       <scope>test</scope> -->
-    </dependency>
-  </dependencies>
 
   <build>
     <sourceDirectory>src/main</sourceDirectory>
@@ -79,6 +92,8 @@
           <includes>
             <include>**/*Test.java</include>
           </includes>
+          <forkMode>once</forkMode>
+          <argLine>-enableassertions</argLine>
         </configuration>
      </plugin>
      <plugin>
@@ -93,6 +108,39 @@
 
   <reporting>
     <outputDirectory>target/site</outputDirectory>
+    <plugins>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-project-info-reports-plugin</artifactId>
+		<reportSets>
+		  <reportSet>
+		    <reports>
+			  <report>dependencies</report>
+<!-- 			  <report>project-team</report> -->
+<!-- 			  <report>mailing-list</report> -->
+<!-- 			  <report>cim</report> -->
+			  <report>index</report>
+			  <report>issue-tracking</report>
+			  <report>license</report>
+			  <report>scm</report>
+			  <report>summary</report>
+		    </reports>
+		  </reportSet>
+		</reportSets>
+	  </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+    </plugins>
   </reporting>
 
 </project>
