@@ -1,8 +1,8 @@
 package org.limewire.util;
 
 public class PairTuple{
-    Object first;
-    Object second;
+    private final Object first;
+    private final Object second;
     
     //constructor
     public PairTuple(Object obj1, Object obj2){

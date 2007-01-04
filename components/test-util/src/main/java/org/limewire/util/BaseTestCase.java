@@ -199,7 +199,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      */
     public void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
-        setupErrorService();
+        ErrorUtils.setCallback(this);
         setupTestTimer();
     }
     
@@ -302,28 +302,5 @@ public abstract class BaseTestCase extends AssertComparisons {
     		}
     	};
     }
-    
-    /**
-     * Sets up ErrorService's callback to a dynamic proxy that 
-     * forwards the calls to this class.  This ass-backwards way
-     * of setting up ErrorService must be used because this class
-     * doesn't have compile-time access to ErrorService nor ErrorCallback.
-     *
-     */
-    private void setupErrorService()  {
-        try {
-            Class errorCallbackClass = Class.forName("org.limewire.service.ErrorCallback");
-            Object errorCallbackDelegate = DuckType.implement(errorCallbackClass, this);
-            Class errorServiceClass = Class.forName("org.limewire.service.ErrorService");
-            PrivilegedAccessor.invokeMethod(errorServiceClass,
-                                            "setErrorCallback",
-                                            new Object[] { errorCallbackDelegate },
-                                            new Class[] { errorCallbackClass } );
-        } catch (Throwable t) {
-            // Oh well -- the environment isn't set up right, nothing we can do.
-            t.printStackTrace();
-        }
-    }
-    
 }       
 
