@@ -19,6 +19,9 @@
 
 package com.limegroup.mojito.db.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -32,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.util.GenericsUtils;
+import com.limegroup.gnutella.util.GenericsUtils.ScanMode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.DHTValueEntity;
@@ -383,6 +388,20 @@ public class DatabaseImpl implements Database {
             }
         }
         return Collections.unmodifiableList(values);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        
+        GenericsUtils.scanForMap(database
+                , KUID.class
+                , DHTValueBag.class
+                , ScanMode.REMOVE);
     }
     
     public synchronized String toString() {

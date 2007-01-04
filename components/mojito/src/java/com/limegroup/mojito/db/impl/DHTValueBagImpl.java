@@ -1,10 +1,15 @@
 package com.limegroup.mojito.db.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.limegroup.gnutella.util.GenericsUtils;
+import com.limegroup.gnutella.util.GenericsUtils.ScanMode;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.db.DHTValueBag;
 import com.limegroup.mojito.db.DHTValueEntity;
@@ -179,6 +184,20 @@ class DHTValueBagImpl implements DHTValueBag {
      */
     public boolean containsKey(KUID key) {
         return entityMap.containsKey(key);
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        
+        GenericsUtils.scanForMap(entityMap
+                , KUID.class
+                , DHTValueEntity.class
+                , ScanMode.REMOVE);
     }
 
     @Override

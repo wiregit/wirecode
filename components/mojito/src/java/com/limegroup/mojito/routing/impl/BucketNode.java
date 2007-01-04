@@ -30,8 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.TrieUtils;
+import com.limegroup.gnutella.util.GenericsUtils.ScanMode;
 import com.limegroup.gnutella.util.Trie.Cursor;
 import com.limegroup.mojito.KUID;
 import com.limegroup.mojito.routing.Bucket;
@@ -409,6 +411,9 @@ class BucketNode implements Bucket {
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        
+        GenericsUtils.scanForMap(nodeTrie, KUID.class, Contact.class, ScanMode.REMOVE);
+        
         init();
     }
 }
