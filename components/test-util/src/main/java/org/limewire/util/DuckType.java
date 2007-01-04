@@ -11,10 +11,10 @@ import java.lang.reflect.Proxy;
  */
 public class DuckType implements InvocationHandler {
 
-    protected final Object object;
-    protected final Class objectClass;
+    private final Object object;
+    private final Class objectClass;
     
-    protected DuckType(Object object) {
+    private DuckType(Object object) {
         this.object = object;
         this.objectClass = object.getClass();
     }
