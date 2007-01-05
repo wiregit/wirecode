@@ -968,7 +968,7 @@ public class HostCatcher {
         else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
             Iterator<ExtendedEndpoint> iter = FREE_LEAF_SLOTS_SET.iterator();
             ExtendedEndpoint ee = iter.next();
-            iter.remove();
+            FREE_LEAF_SLOTS_SET.remove(ee);
             return ee;
         } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
