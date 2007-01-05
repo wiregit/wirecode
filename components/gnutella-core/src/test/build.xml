@@ -58,7 +58,7 @@
     </target>
     
     <target name="compile-tests" depends="initialize, lw-components.compile-tests">
-    	<do.compile-tests component="tests" excludes="**"/>
+    	<do.compile-tests component="tests"/>
     </target>
     
 	<target name="test"
@@ -81,7 +81,7 @@
 	<target name="test-all" 
             description="Runs every test in this module."
             depends="compile">
-	    <do.test-all component="all"
+	    <do.test-all component="tests"
 	    			 forkmode="perTest"/>
 	</target>
     

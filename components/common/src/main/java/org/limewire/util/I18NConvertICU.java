@@ -32,19 +32,19 @@ final class I18NConvertICU extends AbstractI18NConverter {
         java.util.BitSet bs2 = null;
     	Map hm = null;
 
-        InputStream fi = CommonUtils.getResourceStream("excluded.dat");
+        InputStream fi = CommonUtils.getResourceStream("org/limewire/util/excluded.dat");
         //read in the explusion bitset
         ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(fi));
         bs = (java.util.BitSet)ois.readObject();
         ois.close();
         
-        fi = CommonUtils.getResourceStream("caseMap.dat");
+        fi = CommonUtils.getResourceStream("org/limewire/util/caseMap.dat");
         //read in the case map
         ois = new ConverterObjectInputStream(new BufferedInputStream(fi));
         hm = (HashMap)ois.readObject();
         ois.close();
         
-        fi = CommonUtils.getResourceStream("replaceSpace.dat");
+        fi = CommonUtils.getResourceStream("org/limewire/util/replaceSpace.dat");
         ois = new ObjectInputStream(new BufferedInputStream(fi));
         bs2 = (java.util.BitSet)ois.readObject();
         ois.close();

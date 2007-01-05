@@ -36,11 +36,19 @@
         <sequential>
         	<property name="limewire.components.@{component}.home"
         		      location="${limewire.components.home}/@{component}"/>
+        	<property name="limewire.components.@{component}.src.home"
+        			  location="${limewire.components.@{component}.home}/src/main"/>	
         	<property name="limewire.components.@{component}.src"
-        			  location="${limewire.components.@{component}.home}/src/main/java"/>	
-        	<property name="limewire.components.@{component}.tests"
-        			  location="${limewire.components.@{component}.home}/src/test/java"/>
-        	
+            		  location="${limewire.components.@{component}.src.home}/java"/>
+        	<property name="limewire.components.@{component}.src.resources"
+            		  location="${limewire.components.@{component}.src.home}/resources"/>
+            <property name="limewire.components.@{component}.tests.home"
+        			  location="${limewire.components.@{component}.home}/src/test"/>
+          	<property name="limewire.components.@{component}.tests"
+              		  location="${limewire.components.@{component}.tests.home}/java"/>
+          	<property name="limewire.components.@{component}.tests.resources"
+              		  location="${limewire.components.@{component}.tests.home}/resources"/>
+            
         	<property name="build.limewire.components.@{component}.home"
         		      location="${limewire.components.@{component}.home}/build"/>
         	<property name="build.limewire.components.@{component}.classes"
@@ -89,6 +97,8 @@
         	    <pathelement location="${cloverjar}"/>
         		<path refid="build.limewire.components.@{component}.tests.classpath"/>
         		<pathelement location="${build.limewire.components.@{component}.tests}"/>
+        	    <pathelement location="${limewire.components.@{component}.src.resources}"/>
+        	    <pathelement location="${limewire.components.@{component}.tests.resources}"/>
         	    <tests-classpath/>
         	</path>	
         </sequential>
@@ -148,8 +158,6 @@
 	
 	<macrodef name="do.compile-tests" description="Compiles test code and copies resources tests use.">
 	    <attribute name="component"/>
-	    <attribute name="resourcedir" default="${limewire.components.@{component}.tests}"/>
-	    <attribute name="excludes" default="" description="Pattern to exclude from resourcedir"/>
 		<sequential>
 			<mkdir dir="${build.limewire.components.@{component}.tests}"/>
 			<javac destdir		="${build.limewire.components.@{component}.tests}"
@@ -166,15 +174,6 @@
 			    </src>
 				<classpath refid="build.limewire.components.@{component}.tests.classpath"/>
 			</javac>
-		    
-		    <!-- copy any required resources too -->
-		   	<copy todir="${build.limewire.components.@{component}.tests}">
-		   		<fileset dir="@{resourcedir}">
-		   	    	<exclude name="**/*.java"/>
-		   		    <exclude name="**/*.class"/>
-		   		    <exclude name="@{excludes}"/>
-		   		</fileset>
-			</copy>
 		</sequential>
 	</macrodef>
     
@@ -247,9 +246,11 @@
     <macrodef name="do.jar" description="Generates a jar of the classfiles.">
     	<attribute name="component"/>
     	<element name="more-jar-elements" optional="true"/>
-        <attribute name="basedir" default="${build.limewire.components.@{component}.classes}"/>
-        <attribute name="compress" default="false"/>
-        <attribute name="excludes" default=""/>
+        <attribute name="basedir"     default="${build.limewire.components.@{component}.classes}"/>
+        <attribute name="resourcedir" default="${limewire.components.@{component}.src.resources}"/>
+        <attribute name="resexclude"  default=""/>
+        <attribute name="compress"    default="false"/>
+        <attribute name="excludes"    default=""/>
         <sequential>
             <do.dist-init component="@{component}"/>
             <delete file="${dist.limewire.components.@{component}.jar}"/>
@@ -258,6 +259,7 @@
                  basedir="@{basedir}"
                  excludes="@{excludes}"
             >
+                <fileset dir="@{resourcedir}" excludes="@{resexclude}"/>
                 <more-jar-elements/>
             </jar>
         </sequential>
