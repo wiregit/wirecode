@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>  
   <parent>
     <groupId>org.limewire</groupId>
-    <artifactId>components</artifactId>
+    <artifactId>lw-components</artifactId>
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
  
-  <artifactId>test-util</artifactId>
+  <artifactId>lw-test-util</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
   <name>LimeWire Test Utilities Component</name>

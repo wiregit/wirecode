@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.limewire</groupId>
-  <artifactId>components</artifactId>
+  <artifactId>lw-components</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
   <url>http://limewire.org</url>
@@ -62,18 +62,12 @@
     <testSourceDirectory>src/test/java</testSourceDirectory>
 	<resources>
       <resource>
-        <directory>src/main/java</directory>
-		<excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
+        <directory>src/main/resources</directory>
       </resource>
     </resources>
     <testResources>
       <testResource>
-        <directory>src/test/java</directory>
-		<excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
+        <directory>src/test/resources</directory>
       </testResource>
     </testResources>
     <plugins>

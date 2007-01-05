@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>  
   <parent>
     <groupId>org.limewire</groupId>
-    <artifactId>components</artifactId>
+    <artifactId>lw-components</artifactId>
     <version>1.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>collection</artifactId>
+  <artifactId>lw-collection</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
   <name>LimeWire Collection Component</name>
@@ -16,12 +16,12 @@
   <dependencies> 
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>common</artifactId>
+      <artifactId>lw-common</artifactId>
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>test-util</artifactId>
+      <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
 	  <scope>test</scope>
     </dependency>
