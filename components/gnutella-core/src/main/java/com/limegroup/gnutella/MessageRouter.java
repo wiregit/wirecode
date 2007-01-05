@@ -23,6 +23,8 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.filters.IP;
+import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.guess.QueryKey;
@@ -64,6 +66,7 @@ import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.ResultCounter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
@@ -2693,8 +2696,15 @@ public abstract class MessageRouter {
     	//I'm not locking it.
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
-    	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.reply(newMsg);
+        
+        IPList allowed = new IPList();
+        String [] allowedIps = FilterSettings.CRAWLER_IP_ADDRESSES.getValue();
+        for (int i = 0; i < allowedIps.length; i++)
+            allowed.add(allowedIps[i]);
+        if (allowed.contains(new IP(handler.getAddress()))) {
+            UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
+            handler.reply(newMsg);
+        }
     }
     
     /**

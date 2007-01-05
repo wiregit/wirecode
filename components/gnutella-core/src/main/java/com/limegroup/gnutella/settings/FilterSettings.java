@@ -74,6 +74,13 @@ public class FilterSettings extends LimeProps {
         FACTORY.createStringArraySetting("WHITE_LISTED_IP_ADDRESSES", new String[0]);
     
     /**
+     * An array of ip addresses that LimeWire will respond to.  
+     */
+    public static final StringArraySetting CRAWLER_IP_ADDRESSES =
+        FACTORY.createSettableStringArraySetting("CRAWLER_IPS", new String[]{"*.*.*.*"}, 
+                "FilterSettings.crawlerIps");
+    
+    /**
 	 * An array of words that the user has banned from appearing in
 	 * search results.
 	 */

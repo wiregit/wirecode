@@ -116,6 +116,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
                 new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {localIP,"127.*.*.*"});
+        FilterSettings.CRAWLER_IP_ADDRESSES.setValue(new String[]{"*.*.*.*"});
         ConnectionSettings.PORT.setValue(PORT);
         
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
@@ -343,6 +344,14 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
             throw ex;
         }
         sleep();
+    }
+    
+    public void testNotAllowed() throws Exception {
+        FilterSettings.CRAWLER_IP_ADDRESSES.setValue(new String[0]);
+        try {
+            tryMessage();
+            fail("message should fail");
+        } catch (Exception expected){}
     }
     
     /**
