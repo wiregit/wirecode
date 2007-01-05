@@ -21,8 +21,6 @@ import com.limegroup.mojito.settings.ContextSettings;
  * 
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
- * This may potentially create unstable transitional states, but they eventually
- * get corrected by the NodeAssigner. 
  * 
  */
 public class LimeDHTManager implements DHTManager {
@@ -55,27 +53,43 @@ public class LimeDHTManager implements DHTManager {
      * */
     private ThreadPool threadPool;
     
+    private volatile boolean stopped;
+    
     public LimeDHTManager(ThreadPool threadPool) {
         this.threadPool = threadPool;
     }
     
-    public synchronized void start(boolean activeMode) {
-    	
-    	//controller already running in the correct mode?
-    	if(controller.isRunning() 
-    			&& (controller.isActiveNode() == activeMode)) {
-    		return;
-    	}
+    public void start(final boolean activeMode) {
         
-    	controller.stop();
+        stopped = false;
+        Runnable r = new Runnable() {
+            public void run() {
+                
+                synchronized(LimeDHTManager.this) {
+                    //could have been stopped before this gets executed
+                    if(stopped) {
+                        return;
+                    }
+                    
+                    //controller already running in the correct mode?
+                    if(controller.isRunning() 
+                            && (controller.isActiveNode() == activeMode)) {
+                        return;
+                    }
+                    
+                    controller.stop();
 
-    	if (activeMode) {
-            controller = new ActiveDHTNodeController(vendor, version, this);
-        } else {
-            controller = new PassiveDHTNodeController(vendor, version, this);
-        }
+                    if (activeMode) {
+                        controller = new ActiveDHTNodeController(vendor, version, LimeDHTManager.this);
+                    } else {
+                        controller = new PassiveDHTNodeController(vendor, version, LimeDHTManager.this);
+                    }
 
-        controller.start();
+                    controller.start();
+                }
+            }
+        };
+        threadPool.invokeLater(r);
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
@@ -122,7 +136,12 @@ public class LimeDHTManager implements DHTManager {
         return (controller.isActiveNode() && controller.isRunning());
     }
     
+    /**
+     * This method has to be synchronized to make sure the
+     * DHT actually gets stopped and persisted when it is called.
+     */
     public synchronized void stop(){
+        stopped = true;
         controller.stop();
         controller = new NullDHTController();
     }
