@@ -100,7 +100,7 @@ public class SimpleTimerTest extends BaseTestCase {
             t.cancel();
             sleep(3*T);
             
-            assertEquals( 1, now.exceptions );
+            assertEquals( 1, now.getExceptionCount() );
         } finally {
             ErrorService.setErrorCallback(old);
         }

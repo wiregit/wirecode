@@ -1,20 +1,24 @@
 package org.limewire.service;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.limewire.service.ErrorCallback;
 
 /**
  * Simple class that counts up how many exceptions it recieved.
  */
 public class ErrorCallbackStub implements ErrorCallback {
-    public int exceptions = 0;
+    private final AtomicInteger exceptions = new AtomicInteger(0);
     
     public void error(Throwable t) {
-      //  t.printStackTrace();
-        exceptions++;
+        exceptions.getAndIncrement();
     }
     
     public void error(Throwable t, String detail) {
-      //  t.printStackTrace();
-        exceptions++;
+        exceptions.getAndIncrement();
+    }
+    
+    public int getExceptionCount() {
+        return exceptions.get();
     }
 }   
