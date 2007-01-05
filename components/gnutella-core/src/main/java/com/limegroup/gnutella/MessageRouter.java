@@ -2697,11 +2697,18 @@ public abstract class MessageRouter {
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
         
-        IPList allowed = new IPList();
-        String [] allowedIps = FilterSettings.CRAWLER_IP_ADDRESSES.getValue();
-        for (int i = 0; i < allowedIps.length; i++)
-            allowed.add(allowedIps[i]);
-        if (allowed.contains(new IP(handler.getAddress()))) {
+        boolean allow = false;
+        try {
+            IPList allowed = new IPList();
+            String [] allowedIps = FilterSettings.CRAWLER_IP_ADDRESSES.getValue();
+            for (int i = 0; i < allowedIps.length; i++)
+                allowed.add(allowedIps[i]);
+            allow = allowed.contains(new IP(handler.getAddress()));
+        } catch (IllegalArgumentException badSimpp) {
+            allow = true;
+        }
+        
+        if (allow) {
             UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
             handler.reply(newMsg);
         }
