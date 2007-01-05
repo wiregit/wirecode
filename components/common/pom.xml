@@ -37,25 +37,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-	    <!-- test-util requires classes from common during runtime
-             that are loaded through relfection. Unfortunatelly the 
-			 surefire classloader isolates classes in the current
-             project from being accessed by dependent jars.
-
-			 Setting the classpath below does NOT work.  -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>**/*Test.java</include>
-          </includes>
-          <forkMode>once</forkMode>
-          <argLine>-enableassertions -classpath ${project.build.outputDirectory}</argLine>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

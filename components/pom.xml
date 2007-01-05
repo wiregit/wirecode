@@ -31,7 +31,7 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:cvs:pserver:guest@cvs.limewire.org:/cvs/components</connection>
+    <connection>scm:cvs:pserver:guest:guest@cvs.limewire.org:/cvs:components</connection>
     <tag>HEAD</tag>
     <url>https://www.limewire.org/fisheye/viewrep/limecvs/</url>
   </scm>
