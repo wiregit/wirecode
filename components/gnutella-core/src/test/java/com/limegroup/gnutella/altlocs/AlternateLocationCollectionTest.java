@@ -19,6 +19,7 @@ import com.limegroup.gnutella.util.FixedSizeSortedSet;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class AlternateLocationCollectionTest extends LimeTestCase {
 
 	private Set _alternateLocations;

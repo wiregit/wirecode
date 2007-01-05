@@ -27,6 +27,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
+@SuppressWarnings("unchecked")
 public class MulticastTest extends LimeTestCase {
 
     private static ActivityCallback CALLBACK;

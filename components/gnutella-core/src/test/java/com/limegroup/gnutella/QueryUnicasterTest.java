@@ -30,6 +30,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 
+@SuppressWarnings("unchecked")
 public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase {
     private static final Log LOG = LogFactory.getLog(QueryUnicasterTest.class);
     

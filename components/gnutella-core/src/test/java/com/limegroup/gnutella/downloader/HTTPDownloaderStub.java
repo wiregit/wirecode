@@ -12,6 +12,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 /**
  * stubbed out HTTPDownloader.  Extend this stub to override specific behavior
  */
+@SuppressWarnings("all")
 public class HTTPDownloaderStub extends HTTPDownloader {
 
 	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {

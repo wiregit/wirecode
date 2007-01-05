@@ -11,7 +11,7 @@ import junit.framework.Test;
 
 
 
-
+@SuppressWarnings("unchecked")
 public class MultiIteratorTest extends LimeTestCase {
 	
 	public MultiIteratorTest(String name) {

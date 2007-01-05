@@ -10,6 +10,7 @@ import junit.framework.Test;
 /**
  * Unit tests for FixedsizeForgetfulHashMap
  */
+@SuppressWarnings("unchecked")
 public class FixedSizeExpiringSetTest extends com.limegroup.gnutella.util.LimeTestCase {
 	
 	Collection empty1,empty2,nullColl;

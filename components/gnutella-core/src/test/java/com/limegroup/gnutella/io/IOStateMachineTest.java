@@ -10,6 +10,7 @@ import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.connection.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+@SuppressWarnings("unchecked")
 public class IOStateMachineTest extends LimeTestCase {
     
     public IOStateMachineTest(String name) {

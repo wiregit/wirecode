@@ -10,6 +10,7 @@ import junit.framework.Test;
 /**
  * Unit tests for FixedsizeForgetfulHashSetTest
  */
+@SuppressWarnings("unchecked")
 public class FixedsizeForgetfulHashSetTest extends LimeTestCase {
             
     public FixedsizeForgetfulHashSetTest(String name) {

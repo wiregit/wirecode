@@ -15,6 +15,7 @@ import com.limegroup.gnutella.downloader.Interval;
 /**
  * Unit tests for IntervalSet
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class IntervalSetTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(IntervalSetTest.class);

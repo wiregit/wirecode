@@ -40,6 +40,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  *                             LEAF[0]
  *
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;
     private static final long EXPIRE_TIME = 20 * 1000;

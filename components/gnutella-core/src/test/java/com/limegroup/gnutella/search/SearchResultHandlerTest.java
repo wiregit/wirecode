@@ -22,6 +22,7 @@ import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
+@SuppressWarnings("unchecked")
 public class SearchResultHandlerTest extends LimeTestCase {
     
     private StubCallback callback = new StubCallback();

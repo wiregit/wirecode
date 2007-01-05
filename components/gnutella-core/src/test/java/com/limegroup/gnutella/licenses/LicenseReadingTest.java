@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+@SuppressWarnings("unchecked")
 public final class LicenseReadingTest extends LimeTestCase {
 
 	public LicenseReadingTest(String name) {

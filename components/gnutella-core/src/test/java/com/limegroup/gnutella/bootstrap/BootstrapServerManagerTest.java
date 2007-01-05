@@ -19,6 +19,7 @@ import com.limegroup.gnutella.util.EncodingUtils;
 /**
  * Unit tests for BootstrapServerManager.
  */
+@SuppressWarnings("unchecked")
 public class BootstrapServerManagerTest extends LimeTestCase {
     public BootstrapServerManagerTest(String name) {
         super(name);
@@ -375,6 +376,7 @@ public class BootstrapServerManagerTest extends LimeTestCase {
 }
 
 /** Overrides the add(Endpoint, boolean) method) */
+@SuppressWarnings("unchecked")
 class TestHostCatcher extends HostCatcher {
     List /* of Endpoint */ list=new ArrayList(20);
 
@@ -394,6 +396,7 @@ class TestHostCatcher extends HostCatcher {
 }
 
 /** A BootstrapServerManager that tries host in a round-robin fashion. */
+@SuppressWarnings("unchecked")
 class TestBootstrapServerManager extends BootstrapServerManager {
     
     public int failed = 0;

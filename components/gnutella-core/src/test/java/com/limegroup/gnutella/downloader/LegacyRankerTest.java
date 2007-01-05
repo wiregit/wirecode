@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * Tests that the legacy ranker is properly selecting which 
  * RFDs it should return.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class LegacyRankerTest extends LimeTestCase {
 
     public LegacyRankerTest(String name) {

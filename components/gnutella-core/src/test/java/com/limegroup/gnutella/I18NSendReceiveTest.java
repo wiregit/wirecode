@@ -28,6 +28,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
+@SuppressWarnings("unchecked")
 public class I18NSendReceiveTest 
     extends com.limegroup.gnutella.util.LimeTestCase {
 

@@ -23,6 +23,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  *
  * ULTRAPEER_1  ----  ULTRAPEER_2
  */
+@SuppressWarnings("unchecked")
 public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
     private static ActivityCallback CALLBACK;        

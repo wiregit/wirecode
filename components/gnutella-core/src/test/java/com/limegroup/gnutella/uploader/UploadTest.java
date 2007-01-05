@@ -92,6 +92,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Test that a client uploads a file correctly.  Depends on a file
  * containing the lowercase characters a-z.
  */
+@SuppressWarnings("unchecked")
 public class UploadTest extends LimeTestCase {
     private static final int PORT = 6668;
     /** The file name, plain and encoded. */

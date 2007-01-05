@@ -14,6 +14,7 @@ import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 
+@SuppressWarnings("unchecked")
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public HTTPDownloaderTest(String name) {

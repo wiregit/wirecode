@@ -28,6 +28,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("unchecked")
 public class CreationTimeCacheTest 
     extends com.limegroup.gnutella.util.LimeTestCase {
     private static final int PORT=6669;

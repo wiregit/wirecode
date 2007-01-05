@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Tests that Throttle does its thing.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class NBThrottleTest extends LimeTestCase {
 
     private final int TICKS_PER_SECOND = 10;

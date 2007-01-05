@@ -42,6 +42,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *    in.
  * 3) Wakes up from the GAVE_UP state when a new, valid query comes in.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class RequeryDownloadTest 
     extends com.limegroup.gnutella.util.LimeTestCase {
 

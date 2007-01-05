@@ -22,6 +22,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 /**
  * Checks whether Meta-Queries are correctly answered, etc.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     public ServerSideMetaQueryTest(String name) {

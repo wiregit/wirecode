@@ -36,6 +36,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+@SuppressWarnings("unchecked")
 public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     protected static final String EXTENSION = "XYZ";

@@ -17,6 +17,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.NameValue;
 
+@SuppressWarnings("unchecked")
 public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public PingRequestTest(String name) {
         super(name);

@@ -8,6 +8,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+@SuppressWarnings("unchecked")
 public class RRProcessingQueueTest extends LimeTestCase {
     public RRProcessingQueueTest(String name) {
         super(name);

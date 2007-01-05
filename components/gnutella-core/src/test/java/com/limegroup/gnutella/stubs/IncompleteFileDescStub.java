@@ -21,6 +21,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
  * It also stubs out some methods.  Feel free to stub out more methods as
  * need arises.
  */
+@SuppressWarnings("unchecked")
 public class IncompleteFileDescStub extends IncompleteFileDesc {
 	public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final Set set;

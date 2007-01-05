@@ -13,6 +13,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 import junit.framework.Test;
 
+@SuppressWarnings("unchecked")
 public class QueryUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public QueryUtilsTest(String name) {

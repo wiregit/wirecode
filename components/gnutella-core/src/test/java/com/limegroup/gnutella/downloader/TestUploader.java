@@ -44,6 +44,7 @@ interface HTTP11Listener {
 	public void requestHandled();
 }
 
+@SuppressWarnings("all")
 public class TestUploader extends AssertComparisons {    
     
     private static final Log LOG = LogFactory.getLog(TestUploader.class);

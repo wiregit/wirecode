@@ -14,6 +14,7 @@ import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
+@SuppressWarnings("unchecked")
 public class ClientSideInitialMessagesTest extends ClientSideTestCase {
     protected static int TIMEOUT = 2000;
 

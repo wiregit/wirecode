@@ -9,6 +9,7 @@ import junit.framework.Test;
 /**
  * Unit tests for ForgetfulHashMap
  */
+@SuppressWarnings("unchecked")
 public class ForgetfulHashMapTest extends LimeTestCase {
             
 	public ForgetfulHashMapTest(String name) {

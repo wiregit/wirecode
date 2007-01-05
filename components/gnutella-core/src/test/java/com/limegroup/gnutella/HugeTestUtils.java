@@ -15,6 +15,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
  * This class provides convenient data and utility functions to
  * huge test classes.
  */
+@SuppressWarnings("unchecked")
 public final class HugeTestUtils {
 
 	public static final URL[] BAD_PORT_URLS = new URL[2];

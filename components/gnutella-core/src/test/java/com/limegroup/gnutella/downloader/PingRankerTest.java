@@ -41,6 +41,7 @@ import com.limegroup.gnutella.util.IntervalSet;
  * and how it ranks hosts based on the returned results.
  *
  */
+@SuppressWarnings("unchecked")
 public class PingRankerTest extends LimeTestCase {
 
     public PingRankerTest(String name) {

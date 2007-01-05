@@ -21,6 +21,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
  * of right events.  
  */
+@SuppressWarnings("all")
 public class ConnectionManagerTest extends LimeTestCase {
 
     private static TestHostCatcher CATCHER;

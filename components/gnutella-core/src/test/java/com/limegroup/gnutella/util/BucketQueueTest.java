@@ -10,6 +10,7 @@ import com.limegroup.gnutella.Endpoint;
 /**
  * Unit tests for BucketQueue
  */
+@SuppressWarnings("unchecked")
 public class BucketQueueTest extends LimeTestCase {
             
 	public BucketQueueTest(String name) {

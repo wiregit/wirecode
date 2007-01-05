@@ -31,6 +31,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * Tests the issuing of Push Request through udp and failover to tcp.
  */
+@SuppressWarnings("unchecked")
 public class UDPPushTest extends LimeTestCase {
 	
 	public UDPPushTest(String name) {

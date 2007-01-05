@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
+@SuppressWarnings("unchecked")
 public class LongHashMapTest extends LimeTestCase {
 
     public LongHashMapTest(String name) {

@@ -35,6 +35,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * this class tests that the node properly detects if it is
  * capable of firewall to firewall transfers.
  */
+@SuppressWarnings("unchecked")
 public class FWTDetectionTest extends LimeTestCase {
     
     public FWTDetectionTest(String name) {

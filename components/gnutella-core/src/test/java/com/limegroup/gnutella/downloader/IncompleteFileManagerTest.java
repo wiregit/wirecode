@@ -24,6 +24,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;

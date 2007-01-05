@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.limegroup.gnutella.messages.Message;
 
+@SuppressWarnings("unchecked")
 class StubSentHandler implements SentMessageHandler {
     
     private List SENT = new LinkedList();

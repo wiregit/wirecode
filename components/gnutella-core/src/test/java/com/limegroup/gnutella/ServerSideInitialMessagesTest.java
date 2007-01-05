@@ -19,6 +19,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  *  Tests that an Ultrapeer and Leaf correctly send and parse some initial messages
  *
  */
+@SuppressWarnings("unchecked")
 public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     protected static int TIMEOUT = 2000;
 

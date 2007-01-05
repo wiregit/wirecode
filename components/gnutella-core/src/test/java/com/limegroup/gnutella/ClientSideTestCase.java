@@ -42,6 +42,7 @@ import com.limegroup.gnutella.spam.SpamManager;
  * and numUPs (for the number of Ultrapeers to connect to, must be 1-4), 
  * and main and suite().
  */
+@SuppressWarnings("all")
 public abstract class ClientSideTestCase 
     extends com.limegroup.gnutella.util.LimeTestCase {
     public static final int SERVER_PORT = 6669;

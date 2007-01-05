@@ -51,6 +51,7 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 
+@SuppressWarnings("unchecked")
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);

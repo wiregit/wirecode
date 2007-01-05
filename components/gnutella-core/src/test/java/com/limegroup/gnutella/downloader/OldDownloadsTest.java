@@ -19,6 +19,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 /**
  * Tests backwards compatibility with old downloads.dat files.
  */
+@SuppressWarnings("unchecked")
 public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         
     private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);

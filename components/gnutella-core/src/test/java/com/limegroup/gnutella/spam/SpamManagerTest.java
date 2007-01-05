@@ -14,6 +14,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+
+@SuppressWarnings("unchecked")
 public class SpamManagerTest extends LimeTestCase {
 
     public SpamManagerTest(String name) {

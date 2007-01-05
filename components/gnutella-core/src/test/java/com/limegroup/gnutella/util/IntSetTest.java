@@ -11,6 +11,7 @@ import junit.framework.Test;
 /**
  * Unit tests for IntSet
  */
+@SuppressWarnings("unchecked")
 public class IntSetTest extends LimeTestCase {
     
     IntSet s, s1, s2;

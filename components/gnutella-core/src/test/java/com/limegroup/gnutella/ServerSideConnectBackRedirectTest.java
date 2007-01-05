@@ -35,6 +35,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;

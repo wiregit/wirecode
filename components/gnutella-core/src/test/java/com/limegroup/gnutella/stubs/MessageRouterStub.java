@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /** A stub for MessageRouter that does nothing. */
+@SuppressWarnings("unchecked")
 public class MessageRouterStub extends MessageRouter {
     
     @Override

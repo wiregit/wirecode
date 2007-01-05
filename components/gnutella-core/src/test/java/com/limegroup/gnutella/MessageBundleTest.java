@@ -14,6 +14,7 @@ import junit.framework.Test;
 /**
  * Test the message bundles to ensure uniqueness of keys.
  */
+@SuppressWarnings("unchecked")
 public final class MessageBundleTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public MessageBundleTest(String name) {

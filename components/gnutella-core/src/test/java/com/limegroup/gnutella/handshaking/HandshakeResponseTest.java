@@ -30,6 +30,7 @@ import com.limegroup.gnutella.util.TestConnectionManager;
 /**
  * Tests the functionality of the <tt>HandshakeResponse</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class HandshakeResponseTest extends LimeTestCase {
 
     private static HandshakeResponse ULTRAPEER_HEADERS;

@@ -17,6 +17,7 @@ import com.limegroup.gnutella.util.NameValue;
 /**
  * Tests for the XMLParsingUtils class
  */
+@SuppressWarnings("unchecked")
 public class XMLParsingUtilsTest extends LimeTestCase {
     
     private static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";

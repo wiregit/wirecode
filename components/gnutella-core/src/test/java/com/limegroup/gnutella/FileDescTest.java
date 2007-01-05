@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;

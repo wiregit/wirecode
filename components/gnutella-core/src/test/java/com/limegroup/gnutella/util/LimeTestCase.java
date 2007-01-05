@@ -40,6 +40,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
+@SuppressWarnings("unchecked")
 public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
     protected static File _baseDir;

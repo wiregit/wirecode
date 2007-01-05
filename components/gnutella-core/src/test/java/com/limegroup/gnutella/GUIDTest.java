@@ -12,6 +12,7 @@ import junit.framework.Test;
 /**
  * Unit tests for GUID.
  */
+@SuppressWarnings("unchecked")
 public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
     private byte[] bytes;
     private byte[] b1;

@@ -28,6 +28,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 /**
  * Tests that UDP host ranker works.
  */
+@SuppressWarnings("unchecked")
 public class UDPHostRankerTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super

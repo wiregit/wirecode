@@ -10,6 +10,7 @@ import junit.framework.Test;
 /**
  * a test for the round robin queues.
  */
+@SuppressWarnings("unchecked")
 public class RoundRobinQueueTest extends LimeTestCase {
 
 	static Integer [] objects = new Integer[20];

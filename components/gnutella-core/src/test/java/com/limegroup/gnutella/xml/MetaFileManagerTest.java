@@ -26,6 +26,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
  * the same tests ran for SimpleFileManager can be run for 
  * MetaFileManager.
  */
+@SuppressWarnings("unchecked")
 public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest {
 
     public MetaFileManagerTest(String name) {

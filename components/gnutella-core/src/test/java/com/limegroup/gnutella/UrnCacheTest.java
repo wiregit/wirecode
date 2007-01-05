@@ -14,6 +14,7 @@ import junit.framework.Test;
 /**
  * Tests the public methods of the UrnCache class.
  */
+@SuppressWarnings("unchecked")
 public final class UrnCacheTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     /**

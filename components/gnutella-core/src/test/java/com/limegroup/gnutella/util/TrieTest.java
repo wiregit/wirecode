@@ -12,6 +12,7 @@ import junit.framework.Test;
 /**
  * Tests Trie.
  */
+@SuppressWarnings("unchecked")
 public class TrieTest extends com.limegroup.gnutella.util.LimeTestCase {
     public TrieTest(String name) {
         super(name);

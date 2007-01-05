@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 class StubSelector extends AbstractSelector {
     
     private Set keys = new HashSet();

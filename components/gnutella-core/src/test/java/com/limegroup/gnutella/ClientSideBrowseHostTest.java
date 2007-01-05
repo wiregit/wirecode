@@ -33,6 +33,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("unchecked")
 public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
     private MyActivityCallback callback;

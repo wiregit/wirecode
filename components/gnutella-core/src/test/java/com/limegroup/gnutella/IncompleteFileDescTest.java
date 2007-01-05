@@ -13,6 +13,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
 
+@SuppressWarnings("unchecked")
 public class IncompleteFileDescTest extends LimeTestCase {
     
     private IncompleteFileDesc ifd;

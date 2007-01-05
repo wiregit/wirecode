@@ -40,6 +40,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("unchecked")
 public class ClientSidePushProxyTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super

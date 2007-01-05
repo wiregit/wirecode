@@ -21,6 +21,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.stubs.FileDescStub;
 
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     public VendorMessageTest(String name) {
         super(name);

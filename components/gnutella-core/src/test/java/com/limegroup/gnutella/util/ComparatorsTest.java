@@ -11,6 +11,7 @@ import java.util.TreeMap;
  * 
  * TODO:: add tests for both FileComparator and StringComparator.
  */
+@SuppressWarnings("unchecked")
 public class ComparatorsTest extends LimeTestCase {
 
     public ComparatorsTest(String name) {

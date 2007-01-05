@@ -43,6 +43,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *
  *  The leaf must be connected in the first test.
  */
+@SuppressWarnings("unchecked")
 public final class ServerSidePushProxyTest extends ServerSideTestCase {
 
 	/**

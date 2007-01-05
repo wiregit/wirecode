@@ -20,6 +20,7 @@ import com.limegroup.gnutella.util.UltrapeerConnectionManager;
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most
  * recent pongs seen.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class PongCacherTest extends LimeTestCase {
 
 

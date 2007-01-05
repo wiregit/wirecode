@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase { 
     //Most of this code assumes a window factor W of 7 days.
 

@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
+@SuppressWarnings("unchecked")
 public class BEncodeTest extends LimeTestCase {
 
     public BEncodeTest(String name) {

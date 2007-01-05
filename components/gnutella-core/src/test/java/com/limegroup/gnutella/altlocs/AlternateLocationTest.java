@@ -29,6 +29,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class AlternateLocationTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     

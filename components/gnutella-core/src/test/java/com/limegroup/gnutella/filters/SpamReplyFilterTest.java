@@ -14,6 +14,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for SpamReplyFilter
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class SpamReplyFilterTest extends LimeTestCase {
         
     /**

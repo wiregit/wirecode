@@ -21,6 +21,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * tests the PushEndpoint class.
  */
+@SuppressWarnings("unchecked")
 public class PushEndpointTest extends LimeTestCase {
 
 	public PushEndpointTest(String name) {

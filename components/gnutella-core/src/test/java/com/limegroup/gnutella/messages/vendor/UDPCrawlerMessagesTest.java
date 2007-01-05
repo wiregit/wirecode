@@ -45,7 +45,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 
-
+@SuppressWarnings( { "unchecked", "cast" } )
 public class UDPCrawlerMessagesTest extends LimeTestCase {
 
 	/**

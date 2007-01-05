@@ -20,6 +20,7 @@ import org.limewire.service.ErrorService;
  * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
+@SuppressWarnings("unchecked")
 public class TestBootstrapServer {
     
     

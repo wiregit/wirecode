@@ -24,6 +24,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
  */
+@SuppressWarnings("unchecked")
 public final class QueryRequestTest extends LimeTestCase {
     
     private final String XML_STRING =

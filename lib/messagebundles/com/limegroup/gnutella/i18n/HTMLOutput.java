@@ -15,6 +15,7 @@ import java.util.TreeMap;
 /**
  * Writes language info out in HTML format.
  */
+@SuppressWarnings("unchecked")
 class HTMLOutput {
     /** @see LanguageInfo#getLink() */
     static final String PRE_LINK = "http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/";

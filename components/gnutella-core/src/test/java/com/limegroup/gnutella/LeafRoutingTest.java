@@ -41,6 +41,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("all")
 public class LeafRoutingTest extends LimeTestCase {
     private static final int SERVER_PORT = 6669;
     private static final int TIMEOUT=500;

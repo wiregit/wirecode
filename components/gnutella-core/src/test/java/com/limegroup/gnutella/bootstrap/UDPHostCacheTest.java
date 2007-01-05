@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for UDPHostCache.
  */
+@SuppressWarnings("unchecked")
 public class UDPHostCacheTest extends LimeTestCase {
     private StubCache cache;
     

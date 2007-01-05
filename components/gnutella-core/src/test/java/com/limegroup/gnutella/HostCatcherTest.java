@@ -19,7 +19,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 
-
+@SuppressWarnings( { "unchecked", "cast" } )
 public class HostCatcherTest extends LimeTestCase {  
     private HostCatcher hc;
 

@@ -11,6 +11,7 @@ import org.limewire.service.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 
+@SuppressWarnings("unchecked")
 public class FileDescStub extends FileDesc {
     public static final String DEFAULT_URN =
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";

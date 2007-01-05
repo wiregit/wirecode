@@ -33,6 +33,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
  * controlled delay times and loss rates for testing UDP communication.
  * It routes outgoing messages to itself after the delay time.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class UDPServiceStub extends UDPService {
 
 	/**

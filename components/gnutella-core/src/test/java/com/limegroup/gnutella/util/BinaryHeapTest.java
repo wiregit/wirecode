@@ -13,6 +13,7 @@ import junit.framework.Test;
 /**
  * Unit tests for BinaryHeap
  */
+@SuppressWarnings("unchecked")
 public class BinaryHeapTest extends LimeTestCase {
     
     private List FINALIZED = new ArrayList();

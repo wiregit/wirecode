@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 /** Returns pre-determined pseudorandom numbers. */
+@SuppressWarnings("unchecked")
 public class TestPredeterminedRandom extends Random {
     /** Holds float values for nextFloat */
     public Iterator /* of Float */floatIterator;

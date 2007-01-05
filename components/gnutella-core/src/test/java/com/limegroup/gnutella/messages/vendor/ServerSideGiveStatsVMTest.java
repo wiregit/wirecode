@@ -55,6 +55,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class ServerSideGiveStatsVMTest extends LimeTestCase {
 
 	/**

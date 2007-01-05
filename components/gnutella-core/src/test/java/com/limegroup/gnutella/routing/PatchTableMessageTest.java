@@ -14,6 +14,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for PatchTableMessage
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class PatchTableMessageTest extends LimeTestCase {
         
 	public PatchTableMessageTest(String name) {

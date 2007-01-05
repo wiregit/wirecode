@@ -33,6 +33,7 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *                              |
  *                             LEAF
  */
+@SuppressWarnings("unchecked")
 public final class PongCachingTest extends LimeTestCase {
 
 	/**

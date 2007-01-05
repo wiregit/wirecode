@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Unit tests for ResetTableMessage
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ResetTableMessageTest extends LimeTestCase {
         
 	public ResetTableMessageTest(String name) {

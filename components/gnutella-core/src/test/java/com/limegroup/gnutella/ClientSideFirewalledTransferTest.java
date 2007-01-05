@@ -44,6 +44,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.  The test includes a leaf attached to 1 Ultrapeer.
  */
+@SuppressWarnings("unchecked")
 public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super

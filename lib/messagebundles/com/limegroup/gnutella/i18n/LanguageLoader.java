@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 
+@SuppressWarnings("unchecked")
 class LanguageLoader {
     /** @see LanguageInfo#getLink() */
     static final String BUNDLE_NAME = "MessagesBundle"; //$NON-NLS-1$

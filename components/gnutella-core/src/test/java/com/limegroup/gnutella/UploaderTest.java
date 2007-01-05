@@ -38,6 +38,7 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
+@SuppressWarnings("unchecked")
 public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private ActivityCallback ac;

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.util.IntervalSet;
  * 
  * This is not well tested; it's just here as a testing stub. 
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class TestSequentialStrategy implements SelectionStrategy {
     public Interval pickAssignment(IntervalSet availableBytes,
             IntervalSet neededBytes,

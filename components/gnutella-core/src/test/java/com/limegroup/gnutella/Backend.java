@@ -41,6 +41,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * and user preference directories will be switched to harmless test
  * directories, saving us from having to save and restore important files.
  */
+@SuppressWarnings("all")
 public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 
     /** Extensions of files that the backend automatically shares */

@@ -8,6 +8,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+@SuppressWarnings("unchecked")
 public class FixedSizeSortedSetTest extends LimeTestCase {
     
     private FixedSizeSortedSet _set;

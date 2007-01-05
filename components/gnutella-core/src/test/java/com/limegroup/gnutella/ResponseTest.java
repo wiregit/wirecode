@@ -19,6 +19,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * This class tests the Response class.
  */
+@SuppressWarnings("unchecked")
 public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 	/**

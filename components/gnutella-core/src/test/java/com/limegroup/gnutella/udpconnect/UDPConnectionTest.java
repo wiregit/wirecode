@@ -24,6 +24,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Put full UDPConnection system through various tests.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class UDPConnectionTest extends LimeTestCase {
 
 	/*

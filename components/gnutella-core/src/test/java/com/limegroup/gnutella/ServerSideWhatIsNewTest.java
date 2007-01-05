@@ -31,6 +31,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * assume that an Ultrapeer will be equally functional.
  * 
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideWhatIsNewTest 
     extends ClientSideTestCase {
     private static final int PORT=6669;

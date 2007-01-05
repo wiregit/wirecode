@@ -27,6 +27,7 @@ import com.limegroup.gnutella.util.Sockets;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("all")
 public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
 
     /**

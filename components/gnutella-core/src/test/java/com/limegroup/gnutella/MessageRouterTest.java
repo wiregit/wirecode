@@ -36,6 +36,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 /**
  * This class tests the <tt>MessageRouter</tt>.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class MessageRouterTest extends LimeTestCase {
 
     /**

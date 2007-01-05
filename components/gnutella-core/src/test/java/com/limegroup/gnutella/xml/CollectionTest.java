@@ -21,6 +21,7 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.NameValue;
 
 
+@SuppressWarnings("unchecked")
 public class CollectionTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     FileDesc[] files = new FileDesc[3];

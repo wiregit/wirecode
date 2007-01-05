@@ -41,6 +41,7 @@ import com.limegroup.gnutella.util.IntervalSet;
 /**
  * this class tests the handling of udp head requests and responses.
  */
+@SuppressWarnings("unchecked")
 public class HeadTest extends LimeTestCase {
 
 	/**

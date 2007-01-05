@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.util.NameValue;
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     public GGEPTest(String name) {
         super(name);

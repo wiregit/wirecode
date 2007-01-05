@@ -25,6 +25,7 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     /**

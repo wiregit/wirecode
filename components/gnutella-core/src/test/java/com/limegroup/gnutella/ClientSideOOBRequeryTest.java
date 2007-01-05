@@ -41,6 +41,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     private static final int UPLOADER_PORT = 10000;    

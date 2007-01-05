@@ -27,6 +27,7 @@ import com.limegroup.gnutella.util.Buffer;
  *  underneath it.
  *  If you run main, this will stop when you enter anything and press RETURN.
  */
+@SuppressWarnings("unchecked")
 public class GUESSMonitor extends LimeTestCase {
 
     public final static String INSTRUCTIONS = 

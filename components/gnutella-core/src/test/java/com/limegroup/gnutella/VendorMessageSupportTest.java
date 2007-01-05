@@ -27,7 +27,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 
-
+@SuppressWarnings( { "unchecked", "cast" } )
 public class VendorMessageSupportTest extends LimeTestCase {
     
     private String _remoteHost = "localhost";

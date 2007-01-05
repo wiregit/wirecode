@@ -32,6 +32,7 @@ import com.limegroup.gnutella.stubs.FileManagerStub;
  * larger integration tests.
  * @see RequeryDownloadTest 
  */
+@SuppressWarnings("unchecked")
 public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     static final String filePath="com/limegroup/gnutella/downloader/";
     static final String queryName = "filename";

@@ -34,6 +34,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
  * Tests basic connection properties.  All tests are done once with compression
  * and once without.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ManagedConnectionTest extends ServerSideTestCase {
     
     private static final int LISTEN_PORT = 12350;

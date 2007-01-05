@@ -8,6 +8,7 @@ import junit.framework.Test;
 /**
  * Tests TrieNode.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class TrieNodeTest extends com.limegroup.gnutella.util.LimeTestCase {
     public TrieNodeTest(String name) {
         super(name);

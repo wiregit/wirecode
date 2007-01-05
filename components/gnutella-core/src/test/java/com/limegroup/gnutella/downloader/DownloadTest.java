@@ -70,6 +70,7 @@ import com.limegroup.gnutella.util.Sockets;
  * Comprehensive test of downloads -- one of the most important tests in
  * LimeWire.
  */
+@SuppressWarnings("unchecked")
 public class DownloadTest extends LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(DownloadTest.class);

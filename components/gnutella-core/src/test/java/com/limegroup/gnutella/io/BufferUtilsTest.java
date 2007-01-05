@@ -8,6 +8,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+@SuppressWarnings( { "unchecked", "cast" } )
 public class BufferUtilsTest extends LimeTestCase {
     
     public BufferUtilsTest(String name) {

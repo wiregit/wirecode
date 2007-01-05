@@ -28,6 +28,7 @@ import com.limegroup.gnutella.util.UltrapeerConnection;
 /**
  * Tests the functionality of the <tt>QueryHandlerTest</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class QueryHandlerTest extends LimeTestCase {
 
 

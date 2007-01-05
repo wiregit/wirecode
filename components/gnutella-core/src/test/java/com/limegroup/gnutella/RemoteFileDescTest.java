@@ -17,6 +17,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTestCase {	  
 
 	private byte[] TEST_GUID;

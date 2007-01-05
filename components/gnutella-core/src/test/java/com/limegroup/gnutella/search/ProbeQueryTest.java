@@ -22,6 +22,7 @@ import com.limegroup.gnutella.util.TestResultCounter;
 /**
  * Tests the functionality of the <tt>QueryHandlerTest</tt> class.
  */
+@SuppressWarnings("unchecked")
 public final class ProbeQueryTest extends LimeTestCase {
 
     /**

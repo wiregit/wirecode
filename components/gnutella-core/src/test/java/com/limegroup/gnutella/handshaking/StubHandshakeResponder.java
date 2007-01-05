@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class StubHandshakeResponder implements HandshakeResponder {
     private HandshakeResponse respondedTo;
     private Map respondedToProps;
