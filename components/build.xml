@@ -105,13 +105,18 @@
     <target name="jar"
             description="Creates a jar file of the compiled source of every component."
             depends="initialize, compile-src">
-        <do.jar component="all" basedir="" excludes="**">
+        <do.jar component="all" basedir="" resourcedir="" resexclude="**" excludes="**">
 			<more-jar-elements>
 			    <fileset dir="${build.limewire.components.common.classes}" />
-    	        <fileset dir="${build.limewire.components.collection.classes}"/>
+	    	    <fileset dir="${limewire.components.common.src.resources}" />
+			    <fileset dir="${build.limewire.components.collection.classes}"/>
+    	    	<fileset dir="${limewire.components.collection.src.resources}" />
     	        <fileset dir="${build.limewire.components.security.classes}" />
+    	    	<fileset dir="${limewire.components.security.src.resources}" />
     	        <fileset dir="${build.limewire.components.io.classes}" />
+    	    	<fileset dir="${limewire.components.io.src.resources}" />
     	    	<fileset dir="${build.limewire.components.setting.classes}" />
+    	    	<fileset dir="${limewire.components.setting.src.resources}" />
 			</more-jar-elements>
         </do.jar>
     </target>
