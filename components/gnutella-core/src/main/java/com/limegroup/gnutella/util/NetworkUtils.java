@@ -447,7 +447,7 @@ public final class NetworkUtils {
     /**
      * Returns true if the SocketAddress is any of our local machine addresses.
      */
-    public static boolean isLocalHostAddress(SocketAddress addr) throws IOException {
+    public static boolean isLocalHostAddress(SocketAddress addr) throws SocketException {
         InetSocketAddress iaddr = (InetSocketAddress)addr;
         return !iaddr.isUnresolved() && isLocalHostAddress(iaddr.getAddress());
     }
@@ -455,7 +455,7 @@ public final class NetworkUtils {
     /**
      * Returns true if the InetAddress is any of our local machine addresses
      */
-    public static boolean isLocalHostAddress(InetAddress addr) throws IOException {
+    public static boolean isLocalHostAddress(InetAddress addr) throws SocketException {
         return NetworkInterface.getByInetAddress(addr) != null;
     }
     
