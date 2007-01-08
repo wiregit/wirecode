@@ -162,7 +162,7 @@ public class DHTValue implements Serializable {
                     buffer.append(ArrayUtils.toHexString(getValue())).append("\n");
                 }
             } catch (UnsupportedEncodingException err) {
-                throw new Error(err);
+                throw new RuntimeException(err);
             }
         }
         

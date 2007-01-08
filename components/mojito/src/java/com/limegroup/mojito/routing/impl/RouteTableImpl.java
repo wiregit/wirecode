@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.GenericsUtils;
 import com.limegroup.gnutella.util.PatriciaTrie;
 import com.limegroup.gnutella.util.GenericsUtils.ScanMode;
@@ -203,9 +204,13 @@ public class RouteTableImpl implements RouteTable {
     public synchronized void add(Contact node) {
         
         if (localNode.equals(node)) {
+            String msg = "Cannot add the local Node: " + node;
+            
             if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot add the local Node: " + node);
+                LOG.error(msg);
             }
+            
+            ErrorService.error(new IllegalArgumentException(msg));
             return;
         }
         
@@ -266,16 +271,20 @@ public class RouteTableImpl implements RouteTable {
             // to check if we're alive and we're hopefully able to
             // respond. Besides that there isn't much we can do. :-/
             if (!isLocalNode(node)) {
-                if (LOG.isWarnEnabled()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug(node + " collides with " + existing);
                 }
                 
             // Must be instance of LocalContact!
             } else if (!(node instanceof LocalContact)) {
+                String msg = "Attempting to replace the local Node " 
+                    + existing + " with " + node;
+                
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Attempting to replace the local Node " 
-                            + existing + " with " + node);
+                    LOG.error(msg);
                 }
+                
+                throw new IllegalArgumentException(msg);
                 
             // Alright, replace the existing Contact with the new
             // LocalContact. Log a warning... 

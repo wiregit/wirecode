@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.mojito.Context;
@@ -133,12 +134,17 @@ public class DefaultMessageHandler {
                     LOG.info("Looks like our NodeID collides with " + node);
             	}
             } else {
-            	// This is unexpected. The MessageDispatcher should have
+                // This is unexpected. The MessageDispatcher should have
                 // caught it!
+                
+                String msg = "Received a " + message + " message from " + node 
+                    + ". This message should have never gotten so far!";
+                
                 if (LOG.isErrorEnabled()) {
-                    LOG.error("Received a " + message + " message from " + node 
-                        + ". This message should have never gotten so far!");
+                    LOG.error(msg);
             	}
+                
+                ErrorService.error(new IllegalArgumentException(msg));
             }
             
             return;

@@ -571,8 +571,9 @@ public abstract class MessageDispatcher {
                 processRequest((RequestMessage)message);
             }
             
-        } else if (LOG.isFatalEnabled()) {
-            LOG.fatal(message + " is neither a Request nor a Response. Fix the code!");
+        } else {
+            throw new IllegalArgumentException(message 
+                    + " is neither instance of RequestMessage nor ResponseMessage!");
         }
     }
     

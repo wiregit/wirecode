@@ -27,8 +27,10 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -172,9 +174,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             if (file.exists() && file.isFile()) {
                 masterKey = CryptoUtils.loadMasterKey(file);
             }
-        } catch (Exception err) {
-            LOG.error("Loading the MasterKey failed!", err);
-        }
+        } catch (InvalidKeyException e) {
+            LOG.debug("InvalidKeyException", e);
+        } catch (SignatureException e) {
+            LOG.debug("SignatureException", e);
+        } catch (IOException e) {
+            LOG.debug("IOException", e);
+        } 
         masterKeyPair = new KeyPair(masterKey, null);
         
         setRouteTable(routeTable);
@@ -371,18 +377,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                     new NetworkStatisticContainer.Listener(networkStats));
             
             return messageDispatcher;
-        } catch (SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         } catch (InstantiationException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
     
@@ -462,10 +464,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         if (this.database != null && this.database == database) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Cannot set the same instance multiple times");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Cannot set the same instance multiple times");
             }
-            //throw new IllegalArgumentException();
             return;
         }
         
@@ -737,7 +738,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         if (isRunning()) {
-            LOG.error(getName() + " is already running!");
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(getName() + " is already running!");
+            }
             return;
         }
         

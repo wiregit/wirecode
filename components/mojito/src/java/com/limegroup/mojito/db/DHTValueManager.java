@@ -29,9 +29,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.mojito.Context;
 import com.limegroup.mojito.concurrent.DHTFuture;
 import com.limegroup.mojito.concurrent.DHTFutureListener;
+import com.limegroup.mojito.exceptions.DHTException;
 import com.limegroup.mojito.result.StoreResult;
 import com.limegroup.mojito.settings.DatabaseSettings;
 import com.limegroup.mojito.statistics.DatabaseStatisticContainer;
@@ -235,6 +237,10 @@ public class DHTValueManager implements Runnable {
         
         public void handleFutureFailure(ExecutionException e) {
             LOG.error("ExecutionException", e);
+
+            if (!(e.getCause() instanceof DHTException)) {
+                ErrorService.error(e);
+            }
             
             if (!next()) {
                 stop();
@@ -247,7 +253,7 @@ public class DHTValueManager implements Runnable {
         }
         
         public void handleFutureInterrupted(InterruptedException e) {
-            LOG.debug("CancellationException", e);
+            LOG.debug("InterruptedException", e);
             stop();
         }   
     }
