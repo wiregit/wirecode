@@ -20,7 +20,7 @@
 
 extern double CGSSecondsSinceLastInputEvent(unsigned long envType);
 
-JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable
+JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setFileWriteable
   (JNIEnv *env, jclass clazz, jstring fileName) {
 	const char* cFileName;
 	int retVal;
@@ -46,7 +46,7 @@ JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWrite
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime
+JNIEXPORT jlong JNICALL Java_org_limewire_util_SystemUtils_idleTime
   (JNIEnv *env, jclass clazz) {
     double idleTime = CGSSecondsSinceLastInputEvent(-1);
         
@@ -57,7 +57,7 @@ JNIEXPORT jlong JNICALL Java_com_limegroup_gnutella_util_SystemUtils_idleTime
     return (jlong)idleTime*1000;
 }
 
-JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setOpenFileLimit0
+JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setOpenFileLimit0
   (JNIEnv *env, jclass clazz, jint limit) {
     int retval = 0;
 	int maxFiles = (int)limit;
