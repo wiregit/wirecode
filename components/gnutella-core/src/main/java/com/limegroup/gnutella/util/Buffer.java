@@ -4,6 +4,8 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.UnmodifiableIterator;
+
 import com.limegroup.gnutella.Assert;
 
 /** 

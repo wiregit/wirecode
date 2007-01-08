@@ -5,6 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.security.SecureMessage;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ForMeReplyHandler;
@@ -13,15 +16,14 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.SecureMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
-public class SearchResultHandlerTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class SearchResultHandlerTest extends LimeTestCase {
     
     private StubCallback callback = new StubCallback();
 

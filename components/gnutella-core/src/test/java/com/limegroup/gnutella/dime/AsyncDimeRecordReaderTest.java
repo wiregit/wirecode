@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
+import org.limewire.io.ByteOrder;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 
 /**
  * Tests for AsyncDimeRecordReader.
  */
-public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     /**
      * Constructs a new test instance for responses.

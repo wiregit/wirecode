@@ -1,7 +1,9 @@
 package com.limegroup.gnutella;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since

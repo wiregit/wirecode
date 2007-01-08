@@ -4,12 +4,16 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import org.limewire.util.PrivilegedAccessor;
+
+
 import junit.framework.Test;
 
 /**
  * Tests Trie.
  */
-public class TrieTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class TrieTest extends com.limegroup.gnutella.util.LimeTestCase {
     public TrieTest(String name) {
         super(name);
     }

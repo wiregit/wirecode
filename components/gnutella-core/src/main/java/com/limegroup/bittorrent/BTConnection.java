@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
@@ -24,9 +26,7 @@ import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.util.BitField;
 import com.limegroup.gnutella.util.BitFieldSet;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NECallable;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * Class wrapping a Bittorrent connection.

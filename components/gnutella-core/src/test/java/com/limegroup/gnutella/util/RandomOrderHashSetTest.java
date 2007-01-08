@@ -4,7 +4,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-public class RandomOrderHashSetTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class RandomOrderHashSetTest extends LimeTestCase {
     public RandomOrderHashSetTest(String name) {
         super(name);
     }

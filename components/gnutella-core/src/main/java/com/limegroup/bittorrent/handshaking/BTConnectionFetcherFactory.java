@@ -1,7 +1,8 @@
 package com.limegroup.bittorrent.handshaking;
 
+import org.limewire.concurrent.SchedulingThreadPool;
+
 import com.limegroup.bittorrent.ManagedTorrent;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 public class BTConnectionFetcherFactory {
 	private static BTConnectionFetcherFactory instance;

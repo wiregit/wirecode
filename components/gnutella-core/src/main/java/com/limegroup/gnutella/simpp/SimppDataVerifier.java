@@ -13,10 +13,10 @@ import java.security.spec.X509EncodedKeySpec;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.security.SignatureVerifier;
+import org.limewire.util.Base32;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class SimppDataVerifier {
     
@@ -86,7 +86,7 @@ public class SimppDataVerifier {
     private PublicKey getPublicKey() {
         //1. Get the file that has the public key 
         //File pubKeyFile =
-        File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
+        File pubKeyFile=new File(LimeWireUtils.getUserSettingsDir(), "pub1.key");
         //TODO: work this out with the setting telling us which public key to
         //use
 

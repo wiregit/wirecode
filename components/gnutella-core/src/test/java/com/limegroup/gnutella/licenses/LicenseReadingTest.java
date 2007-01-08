@@ -6,16 +6,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public final class LicenseReadingTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public final class LicenseReadingTest extends LimeTestCase {
 
 	public LicenseReadingTest(String name) {
 		super(name);

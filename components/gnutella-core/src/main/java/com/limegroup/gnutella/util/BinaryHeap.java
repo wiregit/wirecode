@@ -3,6 +3,9 @@ package com.limegroup.gnutella.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.UnmodifiableIterator;
+
+
 /** 
  * A class for maintaining the objects in a binary heap form, i.e., a classic
  * fixed-size priority queue.  Its a MAX heap, i.e., the root of the heap is the

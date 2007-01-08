@@ -2,7 +2,8 @@ package com.limegroup.gnutella.util;
 
 import java.io.File;
 
-import com.bitzi.util.Base32;
+import org.limewire.util.Base32;
+
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**

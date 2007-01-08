@@ -3,6 +3,9 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Iterator;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryReply;
@@ -11,7 +14,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  *  Tests that a Ultrapeer correctly sends XML Replies.  
@@ -58,7 +60,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3");
         assertTrue(mp3.exists());
         // now move them to the share dir        
-        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
     }
 
     public static void setUpQRPTables() throws Exception {

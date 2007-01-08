@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.SettingsFactory;
+
 /**
  * Handles installation preferences.
  */
-public final class InstallSettings extends AbstractSettings {
+public final class InstallSettings extends AbstractLimeWireSettings {
 
     private static final InstallSettings INSTANCE =
         new InstallSettings();

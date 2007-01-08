@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.SettingsFactory;
+
 import com.limegroup.gnutella.Assert;
 
 /**
@@ -8,7 +10,7 @@ import com.limegroup.gnutella.Assert;
  * the factory via LimeProps.instance().getFactory() and add
  * settings to that factory.
  */
-public class LimeProps extends AbstractSettings {
+public class LimeProps extends AbstractLimeWireSettings {
         
     private static final LimeProps INSTANCE = new LimeProps();
     

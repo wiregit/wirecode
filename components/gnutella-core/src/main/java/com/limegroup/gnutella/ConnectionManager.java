@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,6 +14,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
@@ -27,13 +33,8 @@ import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.SystemUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating

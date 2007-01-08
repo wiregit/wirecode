@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -19,8 +20,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.util.Base32;
+import org.limewire.util.FileLocker;
+import org.limewire.util.FileUtils;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
@@ -40,7 +44,6 @@ import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -97,7 +100,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 @SuppressWarnings("unchecked")
-public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
+public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
 
@@ -248,6 +251,7 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
     			new String[]{"GET","HEAD"},
     			false,
     			true);
+        FileUtils.addFileLocker(this);
     }
     
 	public void acceptConnection(String word, Socket s) {
@@ -923,6 +927,14 @@ public class UploadManager implements ConnectionAcceptor, BandwidthTracker {
 	            return true;
 	    }
 	    return false;
+    }
+    
+    public boolean releaseLock(File file) {
+        FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
+        if(fd != null)
+            return killUploadsForFileDesc(fd);
+        else
+            return false;
     }
 	
 	/**

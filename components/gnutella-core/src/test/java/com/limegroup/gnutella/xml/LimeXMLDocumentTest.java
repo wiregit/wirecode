@@ -6,10 +6,10 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.KeyValue;
 
-public class LimeXMLDocumentTest extends BaseTestCase {
+public class LimeXMLDocumentTest extends LimeTestCase {
             
 	public LimeXMLDocumentTest(String name) {
 		super(name);

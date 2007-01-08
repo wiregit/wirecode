@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public HTTPDownloaderTest(String name) {
         super(name);

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -20,6 +21,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.MessageService;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
@@ -30,11 +34,9 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.RandomOrderHashSet;
 
 
@@ -1219,7 +1221,7 @@ public class HostCatcher {
     }
 
     private File getHostsFile() {
-        return new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
+        return new File(LimeWireUtils.getUserSettingsDir(),"gnutella.net");
     }
     
     /**

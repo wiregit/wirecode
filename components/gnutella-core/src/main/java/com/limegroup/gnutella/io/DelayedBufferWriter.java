@@ -7,9 +7,9 @@ import java.nio.channels.Channel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.gnutella.util.Periodic;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * A Writer that stores data within a buffer and writes it out after some delay,

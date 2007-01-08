@@ -1,7 +1,11 @@
 package com.limegroup.gnutella.util;
 
+
 import java.util.Collection;
 import java.util.TreeSet;
+
+import org.limewire.io.IpPort;
+
 
 /**
  * A stricter genericized version of IpPortSet that lets you

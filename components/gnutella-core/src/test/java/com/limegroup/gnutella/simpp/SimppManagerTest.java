@@ -2,6 +2,10 @@ package com.limegroup.gnutella.simpp;
 
 import java.io.File;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
@@ -11,12 +15,10 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class SimppManagerTest extends BaseTestCase {
+public class SimppManagerTest extends LimeTestCase {
     
     static final int OLD = 1;
     
@@ -106,7 +108,7 @@ public class SimppManagerTest extends BaseTestCase {
         File pub = CommonUtils.getResourceFile(simppDir+"pub1.key");
         File pub2 = new File(".", "pub1.key");
         pub2.delete();
-        CommonUtils.copy(pub, pub2);
+        FileUtils.copy(pub, pub2);
         assertTrue("local public key doesn't exist", pub2.exists());
 
         _simppFile = new File(_settingsDir, "simpp.xml");
@@ -446,7 +448,7 @@ public class SimppManagerTest extends BaseTestCase {
     ////////////////////////////////private methods///////////////////////////
     
     private static void changeSimppFile(File inputFile) throws Exception {        
-        CommonUtils.copy(inputFile, _simppFile);
+        FileUtils.copy(inputFile, _simppFile);
         
         PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
         PrivilegedAccessor.setValue(CapabilitiesVM.class,"_instance", null);

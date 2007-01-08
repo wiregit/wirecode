@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+
 
 /* TODO: Convert to using java.util.concurrent. */
 public class RRProcessingQueue {

@@ -2,12 +2,12 @@ package com.limegroup.gnutella.routing;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for HashFunction
  */
-public class HashFunctionTest extends BaseTestCase {
+public class HashFunctionTest extends LimeTestCase {
         
 	public HashFunctionTest(String name) {
 		super(name);

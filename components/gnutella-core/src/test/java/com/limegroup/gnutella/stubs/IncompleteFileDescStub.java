@@ -7,7 +7,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -20,6 +21,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
  * It also stubs out some methods.  Feel free to stub out more methods as
  * need arises.
  */
+@SuppressWarnings("unchecked")
 public class IncompleteFileDescStub extends IncompleteFileDesc {
 	public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final Set set;

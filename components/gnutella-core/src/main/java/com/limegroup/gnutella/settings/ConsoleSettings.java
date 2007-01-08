@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringSetting;
+
 /**
  * Settings for the Console tab
  */

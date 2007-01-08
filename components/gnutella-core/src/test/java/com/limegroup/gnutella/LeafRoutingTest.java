@@ -12,6 +12,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -29,17 +33,16 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-public class LeafRoutingTest extends BaseTestCase {
+@SuppressWarnings("all")
+public class LeafRoutingTest extends LimeTestCase {
     private static final int SERVER_PORT = 6669;
     private static final int TIMEOUT=500;
     private static final byte[] ultrapeerIP=
@@ -85,8 +88,8 @@ public class LeafRoutingTest extends BaseTestCase {
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
     }        
     
     public static void globalSetUp() throws Exception {

@@ -12,7 +12,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 
-public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public AutoDownloaderDetailsTest(String name) {
         super(name);

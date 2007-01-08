@@ -5,10 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.limegroup.gnutella.util.PatriciaTrie;
-import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.PatriciaTrie.KeyAnalyzer;
-import com.limegroup.gnutella.util.Trie.Cursor;
+import org.limewire.collection.PatriciaTrie;
+import org.limewire.collection.Trie;
+import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
+import org.limewire.collection.Trie.Cursor;
+
 
 /**
  * A mutable list of IP addresses.  More specifically, a list of sets of

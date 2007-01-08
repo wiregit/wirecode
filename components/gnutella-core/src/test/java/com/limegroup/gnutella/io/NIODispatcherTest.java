@@ -14,12 +14,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class NIODispatcherTest extends BaseTestCase {
+public class NIODispatcherTest extends LimeTestCase {
     
     private int LISTEN_PORT = 9999;
     private ServerSocket LISTEN_SOCKET;

@@ -5,6 +5,7 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class StubAcceptChannelObserver implements AcceptChannelObserver {
     private List /* of SocketChannel */ channels = new LinkedList();
     private List /* of IOException */ ioxes = new LinkedList();

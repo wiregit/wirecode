@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.StringSetting;
+
 /**
  * Settings for programs LimeWire should open to view files on unix.
  */

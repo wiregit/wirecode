@@ -24,11 +24,11 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 
-
-public class VendorMessageSupportTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class VendorMessageSupportTest extends LimeTestCase {
     
     private String _remoteHost = "localhost";
     private int _remotePort = Backend.BACKEND_PORT;

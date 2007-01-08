@@ -6,7 +6,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /** 
  * This class manages the properties needed by the 
@@ -258,7 +258,7 @@ public class LimeXMLProperties
         String limeHome = System.getProperty("LIME_HOME"); 
         if(limeHome == null || limeHome.trim().equals(""))
         {
-            File libDir = CommonUtils.getUserSettingsDir();
+            File libDir = LimeWireUtils.getUserSettingsDir();
             String stringPath = libDir.getAbsolutePath();
             if(!stringPath.endsWith(File.separator)) {
                 stringPath = stringPath + File.separator;

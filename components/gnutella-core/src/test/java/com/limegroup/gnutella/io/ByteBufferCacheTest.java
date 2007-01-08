@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ByteBufferCacheTest extends BaseTestCase {
+public class ByteBufferCacheTest extends LimeTestCase {
     
     public ByteBufferCacheTest(String name) {
         super(name);

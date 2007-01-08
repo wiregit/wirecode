@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 
 import junit.framework.Test;
 
-public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class FixedsizePriorityQueueTest extends com.limegroup.gnutella.util.LimeTestCase {
     private final Integer one=new Integer(1);
     private final Integer two=new Integer(2);
     private final Integer three=new Integer(3);

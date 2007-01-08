@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.util.CommonUtils;
+
 import com.limegroup.gnutella.version.Version;
 import com.limegroup.gnutella.version.VersionFormatException;
 

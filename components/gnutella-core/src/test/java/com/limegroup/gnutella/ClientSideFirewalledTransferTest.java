@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -17,9 +18,14 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+import org.limewire.util.Base32;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -33,15 +39,12 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.udpconnect.SynMessage;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.  The test includes a leaf attached to 1 Ultrapeer.
  */
+@SuppressWarnings("unchecked")
 public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super

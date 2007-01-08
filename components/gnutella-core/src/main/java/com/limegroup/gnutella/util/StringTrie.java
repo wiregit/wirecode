@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.EmptyIterator;
+import org.limewire.collection.UnmodifiableIterator;
+
 import com.limegroup.gnutella.Assert;
 
 /**

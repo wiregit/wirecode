@@ -17,6 +17,9 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
@@ -27,11 +30,8 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.EncodingUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**
@@ -542,8 +542,8 @@ public class BootstrapServerManager {
         BufferedReader in = null;
         String urlString = server.getURLString();
         String connectTo = urlString
-                 +"?client="+CommonUtils.QHD_VENDOR_NAME
-                 +"&version="+EncodingUtils.encode(CommonUtils.getLimeWireVersion())
+                 +"?client="+LimeWireUtils.QHD_VENDOR_NAME
+                 +"&version="+EncodingUtils.encode(LimeWireUtils.getLimeWireVersion())
                  +"&"+request.parameters();
         // add the guid if it's our cache, so we can see if we're hammering
         // from a single client, or if it's a bunch of clients behind a NAT
@@ -563,7 +563,7 @@ public class BootstrapServerManager {
         }
             
         get.addRequestHeader("Cache-Control", "no-cache");
-        get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
         get.setFollowRedirects(false);

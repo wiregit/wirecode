@@ -3,12 +3,14 @@ package com.limegroup.gnutella.util;
 import java.util.HashMap;
 import java.util.Map;
 
+
 import junit.framework.Test;
 
 /**
  * Unit tests for ForgetfulHashMap
  */
-public class ForgetfulHashMapTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class ForgetfulHashMapTest extends LimeTestCase {
             
 	public ForgetfulHashMapTest(String name) {
 		super(name);

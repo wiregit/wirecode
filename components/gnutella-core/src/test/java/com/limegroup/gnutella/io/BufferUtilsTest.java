@@ -6,9 +6,10 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class BufferUtilsTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class BufferUtilsTest extends LimeTestCase {
     
     public BufferUtilsTest(String name) {
         super(name);

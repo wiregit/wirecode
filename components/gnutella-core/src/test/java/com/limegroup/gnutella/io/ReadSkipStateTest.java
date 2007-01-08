@@ -7,9 +7,9 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ReadSkipStateTest extends BaseTestCase {
+public class ReadSkipStateTest extends LimeTestCase {
     
     private ByteBuffer BUFFER = ByteBuffer.allocate(1024);
     

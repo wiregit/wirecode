@@ -6,8 +6,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+
 /**
  * Provide MP3 file info derived from the file header data
  *
@@ -16,7 +17,7 @@ import com.limegroup.gnutella.util.IOUtils;
  * @see #getFrequency 		-> available frequencies (32000, 44100, etc) khz
  * @see #getVersion_* 		-> mp3 file version (2.0, or "MPEG Version 2.0")
  * @see #getHeaderBitRate 	-> constant bit rates(CBR) (128, 256, etc) kps
- * @see com.limegroup.gnutella.ByteOrder
+ * @see org.limewire.io.ByteOrder
  *
  * @author  cHANCE mOORE, ctmoore [at] gottapee [dot] com - 30 July 2002
  *			One of the Sindhis (both?), limewire team

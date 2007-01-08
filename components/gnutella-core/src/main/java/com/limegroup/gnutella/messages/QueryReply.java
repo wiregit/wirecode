@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,9 +19,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IPPortCombo;
+import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.SecureMessage;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
@@ -32,9 +40,6 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A query reply.  Contains information about the responding host in addition to
@@ -1322,7 +1327,7 @@ public class QueryReply extends Message implements SecureMessage {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
                                 proxies.add(IPPortCombo.getCombo(combo));
-                            } catch (BadPacketException malformedPair) {}
+                            } catch (InvalidDataException malformedPair) {}
                         }                        
                     }
                  } catch (BadGGEPPropertyException bad) {}

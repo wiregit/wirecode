@@ -1,14 +1,16 @@
 package com.limegroup.gnutella;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.OSUtils;
+
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * This class determines whether or not this node has all of the necessary
@@ -29,7 +31,7 @@ public final class SupernodeAssigner {
 	 * Constant value for whether or not the operating system qualifies
 	 * this node for Ultrapeer status.
 	 */
-	private static final boolean ULTRAPEER_OS = CommonUtils.isUltrapeerOS();
+	private static final boolean ULTRAPEER_OS = OSUtils.isHighLoadOS();
 	
 	/**
 	 * Constant for the number of milliseconds between the timer's calls

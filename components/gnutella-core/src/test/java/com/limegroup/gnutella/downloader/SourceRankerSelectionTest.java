@@ -1,17 +1,18 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * tests the selection of source ranker that is appropriate to the system.
  */
-public class SourceRankerSelectionTest extends BaseTestCase {
+public class SourceRankerSelectionTest extends LimeTestCase {
 
     public SourceRankerSelectionTest(String name) {
         super(name);

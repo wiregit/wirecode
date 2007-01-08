@@ -7,6 +7,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.TestFile;
@@ -21,14 +25,13 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
  * assume that an Ultrapeer will be equally functional.
  * 
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideWhatIsNewTest 
     extends ClientSideTestCase {
     private static final int PORT=6669;
@@ -92,8 +95,8 @@ public class ServerSideWhatIsNewTest
         susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
         
         berkeley = new File(_sharedDir, "berkeley.txt");
         susheel = new File(_sharedDir, "susheel.txt");
@@ -314,8 +317,8 @@ public class ServerSideWhatIsNewTest
         }
         
         // now move them to the share dir
-        CommonUtils.copy(tempFile1, new File(_sharedDir, "tempFile1.txt"));
-        CommonUtils.copy(tempFile2, new File(_sharedDir, "tempFile2.txt"));
+        FileUtils.copy(tempFile1, new File(_sharedDir, "tempFile1.txt"));
+        FileUtils.copy(tempFile2, new File(_sharedDir, "tempFile2.txt"));
         tempFile1 = new File(_sharedDir, "tempFile1.txt");
         tempFile2 = new File(_sharedDir, "tempFile2.txt");
         assertTrue(tempFile1.exists());
@@ -739,11 +742,11 @@ public class ServerSideWhatIsNewTest
             FileManager.PROGRAM_SHARE.mkdir();
         }
 
-        CommonUtils.copy(winInstaller, 
+        FileUtils.copy(winInstaller, 
                          new File(FileManager.PROGRAM_SHARE, "LimeWireWin3.69.0010.exe"));
-        CommonUtils.copy(linInstaller, 
+        FileUtils.copy(linInstaller, 
                          new File(FileManager.PROGRAM_SHARE, "LimeWireLinux.bin"));
-        CommonUtils.copy(osxInstaller, 
+        FileUtils.copy(osxInstaller, 
                          new File(FileManager.PROGRAM_SHARE, "LimeWireOSX.dmg"));
 
         RouterService.getFileManager().loadSettings();

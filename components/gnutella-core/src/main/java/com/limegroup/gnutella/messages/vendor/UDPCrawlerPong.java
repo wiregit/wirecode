@@ -13,17 +13,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IPPortCombo;
+import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class UDPCrawlerPong extends VendorMessage {
 	
@@ -195,7 +196,7 @@ public class UDPCrawlerPong extends VendorMessage {
 			}
 			
 			// append myself at the end
-			agents.append(CommonUtils.getHttpServer());
+			agents.append(LimeWireUtils.getHttpServer());
 			
 			//zip the string
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

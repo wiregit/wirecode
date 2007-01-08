@@ -4,13 +4,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+
 /**
  * Test for the <tt>Comparators</tt> class that provides access to 
  * common <tt>Comparator</tt> isntances.
  * 
  * TODO:: add tests for both FileComparator and StringComparator.
  */
-public class ComparatorsTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class ComparatorsTest extends LimeTestCase {
 
     public ComparatorsTest(String name) {
         super(name);

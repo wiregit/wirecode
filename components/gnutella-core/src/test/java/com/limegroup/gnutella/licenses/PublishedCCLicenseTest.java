@@ -10,9 +10,9 @@ import junit.framework.Test;
 import org.cyberneko.relaxng.parsers.SAXParser;
 import org.xml.sax.InputSource;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class PublishedCCLicenseTest extends BaseTestCase {
+public class PublishedCCLicenseTest extends LimeTestCase {
     
     /** Standard constructors */
     public PublishedCCLicenseTest(String name) {

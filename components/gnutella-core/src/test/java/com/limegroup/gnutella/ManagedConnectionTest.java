@@ -8,6 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -24,14 +28,13 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 
 /**
  * Tests basic connection properties.  All tests are done once with compression
  * and once without.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ManagedConnectionTest extends ServerSideTestCase {
     
     private static final int LISTEN_PORT = 12350;

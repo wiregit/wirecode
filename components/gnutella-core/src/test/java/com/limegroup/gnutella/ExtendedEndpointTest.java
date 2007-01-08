@@ -12,7 +12,8 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 /**
  * Unit tests for ExtendedEndpoint.
  */
-public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCase {
     private ExtendedEndpoint e;
     private Comparator comparator;
 

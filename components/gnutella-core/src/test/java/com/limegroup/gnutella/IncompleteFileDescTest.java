@@ -4,15 +4,17 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class IncompleteFileDescTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class IncompleteFileDescTest extends LimeTestCase {
     
     private IncompleteFileDesc ifd;
     private String fileName = "ifd.txt";

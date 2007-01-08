@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -20,12 +24,11 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests that UDP host ranker works.
  */
+@SuppressWarnings("unchecked")
 public class UDPHostRankerTest extends ClientSideTestCase {
     protected static final int PORT=6669;
     protected static int TIMEOUT=1000; // should override super

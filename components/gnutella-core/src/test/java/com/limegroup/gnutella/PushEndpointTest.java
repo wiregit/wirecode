@@ -1,6 +1,7 @@
 	
 package com.limegroup.gnutella;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.HashSet;
@@ -8,17 +9,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * tests the PushEndpoint class.
  */
-public class PushEndpointTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class PushEndpointTest extends LimeTestCase {
 
 	public PushEndpointTest(String name) {
 		super(name);

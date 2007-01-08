@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.SettingsFactory;
+
 
 
 /**
  * Controls all 'Do not ask this again' or 'Always use this answer' questions.
  */
-public class QuestionsHandler extends AbstractSettings {
+public class QuestionsHandler extends AbstractLimeWireSettings {
 
     private static final QuestionsHandler INSTANCE =
         new QuestionsHandler();

@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.util.ExecutorsHelper;
 
 /**
  * Manages dynamic querying for Ultrapeers.

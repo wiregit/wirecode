@@ -2,9 +2,10 @@ package com.limegroup.gnutella.util;
 
 import java.util.NoSuchElementException;
 
+
 import junit.framework.Test;
 
-public class QuotedStringTokenizerTest extends BaseTestCase {
+public class QuotedStringTokenizerTest extends LimeTestCase {
 
     public QuotedStringTokenizerTest(String name) {
 		super(name);

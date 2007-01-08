@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.guess;
 
+
 import java.net.InetAddress;
 
-import com.limegroup.gnutella.util.IpPort;
+import org.limewire.io.IpPort;
+
+
 
 /**
  * Simple host/port pair for endpoints used in GUESS.  The use of the

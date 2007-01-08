@@ -1,10 +1,12 @@
 package com.limegroup.gnutella;
 
+
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
+
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortSet;
 
 public class UniqueHostPinger extends UDPPinger {
 

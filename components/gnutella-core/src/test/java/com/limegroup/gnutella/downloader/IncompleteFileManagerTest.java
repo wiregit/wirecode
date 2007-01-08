@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.FileDesc;
@@ -21,9 +23,9 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
     private FileManager fm;

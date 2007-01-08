@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.connection;
 
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import org.limewire.io.BufferByteArrayOutputStream;
 
 import com.limegroup.gnutella.io.ChannelWriter;
 import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
 
 /** 
  * Writes messages using non-blocking I/O.

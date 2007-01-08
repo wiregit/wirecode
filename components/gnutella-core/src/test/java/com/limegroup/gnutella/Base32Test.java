@@ -2,14 +2,15 @@ package com.limegroup.gnutella;
 
 import java.util.Arrays;
 
+import org.limewire.util.Base32;
+
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
 
 /**
  * Unit tests for Base32 class.
  */
-public class Base32Test extends com.limegroup.gnutella.util.BaseTestCase {
+public class Base32Test extends com.limegroup.gnutella.util.LimeTestCase {
 
     public Base32Test(String name) {
         super(name);

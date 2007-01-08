@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.routing;
 
+import org.limewire.util.I18NConvert;
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.StringUtils;
 
 /** 
  * The official platform-independent hashing function for query-routing.  The

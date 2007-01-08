@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.version;
 
+import org.limewire.util.OSUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
-public final class UpdateCollectionTest extends BaseTestCase {
+public final class UpdateCollectionTest extends LimeTestCase {
 
 	public UpdateCollectionTest(String name) {
 		super(name);
@@ -217,7 +219,7 @@ public final class UpdateCollectionTest extends BaseTestCase {
     }
     
     public void testOSRange() throws Exception {
-        String defaultOS = CommonUtils.getOS();
+        String defaultOS = OSUtils.getOS();
         
         try {
             
@@ -232,7 +234,7 @@ public final class UpdateCollectionTest extends BaseTestCase {
             case 4: setOSName("OS/2"); break;
             }
             
-            String currentOS = CommonUtils.getOS() + " (on iteration: " + i + ")";
+            String currentOS = OSUtils.getOS() + " (on iteration: " + i + ")";
         
         
             UpdateCollection uc = UpdateCollection.create(
@@ -260,10 +262,10 @@ public final class UpdateCollectionTest extends BaseTestCase {
     	            "</msg>" +
     	        "</update>");
     	        
-            boolean windows = CommonUtils.isWindows();
-            boolean mac = CommonUtils.isAnyMac();
-            boolean linux = CommonUtils.isLinux();
-            boolean unix = CommonUtils.isUnix() && !linux;
+            boolean windows = OSUtils.isWindows();
+            boolean mac = OSUtils.isAnyMac();
+            boolean linux = OSUtils.isLinux();
+            boolean unix = OSUtils.isUnix() && !linux;
             boolean other = !windows && !mac && !linux && !unix;
             // make sure only one of these values is true.
             int set = 0;
@@ -360,7 +362,7 @@ public final class UpdateCollectionTest extends BaseTestCase {
     
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(CommonUtils.class, "setOperatingSystems", null);
+        PrivilegedAccessor.invokeMethod(LimeWireUtils.class, "setOperatingSystems", null);
     }
             
 }

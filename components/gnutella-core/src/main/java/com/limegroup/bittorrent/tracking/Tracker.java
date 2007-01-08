@@ -10,18 +10,18 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 class Tracker {
 	private static final Log LOG = LogFactory.getLog(Tracker.class);
@@ -174,7 +174,7 @@ class Tracker {
 	 */
 	private static TrackerResponse connectHTTP(URI uri, String query) {
 		HttpMethod get = new GetMethod(uri + query);
-		get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
+		get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
 		get.addRequestHeader("Cache-Control", "no-cache");
 		get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
 				"close");

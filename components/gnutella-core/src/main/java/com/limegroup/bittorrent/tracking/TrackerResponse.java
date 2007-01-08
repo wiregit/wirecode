@@ -11,15 +11,15 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.ValueException;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Class parsing the response from a tracker

@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.auth;
 
+
 import java.io.ByteArrayOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 
 import junit.framework.Test;
 
@@ -17,11 +21,9 @@ import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
+import com.limegroup.gnutella.util.LimeTestCase;
  
-public class ContentManagerNetworkTest extends BaseTestCase {
+public class ContentManagerNetworkTest extends LimeTestCase {
     
     private static final String S_URN_1 = "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB";
     

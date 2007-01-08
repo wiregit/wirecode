@@ -12,13 +12,13 @@ import java.util.zip.Inflater;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.CompressingOutputStream;
 
 /**
  * Tests that InflaterReader inflates the source channel correctly.
  */
-public final class InflaterReaderTest extends BaseTestCase {
+public final class InflaterReaderTest extends LimeTestCase {
     
     private Inflater INFLATER = new Inflater();
     private InflaterReader READER = new InflaterReader(INFLATER);

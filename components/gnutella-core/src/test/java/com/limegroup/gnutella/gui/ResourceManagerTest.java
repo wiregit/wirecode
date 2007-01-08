@@ -3,9 +3,9 @@ package com.limegroup.gnutella.gui;
 import java.util.Locale;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ResourceManagerTest extends BaseTestCase {
+public class ResourceManagerTest extends LimeTestCase {
 
 	public ResourceManagerTest(String name) {
 		super(name);

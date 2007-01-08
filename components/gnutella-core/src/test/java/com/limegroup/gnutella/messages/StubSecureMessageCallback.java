@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.messages;
 
+import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessageCallback;
+
 public class StubSecureMessageCallback implements SecureMessageCallback {
 
     private SecureMessage sm;

@@ -1,13 +1,15 @@
 package com.limegroup.gnutella;
 
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.NetworkUtils;
 /**
  * A push endpoint for myself.  This differs from the standard
  * push endpoints because it always returns the current connections

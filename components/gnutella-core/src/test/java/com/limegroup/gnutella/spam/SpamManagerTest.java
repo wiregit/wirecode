@@ -10,11 +10,13 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class SpamManagerTest extends BaseTestCase {
+
+@SuppressWarnings("unchecked")
+public class SpamManagerTest extends LimeTestCase {
 
     public SpamManagerTest(String name) {
         super(name);

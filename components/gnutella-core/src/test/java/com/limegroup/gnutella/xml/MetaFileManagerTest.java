@@ -7,6 +7,9 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.util.I18NConvert;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.FileManagerEvent;
@@ -17,14 +20,13 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that
  * the same tests ran for SimpleFileManager can be run for 
  * MetaFileManager.
  */
+@SuppressWarnings("unchecked")
 public class MetaFileManagerTest extends com.limegroup.gnutella.FileManagerTest {
 
     public MetaFileManagerTest(String name) {

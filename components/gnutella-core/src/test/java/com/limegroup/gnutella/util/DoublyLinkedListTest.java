@@ -9,7 +9,8 @@ import com.limegroup.gnutella.util.DoublyLinkedList.ListElement;
 /**
  * Unit tests for DoublyLinkedList
  */
-public class DoublyLinkedListTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class DoublyLinkedListTest extends LimeTestCase {
             
 	public DoublyLinkedListTest(String name) {
 		super(name);

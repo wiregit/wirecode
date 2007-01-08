@@ -3,13 +3,15 @@ package com.limegroup.gnutella.util;
 
 import java.util.NoSuchElementException;
 
+
 import junit.framework.Test;
 
 
 /**
  * a test for the round robin queues.
  */
-public class RoundRobinQueueTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class RoundRobinQueueTest extends LimeTestCase {
 
 	static Integer [] objects = new Integer[20];
 	static RoundRobinQueue queue;

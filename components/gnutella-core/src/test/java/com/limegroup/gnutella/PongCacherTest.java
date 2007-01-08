@@ -5,21 +5,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.MessageTestUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 
 /**
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most
  * recent pongs seen.
  */
-public final class PongCacherTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public final class PongCacherTest extends LimeTestCase {
 
 
     

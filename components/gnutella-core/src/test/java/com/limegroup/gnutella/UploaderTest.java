@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.auth.StubContentAuthority;
@@ -32,11 +35,11 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private ActivityCallback ac;
     private static FileManager fm;
@@ -451,7 +454,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             OutputStream os = sb.getOutputStream();
             out = new BufferedWriter(new OutputStreamWriter(os));
             out.write("GET /get/0/abc1.txt HTTP/1.1\r\n");
-            out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+            out.write("User-Agent: "+LimeWireUtils.getHttpServer()+"\r\n");
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
             out.write("Range: bytes=0-12000 \r\n");
             out.write("\r\n");
@@ -485,7 +488,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
                     break;
             }
             out.write("GET /get/0/abc1.txt HTTP/1.1\r\n");
-            out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+            out.write("User-Agent: "+LimeWireUtils.getHttpServer()+"\r\n");
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
             out.write("Range: bytes=1200-2400 \r\n");
             out.write("\r\n");

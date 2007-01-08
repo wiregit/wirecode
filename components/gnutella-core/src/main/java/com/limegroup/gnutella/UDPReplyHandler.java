@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -14,7 +16,6 @@ import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class is an implementation of <tt>ReplyHandler</tt> that is 

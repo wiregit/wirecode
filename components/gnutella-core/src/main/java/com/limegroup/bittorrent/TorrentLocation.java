@@ -1,11 +1,13 @@
 package com.limegroup.bittorrent;
 
+
 import java.net.InetAddress;
 import java.util.Arrays;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.util.Base32;
+
 
 /**
  * A TorrentLocation object represents a remote computer on the Internet running BitTorrent software.

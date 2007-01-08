@@ -8,7 +8,7 @@ import java.io.File;
  * 
  * Subclasses must provide a suite method for this setting to work.
  */
-public class GUIBaseTestCase extends BaseTestCase {
+public class GUIBaseTestCase extends LimeTestCase {
 
 	private static String savedWorkingDir;
 	

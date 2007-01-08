@@ -20,6 +20,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+import org.limewire.service.MessageService;
+import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -42,11 +47,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.DualIterator;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -360,7 +361,7 @@ public class DownloadManager implements BandwidthTracker {
         File real = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
         File backup = SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue();        
         real.delete();
-        CommonUtils.copy(backup, real);
+        FileUtils.copy(backup, real);
     }
     
     /**

@@ -77,8 +77,8 @@ public class MessageTestUtils {
         if (isGUESSCapable && isUltrapeer) {
             // indicate guess support
             byte[] vNum = {
-                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
-                                     CommonUtils.getGUESSMinorVersionNumber())};
+                convertToGUESSFormat(LimeWireUtils.getGUESSMajorVersionNumber(),
+                                     LimeWireUtils.getGUESSMinorVersionNumber())};
             ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
         }
         
@@ -105,8 +105,8 @@ public class MessageTestUtils {
                                               boolean freeUP) {
         byte[] payload = new byte[3];
         // put version
-        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
-                                          CommonUtils.getUPMinorVersionNumber()
+        payload[0] = convertToGUESSFormat(LimeWireUtils.getUPMajorVersionNumber(),
+                                          LimeWireUtils.getUPMinorVersionNumber()
                                           );
         if(freeLeaf) {
             payload[1] = (byte)10;

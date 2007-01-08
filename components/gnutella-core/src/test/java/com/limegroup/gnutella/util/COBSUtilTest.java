@@ -2,14 +2,15 @@ package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 
+import org.limewire.io.ByteOrder;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 
 /**
  * Tests COBSUtil
  */
-public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class COBSUtilTest extends com.limegroup.gnutella.util.LimeTestCase {
     public COBSUtilTest(String name) {
         super(name);
     }

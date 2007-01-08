@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.InterruptedIOException;
 import java.util.Iterator;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
@@ -22,8 +26,6 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public final class LicenseSharingTest extends ClientSideTestCase {
@@ -69,11 +71,11 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         assertTrue(cc4.exists());
         assertTrue(wma5.exists());
         // now move them to the share dir
-        CommonUtils.copy(cc1, new File(_sharedDir, "cc1.mp3"));
-        CommonUtils.copy(cc2, new File(_sharedDir, "cc2.mp3"));	    
-        CommonUtils.copy(cc3, new File(_sharedDir, "cc3.mp3"));
-        CommonUtils.copy(cc4, new File(_sharedDir, "cc4.ogg"));
-        CommonUtils.copy(wma5, new File(_sharedDir, "wma5.wma"));
+        FileUtils.copy(cc1, new File(_sharedDir, "cc1.mp3"));
+        FileUtils.copy(cc2, new File(_sharedDir, "cc2.mp3"));	    
+        FileUtils.copy(cc3, new File(_sharedDir, "cc3.mp3"));
+        FileUtils.copy(cc4, new File(_sharedDir, "cc4.ogg"));
+        FileUtils.copy(wma5, new File(_sharedDir, "wma5.wma"));
     }
 	
 	public void testFileDescKnowsLicense() throws Exception {

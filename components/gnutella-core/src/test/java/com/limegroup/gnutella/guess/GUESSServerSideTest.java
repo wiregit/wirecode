@@ -10,6 +10,8 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.limewire.security.QueryKey;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Backend;
@@ -18,11 +20,11 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Tests the Server Side of GUESS....
  */ 
-public class GUESSServerSideTest extends BaseTestCase {
+public class GUESSServerSideTest extends LimeTestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon

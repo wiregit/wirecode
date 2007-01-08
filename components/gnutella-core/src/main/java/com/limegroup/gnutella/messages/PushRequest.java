@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A Gnutella push request, used to download files behind a firewall.

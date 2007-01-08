@@ -13,8 +13,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.util.Base32;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.security.TigerTree;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * This class stores HashTrees and is capable of verifying a file it is also

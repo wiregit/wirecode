@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.RandomAccess;
 
+import org.limewire.collection.UnmodifiableIterator;
+
 /**
  * A fixed size hashset that provides indexed access.  The replacement
  * policy is FIFO and the iteration order is from newest to oldest.
@@ -80,11 +82,11 @@ public class FixedSizeArrayHashSet<T> extends HashSet<T> implements RandomAccess
         super.clear();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked" })
     @Override
     public Object clone() {
         FixedSizeArrayHashSet<T> newSet = (FixedSizeArrayHashSet<T>)super.clone();
-        newSet.buf = (Buffer<T>)buf.clone();
+        newSet.buf = buf.clone();
         return newSet;
     }
 

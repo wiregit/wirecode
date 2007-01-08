@@ -10,6 +10,9 @@ import java.util.Random;
 import java.util.zip.Inflater;
 
 import org.apache.commons.pool.ObjectPool;
+import org.limewire.io.IOUtils;
+import org.limewire.io.Pools;
+import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
@@ -17,11 +20,8 @@ import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.Pools;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCase {
     private final Random RND = new Random();
     
     public QueryRouteTableTest(String name) {

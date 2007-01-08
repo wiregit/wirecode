@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.auth;
 
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.limewire.io.IpPortImpl;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.util.IpPortImpl;
 
 /** Content Authority that sends requests, randomly, to a host in the settings. */
 public class SettingsBasedContentAuthority implements ContentAuthority {

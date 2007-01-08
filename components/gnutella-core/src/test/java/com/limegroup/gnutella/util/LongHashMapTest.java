@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.util;
 
+
 import junit.framework.Test;
 
-public class LongHashMapTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class LongHashMapTest extends LimeTestCase {
 
     public LongHashMapTest(String name) {
         super(name);

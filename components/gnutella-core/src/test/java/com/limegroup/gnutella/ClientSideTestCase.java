@@ -9,6 +9,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -25,8 +29,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.spam.SpamManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Sets up a Test Scenario of a Leaf connected to some Ultrapeers (default of
@@ -40,8 +42,9 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * and numUPs (for the number of Ultrapeers to connect to, must be 1-4), 
  * and main and suite().
  */
+@SuppressWarnings("all")
 public abstract class ClientSideTestCase 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends com.limegroup.gnutella.util.LimeTestCase {
     public static final int SERVER_PORT = 6669;
     protected static int TIMEOUT=500;
     private static final byte[] ultrapeerIP=
@@ -88,8 +91,8 @@ public abstract class ClientSideTestCase
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        

@@ -3,7 +3,8 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;

@@ -2,13 +2,14 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 /**
@@ -19,7 +20,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  *
  * http://groups.yahoo.com/group/the_gdf/files/Proposals/Ultrapeer/Ultrapeers_1.0_clean.html
  */
-public final class LeafHandshakeResponderTest extends BaseTestCase {
+public final class LeafHandshakeResponderTest extends LimeTestCase {
 
 
 	public LeafHandshakeResponderTest(String name) {

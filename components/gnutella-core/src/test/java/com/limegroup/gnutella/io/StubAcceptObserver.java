@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class StubAcceptObserver implements AcceptObserver {
     private List sockets = new LinkedList();
     private List ioxes = new LinkedList();

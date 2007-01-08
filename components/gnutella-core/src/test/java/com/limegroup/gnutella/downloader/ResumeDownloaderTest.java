@@ -11,6 +11,10 @@ import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.ConverterObjectInputStream;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.DownloadManager;
@@ -22,16 +26,14 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /** 
  * Unit tests small parts of ResumeDownloader.  See RequeryDownloadTest for
  * larger integration tests.
  * @see RequeryDownloadTest 
  */
-public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class ResumeDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     static final String filePath="com/limegroup/gnutella/downloader/";
     static final String queryName = "filename";
     static final String name="filename.txt";

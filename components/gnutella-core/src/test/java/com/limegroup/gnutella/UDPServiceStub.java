@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,18 +18,22 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ExecutorsHelper;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class allows the creation of a UDPService instances with 
  * controlled delay times and loss rates for testing UDP communication.
  * It routes outgoing messages to itself after the delay time.
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class UDPServiceStub extends UDPService {
 
 	/**

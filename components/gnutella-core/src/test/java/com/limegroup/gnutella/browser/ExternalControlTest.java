@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.browser;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ExternalControlTest extends BaseTestCase {
+public class ExternalControlTest extends LimeTestCase {
 
 	MagnetOptions[] validMagnets;
 	

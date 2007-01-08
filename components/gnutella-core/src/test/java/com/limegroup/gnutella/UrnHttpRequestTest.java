@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -19,15 +21,14 @@ import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This class tests HTTP requests involving URNs, as specified in HUGE v094,
  * utilizing the X-Gnutella-Content-URN header and the 
  * X-Gnutella-Alternate-Location header.
  */
-public final class UrnHttpRequestTest extends BaseTestCase {
+public final class UrnHttpRequestTest extends LimeTestCase {
 
 	private static RouterService ROUTER_SERVICE;	   
 

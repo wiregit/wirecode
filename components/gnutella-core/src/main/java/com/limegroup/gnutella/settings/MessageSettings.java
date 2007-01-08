@@ -1,4 +1,7 @@
 package com.limegroup.gnutella.settings;
+
+import org.limewire.setting.IntSetting;
+
 /**
  * Settings for messages
  */

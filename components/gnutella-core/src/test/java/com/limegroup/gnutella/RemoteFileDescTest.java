@@ -1,21 +1,24 @@
 package com.limegroup.gnutella;
 
+
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.IpPortSet;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
  */
-public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTestCase {	  
+@SuppressWarnings("unchecked")
+public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTestCase {	  
 
 	private byte[] TEST_GUID;
 

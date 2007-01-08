@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
@@ -13,14 +17,13 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Unit tests for UpdateMessageVerifier
  */
-public class UpdateManagerTest extends BaseTestCase {
+public class UpdateManagerTest extends LimeTestCase {
     
     static final int OLD = 0;
     
@@ -110,7 +113,7 @@ public class UpdateManagerTest extends BaseTestCase {
 
         File pub = CommonUtils.getResourceFile(updateDir+"public.key");
         File pub2 = new File(_settingsDir, "public.key");
-        CommonUtils.copy(pub, pub2);
+        FileUtils.copy(pub, pub2);
         assertTrue("test could not be set up", pub2.exists());
         updateXMLFile = new File(_settingsDir,"update.xml");
         
@@ -135,7 +138,7 @@ public class UpdateManagerTest extends BaseTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         //Set the version to a lower version
-        PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", "3.2.2");
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "testVersion", "3.2.2");
     }
 
     public void setUp() throws Exception {
@@ -498,7 +501,7 @@ public class UpdateManagerTest extends BaseTestCase {
     * @param updateFile the File that is to be coppied over the update XML file
     */
     private static void changeUpdateFile(File updateFile) throws Exception {
-        CommonUtils.copy(updateFile, updateXMLFile);
+        FileUtils.copy(updateFile, updateXMLFile);
         //Set UpdateManager.INSTANCE to null
         PrivilegedAccessor.setValue(UpdateManager.class, "INSTANCE", null);
     }
@@ -510,19 +513,19 @@ public class UpdateManagerTest extends BaseTestCase {
      */
     private static void changeUpdateFile() throws Exception {        
         if(updateVersion == OLD) 
-            CommonUtils.copy(OLD_VERSION_FILE, updateXMLFile);
+            FileUtils.copy(OLD_VERSION_FILE, updateXMLFile);
         else if(updateVersion == MIDDLE)
-            CommonUtils.copy(MIDDLE_VERSION_FILE, updateXMLFile);
+            FileUtils.copy(MIDDLE_VERSION_FILE, updateXMLFile);
         else if(updateVersion == NEW) 
-            CommonUtils.copy(NEW_VERSION_FILE, updateXMLFile);
+            FileUtils.copy(NEW_VERSION_FILE, updateXMLFile);
         else if(updateVersion == DEF_MESSAGE)
-            CommonUtils.copy(DEF_MESSAGE_FILE, updateXMLFile);
+            FileUtils.copy(DEF_MESSAGE_FILE, updateXMLFile);
         else if(updateVersion == DEF_SIGNATURE)
-            CommonUtils.copy(DEF_SIG_FILE, updateXMLFile);
+            FileUtils.copy(DEF_SIG_FILE, updateXMLFile);
         else if(updateVersion == BAD_XML)
-            CommonUtils.copy(BAD_XML_FILE, updateXMLFile);
+            FileUtils.copy(BAD_XML_FILE, updateXMLFile);
         else if(updateVersion == RANDOM_BYTES)
-            CommonUtils.copy(RANDOM_BYTES_FILE, updateXMLFile);
+            FileUtils.copy(RANDOM_BYTES_FILE, updateXMLFile);
         else
             fail("updateVersion set to wrong value");
         

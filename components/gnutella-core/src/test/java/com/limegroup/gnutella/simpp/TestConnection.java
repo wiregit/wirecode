@@ -7,17 +7,18 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 
+import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
 public class TestConnection {
@@ -130,7 +131,7 @@ public class TestConnection {
         //Read the first message of type SimppRequest
         Message message = null;
         try {
-            message = BaseTestCase.getFirstInstanceOfMessage(
+            message = LimeTestCase.getFirstInstanceOfMessage(
                                            _socket, SimppRequestVM.class, 2000);
         } catch (BadPacketException bpx) {
             Assert.that(false, "limewire sent message with BPX");

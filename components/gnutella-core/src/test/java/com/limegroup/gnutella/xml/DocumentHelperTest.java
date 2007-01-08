@@ -5,12 +5,12 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests the LimeXMLDocumentHelper logic.
  */
-public class DocumentHelperTest extends BaseTestCase {
+public class DocumentHelperTest extends LimeTestCase {
 
     public DocumentHelperTest(String name){
         super(name);

@@ -6,9 +6,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class SharingSettingsTest extends BaseTestCase {
+public class SharingSettingsTest extends LimeTestCase {
 
 	public SharingSettingsTest(String name) {
 		super(name);

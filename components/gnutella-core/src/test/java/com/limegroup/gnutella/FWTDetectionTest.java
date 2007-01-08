@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,6 +15,11 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.List;
 
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -22,17 +28,15 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * this class tests that the node properly detects if it is
  * capable of firewall to firewall transfers.
  */
-public class FWTDetectionTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class FWTDetectionTest extends LimeTestCase {
     
     public FWTDetectionTest(String name) {
         super(name);
@@ -83,7 +87,7 @@ public class FWTDetectionTest extends BaseTestCase {
         cmStub.setConnected(false);
         assertFalse(RouterService.isConnected());
         
-        gnet = new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
+        gnet = new File(LimeWireUtils.getUserSettingsDir(),"gnutella.net");
                 
     }
     

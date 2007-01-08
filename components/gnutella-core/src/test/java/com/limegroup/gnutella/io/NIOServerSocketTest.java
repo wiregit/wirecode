@@ -4,12 +4,13 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.Selector;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class NIOServerSocketTest extends BaseTestCase {
+public class NIOServerSocketTest extends LimeTestCase {
     
     private final int LISTEN_PORT = 9999;
     private final InetSocketAddress LISTEN_ADDR = new InetSocketAddress("127.0.0.1", LISTEN_PORT);

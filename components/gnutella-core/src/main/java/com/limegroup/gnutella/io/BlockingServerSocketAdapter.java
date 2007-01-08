@@ -10,7 +10,8 @@ import java.net.SocketException;
 import java.nio.channels.IllegalBlockingModeException;
 import java.nio.channels.ServerSocketChannel;
 
-import com.limegroup.gnutella.util.ThreadExecutor;
+import org.limewire.concurrent.ThreadExecutor;
+
 
 /**
  * A ServerSocket that allows asynchronous accepts but is backed

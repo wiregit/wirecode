@@ -15,19 +15,20 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.service.MessageService;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.Sockets;
 
 public class ExternalControl {
@@ -63,7 +64,7 @@ public class ExternalControl {
 	}
 
 	public static void checkForActiveLimeWire(String arg) {
-	    if(  CommonUtils.isWindows() && testForLimeWire(arg) ) {
+	    if(  OSUtils.isWindows() && testForLimeWire(arg) ) {
 		    System.exit(0);	
 		}
 	}

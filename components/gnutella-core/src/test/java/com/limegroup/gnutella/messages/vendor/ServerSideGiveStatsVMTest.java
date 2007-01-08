@@ -12,6 +12,9 @@ import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.CountingConnection;
@@ -35,8 +38,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
@@ -53,7 +55,8 @@ import com.limegroup.gnutella.util.EmptyResponder;
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
-public final class ServerSideGiveStatsVMTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public final class ServerSideGiveStatsVMTest extends LimeTestCase {
 
 	/**
 	 * The port that the central Ultrapeer listens on, and that the other nodes
@@ -191,8 +194,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         File susheel = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);

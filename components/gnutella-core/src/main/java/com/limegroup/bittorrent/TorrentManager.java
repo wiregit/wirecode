@@ -10,6 +10,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.util.FileLocker;
+import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
@@ -22,10 +26,7 @@ import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.io.AbstractNBSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 /**
  * Class which manages active torrents and dispatching of 
@@ -45,7 +46,7 @@ import com.limegroup.gnutella.util.SchedulingThreadPool;
  * the new torrent is queued.
  */
 public class TorrentManager 
-implements ConnectionAcceptor, TorrentEventListener, 
+implements FileLocker, ConnectionAcceptor, TorrentEventListener, 
 EventDispatcher<TorrentEvent, TorrentEventListener> {
 	
 
@@ -95,6 +96,8 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 				this,
 				new String[]{word.toString()},
 				false,false);
+        
+        FileUtils.addFileLocker(this);
 		
         this.fileManager = fileManager;
         this.threadPool = threadPool;
@@ -109,7 +112,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	private static int getMaxActiveTorrents() { 
 		
 		// windows 98 has very small connection limit, allow a single torrent only
-		if (CommonUtils.isWindows() && !CommonUtils.isGoodWindows())
+		if (OSUtils.isWindows() && !OSUtils.isGoodWindows())
 			return 1;
 		
 		int speed = ConnectionSettings.CONNECTION_SPEED.getValue();
@@ -126,7 +129,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	public static int getMaxTorrentConnections() {
 		
 		// windows 98 50 connection limit
-		if (CommonUtils.isWindows() && !CommonUtils.isGoodWindows())
+		if (OSUtils.isWindows() && !OSUtils.isGoodWindows())
 			return 30;
 		
 		if (ConnectionSettings.CONNECTION_SPEED.getValue() <= 
@@ -235,6 +238,10 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	synchronized boolean hasNonSeeding() {
 		return _active.size() > _seeding.size();
 	}
+        
+    public boolean releaseLock(File file) {
+        return killTorrentForFile(file);
+    }
 	
 	public boolean killTorrentForFile(File f) {
 		ManagedTorrent found = null;

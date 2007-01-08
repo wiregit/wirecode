@@ -13,7 +13,7 @@ import junit.framework.Test;
 /**
  * Tests for DIMEParser.
  */
-public final class DIMEParserTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class DIMEParserTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 	/**
 	 * Constructs a new test instance for responses.

@@ -3,9 +3,9 @@ package com.limegroup.gnutella.licenses;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class LicenseFactoryTest extends BaseTestCase {
+public final class LicenseFactoryTest extends LimeTestCase {
 
 	public LicenseFactoryTest(String name) {
 		super(name);

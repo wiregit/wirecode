@@ -19,12 +19,12 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that MessageReader extracts messages from a source channel correctly.
  */
-public final class MessageReaderTest extends BaseTestCase {
+public final class MessageReaderTest extends LimeTestCase {
     
     private StubMessageReceiver STUB = new StubMessageReceiver();
     private MessageReader READER = new MessageReader(STUB);

@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -27,7 +29,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  *  Tests that an Ultrapeer correctly proxies for a Leaf.
@@ -39,6 +40,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  *                             LEAF[0]
  *
  */
+@SuppressWarnings( { "unchecked", "cast" } )
 public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;
     private static final long EXPIRE_TIME = 20 * 1000;

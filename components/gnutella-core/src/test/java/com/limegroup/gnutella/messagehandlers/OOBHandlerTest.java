@@ -13,9 +13,9 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class OOBHandlerTest extends BaseTestCase {
+public class OOBHandlerTest extends LimeTestCase {
 
 	public OOBHandlerTest(String name) {
 		super(name);

@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.browser;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EncodingUtils;
 
-public class MagnetOptionsTest extends BaseTestCase {
+public class MagnetOptionsTest extends LimeTestCase {
 
 	public MagnetOptionsTest(String name) {
 		super(name);

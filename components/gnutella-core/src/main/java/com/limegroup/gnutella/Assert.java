@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.service.ErrorService;
+
 /**
  * Assertion checking. 
  */

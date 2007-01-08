@@ -3,15 +3,16 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * test for the parsing of ASF files.
  */
-public class ASFParsingTest extends BaseTestCase {
+public class ASFParsingTest extends LimeTestCase {
 	
 	public ASFParsingTest(String name) {
 		super(name);

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +14,11 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -20,12 +26,8 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 
@@ -255,7 +257,7 @@ public class BrowseHostHandler {
         str = "Host: " + NetworkUtils.ip2string(RouterService.getAddress()) + 
               ":" + RouterService.getPort() + LF;
         oStream.write(str.getBytes());
-        str = "User-Agent: " + CommonUtils.getVendor() + LF;
+        str = "User-Agent: " + LimeWireUtils.getVendor() + LF;
         oStream.write(str.getBytes());
         str = "Accept: " + Constants.QUERYREPLY_MIME_TYPE + LF;
         oStream.write(str.getBytes());

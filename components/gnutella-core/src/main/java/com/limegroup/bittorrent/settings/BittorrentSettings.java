@@ -1,8 +1,9 @@
 package com.limegroup.bittorrent.settings;
 
 
-import com.limegroup.gnutella.settings.BooleanSetting;
-import com.limegroup.gnutella.settings.IntSetting;
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+
 import com.limegroup.gnutella.settings.LimeProps;
 
 /**

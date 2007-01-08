@@ -15,7 +15,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 /**
  * Unit tests for IP, IPFilter, IPList
  */
-public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class IPTest extends com.limegroup.gnutella.util.LimeTestCase {
     SpamFilter filter;
     byte[] guid;
 

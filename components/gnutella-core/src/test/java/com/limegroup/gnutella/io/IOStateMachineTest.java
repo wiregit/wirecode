@@ -8,9 +8,10 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.connection.WriteBufferChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class IOStateMachineTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class IOStateMachineTest extends LimeTestCase {
     
     public IOStateMachineTest(String name) {
         super(name);

@@ -13,7 +13,7 @@ import com.limegroup.gnutella.connection.ReadBufferChannel;
 /**
  * Tests for AsyncDimeParser.
  */
-public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeTestCase {
     
 
     private ByteArrayOutputStream out;

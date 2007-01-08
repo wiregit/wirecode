@@ -8,9 +8,9 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class UDPSocketChannelTest extends BaseTestCase {
+public class UDPSocketChannelTest extends LimeTestCase {
     public UDPSocketChannelTest(String name) {
         super(name);
     }

@@ -6,7 +6,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 
-public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class MessageTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public MessageTest(String name) {
         super(name);

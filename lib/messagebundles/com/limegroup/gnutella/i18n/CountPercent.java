@@ -23,6 +23,7 @@ import java.util.Set;
 /**
  * @author Admin
  */
+@SuppressWarnings("unchecked")
 public class CountPercent {
     private static final int ACTION_STATISTICS = 0;
     private static final int ACTION_HTML = 1;

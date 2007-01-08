@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.filters;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,15 +9,16 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ExecutorsHelper;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Blocks messages and hosts based on IP address.  
@@ -82,7 +84,7 @@ public final class IPFilter extends SpamFilter {
         }
         
         // Load data from hostiles.txt...
-        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+        File hostiles = new File(LimeWireUtils.getUserSettingsDir(), "hostiles.txt");
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(hostiles));

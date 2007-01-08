@@ -1,14 +1,15 @@
 package com.limegroup.gnutella;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for MediaType
  */
-public class MediaTypeTest extends BaseTestCase {
+public class MediaTypeTest extends LimeTestCase {
     
 	public MediaTypeTest(String name) {
 		super(name);

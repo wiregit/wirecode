@@ -9,8 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.IntBuffer;
+import org.limewire.collection.IntBuffer;
+import org.limewire.service.ErrorService;
+
 
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>

@@ -11,9 +11,9 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class BlockingIncomingHandshakerTest extends BaseTestCase {
+public class BlockingIncomingHandshakerTest extends LimeTestCase {
     
     public BlockingIncomingHandshakerTest(String name) {
         super(name);

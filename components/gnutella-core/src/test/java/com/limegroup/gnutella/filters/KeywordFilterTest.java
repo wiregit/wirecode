@@ -3,12 +3,12 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for KeywordFilter
  */
-public class KeywordFilterTest extends BaseTestCase {
+public class KeywordFilterTest extends LimeTestCase {
     
     KeywordFilter filter=new KeywordFilter();
     QueryRequest qr=null;    

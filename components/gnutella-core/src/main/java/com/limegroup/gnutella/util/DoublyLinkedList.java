@@ -9,6 +9,9 @@ package com.limegroup.gnutella.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.UnmodifiableIterator;
+
+
 /**
 * A classic doubly-linked list.  Unlike the LinkedList class in the JDK, this
 * provides way a way to refer to elements of the list (each of type ListElement)

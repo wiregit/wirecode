@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.search;
 
+
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class contains data about a host that has returned a query hit,

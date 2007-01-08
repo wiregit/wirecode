@@ -9,12 +9,13 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for PatchTableMessage
  */
-public class PatchTableMessageTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class PatchTableMessageTest extends LimeTestCase {
         
 	public PatchTableMessageTest(String name) {
 		super(name);

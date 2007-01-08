@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.limewire.util.OSUtils;
+import org.limewire.util.StringUtils;
+import org.limewire.util.SystemUtils;
+
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.settings.URLHandlerSettings;
 
@@ -56,7 +60,7 @@ public final class Launcher {
 	 * Loads the necessary Mac classes if running on Mac.
 	 */
 	static {
-	    if(CommonUtils.isMacOSX()) {
+	    if(OSUtils.isMacOSX()) {
 			try {
 				loadMacClasses();		
 			} catch(IOException ioe) {
@@ -84,10 +88,10 @@ public final class Launcher {
 	 * @throws IOException if the url cannot be loaded do to an IO problem
 	 */
 	public static int openURL(String url) throws IOException {	   
-		if(CommonUtils.isWindows()) {
+		if(OSUtils.isWindows()) {
 			return openURLWindows(url);
 		}	   
-		else if(CommonUtils.isMacOSX()) {
+		else if(OSUtils.isMacOSX()) {
 			openURLMac(url);
 		}
 		else {
@@ -177,11 +181,11 @@ public final class Launcher {
 		   !extCheckString.endsWith(".bat") &&
 		   !extCheckString.endsWith(".sys") &&
 		   !extCheckString.endsWith(".com")) {
-			if(CommonUtils.isWindows()) {
+			if(OSUtils.isWindows()) {
 				launchFileWindows(path);
 				return null;
 			}
-			else if(CommonUtils.isMacOSX()) {
+			else if(OSUtils.isMacOSX()) {
 				return launchFileMacOSX(path);
 			}
 			else {
@@ -203,7 +207,7 @@ public final class Launcher {
      * @see #launchFile(File)
      */
     public static LimeProcess launchExplorer(File file) throws IOException, SecurityException {
-        if (CommonUtils.isWindows()) {
+        if (OSUtils.isWindows()) {
             String explorePath = file.getPath(); 
             try { 
                 explorePath = file.getCanonicalPath(); 
@@ -212,7 +216,7 @@ public final class Launcher {
             
             // launches explorer and highlights the file
             return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
-        } else if (CommonUtils.isMacOSX()) {
+        } else if (OSUtils.isMacOSX()) {
             if (file.isFile()) {
                 return launchFile(file.getParentFile());
             } else {

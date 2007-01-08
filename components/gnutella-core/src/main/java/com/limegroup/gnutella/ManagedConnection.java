@@ -11,6 +11,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.ByteOrder;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
@@ -70,7 +73,6 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.version.UpdateHandler;
 

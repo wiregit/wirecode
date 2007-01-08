@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
@@ -26,13 +28,13 @@ import com.limegroup.gnutella.UniqueHostPinger;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for UDPHostCache.
  */
-public class UDPHostCacheTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class UDPHostCacheTest extends LimeTestCase {
     private StubCache cache;
     
     public UDPHostCacheTest(String name) {

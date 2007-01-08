@@ -24,7 +24,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  *  THIS TEST SHOULD NOT BE INCLUDED IN ALL TESTS!  It is very specifically 
  *  tuned and will now work in general.
  */
-public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
+public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
 
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon

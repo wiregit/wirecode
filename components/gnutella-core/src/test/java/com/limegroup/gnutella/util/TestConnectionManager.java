@@ -14,6 +14,7 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 /**
  * Helper class that supplies the list of connections for searching.
  */
+@SuppressWarnings("unchecked")
 public final class TestConnectionManager extends ConnectionManager {
     
     /**

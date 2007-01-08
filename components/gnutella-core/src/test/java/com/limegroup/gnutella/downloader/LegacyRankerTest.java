@@ -7,13 +7,14 @@ import java.util.Set;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that the legacy ranker is properly selecting which 
  * RFDs it should return.
  */
-public class LegacyRankerTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class LegacyRankerTest extends LimeTestCase {
 
     public LegacyRankerTest(String name) {
         super(name);

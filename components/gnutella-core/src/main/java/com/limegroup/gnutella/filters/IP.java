@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
 
 /**
  * An IP address.  More precisely, a set of IP addresses specified by a regular

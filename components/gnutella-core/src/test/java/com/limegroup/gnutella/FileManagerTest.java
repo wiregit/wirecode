@@ -12,6 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.I18NConvert;
+import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -28,13 +34,10 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
-public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     protected static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
@@ -961,7 +964,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(CommonUtils.class, "setOperatingSystems", null);
+        PrivilegedAccessor.invokeMethod(LimeWireUtils.class, "setOperatingSystems", null);
     }
     
     //helper function to create queryrequest with I18N
@@ -993,7 +996,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			if(!testFiles[i].isFile()) continue;
 			File shared = new File(
 			    _sharedDir, testFiles[i].getName() + "." + EXTENSION);
-			assertTrue("unable to get file", CommonUtils.copy( testFiles[i], shared));
+			assertTrue("unable to get file", FileUtils.copy( testFiles[i], shared));
 		}
 
         waitForLoad();

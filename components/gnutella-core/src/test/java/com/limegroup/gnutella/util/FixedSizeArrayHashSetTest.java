@@ -6,7 +6,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-public class FixedSizeArrayHashSetTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class FixedSizeArrayHashSetTest extends LimeTestCase {
 
     public FixedSizeArrayHashSetTest(String name) {
         super(name);

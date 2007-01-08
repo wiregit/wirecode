@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.auth;
 
+
 import java.net.UnknownHostException;
+
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 
 /** A ContentAuthority that sends to a single IpPort. */
 public class IpPortContentAuthority implements ContentAuthority {

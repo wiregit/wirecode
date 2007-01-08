@@ -3,6 +3,8 @@ package com.limegroup.gnutella.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.limewire.collection.UnmodifiableIterator;
+
 /**
  * A class that generates all the integers from 0 to a certain limit in a 
  * random fashion where each number is generated only once per cycle.

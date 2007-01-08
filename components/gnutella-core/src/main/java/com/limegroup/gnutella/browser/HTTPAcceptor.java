@@ -7,14 +7,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkUtils;
+import org.limewire.service.MessageService;
+
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.SocketFactory;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**

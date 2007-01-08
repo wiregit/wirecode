@@ -6,17 +6,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.io.AcceptObserver;
 import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.ThreadExecutor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class ConnectionTest extends BaseTestCase {
+public class ConnectionTest extends LimeTestCase {
     
     private static int LISTEN_PORT = 9999;
     private ConnectionAcceptor ACCEPTOR;

@@ -2,12 +2,13 @@ package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
 
+import org.limewire.io.NetworkUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.updates.UpdateManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class contains the headers that all LimeWires pass in connection
@@ -44,7 +45,7 @@ public abstract class DefaultHeaders extends Properties {
         props.put(HeaderNames.X_QUERY_ROUTING, 
 				  QUERY_ROUTING_VERSION);
         props.put(HeaderNames.USER_AGENT,
-				  CommonUtils.getHttpServer());       
+				  LimeWireUtils.getHttpServer());       
         props.put(HeaderNames.GGEP, "0.5");
 		props.put(HeaderNames.X_GUESS, "0.1");
         props.put(HeaderNames.X_VENDOR_MESSAGE, "0.2");

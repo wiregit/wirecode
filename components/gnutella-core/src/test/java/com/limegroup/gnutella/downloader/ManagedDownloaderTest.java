@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,12 +20,16 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.service.ErrorService;
+import org.limewire.util.OSUtils;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -45,12 +50,9 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
-public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class ManagedDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);
     
@@ -358,10 +360,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
 		file.deleteOnExit();
 
 		File noWritePermissionDir = null;
-		if (CommonUtils.isLinux()) {
+		if (OSUtils.isLinux()) {
 			noWritePermissionDir = new File("/");
 		}
-		else if (CommonUtils.isWindows()) {
+		else if (OSUtils.isWindows()) {
 			// doesn't work on 
 //			noWritePermissionDir = new File("C:\\WINDOWS\\");
 		}

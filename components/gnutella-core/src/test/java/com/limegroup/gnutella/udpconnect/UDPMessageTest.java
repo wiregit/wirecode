@@ -6,12 +6,12 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for UDPConnectionMessages
  */
-public class UDPMessageTest extends BaseTestCase {
+public class UDPMessageTest extends LimeTestCase {
     
     ByteArrayInputStream sin;
     ByteArrayOutputStream sout;

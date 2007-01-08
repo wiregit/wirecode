@@ -17,12 +17,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class SHA1Test extends BaseTestCase {
+public class SHA1Test extends LimeTestCase {
     
     private static final SHA1 hash = new SHA1();
     

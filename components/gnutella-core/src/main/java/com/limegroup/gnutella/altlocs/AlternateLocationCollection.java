@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.ErrorService;
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.util.FixedSizeSortedSet;

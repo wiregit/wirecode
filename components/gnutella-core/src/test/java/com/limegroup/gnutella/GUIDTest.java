@@ -4,12 +4,16 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import org.limewire.io.ByteOrder;
+
+
 import junit.framework.Test;
 
 /**
  * Unit tests for GUID.
  */
-public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
     private byte[] bytes;
     private byte[] b1;
     private byte[] b2;

@@ -11,12 +11,12 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that the basic queue is just that -- basic.
  */
-public class BasicQueueTest extends BaseTestCase {
+public class BasicQueueTest extends LimeTestCase {
     
     private BasicQueue QUEUE = new BasicQueue();
 	

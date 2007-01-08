@@ -1,71 +1,77 @@
-<project name="Gnutella" default="core" basedir=".">
+<project name="lw-core" default="compile" basedir=".">
 
-<!-- set global properties for this basedir -->
-<property name="basedir" value="."/>
-<property name="lib" value="../lib"/>
-<property name="jars" value="${lib}/jars"/>
-
-
-<!-- constants -->
-<property name="DEBUG" value="yes"/>  
-<property name="OPTIMIZE" value="no"/>  
-<property name="DEPRECATION" value="yes"/>
-<property name="NOWARN" value="yes"/>
-
-<!-- default classpath for javac.  it is set as the user's CLASSPATH
-     environment with the jar files necessary for compilation appended. -->
-<path id="default.classpath" >
-  <fileset dir="${jars}" includes="**/*.jar"/>
-</path>
-
-
-<!-- Initialization stuff -->
-<target name="init">
-    <available file="${jars}" type="dir" property="jars.present"/>
-	<tstamp/>
-	<antcall target="checkjars"/>
-</target>
-
-<target name="checkjars" unless="jars.present">
-    <echo message="*******************************************************"/>
-    <echo message="*******  YOU MUST CHECKOUT THE lib MODULE *************"/>
-    <echo message="**** and place it as a sibling to this core module ****"/>
-    <echo message="*******************************************************"/>
-</target>
-
-<!-- Core -->
-<target name="core" depends="init">
-	<javac debug="${DEBUG}" 
-           optimize="${OPTIMIZE}" 
-           deprecation="${DEPRECATION}"
-		   srcdir="${basedir}" 
-           destdir="${basedir}"
-           nowarn="${NOWARN}"
-      source="1.5"
-      target="1.5"
-    >
-    <classpath refid="default.classpath" />
-    </javac>
-</target>
-
+    <property name="limewire.home" location="${basedir}/.."/>
+    
+    <echo message="Update: Building now requires the 'components' module."/>
+    <echo message="        If building fails because it cannot find ../components/build.xml,"/>
+    <echo message="        please checkout the components module as a sibling to core."/>
+    <import file="../components/build.xml"/>
+    
+    <target name="initialize" depends="lw-components.initialize">
+        <property name="limewire.core.home"           location="${limewire.home}/core"/>
+        <property name="limewire.core.src"  		  location="${limewire.core.home}"/>
+        <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
+        <path id="build.limewire.core.classpath">
+            <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
+            <path refid="build.limewire.components.classes"/>
+        </path>
+    </target>
+    
+    <!-- compiles the core & components -->
+    <target name="compile-all"
+            description="Compiles the components and the core."
+            depends="initialize, lw-components.compile-src, compile-core"/>
+    
+	<!-- builds only the core -->
+	<target name="compile-core" 
+	        description="Compiles just the core."
+	        depends="initialize">
+	    <javac destdir      ="${build.limewire.core.classes}"
+			   debug	    ="${compile.debug}"
+			   deprecation  ="${compile.deprecation}"
+	           optimize     ="${compile.optimize}"
+			   encoding     ="UTF-8"
+	           source		="${compile.source}"
+	           target       ="${compile.target}"
+	           srcdir	    ="${limewire.core.src}"
+	    >
+			<classpath refid="build.limewire.core.classpath"/>
+	   	</javac>
+	</target>
+    
+    <!-- cleans the core & components -->
+    <target name="clean-all" 
+            description="Cleans the classfiles generated from compiling the components and core."
+            depends="initialize, lw-components.clean-src, clean-core"/>
 	
-
-<!-- CLEAN -->
-<target name="clean">
-	<delete>
-		<fileset dir="${basedir}/com" includes="**/*.class"/>
-	</delete>
-</target>
-
-<!-- Creates a jar file from core code -->
-<target name="jar" depends="clean, core">
-	<delete file="lib/core.jar"/>
-	<jar destfile="lib/core.jar" 
-		 basedir="." 
-		 excludes="**/*.java **/*.xml **/*.txt **/*.sh **/*.bat 
-		 		   **/*.html **/*.jar compile run query_keys">
-	</jar>
-</target>
+	<!-- cleans only the core -->
+	<target name="clean-core"
+	        description="Cleans just the core classes."
+            depends="initialize">
+		<delete>
+			<fileset dir="${build.limewire.core.classes}" includes="**/*.class"/>
+		</delete>
+	</target>
+    
+    <target name="clean" description="Cleans just the core" depends="clean-core"/>
+    <target name="compile" description="Compiles just the core" depends="compile-core"/>
+    
+    <!--
+       everything below is just to erase the targets from 'ant -p'
+       they are listed because we import the component's buildfile.
+      -->
+    <target name="clean-src"/>
+    <target name="clean-dist"/>
+    <target name="clean-tests"/>
+    <target name="clover2html"/>
+    <target name="compile-src"/>
+    <target name="compile-tests"/>
+	<target name="jar"/>
+    <target name="javadoc"/>
+    <target name="test"/>
+    <target name="test-all"/>
+    <target name="test-package"/>
+    <target name="with.clover"/>
 
 </project>
 

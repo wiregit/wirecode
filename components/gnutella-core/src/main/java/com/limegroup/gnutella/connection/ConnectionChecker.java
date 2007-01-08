@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.connection;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -10,6 +11,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.ReplyHandler;
@@ -20,11 +25,7 @@ import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.ThreadExecutor;
 
 /**
  * Specialized class that attempts to connect to a rotating list of well-known
@@ -189,7 +190,7 @@ public final class ConnectionChecker implements Runnable {
                 // multiple times adds no load to the test servers.
                 if(_unsuccessfulAttempts > 2) {
                     LOG.debug("Failed connection check more than twice.");
-                    if (_triedSP2Workaround || !CommonUtils.isSocketChallengedWindows()) {
+                    if (_triedSP2Workaround || !OSUtils.isSocketChallengedWindows()) {
                         RouterService.getConnectionManager().noInternetConnection();
                         return;
                     } else {

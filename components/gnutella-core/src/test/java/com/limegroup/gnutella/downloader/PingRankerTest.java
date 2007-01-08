@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -10,6 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
@@ -26,12 +31,9 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
 /**
@@ -39,7 +41,8 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * and how it ranks hosts based on the returned results.
  *
  */
-public class PingRankerTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class PingRankerTest extends LimeTestCase {
 
     public PingRankerTest(String name) {
         super(name);

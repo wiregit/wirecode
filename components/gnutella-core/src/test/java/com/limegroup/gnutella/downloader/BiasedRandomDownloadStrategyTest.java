@@ -2,15 +2,16 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Random;
 
+import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.SystemUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.SystemUtils;
 
 
-public class BiasedRandomDownloadStrategyTest extends BaseTestCase {
+public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
     
     /** Smallest number that can be subtracted from 1.0f 
      * and get something different from 1.0f.  Note that

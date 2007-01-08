@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.connection;
 
+
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -7,16 +8,17 @@ import java.util.Random;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import org.limewire.io.BufferByteArrayOutputStream;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.BufferByteArrayOutputStream;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Tests that DeflaterWriter deflates data written to it correctly,
  * passing it on to the source channel.
  */
-public final class DeflaterWriterTest extends BaseTestCase {
+public final class DeflaterWriterTest extends LimeTestCase {
     
     private Deflater DEFLATER = new Deflater();
     private WriteBufferChannel SINK = new WriteBufferChannel(1024 * 1024);

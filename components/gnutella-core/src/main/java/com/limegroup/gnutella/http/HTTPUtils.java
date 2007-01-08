@@ -12,11 +12,12 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.limewire.util.StringUtils;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * This class supplies general facilities for handling HTTP, such as

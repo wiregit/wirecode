@@ -3,7 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Sends a 403 Banned For Hammering reply to a greedy client
@@ -29,7 +29,7 @@ public class BannedUploadState extends UploadState {
 		String str;
 		str = "HTTP/1.1 403 Banned\r\n";
 		os.write(str.getBytes());
-		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
 		os.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		os.write(str.getBytes());

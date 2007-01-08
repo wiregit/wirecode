@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import org.limewire.util.OSUtils;
+
 
 /**
  * Finds out the Mac address of the machine. 
@@ -23,16 +24,16 @@ public class MacAddressFinder {
      */
     String getMacAddress() {
         try {
-            if(CommonUtils.isWindows()) {
+            if(OSUtils.isWindows()) {
                 return getWindowsMac();
             }
-            else if(CommonUtils.isMacOSX()) {
+            else if(OSUtils.isMacOSX()) {
                 return getOSXMac();
             }
-            else if(CommonUtils.isSolaris()) {
+            else if(OSUtils.isSolaris()) {
                 return getSolarisMac();
             }
-            else if(CommonUtils.isLinux()) {
+            else if(OSUtils.isLinux()) {
                 getLinuxMac();
             }
             else {

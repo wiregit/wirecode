@@ -4,7 +4,8 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
-public class RandomSequenceTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class RandomSequenceTest extends LimeTestCase {
     
     public RandomSequenceTest(String name) {
         super(name);

@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 
+import org.limewire.concurrent.SchedulingThreadPool;
+
 import com.limegroup.bittorrent.BTMessageHandler;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BandwidthStat;
@@ -13,7 +15,6 @@ import com.limegroup.gnutella.io.ChannelReadObserver;
 import com.limegroup.gnutella.io.IOErrorObserver;
 import com.limegroup.gnutella.io.InterestReadChannel;
 import com.limegroup.gnutella.util.CircularByteBuffer;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
 
 public class BTMessageReader implements ChannelReadObserver, PieceParseListener {
 	

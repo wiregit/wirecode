@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.handshaking;
 
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -7,11 +8,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.limewire.io.IpPort;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -391,7 +393,7 @@ public class HandshakeResponse {
 		Properties headers = new Properties();
 		
         // add our user agent
-        headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
+        headers.put(HeaderNames.USER_AGENT, LimeWireUtils.getHttpServer());
         headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
         
 		// add any leaves

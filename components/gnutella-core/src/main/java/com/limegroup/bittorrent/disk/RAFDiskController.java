@@ -9,11 +9,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
+import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * implementation of the DiskController interface using

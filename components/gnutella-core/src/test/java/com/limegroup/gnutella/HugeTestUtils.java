@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.service.ErrorService;
+
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPConstants;
 
@@ -13,6 +15,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
  * This class provides convenient data and utility functions to
  * huge test classes.
  */
+@SuppressWarnings("unchecked")
 public final class HugeTestUtils {
 
 	public static final URL[] BAD_PORT_URLS = new URL[2];

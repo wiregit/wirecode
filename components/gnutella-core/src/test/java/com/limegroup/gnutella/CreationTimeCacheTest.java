@@ -10,6 +10,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -17,8 +21,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
@@ -26,8 +28,9 @@ import com.limegroup.gnutella.xml.MetaFileManager;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("unchecked")
 public class CreationTimeCacheTest 
-    extends com.limegroup.gnutella.util.BaseTestCase {
+    extends com.limegroup.gnutella.util.LimeTestCase {
     private static final int PORT=6669;
 
     private static RouterService rs;
@@ -92,9 +95,9 @@ public class CreationTimeCacheTest
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        

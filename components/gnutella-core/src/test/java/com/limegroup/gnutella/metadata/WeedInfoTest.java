@@ -2,9 +2,9 @@ package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public final class WeedInfoTest extends BaseTestCase {
+public final class WeedInfoTest extends LimeTestCase {
     
 	public WeedInfoTest(String name) {
 		super(name);

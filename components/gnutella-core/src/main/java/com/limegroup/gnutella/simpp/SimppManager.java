@@ -14,14 +14,14 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.util.FileUtils;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.ExecutorsHelper;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings
@@ -59,7 +59,7 @@ public class SimppManager {
         _processingQueue = ExecutorsHelper.newProcessingQueue("Simpp Handling Queue");
         try {
             File file = 
-                new File(CommonUtils.getUserSettingsDir(), SIMPP_FILE);
+                new File(LimeWireUtils.getUserSettingsDir(), SIMPP_FILE);
             raf = new RandomAccessFile(file, "r");
             byte[] content = new byte[(int)raf.length()];
             raf.readFully(content);
@@ -187,8 +187,8 @@ public class SimppManager {
      * Saves the simpp.xml file to the user settings directory.
      */
     public boolean save(){
-        File tmp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE+".tmp");
-        File simpp = new File(CommonUtils.getUserSettingsDir(),SIMPP_FILE);
+        File tmp = new File(LimeWireUtils.getUserSettingsDir(),SIMPP_FILE+".tmp");
+        File simpp = new File(LimeWireUtils.getUserSettingsDir(),SIMPP_FILE);
         
         OutputStream simppWriter = null;
         try {

@@ -1,16 +1,18 @@
 package com.limegroup.gnutella.auth;
 
+
 import java.util.Random;
+
+import org.limewire.io.IpPort;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ContentSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.LimeTestCase;
  
-public class SettingsBasedContentAuthorityTest extends BaseTestCase {
+public class SettingsBasedContentAuthorityTest extends LimeTestCase {
     
     public SettingsBasedContentAuthorityTest(String name) {
         super(name);

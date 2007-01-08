@@ -3,6 +3,10 @@ package com.limegroup.gnutella.version;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -17,10 +21,8 @@ import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests to make sure updates are sent, requested, etc...
@@ -354,7 +356,7 @@ public class InterClientTest extends ClientSideTestCase {
     }
     
     private static void setVersion(String v) throws Exception {
-        PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", v);
+        PrivilegedAccessor.setValue(LimeWireUtils.class, "testVersion", v);
     }
     
     private static byte[] payload(Message m) throws Exception {

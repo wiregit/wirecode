@@ -1,6 +1,10 @@
 
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.IntSetting;
+import org.limewire.setting.StringArraySetting;
+
 /**
  * Settings for filters
  */
@@ -85,16 +89,16 @@ public class FilterSettings extends LimeProps {
      * TODO: naming convention for SIMPP keys?
      */
     public static final BooleanSetting FILTER_HASH_QUERIES =
-        FACTORY.createSettableBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
+        FACTORY.createRemoteBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
     
     public static final IntSetting MIN_MATCHING_WORDS =
-    	FACTORY.createSettableIntSetting("MIN_MATCHING_WORDS",0,
+    	FACTORY.createRemoteIntSetting("MIN_MATCHING_WORDS",0,
     			"FilterSettings.minMatchingWords", 0, 30);
     
     /** 
      * Whether to drop responses that have an action 
      */
     public static final BooleanSetting FILTER_ACTION_RESPONSES =
-    		FACTORY.createSettableBooleanSetting("FILTER_ACTION_RESPONSES",false,
+    		FACTORY.createRemoteBooleanSetting("FILTER_ACTION_RESPONSES",false,
     				"FilterSettings.filterActionResponses");
 }

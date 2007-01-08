@@ -18,6 +18,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A simple FileManager that shares one file of (near) infinite length.
  */
+@SuppressWarnings("unchecked")
 public class FileManagerStub extends FileManager {
 
 	Map _urns,_files;

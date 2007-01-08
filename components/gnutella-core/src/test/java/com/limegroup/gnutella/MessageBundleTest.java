@@ -6,14 +6,16 @@ import java.io.FileReader;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.CommonUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Test the message bundles to ensure uniqueness of keys.
  */
-public final class MessageBundleTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public final class MessageBundleTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public MessageBundleTest(String name) {
 		super(name);

@@ -11,13 +11,14 @@ import junit.framework.Test;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.NameValue;
 
 /**
  * Tests for the XMLParsingUtils class
  */
-public class XMLParsingUtilsTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class XMLParsingUtilsTest extends LimeTestCase {
     
     private static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";
     

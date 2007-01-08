@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -23,10 +24,16 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.QueryKey;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
@@ -77,11 +84,6 @@ import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.FixedsizeHashMap;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ExecutorsHelper;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;

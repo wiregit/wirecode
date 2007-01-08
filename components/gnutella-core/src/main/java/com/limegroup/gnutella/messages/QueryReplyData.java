@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.messages;
 
+
 import java.util.Set;
+
+import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.IpPort;
 
 class QueryReplyData {
 

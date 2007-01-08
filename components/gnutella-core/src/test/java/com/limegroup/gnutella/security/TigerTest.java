@@ -12,7 +12,7 @@ package com.limegroup.gnutella.security;
 
 import junit.framework.Test;
 
-public class TigerTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class TigerTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public TigerTest(String name) {
         super(name);

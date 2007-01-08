@@ -24,10 +24,10 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.GenericsUtils;
-import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A container for storing serialized objects to disk.
@@ -148,7 +148,7 @@ class Container {
      * Saves the given object to disk.
      */
     private void writeToDisk(Object o) {
-        File f = new File(CommonUtils.getUserSettingsDir(), filename);
+        File f = new File(LimeWireUtils.getUserSettingsDir(), filename);
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
@@ -165,7 +165,7 @@ class Container {
      * Reads a Map from disk.
      */
     private Map<String, Collection<File>> readFromDisk() {
-        File f = new File(CommonUtils.getUserSettingsDir(), filename);
+        File f = new File(LimeWireUtils.getUserSettingsDir(), filename);
         ObjectInputStream ois = null;
         Map map = null;
         try {

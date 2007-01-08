@@ -10,8 +10,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
+import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.service.ErrorService;
+import org.limewire.util.AssertComparisons;
+
 import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.ErrorService;
 
 // extends AssertCmparisons just to get useful methods.
 public class FakeProxyServer extends AssertComparisons {

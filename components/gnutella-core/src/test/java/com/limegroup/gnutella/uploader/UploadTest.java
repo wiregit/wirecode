@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -32,6 +33,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -78,19 +84,16 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
  * containing the lowercase characters a-z.
  */
-public class UploadTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class UploadTest extends LimeTestCase {
     private static final int PORT = 6668;
     /** The file name, plain and encoded. */
     private static String testDirName = "com/limegroup/gnutella/uploader/data";

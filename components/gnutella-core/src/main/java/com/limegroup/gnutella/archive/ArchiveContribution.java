@@ -26,7 +26,7 @@ import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 
@@ -354,7 +354,7 @@ abstract class ArchiveContribution extends AbstractContribution {
 			final Element uploadApplicationElement = document.createElement( UPLOAD_APPLICATION_ELEMENT );
 			metadataElement.appendChild( uploadApplicationElement );
 			uploadApplicationElement.setAttribute( APPID_ATTR, APPID_ATTR_VALUE );
-			uploadApplicationElement.setAttribute( VERSION_ATTR, CommonUtils.getLimeWireVersion() );
+			uploadApplicationElement.setAttribute( VERSION_ATTR, LimeWireUtils.getLimeWireVersion() );
 			
 			final Element uploaderElement = document.createElement( UPLOADER_ELEMENT );
 			metadataElement.appendChild( uploaderElement );

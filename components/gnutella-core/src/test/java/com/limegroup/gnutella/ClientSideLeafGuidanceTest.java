@@ -26,6 +26,7 @@ import com.limegroup.gnutella.util.DataUtils;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("all")
 public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
     

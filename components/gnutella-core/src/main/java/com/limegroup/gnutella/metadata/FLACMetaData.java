@@ -9,8 +9,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.util.IOUtils;
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IOUtils;
+
 
 /**
  * this file parses comments from a flac file for general packet specs see:

@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
@@ -20,12 +24,11 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 
-public class MulticastTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class MulticastTest extends LimeTestCase {
 
     private static ActivityCallback CALLBACK;
     
@@ -66,7 +69,7 @@ public class MulticastTest extends BaseTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
-        CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);

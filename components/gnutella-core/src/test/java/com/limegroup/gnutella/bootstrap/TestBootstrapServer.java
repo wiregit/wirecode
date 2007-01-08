@@ -13,13 +13,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.ErrorService;
 
 /**
  * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single
  * connection, records request and writes result.
  */
+@SuppressWarnings("unchecked")
 public class TestBootstrapServer {
     
     

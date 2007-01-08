@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,9 +23,18 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.io.ByteOrder;
+import org.limewire.io.IPPortCombo;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.security.SecureMessage;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.StringUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -37,16 +47,12 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * This class tests the QueryReply class.
  */
-public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
     private static final String EXTENSION = "XYZ";
@@ -1179,7 +1185,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         for (int i = 0; i < testFiles.length; i++) {
             File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
-            assertTrue("unable to get file", CommonUtils.copy(testFiles[i], shared));
+            assertTrue("unable to get file", FileUtils.copy(testFiles[i], shared));
         }
 
         waitForLoad();
@@ -1239,6 +1245,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
     
     /** SPI that stores things statically because there's no other reference to it anywhere. */
+    @SuppressWarnings("deprecation")
     public static class FakeSignatureSpi extends SignatureSpi {
         private static byte[] update1;
         private static int off1;
@@ -1247,7 +1254,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         private static byte[] update2;
         private static int off2;
         private static int len2;
-        
+
+        @SuppressWarnings("deprecation")
         protected Object engineGetParameter(String arg0) throws InvalidParameterException {
             return null;
         }
@@ -1264,6 +1272,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         protected void engineInitVerify(PublicKey arg0) throws InvalidKeyException {
         }
 
+        @SuppressWarnings("deprecation")
         protected void engineSetParameter(String arg0, Object arg1) throws InvalidParameterException {
         }
 

@@ -3,6 +3,8 @@ package com.limegroup.gnutella.util;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.limewire.collection.UnmodifiableIterator;
+
 /**
  * A variant of <tt>FixedSizeArrayHashSet</tt> that allows iterations over
  * its elements in random order. 

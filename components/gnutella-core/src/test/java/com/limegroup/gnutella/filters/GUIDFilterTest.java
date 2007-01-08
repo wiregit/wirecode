@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 /**
  * Unit tests for GUIDFilterTest
  */
-public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class GUIDFilterTest extends com.limegroup.gnutella.util.LimeTestCase {
     SpamFilter filter;
     byte[] guid;
 

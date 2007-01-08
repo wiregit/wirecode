@@ -3,15 +3,17 @@ package com.limegroup.gnutella.updates;
 import java.io.File;
 import java.io.RandomAccessFile;
 
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for UpdateMessageVerifier
  */
-public class UpdateMessageVerifierTest extends BaseTestCase {
+public class UpdateMessageVerifierTest extends LimeTestCase {
 
 	private static final String testXMLPath = "com"+File.separator+
 												"limegroup"+File.separator+
@@ -69,7 +71,7 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
     protected void setUp() throws Exception {
     	File pub = CommonUtils.getResourceFile(testXMLPath+"public.key");
         File pub2 = new File(_settingsDir, "public.key");
-        CommonUtils.copy(pub, pub2);
+        FileUtils.copy(pub, pub2);
         assertTrue("test could not be set up", pub2.exists());
     }
     private void specificTest(String filename, boolean good) throws Exception{

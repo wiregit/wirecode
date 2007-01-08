@@ -9,12 +9,13 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for SpamReplyFilter
  */
-public class SpamReplyFilterTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class SpamReplyFilterTest extends LimeTestCase {
         
     /**
      * A non blank IP

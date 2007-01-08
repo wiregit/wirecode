@@ -11,23 +11,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.util.Base32;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.UUID;
 
 /**
  * Unit tests for HashTree
  */
-public class HashTreeTest extends BaseTestCase {
+public class HashTreeTest extends LimeTestCase {
     
     private static final String filename = 
      "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
@@ -150,7 +152,7 @@ public class HashTreeTest extends BaseTestCase {
 
     public void testVerifyChunk() throws Throwable {
         File corrupt = new File("corruptFile");
-        CommonUtils.copy(file, corrupt);
+        FileUtils.copy(file, corrupt);
         assertTrue(corrupt.exists());
         
         // Now corrupt the 4th chunk.

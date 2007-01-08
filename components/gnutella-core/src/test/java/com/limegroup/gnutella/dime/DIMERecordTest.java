@@ -5,14 +5,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.limewire.io.ByteOrder;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.ByteOrder;
 
 /**
  * Tests for DIMERecord.
  */
-public final class DIMERecordTest extends com.limegroup.gnutella.util.BaseTestCase {
+public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCase {
 
 	/**
 	 * Constructs a new test instance for responses.

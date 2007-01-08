@@ -7,12 +7,12 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for PriorityMessageQueue
  */
-public class PriorityMessageQueueTest extends BaseTestCase {
+public class PriorityMessageQueueTest extends LimeTestCase {
     
     /**
      * A non-blank IP.

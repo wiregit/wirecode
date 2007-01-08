@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.bootstrap;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Endpoint;
@@ -7,13 +9,12 @@ import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for the HostCatcher/BootstrapServerManager interface.
  */
-public class HostCatcherFetchTest extends BaseTestCase {
+public class HostCatcherFetchTest extends LimeTestCase {
     private HostCatcher hc;
     private RecordingBootstrapServerManager gWebCache;
 

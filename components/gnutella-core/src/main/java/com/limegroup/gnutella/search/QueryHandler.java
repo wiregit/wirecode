@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ManagedConnection;

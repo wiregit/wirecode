@@ -9,15 +9,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.connection.WriteBufferChannel;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.SchedulingThreadPool;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class DelayedBufferWriterTest extends BaseTestCase {
+public class DelayedBufferWriterTest extends LimeTestCase {
 
     private WriteBufferChannel source;
     private WriteBufferChannel sink;

@@ -6,7 +6,8 @@ import java.util.NoSuchElementException;
 
 import junit.framework.Test;
 
-public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
+@SuppressWarnings("unchecked")
+public class BufferTest extends com.limegroup.gnutella.util.LimeTestCase {
     public BufferTest(String name) {
         super(name);
     }

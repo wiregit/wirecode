@@ -7,7 +7,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.limegroup.gnutella.ByteOrder;
+import org.limewire.io.ByteOrder;
+
 
 import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2Exception;

@@ -8,12 +8,13 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Unit tests for ResetTableMessage
  */
-public class ResetTableMessageTest extends BaseTestCase {
+@SuppressWarnings( { "unchecked", "cast" } )
+public class ResetTableMessageTest extends LimeTestCase {
         
 	public ResetTableMessageTest(String name) {
 		super(name);

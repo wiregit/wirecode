@@ -3,12 +3,16 @@ package com.limegroup.gnutella.util;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.limewire.util.PrivilegedAccessor;
+
+
 import junit.framework.Test;
 
 /**
  * Unit tests for IntSet
  */
-public class IntSetTest extends BaseTestCase {
+@SuppressWarnings("unchecked")
+public class IntSetTest extends LimeTestCase {
     
     IntSet s, s1, s2;
             

@@ -2,16 +2,17 @@ package com.limegroup.gnutella;
 
 import java.util.Map;
 
+import org.limewire.util.PrivilegedAccessor;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
-public final class RouteTableTest extends BaseTestCase {
+public final class RouteTableTest extends LimeTestCase {
 
 	public RouteTableTest(String name) {
 		super(name);
