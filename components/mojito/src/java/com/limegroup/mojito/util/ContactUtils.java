@@ -19,9 +19,9 @@
  
 package com.limegroup.mojito.util;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.Collection;
 
 import org.apache.commons.logging.Log;
@@ -66,8 +66,8 @@ public final class ContactUtils {
     public static boolean isLocalHostAddress(Contact node) {
         try {
             return NetworkUtils.isLocalHostAddress(node.getContactAddress());
-        } catch (IOException e) {
-            LOG.error("IOException", e);
+        } catch (SocketException e) {
+            LOG.error("SocketException", e);
         }
         return false;
     }
@@ -86,8 +86,8 @@ public final class ContactUtils {
                     && newAddress.getPort() == oldAddress.getPort()) {
                 return true;
             }
-        } catch (IOException e) {
-            LOG.error("IOException", e);
+        } catch (SocketException e) {
+            LOG.error("SocketException", e);
         }
         
         return false;
