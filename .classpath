@@ -16,6 +16,18 @@
 	<classpathentry excluding="windows/|macosx/" path="gui" kind="src"/>
 	<classpathentry path="lib/messagebundles" kind="src"/>
 	<classpathentry path="tests" kind="src"/>
+	<classpathentry path="components/collection/src/main/resources" kind="src"/>
+	<classpathentry path="components/collection/src/test/resources" kind="src"/>
+	<classpathentry path="components/common/src/main/resources" kind="src"/>
+	<classpathentry path="components/common/src/test/resources" kind="src"/>
+	<classpathentry path="components/io/src/main/resources" kind="src"/>
+	<classpathentry path="components/io/src/test/resources" kind="src"/>
+	<classpathentry path="components/security/src/main/resources" kind="src"/>
+	<classpathentry path="components/security/src/test/resources" kind="src"/>
+	<classpathentry path="components/setting/src/main/resources" kind="src"/>
+	<classpathentry path="components/setting/src/test/resources" kind="src"/>
+	<classpathentry path="components/test-util/src/main/resources" kind="src"/>
+	<classpathentry path="components/test-util/src/test/resources" kind="src"/>
 	<classpathentry path="lib/jars/clink.jar" kind="lib"/>
 	<classpathentry path="lib/jars/commons-httpclient.jar" kind="lib"/>
 	<classpathentry path="lib/jars/commons-logging.jar" kind="lib"/>
