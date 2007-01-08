@@ -147,10 +147,11 @@ public class RouteTableImpl implements RouteTable {
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         
+        // TODO: Use CORE-144 instead
         GenericsUtils.scanForMap(bucketTrie
                 , KUID.class
                 , Bucket.class
-                , ScanMode.REMOVE);
+                , ScanMode.EXCEPTION);
         
         listeners = new CopyOnWriteArrayList<RouteTableListener>();
     }
