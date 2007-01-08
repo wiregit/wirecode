@@ -425,8 +425,13 @@ public class HTTPDownloader implements BandwidthTracker {
             _socket = Sockets.connect(_host, _port, timeout);
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
         }
-        
-        _socket.setKeepAlive(true);
+        try {
+        	_socket.setKeepAlive(true);
+        } catch (IOException iox) {
+        	if (!CommonUtils.isWindowsVista())
+        		throw iox;
+        	LOG.warn("couldn't set keepalive");
+        }
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList(), BUF_LENGTH);
         _stateMachine.setReadChannel(new ThrottleReader(THROTTLE));
