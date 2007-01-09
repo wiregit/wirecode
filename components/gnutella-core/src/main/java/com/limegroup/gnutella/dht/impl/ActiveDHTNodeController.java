@@ -67,8 +67,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
                     dht.setDatabase(database);
                 }
                 
-            } catch (ClassNotFoundException ignored) {
-            } catch (IOException ignored) {
+            } catch (Throwable ignored) {
             } finally {
                 IOUtils.close(in);
             }
