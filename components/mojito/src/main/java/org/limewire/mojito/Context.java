@@ -773,6 +773,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             LOG.debug("Stopping " + getName());
         }
         
+        // Stop the Bucket refresher and the value manager
+        bucketRefresher.stop();
+        valueManager.stop();
+        
         // Shutdown the local Node
         Contact localNode = getLocalNode();
         localNode.shutdown(true);
@@ -808,9 +812,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         running = false;
-        
-        bucketRefresher.stop();
-        valueManager.stop();
         
         executorService.stop();
         messageDispatcher.stop();
