@@ -90,12 +90,12 @@ public class SecureInputStream extends FilterInputStream {
         
         // Make some final sanity checks
         if (!algorithm.equals(md.getAlgorithm())) {
-            throw new IllegalArgumentException("Expected a MessageDigest of type " 
+            throw new StreamCorruptedException("Expected a MessageDigest of type " 
                     + algorithm + " but is " + md.getAlgorithm());
         }
         
         if (digestLength != md.getDigestLength()) {
-            throw new IllegalArgumentException("Expected a MessageDigest with length " 
+            throw new StreamCorruptedException("Expected a MessageDigest with length " 
                     + digestLength + " but is " + md.getDigestLength());
         }
         
@@ -133,7 +133,7 @@ public class SecureInputStream extends FilterInputStream {
         length -= digestLength; 
         
         if (length <= 0) {
-            throw new StreamCorruptedException();
+            throw new StreamCorruptedException("Illegal payload length: " + length);
         }
         
         // Compute the hash
@@ -144,7 +144,7 @@ public class SecureInputStream extends FilterInputStream {
         assert (digest.length == digestLength);
         for (int i = 0; i < digest.length; i++) {
             if (digest[i] != buffer[length+i]) {
-                throw new StreamCorruptedException();
+                throw new StreamCorruptedException("Checksums do not match");
             }
         }
         
