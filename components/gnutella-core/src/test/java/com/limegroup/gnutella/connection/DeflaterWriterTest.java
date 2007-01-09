@@ -8,7 +8,8 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.ByteBufferOutputStream;
+import org.limewire.io.ByteBufferOutputStream;
+
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

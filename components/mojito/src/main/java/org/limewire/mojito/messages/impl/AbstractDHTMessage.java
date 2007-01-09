@@ -26,6 +26,7 @@ import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
 
+import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -35,8 +36,6 @@ import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-
-import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * An abstract implementation of DHTMessage

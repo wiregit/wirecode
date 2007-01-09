@@ -1,4 +1,5 @@
-package com.limegroup.gnutella.util;
+package org.limewire.io;
+
 
 import java.io.IOException;
 import java.io.OutputStream;

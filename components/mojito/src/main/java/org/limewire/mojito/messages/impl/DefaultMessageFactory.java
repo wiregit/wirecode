@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Map.Entry;
 
 import org.limewire.io.ByteBufferInputStream;
+import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -51,8 +52,6 @@ import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.QueryKey;
-
-import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * The default implementation of the MessageFactory

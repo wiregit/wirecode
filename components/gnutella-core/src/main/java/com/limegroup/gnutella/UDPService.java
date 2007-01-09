@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +14,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -29,7 +29,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * This class handles UDP messaging services.  It both sends and
