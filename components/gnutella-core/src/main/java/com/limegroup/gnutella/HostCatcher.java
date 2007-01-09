@@ -7,13 +7,18 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +33,8 @@ import org.limewire.service.MessageService;
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -120,6 +127,23 @@ public class HostCatcher {
      * Constant for the index of non-Ultrapeer hosts.
      */
     public static final int NORMAL_PRIORITY = 0;
+    
+    private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
+        new Comparator<ExtendedEndpoint>() {
+            public int compare(ExtendedEndpoint e1, ExtendedEndpoint e2) {
+                DHTMode mode1 = e1.getDHTMode();
+                DHTMode mode2 = e2.getDHTMode();
+                if ((mode1.equals(DHTMode.ACTIVE) && !mode2.equals(DHTMode.ACTIVE))
+                        || (mode1.equals(DHTMode.PASSIVE) && mode2.equals(DHTMode.INACTIVE))) {
+                    return -1;
+                } else if ((mode2.equals(DHTMode.ACTIVE) && !mode1.equals(DHTMode.ACTIVE))
+                        || (mode2.equals(DHTMode.PASSIVE) && mode1.equals(DHTMode.INACTIVE))) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        };
 
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
@@ -363,6 +387,41 @@ public class HostCatcher {
         }
     }
     
+    
+    public void sendMessageToAllHosts(Message m, MessageListener listener, Cancellable c) {
+        pinger.rank(getAllHosts(), listener, c, m);
+    }
+    
+    private synchronized Collection<ExtendedEndpoint> getAllHosts() {
+        //keep them ordered
+        LinkedHashSet<ExtendedEndpoint> hosts = new LinkedHashSet<ExtendedEndpoint>(getNumHosts());
+        hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
+        hosts.addAll(FREE_LEAF_SLOTS_SET);
+        hosts.addAll(ENDPOINT_SET);
+        return hosts;
+    }
+    
+    /**
+     * Gets a List of hosts that support the DHT. If <tt>this</tt> knows any active nodes,
+     * return them at the head of the list.
+     * Note: this method is slow and is not meant to be used often.
+     * 
+     * @param minVersion The minimum DHT Version. Should be 0 to return all versions
+     * 
+     * @return A Collection of ExtendedEndpoints that support the DHT.
+     */
+    public synchronized List<ExtendedEndpoint> getDHTSupportEndpoint(int minVersion) {
+        List<ExtendedEndpoint> hostsList = new ArrayList<ExtendedEndpoint>();
+        for(ExtendedEndpoint host : getAllHosts()) {
+            if(host.supportsDHT() 
+                    && host.getDHTVersion() >= minVersion) {
+                hostsList.add(host);
+            }
+        }
+        Collections.sort(hostsList, DHT_COMPARATOR);
+        return hostsList;
+    }
+    
     /**
      * Determines if UDP Pongs need to be sent out.
      */
@@ -504,6 +563,23 @@ public class HostCatcher {
         if(pr.isUDPHostCache()) {
             endpoint.setHostname(pr.getUDPCacheAddress());            
             endpoint.setUDPHostCache(true);
+        }
+        
+        int dhtVersion = pr.getDHTVersion();
+        if(dhtVersion > -1) {
+            DHTMode mode = pr.getDHTMode();
+            endpoint.setDHTVersion(dhtVersion);
+            endpoint.setDHTMode(mode);
+            //if active DHT endpoint, immediately send to dht manager
+            if(mode.equals(DHTMode.ACTIVE)) {
+                SocketAddress address = new InetSocketAddress(
+                        endpoint.getAddress(), endpoint.getPort());
+                RouterService.getDHTManager().addActiveDHTNode(address);
+            } else if(mode.equals(DHTMode.PASSIVE)) {
+                SocketAddress address = new InetSocketAddress(
+                        endpoint.getAddress(), endpoint.getPort());
+                RouterService.getDHTManager().addPassiveDHTNode(address);
+            }
         }
         
         if(!isValidHost(endpoint))

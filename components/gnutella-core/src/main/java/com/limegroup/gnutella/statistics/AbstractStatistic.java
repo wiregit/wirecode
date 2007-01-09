@@ -158,6 +158,17 @@ public abstract class AbstractStatistic implements Statistic {
 		_current = 0;
 		_totalStatsRecorded++;
 	}
+    
+    public void storeStats(Writer writer) throws IOException {
+        writer.write(Integer.toString(getCurrent()));
+        writer.write("\t");
+        writer.write(Double.toString(getTotal()));
+        writer.write("\t");
+        writer.write(Double.toString(getAverage()));
+        writer.write("\t");
+        writer.write(Double.toString(getMax()));
+        writer.flush();
+    }
 
 	// inherit doc comment
 	public synchronized void setWriteStatToFile(boolean write) {

@@ -1,56 +1,111 @@
 <?xml version="1.0"?>
-<project name="MojitoDHT" default="build" basedir=".">
+<project name="MojitoDHT" default="buildall" basedir=".">
     <description>MojitoDHT</description>
 
-	<property name="basedir" value="."/>
-	<property name="jars" value="${basedir}/lib"/>
-		
-	<path id="default.classpath" >
-		<fileset dir="${jars}" includes="**/*.jar"/>
-	</path>
+    <property name="basedir" value="."/>
+    <property name="src" value="${basedir}/src/java"/>
+	<property name="test" value="${basedir}/src/test"/>
+	<property name="misc" value="${basedir}/src/misc"/>
 	
+    <property name="coredir" value="../core"/>
+	<property name="guidir" value="../gui"/>
+    <property name="lib" value="../lib"/>
+    <property name="jars" value="${lib}/jars"/>
+    <property name="miscjars" value="${basedir}/lib/misc"/>
+	
+    <path id="default.classpath" >
+        <fileset dir="${jars}" includes="**/*.jar"/>
+        <fileset dir="${miscjars}" includes="**/*.jar"/>
+    	<pathelement location="${coredir}" />
+    </path>
+
     <target name="build">
-	    	<javac srcdir="${basedir}" 
-				destdir="${basedir}"
-		    		target="1.4"
-		    		source="1.4"
-	    			compiler="javac1.4"
+        <javac srcdir="${src}" 
+				destdir="${src}"
+		    		target="1.5"
+		    		source="1.5"
+	    			compiler="javac1.5"
 		    		debug="true"
 	    			optimize="false">
-			<classpath refid="default.classpath"/>
-    	    </javac>
+            <classpath refid="default.classpath" />
+        </javac>
+    	
+    	<javac srcdir="${misc}" 
+				destdir="${misc}"
+		    		target="1.5"
+		    		source="1.5"
+	    			compiler="javac1.5"
+		    		debug="true"
+	    			optimize="false">
+            <classpath refid="default.classpath" />
+    		<classpath>
+	      		<pathelement path="${src}"/>
+		    </classpath>
+        </javac>
     </target>
-		
-	<target name="clean">
-		<delete>
-			<fileset dir="${basedir}" 
-				includes="com/**/*.class de/**/*.class"
-			/>
-		</delete>
-	</target>
+
+    <target name="buildall">
+        <javac destdir="${src}" 
+	            target="1.5" 
+	            source="1.5" 
+	            compiler="javac1.5" 
+	            debug="true" 
+	            optimize="false">
+            <src path="${src}" />
+            <src path="${coredir}" />
+            <classpath refid="default.classpath"/>
+        </javac>
+    	
+    	<javac srcdir="${misc}" 
+				destdir="${misc}"
+		    		target="1.5"
+		    		source="1.5"
+	    			compiler="javac1.5"
+		    		debug="true"
+	    			optimize="false">
+            <classpath refid="default.classpath" />
+    		<classpath>
+	      		<pathelement path="${src}"/>
+		    </classpath>
+        </javac>
+    	
+    	<move todir="${coredir}">
+			<fileset dir="${src}">
+				<exclude name="**/mojito/**"/>
+			</fileset>
+		</move>
+    </target>
 	
-	<target name="jar" depends="clean, build">
-		<delete file="mojito.jar"/>
-		<jar destfile="mojito.jar" 
-				basedir="${basedir}"
-				includes="com/**"
-				excludes="**/bin/** **/tests/** **/statistics/**"
+    <target name="clean">
+        <delete>
+            <fileset dir="${src}" includes="**/*.class"/>
+        	<fileset dir="${misc}" includes="**/*.class"/>
+        	<fileset dir="${test}" includes="**/*.class"/>
+        	<fileset dir="${coredir}" includes="**/*.class"/>
+        </delete>
+    </target>
+
+    <target name="jar" depends="clean, buildall">
+        <delete file="mojito.jar"/>
+        <jar destfile="mojito.jar" 
+				basedir="${src}"
+				includes="**/*.class"
 				compress="false">
-		</jar>
-	</target>
-		
-	<target name="planetLab" depends="clean, build">
-		<delete file="planetlab.jar"/>
-		<jar destfile="planetlab.jar" 
-				basedir="${basedir}"
-				includes="com/**, de/**"
-				excludes="**/bin/**"
+        </jar>
+    	
+    	<delete file="mojito-misc.jar"/>
+    	<jar destfile="mojito-misc.jar" 
+				basedir="${misc}"
+				includes="**/*.class"
 				compress="false">
-			<manifest>
-			 	<attribute name="Main-Class" value="com.limegroup.mojito.tests.PlanetLab"/>
-			 	<attribute name="Class-Path" value=". commons-logging.jar log4j.jar core.jar"/>
-			</manifest>
-		</jar>
-	</target>
+	    </jar>
+    	
+    	<delete file="core.jar"/>
+        <jar destfile="core.jar" 
+				basedir="${coredir}"
+				includes="**/*.class"
+				compress="false">
+        </jar>
+    </target>
 </project>
 

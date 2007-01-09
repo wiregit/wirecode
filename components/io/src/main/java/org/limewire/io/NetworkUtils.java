@@ -1,11 +1,13 @@
 package org.limewire.io;
 
-
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+
+import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
  * This class handles common utility functions for networking tasks.
@@ -226,6 +230,19 @@ public final class NetworkUtils {
         }
     }
 
+    /**
+     * Utility method for determing whether or not the given 
+     * address is private taking an InetAddress object as argument
+     * like the isLocalAddress(InetAddress) method. Delegates to 
+     * <tt>isPrivateAddress(byte[] address)</tt>.
+     *
+     * @return <tt>true</tt> if the specified address is private,
+     *  otherwise <tt>false</tt>
+     */
+    public static boolean isPrivateAddress(SocketAddress address) {
+        return isPrivateAddress(((InetSocketAddress)address).getAddress().getAddress());
+    }
+    
     /** 
      * Returns the ip (given in BIG-endian) format as standard
      * dotted-decimal, e.g., 192.168.0.1<p> 
@@ -409,7 +426,89 @@ public final class NetworkUtils {
         throw new UnknownHostException(
                 "localhost has no interface with a non-loopback IPv4 address");
     }
+    
+    /**
+     * Returns true if the SocketAddress is any of our local machine addresses.
+     */
+    public static boolean isLocalHostAddress(SocketAddress addr) throws SocketException {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        return !iaddr.isUnresolved() && isLocalHostAddress(iaddr.getAddress());
+    }
+    
+    /**
+     * Returns true if the InetAddress is any of our local machine addresses
+     */
+    public static boolean isLocalHostAddress(InetAddress addr) throws SocketException {
+        return NetworkInterface.getByInetAddress(addr) != null;
+    }
+    
+    /**
+     * Returns whether or not the specified InetAddress and Port is valid.
+     */
+    public static boolean isValidSocketAddress(SocketAddress address) {
+        InetSocketAddress iaddr = (InetSocketAddress)address;
+        
+        return !iaddr.isUnresolved()
+            && isValidAddress(iaddr.getAddress())
+            && isValidPort(iaddr.getPort());
+    }
+    
+    /**
+     * Retuens the IP:Port as byte array.
+     * 
+     * This method is IPv6 compliant
+     */
+    public static byte[] getBytes(SocketAddress addr) throws UnknownHostException {
+        InetSocketAddress iaddr = (InetSocketAddress)addr;
+        if (iaddr.isUnresolved()) {
+            throw new UnknownHostException(iaddr.toString());
+        }
+        
+        return getBytes(iaddr.getAddress(), iaddr.getPort());
+    }
+    
+    /**
+     * Returns the IP:Port as byte array.
+     * 
+     * This method is IPv6 compliant
+     */
+    public static byte[] getBytes(InetAddress addr, int port) {
+        if (port < 0 || port > 0xFFFF) {
+            throw new IllegalArgumentException("Port out of range: " + port);
+        }
+        
+        byte[] address = addr.getAddress();
+
+        byte[] dst = new byte[address.length + 2];
+        System.arraycopy(address, 0, dst, 0, address.length);
+        dst[dst.length-2] = (byte)((port >> 8) & 0xFF);
+        dst[dst.length-1] = (byte)((port     ) & 0xFF);
+        return dst;
+    }
+    
+    /**
+     * Returns true if both SocketAddresses are either IPv4 or IPv6 addresses
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isSameAddressSpace(SocketAddress a, SocketAddress b) {
+        return isSameAddressSpace(
+                    ((InetSocketAddress)a).getAddress(), 
+                    ((InetSocketAddress)b).getAddress());
+    }
+    
+    /**
+     * Returns true if both InetAddresses are either IPv4 or IPv6 addresses
+     * 
+     * This method is IPv6 compliant
+     */
+    public static boolean isSameAddressSpace(InetAddress a, InetAddress b) {
+        if (a instanceof Inet4Address) {
+            return (b instanceof Inet4Address);
+        } else /*if (a instanceof Inet6Address)*/ {
+            return (b instanceof Inet6Address);
+        }/* else {
+            return false;
+        }*/
+    }
 }
-
-
-

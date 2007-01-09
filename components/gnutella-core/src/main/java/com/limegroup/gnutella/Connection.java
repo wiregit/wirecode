@@ -312,8 +312,9 @@ public class Connection implements IpPort {
     protected void handleVendorMessage(VendorMessage vm) {
         if (vm instanceof MessagesSupportedVendorMessage)
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
-        if (vm instanceof CapabilitiesVM)
+        if (vm instanceof CapabilitiesVM) {
             _capabilities = (CapabilitiesVM) vm;
+        }
         if (vm instanceof HeaderUpdateVendorMessage) {
             HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;
             Properties props = _headersRead.props();
@@ -1100,6 +1101,28 @@ public class Connection implements IpPort {
             return _capabilities.supportsUpdate();
         else
             return -1;
+    }
+    
+    /**
+     * Returns the DHT version if the remote host is an active DHT node
+     * or -1 if it is not.
+     * 
+     */
+    public int remostHostIsActiveDHTNode() {
+        if(_capabilities != null) 
+            return _capabilities.isActiveDHTNode();
+        return -1;
+    }
+    
+    /**
+     * Returns the DHT version if the remote host is a passive DHT node
+     * or -1 if it is not.
+     * 
+     */
+    public int remostHostIsPassiveDHTNode() {
+        if(_capabilities != null) 
+            return _capabilities.isPassiveDHTNode();
+        return -1;
     }
 
     /**

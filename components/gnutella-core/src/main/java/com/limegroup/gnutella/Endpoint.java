@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.io.ByteOrder;
@@ -245,6 +247,15 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
         return port;
     }
 
+    public SocketAddress getSocketAddress() {
+        InetAddress addr = getInetAddress();
+        if (addr == null) {
+            return null;
+        }
+        
+        return new InetSocketAddress(addr, getPort());
+    }
+    
     /** Returns the number of files the host has, or -1 if I don't know */
     public long getFiles()
     {

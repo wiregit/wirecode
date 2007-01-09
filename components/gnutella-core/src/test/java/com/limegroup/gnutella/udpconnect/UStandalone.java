@@ -26,6 +26,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -389,15 +390,8 @@ public class UStandalone extends ActivityCallbackStub
 
     /////////////////////////// ActivityCallback methods //////////////////////
 
-    public void connectionInitializing(Connection c) {
-    }
-
-    public void connectionInitialized(Connection c) {
-    }
-
-    public void connectionClosed(Connection c) {
-    }
-
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
+    
     public void knownHost(Endpoint e) {
     }
 
@@ -425,7 +419,7 @@ public class UStandalone extends ActivityCallbackStub
 		t.printStackTrace();
     }
 
-    public void addressStateChanged() {}
+    public void handleAddressStateChanged() {}
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -500,4 +494,5 @@ public class UStandalone extends ActivityCallbackStub
 	}
 
 	public void acceptedIncomingChanged(boolean status) { }
+
 }

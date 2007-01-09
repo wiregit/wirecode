@@ -15,7 +15,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.BufferByteArrayOutputStream;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -30,6 +29,7 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.ByteBufferOutputStream;
 
 /**
  * This class handles UDP messaging services.  It both sends and
@@ -299,7 +299,7 @@ public class UDPService implements ReadWriteObserver {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data, 0, length);
-                    Message message = MessageFactory.read(in, Message.N_UDP, IN_HEADER_BUF);
+                    Message message = MessageFactory.read(in, IN_HEADER_BUF, Message.N_UDP);
                     if (message == null)
                         continue;
 
@@ -330,7 +330,7 @@ public class UDPService implements ReadWriteObserver {
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
         updateState(message, addr);
-        MessageDispatcher.instance().dispatchUDP(message, addr);
+        RouterService.getMessageDispatcher().dispatchUDP(message, addr);
     }
 	
 	/** Updates internal state of the UDP Service. */
@@ -445,7 +445,7 @@ public class UDPService implements ReadWriteObserver {
                                             ", position: " + buffer.position() +
                                             ", limit: " + buffer.limit());
 
-        BufferByteArrayOutputStream baos = new BufferByteArrayOutputStream(buffer);
+        ByteBufferOutputStream baos = new ByteBufferOutputStream(buffer);
         try {
             msg.writeQuickly(baos);
         } catch(IOException e) {

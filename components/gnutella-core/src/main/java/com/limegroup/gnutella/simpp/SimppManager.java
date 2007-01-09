@@ -176,7 +176,7 @@ public class SimppManager {
                 }
                 // 5. Update the capabilities VM with the new version
                 CapabilitiesVM.reconstructInstance();
-                // 5. Send the new CapabilityVM to all our connections. 
+                // 6. Send the new CapabilityVM to all our connections. 
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
             }
         };

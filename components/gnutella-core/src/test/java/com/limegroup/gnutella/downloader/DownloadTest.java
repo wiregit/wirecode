@@ -36,11 +36,11 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -173,7 +173,8 @@ public class DownloadTest extends LimeTestCase {
                 dm.measureBandwidth();
             }
         };
-        RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
+
+        RouterService.schedule(click,0,NodeAssigner.TIMER_DELAY);
         rs.start();
     } 
     

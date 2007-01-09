@@ -2,6 +2,8 @@ package com.limegroup.gnutella.guess;
 
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 import org.limewire.io.IpPort;
 
@@ -59,7 +61,10 @@ public final class GUESSEndpoint implements IpPort {
 		return PORT;
 	}
 
-    
+	public SocketAddress getSocketAddress() {
+		return new InetSocketAddress(getInetAddress(), getPort());
+	}
+        
     /** Returns true if two GUESSEndpoint objects are equal.
      */
     public boolean equals(Object o) {

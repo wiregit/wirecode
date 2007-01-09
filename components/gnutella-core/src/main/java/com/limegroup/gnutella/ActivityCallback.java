@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 
@@ -22,35 +24,14 @@ import com.limegroup.gnutella.version.UpdateInformation;
  *  <li>Error messages
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener {
+public interface ActivityCallback extends DownloadCallback, FileEventListener, ConnectionLifecycleListener
+{
     
     /**
      * The address of the program has changed or we've
      * just accepted our first incoming connection.
      */
-    public void addressStateChanged();
-    
-    /**
-     *  Add a new unitialized connection.
-     */
-    public void connectionInitializing(ManagedConnection c);
-
-    /**
-     *  Mark a connection as initialized
-     */
-    public void connectionInitialized(ManagedConnection c);
-
-    /**
-     *  Mark a connection as closed
-     */
-    public void connectionClosed(ManagedConnection c);
-    
-    /**
-     * Notify the UI that we are disconnected from the network
-     * 
-     */
-    public void disconnected();
-    
+    public void handleAddressStateChanged();
 
     /**
      * Notifies the UI that a new query result has come in to the backend.
@@ -111,6 +92,13 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener {
      * or MetaFileManager.
      */
     public void handleFileEvent(FileManagerEvent evt);
+    
+    /** 
+     * Notifies the GUI of connection lifecycle related events.
+     * This event is triggered by the ConnectionManager
+     * 
+     */
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt);
     
     /**
      * Notifies the GUI that the given shared file has new information.

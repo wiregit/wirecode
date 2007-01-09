@@ -29,6 +29,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -398,9 +399,11 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 == (int)UDPCrawlerPing.CONNECTION_TIME);
         assertTrue((format & UDPCrawlerPing.LOCALE_INFO)
                 == (int)UDPCrawlerPing.LOCALE_INFO);
+        assertTrue((format & UDPCrawlerPing.DHT_STATUS)
+                == (int)UDPCrawlerPing.DHT_STATUS);
         
         //see if the result we got had any uptime (it should!)
-        short uptime = ByteOrder.leb2short(payload,9);
+        short uptime = ByteOrder.leb2short(payload,14);
         assertGreaterThan(0,uptime);
  	}
  	
@@ -581,6 +584,24 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     	}
     }
     
+    public void testMsgDHTStatus() throws Exception {
+        PrivilegedAccessor.setValue(ROUTER_SERVICE, "dhtManager", new DHTManagerStub());
+        UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x20);
+        UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTStatus);
+        byte[] payload = pong.getPayload();
+        byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
+        assertFalse((format & UDPCrawlerPing.CONNECTION_TIME)
+                == (int)UDPCrawlerPing.CONNECTION_TIME);
+        assertTrue((format & UDPCrawlerPing.DHT_STATUS)
+                == (int)UDPCrawlerPing.DHT_STATUS);
+        
+        byte status = payload[3];
+        assertFalse( (status & UDPCrawlerPong.DHT_WAITING_MASK) == UDPCrawlerPong.DHT_WAITING_MASK);
+        assertFalse( (status & UDPCrawlerPong.DHT_PASSIVE_MASK) == UDPCrawlerPong.DHT_PASSIVE_MASK);
+        assertTrue( (status & UDPCrawlerPong.DHT_ACTIVE_MASK) == UDPCrawlerPong.DHT_ACTIVE_MASK);
+        
+    }
+    
  	private void tryMessage() throws Exception {
  		assertTrue(UDPService.instance().isListening());
  		UDP_ACCESS.setSoTimeout(5000);
@@ -633,4 +654,4 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
             return null;
         }
     }
-}
+}    

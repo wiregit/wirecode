@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -36,6 +38,9 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * This class is the message routing implementation for TCP messages.
  */
 public class StandardMessageRouter extends MessageRouter {
+    
+    private static final Log LOG = LogFactory.getLog(StandardMessageRouter.class);
+    
     /**
      * Responds to a Gnutella ping with cached pongs.  This does special 
      * handling for both "heartbeat" pings that were sent to ensure that
@@ -128,25 +133,45 @@ public class StandardMessageRouter extends MessageRouter {
             } catch(IOException tooBad) { }
         }
         
+        List<IpPort> dhthosts = Collections.emptyList();
+        int maxHosts = ConnectionSettings.NUM_RETURN_PONGS.getValue();
+        
+        if (request.requestsDHTIPP() && RouterService.isDHTNode()) {
+            dhthosts = RouterService.getDHTManager().getActiveDHTNodes(maxHosts);
+        }
+        
+        int numDHTHosts = dhthosts.size();
+        
         byte[] data = request.getSupportsCachedPongData();
-        Collection<IpPort> hosts = Collections.emptyList();
-        if(data != null) {
+        Collection<IpPort> gnuthosts = Collections.emptyList();
+        if(data != null){
             boolean isUltrapeer =
                 data.length >= 1 && 
-		        (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
-		            PingRequest.SCP_ULTRAPEER;
-            hosts = RouterService.getPreferencedHosts(
+                (data[0] & PingRequest.SCP_ULTRAPEER_OR_LEAF_MASK) ==
+                    PingRequest.SCP_ULTRAPEER;
+                
+            int dhtFraction = ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.getValue();
+            int maxDHTHosts = Math.round(((float)dhtFraction/100)*maxHosts);
+            
+            gnuthosts = RouterService.getPreferencedHosts(
                         isUltrapeer, 
-			            request.getLocale(),
-			            ConnectionSettings.NUM_RETURN_PONGS.getValue());
-        }        
-        
+                        request.getLocale(),
+                        maxHosts - Math.min(numDHTHosts, maxDHTHosts));
+            //remove extra dht hosts
+            dhthosts = dhthosts.subList(0, Math.min(numDHTHosts,maxHosts - gnuthosts.size()));
+        } 
         
         PingReply reply;
     	if (ipport != null)
-    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, hosts);
+    	    reply = PingReply.create(request.getGUID(), (byte)1, ipport, gnuthosts, dhthosts);
     	else
-    	    reply = PingReply.create(request.getGUID(), (byte)1, hosts);
+    	    reply = PingReply.create(request.getGUID(), (byte)1, gnuthosts, dhthosts);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Responding to UDPPingRequest "+(request.requestsDHTIPP()?"with DHTIPP ":"") +
+                    "from : "+ addr + " with Gnutella hosts: \n"+ gnuthosts 
+                    + "\n and DHT hosts: \n" + dhthosts);
+        }
         
         sendPingReply(reply, handler);
         
