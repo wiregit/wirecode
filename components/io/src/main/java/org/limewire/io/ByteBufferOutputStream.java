@@ -107,7 +107,7 @@ public class ByteBufferOutputStream extends OutputStream {
     /**
      * Returns the backing buffer.
      */
-    public ByteBuffer buffer() {
+    public ByteBuffer getBuffer() {
         return buffer;
     }
     

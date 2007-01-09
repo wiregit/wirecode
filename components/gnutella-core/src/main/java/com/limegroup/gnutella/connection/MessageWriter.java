@@ -154,7 +154,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             throw new IOException("connection shut down.");
         
         // if there was data left in the stream, try writing it.
-        ByteBuffer buffer = out.buffer();
+        ByteBuffer buffer = out.getBuffer();
         
         // write any data that was leftover in the buffer.
         if(flipped || buffer.position() > 0) {

@@ -128,7 +128,7 @@ public class DefaultMessageFactory implements MessageFactory {
         ByteBufferOutputStream out = new ByteBufferOutputStream(640, true);
         message.write(out);
         out.close();
-        return ((ByteBuffer)out.buffer().flip()).order(ByteOrder.BIG_ENDIAN);
+        return ((ByteBuffer)out.getBuffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
     public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
