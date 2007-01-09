@@ -78,8 +78,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 while((node = (Contact)ois.readObject()) != null){
                     limeDHTRouteTable.add(node);
                 }
-            } catch (ClassNotFoundException ignored) {
-            } catch (IOException ignored) {
+            } catch (Throwable ignored) {
             } finally {
                 IOUtils.close(ois);
             }
