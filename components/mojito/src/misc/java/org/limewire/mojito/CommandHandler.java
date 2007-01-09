@@ -37,6 +37,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.limewire.io.SecureInputStream;
+import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -348,7 +350,8 @@ public class CommandHandler {
         try {
             ois = new ObjectInputStream(
                     new BufferedInputStream(
-                        new FileInputStream(file)));
+                        new SecureInputStream(
+                            new FileInputStream(file))));
             RouteTable routeTable = (RouteTable)ois.readObject();
             Database database = (Database)ois.readObject();
             
@@ -373,7 +376,8 @@ public class CommandHandler {
         try {
             oos = new ObjectOutputStream(
                     new BufferedOutputStream(
-                        new FileOutputStream(file)));
+                        new SecureOutputStream(
+                            new FileOutputStream(file))));
             synchronized (dht) {
                 oos.writeObject(dht.getRouteTable());
                 oos.writeObject(dht.getDatabase());

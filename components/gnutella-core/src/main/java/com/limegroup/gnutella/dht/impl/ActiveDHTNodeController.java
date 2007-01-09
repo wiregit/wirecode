@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.SecureInputStream;
+import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.Database;
@@ -54,7 +56,8 @@ class ActiveDHTNodeController extends AbstractDHTController {
             try {
                 in = new ObjectInputStream(
                         new BufferedInputStream(
-                            new FileInputStream(FILE)));
+                            new SecureInputStream(
+                                new FileInputStream(FILE))));
                 
                 RouteTable routeTable = (RouteTable)in.readObject();
                 Database database = (Database)in.readObject();
@@ -63,9 +66,10 @@ class ActiveDHTNodeController extends AbstractDHTController {
                     dht.setRouteTable(routeTable);
                     dht.setDatabase(database);
                 }
-            } catch (Throwable ignored) {}
-            
-            finally {
+                
+            } catch (ClassNotFoundException ignored) {
+            } catch (IOException ignored) {
+            } finally {
                 IOUtils.close(in);
             }
         }
@@ -110,16 +114,17 @@ class ActiveDHTNodeController extends AbstractDHTController {
             try {
                 out = new ObjectOutputStream(
                         new BufferedOutputStream(
-                            new FileOutputStream(FILE)));
+                            new SecureOutputStream(
+                                new FileOutputStream(FILE))));
+                
                 MojitoDHT dht = getMojitoDHT();
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
                     out.writeObject(dht.getDatabase());
                 }
                 out.flush();
-            } catch (IOException ignored) {} 
-            
-            finally {
+            } catch (IOException ignored) {
+            } finally {
                 IOUtils.close(out);
             }
         }

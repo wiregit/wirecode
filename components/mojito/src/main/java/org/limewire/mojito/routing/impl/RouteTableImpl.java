@@ -51,8 +51,6 @@ import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
 
 
 /**
@@ -147,12 +145,6 @@ public class RouteTableImpl implements RouteTable {
     private void readObject(ObjectInputStream in) 
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
-        // TODO: Use CORE-144 instead
-        GenericsUtils.scanForMap(bucketTrie
-                , KUID.class
-                , Bucket.class
-                , ScanMode.EXCEPTION);
         
         listeners = new CopyOnWriteArrayList<RouteTableListener>();
     }

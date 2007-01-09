@@ -1,8 +1,5 @@
 package org.limewire.mojito.db.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,8 +9,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueBag;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
 
 
 /**
@@ -185,20 +180,6 @@ class DHTValueBagImpl implements DHTValueBag {
      */
     public boolean containsKey(KUID key) {
         return entityMap.containsKey(key);
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        
-        GenericsUtils.scanForMap(entityMap
-                , KUID.class
-                , DHTValueEntity.class
-                , ScanMode.REMOVE);
     }
 
     @Override

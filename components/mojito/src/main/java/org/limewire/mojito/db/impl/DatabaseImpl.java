@@ -19,9 +19,6 @@
 
 package org.limewire.mojito.db.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -43,8 +40,6 @@ import org.limewire.mojito.db.DatabaseSecurityConstraint;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
 
 
 /*
@@ -389,20 +384,6 @@ public class DatabaseImpl implements Database {
             }
         }
         return Collections.unmodifiableList(values);
-    }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        
-        GenericsUtils.scanForMap(database
-                , KUID.class
-                , DHTValueBag.class
-                , ScanMode.REMOVE);
     }
     
     public synchronized String toString() {

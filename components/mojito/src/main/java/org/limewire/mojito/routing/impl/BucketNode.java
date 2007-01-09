@@ -21,7 +21,6 @@ package org.limewire.mojito.routing.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,8 +39,6 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.FixedSizeHashMap;
-import org.limewire.util.GenericsUtils;
-import org.limewire.util.GenericsUtils.ScanMode;
 
 
 /**
@@ -405,15 +402,9 @@ class BucketNode implements Bucket {
         return buffer.toString();
     }
     
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-    
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        
-        GenericsUtils.scanForMap(nodeTrie, KUID.class, Contact.class, ScanMode.REMOVE);
         
         init();
     }

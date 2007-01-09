@@ -6,10 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -17,6 +15,8 @@ import java.util.List;
 
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.SecureInputStream;
+import org.limewire.io.SecureOutputStream;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -67,17 +67,21 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {
-            InputStream in = null;
+            ObjectInputStream ois = null;
             try {
-                in = new BufferedInputStream(new FileInputStream(FILE));
-                ObjectInputStream ois = new ObjectInputStream(in);
+                ois = new ObjectInputStream(
+                            new BufferedInputStream(
+                                new SecureInputStream(
+                                    new FileInputStream(FILE))));
+                
                 Contact node = null;
                 while((node = (Contact)ois.readObject()) != null){
                     limeDHTRouteTable.add(node);
                 }
-            } catch (Throwable ignored){}
-            finally {
-                IOUtils.close(in);
+            } catch (ClassNotFoundException ignored) {
+            } catch (IOException ignored) {
+            } finally {
+                IOUtils.close(ois);
             }
         }
     }
@@ -133,10 +137,12 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         List<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
-            OutputStream out = null;
+            ObjectOutputStream oos = null;
             try {
-                out = new BufferedOutputStream(new FileOutputStream(FILE));
-                ObjectOutputStream oos = new ObjectOutputStream(out);
+                oos = new ObjectOutputStream(
+                            new BufferedOutputStream(
+                                new SecureOutputStream(
+                                    new FileOutputStream(FILE))));
                 
                 // Sort by MRS
                 contacts = BucketUtils.sort(contacts);
@@ -153,11 +159,11 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 
                 // EOF Terminator
                 oos.writeObject(null);
+                oos.flush();
                 
-            } catch (IOException ignored) {} 
-            
-            finally {
-                IOUtils.close(out);
+            } catch (IOException ignored) {
+            } finally {
+                IOUtils.close(oos);
             }
         }
     }
