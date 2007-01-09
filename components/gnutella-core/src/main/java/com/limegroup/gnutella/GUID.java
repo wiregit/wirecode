@@ -3,8 +3,8 @@ package com.limegroup.gnutella;
 import java.util.Comparator;
 import java.util.Random;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 
 
 /**

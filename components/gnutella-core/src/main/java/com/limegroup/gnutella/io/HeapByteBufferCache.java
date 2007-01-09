@@ -4,7 +4,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.limegroup.gnutella.util.IntHashMap;
+import org.limewire.collection.IntHashMap;
+
 
 public class HeapByteBufferCache {
 

@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.collection.NumericBuffer;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.util.NumericBuffer;
 
 import com.limegroup.bittorrent.Torrent.TorrentState;
 

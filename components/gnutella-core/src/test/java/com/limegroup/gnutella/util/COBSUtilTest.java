@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.io.IOException;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 import junit.framework.Test;
 

@@ -9,10 +9,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.Comparators;
 
 /**
  * Singleton that manages saved files.

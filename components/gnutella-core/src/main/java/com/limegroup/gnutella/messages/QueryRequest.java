@@ -13,9 +13,9 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.security.QueryKey;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;

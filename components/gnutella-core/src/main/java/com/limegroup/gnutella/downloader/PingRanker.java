@@ -15,6 +15,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Cancellable;
+import org.limewire.collection.DualIterator;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
@@ -28,8 +30,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.DualIterator;
 
 public class PingRanker extends SourceRanker implements MessageListener, Cancellable {
 

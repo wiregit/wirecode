@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.NameValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseType;
-import com.limegroup.gnutella.util.NameValue;
 
 
 /**

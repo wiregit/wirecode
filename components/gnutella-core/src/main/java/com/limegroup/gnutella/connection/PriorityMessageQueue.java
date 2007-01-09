@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.connection;
 
+import org.limewire.collection.BucketQueue;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.BucketQueue;
 
 
 /**

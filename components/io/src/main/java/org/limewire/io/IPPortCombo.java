@@ -4,6 +4,8 @@ package org.limewire.io;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.limewire.util.ByteOrder;
+
 
 /** Another utility class the encapsulates some complexity.
  *  Keep in mind that I very well could have used Endpoint here, but I

@@ -8,12 +8,12 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.IntHashMap;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.util.IntHashMap;
 
 /**
  * Factory to turn binary input as read from Network to VendorMessage

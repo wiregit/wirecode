@@ -2,8 +2,8 @@ package com.limegroup.gnutella.udpconnect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.LongHashMap;
 
-import com.limegroup.gnutella.util.LongHashMap;
 
 /**
  *  This class defines a DataWindow for sending or receiving data 

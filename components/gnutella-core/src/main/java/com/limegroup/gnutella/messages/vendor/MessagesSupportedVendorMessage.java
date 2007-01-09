@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;

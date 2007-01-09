@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.limewire.collection.Interval;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -22,7 +23,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
-import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.UUID;
 

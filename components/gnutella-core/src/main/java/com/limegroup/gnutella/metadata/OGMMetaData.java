@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IOUtils;
+import org.limewire.util.ByteOrder;
 
 
 public class OGMMetaData extends VideoMetaData {

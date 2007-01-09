@@ -8,11 +8,11 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.collection.NameValue;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.NameValue;
 
 /**
  * Tests for the XMLParsingUtils class

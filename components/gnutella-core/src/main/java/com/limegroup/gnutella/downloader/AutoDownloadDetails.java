@@ -9,13 +9,13 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.limewire.collection.ApproximateMatcher;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ResponseVerifier;
-import com.limegroup.gnutella.util.ApproximateMatcher;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 

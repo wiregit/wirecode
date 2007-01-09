@@ -13,9 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IPPortCombo;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Connection;

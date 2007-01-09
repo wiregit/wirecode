@@ -7,7 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Set;
 
-import com.limegroup.gnutella.downloader.Interval;
+import org.limewire.collection.Interval;
+
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.tigertree.HashTree;

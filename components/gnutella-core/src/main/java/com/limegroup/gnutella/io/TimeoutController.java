@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.BinaryHeap;
 
-import com.limegroup.gnutella.util.BinaryHeap;
 
 /**
  * Keeps track of a bunch of things that want to be timed out.

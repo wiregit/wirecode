@@ -3,7 +3,8 @@ package com.limegroup.gnutella.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.util.NameValue;
+import org.limewire.collection.NameValue;
+
 
 /**
  * Stores information pertaining to fields (elements) in xml documents

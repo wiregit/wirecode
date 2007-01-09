@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.limewire.util.ByteOrder;
+
 /**
  * This class handles common utility functions for networking tasks.
  */

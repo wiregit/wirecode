@@ -4,9 +4,9 @@ package com.limegroup.gnutella;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
 
 

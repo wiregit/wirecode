@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.collection.NameValue;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -18,7 +19,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 

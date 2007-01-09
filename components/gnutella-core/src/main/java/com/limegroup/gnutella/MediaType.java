@@ -9,17 +9,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.collection.Comparators;
+
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.Comparators;
 
 /**
  * A generic type of media, i.e., "video" or "audio".
  * Many different file formats can be of the same media type.
  * MediaType's are immutable.
- *
- * MediaType is Serializable so that older downloads.dat files
- * with serialized wishlist downloaders can be deserialized.
- * Note that we no longer serialize MediaType though.
  *
  * // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
  */
@@ -48,6 +45,9 @@ public class MediaType implements Serializable {
      */
     private static final MediaType TYPE_ANY = 
         new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
+            // required SVUID because we're constructing an anonymous class.
+            private static final long serialVersionUID = 3728385699213635375L;
+            
             public boolean matches(String ext) {
                 return true;
             }

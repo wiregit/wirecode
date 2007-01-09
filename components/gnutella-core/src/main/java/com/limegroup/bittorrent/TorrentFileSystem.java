@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.limewire.collection.MultiCollection;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.MultiCollection;
 
 /**
  * Information about the file hierarchy contained in the torrent.

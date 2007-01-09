@@ -6,7 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.limegroup.gnutella.util.Buffer;
+import org.limewire.collection.Buffer;
+
 
 /**
  * A helper class for implementing the BandwidthTracker interface.  For

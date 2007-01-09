@@ -6,13 +6,13 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.NECallable;
 import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.util.NECallable;
 
 public abstract class Choker implements Runnable, Shutdownable {
 	

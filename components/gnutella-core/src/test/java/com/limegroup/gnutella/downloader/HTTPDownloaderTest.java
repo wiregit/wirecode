@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 
+import org.limewire.collection.Interval;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;

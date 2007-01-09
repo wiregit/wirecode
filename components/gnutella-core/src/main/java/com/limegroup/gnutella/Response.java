@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.NameValue;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 

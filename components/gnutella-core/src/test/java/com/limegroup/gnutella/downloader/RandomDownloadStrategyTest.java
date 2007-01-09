@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.IntervalSet;
 
 public class RandomDownloadStrategyTest extends LimeTestCase {
 

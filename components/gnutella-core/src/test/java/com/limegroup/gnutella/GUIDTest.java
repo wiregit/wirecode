@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 
 import junit.framework.Test;

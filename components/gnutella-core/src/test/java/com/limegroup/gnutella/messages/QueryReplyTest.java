@@ -23,11 +23,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;

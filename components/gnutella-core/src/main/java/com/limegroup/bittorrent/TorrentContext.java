@@ -1,8 +1,9 @@
 package com.limegroup.bittorrent;
 
+import org.limewire.collection.BitField;
+import org.limewire.collection.BitSet;
+
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.BitSet;
 
 public interface TorrentContext {
 	TorrentFileSystem getFileSystem();

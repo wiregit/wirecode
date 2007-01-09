@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.QueryKey;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.util.Buffer;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master

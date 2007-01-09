@@ -1,12 +1,13 @@
 package com.limegroup.bittorrent.reader;
 
+import org.limewire.collection.NECallable;
+
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.NECallable;
 
 /**
  * State that parses the Piece message. 

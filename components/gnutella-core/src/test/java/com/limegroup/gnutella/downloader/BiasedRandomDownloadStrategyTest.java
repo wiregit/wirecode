@@ -1,14 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.util.Random;
 
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.IntervalSet;
 
 
 public class BiasedRandomDownloadStrategyTest extends LimeTestCase {

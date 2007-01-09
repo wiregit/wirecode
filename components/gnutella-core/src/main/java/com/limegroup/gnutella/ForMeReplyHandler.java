@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedsizeForgetfulHashMap;
+import org.limewire.collection.IntWrapper;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
@@ -26,8 +28,6 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLUtils;

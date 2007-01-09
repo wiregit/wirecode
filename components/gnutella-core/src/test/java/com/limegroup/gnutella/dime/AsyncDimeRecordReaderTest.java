@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 import junit.framework.Test;
 

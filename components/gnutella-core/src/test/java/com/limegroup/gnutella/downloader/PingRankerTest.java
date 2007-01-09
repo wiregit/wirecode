@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.collection.Cancellable;
+import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.PrivilegedAccessor;
@@ -32,8 +35,6 @@ import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.IntervalSet;
 
 
 /**

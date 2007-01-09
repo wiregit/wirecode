@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.BucketQueue;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -12,7 +13,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 

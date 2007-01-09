@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +25,8 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPortSet;
 import org.limewire.service.ErrorService;
@@ -63,7 +66,6 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.Sockets;
 
 /**

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -16,11 +17,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.MultiRRIterator;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -39,8 +42,6 @@ import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.MultiRRIterator;
 
 /**
  * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,

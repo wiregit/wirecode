@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.NameValue;
 import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
@@ -13,7 +14,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 @SuppressWarnings("unchecked")

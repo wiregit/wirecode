@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 import junit.framework.Test;
 

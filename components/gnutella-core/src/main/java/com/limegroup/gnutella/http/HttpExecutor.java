@@ -3,9 +3,9 @@ package com.limegroup.gnutella.http;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpMethod;
+import org.limewire.collection.Cancellable;
 
 import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.util.Cancellable;
 
 /**
  * Something that executes HTTP requests using the http client library.

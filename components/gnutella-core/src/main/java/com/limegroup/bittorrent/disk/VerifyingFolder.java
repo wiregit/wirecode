@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.disk;
 
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.Serializable;
@@ -16,6 +17,16 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.AndView;
+import org.limewire.collection.BitField;
+import org.limewire.collection.BitFieldSet;
+import org.limewire.collection.BitSet;
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.MultiIterable;
+import org.limewire.collection.NECallable;
+import org.limewire.collection.NotView;
+import org.limewire.collection.RRProcessingQueue;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
 
@@ -28,17 +39,7 @@ import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.AndView;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.MultiIterable;
-import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.NECallable;
-import com.limegroup.gnutella.util.NotView;
-import com.limegroup.gnutella.util.RRProcessingQueue;
 
 /**
  * A default implementation of <tt>TorrentDiskManager</tt>

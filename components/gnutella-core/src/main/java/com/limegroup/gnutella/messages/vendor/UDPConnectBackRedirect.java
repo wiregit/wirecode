@@ -6,9 +6,9 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;

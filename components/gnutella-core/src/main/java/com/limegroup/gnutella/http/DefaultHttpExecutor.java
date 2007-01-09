@@ -5,10 +5,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
 
 import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.util.Cancellable;
 
 /**
  * Default implementation of <tt>HttpExecutor</tt>.

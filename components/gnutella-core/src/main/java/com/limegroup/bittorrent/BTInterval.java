@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent;
 
-import com.limegroup.gnutella.downloader.Interval;
+import org.limewire.collection.Interval;
 
 /**
  * An interval within a block. 

@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class HostCatcherTest extends LimeTestCase {  

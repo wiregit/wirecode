@@ -12,8 +12,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.io.ByteOrder;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;

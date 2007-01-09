@@ -6,9 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.BucketQueue;
+
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.BucketQueue;
 
 /**
  * This class caches pongs from the network.  Caching pongs saves considerable

@@ -11,9 +11,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteOrder;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.Constants;

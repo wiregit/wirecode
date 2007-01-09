@@ -2,10 +2,10 @@ package com.limegroup.bittorrent.choking;
 
 import java.util.List;
 
+import org.limewire.collection.NECallable;
 import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
-import com.limegroup.gnutella.util.NECallable;
 
 public class ChokerFactory {
 	private static ChokerFactory instance;

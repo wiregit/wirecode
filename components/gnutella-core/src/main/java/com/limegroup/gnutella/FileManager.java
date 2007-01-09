@@ -20,8 +20,12 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Function;
+import org.limewire.collection.IntSet;
+import org.limewire.collection.MultiCollection;
+import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
@@ -36,10 +40,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Function;
-import com.limegroup.gnutella.util.IntSet;
-import com.limegroup.gnutella.util.MultiCollection;
-import com.limegroup.gnutella.util.StringTrie;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

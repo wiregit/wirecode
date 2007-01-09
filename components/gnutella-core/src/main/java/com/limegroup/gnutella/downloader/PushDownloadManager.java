@@ -18,6 +18,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.IntWrapper;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 

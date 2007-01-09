@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import com.limegroup.gnutella.util.IntervalSet;
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
+
 
 /** 
  * Selection strategy that selects the next available block.  

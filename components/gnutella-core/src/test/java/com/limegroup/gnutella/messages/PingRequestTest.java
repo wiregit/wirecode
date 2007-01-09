@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.collection.NameValue;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.NameValue;
 
 @SuppressWarnings("unchecked")
 public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {

@@ -1,10 +1,11 @@
 package com.limegroup.bittorrent;
 
+import org.limewire.collection.BitField;
+import org.limewire.collection.BitFieldSet;
+import org.limewire.collection.BitSet;
+
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.BitSet;
 
 public class BTContext implements TorrentContext {
 

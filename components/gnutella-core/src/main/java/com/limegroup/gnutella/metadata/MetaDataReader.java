@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import com.limegroup.gnutella.util.NameValue;
+import org.limewire.collection.NameValue;
+
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 

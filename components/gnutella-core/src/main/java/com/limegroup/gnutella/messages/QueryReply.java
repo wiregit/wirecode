@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -27,6 +26,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.GUID;

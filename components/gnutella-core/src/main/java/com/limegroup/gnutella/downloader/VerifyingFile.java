@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -14,16 +15,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.ByteArrayCache;
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.MultiIterable;
+import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.ByteArrayCache;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.MultiIterable;
-import com.limegroup.gnutella.util.PowerOf2ByteArrayCache;
 
 
 /**

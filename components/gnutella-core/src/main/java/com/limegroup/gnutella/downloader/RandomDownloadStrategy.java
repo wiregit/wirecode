@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
+
 import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 
-import com.limegroup.gnutella.util.IntervalSet;
 
 /** 
  * This SelectionStrategy selects random Intervals from the availableIntervals.

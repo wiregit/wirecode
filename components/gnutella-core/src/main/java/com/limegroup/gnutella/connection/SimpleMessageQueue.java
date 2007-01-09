@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.connection;
 
+import org.limewire.collection.Buffer;
+
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.util.Buffer;
 
 
 /**

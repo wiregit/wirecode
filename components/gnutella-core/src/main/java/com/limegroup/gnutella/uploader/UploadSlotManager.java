@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.MultiIterable;
+import org.limewire.collection.NumericBuffer;
 
 import com.limegroup.gnutella.BandwidthTracker;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.MultiIterable;
-import com.limegroup.gnutella.util.NumericBuffer;
 
 
 /**

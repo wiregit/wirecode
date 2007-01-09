@@ -3,12 +3,13 @@ package com.limegroup.gnutella.filters;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.collection.Buffer;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**

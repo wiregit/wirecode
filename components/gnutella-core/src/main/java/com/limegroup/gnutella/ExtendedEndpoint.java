@@ -7,12 +7,12 @@ import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import org.limewire.collection.Buffer;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.Buffer;
 
 /**
  * An endpoint with additional history information used to prioritize

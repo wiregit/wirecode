@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.NameValue;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a

@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.IPPortCombo;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class UDPCrawlerMessagesTest extends LimeTestCase {

@@ -6,7 +6,7 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.io.BufferUtils;
 import com.limegroup.gnutella.io.ReadState;

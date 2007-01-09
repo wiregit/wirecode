@@ -20,12 +20,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Buffer;
+import org.limewire.collection.FixedsizeForgetfulHashMap;
+import org.limewire.collection.Interval;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -42,8 +44,6 @@ import com.limegroup.gnutella.uploader.PushProxyUploadState;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadType;
-import com.limegroup.gnutella.util.Buffer;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**

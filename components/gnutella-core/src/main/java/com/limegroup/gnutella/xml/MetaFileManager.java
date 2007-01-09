@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.NameValue;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.NameValue;
 
 /**
  * This class handles querying shared files with XML data and returning XML data

@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.collection.NECallable;
+
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.util.NECallable;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 class BTLinkManagerFactory {

@@ -7,13 +7,13 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.collection.FixedSizeSortedSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.FixedSizeSortedSet;
 
 
 /**

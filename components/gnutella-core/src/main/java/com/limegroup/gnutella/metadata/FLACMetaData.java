@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IOUtils;
+import org.limewire.util.ByteOrder;
 
 
 /**

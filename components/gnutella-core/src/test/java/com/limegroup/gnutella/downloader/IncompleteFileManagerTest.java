@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.limewire.collection.Interval;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;

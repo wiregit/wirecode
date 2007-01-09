@@ -21,6 +21,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.BucketQueue;
+import org.limewire.collection.Cancellable;
+import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.collection.RandomOrderHashSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
@@ -32,12 +36,8 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.BucketQueue;
-import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.FixedsizePriorityQueue;
-import com.limegroup.gnutella.util.RandomOrderHashSet;
 
 
 /**

@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.collection.IntWrapper;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.SystemUtils;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.IntWrapper;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as

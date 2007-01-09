@@ -3,9 +3,9 @@ package com.limegroup.gnutella.search;
 
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;

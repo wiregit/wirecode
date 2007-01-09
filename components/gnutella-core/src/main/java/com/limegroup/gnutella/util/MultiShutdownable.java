@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.collection.Cancellable;
+
 import com.limegroup.gnutella.io.Shutdownable;
 
 /**

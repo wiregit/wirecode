@@ -4,10 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.collection.KeyValue;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.KeyValue;
 
 public class LimeXMLDocumentTest extends LimeTestCase {
             

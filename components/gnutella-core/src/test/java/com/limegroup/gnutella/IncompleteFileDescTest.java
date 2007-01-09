@@ -1,17 +1,18 @@
 package com.limegroup.gnutella;
 
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.IntervalSet;
 
 @SuppressWarnings("unchecked")
 public class IncompleteFileDescTest extends LimeTestCase {

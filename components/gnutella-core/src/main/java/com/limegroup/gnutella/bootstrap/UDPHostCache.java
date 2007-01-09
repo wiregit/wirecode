@@ -13,6 +13,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Cancellable;
+import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -24,8 +26,6 @@ import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.Cancellable;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**

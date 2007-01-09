@@ -18,6 +18,8 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Comparators;
+import org.limewire.collection.Interval;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -28,7 +30,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.Comparators;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary

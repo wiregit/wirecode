@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 
 
 /**

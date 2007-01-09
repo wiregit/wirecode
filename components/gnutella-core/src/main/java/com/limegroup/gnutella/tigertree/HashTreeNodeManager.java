@@ -3,7 +3,8 @@ package com.limegroup.gnutella.tigertree;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import org.limewire.collection.FixedsizeForgetfulHashMap;
+
 
 /**
  * Manages access to the list of full nodes for a HashTree.

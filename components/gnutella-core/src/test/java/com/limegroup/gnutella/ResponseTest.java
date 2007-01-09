@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.limewire.io.ByteOrder;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;

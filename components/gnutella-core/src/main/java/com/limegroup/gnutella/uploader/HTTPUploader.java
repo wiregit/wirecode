@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.MultiRRIterator;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.StringUtils;
 
@@ -42,7 +43,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.CountingOutputStream;
-import com.limegroup.gnutella.util.MultiRRIterator;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the

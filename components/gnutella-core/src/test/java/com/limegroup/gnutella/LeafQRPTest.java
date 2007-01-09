@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.InterruptedIOException;
 
+import org.limewire.collection.BitSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -12,7 +13,6 @@ import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BitSet;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;

@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.limewire.collection.NECallable;
 import org.limewire.concurrent.SchedulingThreadPool;
 
 import com.limegroup.bittorrent.Chokable;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
-import com.limegroup.gnutella.util.NECallable;
 
 /**
  * Choker that implements the choking logic during torrent downloading

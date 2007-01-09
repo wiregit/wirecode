@@ -3,11 +3,12 @@ package com.limegroup.gnutella.messagehandlers;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import org.limewire.collection.FixedSizeExpiringSet;
+
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
-import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 
 public class UDPCrawlerPingHandler implements MessageHandler {
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {

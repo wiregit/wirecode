@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.collection.Interval;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;

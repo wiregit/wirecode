@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.util.Comparators;
 
 /**
  * This class establishes a connection for a chat, either

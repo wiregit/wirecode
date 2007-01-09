@@ -19,6 +19,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IdentityHashSet;
+import org.limewire.collection.NameValue;
+import org.limewire.collection.StringTrie;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
@@ -31,9 +34,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataEditor;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.IdentityHashSet;
-import com.limegroup.gnutella.util.NameValue;
-import com.limegroup.gnutella.util.StringTrie;
 
 /**
  * Maps LimeXMLDocuments for FileDescs in a specific schema.

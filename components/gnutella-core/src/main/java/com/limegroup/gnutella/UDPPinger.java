@@ -6,13 +6,13 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.Cancellable;
 
 /**
  * Sends Gnutella messages via UDP to a set of hosts and calls back to a 

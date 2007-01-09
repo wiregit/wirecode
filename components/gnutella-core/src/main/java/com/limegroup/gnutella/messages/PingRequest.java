@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.collection.NameValue;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.NameValue;
 
 /**
  * A Gnutella ping message.

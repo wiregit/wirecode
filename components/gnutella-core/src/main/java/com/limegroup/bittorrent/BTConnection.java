@@ -9,6 +9,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.BitField;
+import org.limewire.collection.BitFieldSet;
+import org.limewire.collection.BitSet;
+import org.limewire.collection.NECallable;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 
@@ -23,10 +27,6 @@ import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.messages.*;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.BitFieldSet;
-import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.util.NECallable;
 
 /**
  * Class wrapping a Bittorrent connection.

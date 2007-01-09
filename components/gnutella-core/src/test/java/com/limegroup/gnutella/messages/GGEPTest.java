@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.NameValue;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {

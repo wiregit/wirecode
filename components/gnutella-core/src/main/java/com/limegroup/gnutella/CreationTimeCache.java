@@ -20,6 +20,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ConverterObjectInputStream;
@@ -27,7 +28,6 @@ import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.LimeWireUtils;
-import com.limegroup.gnutella.util.Comparators;
 
 /**
  * This class contains a systemwide File creation time cache that persists these

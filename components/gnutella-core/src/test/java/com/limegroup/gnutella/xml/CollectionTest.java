@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.collection.NameValue;
 import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
@@ -18,7 +19,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.util.NameValue;
 
 
 @SuppressWarnings("unchecked")

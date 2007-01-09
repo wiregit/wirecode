@@ -20,9 +20,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.ByteOrder;
+import org.limewire.collection.DualIterator;
+import org.limewire.collection.MultiIterable;
 import org.limewire.io.IOUtils;
 import org.limewire.service.MessageService;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 
@@ -47,8 +49,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
-import com.limegroup.gnutella.util.DualIterator;
-import com.limegroup.gnutella.util.MultiIterable;
 import com.limegroup.gnutella.version.DownloadInformation;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -515,6 +515,7 @@ public class DownloadManager implements BandwidthTracker {
             buf=(List)in.readObject();
             incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch(Throwable t) {
+            t.printStackTrace();
             LOG.error("Unable to read download file", t);
             return false;
         }

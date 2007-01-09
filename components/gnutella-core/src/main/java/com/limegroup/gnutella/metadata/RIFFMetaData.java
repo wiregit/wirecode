@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.limewire.io.ByteOrder;
 import org.limewire.io.IOUtils;
+import org.limewire.util.ByteOrder;
 
 
 public class RIFFMetaData extends VideoMetaData {

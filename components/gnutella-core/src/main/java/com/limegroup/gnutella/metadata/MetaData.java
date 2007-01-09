@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.NameValue;
 
-import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**

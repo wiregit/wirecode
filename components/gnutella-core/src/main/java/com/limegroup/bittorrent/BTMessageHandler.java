@@ -1,8 +1,9 @@
 package com.limegroup.bittorrent;
 
 
+import org.limewire.collection.NECallable;
+
 import com.limegroup.bittorrent.messages.BTMessage;
-import com.limegroup.gnutella.util.NECallable;
 
 /**
  * A handler for received BTMessages.  Since Piece messages

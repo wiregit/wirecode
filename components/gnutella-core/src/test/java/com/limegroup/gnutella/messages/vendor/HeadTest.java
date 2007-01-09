@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages.vendor;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.collection.Interval;
+import org.limewire.collection.IntervalSet;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -25,7 +28,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -36,7 +38,6 @@ import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.IntervalSet;
 
 /**
  * this class tests the handling of udp head requests and responses.

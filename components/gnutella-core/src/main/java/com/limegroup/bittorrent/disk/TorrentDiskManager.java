@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.limewire.collection.BitField;
+import org.limewire.collection.NECallable;
+
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.PieceReadListener;
-import com.limegroup.gnutella.util.BitField;
-import com.limegroup.gnutella.util.NECallable;
 
 /**
  * A facility that manages access to the collection of files 

@@ -15,6 +15,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IntPair;
+import org.limewire.collection.RoundRobinQueue;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.PrivilegedAccessor;
@@ -30,8 +32,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.IntPair;
-import com.limegroup.gnutella.util.RoundRobinQueue;
 
 /**
  * Callback for whenever this uploader starts or finishes to serve

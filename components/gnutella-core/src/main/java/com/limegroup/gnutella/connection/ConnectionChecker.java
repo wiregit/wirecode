@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
