@@ -515,7 +515,6 @@ public class DownloadManager implements BandwidthTracker {
             buf=(List)in.readObject();
             incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch(Throwable t) {
-            t.printStackTrace();
             LOG.error("Unable to read download file", t);
             return false;
         }
