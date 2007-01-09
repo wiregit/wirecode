@@ -4,9 +4,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
+import org.limewire.security.QueryKey;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LimeProps;
+import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
 
@@ -46,8 +48,19 @@ public class LimeCoreGlue {
             public boolean isLocalAddressPrivate() {
                 return ConnectionSettings.LOCAL_IS_PRIVATE.getValue();
             }
-            
         });
+        
+        QueryKey.SettingsProvider settingsProvider = new QueryKey.SettingsProvider() {
+            public long getChangePeriod() {
+                return SecuritySettings.CHANGE_QK_EVERY.getValue();
+            }
+
+            public long getGrancePeriod() {
+                return SecuritySettings.QK_GRACE_PERIOD.getValue();
+            }
+        };
+        
+        QueryKey.setSettingsProvider(settingsProvider);
     }
 
 }

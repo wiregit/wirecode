@@ -11,8 +11,6 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.settings.SecuritySettings;
-
 /**
  * Abstraction for a Query Key as detailed in the GUESS protocol spec.
  * Provides:
@@ -35,6 +33,11 @@ public final class QueryKey {
 
     private static final Log LOG = LogFactory.getLog(QueryKey.class);
 
+    /**
+     * 
+     */
+    private static volatile SettingsProvider settingsProvider = new DefaultSettingsProvider();
+    
     private static final Object LOCK = new Object();
     
     /**
@@ -79,6 +82,18 @@ public final class QueryKey {
         oldSecretKey = secretKey;
         
         lastQueryKeyChange = System.currentTimeMillis();
+    }
+    
+    public static void setSettingsProvider(SettingsProvider settingsProvider) {
+        if (settingsProvider == null) {
+            settingsProvider = new DefaultSettingsProvider();
+        }
+        
+        QueryKey.settingsProvider = settingsProvider;
+    }
+    
+    public static SettingsProvider getSettingsProvider() {
+        return settingsProvider;
     }
     
     private QueryKey(byte[] key, boolean prepareForNet) throws IllegalArgumentException {
@@ -136,8 +151,9 @@ public final class QueryKey {
                 return true;
             }
             
+            // Check if the old key has expired
             if ((System.currentTimeMillis() - lastQueryKeyChange) 
-                    >= SecuritySettings.QK_GRACE_PERIOD.getValue()) {
+                    >= settingsProvider.getGrancePeriod()) {
                 return false;
             }
             
@@ -261,7 +277,7 @@ public final class QueryKey {
     private static QueryKeyGenerator getSecretKey() {
         synchronized (LOCK) {
             if ((System.currentTimeMillis()-lastQueryKeyChange)
-                    >= SecuritySettings.CHANGE_QK_EVERY.getValue()) {
+                    >= settingsProvider.getChangePeriod()) {
                 newKeyGenerator();
             }
             return secretKey;
@@ -287,5 +303,36 @@ public final class QueryKey {
      */
     public static QueryKeyGenerator createKeyGenerator() {
         return new TEAQueryKeyGenerator();
+    }
+    
+    /**
+     * The QueryKey.SettingsProvider provides Settings 
+     * for the QueryKey class
+     */
+    public static interface SettingsProvider {
+        
+        /**
+         * Time in milliseconds
+         */
+        public long getChangePeriod();
+        
+        /**
+         * Time in milliseconds
+         */
+        public long getGrancePeriod();
+    }
+    
+    /**
+     * Keys don't expire in the default implementation
+     */
+    private static class DefaultSettingsProvider implements SettingsProvider {
+
+        public long getChangePeriod() {
+            return Long.MAX_VALUE;
+        }
+
+        public long getGrancePeriod() {
+            return Long.MAX_VALUE;
+        }
     }
 }
