@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.EOFException;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -188,6 +189,14 @@ public class IOUtils {
     }
     
     /**
+     * A utility method to flush Flushable objects (Readers, Writers, 
+     * Input- and OutputStreams and RandomAccessFiles).
+     */
+    public static void flush(Flushable flushable) {
+        FileUtils.flush(flushable);
+    }
+    
+    /**
      * A utility method to close Sockets
      */
     public static void close(Socket s) {
@@ -207,7 +216,7 @@ public class IOUtils {
     }
     
     /**
-     * A utility method to close ServerSocket
+     * A utility method to close ServerSockets
      */
     public static void close(ServerSocket s) {
         if(s != null) {
@@ -234,7 +243,7 @@ public class IOUtils {
             ErrorService.error(impossible);
             return null;
         } finally {
-            IOUtils.close(dos);
+            close(dos);
             Pools.getDeflaterPool().returnObject(def);
         }
     }
@@ -260,7 +269,7 @@ public class IOUtils {
         } catch(OutOfMemoryError oome) {
             throw new IOException(oome.getMessage());
         } finally {
-            IOUtils.close(in);
+            close(in);
             Pools.getInflaterPool().returnObject(inf);
         }
     }    

@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -595,7 +596,19 @@ public class FileUtils {
             } catch (IOException ignored) {}
         }
     }
-
+    
+    /**
+     * A utility method to flush Flushable objects (Readers, Writers, 
+     * Input- and OutputStreams and RandomAccessFiles).
+     */
+    public static void flush(Flushable flushable) {
+        if (flushable != null) {
+            try {
+                flushable.flush();
+            } catch (IOException ignored) {}
+        }
+    }
+    
     /** 
      * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
      * returning the number of bytes actually copied.  If 'dst' already exists,
@@ -626,12 +639,9 @@ public class FileUtils {
             }
         } catch (IOException e) {
         } finally {
-            if (in!=null)
-                try { in.close(); } catch (IOException e) { }
-            if (out!=null) {
-                try { out.flush(); } catch (IOException e) { }
-                try { out.close(); } catch (IOException e) { }
-            }
+            close(in);
+            flush(out);
+            close(out);
         }
         return amount-amountToRead;
     }
