@@ -52,6 +52,12 @@ public class DHTValueTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setLocalIsPrivate(false);
+    }
+
     public void testLocationCount() throws Exception {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

@@ -35,6 +35,12 @@ public class PingManagerTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setLocalIsPrivate(false);
+    }
+
     public void testParallelPings() throws Exception {
         KademliaSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);

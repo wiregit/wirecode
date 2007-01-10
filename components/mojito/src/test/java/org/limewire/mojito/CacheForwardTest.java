@@ -66,6 +66,12 @@ public class CacheForwardTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setLocalIsPrivate(false);
+    }
+
     @SuppressWarnings("unchecked")
     public void testGetQueryKey() throws Exception {
         

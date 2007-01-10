@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -15,11 +16,9 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.DatabaseUtils;
-import org.limewire.util.BaseTestCase;
 
 
-public class DatabaseUtilsTest extends BaseTestCase {
+public class DatabaseUtilsTest extends MojitoTestCase {
     
     public static final String LOCAL_NODE_ID = "8A82F518E1CD6E7D56F965D65CE5FCAA6261DEA4";
     

@@ -50,6 +50,12 @@ public class CollisionTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setLocalIsPrivate(false);
+    }
+
     public void testSpoof() throws Exception {
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
         

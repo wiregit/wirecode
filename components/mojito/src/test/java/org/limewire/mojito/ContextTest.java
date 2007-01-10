@@ -31,6 +31,7 @@ public class ContextTest extends MojitoTestCase {
     }
     
     public void testShutdown() throws Exception {
+        setLocalIsPrivate(false);
         
         int m = KademliaSettings.SHUTDOWN_MULTIPLIER.getValue();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();

@@ -51,7 +51,9 @@ public class BootstrapManagerTest extends MojitoTestCase {
     
     @Override
     protected void setUp() throws Exception {
+        super.setUp();
         setSettings();
+        setLocalIsPrivate(false);
         
         //setup bootstrap node
         BOOTSTRAP_DHT = MojitoFactory.createDHT("bootstrapNode");

@@ -30,6 +30,12 @@ public class PingRequestHandlerTest extends MojitoTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        setLocalIsPrivate(false);
+    }
+
     public void testPingRequest() throws Exception {
         NetworkSettings.MAX_ERRORS.setValue(0);
         NetworkSettings.TIMEOUT.setValue(250);

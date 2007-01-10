@@ -10,7 +10,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.settings.NetworkSettings;
 
-
 public class RemoteContactTest extends MojitoTestCase {
     
     public RemoteContactTest(String name) {
@@ -26,6 +25,8 @@ public class RemoteContactTest extends MojitoTestCase {
     }
     
     public void testFixSourceAndContactAddress() {
+        setLocalIsPrivate(false);
+        
         // External Port == 0 -> force firewalled if it isn't!
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 null, 0, 0, KUID.createRandomID(), 
@@ -61,6 +62,8 @@ public class RemoteContactTest extends MojitoTestCase {
     }
     
     public void testUpdateWithExistingContact() {
+        setLocalIsPrivate(false);
+        
         KUID nodeId = KUID.createRandomID();
         
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
@@ -107,6 +110,8 @@ public class RemoteContactTest extends MojitoTestCase {
     }
     
     public void testVendorAndVersion() {
+        setLocalIsPrivate(false);
+        
         Contact node1 = ContactFactory.createLocalContact(1, 2, false);
         
         assertEquals(1, node1.getVendor());
@@ -130,6 +135,8 @@ public class RemoteContactTest extends MojitoTestCase {
     }
     
     public void testAdaptiveTimeout() {
+        setLocalIsPrivate(false);
+        
         Contact node1 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
                 0, 0, KUID.createRandomID(), 
@@ -164,6 +171,8 @@ public class RemoteContactTest extends MojitoTestCase {
     }
     
     public void testPublicPrivateAddress() {
+        setLocalIsPrivate(true);
+        
         InetSocketAddress sourceAddress = new InetSocketAddress("localhost", 1234);
         InetSocketAddress contactAddress = new InetSocketAddress("216.244.101.15", 5000);
         InetSocketAddress externalAddress = new InetSocketAddress("216.244.101.16", 5000);

@@ -26,7 +26,6 @@ import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.CommonUtils;
 
-
 public class RouteTableTest extends MojitoTestCase {
     
     /*static {
@@ -470,6 +469,7 @@ public class RouteTableTest extends MojitoTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        setLocalIsPrivate(false);
         
         toPing.clear();
         
@@ -502,7 +502,9 @@ public class RouteTableTest extends MojitoTestCase {
         }
         
         for (Contact node : nodes) {
-            routeTable.add(node);
+            if (!node.equals(localNode)) {
+                routeTable.add(node);
+            }
         }
         
         assertEquals(18, routeTable.getBuckets().size());
@@ -517,6 +519,7 @@ public class RouteTableTest extends MojitoTestCase {
      * final state
      */
     public void testRouteTableState() throws Exception {
+        setLocalIsPrivate(false);
         
         // Check if all Buckets exist
         for (int i = 0; i < BUCKET_IDS.length; i++) {
@@ -544,7 +547,7 @@ public class RouteTableTest extends MojitoTestCase {
         for (int i = 0; i < CACHED_NODE_IDS.length; i++) {
             KUID nodeId = KUID.createWithHexString(CACHED_NODE_IDS[i]);
             Contact node1 = routeTable.get(nodeId);
-            assertNotNull(node1);
+            assertNotNull(CACHED_NODE_IDS[i], node1);
             assertEquals(nodeId, node1.getNodeID());
             
             Bucket b = routeTable.getBucket(nodeId);
@@ -581,7 +584,7 @@ public class RouteTableTest extends MojitoTestCase {
     }
     
     private List<Entry<KUID, KUID[]>> load(String name) throws Exception {
-        File file = CommonUtils.getResourceFile("com/limegroup/mojito/routing/impl/" + name);
+        File file = CommonUtils.getResourceFile("org/limewire/mojito/routing/impl/" + name);
         BufferedReader in = null;
         
         List<Entry<KUID, KUID[]>> entries = new ArrayList<Entry<KUID, KUID[]>>();

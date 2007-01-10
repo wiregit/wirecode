@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
@@ -14,11 +15,9 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.ContactPinger;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
-import org.limewire.mojito.util.DHTSizeEstimator;
-import org.limewire.util.BaseTestCase;
 
 
-public class DHTSizeEstimatorTest extends BaseTestCase {
+public class DHTSizeEstimatorTest extends MojitoTestCase {
 	
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -209,6 +208,8 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     }
     
     public void testEstimateSize() {
+        setLocalIsPrivate(false);
+        
     	RouteTable routeTable = new RouteTableImpl(LOCAL_NODE_ID);
         routeTable.setContactPinger(new ContactPinger() {
             public DHTFuture<PingResult> ping(Contact node) {
@@ -219,7 +220,8 @@ public class DHTSizeEstimatorTest extends BaseTestCase {
     	for (String id : NODE_IDS) {
             KUID nodeId = KUID.createWithHexString(id);
             SocketAddress addr = new InetSocketAddress("localhost", 5000);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+            routeTable.add(ContactFactory.createLiveContact(
+                    addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}
     	
     	assertEquals(490, routeTable.size());
