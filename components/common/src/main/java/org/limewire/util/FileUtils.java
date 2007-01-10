@@ -2,6 +2,7 @@ package org.limewire.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,9 +12,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -573,6 +571,10 @@ public class FileUtils {
     	
     }
     
+    /**
+     * Returns total length of all files by going through
+     * the given directory (if it's a directory).
+     */
     public static long getLengthRecursive(File f) {
     	if (!f.isDirectory())
     		return f.length();
@@ -582,43 +584,15 @@ public class FileUtils {
     	return ret;
     }
 
-    public static void close(Reader in) {
-        if(in != null) {
+    /**
+     * A utility method to close Closeable objects (Readers, Writers, 
+     * Input- and OutputStreams and RandomAccessFiles).
+     */
+    public static void close(Closeable closeable) {
+        if (closeable != null) {
             try {
-                in.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
-    public static void close(InputStream in) {
-        if(in != null) {
-            try {
-                in.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
-    public static void close(Writer out) {
-        if(out != null) {
-            try {
-                out.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
-    public static void close(OutputStream out) {
-        if(out != null) {
-            try {
-                out.close();
-            } catch(IOException ignored) {}
-        }
-    }
-    
-    public static void close(RandomAccessFile raf) {
-        if(raf != null) {
-            try {
-                raf.close();
-            } catch(IOException ignored) {}
+                closeable.close();
+            } catch (IOException ignored) {}
         }
     }
 

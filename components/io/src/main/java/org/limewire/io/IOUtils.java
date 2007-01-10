@@ -2,13 +2,11 @@ package org.limewire.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.zip.Deflater;
@@ -181,26 +179,17 @@ public class IOUtils {
     	return skipped;
     }
 
-    public static void close(Reader in) {
-        FileUtils.close(in);
+    /**
+     * A utility method to close Closeable objects (Readers, Writers, 
+     * Input- and OutputStreams and RandomAccessFiles).
+     */
+    public static void close(Closeable closeable) {
+        FileUtils.close(closeable);
     }
     
-    public static void close(InputStream in) {
-        FileUtils.close(in);
-    }
-    
-    public static void close(Writer out) {
-        FileUtils.close(out);
-    }
-    
-    public static void close(OutputStream out) {
-        FileUtils.close(out);
-    }
-    
-    public static void close(RandomAccessFile raf) {
-        FileUtils.close(raf);
-    }
-    
+    /**
+     * A utility method to close Sockets
+     */
     public static void close(Socket s) {
         if(s != null) {
             try {
@@ -217,6 +206,9 @@ public class IOUtils {
         }
     }
     
+    /**
+     * A utility method to close ServerSocket
+     */
     public static void close(ServerSocket s) {
         if(s != null) {
             try {
