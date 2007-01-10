@@ -1189,7 +1189,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         public int bitIndex(Character key,   int keyOff, int keyLength,
                             Character found, int foundOff, int foundKeyLength) {
             if (found == null)
-                found = 0;
+                found = (char)0;
             
             if(keyOff != 0 || foundOff != 0)
                 throw new IllegalArgumentException("offsets must be 0 for fixed-size keys");
