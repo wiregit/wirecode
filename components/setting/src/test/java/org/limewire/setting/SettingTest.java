@@ -54,8 +54,12 @@ public class SettingTest extends BaseTestCase {
             BYTE_SETTING = FACTORY.createByteSetting("BYTE_SETTING", (byte)23);
             COLOR_SETTING = FACTORY.createColorSetting("COLOR_SETTING", 
                                                        new Color(255, 127, 63));
-            FILE_SETTING = FACTORY.createFileSetting("FILE_SETTING", 
+            if(OSUtils.isUnix() || OSUtils.isMacOSX())
+                FILE_SETTING = FACTORY.createFileSetting("FILE_SETTING", 
                                                      new File("/temp/turkey.txt"));
+            else
+                FILE_SETTING = FACTORY.createFileSetting("FILE_SETTING", 
+                                                     new File("c:/temp/turkey.txt"));
             INT_SETTING = FACTORY.createIntSetting("INT_SETTING", 143);
             LONG_SETTING = FACTORY.createLongSetting("LONG_SETTING", 666666);
             STRING_SETTING = FACTORY.createStringSetting("STRING_SETTING", 
@@ -170,7 +174,10 @@ public class SettingTest extends BaseTestCase {
         settings.STRING_SETTING.setValue("OK so far");
         settings.CHAR_ARRAY_SETTING.setValue(new char[] {'d', 'e', 'f'});
         settings.STRING_ARRAY_SETTING.setValue(new String[]{"OK", "so", "far"});
-        settings.FILE_ARRAY_SETTING.setValue(new File[]{new File("/temp/A"), new File("/temp/B")});
+        if(OSUtils.isUnix() || OSUtils.isMacOSX())
+            settings.FILE_ARRAY_SETTING.setValue(new File[]{new File("/temp/A"), new File("/temp/B")});
+        else
+            settings.FILE_ARRAY_SETTING.setValue(new File[]{new File("c:/temp/A"), new File("c:/temp/B")});
         settings.EXPIRABLE_INT_SETTING.setValue(0xFFFF);
         settings.EXPIRABLE_BOOLEAN_SETTING.setValue(true);
         
