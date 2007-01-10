@@ -8,17 +8,16 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.io.MessageDispatcher;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.util.BaseTestCase;
 
 
-public class MessageDispatcherTest extends BaseTestCase {
+public class MessageDispatcherTest extends MojitoTestCase {
     
     public MessageDispatcherTest(String name) {
         super(name);

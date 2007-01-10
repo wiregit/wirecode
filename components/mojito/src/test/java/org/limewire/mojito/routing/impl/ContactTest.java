@@ -5,14 +5,12 @@ import java.net.InetSocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.routing.impl.RemoteContact;
-import org.limewire.util.BaseTestCase;
 
 
-public class ContactTest extends BaseTestCase {
+public class ContactTest extends MojitoTestCase {
     
     public ContactTest(String name) {
         super(name);

@@ -29,17 +29,12 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
-import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-
-public class DHTValueTest extends BaseTestCase {
+public class DHTValueTest extends MojitoTestCase {
     
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -58,7 +53,6 @@ public class DHTValueTest extends BaseTestCase {
     }
     
     public void testLocationCount() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();

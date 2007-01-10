@@ -9,16 +9,14 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.UnitTestUtils;
-import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-
-public class PingRequestHandlerTest extends BaseTestCase {
+public class PingRequestHandlerTest extends MojitoTestCase {
     
     public PingRequestHandlerTest(String name) {
         super(name);
@@ -33,7 +31,6 @@ public class PingRequestHandlerTest extends BaseTestCase {
     }
     
     public void testPingRequest() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.MAX_ERRORS.setValue(0);
         NetworkSettings.TIMEOUT.setValue(250);
         

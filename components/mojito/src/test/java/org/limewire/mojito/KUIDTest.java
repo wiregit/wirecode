@@ -21,10 +21,7 @@ package org.limewire.mojito;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.KUID;
-import org.limewire.util.BaseTestCase;
-
-public class KUIDTest extends BaseTestCase {
+public class KUIDTest extends MojitoTestCase {
     
     public KUIDTest(String name) {
         super(name);

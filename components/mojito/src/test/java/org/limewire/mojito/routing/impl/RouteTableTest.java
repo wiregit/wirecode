@@ -15,21 +15,19 @@ import junit.framework.TestSuite;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.CommonUtils;
 
 
-public class RouteTableTest extends BaseTestCase {
+public class RouteTableTest extends MojitoTestCase {
     
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");

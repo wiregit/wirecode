@@ -5,12 +5,11 @@ import java.net.SocketAddress;
 
 import junit.framework.TestSuite;
 
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.ContactFactory;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.util.BaseTestCase;
 
 
-public class LocalContactTest extends BaseTestCase {
+public class LocalContactTest extends MojitoTestCase {
     
     public LocalContactTest(String name) {
         super(name);

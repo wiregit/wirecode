@@ -11,15 +11,13 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-
-public class PingManagerTest extends BaseTestCase {
+public class PingManagerTest extends MojitoTestCase {
     
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -38,7 +36,6 @@ public class PingManagerTest extends BaseTestCase {
     }
     
     public void testParallelPings() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         KademliaSettings.PARALLEL_PINGS.setValue(3);
         NetworkSettings.MAX_ERRORS.setValue(0);
         

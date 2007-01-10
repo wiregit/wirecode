@@ -27,7 +27,7 @@ public class UnitTestUtils {
         futureField.setAccessible(true);
         
         if (nodeId != null) {
-            Class clazz = Class.forName("com.limegroup.mojito.manager.BootstrapManager$BootstrapFuture");
+            Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
             Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
             con.setAccessible(true);
             

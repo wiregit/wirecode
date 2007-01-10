@@ -7,18 +7,12 @@ import java.util.Random;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
-import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.settings.ConnectionSettings;
-
-public class ContextTest extends BaseTestCase {
+public class ContextTest extends MojitoTestCase {
     
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
@@ -37,7 +31,6 @@ public class ContextTest extends BaseTestCase {
     }
     
     public void testShutdown() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         int m = KademliaSettings.SHUTDOWN_MULTIPLIER.getValue();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();

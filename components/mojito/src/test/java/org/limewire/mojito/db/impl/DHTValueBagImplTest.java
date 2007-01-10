@@ -6,18 +6,17 @@ import java.net.SocketAddress;
 import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.impl.DHTValueBagImpl;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.settings.DatabaseSettings;
-import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
 
 
-public class DHTValueBagImplTest extends BaseTestCase {
+public class DHTValueBagImplTest extends MojitoTestCase {
 
     public DHTValueBagImplTest(String name) {
         super(name);

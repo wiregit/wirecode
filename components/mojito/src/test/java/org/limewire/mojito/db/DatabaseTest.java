@@ -28,20 +28,16 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.Database;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.util.BaseTestCase;
 
 
-public class DatabaseTest extends BaseTestCase {
+public class DatabaseTest extends MojitoTestCase {
     
     /*static {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");

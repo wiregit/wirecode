@@ -6,17 +6,15 @@ import java.net.SocketAddress;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Contact.State;
-import org.limewire.mojito.routing.impl.RemoteContact;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.util.BaseTestCase;
 
 
-public class BucketNodeTest extends BaseTestCase {
+public class BucketNodeTest extends MojitoTestCase {
     
     private Contact localNode;
     

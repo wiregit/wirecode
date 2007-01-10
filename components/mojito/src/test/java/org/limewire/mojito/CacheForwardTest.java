@@ -30,10 +30,6 @@ import java.util.concurrent.Callable;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -48,12 +44,9 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.QueryKey;
-import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
-public class CacheForwardTest extends BaseTestCase {
+public class CacheForwardTest extends MojitoTestCase {
     
     private static final int PORT = 3000;
     
@@ -72,10 +65,9 @@ public class CacheForwardTest extends BaseTestCase {
     public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
     }
-
+    
     @SuppressWarnings("unchecked")
     public void testGetQueryKey() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         MojitoDHT dht1 = null;
         MojitoDHT dht2 = null;
@@ -103,7 +95,7 @@ public class CacheForwardTest extends BaseTestCase {
             assertFalse(context2.isBootstrapping());
             
             // Get the QueryKey...
-            Class clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
+            Class clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
             Constructor<Callable<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
@@ -112,7 +104,7 @@ public class CacheForwardTest extends BaseTestCase {
             
             try {
                 Result result = handler.call();
-                clazz = Class.forName("com.limegroup.mojito.handler.response.StoreResponseHandler$GetQueryKeyResult");
+                clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetQueryKeyResult");
                 Method m = clazz.getDeclaredMethod("getQueryKey", new Class[0]);
                 m.setAccessible(true);
                 
@@ -130,7 +122,6 @@ public class CacheForwardTest extends BaseTestCase {
     
     public void testCacheForward() throws Exception {
         
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
@@ -151,8 +142,7 @@ public class CacheForwardTest extends BaseTestCase {
                 dhts.put(dht.getLocalNodeID(), dht);
             }
             PingResult result = creator.ping(new InetSocketAddress("localhost", PORT+1)).get();
-            creator.bootstrap(result.getContact());
-            Thread.sleep(250);
+            creator.bootstrap(result.getContact()).get();
             
             // Store the value
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");

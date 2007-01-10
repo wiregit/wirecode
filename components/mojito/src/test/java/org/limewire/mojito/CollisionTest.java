@@ -28,20 +28,13 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.MojitoUtils;
-import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
-public class CollisionTest extends BaseTestCase {
+public class CollisionTest extends MojitoTestCase {
     
     private static final int PORT = 4000;
     
@@ -58,7 +51,6 @@ public class CollisionTest extends BaseTestCase {
     }
     
     public void testSpoof() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
         
         MojitoDHT bootstrap = null, original = null, spoofer = null;
@@ -127,7 +119,6 @@ public class CollisionTest extends BaseTestCase {
     }
     
     public void testReplace() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         RouteTableSettings.MIN_RECONNECTION_TIME.setValue(0);
         NetworkSettings.TIMEOUT.setValue(100L);
         NetworkSettings.MAX_ERRORS.setValue(0);

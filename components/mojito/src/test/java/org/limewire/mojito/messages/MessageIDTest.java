@@ -5,11 +5,10 @@ import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
-import org.limewire.mojito.messages.MessageID;
+import org.limewire.mojito.MojitoTestCase;
 import org.limewire.security.QueryKey;
-import org.limewire.util.BaseTestCase;
 
-public class MessageIDTest extends BaseTestCase {
+public class MessageIDTest extends MojitoTestCase {
     
     public MessageIDTest(String name) {
         super(name);
