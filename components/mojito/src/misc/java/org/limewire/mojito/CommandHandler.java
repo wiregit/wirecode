@@ -33,16 +33,10 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
@@ -430,55 +424,20 @@ public class CommandHandler {
     }
     
     public static void rt_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("com.limegroup.mojito.visual.RouteTableVisualizer");
+        Class clazz = Class.forName("org.limewire.mojito.visual.RouteTableVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
     }
     
     public static void tiles_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("com.limegroup.mojito.visual.TilesVisualizer");
+        Class clazz = Class.forName("org.limewire.mojito.visual.TilesVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
     }
     
     public static void arcs_gui(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Class clazz = Class.forName("com.limegroup.mojito.visual.ArcsVisualizer");
+        Class clazz = Class.forName("org.limewire.mojito.visual.ArcsVisualizer");
         Method show = clazz.getDeclaredMethod("show", Context.class);
         show.invoke(null, dht);
-    }
-    
-    public static void test(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        Set<SocketAddress> hosts = new LinkedHashSet<SocketAddress>();
-        
-        hosts.add(new InetSocketAddress("www.apple.com", 80));
-        hosts.add(new InetSocketAddress("www.microsoft.com", 80));
-        hosts.add(new InetSocketAddress("www.ibm.com", 80));
-        hosts.add(new InetSocketAddress("www.heise.de", 80));
-        hosts.add(new InetSocketAddress("www.kapsi.de", 80));
-        hosts.add(new InetSocketAddress("www.ardverk.com", 80));
-        hosts.add(new InetSocketAddress("www.n24.de", 80));
-        hosts.add(new InetSocketAddress("www.n-tv.de", 80));
-        hosts.add(new InetSocketAddress("www.cnn.com", 80));
-        hosts.add(new InetSocketAddress("www.flickr.com", 80));
-        hosts.add(new InetSocketAddress("www.slyck.com", 80));
-        hosts.add(new InetSocketAddress("www.macnn.com", 80));
-        hosts.add(new InetSocketAddress("www.xlr8yourmac.com", 80));
-        hosts.add(new InetSocketAddress("www.haribo.de", 80));
-        hosts.add(new InetSocketAddress("www.citibank.com", 80));
-        hosts.add(new InetSocketAddress("www.quiksilver.com", 80));
-        hosts.add(new InetSocketAddress("www.nutella.de", 80));
-        
-        hosts.add(new InetSocketAddress("localhost", 3000));
-        
-        System.out.println(hosts);
-        
-        try {
-            Context context = (Context)dht;
-            context.ping(hosts);
-            out.println("foo");
-        } catch (Exception e) {
-            e.printStackTrace(out);
-            out.flush();
-        }
     }
 }
