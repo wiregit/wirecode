@@ -1,13 +1,12 @@
 package org.limewire.io;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
- * A ByteBufferOutputStream that uses ByteBuffers internally and can optionally
+ * A ByteArrayOutputStream that uses ByteBuffers internally and can optionally
  * grow or throw IOExceptions when the maximum size is reached and more is written.
  *
  * This exposes many methods to make using byte[]'s & ByteBuffers more efficient.
@@ -24,14 +23,14 @@ public class ByteBufferOutputStream extends OutputStream {
      * Creates an OutputStream initially sized at 32 that can grow.
      */
     public ByteBufferOutputStream() {
-	    this(32);
+        this(32);
     }
 
     /**
      * Creates an OutputStream of the given size that can grow.
      */
     public ByteBufferOutputStream(int size) {
-	    this(ByteBuffer.allocate(size), true);
+        this(ByteBuffer.allocate(size), true);
     }
     
     /**
@@ -182,6 +181,19 @@ public class ByteBufferOutputStream extends OutputStream {
             grow(len);
         
         buffer.put(b, off, len);
+    }
+    
+    /**
+     * Writes the remaining bytes of the ByteBuffer to the buffer.
+     * If the buffer cannot grow and this exceeds the size of the buffer, a
+     * BufferOverflowException is thrown and no data is written. 
+     * If the buffer can grow, a new buffer is created & data is written.
+     */
+    public void write(ByteBuffer src) {
+    	if (grow && src.remaining() > buffer.remaining())
+    	    grow(src.remaining());
+    	
+    	buffer.put(src);
     }
     
     /**
