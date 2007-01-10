@@ -17,8 +17,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-
 /**
  * This class handles common utility functions for networking tasks.
  */
@@ -356,7 +354,7 @@ public final class NetworkUtils {
      * parses an ip:port byte-packed values.  
      * 
      * @return a collection of <tt>IpPort</tt> objects.
-     * @throws BadPacketException if an invalid Ip is found or the size 
+     * @throws InvalidDataException if an invalid Ip is found or the size 
      * is not divisble by six
      */
     public static List<IpPort> unpackIps(byte [] data) throws InvalidDataException {

@@ -1,111 +1,89 @@
 <?xml version="1.0"?>
-<project name="MojitoDHT" default="buildall" basedir=".">
-    <description>MojitoDHT</description>
-
-    <property name="basedir" value="."/>
-    <property name="src" value="${basedir}/src/java"/>
-	<property name="test" value="${basedir}/src/test"/>
-	<property name="misc" value="${basedir}/src/misc"/>
+<project name="mojito" default="compile-src" basedir=".">
+    <description>The Mojito DHT</description>
 	
-    <property name="coredir" value="../core"/>
-	<property name="guidir" value="../gui"/>
-    <property name="lib" value="../lib"/>
-    <property name="jars" value="${lib}/jars"/>
-    <property name="miscjars" value="${basedir}/lib/misc"/>
+	<import file="../collection/build.xml"/>
+	<import file="../io/build.xml"/>
+	<import file="../security/build.xml"/>
+	<import file="../setting/build.xml"/>
+	<import file="../common/build-macros.xml" />
+	<import file="../common/build.xml"/>
 	
-    <path id="default.classpath" >
-        <fileset dir="${jars}" includes="**/*.jar"/>
-        <fileset dir="${miscjars}" includes="**/*.jar"/>
-    	<pathelement location="${coredir}" />
-    </path>
-
-    <target name="build">
-        <javac srcdir="${src}" 
-				destdir="${src}"
-		    		target="1.5"
-		    		source="1.5"
-	    			compiler="javac1.5"
-		    		debug="true"
-	    			optimize="false">
-            <classpath refid="default.classpath" />
-        </javac>
-    	
-    	<javac srcdir="${misc}" 
-				destdir="${misc}"
-		    		target="1.5"
-		    		source="1.5"
-	    			compiler="javac1.5"
-		    		debug="true"
-	    			optimize="false">
-            <classpath refid="default.classpath" />
-    		<classpath>
-	      		<pathelement path="${src}"/>
-		    </classpath>
-        </javac>
-    </target>
-
-    <target name="buildall">
-        <javac destdir="${src}" 
-	            target="1.5" 
-	            source="1.5" 
-	            compiler="javac1.5" 
-	            debug="true" 
-	            optimize="false">
-            <src path="${src}" />
-            <src path="${coredir}" />
-            <classpath refid="default.classpath"/>
-        </javac>
-    	
-    	<javac srcdir="${misc}" 
-				destdir="${misc}"
-		    		target="1.5"
-		    		source="1.5"
-	    			compiler="javac1.5"
-		    		debug="true"
-	    			optimize="false">
-            <classpath refid="default.classpath" />
-    		<classpath>
-	      		<pathelement path="${src}"/>
-		    </classpath>
-        </javac>
-    	
-    	<move todir="${coredir}">
-			<fileset dir="${src}">
-				<exclude name="**/mojito/**"/>
-			</fileset>
-		</move>
+	<target name="initialize" depends="lw-collection.initialize, lw-io.initialize, lw-security.initialize,
+				lw-setting.initialize, lw-common.initialize">
+	        <do.setup-properties component="mojito">
+				<src-classpath>
+					<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+					<path refid="build.limewire.components.collection.buildpath"/>
+					<path refid="build.limewire.components.io.buildpath"/>
+					<path refid="build.limewire.components.security.buildpath"/>
+					<path refid="build.limewire.components.setting.buildpath"/>
+				    <path refid="build.limewire.components.common.buildpath"/>
+				</src-classpath>
+	        </do.setup-properties>
+	</target>
+	
+	<target name="clean" depends="lw-collection.clean, lw-io.clean, lw-security.clean,
+				lw-setting.clean, lw-common.clean">
+		    <do.clean component="mojito"/>
+	</target>
+	    
+    <target name="compile" depends="lw-collection.compile, lw-io.compile, lw-security.compile,
+				lw-setting.compile, lw-common.compile">
+    	<do.compile component="mojito"/>
     </target>
 	
-    <target name="clean">
-        <delete>
-            <fileset dir="${src}" includes="**/*.class"/>
-        	<fileset dir="${misc}" includes="**/*.class"/>
-        	<fileset dir="${test}" includes="**/*.class"/>
-        	<fileset dir="${coredir}" includes="**/*.class"/>
-        </delete>
+	<target name="compile-src" depends="lw-collection.compile-src, lw-io.compile-src, lw-security.compile-src,
+				lw-setting.compile-src, lw-common.compile-src">
+	    <do.compile-src component="mojito"/>
+	</target>
+    
+	<target name="clean-src" depends="lw-collection.clean-src, lw-io.clean-src, lw-security.clean-src,
+				lw-setting.clean-src, lw-common.clean-src">
+	    <do.clean-src component="mojito"/>
+	</target>
+	
+	<target name="compile-tests" depends="lw-collection.compile-tests, lw-io.compile-tests, lw-security.compile-tests,
+				lw-setting.compile-tests, lw-common.compile-tests">
+	    <do.compile-tests component="mojito"/>
+	</target>
+	
+	<target name="clean-tests" depends="lw-collection.clean-tests, lw-io.clean-tests, lw-security.clean-tests,
+				lw-setting.clean-tests, lw-common.clean-tests">
+	    <do.clean-tests component="mojito"/>
+	</target>
+	
+	<target name="test" if="class" depends="compile">
+	    <do.test component="mojito" class="${class}"/>
+	</target>
+	
+	<target name="test-package" if="package" depends="compile">
+	    <do.test-package component="mojito" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="compile">
+	    <do.test-all component="mojito"/>
+	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="mojito"/>
+    </target>
+    
+	<target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="mojito"/>
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="mojito"/>
+    </target>
+	
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="mojito"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="mojito"/>
     </target>
 
-    <target name="jar" depends="clean, buildall">
-        <delete file="mojito.jar"/>
-        <jar destfile="mojito.jar" 
-				basedir="${src}"
-				includes="**/*.class"
-				compress="false">
-        </jar>
-    	
-    	<delete file="mojito-misc.jar"/>
-    	<jar destfile="mojito-misc.jar" 
-				basedir="${misc}"
-				includes="**/*.class"
-				compress="false">
-	    </jar>
-    	
-    	<delete file="core.jar"/>
-        <jar destfile="core.jar" 
-				basedir="${coredir}"
-				includes="**/*.class"
-				compress="false">
-        </jar>
-    </target>
 </project>
 

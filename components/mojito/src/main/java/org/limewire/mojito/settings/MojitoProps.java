@@ -24,9 +24,6 @@ import java.io.File;
 import org.limewire.setting.AbstractSettings;
 import org.limewire.setting.SettingsFactory;
 
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 
 /**
  * Handler for all Mojito Settings.
@@ -42,9 +39,9 @@ public class MojitoProps extends AbstractSettings {
     // This is protected so that subclasses can extend from it, but
     // subclasses should NEVER instantiate a copy themselves.
     protected MojitoProps() {
-        super(new File(LimeWireUtils.getUserSettingsDir(), "mojito.props"), "Mojito properties file");
-        Assert.that( getClass() == MojitoProps.class,
-            "should not have a subclass instantiate");
+        //TODO: change to LimeWireUtils.getUserSettingsDir()
+        super(new File(System.getProperty("user.home"), "mojito.props"), "Mojito properties file");
+        assert (getClass() == MojitoProps.class);
     }
     
     /**
