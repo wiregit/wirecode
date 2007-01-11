@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="components/collection/build/classes" path="components/collection/src/main/java"/>
+	<classpathentry kind="src" path="components/mojito-ui/src/misc/java"/>
 	<classpathentry kind="src" path="components/mojito/src/main/java"/>
 	<classpathentry kind="src" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" path="components/mojito/src/test/java"/>

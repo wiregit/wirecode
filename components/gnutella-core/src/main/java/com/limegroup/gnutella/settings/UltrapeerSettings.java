@@ -39,16 +39,20 @@ public final class UltrapeerSettings extends LimeProps {
     /**
      * The minimum number of upstream kbytes per second that 
      * a node must be able to transfer in order to qualify as a ultrapeer.
+     * 
+     * TODO: change back
      */
     public static final IntSetting MIN_UPSTREAM_REQUIRED =
-        FACTORY.createRemoteIntSetting("MIN_UPSTREAM_REQUIRED",10,"UltrapeerSettings.MinUpstream",8,32);
+        FACTORY.createRemoteIntSetting("MIN_UPSTREAM_REQUIRED",10,"UltrapeerSettings.MinUpstream",0,32);
     
     /**
      * The minimum number of downlstream kbytes per second that 
      * a node must be able to transfer in order to qualify as a ultrapeer.
+     * 
+     * TODO: change back
      */
     public static final IntSetting MIN_DOWNSTREAM_REQUIRED =
-        FACTORY.createRemoteIntSetting("MIN_DOWNSTREAM_REQUIRED",20,"UltrapeerSettings.MinDownstream",16,64);
+        FACTORY.createRemoteIntSetting("MIN_DOWNSTREAM_REQUIRED",20,"UltrapeerSettings.MinDownstream",0,64);
     
     /**
      * The minimum average uptime in seconds that a node must have to qualify for ultrapeer status.

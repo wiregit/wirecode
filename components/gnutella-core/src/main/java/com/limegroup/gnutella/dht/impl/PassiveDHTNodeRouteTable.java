@@ -18,6 +18,7 @@ import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 
 
@@ -41,8 +42,13 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
 
     private MojitoDHT dht;
     
-    public PassiveDHTNodeRouteTable(MojitoDHT dht) {
+    public PassiveDHTNodeRouteTable(MojitoDHT dht, int vendor, int version) {
+        super(dht.getLocalNodeID());
         this.dht = dht;
+        LocalContact localNode = (LocalContact) getLocalNode();
+        localNode.setVendor(vendor);
+        localNode.setVersion(version);
+        localNode.setFirewalled(true);
     }
     
     /**

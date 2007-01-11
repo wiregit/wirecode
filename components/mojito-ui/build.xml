@@ -5,8 +5,8 @@
 	<import file="../mojito/build.xml"/>
 	<import file="../common/build-macros.xml" />
 	
-	<property name="mojito-ui.lib.jars"
-				  location="./lib"/>
+	<property name="limewire.mojito-ui.home" location="${limewire.components.home}/mojito-ui" />
+	<property name="mojito-ui.lib.jars" location="${limewire.mojito-ui.home}/lib"/>
 	
 	<target name="initialize" depends="mojito.initialize">
 	        <do.setup-properties component="mojito-ui">
