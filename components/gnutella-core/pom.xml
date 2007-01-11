@@ -40,6 +40,11 @@
       <artifactId>lw-setting</artifactId>
       <version>${limewire.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-lib</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
 	<!-- Customized LimeWire Jars --> 
 	<dependency>
       <groupId>org.limewire</groupId>
