@@ -23,7 +23,7 @@ public abstract class AbstractNumberSetting<T extends Number & Comparable<T>> ex
                                     String key, String defaultValue, 
                                     boolean remote, T min, T max) {
         super(defaultProps, props, key, defaultValue);
-        this.remote = true;
+        this.remote = remote;
         if(max != null && min != null) {//do we need to check max, min?
             if(max.compareTo(min) < 0) //max less than min?
                 throw new IllegalArgumentException("max less than min");
