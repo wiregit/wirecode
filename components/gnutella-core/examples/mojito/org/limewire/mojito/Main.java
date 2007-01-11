@@ -33,9 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
@@ -47,6 +44,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
@@ -56,7 +54,6 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.LIFOSet;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 public class Main {
@@ -80,6 +77,8 @@ public class Main {
                 bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
             }
         }
+        
+        LimeCoreGlue.install();
         
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
@@ -153,9 +152,9 @@ public class Main {
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
         
-        Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
+        /*Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
         
-        /*SocketAddress[] hosts = { 
+        SocketAddress[] hosts = { 
             new InetSocketAddress("www.apple.com", 80), 
             new InetSocketAddress("www.microsoft.com", 80), 
             new InetSocketAddress("www.google.com", 80),
