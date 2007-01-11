@@ -1618,9 +1618,10 @@ public abstract class FileManager {
     }
 
 	/**
-	 * Returns true if the given file is shared by the FileManager. 
+	 * Returns true if the given file is shared by the FileManager.
+     * The provided file should be in canonical form.  
 	 */
-	public boolean isFileShared(File file) {
+	public synchronized boolean isFileShared(File file) {
 		if (file == null)
 			return false;
 		if (_fileToFileDescMap.get(file) == null)
