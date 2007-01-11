@@ -234,7 +234,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
             if(!connect(addr, timeout, connecter)) {
                 long then = System.currentTimeMillis();
                 try {
-                    connecter.wait();
+                    // wait a little extra to allow other threads to notify
+                    connecter.wait(timeout > 0 ? timeout + 1000 : timeout);
                 } catch(InterruptedException ie) {
                     shutdown();
                     throw new InterruptedIOException(ie);
