@@ -5,15 +5,12 @@
 	<import file="../mojito/build.xml"/>
 	<import file="../common/build-macros.xml" />
 	
-	<property name="limewire.mojito-ui.home" location="${limewire.components.home}/mojito-ui" />
-	<property name="mojito-ui.lib.jars" location="${limewire.mojito-ui.home}/lib"/>
-	
 	<target name="initialize" depends="mojito.initialize">
 	        <do.setup-properties component="mojito-ui">
 				<src-classpath>
-					<pathelement location="${mojito-ui.lib.jars}/jung-1.7.5.jar"/>
-					<pathelement location="${mojito-ui.lib.jars}/commons-collections-3.2.jar"/>
-					<pathelement location="${mojito-ui.lib.jars}/colt.jar"/>
+					<pathelement location="${limewire.components.mojito-ui.home}/lib/jung-1.7.5.jar"/>
+					<pathelement location="${limewire.components.mojito-ui.home}/lib/commons-collections-3.2.jar"/>
+					<pathelement location="${limewire.components.mojito-ui.home}/lib/colt.jar"/>
 					<path refid="build.limewire.components.mojito.buildpath"/>
 				</src-classpath>
 	        </do.setup-properties>
