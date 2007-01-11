@@ -61,8 +61,8 @@ public class DatabaseUtils {
         // The value expires inversly proportional otherwise by using
         // the xor distance
         } else {
-            KUID valueBucketId = routeTable.getBucketID(primaryKey);
-            KUID localBucketId = routeTable.getBucketID(routeTable.getLocalNode().getNodeID());
+            KUID valueBucketId = routeTable.getBucket(primaryKey).getBucketID();
+            KUID localBucketId = routeTable.getBucket(routeTable.getLocalNode().getNodeID()).getBucketID();
             KUID xor = localBucketId.xor(valueBucketId);
             
             int lowestSetBit = xor.toBigInteger().getLowestSetBit();

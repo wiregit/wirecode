@@ -61,7 +61,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
         super(dispatcher);
         MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
         
-        limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht, vendor, version);
+        limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
         setMojitoDHT(dht);
         

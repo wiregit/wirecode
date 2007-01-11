@@ -639,15 +639,7 @@ public class RouteTableImpl implements RouteTable {
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.routing.RouteTable#getBucketID(com.limegroup.mojito.KUID)
-     */
-    public synchronized KUID getBucketID(KUID nodeId) {
-        return bucketTrie.select(nodeId).getBucketID();
-    }
-    
-    /**
-     * Returns a Bucket that is nearest (xor distance) 
-     * to the given KUID
+     * @see org.limewire.mojito.routing.RouteTable#getBucket(org.limewire.mojito.KUID)
      */
     public synchronized Bucket getBucket(KUID nodeId) {
         return bucketTrie.select(nodeId);

@@ -91,6 +91,12 @@ public interface RouteTable extends Serializable {
     public List<Contact> getCachedContacts();
     
     /**
+     * Returns a Bucket that is nearest (xor distance) 
+     * to the given KUID
+     */
+    public Bucket getBucket(KUID nodeId);
+    
+    /**
      * Returns all Buckets as an Collection
      */
     public Collection<Bucket> getBuckets();
@@ -102,11 +108,6 @@ public interface RouteTable extends Serializable {
      * @param bootstrapping Whether or not this refresh is done during bootstrap
      */
     public List<KUID> getRefreshIDs(boolean bootstrapping);
-    
-    /**
-     * Returns the Bucket ID for the given Node ID
-     */
-    public KUID getBucketID(KUID nodeId);
     
     /**
      * Clears all elements from the RoutingTable

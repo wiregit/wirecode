@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.dht.impl;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -18,9 +21,7 @@ import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.impl.LocalContact;
-import org.limewire.mojito.routing.impl.RouteTableImpl;
-
+import org.limewire.mojito.routing.RouteTable;
 
 /**
  * Passive Nodes (Ultrapeers) use this slightly extended version 
@@ -28,29 +29,29 @@ import org.limewire.mojito.routing.impl.RouteTableImpl;
  * leaves that are currently connected to the Ultrapeer (Gnutella 
  * connections). 
  */
-class PassiveDHTNodeRouteTable extends RouteTableImpl {
+class PassiveDHTNodeRouteTable implements RouteTable, Serializable {
     
     private static final long serialVersionUID = 707016966528414433L;
 
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeRouteTable.class);
+    
+    private final MojitoDHT dht;
+    
+    private final RouteTable delegate;
     
     /**
      * The Map storing the leaf nodes connected to this ultrapeer. The mapping is
      * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>RemoteContact</tt>. 
      */
     private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
-
-    private MojitoDHT dht;
     
-    public PassiveDHTNodeRouteTable(MojitoDHT dht, int vendor, int version) {
-        super(dht.getLocalNodeID());
+    public PassiveDHTNodeRouteTable(MojitoDHT dht) {
+        assert (dht.getLocalNode().isFirewalled());
+        
         this.dht = dht;
-        LocalContact localNode = (LocalContact) getLocalNode();
-        localNode.setVendor(vendor);
-        localNode.setVersion(version);
-        localNode.setFirewalled(true);
+        delegate = dht.getRouteTable();
     }
-    
+
     /**
      * Adds a DHT leaf node to the dht routing table, setting a very high timestamp
      * to make sure it always gets contacted first for the first hop of lookups, and 
@@ -155,5 +156,91 @@ class PassiveDHTNodeRouteTable extends RouteTableImpl {
      */
     public synchronized Set<SocketAddress> getDHTLeaves() {
         return Collections.unmodifiableSet(leafDHTNodes.keySet());
+    }
+    
+    // --- ROUTE TABLE ---
+    
+    public synchronized void add(Contact node) {
+        delegate.add(node);
+    }
+
+    public synchronized void addRouteTableListener(RouteTableListener l) {
+        delegate.addRouteTableListener(l);
+    }
+
+    public synchronized void removeRouteTableListener(RouteTableListener l) {
+        delegate.removeRouteTableListener(l);
+    }
+    
+    public synchronized Contact get(KUID nodeId) {
+        return delegate.get(nodeId);
+    }
+
+    public synchronized List<Contact> getActiveContacts() {
+        return delegate.getActiveContacts();
+    }
+
+    public synchronized Bucket getBucket(KUID nodeId) {
+        return delegate.getBucket(nodeId);
+    }
+
+    public synchronized Collection<Bucket> getBuckets() {
+        return delegate.getBuckets();
+    }
+
+    public synchronized List<Contact> getCachedContacts() {
+        return delegate.getCachedContacts();
+    }
+
+    public synchronized List<Contact> getContacts() {
+        return delegate.getContacts();
+    }
+
+    public synchronized Contact getLocalNode() {
+        return delegate.getLocalNode();
+    }
+
+    public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
+        return delegate.getRefreshIDs(bootstrapping);
+    }
+
+    public synchronized void handleFailure(KUID nodeId, SocketAddress address) {
+        delegate.handleFailure(nodeId, address);
+    }
+
+    public synchronized boolean isLocalNode(Contact node) {
+        return delegate.isLocalNode(node);
+    }
+
+    public synchronized void rebuild() {
+        delegate.rebuild();
+    }
+    
+    public synchronized void purge() {
+        delegate.purge();
+    }
+
+    public synchronized void purge(long lastContactTime) {
+        delegate.purge(lastContactTime);
+    }
+    
+    public synchronized Contact select(KUID nodeId) {
+        return delegate.select(nodeId);
+    }
+    
+    public synchronized List<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
+        return delegate.select(nodeId, count, aliveContacts);
+    }
+    
+    public synchronized void setContactPinger(ContactPinger pinger) {
+        delegate.setContactPinger(pinger);
+    }
+
+    public synchronized int size() {
+        return delegate.size();
+    }
+    
+    public synchronized void clear() {
+        delegate.clear();
     }
 }

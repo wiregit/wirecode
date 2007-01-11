@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="components/collection/build/classes" path="components/collection/src/main/java"/>
-	<classpathentry kind="src" path="components/mojito-ui/src/misc/java"/>
 	<classpathentry kind="src" path="components/mojito/src/main/java"/>
 	<classpathentry kind="src" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" path="components/mojito/src/test/java"/>
@@ -16,7 +15,7 @@
 	<classpathentry kind="src" output="components/setting/build/tests" path="components/setting/src/test/java"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
 	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>
-	<classpathentry kind="src" output="core" path="core"/>
+	<classpathentry excluding="examples/mojito/org/limewire/mojito/" kind="src" output="core" path="core"/>
 	<classpathentry excluding="windows/|macosx/" kind="src" output="gui" path="gui"/>
 	<classpathentry kind="src" output="lib/messagebundles" path="lib/messagebundles"/>
 	<classpathentry kind="src" path="tests"/>
