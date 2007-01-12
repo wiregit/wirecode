@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import org.limewire.util.CommonUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 
 /**
@@ -93,7 +96,7 @@ public final class LimeWireUtils {
     /**
      * Variable for the settings directory.
      */
-    static File SETTINGS_DIRECTORY = null;
+    private static File SETTINGS_DIRECTORY = null;
 
 
 	/**
@@ -292,11 +295,7 @@ public final class LimeWireUtils {
         if(!settingsDir.canRead()) {
             throw new IOException("settings dir not readable");
         }
-
-        // make sure Windows files are moved
-        moveWindowsFiles(settingsDir);
-        // make sure old metadata files are moved
-        moveXMLFiles(settingsDir);
+        
         // cache the directory.
         SETTINGS_DIRECTORY = settingsDir;
     }
@@ -358,137 +357,24 @@ public final class LimeWireUtils {
         }
         return settingsDir;
     }
-
-    /**
-     * Boolean for whether or not the windows files have been copied.
-     */
-    private static boolean _windowsFilesMoved = false;
     
     /**
-     * Boolean for whether or not XML files have been copied.
+     * Updates a URL to contain common information about the LW installation.
      */
-    private static boolean _xmlFilesMoved = false;
-
-    /**
-     * The array of files that should be stored in the user's home 
-     * directory.
-     */
-    private static final String[] USER_FILES = {
-        "limewire.props",
-        "gnutella.net",
-        "fileurns.cache"
-    };
-
-    /**
-     * On Windows, this copies files from the current directory to the
-     * user's LimeWire home directory.  The installer does not have
-     * access to the user's home directory, so these files must be
-     * copied.  Note that they are only copied, however, if existing 
-     * files are not there.  This ensures that the most recent files,
-     * and the files that should be used, should always be saved in 
-     * the user's home LimeWire preferences directory.
-     */
-    private synchronized static void moveWindowsFiles(File settingsDir) {
-        if(!OSUtils.isWindows()) return;
-        if(_windowsFilesMoved) return;
-        File currentDir = LimeWireUtils.getCurrentDirectory();
-        for(int i=0; i<USER_FILES.length; i++) {
-            File curUserFile = new File(settingsDir, USER_FILES[i]);
-            File curDirFile  = new File(currentDir,  USER_FILES[i]);
-            
-            // if the file already exists in the user's home directory,
-            // don't copy it
-            if(curUserFile.isFile()) {
-                continue;
-            }
-            if(!FileUtils.copy(curDirFile, curUserFile)) {
-                throw new RuntimeException();
-            }
-        }
-        _windowsFilesMoved = true;
+    public static String addLWInfoToUrl(String url) {
+        if(url.indexOf('?') == -1)
+            url += "?";
+        else
+            url += "&";
+        url += "pro="   + LimeWireUtils.isPro() + 
+               "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
+               "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
+               "&jv="   + EncodingUtils.encode(CommonUtils.getJavaVersion()) +
+               "&os="   + EncodingUtils.encode(OSUtils.getOS()) +
+               "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
+               "&guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString());
+        return url;
     }
-
-    /**
-     * Old metadata definitions must be moved from ./lib/xml/data/*.*
-     * This is done like the windows files copying, but for all files
-     * in the data directory.
-     */
-    private synchronized static void moveXMLFiles(File settingsDir) {
-        if(_xmlFilesMoved) return;
-        // We must extend the currentDir & settingsDir to look 
-        // in the right places (lib/xml/data & xml/data).
-        File currentDir = new File( 
-            LimeWireUtils.getCurrentDirectory().getPath() + "/lib/xml/data"
-        );
-        settingsDir = new File(settingsDir.getPath() + "/xml/data");
-        settingsDir.mkdirs();
-        String[] filesToMove = currentDir.list();
-        if ( filesToMove != null ) {
-            for(int i=0; i<filesToMove.length; i++) {
-                File curUserFile = new File(settingsDir, filesToMove[i]);
-                File curDirFile  = new File(currentDir,  filesToMove[i]);
-                
-                // if the file already exists in the user's home directory,
-                // don't copy it
-                if(curUserFile.isFile()) {
-                    continue;
-                }
-                FileUtils.copy(curDirFile, curUserFile);
-            }
-        }
-        _xmlFilesMoved = true;
-    }
-    
-    /*
-    public static void main(String args[]) {
-        System.out.println("Is 1.3 or later? "+isJava13OrLater());
-        System.out.println("Is 1.4 or later? "+isJava14OrLater());
-        try {
-            File src=new File("src.tmp");
-            File dst=new File("dst.tmp");
-            Assert.that(!src.exists() && !dst.exists(),
-                        "Temp files already exists");
-            
-            write("abcdef", src);
-            Assert.that(copy(src, dst)==true);
-            Assert.that(equal(src, dst));
-
-            write("zxcvbnmn", src);
-            Assert.that(copy(src, 3, dst)==3);
-            write("zxc", src);
-            Assert.that(equal(src, dst));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false);
-        } //  catch (InterruptedException e) {
-//              e.printStackTrace();
-//              Assert.that(false);
-//          }
-    }
-    
-    private static void write(String txt, File f) throws IOException {
-        BufferedOutputStream bos=new BufferedOutputStream(
-            new FileOutputStream(f));
-        bos.write(txt.getBytes());   //who care about encoding?
-        bos.flush();
-        bos.close();
-    }
-
-    private static boolean equal(File f1, File f2) throws IOException {
-        InputStream in1=new FileInputStream(f1);
-        InputStream in2=new FileInputStream(f2);
-        while (true) {
-            int c1=in1.read();
-            int c2=in2.read();
-            if (c1!=c2)
-                return false;
-            if (c1==-1)
-                break;
-        }
-        return true;
-    }
-    */
 }
 
 
