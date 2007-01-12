@@ -30,6 +30,14 @@ done
 export CLASSPATH
 
 javac org/limewire/mojito/Main.java
-java -ea org.limewire.mojito.Main $*
+exit_code=$?;
+
+if [[ ${exit_code} == 127 ]]; then
+	echo "Please make sure the {JDK_HOME}/bin directory is in your PATH";
+	echo;
+else
+	java -ea org.limewire.mojito.Main $*;
+fi;
+
 
 exit 0

@@ -15,13 +15,14 @@
 	<classpathentry kind="src" output="components/setting/build/tests" path="components/setting/src/test/java"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
 	<classpathentry kind="src" output="components/test-util/build/tests" path="components/test-util/src/test/java"/>
-	<classpathentry excluding="examples/mojito/org/limewire/mojito/" kind="src" output="core" path="core"/>
+	<classpathentry excluding="examples/mojito/org/limewire/mojito/|examples/mojito/org/limewire/|examples/mojito/" kind="src" output="core" path="core"/>
 	<classpathentry excluding="windows/|macosx/" kind="src" output="gui" path="gui"/>
 	<classpathentry kind="src" output="lib/messagebundles" path="lib/messagebundles"/>
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="src" output="components/collection/src/test/resources" path="components/collection/src/test/resources"/>
 	<classpathentry kind="src" output="components/common/src/main/resources" path="components/common/src/main/resources"/>
 	<classpathentry kind="src" output="components/common/src/test/resources" path="components/common/src/test/resources"/>
+	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-httpclient.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
