@@ -8,7 +8,7 @@ import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.BufferByteArrayOutputStream;
+import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.messages.BTBitField;
@@ -29,7 +29,7 @@ class BitFieldState extends BTReadMessageState {
 	 * not pre-allocated even though we know how large it will 
 	 * eventually get.
 	 */
-	private BufferByteArrayOutputStream bbaos;
+	private ByteBufferOutputStream bbaos;
 	private WritableByteChannel bbaosChan;
 
 	/**
@@ -47,7 +47,7 @@ class BitFieldState extends BTReadMessageState {
 		BTDataSource buf = readerState.getDataSource();
 
 		if (bbaos == null) {
-			bbaos = new BufferByteArrayOutputStream();
+			bbaos = new ByteBufferOutputStream();
 			bbaosChan = Channels.newChannel(bbaos);
 		}
 		

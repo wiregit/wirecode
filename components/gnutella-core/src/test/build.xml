@@ -18,7 +18,8 @@
         
         <path id="build.limewire.code.classpath">
             <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
-            <path refid="build.limewire.components.classes"/>
+            <path refid="build.limewire.components.classes.core"/>
+			<path refid="build.limewire.components.classes.ui"/>
         </path>
         
         <property name="limewire.lib.messagebundles"
@@ -26,9 +27,9 @@
         
         <do.setup-properties component="tests">
             <src-classpath>
-                <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
                 <fileset dir="${limewire.components.tests.home}/lib" includes="*.jar"/>
-                <path refid="build.limewire.components.classes"/>
+                <path refid="build.limewire.code.classpath"/>
+	
             </src-classpath>
 			<tests-classpath>
             	<path refid="tests.limewire.components.all.classpath"/>
@@ -101,6 +102,8 @@
      	        <fileset dir="${limewire.components.security.src}" />
      	        <fileset dir="${limewire.components.io.src}" />
      	    	<fileset dir="${limewire.components.setting.src}" />
+			 	<fileset dir="${limewire.components.mojito.src}" />
+			 	<fileset dir="${limewire.components.mojito-ui.src}" />
  	            <fileset dir="${limewire.core.src}"/>
  			</locations>
  	    </do.clover-setup>

@@ -1,56 +1,89 @@
 <?xml version="1.0"?>
-<project name="MojitoDHT" default="build" basedir=".">
-    <description>MojitoDHT</description>
-
-	<property name="basedir" value="."/>
-	<property name="jars" value="${basedir}/lib"/>
-		
-	<path id="default.classpath" >
-		<fileset dir="${jars}" includes="**/*.jar"/>
-	</path>
+<project name="mojito" default="compile-src" basedir=".">
+    <description>The Mojito DHT</description>
 	
-    <target name="build">
-	    	<javac srcdir="${basedir}" 
-				destdir="${basedir}"
-		    		target="1.4"
-		    		source="1.4"
-	    			compiler="javac1.4"
-		    		debug="true"
-	    			optimize="false">
-			<classpath refid="default.classpath"/>
-    	    </javac>
+	<import file="../collection/build.xml"/>
+	<import file="../io/build.xml"/>
+	<import file="../security/build.xml"/>
+	<import file="../setting/build.xml"/>
+	<import file="../common/build-macros.xml" />
+	<import file="../common/build.xml"/>
+	
+	<target name="initialize" depends="lw-collection.initialize, lw-io.initialize, lw-security.initialize,
+				lw-setting.initialize, lw-common.initialize">
+	        <do.setup-properties component="mojito">
+				<src-classpath>
+					<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+					<path refid="build.limewire.components.collection.buildpath"/>
+					<path refid="build.limewire.components.io.buildpath"/>
+					<path refid="build.limewire.components.security.buildpath"/>
+					<path refid="build.limewire.components.setting.buildpath"/>
+				    <path refid="build.limewire.components.common.buildpath"/>
+				</src-classpath>
+	        </do.setup-properties>
+	</target>
+	
+	<target name="clean" depends="lw-collection.clean, lw-io.clean, lw-security.clean,
+				lw-setting.clean, lw-common.clean">
+		    <do.clean component="mojito"/>
+	</target>
+	    
+    <target name="compile" depends="lw-collection.compile, lw-io.compile, lw-security.compile,
+				lw-setting.compile, lw-common.compile">
+    	<do.compile component="mojito"/>
     </target>
-		
-	<target name="clean">
-		<delete>
-			<fileset dir="${basedir}" 
-				includes="com/**/*.class de/**/*.class"
-			/>
-		</delete>
+	
+	<target name="compile-src" depends="lw-collection.compile-src, lw-io.compile-src, lw-security.compile-src,
+				lw-setting.compile-src, lw-common.compile-src">
+	    <do.compile-src component="mojito"/>
+	</target>
+    
+	<target name="clean-src" depends="lw-collection.clean-src, lw-io.clean-src, lw-security.clean-src,
+				lw-setting.clean-src, lw-common.clean-src">
+	    <do.clean-src component="mojito"/>
 	</target>
 	
-	<target name="jar" depends="clean, build">
-		<delete file="mojito.jar"/>
-		<jar destfile="mojito.jar" 
-				basedir="${basedir}"
-				includes="com/**"
-				excludes="**/bin/** **/tests/** **/statistics/**"
-				compress="false">
-		</jar>
+	<target name="compile-tests" depends="lw-collection.compile-tests, lw-io.compile-tests, lw-security.compile-tests,
+				lw-setting.compile-tests, lw-common.compile-tests">
+	    <do.compile-tests component="mojito"/>
 	</target>
-		
-	<target name="planetLab" depends="clean, build">
-		<delete file="planetlab.jar"/>
-		<jar destfile="planetlab.jar" 
-				basedir="${basedir}"
-				includes="com/**, de/**"
-				excludes="**/bin/**"
-				compress="false">
-			<manifest>
-			 	<attribute name="Main-Class" value="com.limegroup.mojito.tests.PlanetLab"/>
-			 	<attribute name="Class-Path" value=". commons-logging.jar log4j.jar core.jar"/>
-			</manifest>
-		</jar>
+	
+	<target name="clean-tests" depends="lw-collection.clean-tests, lw-io.clean-tests, lw-security.clean-tests,
+				lw-setting.clean-tests, lw-common.clean-tests">
+	    <do.clean-tests component="mojito"/>
 	</target>
+	
+	<target name="test" if="class" depends="compile">
+	    <do.test component="mojito" class="${class}"/>
+	</target>
+	
+	<target name="test-package" if="package" depends="compile">
+	    <do.test-package component="mojito" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="compile">
+	    <do.test-all component="mojito"/>
+	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="mojito"/>
+    </target>
+    
+	<target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="mojito"/>
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="mojito"/>
+    </target>
+	
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="mojito"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="mojito"/>
+    </target>
+
 </project>
 

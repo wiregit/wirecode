@@ -3062,7 +3062,8 @@ public abstract class MessageRouter {
     
     public class VendorMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ((ManagedConnection)handler).handleVendorMessage((VendorMessage)msg);
+            ManagedConnection c = (ManagedConnection)handler;
+            c.handleVendorMessage((VendorMessage)msg);
         }
     }
     

@@ -13,7 +13,7 @@
         <property name="build.limewire.core.classes"  location="${limewire.core.home}"/>
         <path id="build.limewire.core.classpath">
             <fileset dir="${limewire.lib.jars}" includes="**/*.jar"/>
-            <path refid="build.limewire.components.classes"/>
+            <path refid="build.limewire.components.classes.core"/>
         </path>
     </target>
     

@@ -303,5 +303,10 @@ public class LimeSentMessageStatBytes extends AdvancedKilobytesStatistic {
 	public static final Statistic UDP_LIME_ACK = 
 	    new UDPLimeSentMessageStatBytes();
 
-
+    /**
+     * <tt>Statistic</tt> for Mojito DHT messages sent over UDP.
+     */
+    public static final Statistic UDP_DHT_MSG = 
+        new UDPLimeSentMessageStatBytes();
+    
 }

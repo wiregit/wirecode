@@ -290,4 +290,10 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic UDP_LIME_ACK = 
 	    new UDPSentMessageStat();
+    
+    /**
+     * <tt>Statistic</tt> for Mojito DHT messages sent over UDP.
+     */
+    public static final Statistic UDP_DHT_MSG = 
+        new UDPSentMessageStat();
 }

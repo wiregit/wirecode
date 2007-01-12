@@ -281,6 +281,14 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(1, data.length);        
     }
     
+    public void testRequestsDHTIPP() throws Exception{
+        List ggeps = new LinkedList();
+        ggeps.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
+        PingRequest pr = make(ggeps);
+        assertTrue(pr.requestsDHTIPP());
+        assertFalse(pr.supportsCachedPongs());
+    }
+    
     private PingRequest make(List ggeps) throws Exception {
         return (PingRequest)PrivilegedAccessor.invokeConstructor(
             PingRequest.class,

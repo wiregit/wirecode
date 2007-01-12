@@ -14,8 +14,10 @@
     <import file="security/build.xml"/>
     <import file="io/build.xml"/>
     <import file="setting/build.xml"/>
-    
-    <target name="initialize" depends="lw-setting.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize">
+    <import file="mojito/build.xml"/>
+	<import file="mojito-ui/build.xml"/>
+	
+    <target name="initialize" depends="lw-setting.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize">
         <do.setup-properties component="all">
 			<tests-classpath>
             	<path refid="tests.limewire.components.common.classpath"/>
@@ -23,73 +25,94 @@
 	            <path refid="tests.limewire.components.security.classpath"/>
 		        <path refid="tests.limewire.components.io.classpath"/>
 		        <path refid="tests.limewire.components.setting.classpath"/>
+				<path refid="tests.limewire.components.mojito.classpath"/>
+				<path refid="tests.limewire.components.mojito-ui.classpath"/>
 			    <path refid="tests.limewire.components.test-util.classpath"/>
 		    </tests-classpath>
         </do.setup-properties>
         
         <!-- setup a special property for the buildpath of each component combined. -->
-        <path id="build.limewire.components.classes">
+        <path id="build.limewire.components.classes.core">
             <pathelement location="${build.limewire.components.common.classes}"/>
             <pathelement location="${build.limewire.components.collection.classes}"/>
             <pathelement location="${build.limewire.components.security.classes}"/>
             <pathelement location="${build.limewire.components.io.classes}"/>
             <pathelement location="${build.limewire.components.setting.classes}"/>
+			<pathelement location="${build.limewire.components.mojito.classes}"/>
             <!-- test-util not added purposely, as the classes are required for tests only -->
+        </path>
+	
+		<path id="build.limewire.components.classes.ui">
+			<pathelement location="${build.limewire.components.mojito-ui.classes}"/>
+			<path refid="build.limewire.components.classes.core"/>
         </path>
     </target>
 	
 	<target name="clean"
 	        description="Cleans all generated data in every component."
-	        depends="lw-setting.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean">
+	        depends="lw-setting.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean">
 	    <do.clean component="all"/>
     </target>
     
     <target name="compile"
             description="Compiles the source and tests of every component."
-            depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile">
+            depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile">
         <mkdir dir="${build.limewire.components.all.classes}"/>
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
 	
+	<target name="compile-ui"
+	            description="Compiles the source and tests of every component for a UI target."
+	            depends="mojito-ui.compile">
+	        <mkdir dir="${build.limewire.components.all.classes}"/>
+	        <mkdir dir="${build.limewire.components.all.tests}"/>
+	</target>
+	
 	<target name="compile-src"
 	        description="Compiles only the source code of every component."
-	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src">
+	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src, mojito-ui.compile-src">
         <mkdir dir="${build.limewire.components.all.classes}"/>
+	</target>
+	
+	<target name="compile-ui-src"
+		        description="Compiles only the source code of every component for a UI target."
+		        depends="mojito-ui.compile-src">
+	        <mkdir dir="${build.limewire.components.all.classes}"/>
 	</target>
     
 	<target name="clean-src"
 	        description="Cleans files generated from compiling the source code of every component."
-	        depends="lw-setting.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src">
+	        depends="lw-setting.clean-src, lw-io.clean-src, lw-security.clean-src, lw-collection.clean-src, lw-common.clean-src, mojito.clean-src, mojito-ui.clean-src">
 		<do.clean-src component="all"/>
 	</target>
 	
 	<target name="compile-tests"
 	        description="Compiles the tests of every component (and the source if necessary)"
-	        depends="compile-src, lw-setting.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests">
+	        depends="compile-src, lw-setting.compile-tests, lw-io.compile-tests, lw-security.compile-tests, lw-collection.compile-tests, lw-common.compile-tests, lw-test-util.compile-src, lw-test-util.compile-tests, mojito.compile-tests, mojito-ui.compile-tests">
         <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
     
 	<target name="clean-tests"
 	        description="Cleans data generated from compiling and running the tests of every component."
-	        depends="initialize, lw-setting.clean-tests, lw-io.clean-tests, lw-security.clean-tests, lw-collection.clean-tests, lw-common.clean-tests, lw-test-util.clean-tests">
+	        depends="initialize, lw-setting.clean-tests, lw-io.clean-tests, lw-security.clean-tests, lw-collection.clean-tests, lw-common.clean-tests, lw-test-util.clean-tests, mojito.clean-tests, mojito-ui.clean-tests">
 	    <do.clean-tests component="all"/>
 	</target>
 	
 	<target name="test"
             description="Runs a single test from one component. Requires: -Dclass=X and -Dcomponent=X."
-            if="class, component" depends="compile">
+            if="class, component" depends="compile, compile-ui">
 	    <do.test component="${component}" class="${class}"/>
 	</target>
 	
 	<target name="test-package"
             description="Runs all tests in a package of one component.  Requires: -Dpackage=X -Dcomponent=X."
-            if="package, component" depends="compile">
+            if="package, component" depends="compile, compile-ui">
 	    <do.test-package component="${component}" package="${package}"/>
 	</target>
 	
 	<target name="test-all" 
             description="Runs every test in every component."
-            depends="compile">
+            depends="compile, compile-ui">
 	    <do.test-all component="all">
 	        <testLocations>
 		        <fileset dir="${build.limewire.components.test-util.tests}" includes="**/*Test.class"/>
@@ -98,13 +121,15 @@
 		        <fileset dir="${build.limewire.components.security.tests}" includes="**/*Test.class"/>
 		        <fileset dir="${build.limewire.components.io.tests}" includes="**/*Test.class"/>
 		        <fileset dir="${build.limewire.components.setting.tests}" includes="**/*Test.class"/>
+				<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
+	        	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
 	         </testLocations>
 	    </do.test-all>
 	</target>
 	    
     <target name="jar"
             description="Creates a jar file of the compiled source of every component."
-            depends="initialize, compile-src">
+            depends="initialize, compile-src, compile-ui-src">
         <do.jar component="all" basedir="" resourcedir="" resexclude="**" excludes="**">
 			<more-jar-elements>
 			    <fileset dir="${build.limewire.components.common.classes}" />
@@ -117,6 +142,8 @@
     	    	<fileset dir="${limewire.components.io.src.resources}" />
     	    	<fileset dir="${build.limewire.components.setting.classes}" />
     	    	<fileset dir="${limewire.components.setting.src.resources}" />
+				<fileset dir="${limewire.components.mojito.src.resources}" />
+				<fileset dir="${limewire.components.mojito-ui.src.resources}" />
 			</more-jar-elements>
         </do.jar>
     </target>
@@ -134,6 +161,8 @@
     	        <fileset dir="${limewire.components.security.src}" />
     	        <fileset dir="${limewire.components.io.src}" />
     	    	<fileset dir="${limewire.components.setting.src}" />
+				<fileset dir="${limewire.components.mojito.src}" />
+				<fileset dir="${limewire.components.mojito-ui.src}" />
 	        </more-javadoc-elements>
 	    </do.javadoc>
 	</target>
@@ -155,6 +184,8 @@
     	        <fileset dir="${limewire.components.security.src}" />
     	        <fileset dir="${limewire.components.io.src}" />
     	    	<fileset dir="${limewire.components.setting.src}" />	            
+				<fileset dir="${limewire.components.mojito.src}" />	 
+				<fileset dir="${limewire.components.mojito-ui.src}" />	 
 			</locations>
 	    </do.clover-setup>
 	</target>

@@ -8,8 +8,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Data;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 public final class StaticMessages {
     

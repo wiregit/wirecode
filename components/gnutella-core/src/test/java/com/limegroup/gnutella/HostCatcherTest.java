@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.FixedsizePriorityQueue;
@@ -13,6 +14,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -408,6 +410,17 @@ public class HostCatcherTest extends LimeTestCase {
         // udp host caches ..
         hc.add(new ExtendedEndpoint("1.2.3.4", 6346).setUDPHostCache(true), false);
         hc.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
+        
+        // dht capable node
+        ExtendedEndpoint ep = new ExtendedEndpoint("18.239.0.100", 6323, 3);
+        ep.setDHTVersion(2);
+        ep.setDHTMode(DHTMode.INACTIVE);
+        hc.add(ep, false);
+        // dht active node
+        ep = new ExtendedEndpoint("18.239.0.101", 6322, 2);
+        ep.setDHTVersion(1);
+        ep.setDHTMode(DHTMode.ACTIVE);
+        hc.add(ep, false);
             
         File tmp=File.createTempFile("hc_test", ".net" );
         hc.write(tmp);
@@ -419,13 +432,20 @@ public class HostCatcherTest extends LimeTestCase {
         assertEquals(0, hc.getNumHosts());
         hc.read(tmp);
         assertEquals(2, uhc.getSize());        
-        assertEquals(3, hc.getNumHosts());
+        assertEquals(5, hc.getNumHosts());
         assertEquals(new Endpoint("18.239.0.142", 6342),
                      hc.getAnEndpoint());
         assertEquals(new Endpoint("18.239.0.141", 6341),
                      hc.getAnEndpoint());
         assertEquals(new Endpoint("18.239.0.143", 6343),
                      hc.getAnEndpoint());
+        ExtendedEndpoint xep = (ExtendedEndpoint) hc.getAnEndpoint();
+        assertTrue(xep.supportsDHT());
+        assertEquals(xep.getDHTVersion(), 2);
+        xep = (ExtendedEndpoint) hc.getAnEndpoint();
+        assertTrue(xep.supportsDHT());
+        assertEquals(xep.getDHTVersion(), 1);
+        assertEquals(DHTMode.ACTIVE, xep.getDHTMode());
         assertEquals(0, hc.getNumHosts());
         //Cleanup.
         tmp.delete();
@@ -677,6 +697,47 @@ public class HostCatcherTest extends LimeTestCase {
         hc.add(p, true);
         hc.getAnEndpoint(observer);
         assertEquals(p, observer.getEndpoint());       
+    }
+    
+    public void testGetDHTSupportEndpoint() throws Exception {
+        assertEquals(0, hc.getDHTSupportEndpoint(0).size());
+        
+        ExtendedEndpoint ep;
+        //dht nodes
+        for(int i=6300; i < 6309 ; i++) {
+            ep = new ExtendedEndpoint("18.239.0.100", i);
+            ep.setDHTVersion(2);
+            if((i % 2) == 0) {
+                ep.setDHTMode(DHTMode.INACTIVE);
+            } else {
+                ep.setDHTMode(DHTMode.PASSIVE);
+            }
+            hc.add(ep, false);
+        }
+        
+        //dht active node
+        ep = new ExtendedEndpoint("18.239.0.101", 6322);
+        ep.setDHTVersion(1);
+        ep.setDHTMode(DHTMode.ACTIVE);
+        hc.add(ep, false);
+        
+        List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
+        assertEquals(10, hostList.size());
+        ep = hostList.get(0);
+        assertEquals("18.239.0.101", ep.getAddress());
+        assertTrue(ep.getDHTMode().equals(DHTMode.ACTIVE));
+        
+        hostList.remove(0);
+        ep = hostList.iterator().next();
+        assertTrue(ep.getDHTMode().equals(DHTMode.PASSIVE));
+        ep = hostList.get(hostList.size()-1);
+        assertFalse(ep.getDHTMode().equals(DHTMode.PASSIVE));
+        assertTrue(ep.getDHTMode().equals(DHTMode.INACTIVE));
+        
+        //try excluding version
+        hostList = hc.getDHTSupportEndpoint(2);
+        assertEquals(9, hostList.size());
+        assertEquals("18.239.0.100", hostList.get(0).getAddress());
     }
         
    

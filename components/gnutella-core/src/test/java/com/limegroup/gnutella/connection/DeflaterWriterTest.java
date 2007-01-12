@@ -1,16 +1,14 @@
 package com.limegroup.gnutella.connection;
 
-
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import org.limewire.io.BufferByteArrayOutputStream;
-
 import junit.framework.Test;
+
+import org.limewire.io.ByteBufferOutputStream;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -157,7 +155,7 @@ public final class DeflaterWriterTest extends LimeTestCase {
 	private byte[] inflate(ByteBuffer data) throws Exception {
 	    INFLATER.setInput(data.array(), 0, data.limit());
 	    byte[] buf = new byte[512];
-	    ByteArrayOutputStream out = new BufferByteArrayOutputStream();
+        ByteBufferOutputStream out = new ByteBufferOutputStream();
 	    int inflated = 0;
 	    while( (inflated = INFLATER.inflate(buf)) > 0)
 	        out.write(buf, 0, inflated);

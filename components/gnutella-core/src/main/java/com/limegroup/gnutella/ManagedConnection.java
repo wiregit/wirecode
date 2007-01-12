@@ -16,6 +16,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.connection.CompositeQueue;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.DeflaterWriter;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
@@ -26,6 +27,7 @@ import com.limegroup.gnutella.connection.MessageReceiver;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.OutputRunner;
 import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.AsyncIncomingHandshaker;
 import com.limegroup.gnutella.handshaking.AsyncOutgoingHandshaker;
@@ -852,7 +854,7 @@ public class ManagedConnection extends Connection
                 else if (m instanceof QueryStatusResponse)
                     m = morphToStopQuery((QueryStatusResponse) m);
             }
-            MessageDispatcher.instance().dispatchTCP(m, this);
+            RouterService.getMessageDispatcher().dispatchTCP(m, this);
         }
     }
     
@@ -1077,6 +1079,9 @@ public class ManagedConnection extends Connection
                 send(new UpdateRequest());
             else if(currentId == latestId)
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+            //fire a vendor event
+            _manager.dispatchEvent(new ConnectionLifecycleEvent(this, 
+                    EventType.CONNECTION_CAPABILITIES , this));
                 
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        

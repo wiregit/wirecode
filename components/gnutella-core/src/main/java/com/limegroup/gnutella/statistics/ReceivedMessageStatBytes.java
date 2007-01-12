@@ -320,5 +320,11 @@ public class ReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	 */
 	public static final Statistic UDP_LIME_ACK = 
 	    new UDPReceivedMessageStat();
-
+    
+    /**
+     * <tt>Statistic</tt> for Mojito DHT messages received over UDP
+     */
+    public static final Statistic UDP_DHT_MSG = 
+        new UDPReceivedMessageStat();
+    
 }

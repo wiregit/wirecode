@@ -12,6 +12,8 @@ import java.util.Set;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -125,6 +127,18 @@ public final class CapabilitiesVM extends VendorMessage {
         smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
                                         UpdateHandler.instance().getLatestId());
         hashSet.add(smp);
+        
+        if(RouterService.isMemberOfDHT()) {
+            if(RouterService.isActiveDHTNode()) {
+                smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.ACTIVE),
+                        RouterService.getDHTManager().getVersion().getVersion());
+            } else {
+                smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.PASSIVE),
+                        RouterService.getDHTManager().getVersion().getVersion());
+            }
+            hashSet.add(smp);
+        }
+        
     }
 
 
@@ -180,6 +194,20 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     public int supportsUpdate() {
         return supportsCapability(LIME_UPDATE_BYTES);
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int isActiveDHTNode() {
+        return supportsCapability(DHTMode.getCapabilitiesVMBytes(DHTMode.ACTIVE));
+    }
+    
+    /**
+     * Returns the current DHT version if this node is an active DHT node
+     */
+    public int isPassiveDHTNode() {
+        return supportsCapability(DHTMode.getCapabilitiesVMBytes(DHTMode.PASSIVE));
     }
 
     // override super

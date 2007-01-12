@@ -3,13 +3,17 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.limewire.util.ByteOrder;
-
 import junit.framework.Test;
 
+import org.limewire.util.ByteOrder;
+import org.limewire.util.PrivilegedAccessor;
+
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */
@@ -34,6 +38,7 @@ public class CapabilitiesVMTest
         assertGreaterThan(0, vmp.supportsFeatureQueries());
         assertTrue(vmp.supportsWhatIsNew());
         assertGreaterThan(0, vmp.supportsCapability("WHAT".getBytes()));
+        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         vmp.write(baos);
@@ -46,7 +51,19 @@ public class CapabilitiesVMTest
         assertGreaterThan(0, vmpRead.supportsFeatureQueries());
         assertTrue(vmpRead.supportsWhatIsNew());
         assertGreaterThan(0, vmpRead.supportsCapability("WHAT".getBytes()));
-
+        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
+    }
+    
+    public void testDHTCapability() throws Exception { 
+        CapabilitiesVM vmp = CapabilitiesVM.instance();
+        assertEquals(-1, vmp.supportsCapability("MDHT".getBytes()));
+        
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        PrivilegedAccessor.setValue(rs, "dhtManager", new DHTManagerStub());
+        
+        CapabilitiesVM.reconstructInstance();
+        vmp = CapabilitiesVM.instance();
+        assertGreaterThan(-1, vmp.isActiveDHTNode());
     }
 
     public void testNetworkConstructor() throws Exception {
@@ -149,6 +166,4 @@ public class CapabilitiesVMTest
         assertNotEquals(vmpOther,vmpOneOther);
 
     }
-
-
 }
