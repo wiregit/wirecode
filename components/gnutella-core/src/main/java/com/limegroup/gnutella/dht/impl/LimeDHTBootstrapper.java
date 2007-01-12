@@ -179,10 +179,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
      * 1) We're NOT bootstrapped
      * 2) And there's no bootstrap process active OR we are bootstrapping from routetable
      * 
-     * TODO: Deprecated because its former purpose was to
-     * stop the DHTNodeFetcher. Maybe useful for testing.
      */
-    @Deprecated
     public boolean isWaitingForNodes() {
         synchronized (lock) {
             return !getMojitoDHT().isBootstrapped() && bootstrapFuture == null;
