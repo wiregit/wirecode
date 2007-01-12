@@ -70,7 +70,7 @@
 	
 	<target name="compile-src"
 	        description="Compiles only the source code of every component."
-	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src, mojito-ui.compile-src">
+	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src">
         <mkdir dir="${build.limewire.components.all.classes}"/>
 	</target>
 	

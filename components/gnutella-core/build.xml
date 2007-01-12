@@ -34,6 +34,7 @@
 	           source		="${compile.source}"
 	           target       ="${compile.target}"
 	           srcdir	    ="${limewire.core.src}"
+			   excludes		="examples/**"
 	    >
 			<classpath refid="build.limewire.core.classpath"/>
 	   	</javac>
