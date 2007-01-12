@@ -40,8 +40,6 @@ import com.limegroup.gnutella.util.Cancellable;
  * 
  * This class can also start a timer task to periodically requests hosts until 
  * the manager is able to bootstrap. 
- * 
- * TODO: ability to cancel timer task
  */
 public class DHTNodeFetcher {
     

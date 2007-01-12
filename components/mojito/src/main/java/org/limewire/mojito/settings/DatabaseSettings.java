@@ -121,8 +121,7 @@ public final class DatabaseSettings extends MojitoProps {
      * the furthest of the k closest Nodes and a new Node comes along
      * that is nearer
      */
-    // TODO: Set to false!!!
     public static final BooleanSetting DELETE_VALUE_IF_FURTHEST_NODE
-        = FACTORY.createRemoteBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", true, 
+        = FACTORY.createRemoteBooleanSetting("DELETE_VALUE_IF_FURTHEST_NODE", false, 
                 "delete_value_if_furthest_node");
 }
