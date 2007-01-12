@@ -308,16 +308,7 @@ class UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        if(url.indexOf('?') == -1)
-            url += "?";
-        else
-            url += "&";
-        url += "pro="   + CommonUtils.isPro() + 
-               "&lang=" + encode(ApplicationSettings.getLanguage()) +
-               "&lv="   + encode(CommonUtils.getLimeWireVersion()) +
-               "&jv="   + encode(CommonUtils.getJavaVersion()) +
-               "&os="   + encode(CommonUtils.getOS()) +
-               "&osv="  + encode(CommonUtils.getOSVersion());
+        url = CommonUtils.addLWInfoToUrl(url);
         data.setUpdateURL(url);
         
         try {

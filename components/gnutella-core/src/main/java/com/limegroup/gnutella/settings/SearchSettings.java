@@ -338,4 +338,9 @@ public final class SearchSettings extends LimeProps {
     public static final IntSetting QUERY_KEY_DELAY = 
         FACTORY.createSettableIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
+    
+    public static final StringSetting SEARCH_WARNING = 
+        FACTORY.createSettableStringSetting("SEARCH_WARNING", 
+                "Only search results with a {0} are official LimeWire communications.", 
+                "ResultPanel.SearchWarning");
 }

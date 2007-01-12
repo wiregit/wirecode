@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,6 +22,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * This class handles common utility functions that many classes
@@ -1317,6 +1322,29 @@ public final class CommonUtils {
         return true;
     }
     */
+    
+    public static String addLWInfoToUrl(String url) {
+        if(url.indexOf('?') == -1)
+            url += "?";
+        else
+            url += "&";
+        url += "pro="   + isPro() + 
+        "&lang=" + encode(ApplicationSettings.getLanguage()) +
+        "&lv="   + encode(getLimeWireVersion()) +
+        "&jv="   + encode(CommonUtils.getJavaVersion()) +
+        "&os="   + encode(getOS()) +
+        "&osv="  + encode(getOSVersion()) +
+        "&guid=" + encode(new GUID(RouterService.getMyGUID()).toHexString());
+        return url;
+    }
+    
+    public static String encode(String string) {
+        try {
+            return URLEncoder.encode(string, "8859_1");
+        } catch(UnsupportedEncodingException uee) {
+            return string;
+        }
+    }
 }
 
 
