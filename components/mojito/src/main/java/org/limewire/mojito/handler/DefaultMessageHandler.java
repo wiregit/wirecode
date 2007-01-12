@@ -19,7 +19,6 @@
  
 package org.limewire.mojito.handler;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,23 +66,23 @@ public class DefaultMessageHandler {
         databaseStats = context.getDatabaseStats();
     }
     
-    public void handleResponse(ResponseMessage message, long time) throws IOException {
+    public void handleResponse(ResponseMessage message, long time) {
         addLiveContactInfo(message.getContact(), message);
     }
 
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, long time) throws IOException {
+            RequestMessage message, long time) {
         context.getRouteTable().handleFailure(nodeId, dst);
     }
 
-    public void handleRequest(RequestMessage message) throws IOException {
+    public void handleRequest(RequestMessage message) {
         addLiveContactInfo(message.getContact(), message);
     }
     
     /**
      * Adds the given Contact or updates it if it's already in our RouteTable
      */
-    private synchronized void addLiveContactInfo(Contact node, DHTMessage message) throws IOException {
+    private synchronized void addLiveContactInfo(Contact node, DHTMessage message) {
         
         RouteTable routeTable = context.getRouteTable();
         
@@ -185,7 +184,7 @@ public class DefaultMessageHandler {
      * It either forwards or removes a DHTValue it from the local Database.
      * For details see Kademlia spec!
      */
-    private void forwardOrRemoveValues(Contact node, Contact existing, DHTMessage message) throws IOException {
+    private void forwardOrRemoveValues(Contact node, Contact existing, DHTMessage message) {
         
         RouteTable routeTable = context.getRouteTable();
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();

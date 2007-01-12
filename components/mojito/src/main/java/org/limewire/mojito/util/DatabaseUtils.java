@@ -86,7 +86,7 @@ public class DatabaseUtils {
      * 
      */
     public static boolean isRepublishingRequired(long lastRepublishingTime, int locationCount) {
-        long t = (long)((locationCount 
+        long t = ((locationCount 
                 * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());
         

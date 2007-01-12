@@ -203,7 +203,7 @@ abstract class AbstractStatistic implements Statistic {
                         }
                         
                         fieldsList.addAll(Arrays.asList(getClass().getFields()));
-                        Field[] fields = (Field[])fieldsList.toArray(new Field[0]);
+                        Field[] fields = fieldsList.toArray(new Field[0]);
                         for(int i=0; i<fields.length; i++) {
                             try {
                                 Object fieldObject = fields[i].get(null);

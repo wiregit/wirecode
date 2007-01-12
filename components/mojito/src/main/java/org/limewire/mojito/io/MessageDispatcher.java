@@ -606,6 +606,7 @@ public abstract class MessageDispatcher {
      * queue to the Network and returns whether or not some
      * Messages were left in the output queue.
      */
+    @SuppressWarnings("unused")
     public boolean handleWrite() throws IOException {
         
         // Get a local reference of outputQueue and

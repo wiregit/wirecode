@@ -158,7 +158,7 @@ public class ByteBufferInputStream extends InputStream {
             ByteBuffer b = buffers[index];
             
             // The number of bytes we can skip in this ByteBuffer
-            long l = Math.min((long)b.remaining(), n-s);
+            long l = Math.min(b.remaining(), n-s);
             b.position(b.position() + (int)l);
             s += l;
             

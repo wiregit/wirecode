@@ -14,7 +14,6 @@ import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;

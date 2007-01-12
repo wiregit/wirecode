@@ -318,9 +318,9 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         
         //each host in the list is responsible for a subspace of the keyspace
         //first 4 bits responsible for dividing the keyspace
-        int localPrefix = (int)((localId.getBytes()[0] & 0xF0) >> 4);
+        int localPrefix = ((localId.getBytes()[0] & 0xF0) >> 4);
         //now map to hostlist size
-        int index = (int)(((float)list.size()/16f) * localPrefix);
+        int index = (int)((list.size()/16f) * localPrefix);
         return list.get(index);
     }
     

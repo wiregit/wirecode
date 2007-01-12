@@ -382,7 +382,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      * Handles a node response message.  This type of message is handled in the same
      * way regardless of the type of lookup.
      */
-    protected final boolean handleNodeResponse(FindNodeResponse response) throws IOException{
+    protected final boolean handleNodeResponse(FindNodeResponse response) {
         Contact sender = response.getContact();
         Collection<? extends Contact> nodes = response.getNodes();
         for(Contact node : nodes) {

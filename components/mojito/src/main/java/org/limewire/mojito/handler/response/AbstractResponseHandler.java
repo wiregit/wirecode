@@ -110,6 +110,7 @@ abstract class AbstractResponseHandler<V extends Result> implements CallableResp
     /**
      * Is called by call()
      */
+    @SuppressWarnings("unused")
     protected void start() throws DHTException {
         // Do something in the subclass
     }

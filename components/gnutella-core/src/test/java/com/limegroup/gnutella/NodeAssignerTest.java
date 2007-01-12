@@ -64,7 +64,7 @@ public class NodeAssignerTest extends LimeTestCase {
         setSettings();
         ROUTER_SERVICE =
             new RouterService(new ActivityCallbackStub());
-        ASSIGNER = new NodeAssigner(BW, BW, ROUTER_SERVICE.getConnectionManager());
+        ASSIGNER = new NodeAssigner(BW, BW, RouterService.getConnectionManager());
 
     }
     
@@ -94,7 +94,7 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void tearDown() throws Exception {
         ULTRAPEER.shutdown();
-        ROUTER_SERVICE.disconnect();
+        RouterService.disconnect();
         sleep();
     }
     
@@ -123,21 +123,21 @@ public class NodeAssignerTest extends LimeTestCase {
         BW.setIsGoodBandwidth(true);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT + 1);
-        PrivilegedAccessor.setValue(ROUTER_SERVICE.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
-        PrivilegedAccessor.setValue(ROUTER_SERVICE.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedSolicitedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(RouterService.getUdpService(),"_acceptedUnsolicitedIncoming",new Boolean(true));
        
         PrivilegedAccessor.setValue(ROUTER_SERVICE,"nodeAssigner",ASSIGNER);
     }
     
     public void connect() throws Exception {
         //now try to connect
-        ROUTER_SERVICE.clearHostCatcher();
-        ROUTER_SERVICE.connect();
-        assertFalse("should not be connected", ROUTER_SERVICE.isConnected());
-        ROUTER_SERVICE.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
+        RouterService.clearHostCatcher();
+        RouterService.connect();
+        assertFalse("should not be connected", RouterService.isConnected());
+        RouterService.getHostCatcher().add(new Endpoint("localhost", TEST_PORT + 1), true);
         sleep();
         sleep();
-        assertTrue("should be connected", ROUTER_SERVICE.isConnected());
+        assertTrue("should be connected", RouterService.isConnected());
         
     }
     
@@ -166,7 +166,7 @@ public class NodeAssignerTest extends LimeTestCase {
           ROUTER_SERVICE.start();
         connect();
         assertFalse("should be not be an ultrapeer", RouterService.isSupernode());
-        PrivilegedAccessor.setValue(ROUTER_SERVICE.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         setUltrapeerCapabilities();
         DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
         ULTRAPEER.setAcceptsUltrapeers(true);
@@ -189,7 +189,7 @@ public class NodeAssignerTest extends LimeTestCase {
         assertTrue("should be DHT node", RouterService.isActiveDHTNode());
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
-        PrivilegedAccessor.setValue(ROUTER_SERVICE.getAcceptor(),"_acceptedIncoming",new Boolean(true));
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
         DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.setValue(1);
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24*3600*1000));

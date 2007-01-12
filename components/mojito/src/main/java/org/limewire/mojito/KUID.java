@@ -114,8 +114,8 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     public boolean isBitSet(int bitIndex) {
         // Take advantage of rounding errors!
-        int index = (int) (bitIndex / BITS.length);
-        int bit = (int) (bitIndex - index * BITS.length);
+        int index = (bitIndex / BITS.length);
+        int bit = (bitIndex - index * BITS.length);
         return (id[index] & BITS[bit]) != 0;
     }
     
@@ -148,8 +148,8 @@ public class KUID implements Comparable<KUID>, Serializable {
      */
     private KUID set(int bitIndex, boolean set) {
         // Take advantage of rounding errors!
-        int index = (int) (bitIndex / BITS.length);
-        int bit = (int) (bitIndex - index * BITS.length);
+        int index = (bitIndex / BITS.length);
+        int bit = (bitIndex - index * BITS.length);
         boolean isBitSet = (id[index] & BITS[bit]) != 0;
         
         // Don't create a new Object if nothing is

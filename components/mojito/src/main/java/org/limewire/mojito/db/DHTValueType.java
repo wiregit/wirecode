@@ -182,7 +182,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         
         int id = 0;
         for(char c : chars) {
-            id = (id << 8) | (int)(c & 0xFF);
+            id = (id << 8) | (c & 0xFF);
         }
         return id;
     }

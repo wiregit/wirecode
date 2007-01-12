@@ -360,7 +360,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
          * Handles a timeout and returns true if done
          */
         public void timeout(KUID nodeId, SocketAddress dst, 
-                RequestMessage message, long timeout) throws IOException {
+                RequestMessage message, long timeout) {
             this.nodeId = nodeId;
             this.dst = dst;
             this.message = message;

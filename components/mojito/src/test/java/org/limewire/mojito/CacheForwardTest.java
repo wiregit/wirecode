@@ -38,7 +38,6 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
@@ -235,7 +234,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Change the instanceId and we'll asked to store the
             // value again!
-            ((LocalContact)nearest.getLocalNode()).nextInstanceID();
+            nearest.getLocalNode().nextInstanceID();
             bootstrap(nearest, dhts.values());
             Thread.sleep(250);
             
@@ -274,7 +273,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
             
-            ((LocalContact)middle.getLocalNode()).nextInstanceID();
+            middle.getLocalNode().nextInstanceID();
             bootstrap(middle, dhts.values());
             Thread.sleep(250);
             
@@ -291,7 +290,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Change the instanceId the previous furthest Node
             // and it shouldn't get the value
-            ((LocalContact)furthest.getLocalNode()).nextInstanceID();
+            furthest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
             Thread.sleep(250);
             
@@ -328,7 +327,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, furthest.getDatabase().getValueCount());
             
             // Change the instanceId 
-            ((LocalContact)furthest.getLocalNode()).nextInstanceID();
+            furthest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
             Thread.sleep(250);
             
@@ -344,7 +343,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 assertEquals(nearest.getLocalNodeID(), dhtValue.getSender().getNodeID());
             }
             
-            ((LocalContact)nearest.getLocalNode()).nextInstanceID();
+            nearest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
             Thread.sleep(250);
             

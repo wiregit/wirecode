@@ -69,8 +69,7 @@ public class Tag {
     
     private long timeout = -1L;
     
-    Tag(Contact contact, ResponseMessage message) 
-            throws IOException {
+    Tag(Contact contact, ResponseMessage message) {
         
         this.nodeId = contact.getNodeID();
         this.dst = contact.getContactAddress();
@@ -78,24 +77,22 @@ public class Tag {
         this.message = message;
     }
     
-    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) 
-            throws IOException {
+    Tag(SocketAddress dst, RequestMessage message, ResponseHandler handler) {
         this(null, dst, message, handler, -1L);
     }
     
-    Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) 
-            throws IOException {
+    Tag(Contact contact, RequestMessage message, ResponseHandler responseHandler) {
         this(contact.getNodeID(), contact.getContactAddress(), message, 
                 responseHandler, contact.getAdaptativeTimeout());
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
-            ResponseHandler responseHandler) throws IOException {
+            ResponseHandler responseHandler) {
         this(nodeId, dst, message, responseHandler, -1L);
     }
     
     Tag(KUID nodeId, SocketAddress dst, RequestMessage message, 
-            ResponseHandler responseHandler, long timeout) throws IOException {
+            ResponseHandler responseHandler, long timeout) {
         
         this.nodeId = nodeId;
         this.dst = dst;

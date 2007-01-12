@@ -148,10 +148,6 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         g2.fill(new Ellipse2D.Float(x, y, DOT_SIZE, DOT_SIZE));
     }
     
-    private float position(KUID nodeId) {
-        return position(nodeId, getHeight());
-    }
-    
     private float position(BigDecimal nodeId) {
         return position(nodeId, getHeight());
     }

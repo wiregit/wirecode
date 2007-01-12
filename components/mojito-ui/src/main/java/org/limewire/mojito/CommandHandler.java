@@ -80,7 +80,7 @@ public class CommandHandler {
             "test"
     };
     
-    public static boolean handle(MojitoDHT dht, String command, PrintWriter out) throws IOException {
+    public static boolean handle(MojitoDHT dht, String command, PrintWriter out) {
         try {
             command = command.trim();
             for (String c : COMMANDS) {
@@ -104,13 +104,13 @@ public class CommandHandler {
         return false;
     }
     
-    public static void help(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void help(MojitoDHT dht, String[] args, PrintWriter out) {
         for (String c : COMMANDS) {
             out.println(c);
         }
     }
     
-    public static void info(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void info(MojitoDHT dht, String[] args, PrintWriter out) {
         out.println("Local Node: " + ((Context)dht).getLocalNode());
         out.println("Is running: " + dht.isRunning());
         out.println("Database Size (Keys): " + ((Context)dht).getDatabase().getKeyCount());
@@ -119,7 +119,7 @@ public class CommandHandler {
         out.println("Estimated DHT Size: " + dht.size());
     }
     
-    public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) {
         boolean current = KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue();
         KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.setValue(
                 !KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
@@ -127,26 +127,26 @@ public class CommandHandler {
         out.println("Exhaustive: " + current + " -> " + KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
     }
     
-    public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void firewalled(MojitoDHT dht, String[] args, PrintWriter out) {
         ((LocalContact)dht.getLocalNode()).setFirewalled(!dht.isFirewalled());
         out.println("Firewalled: " + dht.isFirewalled());
     }
     
-    public static void database(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void database(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
         Database database = ((Context)dht).getDatabase();
         buffer.append(database.toString());
         out.println(buffer);
     }
     
-    public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
         RouteTable routingTable = ((Context)dht).getRouteTable();
         buffer.append(routingTable.toString());
         out.println(buffer);
     }
     
-    public static Future<PingResult> ping(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static Future<PingResult> ping(MojitoDHT dht, String[] args, final PrintWriter out) {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
@@ -184,10 +184,10 @@ public class CommandHandler {
         return future;
     }
     
-    public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) {
     }
     
-    public static void bootstrap(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static void bootstrap(MojitoDHT dht, String[] args, final PrintWriter out) {
         String host = args[1];
         int port = Integer.parseInt(args[2]);
         
@@ -204,7 +204,7 @@ public class CommandHandler {
         }
     }
     
-    public static void put(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static void put(MojitoDHT dht, String[] args, final PrintWriter out) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             
@@ -256,7 +256,7 @@ public class CommandHandler {
         }
     }
     
-    public static void remove(MojitoDHT dht, String[] args, final PrintWriter out) throws IOException {
+    public static void remove(MojitoDHT dht, String[] args, final PrintWriter out) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             
@@ -295,7 +295,7 @@ public class CommandHandler {
         }
     }
     
-    public static void get(MojitoDHT dht, String[] args, PrintWriter out) throws IOException {
+    public static void get(MojitoDHT dht, String[] args, PrintWriter out) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
             
@@ -406,7 +406,7 @@ public class CommandHandler {
     }
     
     public static void nextid(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
-        ((LocalContact)((Context)dht).getLocalNode()).nextInstanceID();
+        ((Context)dht).getLocalNode().nextInstanceID();
     }
     
     public static void kill(MojitoDHT dht, String[] args, PrintWriter out) throws Exception {
