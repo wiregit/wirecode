@@ -8,9 +8,6 @@
 	<target name="initialize" depends="mojito.initialize">
 	        <do.setup-properties component="mojito-ui">
 				<src-classpath>
-					<pathelement location="${limewire.components.mojito-ui.home}/lib/jung-1.7.5.jar"/>
-					<pathelement location="${limewire.components.mojito-ui.home}/lib/commons-collections-3.2.jar"/>
-					<pathelement location="${limewire.components.mojito-ui.home}/lib/colt.jar"/>
 					<path refid="build.limewire.components.mojito.buildpath"/>
 				</src-classpath>
 	        </do.setup-properties>

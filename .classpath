@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="components/collection/build/classes" path="components/collection/src/main/java"/>
+	<classpathentry kind="src" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" path="components/mojito-ui/src/main/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" path="components/mojito/src/main/java"/>
@@ -56,5 +57,8 @@
 	<classpathentry kind="lib" path="tests/lib/pmd.jar"/>
 	<classpathentry kind="lib" path="tests/lib/saxpath-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="tests/lib/xerces.jar"/>
+	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
+	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
