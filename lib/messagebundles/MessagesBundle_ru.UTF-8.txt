@@ -739,6 +739,10 @@ SEARCH_FILTER_RESULTS=Фильтр результатов:
 SEARCH_BACK_TO_SEARCH=Вернуться к поиску
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=Блокировать результаты поиска от хоста
+#### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
+#? SEARCH_RESULTS_OFFICIAL_WARNING=
+#### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
+#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
 
 ################################################################################
 # Magnet stuff.

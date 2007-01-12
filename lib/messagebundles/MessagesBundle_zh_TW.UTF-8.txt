@@ -886,6 +886,10 @@ SEARCH_FILTER_RESULTS=過濾結果:
 SEARCH_BACK_TO_SEARCH=返回搜尋結果
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=您是否要封鎖來自這個主機的搜尋結果
+#### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
+#? SEARCH_RESULTS_OFFICIAL_WARNING=
+#### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
+#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
 
 ################################################################################
 # Magnet stuff.

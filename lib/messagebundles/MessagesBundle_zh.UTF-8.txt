@@ -739,6 +739,10 @@ SEARCH_WHATSNEW_HIDE_ADULT=忽略 成人 内容
 #? SEARCH_BACK_TO_SEARCH=
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 #? SEARCH_BLOCK_HOST=
+#### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
+#? SEARCH_RESULTS_OFFICIAL_WARNING=
+#### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
+#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
 
 ################################################################################
 # Magnet stuff.

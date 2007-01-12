@@ -739,6 +739,10 @@ SEARCH_FILTER_RESULTS=ਨਤੀਜੇ ਫ਼ਿਲਟਰ ਕਰਆਓ
 SEARCH_BACK_TO_SEARCH=ਫੇਰ ਕੁੱਛ ਲੱਭੋ
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=ਤੁਸੀਂ ਇਸ ਹੋਸਟ ਦੇ ਨਤੀਜੇ ਹਟਾਣਾ ਚਾੰਦੇ ਹੋ
+#### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
+#? SEARCH_RESULTS_OFFICIAL_WARNING=
+#### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
+#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
 
 ################################################################################
 # Magnet stuff.

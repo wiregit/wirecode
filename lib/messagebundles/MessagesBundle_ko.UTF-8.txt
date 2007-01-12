@@ -741,6 +741,10 @@ SEARCH_FILTER_RESULTS=결과를 필터：
 SEARCH_BACK_TO_SEARCH=검색으로 돌아가기
 #### SEARCH_BLOCK_HOST=Do you want to block search results from the following list of hosts?
 SEARCH_BLOCK_HOST=＃로 호스트로부터의 검색 결과를 차단하고 싶습니까?
+#### SEARCH_RESULTS_OFFICIAL_WARNING=Only search results with a {0} are official LimeWire communications.
+#? SEARCH_RESULTS_OFFICIAL_WARNING=
+#### SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=More Info...
+#? SEARCH_RESULTS_OFFICIAL_WARNING_MORE_INFO=
 
 ################################################################################
 # Magnet stuff.
