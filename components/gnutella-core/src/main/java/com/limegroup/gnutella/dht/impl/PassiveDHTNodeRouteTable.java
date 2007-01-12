@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht.impl;
 
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -29,24 +28,29 @@ import org.limewire.mojito.routing.RouteTable;
  * leaves that are currently connected to the Ultrapeer (Gnutella 
  * connections). 
  */
-class PassiveDHTNodeRouteTable implements RouteTable, Serializable {
+@SuppressWarnings("serial")
+class PassiveDHTNodeRouteTable implements RouteTable {
     
-    private static final long serialVersionUID = 707016966528414433L;
-
     private static final Log LOG = LogFactory.getLog(PassiveDHTNodeRouteTable.class);
     
+    /**
+     * MojitoDHT instance
+     */
     private final MojitoDHT dht;
     
+    /**
+     * The actual RouteTable
+     */
     private final RouteTable delegate;
     
     /**
      * The Map storing the leaf nodes connected to this ultrapeer. The mapping is
      * used to go from Gnutella <tt>IpPort</tt> to DHT <tt>RemoteContact</tt>. 
      */
-    private Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
+    private final Map<SocketAddress, KUID> leafDHTNodes = new HashMap<SocketAddress, KUID>();
     
     public PassiveDHTNodeRouteTable(MojitoDHT dht) {
-        assert (dht.getLocalNode().isFirewalled());
+        assert (dht.isFirewalled()); // Must be firewalled
         
         this.dht = dht;
         delegate = dht.getRouteTable();
