@@ -33,6 +33,8 @@ import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.HostFilter;
 
@@ -61,7 +63,7 @@ public class DatabaseTest extends MojitoTestCase {
     }
     
     private static DHTValueEntity createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
-        Contact node = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
+        Contact node = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 0, false);
         return new DHTValueEntity(node, node, valueId, 
                 new DHTValue(DHTValueType.TEST, 0, value), true);
     }
@@ -73,7 +75,8 @@ public class DatabaseTest extends MojitoTestCase {
     
     private static DHTValueEntity createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact node = ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG);
+        Contact node = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                nodeId, addr, 0, Contact.DEFAULT_FLAG);
         
         return new DHTValueEntity(node, node, valueId, 
                 new DHTValue(DHTValueType.TEST, 0, value), false);
@@ -86,8 +89,11 @@ public class DatabaseTest extends MojitoTestCase {
     
     private static DHTValueEntity createIndirectDHTValue(KUID creatorId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact creator = ContactFactory.createLiveContact(addr, 0, 0, creatorId, addr, 0, Contact.DEFAULT_FLAG);
-        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, senderId, addr, 0, Contact.DEFAULT_FLAG);  
+        
+        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                creatorId, addr, 0, Contact.DEFAULT_FLAG);
+        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                senderId, addr, 0, Contact.DEFAULT_FLAG);  
         
         return new DHTValueEntity(creator, sender, valueId, 
                 new DHTValue(DHTValueType.TEST, 0, value), false);
@@ -363,12 +369,13 @@ public class DatabaseTest extends MojitoTestCase {
         
         //this should accept
         Contact badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.1", 1111), 0, 0, KUID.createRandomID()
-                , new InetSocketAddress("169.0.1.1", 1111), 1, 0);
+                new InetSocketAddress("169.0.1.1", 1111), 
+                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                new InetSocketAddress("169.0.1.1", 1111), 1, 0);
         
         Contact goodHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.2", 1111), 0, 0, KUID.createRandomID()
-                , new InetSocketAddress("169.0.1.2", 1111), 1, 0);
+                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                KUID.createRandomID(), new InetSocketAddress("169.0.1.2", 1111), 1, 0);
 
         DHTValueEntity value = null;
         //should allow x direct values
@@ -405,8 +412,9 @@ public class DatabaseTest extends MojitoTestCase {
 
         //test banning now
         badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.3", 1111), 0, 0, KUID.createRandomID()
-                , new InetSocketAddress("169.0.1.3", 1111), 1, 0);
+                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                KUID.createRandomID(), 
+                new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
         for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
             value = new DHTValueEntity(badHost, badHost, KUID.createRandomID(), 

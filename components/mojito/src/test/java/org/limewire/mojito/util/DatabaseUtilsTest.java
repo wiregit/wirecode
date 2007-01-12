@@ -13,6 +13,8 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
@@ -46,7 +48,9 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         for (int i = 0; i < 15; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 5000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+            
+            routeTable.add(ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    nodeId, addr, 0, Contact.DEFAULT_FLAG));
         }
         
         assertEquals(16, routeTable.size());
@@ -62,7 +66,9 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         for (int i = 0; i < 4; i++) {
             KUID nodeId = KUID.createRandomID();
             SocketAddress addr = new InetSocketAddress("localhost", 6000 + i);
-            routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+            
+            routeTable.add(ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    nodeId, addr, 0, Contact.DEFAULT_FLAG));
             
             assertEquals(expectedExpiresAt, DatabaseUtils.getExpirationTime(routeTable, value));
         }
@@ -71,7 +77,9 @@ public class DatabaseUtilsTest extends MojitoTestCase {
         
         KUID nodeId = KUID.createRandomID();
         SocketAddress addr = new InetSocketAddress("localhost", 7000);
-        routeTable.add(ContactFactory.createLiveContact(addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+        
+        routeTable.add(ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+                nodeId, addr, 0, Contact.DEFAULT_FLAG));
         
         long expiresAt = DatabaseUtils.getExpirationTime(routeTable, value);
         assertLessThan(expectedExpiresAt, expiresAt);

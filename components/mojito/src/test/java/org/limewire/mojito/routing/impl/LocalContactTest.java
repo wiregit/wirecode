@@ -7,6 +7,8 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 
 public class LocalContactTest extends MojitoTestCase {
@@ -24,7 +26,8 @@ public class LocalContactTest extends MojitoTestCase {
     }
     
     public void testSetExternalAddress() {
-        LocalContact local = (LocalContact)ContactFactory.createLocalContact(0, 0, false);
+        LocalContact local = (LocalContact)ContactFactory
+            .createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, false);
         
         // Initial State
         assertEquals(new InetSocketAddress("localhost", 0), local.getContactAddress());

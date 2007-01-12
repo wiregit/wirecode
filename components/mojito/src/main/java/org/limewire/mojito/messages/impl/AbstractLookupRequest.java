@@ -29,6 +29,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -49,7 +50,7 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
     
     public AbstractLookupRequest(Context context, 
             OpCode opcode, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, opcode, src, messageId, version, in);
         
         switch(opcode) {

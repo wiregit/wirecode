@@ -30,6 +30,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -50,7 +51,7 @@ public class FindValueRequestImpl extends AbstractLookupRequest
     }
     
     public FindValueRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
         
         this.keys = in.readKUIDs();

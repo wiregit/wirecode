@@ -19,6 +19,8 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 
 public class BootstrapManagerTest extends MojitoTestCase {
@@ -116,14 +118,15 @@ public class BootstrapManagerTest extends MojitoTestCase {
         RouteTable rt = ((Context)TEST_DHT).getRouteTable();
         Contact node;
         for(int i= 1; i < 5; i++) {
-            node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomID(),
-                    new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
+            node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(),
+                    new InetSocketAddress("localhost", 3000+i), 
+                    0, Contact.DEFAULT_FLAG);
             rt.add(node);
         }
         //add good node
-        node = ContactFactory.createLiveContact(null,
-                0,0,BOOTSTRAP_DHT.getLocalNodeID(),
+        node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN,
+                BOOTSTRAP_DHT.getLocalNodeID(),
                 BOOTSTRAP_DHT.getContactAddress(), 0, Contact.DEFAULT_FLAG);
         rt.add(node);
         
@@ -139,11 +142,13 @@ public class BootstrapManagerTest extends MojitoTestCase {
         RouteTable rt = ((Context)TEST_DHT).getRouteTable();
         Contact node;
         for(int i= 1; i < 100; i++) {
-            node = ContactFactory.createUnknownContact(0,0,KUID.createRandomID(),
+            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i));
             rt.add(node);
         }
-        node = ContactFactory.createUnknownContact(0,0,KUID.createRandomID(),
+        node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
+                KUID.createRandomID(),
                 new InetSocketAddress("localhost", 7777));
         rt.add(node);
 

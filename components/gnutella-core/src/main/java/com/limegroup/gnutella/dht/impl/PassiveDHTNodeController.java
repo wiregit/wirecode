@@ -21,6 +21,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.BucketUtils;
 
 import com.limegroup.gnutella.Connection;
@@ -55,7 +57,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
      */
     private static final File FILE = new File(LimeWireUtils.getUserSettingsDir(), "passive.mojito");
     
-    public PassiveDHTNodeController(int vendor, int version, 
+    public PassiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
 
         super(dispatcher);

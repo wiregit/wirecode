@@ -28,6 +28,7 @@ import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -43,7 +44,7 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
     }
     
     public FindNodeRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_REQUEST, src, messageId, version, in);
     }
 

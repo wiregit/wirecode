@@ -45,6 +45,8 @@ import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.BucketUtils;
@@ -123,7 +125,7 @@ public class RouteTableImpl implements RouteTable {
      * for the local Node
      */
     public RouteTableImpl(KUID nodeId) {
-        localNode = ContactFactory.createLocalContact(0, 0, nodeId, 0, false);
+        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 0, false);
         bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
     }

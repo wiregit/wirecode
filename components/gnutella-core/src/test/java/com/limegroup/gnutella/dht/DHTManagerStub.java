@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 
@@ -42,11 +44,11 @@ public class DHTManagerStub implements DHTManager {
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
 
-    public int getVendor() {
-        return 1;
+    public Vendor getVendor() {
+        return Vendor.UNKNOWN;
     }
     
-    public int getVersion() {
-        return 1;
+    public Version getVersion() {
+        return Version.UNKNOWN;
     }
 }

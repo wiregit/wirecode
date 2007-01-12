@@ -51,6 +51,7 @@ import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 import org.limewire.security.QueryKey;
 
 /**
@@ -79,7 +80,7 @@ public class DefaultMessageFactory implements MessageFactory {
                 throw new MessageFormatException("Unknown function ID: " + func);
             }
             
-            int version = in.readUnsignedShort();
+            Version version = new Version(in.readUnsignedShort());
             //byte[] length = in.readBytes(4); // Little-Endian!
             in.skip(4);
             

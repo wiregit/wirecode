@@ -32,6 +32,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -50,7 +51,7 @@ public class StatsResponseImpl extends AbstractResponseMessage
     }
 
     public StatsResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.STATS_RESPONSE, src, messageId, version, in);
         
         byte[] s = in.readStatistics();

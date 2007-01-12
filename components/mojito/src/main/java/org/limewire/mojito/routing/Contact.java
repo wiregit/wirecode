@@ -91,12 +91,12 @@ public interface Contact extends Serializable {
     /**
      * Returns the Vendor of this Contact
      */
-    public int getVendor();
+    public Vendor getVendor();
     
     /**
      * Returns the Version of this Contact
      */
-    public int getVersion();
+    public Version getVersion();
     
     /**
      * Returns the Node ID of this Contact

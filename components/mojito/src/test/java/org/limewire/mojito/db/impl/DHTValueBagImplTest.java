@@ -12,6 +12,8 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -87,9 +89,9 @@ public class DHTValueBagImplTest extends MojitoTestCase {
     	DHTValueBagImpl bag = new DHTValueBagImpl(valueId);
     	
     	SocketAddress addr = new InetSocketAddress(6666);
-        Contact creator = ContactFactory.createLiveContact(addr, 0, 0, 
+        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
         		KUID.createRandomID(), addr, 0, Contact.DEFAULT_FLAG);
-        Contact sender = ContactFactory.createLiveContact(addr, 0, 0, 
+        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
         		KUID.createRandomID(), addr, 0, Contact.DEFAULT_FLAG);   
         
         try {

@@ -140,8 +140,8 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the given Contact to the OutputStream
      */
     public void writeContact(Contact node) throws IOException {
-        writeInt(node.getVendor());
-        writeShort(node.getVersion());
+        writeInt(node.getVendor().getVendor());
+        writeShort(node.getVersion().getVersion());
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getContactAddress());
     }

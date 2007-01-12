@@ -29,6 +29,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 import org.limewire.security.QueryKey;
 
 
@@ -52,7 +53,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     }
     
     public FindNodeResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();

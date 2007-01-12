@@ -20,6 +20,8 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -44,7 +46,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
      */
     private static final File FILE = new File(LimeWireUtils.getUserSettingsDir(), "active.mojito");
     
-    public ActiveDHTNodeController(int vendor, int version, 
+    public ActiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
         super(dispatcher);
         

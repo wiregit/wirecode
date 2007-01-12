@@ -31,6 +31,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -50,7 +51,7 @@ public class StoreResponseImpl extends AbstractResponseMessage
     }
 
     public StoreResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_RESPONSE, src, messageId, version, in);
         
         this.status = in.readStoreStatus();

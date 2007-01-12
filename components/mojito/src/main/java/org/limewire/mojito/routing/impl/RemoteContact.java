@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.ContactUtils;
@@ -49,10 +51,10 @@ public class RemoteContact implements Contact {
     private KUID nodeId;
     
     /** The Vendor code of this Contact */
-    private int vendor;
+    private Vendor vendor;
     
     /** The Version of this Contact */
-    private int version;
+    private Version version;
     
     /** The instance ID of this Contact */
     private int instanceId;
@@ -81,7 +83,7 @@ public class RemoteContact implements Contact {
     /** Whether or not this Node is firewalled */
     private int flags = DEFAULT_FLAG;
     
-    public RemoteContact(SocketAddress sourceAddress, int vendor, int version, 
+    public RemoteContact(SocketAddress sourceAddress, Vendor vendor, Version version, 
             KUID nodeId, SocketAddress contactAddress, 
             int instanceId, int flags, State state) {
         
@@ -91,10 +93,6 @@ public class RemoteContact implements Contact {
         
         if (contactAddress == null) {
             throw new NullPointerException("SocketAddress is null");
-        }
-        
-        if ((version & 0xFFFF0000) != 0) {
-            throw new IllegalArgumentException("Version must be between 0x00 and 0xFFFF: " + version);
         }
         
         this.sourceAddress = sourceAddress;
@@ -177,11 +175,11 @@ public class RemoteContact implements Contact {
         }
     }
     
-    public int getVendor() {
+    public Vendor getVendor() {
         return vendor;
     }
 
-    public int getVersion() {
+    public Version getVersion() {
         return version;
     }
 

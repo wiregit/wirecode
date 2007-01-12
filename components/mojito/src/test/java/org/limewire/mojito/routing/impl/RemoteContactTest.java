@@ -8,6 +8,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 
 public class RemoteContactTest extends MojitoTestCase {
@@ -29,7 +31,7 @@ public class RemoteContactTest extends MojitoTestCase {
         
         // External Port == 0 -> force firewalled if it isn't!
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomID(), 
+                null, Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 0), 0, Contact.DEFAULT_FLAG);
         
         assertNull(node1.getSourceAddress());
@@ -45,7 +47,7 @@ public class RemoteContactTest extends MojitoTestCase {
         
         // External Port != 0 -> Contact Address = Source Address + external Port
         RemoteContact node2 = (RemoteContact)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomID(), 
+                null, Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
                 new InetSocketAddress("dell.com", 2048), 0, Contact.DEFAULT_FLAG);
         
         assertNull(node2.getSourceAddress());
@@ -68,7 +70,7 @@ public class RemoteContactTest extends MojitoTestCase {
         
         RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                0, 0, nodeId, 
+                Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
                 0, Contact.DEFAULT_FLAG);
         
@@ -78,7 +80,7 @@ public class RemoteContactTest extends MojitoTestCase {
         
         RemoteContact node2 = (RemoteContact)ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                0, 0, nodeId, 
+                Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 
                 new InetSocketAddress("localhost", 2048), 
                 0, Contact.DEFAULT_FLAG);
         
@@ -100,7 +102,7 @@ public class RemoteContactTest extends MojitoTestCase {
         try {
             RemoteContact node4 = (RemoteContact)ContactFactory.createLiveContact(
                     new InetSocketAddress("localhost", 1024), 
-                    0, 0, KUID.createRandomID(), 
+                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2048), 
                     0, Contact.DEFAULT_FLAG);
             
@@ -112,26 +114,26 @@ public class RemoteContactTest extends MojitoTestCase {
     public void testVendorAndVersion() {
         setLocalIsPrivate(false);
         
-        Contact node1 = ContactFactory.createLocalContact(1, 2, false);
+        Contact node1 = ContactFactory.createLocalContact(new Vendor(1), new Version(2), false);
         
-        assertEquals(1, node1.getVendor());
-        assertEquals(2, node1.getVersion());
+        assertEquals(new Vendor(1), node1.getVendor());
+        assertEquals(new Version(2), node1.getVersion());
         
         Contact node2 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                3, 4, KUID.createRandomID(), 
+                new Vendor(3), new Version(4), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
                 0, Contact.DEFAULT_FLAG);
         
-        assertEquals(3, node2.getVendor());
-        assertEquals(4, node2.getVersion());
+        assertEquals(new Vendor(3), node2.getVendor());
+        assertEquals(new Version(4), node2.getVersion());
         
         Contact node3 = ContactFactory.createUnknownContact(
-                5, 6, KUID.createRandomID(), 
+                new Vendor(5), new Version(6), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
-        assertEquals(5, node3.getVendor());
-        assertEquals(6, node3.getVersion());
+        assertEquals(new Vendor(5), node3.getVendor());
+        assertEquals(new Version(6), node3.getVersion());
     }
     
     public void testAdaptiveTimeout() {
@@ -139,7 +141,7 @@ public class RemoteContactTest extends MojitoTestCase {
         
         Contact node1 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                0, 0, KUID.createRandomID(), 
+                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
                 0, Contact.DEFAULT_FLAG);
         
@@ -153,7 +155,7 @@ public class RemoteContactTest extends MojitoTestCase {
         assertGreaterThan(NetworkSettings.MIN_TIMEOUT_RTT.getValue(), node1.getAdaptativeTimeout());
         
         Contact node2 = ContactFactory.createUnknownContact(
-                0, 0, KUID.createRandomID(), 
+                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
         assertEquals(-1L, node2.getRoundTripTime());
@@ -177,8 +179,9 @@ public class RemoteContactTest extends MojitoTestCase {
         InetSocketAddress contactAddress = new InetSocketAddress("216.244.101.15", 5000);
         InetSocketAddress externalAddress = new InetSocketAddress("216.244.101.16", 5000);
         
-        RemoteContact node1 = (RemoteContact)ContactFactory.createLiveContact(
-                null, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
+        RemoteContact node1 = (RemoteContact)ContactFactory
+            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         
         // PUBLIC contact address and PRIVATE source address
         // Result: Don't use the IP from the source address
@@ -191,13 +194,15 @@ public class RemoteContactTest extends MojitoTestCase {
         assertEquals(externalAddress, node1.getContactAddress());
         
         // As above...
-        node1 = (RemoteContact)ContactFactory.createLiveContact(
-                sourceAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
+        node1 = (RemoteContact)ContactFactory
+            .createLiveContact(sourceAddress, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         assertEquals(contactAddress, node1.getContactAddress());
         
         // As above...
-        node1 = (RemoteContact)ContactFactory.createLiveContact(
-                externalAddress, 0, 0, KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
+        node1 = (RemoteContact)ContactFactory
+            .createLiveContact(externalAddress, Vendor.UNKNOWN, Version.UNKNOWN, 
+                    KUID.createRandomID(), contactAddress, 0, Contact.DEFAULT_FLAG);
         assertEquals(externalAddress, node1.getContactAddress());
     }
 }

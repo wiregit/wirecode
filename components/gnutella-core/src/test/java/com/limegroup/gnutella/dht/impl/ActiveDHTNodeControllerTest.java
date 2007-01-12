@@ -11,6 +11,8 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
@@ -56,7 +58,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         Context context = (Context) controller.getMojitoDHT();
         KUID nodeID = context.getLocalNodeID();
         RouteTable rt = context.getRouteTable();
@@ -66,8 +68,8 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         KUID kuid = KUID.createRandomID();
         RemoteContact node = new RemoteContact(
                 new InetSocketAddress("localhost",4010),
-                ContextSettings.VENDOR.getValue(),
-                ContextSettings.VERSION.getValue(),
+                ContextSettings.getVendor(),
+                ContextSettings.getVersion(),
                 kuid,
                 new InetSocketAddress("localhost",4010),
                 0,
@@ -76,7 +78,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         rt.add(node);
         controller.start();
         controller.stop();
-        controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
+        controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         //should have the same nodeID as before
@@ -89,7 +91,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(0, 0, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         controller.start();
         //bootstrap active node
         controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));

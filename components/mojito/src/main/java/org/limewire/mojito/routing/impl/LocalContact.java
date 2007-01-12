@@ -31,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ContactUtils;
 
 
@@ -47,9 +49,9 @@ public class LocalContact implements Contact {
     
     private static final long serialVersionUID = -1372388406248015059L;
 
-    private volatile int vendor;
+    private volatile Vendor vendor;
     
-    private volatile int version;
+    private volatile Version version;
     
     private volatile KUID nodeId;
     
@@ -63,12 +65,12 @@ public class LocalContact implements Contact {
     
     private transient SocketAddress tmpExternalAddress;
     
-    public LocalContact(int vendor, int version, KUID nodeId, 
+    public LocalContact(Vendor vendor, Version version, KUID nodeId, 
             int instanceId, boolean firewalled) {
         this(vendor, version, nodeId, instanceId, (firewalled ? FIREWALLED_FLAG : DEFAULT_FLAG));
     }
     
-    public LocalContact(int vendor, int version, KUID nodeId, 
+    public LocalContact(Vendor vendor, Version version, KUID nodeId, 
             int instanceId, int flags) {
         this.vendor = vendor;
         this.version = version;
@@ -86,22 +88,22 @@ public class LocalContact implements Contact {
     /**
      * Sets the local Node's vendor code
      */
-    public void setVendor(int vendor) {
+    public void setVendor(Vendor vendor) {
         this.vendor = vendor;
     }
     
-    public int getVendor() {
+    public Vendor getVendor() {
         return vendor;
     }
     
     /**
      * Sets the local Node's version number
      */
-    public void setVersion(int version) {
+    public void setVersion(Version version) {
         this.version = version;
     }
     
-    public int getVersion() {
+    public Version getVersion() {
         return version;
     }
     

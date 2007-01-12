@@ -31,6 +31,8 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -198,8 +200,8 @@ public final class ContactUtils {
         // guy adds this Contact to its RouteTable. To do so
         // we're creating a firewalled version of our local Node
         // (with the inverted Node ID of course).
-        int vendor = localNode.getVendor();
-        int version = localNode.getVersion();
+        Vendor vendor = localNode.getVendor();
+        Version version = localNode.getVersion();
         KUID nodeId = localNode.getNodeID().invert();
         SocketAddress addr = localNode.getContactAddress();
         Contact sender = ContactFactory.createLiveContact(

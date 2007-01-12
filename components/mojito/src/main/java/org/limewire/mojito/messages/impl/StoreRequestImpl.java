@@ -30,6 +30,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 import org.limewire.security.QueryKey;
 
 
@@ -53,7 +54,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
     }
     
     public StoreRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.queryKey = in.readQueryKey();

@@ -41,7 +41,7 @@ public class ContactFactory {
      * @param version The version
      * @param firewalled whether or not we're firewalled
      */
-    public static Contact createLocalContact(int vendor, int version, boolean firewalled) {
+    public static Contact createLocalContact(Vendor vendor, Version version, boolean firewalled) {
         return createLocalContact(vendor, version, KUID.createRandomID(), 0, firewalled);
     }
     
@@ -53,7 +53,7 @@ public class ContactFactory {
      * @param nodeId Our Node ID
      * @param firewalled whether or not we're firewalled
      */
-    public static Contact createLocalContact(int vendor, int version, 
+    public static Contact createLocalContact(Vendor vendor, Version version, 
             KUID nodeId, int instanceId, boolean firewalled) {
         return new LocalContact(vendor, version, nodeId, instanceId, firewalled);
     }
@@ -70,8 +70,8 @@ public class ContactFactory {
      * @param instanceId The instanceId of the Node
      * @param whether or not the Node is firewalled
      */
-    public static Contact createLiveContact(SocketAddress sourceAddress, int vendor, 
-            int version, KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
+    public static Contact createLiveContact(SocketAddress sourceAddress, Vendor vendor, 
+            Version version, KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
         return new RemoteContact(sourceAddress, vendor, version, 
                 nodeId, contactAddress, instanceId, flags, State.ALIVE);
     }
@@ -84,7 +84,7 @@ public class ContactFactory {
      * @param nodeId The NodeID of the Contact
      * @param contactAddress The address where to send requests and responses
      */
-    public static Contact createUnknownContact(int vendor, int version, 
+    public static Contact createUnknownContact(Vendor vendor, Version version, 
             KUID nodeId, SocketAddress contactAddress) {
         return new RemoteContact(null, vendor, version, 
                 nodeId, contactAddress, 0, Contact.DEFAULT_FLAG, State.UNKNOWN);

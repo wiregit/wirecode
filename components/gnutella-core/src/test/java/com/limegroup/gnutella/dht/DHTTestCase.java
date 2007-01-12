@@ -9,6 +9,8 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
@@ -82,8 +84,8 @@ public abstract class DHTTestCase extends BaseTestCase {
             KUID kuid = KUID.createRandomID();
             RemoteContact node = new RemoteContact(
                     new InetSocketAddress("localhost",4000+i),
-                    ContextSettings.VENDOR.getValue(),
-                    ContextSettings.VERSION.getValue(),
+                    ContextSettings.getVendor(),
+                    ContextSettings.getVersion(),
                     kuid,
                     new InetSocketAddress("localhost",4000+i),
                     0,

@@ -12,6 +12,8 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -112,7 +114,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //only first hex counts
         KUID id = KUID.createWithHexString("03ED9650238A6C576C987793C01440A0EA91A1FB");
-        Contact localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
+        Contact localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         
         bootstrapper.bootstrap();
@@ -123,7 +125,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         
         //change first hex. Should point to last elem of the list
         id = KUID.createWithHexString("F3ED9650238A6C576C987793C01440A0EA91A1FB");
-        localNode = ContactFactory.createLocalContact(0, 0, id, 0, false);
+        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, id, 0, false);
         PrivilegedAccessor.setValue(dhtContext.getRouteTable(), "localNode", localNode);
         addr = (InetSocketAddress) bootstrapper.getSimppHost();
         address = addr.getHostName();

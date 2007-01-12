@@ -13,6 +13,8 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.ContactPinger;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 
@@ -221,7 +223,7 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
             KUID nodeId = KUID.createWithHexString(id);
             SocketAddress addr = new InetSocketAddress("localhost", 5000);
             routeTable.add(ContactFactory.createLiveContact(
-                    addr, 0, 0, nodeId, addr, 0, Contact.DEFAULT_FLAG));
+                    addr, Vendor.UNKNOWN, Version.UNKNOWN, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}
     	
     	assertEquals(490, routeTable.size());

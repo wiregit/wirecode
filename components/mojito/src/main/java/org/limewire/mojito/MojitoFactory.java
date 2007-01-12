@@ -19,6 +19,8 @@
 
 package org.limewire.mojito;
 
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
 /**
@@ -47,7 +49,7 @@ public class MojitoFactory {
     /**
      * Creates a MojitoDHT with the given name, vendor code and version
      */
-    public static MojitoDHT createDHT(String name, int vendor, int version) {
+    public static MojitoDHT createDHT(String name, Vendor vendor, Version version) {
         return create(name, vendor, version, false);
     }
     
@@ -68,7 +70,7 @@ public class MojitoFactory {
     /**
      * Creates a firewalled MojitoDHT with the given name, vendor code and version
      */
-    public static MojitoDHT createFirewalledDHT(String name, int vendor, int version) {
+    public static MojitoDHT createFirewalledDHT(String name, Vendor vendor, Version version) {
         return create(name, vendor, version, true);
     }
     
@@ -77,15 +79,15 @@ public class MojitoFactory {
      */
     private static Context create(String name, boolean firewalled) {
         return create(name, 
-                ContextSettings.VENDOR.getValue(), 
-                ContextSettings.VERSION.getValue(),
-                firewalled);
+        			ContextSettings.getVendor(), 
+        			ContextSettings.getVersion(), 
+        			firewalled);
     }
     
     /**
      * Creates a MojitoDHT with the given arguments
      */
-    private static Context create(String name, int vendor, int version, boolean firewalled) {
+    private static Context create(String name, Vendor vendor, Version version, boolean firewalled) {
         
         if (name == null) {
             name = DEFAULT_NAME;

@@ -39,6 +39,8 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 
@@ -56,12 +58,12 @@ public interface MojitoDHT {
     /**
      * Returns the vendor of the DHT
      */
-    public int getVendor();
+    public Vendor getVendor();
     
     /**
      * Returns the version of the DHT
      */
-    public int getVersion();
+    public Version getVersion();
     
     /**
      * Returns the DHT stats

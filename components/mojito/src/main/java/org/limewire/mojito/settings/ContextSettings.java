@@ -19,8 +19,8 @@
  
 package org.limewire.mojito.settings;
 
-import java.io.UnsupportedEncodingException;
-
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
@@ -96,7 +96,7 @@ public class ContextSettings extends MojitoProps {
      * This Node's Vendor code
      */
     public static final IntSetting VENDOR
-        = FACTORY.createIntSetting("VENDOR", parseVendorID("LIME"));
+        = FACTORY.createIntSetting("VENDOR", Vendor.parseVendorID("LIME"));
     
     /**
      * This Node's Version
@@ -105,37 +105,16 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createIntSetting("VERSION", 0);
     
     /**
-     * A helper method to convert a 4 character ASCII String
-     * into an Interger
+     * 
      */
-    public static int parseVendorID(String vendorId) {
-        char[] chars = vendorId.toCharArray();
-        if (chars.length != 4) {
-            throw new IllegalArgumentException("VendorID must be 4 characters");
-        }
-        
-        int id = 0;
-        for(char c : chars) {
-            id = (id << 8) | (int)(c & 0xFF);
-        }
-        return id;
+    public static Vendor getVendor() {
+        return new Vendor(ContextSettings.VENDOR.getValue());
     }
     
     /**
-     * A helper method to convert each of vendorId's 4 bytes
-     * into an ASCII character and to return them as String
+     * 
      */
-    public static String toVendorString(int vendorId) {
-        try {
-            byte[] name = new byte[]{
-                (byte)((vendorId >> 24) & 0xFF),
-                (byte)((vendorId >> 16) & 0xFF),
-                (byte)((vendorId >>  8) & 0xFF),
-                (byte)((vendorId      ) & 0xFF)
-            };
-            return new String(name, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+    public static Version getVersion() {
+        return new Version(ContextSettings.VERSION.getValue());
     }
 }

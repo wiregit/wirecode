@@ -18,6 +18,8 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -897,12 +899,12 @@ public final class MessageRouterTest extends LimeTestCase {
 
         public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
         
-        public int getVendor() {
-            return 0;
+        public Vendor getVendor() {
+            return Vendor.UNKNOWN;
         }
         
-        public int getVersion() {
-            return 0;
+        public Version getVersion() {
+            return Version.UNKNOWN;
         }
 
         public void addEventListener(DHTEventListener listener) {

@@ -43,6 +43,8 @@ import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.QueryKey;
 
@@ -173,8 +175,8 @@ public class MessageInputStream extends DataInputStream {
      * Reads a Contact from the InputStream 
      */
     public Contact readContact() throws IOException {
-        int vendor = readInt();
-        int version = readUnsignedShort();
+        Vendor vendor = new Vendor(readInt());
+        Version version = new Version(readUnsignedShort());
         KUID nodeId = readKUID();
         SocketAddress addr = readSocketAddress();
         

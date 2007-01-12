@@ -15,6 +15,8 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 
@@ -220,8 +222,8 @@ public class RouteTableVisualizerDemo {
         for (int i = 1; i < NODE_IDS.length; i++) {
             SocketAddress src = new InetSocketAddress("localhost", 3000+i);
             KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
-            int vendor = 0;
-            int version = 0;
+            Vendor vendor = Vendor.UNKNOWN;
+            Version version = Version.UNKNOWN;
             SocketAddress con = new InetSocketAddress("localhost", 30000+i);
             int instanceId = 0;
             int flags = Contact.DEFAULT_FLAG;

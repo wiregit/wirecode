@@ -27,6 +27,8 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
@@ -64,7 +66,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     public void testRandomNodeAdder() throws Exception {
         DHTSettings.PERSIST_DHT.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        AbstractDHTController controller = new ActiveDHTNodeController(1, 1, new DHTManagerStub());
+        AbstractDHTController controller = new ActiveDHTNodeController(new Vendor(1), new Version(1), new DHTManagerStub());
         controller.start();
         MojitoDHTStub dht = new MojitoDHTStub();
         PrivilegedAccessor.setValue(controller, "dht", dht);
@@ -143,12 +145,12 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
-        public int getVendor() {
-            return 0;
+        public Vendor getVendor() {
+            return Vendor.UNKNOWN;
         }
 
-        public int getVersion() {
-            return 0;
+        public Version getVersion() {
+            return Version.UNKNOWN;
         }
 
         public boolean isBootstrapped() {

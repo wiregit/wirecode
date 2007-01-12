@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
@@ -159,10 +161,10 @@ EventDispatcher<DHTEvent, DHTEventListener>{
     /**
      * Returns the Vendor code of this Node
      */
-    public int getVendor();
+    public Vendor getVendor();
     
     /**
      * Returns the Vendor code of this Node
      */
-    public int getVersion();
+    public Version getVersion();
 }

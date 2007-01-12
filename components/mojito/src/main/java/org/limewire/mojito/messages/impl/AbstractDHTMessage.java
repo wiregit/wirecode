@@ -36,6 +36,8 @@ import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 /**
  * An abstract implementation of DHTMessage
@@ -74,7 +76,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
     }
 
     public AbstractDHTMessage(Context context, OpCode opcode, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -88,7 +90,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         this.opcode = opcode;
         this.messageId = messageId;
         
-        int vendor = in.readInt();
+        Vendor vendor = new Vendor(in.readInt());
         KUID nodeId = in.readKUID();
         SocketAddress contactAddress = in.readSocketAddress();
         
@@ -131,7 +133,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         
         messageId.write(out); // 0-15
         out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
-        out.writeShort(getContact().getVersion()); //17-18
+        out.writeShort(getContact().getVersion().getVersion()); //17-18
         
         // Length is in Little-Endian!
         out.write((payload.length      ) & 0xFF); // 19-22
@@ -163,7 +165,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
-        out.writeInt(getContact().getVendor()); // 1-3
+        out.writeInt(getContact().getVendor().getVendor()); // 1-3
         out.writeKUID(getContact().getNodeID()); // 4-23
         out.writeSocketAddress(getContact().getContactAddress()); // 24-31
         out.writeByte(getContact().getInstanceID()); // 32

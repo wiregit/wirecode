@@ -7,6 +7,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -29,12 +31,12 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The Vendor code of this DHT Node
      */
-    private int vendor = ContextSettings.VENDOR.getValue();
+    private Vendor vendor = ContextSettings.getVendor();
     
     /**
      * The Version of this DHT Node
      */
-    private int version = ContextSettings.VERSION.getValue();
+    private Version version = ContextSettings.getVersion();
     
     /**
      * The DHTController instance
@@ -220,11 +222,11 @@ public class LimeDHTManager implements DHTManager {
         threadPool.invokeLater(r);
     }
     
-    public int getVendor() {
+    public Vendor getVendor() {
         return vendor;
     }
     
-    public int getVersion() {
+    public Version getVersion() {
         return version;
     }
 }

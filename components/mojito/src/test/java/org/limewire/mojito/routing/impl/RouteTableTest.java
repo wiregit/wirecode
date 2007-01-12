@@ -22,6 +22,8 @@ import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.util.CommonUtils;
@@ -490,8 +492,8 @@ public class RouteTableTest extends MojitoTestCase {
         for (int i = 1; i < NODE_IDS.length; i++) {
             SocketAddress src = new InetSocketAddress("localhost", PORT+i);
             KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
-            int vendor = 0;
-            int version = 0;
+            Vendor vendor = Vendor.UNKNOWN;
+            Version version = Version.UNKNOWN;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
             int instanceId = 0;
             int flags = Contact.DEFAULT_FLAG;
@@ -677,7 +679,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> liveContacts = new ArrayList<Contact>();
         for(int i = 0; i < 10; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
             liveContacts.add(node);
@@ -686,7 +688,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> deadContacts = new ArrayList<Contact>();;
         for(int i = 0; i < 400; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
             node.handleFailure();
             node.handleFailure();
@@ -729,7 +731,7 @@ public class RouteTableTest extends MojitoTestCase {
         int port = 3000;
         for(String nodeId : NODE_IDS) {
             Contact node = ContactFactory.createLiveContact(null,
-                    0,0,KUID.createWithHexString(nodeId),
+                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createWithHexString(nodeId),
                     new InetSocketAddress("localhost", port++), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
         }

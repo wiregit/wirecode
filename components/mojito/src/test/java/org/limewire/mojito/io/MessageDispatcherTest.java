@@ -15,6 +15,8 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 
 public class MessageDispatcherTest extends MojitoTestCase {
@@ -55,7 +57,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             assertFalse(sent);
             
             // Send to a non local Node
-            Contact node = ContactFactory.createUnknownContact(0, 0, 
+            Contact node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
                     KUID.createRandomID(), new InetSocketAddress("www.google.com", 5000));
             sent = dispatcher.send(node, helper.createPingRequest(node.getContactAddress()), null);
             assertTrue(sent);
@@ -66,14 +68,14 @@ public class MessageDispatcherTest extends MojitoTestCase {
             assertFalse(sent);
             
             // Send to a Node that has the local Node's ID
-            node = ContactFactory.createUnknownContact(0, 0, 
+            node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
                     context.getLocalNodeID(), new InetSocketAddress("www.google.com", 5000));
             sent = dispatcher.send(node, helper.createPingRequest(node.getContactAddress()), null);
             assertFalse(sent);
             
             // Sender is not firewalled
             Contact sender = ContactFactory.createLiveContact(
-                    new InetSocketAddress("www.google.com", 5000), 0, 0, 
+                    new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.UNKNOWN, 
                     context.getLocalNodeID().invert(), 
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
             
@@ -84,7 +86,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
             
             // Same as abvobe but sender is firewalled
             sender = ContactFactory.createLiveContact(
-                    new InetSocketAddress("www.google.com", 5000), 0, 0, 
+                    new InetSocketAddress("www.google.com", 5000), Vendor.UNKNOWN, Version.UNKNOWN, 
                     context.getLocalNodeID().invert(), 
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             

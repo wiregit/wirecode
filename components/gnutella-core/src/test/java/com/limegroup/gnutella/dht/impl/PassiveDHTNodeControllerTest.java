@@ -14,6 +14,8 @@ import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTEvent;
@@ -63,7 +65,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         //first delete any previous file
         File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(0, 0, dispatcherStub);
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         Context context = (Context) controller.getMojitoDHT();
         Contact localContact = context.getLocalNode();
         KUID nodeID = context.getLocalNodeID();
@@ -73,7 +75,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         controller.start();
         controller.stop();
         //now nodeID should have changed and we should have persisted SOME nodes
-        controller = new PassiveDHTNodeController(0, 0, dispatcherStub);
+        controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         assertNotEquals(nodeID, context.getLocalNodeID());
@@ -83,7 +85,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testAddRemoveLeafDHTNode() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        PassiveControllerTest controller = new PassiveControllerTest(0, 0);
+        PassiveControllerTest controller = new PassiveControllerTest(Vendor.UNKNOWN, Version.UNKNOWN);
         controller.start();
         Context context = (Context) controller.getMojitoDHT();
         PassiveDHTNodeRouteTable rt = (PassiveDHTNodeRouteTable) context.getRouteTable();
@@ -126,16 +128,18 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     private class PassiveControllerTest extends PassiveDHTNodeController {
         
-        public PassiveControllerTest(int vendor, int version) {
+        public PassiveControllerTest(Vendor vendor, Version version) {
             super(vendor, version, dispatcherStub);
         }
 
         @Override
+        // Synchronize the method
         protected synchronized void addLeafDHTNode(String host, int port) {
             super.addLeafDHTNode(host, port);
         }
 
         @Override
+        // Synchronize the method
         protected synchronized SocketAddress removeLeafDHTNode(String host, int port) {
             return super.removeLeafDHTNode(host, port);
         }

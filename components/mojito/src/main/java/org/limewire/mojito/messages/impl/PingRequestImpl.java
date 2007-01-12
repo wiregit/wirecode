@@ -28,6 +28,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.PingRequest;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -42,7 +43,7 @@ public class PingRequestImpl extends AbstractRequestMessage
     }
     
     public PingRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.PING_REQUEST, src, messageId, version, in);
     }
 

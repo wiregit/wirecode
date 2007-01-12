@@ -78,6 +78,8 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.BucketRefresher;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.settings.ContextSettings;
@@ -139,7 +141,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Constructor to create a new Context
      */
-    Context(String name, int vendor, int version, boolean firewalled) {
+    Context(String name, Vendor vendor, Version version, boolean firewalled) {
         this.name = name;
         init(null, null);
         
@@ -152,7 +154,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Constructor to create a Context from a pre-existing
      * RouteTable and Database.
      */
-    Context(String name, int vendor, int version, RouteTable routeTable, Database database) {
+    Context(String name, Vendor vendor, Version version, RouteTable routeTable, Database database) {
         this.name = name;
         
         assert (routeTable != null);
@@ -233,7 +235,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getVendor()
      */
-    public int getVendor() {
+    public Vendor getVendor() {
         return getLocalNode().getVendor();
     }
     
@@ -241,7 +243,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getVersion()
      */
-    public int getVersion() {
+    public Version getVersion() {
         return getLocalNode().getVersion();
     }
     

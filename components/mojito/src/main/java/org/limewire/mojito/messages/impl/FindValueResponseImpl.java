@@ -31,6 +31,7 @@ import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -57,7 +58,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
     }
 
     public FindValueResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, int version, MessageInputStream in) throws IOException {
+            MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
         this.requestLoad = in.readFloat();
