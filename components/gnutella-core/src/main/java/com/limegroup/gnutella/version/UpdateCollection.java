@@ -12,6 +12,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.OSUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -20,7 +22,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
@@ -310,7 +314,16 @@ class UpdateCollection {
         }
         
         // Update the URL to contain the correct pro & language.
-        url = LimeWireUtils.addLWInfoToUrl(url);
+        if(url.indexOf('?') == -1)
+            url += "?";
+        else
+            url += "&";
+        url += "pro="   + LimeWireUtils.isPro() + 
+               "&lang=" + encode(ApplicationSettings.getLanguage()) +
+               "&lv="   + encode(LimeWireUtils.getLimeWireVersion()) +
+               "&jv="   + encode(CommonUtils.getJavaVersion()) +
+               "&os="   + encode(OSUtils.getOS()) +
+               "&osv="  + encode(OSUtils.getOSVersion());
         data.setUpdateURL(url);
         
         try {
@@ -372,5 +385,12 @@ class UpdateCollection {
             return node.getNodeValue();
         else
             return null;
+    }
+    
+    /**
+     * Converts a string into url encoding.
+     */
+    private String encode(String unencoded) {
+        return EncodingUtils.encode(unencoded);
     }
 }
