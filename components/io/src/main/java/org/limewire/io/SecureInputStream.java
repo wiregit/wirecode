@@ -42,7 +42,7 @@ public class SecureInputStream extends FilterInputStream {
                 throw new EOFException("Couldn't read the length of the header");
             }
             
-            length = (length << i) | b;
+            length = (length << 8) | (b & 0xFF);
         }
         
         // A simple sanity check. The length cannot be negative 
