@@ -112,7 +112,7 @@ public class MessageInputStream extends DataInputStream {
      */
     private DHTValue readDHTValue() throws IOException {
         DHTValueType valueType = readValueType();
-        int version = readUnsignedShort();
+        Version version = readVersion();
         
         byte[] data = null;
         int length = readUnsignedShort();
@@ -175,8 +175,8 @@ public class MessageInputStream extends DataInputStream {
      * Reads a Contact from the InputStream 
      */
     public Contact readContact() throws IOException {
-        Vendor vendor = new Vendor(readInt());
-        Version version = new Version(readUnsignedShort());
+        Vendor vendor = readVendor();
+        Version version = readVersion();
         KUID nodeId = readKUID();
         SocketAddress addr = readSocketAddress();
         
@@ -299,10 +299,24 @@ public class MessageInputStream extends DataInputStream {
         return Arrays.asList(entries);
     }
     
-    /***
-     * 
+    /**
+     * Reads a DHTValueType from the InputStream
      */
     public DHTValueType readValueType() throws IOException {
         return DHTValueType.valueOf(readInt());
+    }
+    
+    /**
+     * Reads a Vendor from the InputStream
+     */
+    public Vendor readVendor() throws IOException {
+        return Vendor.valueOf(readInt());
+    }
+    
+    /**
+     * Reads a Version from the InputStream
+     */
+    public Version readVersion() throws IOException {
+        return Version.valueOf(readUnsignedShort());
     }
 }

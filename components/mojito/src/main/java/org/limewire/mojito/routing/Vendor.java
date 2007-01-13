@@ -25,7 +25,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * 
  */
-public class Vendor implements Serializable {
+public class Vendor implements Serializable, Comparable<Vendor> {
     
     private static final long serialVersionUID = 1607453128714814318L;
     
@@ -33,20 +33,8 @@ public class Vendor implements Serializable {
     
     private final int vendor;
     
-    public Vendor(int vendor) {
+    private Vendor(int vendor) {
         this.vendor = vendor;
-    }
-    
-    public Vendor(String name) {
-        if (name == null) {
-            throw new NullPointerException();
-        }
-        
-        if (name.length() != 4) {
-            throw new IllegalArgumentException(name);
-        }
-        
-        this.vendor = parseVendorID(name);
     }
     
     public int getVendor() {
@@ -57,6 +45,10 @@ public class Vendor implements Serializable {
         return vendor;
     }
     
+    public int compareTo(Vendor o) {
+        return vendor - o.vendor;
+    }
+
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -71,11 +63,40 @@ public class Vendor implements Serializable {
         return toString(vendor);
     }
     
+    /** 
+     * An array of cached Vendors. Make it bigger if necessary.
+     */
+    private static final Vendor[] VENDORS = new Vendor[10];
+    
+    /**
+     * Returns a Vendor object for the given vendor ID
+     */
+    public static synchronized Vendor valueOf(int vendorId) {
+        int index = (vendorId & Integer.MAX_VALUE) % VENDORS.length;
+        Vendor vendor = VENDORS[index];
+        if (vendor == null || vendor.vendor != vendorId) {
+            vendor = new Vendor(vendorId);
+            VENDORS[index] = vendor;
+        }
+        return vendor;
+    }
+    
+    /**
+     * Returns a Vendor object for the given vendor ID
+     */
+    public static Vendor valueOf(String vendorId) {
+        return valueOf(parseVendorID(vendorId));
+    }
+    
     /**
      * A helper method to convert a 4 character ASCII String
      * into an Interger
      */
     public static int parseVendorID(String vendorId) {
+        if (vendorId == null) {
+            throw new NullPointerException("VendorID is null");
+        }
+        
         char[] chars = vendorId.toCharArray();
         if (chars.length != 4) {
             throw new IllegalArgumentException("VendorID must be 4 characters");

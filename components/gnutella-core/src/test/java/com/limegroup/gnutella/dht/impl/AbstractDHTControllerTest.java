@@ -66,7 +66,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     public void testRandomNodeAdder() throws Exception {
         DHTSettings.PERSIST_DHT.setValue(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        AbstractDHTController controller = new ActiveDHTNodeController(new Vendor(1), new Version(1), new DHTManagerStub());
+        
+        AbstractDHTController controller = new ActiveDHTNodeController(
+                Vendor.valueOf(1), Version.valueOf(1), new DHTManagerStub());
+        
         controller.start();
         MojitoDHTStub dht = new MojitoDHTStub();
         PrivilegedAccessor.setValue(controller, "dht", dht);

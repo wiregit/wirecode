@@ -90,7 +90,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         this.opcode = opcode;
         this.messageId = messageId;
         
-        Vendor vendor = new Vendor(in.readInt());
+        Vendor vendor = in.readVendor();
         KUID nodeId = in.readKUID();
         SocketAddress contactAddress = in.readSocketAddress();
         

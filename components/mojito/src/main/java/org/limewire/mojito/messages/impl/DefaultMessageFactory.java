@@ -80,7 +80,7 @@ public class DefaultMessageFactory implements MessageFactory {
                 throw new MessageFormatException("Unknown function ID: " + func);
             }
             
-            Version version = new Version(in.readUnsignedShort());
+            Version version = in.readVersion();
             //byte[] length = in.readBytes(4); // Little-Endian!
             in.skip(4);
             

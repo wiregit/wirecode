@@ -24,7 +24,7 @@ import java.io.Serializable;
 /**
  * 
  */
-public class Version implements Serializable {
+public class Version implements Serializable, Comparable<Version> {
 
     private static final long serialVersionUID = -4652316695244961502L;
 
@@ -32,24 +32,8 @@ public class Version implements Serializable {
     
     private final int version;
     
-    public Version(int version) {
-        if ((version & 0xFFFF0000) != 0) {
-            throw new IllegalArgumentException("Version is out of range: " + version);
-        }
-        
+    private Version(int version) {
         this.version = version;
-    }
-    
-    public Version(int major, int minor) {
-        if ((major & 0xFFFFFF00) != 0) {
-            throw new IllegalArgumentException("Major version is out of range: " + major);
-        }
-        
-        if ((minor & 0xFFFFFF00) != 0) {
-            throw new IllegalArgumentException("Minor version is out of range: " + minor);
-        }
-        
-        this.version = ((major & 0xFF) << 8) | (minor & 0xFF);
     }
     
     public int getMajor() {
@@ -68,6 +52,10 @@ public class Version implements Serializable {
         return getVersion();
     }
     
+    public int compareTo(Version o) {
+        return version - o.version;
+    }
+
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -80,5 +68,34 @@ public class Version implements Serializable {
     
     public String toString() {
         return getMajor() + "." + getMinor();
+    }
+    
+    /** 
+     * An array of cached Versions. Make it bigger if necessary.
+     */
+    private static final Version[] VERSIONS = new Version[10];
+    
+    /**
+     * Returns a Version object for the given version number
+     */
+    public static synchronized Version valueOf(int version) {
+        if ((version & 0xFFFF0000) != 0) {
+            throw new IllegalArgumentException("Version is out of range (0x0000 - 0xFFFF): " + version);
+        }
+        
+        int index = version % VERSIONS.length;
+        Version v = VERSIONS[index];
+        if (v == null || v.version != version) {
+            v = new Version(version);
+            VERSIONS[index] = v;
+        }
+        return v;
+    }
+    
+    /**
+     * Returns a Version object for the given major and minor version number
+     */
+    public static Version valueOf(int major, int minor) {
+        return valueOf((major << 8) | minor);
     }
 }

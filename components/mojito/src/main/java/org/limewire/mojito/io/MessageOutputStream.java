@@ -32,11 +32,14 @@ import java.util.Map.Entry;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.security.QueryKey;
 
 
@@ -97,8 +100,8 @@ public class MessageOutputStream extends DataOutputStream {
      * 
      */
     private void writeDHTValue(DHTValue value) throws IOException {
-        writeInt(value.getValueType().toInt());
-        writeShort(value.getVersion());
+        writeDHTValueType(value.getValueType());
+        writeVersion(value.getVersion());
         byte[] data = value.getValue();
         writeShort(data.length);
         write(data, 0, data.length);
@@ -140,8 +143,8 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the given Contact to the OutputStream
      */
     public void writeContact(Contact node) throws IOException {
-        writeInt(node.getVendor().getVendor());
-        writeShort(node.getVersion().getVersion());
+        writeVendor(node.getVendor());
+        writeVersion(node.getVersion());
         writeKUID(node.getNodeID());
         writeSocketAddress(node.getContactAddress());
     }
@@ -247,5 +250,26 @@ public class MessageOutputStream extends DataOutputStream {
         }
         
         writeByte(size);
+    }
+    
+    /**
+     * Writes the DHTValueType to the OutputStream
+     */
+    public void writeDHTValueType(DHTValueType type) throws IOException {
+        writeInt(type.toInt());
+    }
+    
+    /**
+     * Writes the Vendor to the OutputStream
+     */
+    public void writeVendor(Vendor vendor) throws IOException {
+        writeInt(vendor.getVendor());
+    }
+    
+    /**
+     * Writes the Version to the OutputStream
+     */
+    public void writeVersion(Version version) throws IOException {
+        writeShort(version.getVersion());
     }
 }

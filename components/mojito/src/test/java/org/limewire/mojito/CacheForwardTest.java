@@ -38,6 +38,7 @@ import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
@@ -152,7 +153,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // Store the value
             //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
             KUID valueId = KUID.createRandomID();
-            DHTValue value = new DHTValue(DHTValueType.TEST, 0, "Hello World".getBytes());
+            DHTValue value = new DHTValue(DHTValueType.TEST, Version.UNKNOWN, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
             

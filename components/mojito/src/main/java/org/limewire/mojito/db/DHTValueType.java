@@ -142,7 +142,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
 
     public int hashCode() {
-        return type & Integer.MAX_VALUE;
+        return type;
     }
     
     public boolean equals(Object o) {
@@ -174,10 +174,14 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         }
     }
     
+    public static DHTValueType valueOf(String type) {
+        return valueOf(parse(type));
+    }
+    
     private static int parse(String type) {
         char[] chars = type.toCharArray();
         if (chars.length != 4) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Length of DHTValueType must be exactly 4 chars but is: " + chars.length);
         }
         
         int id = 0;

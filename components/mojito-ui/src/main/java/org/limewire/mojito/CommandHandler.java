@@ -45,6 +45,7 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DHTStats;
@@ -246,7 +247,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreResult evt = dht.put(key, new DHTValue(DHTValueType.TEST, 0, value)).get();
+            StoreResult evt = dht.put(key, new DHTValue(DHTValueType.TEST, Version.UNKNOWN, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());

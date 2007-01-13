@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ArrayUtils;
 
 
@@ -43,7 +44,7 @@ public class DHTValue implements Serializable {
     /**
      * An empty value
      */
-    public static final DHTValue EMPTY_VALUE = new DHTValue(DHTValueType.BINARY, 0, EMPTY);
+    public static final DHTValue EMPTY_VALUE = new DHTValue(DHTValueType.BINARY, Version.UNKNOWN, EMPTY);
     
     /**
      * The type of the value
@@ -53,7 +54,7 @@ public class DHTValue implements Serializable {
     /**
      * The version of the value
      */
-    private final int version;
+    private final Version version;
     
     /**
      * The actual value
@@ -66,7 +67,7 @@ public class DHTValue implements Serializable {
     private final int hashCode;
     
     public DHTValue(DHTValueType valueType, 
-            int version, byte[] value) {
+            Version version, byte[] value) {
         this.valueType = valueType;
         this.version = version;
         
@@ -89,7 +90,7 @@ public class DHTValue implements Serializable {
     /**
      * Returns the version of the value
      */
-    public int getVersion() {
+    public Version getVersion() {
         return version;
     }
     

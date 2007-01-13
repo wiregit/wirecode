@@ -114,26 +114,26 @@ public class RemoteContactTest extends MojitoTestCase {
     public void testVendorAndVersion() {
         setLocalIsPrivate(false);
         
-        Contact node1 = ContactFactory.createLocalContact(new Vendor(1), new Version(2), false);
+        Contact node1 = ContactFactory.createLocalContact(Vendor.valueOf(1), Version.valueOf(2), false);
         
-        assertEquals(new Vendor(1), node1.getVendor());
-        assertEquals(new Version(2), node1.getVersion());
+        assertEquals(Vendor.valueOf(1), node1.getVendor());
+        assertEquals(Version.valueOf(2), node1.getVersion());
         
         Contact node2 = ContactFactory.createLiveContact(
                 new InetSocketAddress("localhost", 1024), 
-                new Vendor(3), new Version(4), KUID.createRandomID(), 
+                Vendor.valueOf(3), Version.valueOf(4), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048), 
                 0, Contact.DEFAULT_FLAG);
         
-        assertEquals(new Vendor(3), node2.getVendor());
-        assertEquals(new Version(4), node2.getVersion());
+        assertEquals(Vendor.valueOf(3), node2.getVendor());
+        assertEquals(Version.valueOf(4), node2.getVersion());
         
         Contact node3 = ContactFactory.createUnknownContact(
-                new Vendor(5), new Version(6), KUID.createRandomID(), 
+                Vendor.valueOf(5), Version.valueOf(6), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2048));
         
-        assertEquals(new Vendor(5), node3.getVendor());
-        assertEquals(new Version(6), node3.getVersion());
+        assertEquals(Vendor.valueOf(5), node3.getVendor());
+        assertEquals(Version.valueOf(6), node3.getVersion());
     }
     
     public void testAdaptiveTimeout() {

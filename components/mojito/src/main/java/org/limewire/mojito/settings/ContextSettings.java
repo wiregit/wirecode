@@ -108,13 +108,13 @@ public class ContextSettings extends MojitoProps {
      * 
      */
     public static Vendor getVendor() {
-        return new Vendor(ContextSettings.VENDOR.getValue());
+        return Vendor.valueOf(ContextSettings.VENDOR.getValue());
     }
     
     /**
      * 
      */
     public static Version getVersion() {
-        return new Version(ContextSettings.VERSION.getValue());
+        return Version.valueOf(ContextSettings.VERSION.getValue());
     }
 }

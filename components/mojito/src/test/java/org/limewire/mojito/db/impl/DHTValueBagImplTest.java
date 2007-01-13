@@ -96,12 +96,12 @@ public class DHTValueBagImplTest extends MojitoTestCase {
         
         try {
             bag.add(new DHTValueEntity(creator, sender, KUID.createRandomID(), 
-                        new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false));
+                        new DHTValue(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false));
         	assertTrue("Should have thrown an exception: wrong KUID", false);
         } catch(IllegalArgumentException ex) {}
         
         bag.add(new DHTValueEntity(creator, sender, valueId, 
-                    new DHTValue(DHTValueType.TEST, 0, "test".getBytes()), false));
+                    new DHTValue(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false));
         
         assertEquals(1, bag.size());
         assertFalse(bag.isEmpty());
