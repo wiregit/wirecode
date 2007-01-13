@@ -90,6 +90,20 @@ public class SecureOutputStream extends FilterOutputStream {
         this.dataSize = blockSize - digestLength;
     }
     
+    /**
+     * Returns the block (buffer) size of the stream
+     */
+    public int getBlockSize() {
+        return dataSize + md.getDigestLength();
+    }
+    
+    /**
+     * Returns the MessageDigest
+     */
+    public MessageDigest getMessageDigest() {
+        return md;
+    }
+    
     private void digest() throws IOException {
         byte[] digest = md.digest();
         out.write(digest, 0, digest.length);

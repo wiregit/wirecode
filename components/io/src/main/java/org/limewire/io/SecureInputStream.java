@@ -105,6 +105,20 @@ public class SecureInputStream extends FilterInputStream {
         this.buffer = new byte[blockSize];
     }
     
+    /**
+     * Returns the block (buffer) size of the stream
+     */
+    public int getBlockSize() {
+        return buffer.length;
+    }
+    
+    /**
+     * Returns the MessageDigest
+     */
+    public MessageDigest getMessageDigest() {
+        return md;
+    }
+    
     private int refill() throws IOException {
         assert (pos >= length);
         
