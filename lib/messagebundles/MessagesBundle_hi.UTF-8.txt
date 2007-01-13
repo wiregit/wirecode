@@ -405,6 +405,7 @@ MENU_NAV_LIB_ACCESSIBLE=लाइब्रेरी परदा प्रदर
 #### MENU_NAV_LOGGING_ACCESSIBLE=Display the Logging Screen
 #? MENU_NAV_LOGGING_ACCESSIBLE=
 
+
 #### MENU_VIEW_TITLE=View
 MENU_VIEW_TITLE=दृश्य (V)
 #### MENU_VIEW_TITLE_MNEMONIC=V
@@ -521,12 +522,22 @@ MENU_RESOURCES_PRO_ACCESSIBLE=लाइमवायर PRO वैबसाइट
 MENU_TOOLS_TITLE=औज़ार (T)
 #### MENU_TOOLS_TITLE_MNEMONIC=T
 MENU_TOOLS_TITLE_MNEMONIC=T
+#### MENU_TOOLS_ADVANCED_TITLE=Advanced
+#? MENU_TOOLS_ADVANCED_TITLE=
+#### MENU_TOOLS_ADVANCED_TITLE_MNEMONIC=A
+#? MENU_TOOLS_ADVANCED_TITLE_MNEMONIC=
 #### MENU_TOOLS_STATISTICS=Statistics
 MENU_TOOLS_STATISTICS=आँकड़े (S)
 #### MENU_TOOLS_STATISTICS_MNEMONIC=S
 MENU_TOOLS_STATISTICS_MNEMONIC=S
 #### MENU_TOOLS_STATISTICS_ACCESSIBLE=Display the Statistics Screen
 MENU_TOOLS_STATISTICS_ACCESSIBLE=आंकड़ों का पर्दा प्रदर्शित करो.
+#### MENU_TOOLS_DHT_ARCS=Mojito DHT Arcs View
+#? MENU_TOOLS_DHT_ARCS=
+#### MENU_TOOLS_DHT_ARCS_MNEMONIC=D
+#? MENU_TOOLS_DHT_ARCS_MNEMONIC=
+#### MENU_TOOLS_DHT_ARCS_ACCESSIBLE=Display a view of the incoming and outgoing DHT messages
+#? MENU_TOOLS_DHT_ARCS_ACCESSIBLE=
 #### MENU_TOOLS_OPTIONS=Options
 MENU_TOOLS_OPTIONS=विकल्पें (O)
 #### MENU_TOOLS_OPTIONS_MNEMONIC=O
@@ -2603,6 +2614,8 @@ OPTIONS_SAVE_MAIN_TITLE=संचित हो रहा है
 OPTIONS_SHARED_MAIN_TITLE=बांटना
 #### OPTIONS_SPEED_MAIN_TITLE=Speed
 OPTIONS_SPEED_MAIN_TITLE=गति
+#### OPTIONS_PERFORMANCE_MAIN_TITLE=Performance
+#? OPTIONS_PERFORMANCE_MAIN_TITLE=
 #### OPTIONS_DOWNLOAD_MAIN_TITLE=Downloads
 OPTIONS_DOWNLOAD_MAIN_TITLE=डाउनलोड
 #### OPTIONS_UPLOAD_MAIN_TITLE=Uploads
@@ -2764,14 +2777,16 @@ OPTIONS_SPEED_LABEL=आप अपने कनेक्शन गति चय�
 OPTIONS_SPEED_BOX_LABEL=गति
 
 ################################################################################
-# Key/Value pairs for disabling supernode support.
+# Key/Value pairs for disabling capabilities
 ################################################################################
-#### OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer Capabilities
-OPTIONS_DISABLE_SUPERNODE_MODE_TITLE=Ultrapeer क्षमता
-#### OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users. You can disable this if needed.
-#? OPTIONS_DISABLE_SUPERNODE_MODE_LABEL=
+#### OPTIONS_DISABLE_CAPABILITIES_TITLE=Capabilities
+#? OPTIONS_DISABLE_CAPABILITIES_TITLE=
+#### OPTIONS_DISABLE_CAPABILITIES_LABEL=If your computer has a fast internet connection, LimeWire may act as an "Ultrapeer" for slower users and/or connect to the Mojito DHT. You can disable these if needed.
+#? OPTIONS_DISABLE_CAPABILITIES_LABEL=
 #### OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Disable Ultrapeer Capabilities:
 OPTIONS_DISABLE_SUPERNODE_MODE_BOX_LABEL=Ultrapeer सक्षमता को निष्क्रीय करें:
+#### OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=Disable Mojito DHT Capabilities:
+#? OPTIONS_DISABLE_DHT_MODE_BOX_LABEL=
 
 ################################################################################
 # Key/Value pairs for disabling OOB support.
