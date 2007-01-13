@@ -23,7 +23,7 @@ for JAR in $(find ${ROOT}/lib/jars -name *.jar); do
    CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${JAR}"
 done
 
-for JAR in $(find ${COMPONENTS}/mojito-ui/lib -name *.jar); do 
+for JAR in $(find ${COMPONENTS}/mojito-ui/misc/lib -name *.jar); do 
    CLASSPATH="${CLASSPATH}${PATH_SEPARATOR}${JAR}"
 done
 
