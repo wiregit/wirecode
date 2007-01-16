@@ -23,7 +23,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * and retrieve values.
  */
 public interface DHTManager extends ConnectionLifecycleListener, 
-EventDispatcher<DHTEvent, DHTEventListener>{
+        EventDispatcher<DHTEvent, DHTEventListener>{
     
     /**
      * Various modes a DHT Node may have

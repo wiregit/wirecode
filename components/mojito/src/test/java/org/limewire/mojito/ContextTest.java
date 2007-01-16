@@ -61,7 +61,9 @@ public class ContextTest extends MojitoTestCase {
             
             // Check now if the expected number of Nodes
             // was notified about the shutdown
-            int count = 0;
+            int downCounter = 0;
+            int locationCounter = 0;
+            
             for (int i = 0; i < dhts.size(); i++) {
                 if (i != index) {
                     Context dht = (Context)dhts.get(i);
@@ -72,14 +74,20 @@ public class ContextTest extends MojitoTestCase {
                         if (node.isShutdown()) {
                             assertFalse("There shouldn't be more than one Nodes in DOWN state per RouteTable", flag);
                             
-                            count++;
+                            downCounter++;
                             flag = true;
+                        }
+                        
+                        if (node.getNodeID().equals(down.getLocalNodeID())) {
+                            locationCounter++;
                         }
                     }
                 }
             }
-            Thread.sleep(200);
-            assertEquals(expected, count);
+            
+            assertGreaterThanOrEquals(expected, locationCounter);
+            assertEquals(expected, downCounter);
+            
         } finally {
             for (MojitoDHT dht : dhts) {
                 dht.close();

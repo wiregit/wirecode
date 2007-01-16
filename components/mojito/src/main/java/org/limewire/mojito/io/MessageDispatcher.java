@@ -92,31 +92,35 @@ public abstract class MessageDispatcher {
     /** Queue of things we have to send */
     private List<Tag> outputQueue = new LinkedList<Tag>();
     
-    /** A lock for the outputQueue */
-    private Object outputQueueLock = new Object();
+    /** The lock Object of the output queue */
+    private final Object outputQueueLock = new Object();
     
     /** Map of Messages (responses) we're awaiting */
-    private ReceiptMap receiptMap = new ReceiptMap(512);
+    private final ReceiptMap receiptMap = new ReceiptMap(512);
     
-    /** A lock for the ReceiptMap */
-    private Object receiptMapLock = new Object();
-    
+    /** Handle of the Context */
     protected final Context context;
     
-    private DefaultMessageHandler defaultHandler;
-    private PingRequestHandler pingHandler;
-    private FindNodeRequestHandler findNodeHandler;
-    private FindValueRequestHandler findValueHandler;
-    private StoreRequestHandler storeHandler;
-    private StatsRequestHandler statsHandler;
+    private final DefaultMessageHandler defaultHandler;
+    private final PingRequestHandler pingHandler;
+    private final FindNodeRequestHandler findNodeHandler;
+    private final FindValueRequestHandler findValueHandler;
+    private final StoreRequestHandler storeHandler;
+    private final StatsRequestHandler statsHandler;
     
-    private ByteBuffer receiveBuffer;
+    /**
+     * Buffer for incoming Messages
+     */
+    private final ByteBuffer receiveBuffer;
     
-    private final List<MessageDispatcherListener> listeners 
-        = new CopyOnWriteArrayList<MessageDispatcherListener>();
-    
+    /**
+     * Message Filter
+     */
     private volatile Filter filter;
     
+    /**
+     * Handle of the cleanup task future
+     */
     private ScheduledFuture cleanupTaskFuture;
     
     /**
@@ -125,6 +129,10 @@ public abstract class MessageDispatcher {
      */
     private volatile boolean allocateNewByteBuffer 
         = NetworkSettings.ALLOCATE_NEW_BUFFER.getValue();
+    
+    /** A list of MessageDispatcherListeners */
+    private final List<MessageDispatcherListener> listeners 
+        = new CopyOnWriteArrayList<MessageDispatcherListener>();
     
     public MessageDispatcher(Context context) {
         this.context = context;
@@ -188,7 +196,7 @@ public abstract class MessageDispatcher {
      */
     public void start() {
         // Start the CleanupTask
-    	synchronized (receiptMapLock) {
+    	synchronized (getReceiptMapLock()) {
             if (cleanupTaskFuture == null) {
                 long delay = NetworkSettings.CLEANUP_RECEIPTS_DELAY.getValue();
                 
@@ -209,7 +217,7 @@ public abstract class MessageDispatcher {
      */
     public void stop() {
         // Stop the CleanupTask
-    	synchronized (receiptMapLock) {
+    	synchronized (getReceiptMapLock()) {
             if (cleanupTaskFuture != null) {
                 cleanupTaskFuture.cancel(true);
                 cleanupTaskFuture = null;
@@ -241,9 +249,32 @@ public abstract class MessageDispatcher {
     }
     
     /**
+     * Returns whether or not incoming Requests or Respones
+     * are accepted. The default implementation returns true.
+     */
+    public boolean isAccepting() {
+        return true;
+    }
+    
+    /**
      * Returns whether or not the MessageDispatcher is running
      */
     public abstract boolean isRunning();
+    
+    /**
+     * The lock Object of the output Queue. Hold this lock
+     * if you must send a bulk of Messages.
+     */
+    public Object getOutputQueueLock() {
+        return outputQueueLock;
+    }
+    
+    /**
+     * The lock Object of the ReceiptMap
+     */
+    private Object getReceiptMapLock() {
+        return receiptMap;
+    }
     
     /**
      * Sends a ResponseMessage to the given Contact
@@ -381,7 +412,7 @@ public abstract class MessageDispatcher {
      * Enqueues Tag to the Output queue
      */
     protected boolean enqueueOutput(Tag tag) {
-        synchronized(outputQueueLock) {
+        synchronized(getOutputQueueLock()) {
             outputQueue.add(tag);
         }
         
@@ -472,6 +503,16 @@ public abstract class MessageDispatcher {
      * Handles a DHTMessage as read from Network
      */
     protected void handleMessage(DHTMessage message) {
+        
+        if (!isAccepting()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Dropping " + message 
+                        + " because MessageDispatcher is "
+                        + "not accepting requests nor responses");
+            }
+            return;
+        }
+
         // Make sure we're not receiving messages from ourself.
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
@@ -538,7 +579,7 @@ public abstract class MessageDispatcher {
              
             Receipt receipt = null;
             
-            synchronized(receiptMapLock) {
+            synchronized(getReceiptMapLock()) {
                 receipt = receiptMap.get(message.getMessageID());
                 
                 if (receipt != null) {
@@ -610,7 +651,6 @@ public abstract class MessageDispatcher {
      * queue to the Network and returns whether or not some
      * Messages were left in the output queue.
      */
-    @SuppressWarnings("unused")
     public boolean handleWrite() throws IOException {
         
         // Get a local reference of outputQueue and
@@ -618,7 +658,7 @@ public abstract class MessageDispatcher {
         // being added will end up in the new List and
         // we work localy with the previous List.
         List<Tag> queue = null;
-        synchronized (outputQueueLock) {
+        synchronized (getOutputQueueLock()) {
             queue = outputQueue;
             outputQueue = new LinkedList<Tag>();
         }
@@ -657,7 +697,7 @@ public abstract class MessageDispatcher {
         // was not send stays in the front of the Queue followed
         // by stuff that was added during the while-loop above.
         boolean isEmpty = false;
-        synchronized (outputQueueLock) {
+        synchronized (getOutputQueueLock()) {
             if (!queue.isEmpty()) {
                 queue.addAll(outputQueue);
                 outputQueue = queue;
@@ -665,6 +705,7 @@ public abstract class MessageDispatcher {
             
             isEmpty = outputQueue.isEmpty();
         }
+        
         interestWrite(!isEmpty);
         return !isEmpty;
     }
@@ -692,9 +733,9 @@ public abstract class MessageDispatcher {
     protected void registerInput(Tag tag) {
         Receipt receipt = tag.sent();
         if (receipt != null) {
-            synchronized (receiptMapLock) {
+            synchronized (getReceiptMapLock()) {
                 receiptMap.add(receipt);
-                receiptMapLock.notifyAll();
+                getReceiptMapLock().notifyAll();
             }
         }
         
@@ -750,11 +791,11 @@ public abstract class MessageDispatcher {
      * Clears the output queue and receipt map
      */
     protected void clear() {
-        synchronized(outputQueueLock) {
+        synchronized(getReceiptMapLock()) {
             outputQueue.clear();
         }
         
-        synchronized (receiptMapLock) {
+        synchronized (getReceiptMapLock()) {
             receiptMap.clear();
         }
     }
@@ -763,7 +804,7 @@ public abstract class MessageDispatcher {
      * Cleans up the receipt mapping.
      */
     private void cleanup() {
-        synchronized (receiptMapLock) {
+        synchronized (getReceiptMapLock()) {
             receiptMap.cleanup();
         }
     }

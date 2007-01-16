@@ -796,18 +796,20 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             
             List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
             
-            for (Contact node : nodes) {
-                if (!node.equals(localNode)) {
-                    // We are not interested in the responses as we're going
-                    // to shutdown. Send pings without tagging the MessageIDs
-                    // and to register a response handler for the pings.
-                    RequestMessage request = getMessageFactory()
-                        .createPingRequest(localNode, MessageID.createWithSocketAddress(null));
-                    
-                    try {
-                        messageDispatcher.send(node, request, null);
-                    } catch (IOException err) {
-                        LOG.error("IOException", err);
+            synchronized (messageDispatcher.getOutputQueueLock()) {
+                for (Contact node : nodes) {
+                    if (!node.equals(localNode)) {
+                        // We are not interested in the responses as we're going
+                        // to shutdown. Send pings without tagging the MessageIDs
+                        // and to register a response handler for the pings.
+                        RequestMessage request = getMessageFactory()
+                            .createPingRequest(localNode, MessageID.createWithSocketAddress(null));
+                        
+                        try {
+                            messageDispatcher.send(node, request, null);
+                        } catch (IOException err) {
+                            LOG.error("IOException", err);
+                        }
                     }
                 }
             }

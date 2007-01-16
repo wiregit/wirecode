@@ -31,7 +31,6 @@ import java.security.PublicKey;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,30 +48,61 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
 
     private static final Log LOG = LogFactory.getLog(MessageDispatcherImpl.class);
     
+    /**
+     * Sleep timeout of the Selector
+     */
     private static final long SELECTOR_SLEEP = 50L;
     
+    /**
+     * A flag whether or not this MD is running
+     */
     private volatile boolean running = false;
     
+    /**
+     * A flag whether or not this MD is accepting incoming 
+     * Requests and Responses
+     */
+    private volatile boolean accepting = false;
+    
+    /**
+     * The DatagramChannel's Selector
+     */
     private Selector selector;
     
+    /**
+     * The DatagramChanel
+     */
     private DatagramChannel channel;
     
+    /**
+     * The ExecutorService where processes are executed
+     */
     private ExecutorService executor;
     
+    /**
+     * The Thread this MD is running on
+     */
     private Thread thread;
     
     /**
      * The DatagramChannel lock Object
      */
-    protected final Object channelLock = new Object();
+    private final Object channelLock = new Object();
 
     public MessageDispatcherImpl(Context context) {
         super(context);
     }
     
+    /**
+     * Returns the DatagramChannel lock
+     */
+    protected Object getDatagramChannelLock() {
+        return channelLock;
+    }
+    
     @Override
     public void bind(SocketAddress address) throws IOException {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (isOpen()) {
                 throw new IOException("DatagramChannel is already open");
             }
@@ -96,23 +126,25 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * Returns true if the DatagramChannel is open
      */
     public boolean isOpen() {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             return channel != null && channel.isOpen();
         }
     }
-
+    
     /**
      * Returns the DatagramChannel
      */
     public DatagramChannel getDatagramChannel() {
-        return channel;
+        synchronized (getDatagramChannelLock()) {
+            return channel;
+        }
     }
     
     /**
      * Returns the DatagramChannel Socket's local SocketAddress
      */
     public SocketAddress getLocalSocketAddress() {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (channel != null && channel.isOpen()) {
                 return channel.socket().getLocalSocketAddress();
             }
@@ -123,7 +155,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     public void start() {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 throw new IllegalStateException("MessageDispatcher is not bound");
             }
@@ -138,6 +170,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                     }
                 };
                 
+                accepting = true;
                 running = true;
                 
                 executor = Executors.newFixedThreadPool(1, factory);
@@ -154,39 +187,26 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     public void stop() {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
+            // Do not accept any new incoming Requests or Responses
+            accepting = false;
+            
             // Signal the MessageDispatcher Thread that we're
             // going to shutdown and wait for the MD to finish
             // whatever it's doing...
             if (running) {
-                running = false;
                 try {
-                    channelLock.wait(1L*1000L);
+                    getDatagramChannelLock().wait(1000L);
                 } catch (InterruptedException e) {
                     LOG.error("InterruptedException", e);
                 }
+                
+                running = false;
             }
             
             super.stop();
             
             if (executor != null) {
-                // Don't accept new tasks (we rely also on the fact that 
-                // 'running' was set to false - that means we should not
-                // see any RejectedExecutionExceptions that are related
-                // to this Executor) 
-                executor.shutdown(); 
-                
-                // Give the running tasks a bit time to finish
-                try {
-                    executor.awaitTermination(10L*1000L, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException", e);
-                }
-                
-                // And if they don't then kill 'em if possible (it's a
-                // good faith effort and if it doesn't work we'll maybe
-                // see some IOExceptions related to the fact that the
-                // DatagramChannel is not open).
                 executor.shutdownNow();
                 executor = null;
             }
@@ -202,7 +222,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     public void close() {
         super.close();
         
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (selector != null) {
                 try {
                     selector.close();
@@ -222,6 +242,11 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             }
         }
     }
+
+    @Override
+    public boolean isAccepting() {
+        return accepting;
+    }
     
     @Override
     public boolean isRunning() {
@@ -230,7 +255,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
 
     @Override
     protected void process(Runnable runnable) {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (isRunning()) {
                 executor.execute(runnable);
             }
@@ -282,7 +307,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     }
     
     private void interest(int ops, boolean on) {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("DatagramChannel is not open");
@@ -317,7 +342,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     
     @Override
     protected SocketAddress receive(ByteBuffer dst) throws IOException {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 throw new IOException("DatagramChannel is not open");
             }
@@ -328,7 +353,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
 
     @Override
     protected boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
-        synchronized (channelLock) {
+        synchronized (getDatagramChannelLock()) {
             if (!isOpen()) {
                 throw new IOException("DatagramChannel is not open");
             }
@@ -352,7 +377,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 try {
                     // WRITE
-                    handleWrite();
+                    boolean done = !handleWrite();
+                    if (done && !isAccepting()) {
+                        synchronized (getDatagramChannelLock()) {
+                            getDatagramChannelLock().notifyAll();
+                        }
+                    }
                 } catch (IOException err) {
                     LOG.error("IOException-WRITE", err);
                 }
