@@ -96,7 +96,7 @@ public class ContextSettings extends MojitoProps {
      * This Node's Vendor code
      */
     public static final IntSetting VENDOR
-        = FACTORY.createIntSetting("VENDOR", Vendor.parseVendorID("LIME"));
+        = FACTORY.createIntSetting("VENDOR", Vendor.parse("LIME"));
     
     /**
      * This Node's Version
@@ -105,14 +105,14 @@ public class ContextSettings extends MojitoProps {
         = FACTORY.createIntSetting("VERSION", 0);
     
     /**
-     * 
+     * Returns the local Node's Vendor ID
      */
     public static Vendor getVendor() {
         return Vendor.valueOf(ContextSettings.VENDOR.getValue());
     }
     
     /**
-     * 
+     * Returns the local Node's Version number
      */
     public static Version getVersion() {
         return Version.valueOf(ContextSettings.VERSION.getValue());
