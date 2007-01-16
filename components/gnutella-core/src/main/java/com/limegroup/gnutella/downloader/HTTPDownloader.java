@@ -26,6 +26,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.AssertFailure;
@@ -423,7 +424,13 @@ public class HTTPDownloader implements BandwidthTracker {
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
         }
         
-        _socket.setKeepAlive(true);
+        try {
+            _socket.setKeepAlive(true);
+        } catch (IOException iox) {
+            if (!OSUtils.isWindowsVista())
+                throw iox;
+            LOG.warn("couldn't set keepalive");
+        }
         observerHandler = new Observer();
         _stateMachine = new IOStateMachine(observerHandler, new LinkedList<IOState>(), BUF_LENGTH);
         _stateMachine.setReadChannel(new ThrottleReader(RouterService.getBandwidthManager().getReadThrottle()));
