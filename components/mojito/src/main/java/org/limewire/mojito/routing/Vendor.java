@@ -19,7 +19,6 @@
 
 package org.limewire.mojito.routing;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
@@ -94,7 +93,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
      * if one exists. The main goal is to pre-initialize the VENDORS
      * array.
      */
-    private Object readResolve() throws ObjectStreamException {
+    private Object readResolve() {
         synchronized (getClass()) {
             int index = (vendorId & Integer.MAX_VALUE) % VENDORS.length;
             Vendor vendor = VENDORS[index];

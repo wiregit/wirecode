@@ -65,11 +65,11 @@ public class SecureInputOutputTest extends BaseTestCase {
             } else if (clazz.equals(Integer.class)) {
                 dos.writeInt(i);
             } else if (clazz.equals(Float.class)) {
-                dos.writeFloat((float)i);
+                dos.writeFloat(i);
             } else if (clazz.equals(Long.class)) {
-                dos.writeLong((long)i);
+                dos.writeLong(i);
             } else if (clazz.equals(Double.class)) {
-                dos.writeDouble((double)i);
+                dos.writeDouble(i);
             } else if (clazz.equals(String.class)) {
                 dos.writeUTF(str[k++ % str.length]);
             }
@@ -100,7 +100,7 @@ public class SecureInputOutputTest extends BaseTestCase {
             } else if (clazz.equals(Float.class)) {
                 assertEquals((float)i, dis.readFloat());
             } else if (clazz.equals(Long.class)) {
-                assertEquals((long)i, dis.readLong());
+                assertEquals(i, dis.readLong());
             } else if (clazz.equals(Double.class)) {
                 assertEquals((double)i, dis.readDouble());
             } else if (clazz.equals(String.class)) {
@@ -163,11 +163,11 @@ public class SecureInputOutputTest extends BaseTestCase {
             } else if (clazz.equals(Integer.class)) {
                 dos.writeInt(i);
             } else if (clazz.equals(Float.class)) {
-                dos.writeFloat((float)i);
+                dos.writeFloat(i);
             } else if (clazz.equals(Long.class)) {
-                dos.writeLong((long)i);
+                dos.writeLong(i);
             } else if (clazz.equals(Double.class)) {
-                dos.writeDouble((double)i);
+                dos.writeDouble(i);
             } else if (clazz.equals(String.class)) {
                 dos.writeUTF(str[k++ % str.length]);
             }
@@ -198,7 +198,7 @@ public class SecureInputOutputTest extends BaseTestCase {
             } else if (clazz.equals(Float.class)) {
                 assertEquals((float)i, dis.readFloat());
             } else if (clazz.equals(Long.class)) {
-                assertEquals((long)i, dis.readLong());
+                assertEquals(i, dis.readLong());
             } else if (clazz.equals(Double.class)) {
                 assertEquals((double)i, dis.readDouble());
             } else if (clazz.equals(String.class)) {
