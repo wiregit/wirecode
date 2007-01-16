@@ -55,7 +55,11 @@
     </target>
     
     <target name="compile"
-            description="Compiles the source and tests of every component."
+        	description="Compiles the source and tests of every component."
+        	depends="compile-core, compile-ui"/>
+    
+    <target name="compile-core"
+            description="Compiles the source and tests of every non-UI component."
             depends="lw-setting.compile, lw-io.compile, lw-security.compile, lw-collection.compile, lw-common.compile, lw-test-util.compile, mojito.compile, mojito-ui.compile">
         <mkdir dir="${build.limewire.components.all.classes}"/>
         <mkdir dir="${build.limewire.components.all.tests}"/>
@@ -67,9 +71,13 @@
 	        <mkdir dir="${build.limewire.components.all.classes}"/>
 	        <mkdir dir="${build.limewire.components.all.tests}"/>
 	</target>
+    
+    <target name="compile-src"
+    		description="Compiles only the source code of every component."
+    		depends="compile-core-src, compile-ui-src"/>
 	
-	<target name="compile-src"
-	        description="Compiles only the source code of every component."
+	<target name="compile-core-src"
+	        description="Compiles only the source code of every non-UI component."
 	        depends="lw-setting.compile-src, lw-io.compile-src, lw-security.compile-src, lw-collection.compile-src, lw-common.compile-src, mojito.compile-src">
         <mkdir dir="${build.limewire.components.all.classes}"/>
 	</target>

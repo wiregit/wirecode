@@ -30,7 +30,8 @@
 	</target>
 	
 	<target name="compile-tests" depends="mojito.compile-tests">
-	    <do.compile-tests component="mojito-ui"/>
+	   <!-- There are currently no mojito-ui tests. -->
+	   <!-- <do.compile-tests component="mojito-ui"/> -->
 	</target>
 	
 	<target name="clean-tests" depends="mojito.clean-tests">

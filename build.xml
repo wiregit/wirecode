@@ -1,0 +1,77 @@
+<project name="limewire" default="compile-src" basedir=".">
+
+    <property name="limewire.home" location="${basedir}"/>
+
+    <import file="components/build.xml"/>
+    <import file="core/build.xml"/>
+    <import file="gui/build.xml" />
+    <import file="tests/build.xml" />
+    
+    <!-- initializes everything -->
+    <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
+    </target>
+    
+    <target name="compile"
+            description="Compiles all code."
+            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui, lw-tests.compile-src, lw-tests.compile-tests"/>
+    
+    <target name="compile-src"
+            description="Compiles all source code (not tests)."
+            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui"/>
+    
+    <target name="compile-tests"
+            description="Compiles all code required for tests."
+            depends="initialize, lw-components.compile-tests, lw-tests.compile-src, lw-tests.compile-tests"/>
+    
+    <target name="clean" 
+            description="Cleans everything."
+            depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean"/>
+	
+	<target name="clean-src"
+	        description="Cleans artifacts from compiling src."
+            depends="initialize, lw-components.clean-src, clean-core, clean-gui"/>
+    
+	<target name="clean-tests"
+	        description="Cleans artifacts from compiling tests."
+            depends="initialize, lw-components.clean-tests, lw-tests.clean"/>
+        
+	<!-- TODO: implement -->
+    <target name="test-all"/>
+    
+    <!-- TODO: implement -->
+	<target name="jar"/>
+    
+    <!-- TODO: implement -->
+    <target name="clean-dist"/>
+        
+	<!-- TODO: implement -->
+    <target name="javadoc"/>
+    
+    <!-- TODO: implement -->
+    <target name="clover2html"/>
+    
+    <!-- TODO: implement -->
+    <target name="with.clover"/>
+   
+    <!-- mask imported targets -->
+    <target name="test"/>
+    <target name="test-package"/>
+    <target name="compile-core"/>
+    <target name="compile-core-src"/>
+	<target name="compile-ui-src"/>
+    <target name="compile-gui"/>
+
+</project>
+
+
+
+
+
+
+
+
+
+
+
+
+

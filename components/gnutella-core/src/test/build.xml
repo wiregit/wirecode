@@ -86,11 +86,6 @@
 	    			 forkmode="perTest"/>
 	</target>
     
-    <target name="test-all-with-components"
-        	description="Runs every test in this module and every test in every component."
-        	depends="compile">
-    </target>
-    
     <target name="with.clover"
              description="Instructs the build to use clover's instrumenting."
              depends="initialize">
