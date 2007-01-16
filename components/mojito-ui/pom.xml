@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>  
 
   <groupId>org.limewire</groupId>
-  <artifactId>mojito</artifactId>
+  <artifactId>mojito-ui</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>LimeWire Mojito DHT</name>
@@ -52,28 +52,8 @@
 	<!-- LimeWire Components -->
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>lw-common</artifactId>
-      <version>${lw-components.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-collection</artifactId>
-      <version>${lw-components.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-io</artifactId>
-      <version>${lw-components.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-security</artifactId>
-      <version>${lw-components.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-setting</artifactId>
-      <version>${lw-components.version}</version>
+      <artifactId>mojito</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
@@ -81,6 +61,17 @@
       <version>${lw-components.version}</version>
 	  <scope>test</scope>
     </dependency>
+	<!-- Ibiblio Jars -->
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>jung</groupId>
+      <artifactId>jung</artifactId>
+      <version>1.6.0</version>
+    </dependency>	
   </dependencies>
 
   <build>
