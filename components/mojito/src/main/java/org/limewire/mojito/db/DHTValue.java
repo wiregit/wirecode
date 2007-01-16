@@ -143,7 +143,7 @@ public class DHTValue implements Serializable {
         
         DHTValue other = (DHTValue)o;
         return valueType.equals(other.valueType)
-                    && version == other.version
+                    && version.equals(other.version)
                     && Arrays.equals(value, other.value);
     }
     
