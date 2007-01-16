@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.routing;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
@@ -31,22 +32,22 @@ public class Vendor implements Serializable, Comparable<Vendor> {
     
     public static final Vendor UNKNOWN = new Vendor(0);
     
-    private final int vendor;
+    private final int vendorId;
     
-    private Vendor(int vendor) {
-        this.vendor = vendor;
+    private Vendor(int vendorId) {
+        this.vendorId = vendorId;
     }
     
     public int getVendor() {
-        return vendor;
+        return vendorId;
     }
     
     public int hashCode() {
-        return vendor;
+        return vendorId;
     }
     
     public int compareTo(Vendor o) {
-        return vendor - o.vendor;
+        return vendorId - o.vendorId;
     }
 
     public boolean equals(Object o) {
@@ -56,11 +57,11 @@ public class Vendor implements Serializable, Comparable<Vendor> {
             return false;
         }
         
-        return vendor == ((Vendor)o).vendor;
+        return vendorId == ((Vendor)o).vendorId;
     }
     
     public String toString() {
-        return toString(vendor);
+        return toString(vendorId);
     }
     
     /** 
@@ -74,7 +75,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
     public static synchronized Vendor valueOf(int vendorId) {
         int index = (vendorId & Integer.MAX_VALUE) % VENDORS.length;
         Vendor vendor = VENDORS[index];
-        if (vendor == null || vendor.vendor != vendorId) {
+        if (vendor == null || vendor.vendorId != vendorId) {
             vendor = new Vendor(vendorId);
             VENDORS[index] = vendor;
         }
@@ -85,14 +86,31 @@ public class Vendor implements Serializable, Comparable<Vendor> {
      * Returns a Vendor object for the given vendor ID
      */
     public static Vendor valueOf(String vendorId) {
-        return valueOf(parseVendorID(vendorId));
+        return valueOf(parse(vendorId));
+    }
+    
+    /**
+     * Check the cache and replace this instance with the cached instance
+     * if one exists. The main goal is to pre-initialize the VENDORS
+     * array.
+     */
+    private Object readResolve() throws ObjectStreamException {
+        synchronized (getClass()) {
+            int index = (vendorId & Integer.MAX_VALUE) % VENDORS.length;
+            Vendor vendor = VENDORS[index];
+            if (vendor == null || vendor.vendorId != vendorId) {
+                vendor = this;
+                VENDORS[index] = vendor;
+            }
+            return vendor;
+        }
     }
     
     /**
      * A helper method to convert a 4 character ASCII String
      * into an Interger
      */
-    public static int parseVendorID(String vendorId) {
+    public static int parse(String vendorId) {
         if (vendorId == null) {
             throw new NullPointerException("VendorID is null");
         }

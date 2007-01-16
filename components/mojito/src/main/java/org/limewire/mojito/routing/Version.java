@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.routing;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 
 /**
@@ -84,12 +85,12 @@ public class Version implements Serializable, Comparable<Version> {
         }
         
         int index = version % VERSIONS.length;
-        Version v = VERSIONS[index];
-        if (v == null || v.version != version) {
-            v = new Version(version);
-            VERSIONS[index] = v;
+        Version vers = VERSIONS[index];
+        if (vers == null || vers.version != version) {
+            vers = new Version(version);
+            VERSIONS[index] = vers;
         }
-        return v;
+        return vers;
     }
     
     /**
@@ -97,5 +98,22 @@ public class Version implements Serializable, Comparable<Version> {
      */
     public static Version valueOf(int major, int minor) {
         return valueOf((major << 8) | minor);
+    }
+    
+    /**
+     * Check the cache and replace this instance with the cached instance
+     * if one exists. The main goal is to pre-initialize the VERSIONS
+     * array.
+     */
+    private Object readResolve() throws ObjectStreamException {
+        synchronized (getClass()) {
+            int index = version % VERSIONS.length;
+            Version vers = VERSIONS[index];
+            if (vers == null || vers.version != version) {
+                vers = this;
+                VERSIONS[index] = vers;
+            }
+            return vers;
+        }
     }
 }
