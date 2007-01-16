@@ -362,7 +362,11 @@ public abstract class MessageDispatcher {
         // Serialize the Message
         ByteBuffer data = serialize(dst, message);
         int size = data.remaining();
-        if (size >= MAX_MESSAGE_SIZE) {
+        if (size <= 0) {
+            process(new ErrorProcessor(tag, new IOException("Illegal Message size: " + size)));
+            return false;
+            
+        } else if (size >= MAX_MESSAGE_SIZE) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Message (" + message.getClass().getName()  + ") is too large: " 
                     + size + " >= " + MAX_MESSAGE_SIZE);
@@ -654,12 +658,12 @@ public abstract class MessageDispatcher {
         // by stuff that was added during the while-loop above.
         boolean isEmpty = false;
         synchronized (outputQueueLock) {
-        	if (!queue.isEmpty()) {
-        		queue.addAll(outputQueue);
-        		outputQueue = queue;
-        	}
-
-        	isEmpty = outputQueue.isEmpty();
+            if (!queue.isEmpty()) {
+                queue.addAll(outputQueue);
+                outputQueue = queue;
+            }
+            
+            isEmpty = outputQueue.isEmpty();
         }
         interestWrite(!isEmpty);
         return !isEmpty;
