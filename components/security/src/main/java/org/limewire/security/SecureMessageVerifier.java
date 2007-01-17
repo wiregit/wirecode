@@ -47,6 +47,9 @@ public class SecureMessageVerifier {
             QUEUE = ExecutorsHelper.newProcessingQueue(name + "-SecureMessageVerifier");
         }
         
+        if ((keyFile == null) == (keyBase32 == null))
+            throw new IllegalArgumentException("must have only one source of key");
+        
         this.keyFile = keyFile;
         this.keyBase32 = keyBase32;
     }
