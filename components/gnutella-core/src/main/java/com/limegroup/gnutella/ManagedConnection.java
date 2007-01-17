@@ -15,6 +15,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionStats;
@@ -45,6 +46,7 @@ import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -115,7 +117,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+	implements ReplyHandler, MessageReceiver, SentMessageHandler, Shutdownable {
     
     private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
@@ -277,6 +279,9 @@ public class ManagedConnection extends Connection
     
     /** The number of queryReplies received through this connection */
     private volatile long queryReplies;
+    
+    /** If we've received a capVM before. */
+    private boolean receivedCapVM = false;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -754,6 +759,10 @@ public class ManagedConnection extends Connection
      */
     public void flush() throws IOException {        
     }
+    
+    public void shutdown() {
+        close();
+    }
 
     public void close() {
         if(_outputRunner != null)
@@ -1066,19 +1075,24 @@ public class ManagedConnection extends Connection
         else if(vm instanceof CapabilitiesVM) {
             //we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM)vm;
-            if(capVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
+            int smpV = capVM.supportsSIMPP();
+            if(smpV != -1 && (!receivedCapVM || smpV > SimppManager.instance().getVersion())) {
                 //request the simpp message
-                SimppRequestVM simppReq = new SimppRequestVM();
-                send(simppReq);
+                RouterService.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.SIMPP);
+                send(new SimppRequestVM());
             }
             
             // see if there's a new update message.
             int latestId = UpdateHandler.instance().getLatestId();
             int currentId = capVM.supportsUpdate();
-            if(currentId > latestId)
+            if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
+                RouterService.getNetworkUpdateSanityChecker().handleNewRequest(this, RequestType.VERSION);
                 send(new UpdateRequest());
-            else if(currentId == latestId)
+            } else if(currentId == latestId) {
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
+            }
+            
+            receivedCapVM = true;
             //fire a vendor event
             _manager.dispatchEvent(new ConnectionLifecycleEvent(this, 
                     EventType.CONNECTION_CAPABILITIES , this));

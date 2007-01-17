@@ -18,7 +18,9 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.FileUtils;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -133,17 +135,24 @@ public class SimppManager {
     /**
      * Called when we receive a new SIMPPVendorMessage, 
      */
-    public void checkAndUpdate(final byte[] simppPayload) { 
-        if(simppPayload == null)
+    public void checkAndUpdate(final ReplyHandler handler, final byte[] simppPayload) { 
+        if(simppPayload == null) {
+            RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
             return;
+        }
+        
         final int myVersion = _latestVersion;
         Runnable simppHandler = new Runnable() {
             public void run() {
                 
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 
-                if (!verifier.verifySource())
+                if (!verifier.verifySource()) {
+                    RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.SIMPP);
                     return;
+                } else {
+                    RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.SIMPP);
+                }
                 
                 SimppParser parser=null;
                 try {

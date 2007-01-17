@@ -31,6 +31,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
     public void knownHost(Endpoint e) { }
     public void handleNoInternetConnection() { }
+    public void installationCorrupted() {}
     //public void handleQueryReply( QueryReply qr ) { }
 
 	public void handleQueryResult(RemoteFileDesc rfd, 

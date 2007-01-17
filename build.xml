@@ -7,7 +7,6 @@
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
     
-    <!-- initializes everything -->
     <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
     </target>
     

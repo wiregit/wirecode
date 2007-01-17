@@ -221,6 +221,9 @@ public class RouterService {
     /** The IP Filter to use. */
     private static IPFilter ipFilter = new IPFilter(false);
     
+    /** A sanity checker for network update requests/responses. */
+    private static NetworkUpdateSanityChecker networkSanityChecker = new NetworkUpdateSanityChecker();
+    
     /**
      * isShuttingDown flag
      */
@@ -378,6 +381,10 @@ public class RouterService {
     
     public static MessageDispatcher getMessageDispatcher() {
         return messageDispatcher;
+    }
+    
+    public static NetworkUpdateSanityChecker getNetworkUpdateSanityChecker() {
+        return networkSanityChecker;
     }
         
   	/**

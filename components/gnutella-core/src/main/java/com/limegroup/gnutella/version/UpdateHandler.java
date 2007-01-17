@@ -33,6 +33,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -135,7 +136,7 @@ public class UpdateHandler {
         LOG.trace("Initializing UpdateHandler");
         QUEUE.execute(new Runnable() {
             public void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true, null);
             }
         });
         
@@ -186,12 +187,12 @@ public class UpdateHandler {
      * (The actual processing is passed of to be run in a different thread.
      *  All notifications are processed in the same thread, sequentially.)
      */
-    public void handleNewData(final byte[] data) {
+    public void handleNewData(final byte[] data, final ReplyHandler handler) {
         if(data != null) {
             QUEUE.execute(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(data, false);
+                    handleDataInternal(data, false, handler);
                 }
             });
         }
@@ -217,17 +218,23 @@ public class UpdateHandler {
      *
      * (Processes the data immediately.)
      */
-    private void handleDataInternal(byte[] data, boolean fromDisk) {
+    private void handleDataInternal(byte[] data, boolean fromDisk, ReplyHandler handler) {
         if(data != null) {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
+                if(!fromDisk)
+                    RouterService.getNetworkUpdateSanityChecker().handleValidResponse(handler, RequestType.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
                 if(uc.getId() > _lastId)
                     storeAndUpdate(data, uc, fromDisk);
             } else {
+                if(!fromDisk)
+                    RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
+            if(!fromDisk)
+                RouterService.getNetworkUpdateSanityChecker().handleInvalidResponse(handler, RequestType.VERSION);
             LOG.warn("No data to handle.");
         }
     }
@@ -357,10 +364,7 @@ public class UpdateHandler {
      * Tries to download updates.
      * @return whether we had any non-hopeless updates.
      */
-    // TODO: first paramater should really be '? extends DownloadInformation',
-    //       but Eclipse 3.1 freaks out on the '= emptyList()' in that case.
-    //       When 3.2 is released, use that.
-    private void downloadUpdates(List<DownloadInformation> toDownload, ReplyHandler source) {
+    private void downloadUpdates(List<? extends DownloadInformation> toDownload, ReplyHandler source) {
         if (toDownload == null)
             toDownload = Collections.emptyList();
         

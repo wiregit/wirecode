@@ -137,6 +137,9 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      * Indicates a component is loading.
      */
     public void componentLoading(String component);
+    
+    /** Notification that installation may be corrupted. */
+    public void installationCorrupted();
 	
 	/**
 	 * The core passes parsed magnets to the GUI and asks it if it wants

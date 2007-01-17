@@ -274,6 +274,9 @@ public class Main {
     }
     
     private static class DoNothing implements ActivityCallback {
+        
+        public void installationCorrupted() {            
+        }
 
         public void acceptChat(Chatter ctr) {
         }

@@ -280,4 +280,7 @@ public class Main implements ActivityCallback, ErrorCallback {
     
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
     }
+    public void installationCorrupted() {
+        
+    }
 }
