@@ -156,6 +156,7 @@ public class DefaultMessageHandler {
         if (existing == null 
                 || existing.getInstanceID() != node.getInstanceID()) {
             
+            // Store forward only if we're bootstrapped
             if (context.isBootstrapped()) {
                 int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
                 //we select the 2*k closest nodes in order to also check those values
@@ -291,12 +292,10 @@ public class DefaultMessageHandler {
                         //System.out.println(CollectionUtils.toString(nodes));
                         //System.out.println();
                         
-                        boolean delete = DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue();
-                        
-                        if (delete) {
-                            int count = 0;
+                        if (DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
+                            int deletedCount = 0;
                             DHTValueBag bag = database.get(valueId);
-                            if(bag != null ) {
+                            if (bag != null) {
                                 // bag->database does not happen
                                 // because the database monitor is already held.
                                 synchronized(bag.getValuesLock()) {
@@ -305,11 +304,11 @@ public class DefaultMessageHandler {
                                             //System.out.println("REMOVING: " + value + "\n");
                                             
                                             database.remove(value);
-                                            count++;
+                                            deletedCount++;
                                         }
                                     }
                                 }
-                                databaseStats.STORE_FORWARD_REMOVALS.addData(count);
+                                databaseStats.STORE_FORWARD_REMOVALS.addData(deletedCount);
                             }
                         }
                     }
