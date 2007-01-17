@@ -15,21 +15,32 @@ public class SecureMessageVerifier {
     private PublicKey pubKey;
     
     /** The File the public key is stored in. */
-    private File keyFile;
+    private final File keyFile;
+    
+    /** The base32-encoded key */
+    private final String keyBase32;
     
     public SecureMessageVerifier() {
-        this(null, null);
+        this(null, null, null);
     }
     
     public SecureMessageVerifier(String name) {
-        this(null, name);
+        this(null, null, name);
     }
 
     public SecureMessageVerifier(File keyFile) {
-        this(keyFile, null);
+        this(keyFile, null, null);
     }
     
+    public SecureMessageVerifier(String keyBase32, String name) {
+        this(null, keyBase32, name);
+    }
+
     public SecureMessageVerifier(File keyFile, String name) {
+        this(keyFile, null, name);
+    }
+    
+    private SecureMessageVerifier(File keyFile, String keyBase32, String name) {
         if (name == null) {
             QUEUE = ExecutorsHelper.newProcessingQueue("SecureMessageVerifier");
         } else {
@@ -37,6 +48,7 @@ public class SecureMessageVerifier {
         }
         
         this.keyFile = keyFile;
+        this.keyBase32 = keyBase32;
     }
     
     /** Queues this SecureMessage for verification.  The callback will be notified of success or failure. */
@@ -77,8 +89,13 @@ public class SecureMessageVerifier {
     
     /** Creates the public key. */
     protected PublicKey createPublicKey() {
-        if(getKeyFile() == null)
-            throw new NullPointerException("no key file!");
+        if(getKeyFile() == null && keyBase32 == null)
+            throw new NullPointerException("no key source!!");
+        
+        // prefer string-based keys
+        if (keyBase32 != null)
+            return SignatureVerifier.readKey(keyBase32, "DSA");
+        
         return SignatureVerifier.readKey(getKeyFile(), "DSA");
     }
     

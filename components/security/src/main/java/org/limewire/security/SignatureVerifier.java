@@ -76,6 +76,16 @@ public class SignatureVerifier {
      */
     public static String getVerifiedData(byte[] data, File keyFile, String alg, String dig) {
         PublicKey key = readKey(keyFile, alg);
+        return parseAndVerify(key, data, alg, dig);
+    }
+    
+    public static String getVerifiedData(byte [] data, String keyBase32, String alg, String dig) {
+        PublicKey key = readKey(keyBase32, alg);
+        return parseAndVerify(key, data, alg, dig);
+    }
+    
+    
+    private static String parseAndVerify(PublicKey key, byte [] data, String alg, String dig) {
         byte[][] info = parseData(data);
         return verify(key, info, alg, dig);
     }
@@ -117,9 +127,15 @@ public class SignatureVerifier {
         byte[] fileData = FileUtils.readFileFully(keyFile);
         if(fileData == null)
             return null;
-            
+        return readKey(new String(fileData), alg);
+    }
+    
+    /**
+     * Reads a public key from base32-encoded string.
+     */
+    public static PublicKey readKey(String base32Key, String alg) {
         try {
-            EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base32.decode(new String(fileData)));
+            EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base32.decode(base32Key));
             KeyFactory kf = KeyFactory.getInstance(alg);
             PublicKey key = kf.generatePublic(pubKeySpec);
             return key;
@@ -127,11 +143,11 @@ public class SignatureVerifier {
             LOG.error("Invalid algorithm: " + alg, nsae);
             return null;
         } catch(InvalidKeySpecException ikse) {
-            LOG.error("Invalid keyspec: " + keyFile, ikse);
+            LOG.error("Invalid keyspec: " + base32Key, ikse);
             return null;
         }
     }
-    
+
     /**
      * Parses data, returning the signature & content.
      */
