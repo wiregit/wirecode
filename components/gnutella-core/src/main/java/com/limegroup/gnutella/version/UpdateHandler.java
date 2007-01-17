@@ -54,9 +54,18 @@ public class UpdateHandler {
     private static final String FILENAME = "version.xml";
     
     /**
-     * The filename on disk where the public key is stored.
+     * The public key.
      */
-    private static final String KEY = "version.key";
+    private static final String KEY = "GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJC" +
+            "SUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2" +
+            "NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6" +
+            "FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7" +
+            "AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25" +
+            "NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4" +
+            "N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMANJHPNL2" +
+            "K3FJIH54PPBPLMCHVEAVTDQQSU3GKB3N2WG7RDC4WSWCM3HACQJ3MNHJ32STPGSZJCTYZRPCHJORQR4HN2" +
+            "J4KXHJ6JYYLTIBM64EKRTDBVLTWFJDEIC5SYR24CTHM3H3" +
+            "NTBHY4AB26LFPFYMOSK3O4BACF2I4GCRGUPNJS6XGTSNU33APRHI2BJ7ZDJTTU5C4EI6DY";
     
     /**
      * init the random generator on class load time
@@ -207,7 +216,7 @@ public class UpdateHandler {
      */
     private void handleDataInternal(byte[] data, boolean fromDisk) {
         if(data != null) {
-            String xml = SignatureVerifier.getVerifiedData(data, getKeyFile(), "DSA", "SHA1");
+            String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
                 UpdateCollection uc = UpdateCollection.create(xml);
                 if(uc.getId() > _lastId)
@@ -618,14 +627,6 @@ public class UpdateHandler {
         return new File(CommonUtils.getUserSettingsDir(), FILENAME);
     }
     
-    /**
-     * Simple accessor for the key file.
-     */
-    private File getKeyFile() {
-        return new File(CommonUtils.getUserSettingsDir(), KEY);
-    }
-    
-
     /**
      * a functor that repeatedly tries to download updates at a variable
      * interval. 

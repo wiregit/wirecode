@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.simpp;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -13,7 +10,6 @@ import java.security.spec.X509EncodedKeySpec;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.security.SignatureVerifier;
-import com.limegroup.gnutella.util.CommonUtils;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -84,29 +80,18 @@ public class SimppDataVerifier {
     ////////////////////////////helpers/////////////////////
 
     private PublicKey getPublicKey() {
-        //1. Get the file that has the public key 
-        //File pubKeyFile =
-        File pubKeyFile=new File(CommonUtils.getUserSettingsDir(), "pub1.key");
-        //TODO: work this out with the setting telling us which public key to
-        //use
-
-        String base32Enc = null;
-        RandomAccessFile raf = null;
-        //2. read the base32 encoded string of the public key
-        try {
-            raf = new RandomAccessFile(pubKeyFile,"r");
-            byte[] bytes = new byte[(int)raf.length()];
-            raf.readFully(bytes);
-            base32Enc = new String(bytes, "UTF-8");
-        } catch (IOException iox) {
-            LOG.error("IOX reading file", iox);
-            return null;
-        } finally {
-            try {
-                if(raf!=null)
-                    raf.close();
-            } catch (IOException iox) {}
-        }
+        String base32Enc = "GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
+        "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6" +
+        "F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277" +
+        "LPRQ37A5VPZ6GVCTBKDYE7OB7" +
+        "NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7" +
+        "AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25" +
+        "NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7" +
+        "IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQUAAFAMBADZ2" +
+        "DEAUI6Y6O4SJOM6M77DVWGUD7SDOJZK7QACMEUF6BZLNEWUZ26IYVH53F4IPJBUGY4I7" +
+        "QVN5V7POFP7TLL2M6PCU4B66DO5DD7USVJABNT5PGI27G7BQD7OMRPRMOWYQHZUC6" +
+        "GXIW2X7HVSL5FBA5HMKZ6OTOXSAXJH2AUTSHXIM22DPNZVBOSK7UDJFBNMKCKHSRYHNUCY";
+        
         //3. convert the base32 encoded String into the original bytes
         byte[] pubKeyBytes = Base32.decode(base32Enc);
         //4. Make a public key out of it
