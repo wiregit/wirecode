@@ -40,7 +40,7 @@ import org.limewire.mojito.routing.Version;
 public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
-    private Collection<? extends Entry<KUID, Status>> status;
+    private final Collection<? extends Entry<KUID, Status>> status;
 
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 

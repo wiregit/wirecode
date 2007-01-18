@@ -41,7 +41,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 
@@ -317,19 +317,19 @@ public class DefaultMessageHandler {
         }
         
         if (!valuesToForward.isEmpty()) {
-            QueryKey queryKey = null;
+            SecurityToken securityToken = null;
             if (message instanceof FindNodeResponse) {
-                queryKey = ((FindNodeResponse)message).getQueryKey();
+                securityToken = ((FindNodeResponse)message).getSecurityToken();
                 
-                if (queryKey == null) {
+                if (securityToken == null) {
                     if (LOG.isInfoEnabled()) {
-                        LOG.info(node + " sent us a null QueryKey");
+                        LOG.info(node + " sent us a null SecurityToken");
                     }
                     return;
                 }
             }
             
-            context.store(node, queryKey, valuesToForward);
+            context.store(node, securityToken, valuesToForward);
         }
     }
     

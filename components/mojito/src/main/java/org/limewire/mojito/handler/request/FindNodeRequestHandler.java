@@ -35,7 +35,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -50,8 +50,8 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
     }
 
     /**
-     * This method returns a list of nodes along with a QueryKey generated for this node. 
-     * The QueryKey will can then be used by the querying node to store data at this node.
+     * This method returns a list of nodes along with a SecurityToken generated for this node. 
+     * The SecurityToken will can then be used by the querying node to store data at this node.
      * 
      * If the local node is passive (e.g. firewalled), it returns a list of Most Recently Seen 
      * nodes instead of returning the closest nodes to the lookup key. The reason for this is that 
@@ -70,7 +70,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         
         Contact node = request.getContact();
         SocketAddress addr = node.getSourceAddress();
-        QueryKey queryKey = QueryKey.getQueryKey(addr);
+        SecurityToken securityToken = context.getSecurityTokenProvider().getSecurityToken(addr);
         
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
@@ -102,7 +102,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
         
         FindNodeResponse response = context.getMessageHelper()
-                    .createFindNodeResponse(request, queryKey, nodes);
+                    .createFindNodeResponse(request, securityToken, nodes);
         
         context.getMessageDispatcher().send(node, response);
     }

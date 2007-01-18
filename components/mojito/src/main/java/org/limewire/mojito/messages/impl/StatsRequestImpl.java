@@ -39,11 +39,11 @@ import org.limewire.mojito.routing.Version;
 public class StatsRequestImpl extends AbstractRequestMessage
         implements StatsRequest {
 
-    private StatisticType request;
+    private final StatisticType request;
+    
+    private final byte[] signature;
     
     private int secureStatus = INSECURE;
-    
-    private byte[] signature;
     
     public StatsRequestImpl(Context context, 
             Contact contact, MessageID messageId, StatisticType request) {

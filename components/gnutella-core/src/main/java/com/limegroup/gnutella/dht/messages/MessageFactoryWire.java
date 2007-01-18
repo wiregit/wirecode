@@ -26,7 +26,7 @@ import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -88,7 +88,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends Contact> nodes) {
+            SecurityToken queryKey, Collection<? extends Contact> nodes) {
         return new FindNodeResponseWireImpl(
                 delegate.createFindNodeResponse(contact, messageId, queryKey, nodes));
     }
@@ -127,7 +127,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
+            SecurityToken queryKey, Collection<? extends DHTValueEntity> values) {
         return new StoreRequestWireImpl(
                 delegate.createStoreRequest(contact, messageId, queryKey, values));
     }

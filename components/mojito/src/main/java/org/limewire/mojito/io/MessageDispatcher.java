@@ -63,6 +63,7 @@ import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.MessageSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
@@ -493,10 +494,10 @@ public abstract class MessageDispatcher {
      * Checks if we have ever sent a Request to the Node that
      * sent us the Response.
      */
-    private boolean verifyQueryKey(ResponseMessage response) {
+    private boolean verifySecurityToken(ResponseMessage response) {
         MessageID messageId = response.getMessageID();
         Contact node = response.getContact();
-        return messageId.verifyQueryKey(node.getContactAddress());
+        return messageId.verifySecurityToken(node.getContactAddress());
     }
     
     /**
@@ -567,10 +568,9 @@ public abstract class MessageDispatcher {
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
             
-            // Check the QueryKey in the message ID to figure
-            // out whether or not we have ever sent a Request
-            // to that Host!
-            if (!verifyQueryKey(response)) {
+            // Check the SecurityToken in the message ID to figure
+            // out whether or not we have ever sent a Request to that Host!
+            if (!verifySecurityToken(response)) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(response.getContact() + " sent us an unrequested response!");
                 }
@@ -948,6 +948,13 @@ public abstract class MessageDispatcher {
          * and we'll use a higher timeout next time.
          */
         private void processLateResponse() {
+            
+            // If it's a late response and we're not tagging MessageIDs
+            // then do not continue with processing as we're not able
+            // to figure out whether or not it's truly a late response!
+            if (!MessageSettings.TAG_MESSAGE_ID.getValue()) {
+                return;
+            }
             
             Contact node = response.getContact();
             

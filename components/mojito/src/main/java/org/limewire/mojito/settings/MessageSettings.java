@@ -16,29 +16,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package org.limewire.mojito.messages;
 
-import java.util.Collection;
+package org.limewire.mojito.settings;
 
-import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.security.SecurityToken;
-
+import org.limewire.setting.BooleanSetting;
 
 /**
- * An interface for StoreRequest implementations
+ * 
  */
-public interface StoreRequest extends RequestMessage {
-
+public class MessageSettings extends MojitoProps {
+    
+    private MessageSettings() {}
+    
     /**
-     * The SecurityToken the remote Node is using to store
-     * the DHTValue(s) at our Node.
+     * Whether or not MessageIDs should be tagged
      */
-    public SecurityToken getSecurityToken();
-
-    /**
-     * A Collection of DHTValue(s) we're supposed to
-     * store at our Node
-     */
-    public Collection<? extends DHTValueEntity> getDHTValues();
+    public static final BooleanSetting TAG_MESSAGE_ID
+        = FACTORY.createBooleanSetting("TAG_MESSAGE_ID", true);
 }

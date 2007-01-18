@@ -29,7 +29,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.handler.response.StoreResponseHandler;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -56,11 +56,11 @@ public class StoreManager extends AbstractManager<StoreResult> {
     /**
      * Stores a collection of DHTValues at the given Contact.
      */
-    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
+    public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
         
         StoreResponseHandler handler 
-            = new StoreResponseHandler(context, node, queryKey, values);
+            = new StoreResponseHandler(context, node, securityToken, values);
         StoreFuture future = new StoreFuture(handler);
         context.getDHTExecutorService().execute(future);
         return future;

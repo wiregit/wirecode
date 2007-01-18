@@ -51,7 +51,11 @@ import org.limewire.security.QueryKey;
 
 /**
  * The MessageInputStream reads (parses) a DHTMessage
- * from a given InputStream
+ * from a given InputStream.
+ * 
+ * <b>NOTE</b>: This class is specific to Mojito's Gnutella backed
+ * Message format. You may or may not be able to use parts of this
+ * class for alternative message formats!
  */
 public class MessageInputStream extends DataInputStream {
     
@@ -247,9 +251,9 @@ public class MessageInputStream extends DataInputStream {
             return null;
         }
         
-        byte[] queryKey = new byte[length];
-        readFully(queryKey, 0, queryKey.length);
-        return QueryKey.getQueryKey(queryKey, true);
+        byte[] securityToken = new byte[length];
+        readFully(securityToken, 0, securityToken.length);
+        return QueryKey.getQueryKey(securityToken, true);
     }
     
     /**

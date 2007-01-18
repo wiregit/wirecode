@@ -40,11 +40,11 @@ import org.limewire.mojito.routing.Version;
 public class FindValueResponseImpl extends AbstractLookupResponse
         implements FindValueResponse {
 
-    private Collection<KUID> keys;
+    private final Collection<KUID> keys;
     
-    private Collection<? extends DHTValueEntity> values;
+    private final Collection<? extends DHTValueEntity> values;
     
-    private float requestLoad;
+    private final float requestLoad;
 
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 

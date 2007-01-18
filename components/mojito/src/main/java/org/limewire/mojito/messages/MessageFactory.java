@@ -31,8 +31,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
-
+import org.limewire.security.SecurityToken;
 
 /**
  * Factory class to construct DHTMessage(s)
@@ -75,7 +74,7 @@ public interface MessageFactory {
      * Creates and returns a FindNodeResponse Message
      */
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends Contact> nodes);
+            SecurityToken securityToken, Collection<? extends Contact> nodes);
 
     /**
      * Creates and returns a FindValueRequest Message
@@ -93,7 +92,7 @@ public interface MessageFactory {
      * Creates and returns a StoreRequest Message
      */
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValueEntity> values);
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values);
 
     /**
      * Creates and returns a StoreResponse Message

@@ -41,11 +41,16 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
  * The MessageOutputStream class writes a DHTMessage (serializes)
  * to a given OutputStream.
+ * 
+ * <b>NOTE</b>: This class is specific to Mojito's Gnutella backed
+ * Message format. You may or may not be able to use parts of this
+ * class for alternative message formats!
  */
 public class MessageOutputStream extends DataOutputStream {
     
@@ -193,9 +198,10 @@ public class MessageOutputStream extends DataOutputStream {
     /**
      * Writes the given QueryKey to the OutputStream
      */
-    public void writeQueryKey(QueryKey queryKey) throws IOException {
-        if (queryKey != null) {
-            byte[] qk = queryKey.getBytes();
+    public void writeQueryKey(SecurityToken securityToken) throws IOException {
+        if (securityToken != null) {
+            assert (securityToken instanceof QueryKey);
+            byte[] qk = securityToken.getBytes();
             writeByte(qk.length);
             write(qk, 0, qk.length);
         } else {

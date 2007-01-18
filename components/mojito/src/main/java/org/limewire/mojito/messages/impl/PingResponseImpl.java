@@ -38,8 +38,9 @@ import org.limewire.mojito.routing.Version;
 public class PingResponseImpl extends AbstractResponseMessage
         implements PingResponse {
 
-    private SocketAddress externalAddress;
-    private BigInteger estimatedSize;
+    private final SocketAddress externalAddress;
+    
+    private final BigInteger estimatedSize;
 
     public PingResponseImpl(Context context, 
 	    Contact contact, MessageID messageId, 

@@ -43,7 +43,7 @@ import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 public class CacheForwardTest extends MojitoTestCase {
@@ -73,7 +73,7 @@ public class CacheForwardTest extends MojitoTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public void testGetQueryKey() throws Exception {
+    public void testGetSecurityToken() throws Exception {
         
         MojitoDHT dht1 = null;
         MojitoDHT dht2 = null;
@@ -100,8 +100,8 @@ public class CacheForwardTest extends MojitoTestCase {
             assertTrue(dht2.isBootstrapped());
             assertFalse(context2.isBootstrapping());
             
-            // Get the QueryKey...
-            Class clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetQueryKeyHandler");
+            // Get the SecurityToken...
+            Class clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetSecurityTokenHandler");
             Constructor<Callable<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
@@ -110,14 +110,14 @@ public class CacheForwardTest extends MojitoTestCase {
             
             try {
                 Result result = handler.call();
-                clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetQueryKeyResult");
-                Method m = clazz.getDeclaredMethod("getQueryKey", new Class[0]);
+                clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetSecurityTokenResult");
+                Method m = clazz.getDeclaredMethod("getSecurityToken", new Class[0]);
                 m.setAccessible(true);
                 
-                QueryKey queryKey = (QueryKey)m.invoke(result, new Object[0]);
-                assertNotNull(queryKey);
+                SecurityToken securityToken = (SecurityToken)m.invoke(result, new Object[0]);
+                assertNotNull(securityToken);
             } catch (DHTException err) {
-                fail("DHT-1 did not return a QueryKey", err);
+                fail("DHT-1 did not return a SecurityToken", err);
             }
             
         } finally {

@@ -52,7 +52,8 @@ import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
+
 
 /**
  * The default implementation of the MessageFactory
@@ -137,8 +138,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends Contact> nodes) {
-        return new FindNodeResponseImpl(context, contact, messageId, queryKey, nodes);
+            SecurityToken securityToken, Collection<? extends Contact> nodes) {
+        return new FindNodeResponseImpl(context, contact, messageId, securityToken, nodes);
     }
 
     public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
@@ -170,8 +171,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
-        return new StoreRequestImpl(context, contact, messageId, queryKey, values);
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
+        return new StoreRequestImpl(context, contact, messageId, securityToken, values);
     }
 
     public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 

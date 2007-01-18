@@ -39,6 +39,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+
 /**
  * An abstract implementation of DHTMessage
  */
@@ -46,11 +47,11 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     protected final Context context;
     
-    private OpCode opcode;
+    private final OpCode opcode;
     
-    private Contact contact;
+    private final Contact contact;
     
-    private MessageID messageId;
+    private final MessageID messageId;
     
     private byte[] payload;
     

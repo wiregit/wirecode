@@ -96,7 +96,7 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.HostFilter;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -107,9 +107,12 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     private static final Log LOG = LogFactory.getLog(Context.class);
     
-    private KeyPair masterKeyPair;
-    
+    /**
+     * The name of this Mojito instance
+     */
     private String name;
+    
+    private KeyPair masterKeyPair;
     
     private Database database;
     private RouteTable routeTable;
@@ -136,7 +139,15 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     private DHTSizeEstimator estimator;
     
+    /**
+     * 
+     */
     private volatile DHTExecutorService executorService = new DefaultDHTExecutorService();
+    
+    /**
+     * 
+     */
+    private volatile SecurityToken.TokenProvider tokenProvider = new SecurityToken.QueryKeyProvider();
     
     /**
      * Constructor to create a new Context
@@ -575,6 +586,23 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         messageDispatcher.setFilter(hostFilter);
     }
     
+    /**
+     * Sets the TokenProvider
+     */
+    public synchronized void setSecurityTokenProvider(SecurityToken.TokenProvider tokenProvider) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch TokenProvider while " + getName() + " is running");
+        }
+        this.tokenProvider = tokenProvider;
+    }
+    
+    /**
+     * Returns the TokenProvider
+     */
+    public SecurityToken.TokenProvider getSecurityTokenProvider() {
+        return tokenProvider;
+    }
+    
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#setExternalPort(int)
@@ -995,10 +1023,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Stores a Collection of DHTValue(s) at the given Node. 
      * All values must have the same valueId!
      */
-    public DHTFuture<StoreResult> store(Contact node, QueryKey queryKey, 
+    public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
         
-        return storeManager.store(node, queryKey, values);
+        return storeManager.store(node, securityToken, values);
     }
     
     /*

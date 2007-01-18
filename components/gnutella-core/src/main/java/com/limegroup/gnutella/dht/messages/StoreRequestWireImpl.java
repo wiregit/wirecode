@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.StoreRequest;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest> 
@@ -18,7 +18,7 @@ public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest>
         return delegate.getDHTValues();
     }
 
-    public QueryKey getQueryKey() {
-        return delegate.getQueryKey();
+    public SecurityToken getSecurityToken() {
+        return delegate.getSecurityToken();
     }
 }

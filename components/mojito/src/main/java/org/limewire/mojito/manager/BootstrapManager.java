@@ -42,8 +42,7 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.security.QueryKey;
-
+import org.limewire.security.SecurityToken;
 
 /**
  * The BootstrapManager manages the entire bootstrap process.
@@ -217,7 +216,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             }
             
             // Make sure we found some Nodes
-            Map<? extends Contact, ? extends QueryKey> nodes = result.getNodes();
+            Map<? extends Contact, ? extends SecurityToken> nodes = result.getNodes();
             if (nodes == null || nodes.isEmpty()) {
                 return false;
             }

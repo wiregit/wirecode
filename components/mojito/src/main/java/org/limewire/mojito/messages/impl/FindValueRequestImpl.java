@@ -39,7 +39,7 @@ import org.limewire.mojito.routing.Version;
 public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
     
-    private Collection<KUID> keys;
+    private final Collection<KUID> keys;
     
     public FindValueRequestImpl(Context context, 
             Contact contact, MessageID messageId, 

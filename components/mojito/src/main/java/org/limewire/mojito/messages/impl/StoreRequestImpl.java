@@ -31,7 +31,7 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -40,16 +40,16 @@ import org.limewire.security.QueryKey;
 public class StoreRequestImpl extends AbstractRequestMessage
         implements StoreRequest {
 
-    private QueryKey queryKey;
+    private final SecurityToken securityToken;
     
-    private Collection<? extends DHTValueEntity> values;
+    private final Collection<? extends DHTValueEntity> values;
     
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
-        this.queryKey = queryKey;
+        this.securityToken = securityToken;
         this.values = values;
     }
     
@@ -57,12 +57,12 @@ public class StoreRequestImpl extends AbstractRequestMessage
             MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
-        this.queryKey = in.readQueryKey();
+        this.securityToken = in.readQueryKey();
         this.values = in.readDHTValueEntities(getContact());
     }
     
-    public QueryKey getQueryKey() {
-        return queryKey;
+    public SecurityToken getSecurityToken() {
+        return securityToken;
     }
 
     public Collection<? extends DHTValueEntity> getDHTValues() {
@@ -70,7 +70,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeQueryKey(queryKey);
+        out.writeQueryKey(securityToken);
         out.writeDHTValueEntities(values);
     }
 

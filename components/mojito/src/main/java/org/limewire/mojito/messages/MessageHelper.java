@@ -32,7 +32,7 @@ import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.messages.impl.DefaultMessageFactory;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -97,9 +97,9 @@ public class MessageHelper {
     }
 
     public FindNodeResponse createFindNodeResponse(RequestMessage request, 
-            QueryKey queryKey, Collection<? extends Contact> nodes) {
+            SecurityToken securityToken, Collection<? extends Contact> nodes) {
         return factory.createFindNodeResponse(getLocalNode(), request.getMessageID(), 
-                queryKey, nodes);
+                securityToken, nodes);
     }
 
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
@@ -115,9 +115,9 @@ public class MessageHelper {
                 values, requestLoad);
     }
 
-    public StoreRequest createStoreRequest(SocketAddress dst, QueryKey queryKey, 
+    public StoreRequest createStoreRequest(SocketAddress dst, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
-        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), queryKey, values);
+        return factory.createStoreRequest(getLocalNode(), createMessageID(dst), securityToken, values);
     }
 
     public StoreResponse createStoreResponse(RequestMessage request, 

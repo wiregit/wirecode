@@ -1,12 +1,12 @@
 package org.limewire.mojito.messages;
 
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.security.QueryKey;
+import org.limewire.util.PrivilegedAccessor;
 
 public class MessageIDTest extends MojitoTestCase {
     
@@ -46,14 +46,12 @@ public class MessageIDTest extends MojitoTestCase {
         QueryKey key1 = QueryKey.getQueryKey(addr1);
         
         MessageID messageId1 = MessageID.createWithSocketAddress(addr1);
-        Method m = MessageID.class.getDeclaredMethod("getQueryKey", new Class[0]);
-        m.setAccessible(true);
-        QueryKey key2 = (QueryKey)m.invoke(messageId1, new Object[0]);
+        QueryKey key2 = (QueryKey)PrivilegedAccessor.invokeMethod(messageId1, "getSecurityToken", new Object[0]);
         
         assertTrue(key1.equals(key2));
-        assertTrue(messageId1.verifyQueryKey(addr1));
+        assertTrue(messageId1.verifySecurityToken(addr1));
         
         InetSocketAddress addr2 = new InetSocketAddress("www.google.com", 1234);
-        assertFalse(messageId1.verifyQueryKey(addr2));
+        assertFalse(messageId1.verifySecurityToken(addr2));
     }
 }

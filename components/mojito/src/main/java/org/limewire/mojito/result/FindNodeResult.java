@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -36,7 +36,7 @@ public class FindNodeResult implements Result {
     
     private final KUID lookupId;
     
-    private final Map<? extends Contact, ? extends QueryKey> nodes;
+    private final Map<? extends Contact, ? extends SecurityToken> nodes;
     
     private final Collection<? extends Contact> collisions;
     
@@ -47,7 +47,7 @@ public class FindNodeResult implements Result {
     private final int failures;
     
     public FindNodeResult(KUID lookupId, 
-            Map<? extends Contact, ? extends QueryKey> nodes, 
+            Map<? extends Contact, ? extends SecurityToken> nodes, 
             Collection<? extends Contact> collisions,
             long time, int hop, int failures) {
     	
@@ -76,7 +76,7 @@ public class FindNodeResult implements Result {
     /**
      * Returns a Map of Contacts and their QueryKeys
      */
-    public Map<? extends Contact, ? extends QueryKey> getNodes() {
+    public Map<? extends Contact, ? extends SecurityToken> getNodes() {
         return nodes;
     }
     
@@ -106,9 +106,9 @@ public class FindNodeResult implements Result {
         StringBuilder buffer = new StringBuilder();
         buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
         int i = 0;
-        for (Entry<? extends Contact, ? extends QueryKey> entry : nodes.entrySet()) {
+        for (Entry<? extends Contact, ? extends SecurityToken> entry : nodes.entrySet()) {
             buffer.append(i++).append(": ").append(entry.getKey())
-                .append(", qk=").append(entry.getValue()).append("\n");
+                .append(", token=").append(entry.getValue()).append("\n");
         }
         
         if (!collisions.isEmpty()) {

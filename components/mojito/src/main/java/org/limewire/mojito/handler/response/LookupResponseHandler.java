@@ -51,7 +51,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -80,8 +80,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    protected final Trie<KUID, Entry<Contact, QueryKey>> responses 
-        = new PatriciaTrie<KUID, Entry<Contact, QueryKey>>(KUID.KEY_ANALYZER);
+    protected final Trie<KUID, Entry<Contact, SecurityToken>> responses 
+        = new PatriciaTrie<KUID, Entry<Contact, SecurityToken>>(KUID.KEY_ANALYZER);
     
     /** A Map we're using to count the number of hops */
     private final Map<KUID, Integer> hopMap = new HashMap<KUID, Integer>();
@@ -430,7 +430,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
         
         if (!nodes.isEmpty()) {
-            addResponse(sender, response.getQueryKey());
+            addResponse(sender, response.getSecurityToken());
         }
         
         return true;
@@ -711,11 +711,11 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return true;
     }
     
-    /** Adds the Contact-QueryKey Tuple to the response Trie */
-    private void addResponse(Contact node, QueryKey queryKey) {
+    /** Adds the Contact-SecurityToken Tuple to the response Trie */
+    private void addResponse(Contact node, SecurityToken securityToken) {
         
-        Entry<Contact,QueryKey> entry 
-            = new EntryImpl<Contact,QueryKey>(node, queryKey, true);
+        Entry<Contact,SecurityToken> entry 
+            = new EntryImpl<Contact,SecurityToken>(node, securityToken, true);
         
         responses.put(node.getNodeID(), entry);
         

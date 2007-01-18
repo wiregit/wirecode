@@ -30,7 +30,7 @@ import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -39,16 +39,16 @@ import org.limewire.security.QueryKey;
 public class FindNodeResponseImpl extends AbstractLookupResponse
         implements FindNodeResponse {
 
-    private QueryKey queryKey;
+    private final SecurityToken securityToken;
 
-    private Collection<? extends Contact> nodes;
+    private final Collection<? extends Contact> nodes;
 
     public FindNodeResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            QueryKey queryKey, Collection<? extends Contact> nodes) {
+            SecurityToken securityToken, Collection<? extends Contact> nodes) {
         super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId);
 
-        this.queryKey = queryKey;
+        this.securityToken = securityToken;
         this.nodes = nodes;
     }
     
@@ -56,12 +56,12 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
             MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, version, in);
         
-        this.queryKey = in.readQueryKey();
+        this.securityToken = in.readQueryKey();
         this.nodes = in.readContacts();
     }
     
-    public QueryKey getQueryKey() {
-        return queryKey;
+    public SecurityToken getSecurityToken() {
+        return securityToken;
     }
 
     public Collection<? extends Contact> getNodes() {
@@ -69,11 +69,11 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeQueryKey(queryKey);
+        out.writeQueryKey(securityToken);
         out.writeContacts(nodes);
     }
     
     public String toString() {
-        return "FindNodeResponse: queryKey=" + queryKey + ", nodes=" + nodes;
+        return "FindNodeResponse: securityToken=" + securityToken + ", nodes=" + nodes;
     }
 }

@@ -22,8 +22,7 @@ package org.limewire.mojito.messages;
 import java.util.Collection;
 
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
-
+import org.limewire.security.SecurityToken;
 
 /**
  * An interface for FindNodeResponse implementations
@@ -31,11 +30,11 @@ import org.limewire.security.QueryKey;
 public interface FindNodeResponse extends LookupResponse {
 
     /**
-     * Returns the remote Node's QueryKey we're supposted to
+     * Returns the remote Node's SecurityToken we're supposted to
      * use if we're planning to store values at the remote
      * Node for example
      */
-    public QueryKey getQueryKey();
+    public SecurityToken getSecurityToken();
 
     /**
      * Returns the k-closest (or less) Node's to the

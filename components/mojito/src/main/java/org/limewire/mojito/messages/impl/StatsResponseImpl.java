@@ -41,7 +41,7 @@ import org.limewire.mojito.routing.Version;
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 
-    private String statistics;
+    private final String statistics;
 
     public StatsResponseImpl(Context context, 
             Contact contact, MessageID messageId, String statistics) {

@@ -50,7 +50,7 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.ContactUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -70,8 +70,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
      */
     private final Contact node;
     
-    /** The QueryKey we have to use. Can be null. */
-    private QueryKey queryKey;
+    /** The SecurityToken we have to use. Can be null. */
+    private SecurityToken securityToken;
     
     /** The Value(s) we're going to store */
     private Collection<? extends DHTValueEntity> values;
@@ -95,13 +95,13 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
 
     
     public StoreResponseHandler(Context context, Contact node, 
-            QueryKey queryKey, Collection<? extends DHTValueEntity> values) {
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
         super(context);
         
         assert (values != null && !values.isEmpty());
         
         this.node = node;
-        this.queryKey = queryKey;
+        this.securityToken = securityToken;
         this.values = values;
         
         if (!isSingleNodeStore()) {
@@ -131,22 +131,22 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         if (isSingleNodeStore()) {
             
-            // Get the QueryKey if we don't have it
-            if (queryKey == null) {
-                GetQueryKeyHandler handler = new GetQueryKeyHandler(context, node);
+            // Get the SecurityToken if we don't have it
+            if (securityToken == null) {
+                GetSecurityTokenHandler handler = new GetSecurityTokenHandler(context, node);
                 
                 try {
-                    queryKey = handler.call().getQueryKey();
+                    securityToken = handler.call().getSecurityToken();
                 } catch (InterruptedException e) {
                     throw new DHTException(e);
                 }
             }
             
-            if (queryKey == null) {
-                throw new IllegalStateException("QueryKey is null");
+            if (securityToken == null) {
+                throw new IllegalStateException("SecurityToken is null");
             }
             
-            processList.add(new StoreProcess(node, queryKey));
+            processList.add(new StoreProcess(node, securityToken));
             
         } else {
             // Do a lookup for the k-closest Nodes where we're
@@ -157,17 +157,17 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             // Use only alive Contacts from the RouteTable
             handler.setSelectAliveNodesOnly(true);
             
-            Map<? extends Contact, ? extends QueryKey> nodes = null;
+            Map<? extends Contact, ? extends SecurityToken> nodes = null;
             try {
                 nodes = handler.call().getNodes();
             } catch (InterruptedException e) {
                 throw new DHTException(e);
             }
             
-            for (Entry<? extends Contact,? extends QueryKey> entry : nodes.entrySet()) {
+            for (Entry<? extends Contact,? extends SecurityToken> entry : nodes.entrySet()) {
                 Contact node = entry.getKey();
-                QueryKey queryKey = entry.getValue();
-                processList.add(new StoreProcess(node, queryKey));
+                SecurityToken securityToken = entry.getValue();
+                processList.add(new StoreProcess(node, securityToken));
             }
             
         }
@@ -275,8 +275,8 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /** The Node to where to store the values */
         private final Contact node;
         
-        /** The QueryKey for the Node */
-        private final QueryKey queryKey;
+        /** The SecurityToken for the Node */
+        private final SecurityToken securityToken;
         
         /** The Values to store */
         private final Iterator<? extends DHTValueEntity> it;
@@ -296,9 +296,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /** A reference to an Exception that iterrupted this store process */
         private Exception exception;
         
-        private StoreProcess(Contact node, QueryKey queryKey) {
+        private StoreProcess(Contact node, SecurityToken securityToken) {
             this.node = node;
-            this.queryKey = queryKey;
+            this.securityToken = securityToken;
             
             Iterable<? extends DHTValueEntity> it = values;
             if (context.isLocalNode(node)) {
@@ -350,7 +350,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             
             value = it.next();
             StoreRequest request = context.getMessageHelper()
-                .createStoreRequest(node.getContactAddress(), queryKey, Collections.singleton(value));
+                .createStoreRequest(node.getContactAddress(), securityToken, Collections.singleton(value));
             context.getMessageDispatcher().send(node, request, StoreResponseHandler.this);
 
             return false;
@@ -393,13 +393,13 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
     
     /**
-     * GetQueryKeyHandler tries to get the QueryKey of a Node
+     * GetSecurityTokenHandler tries to get the SecurityToken of a Node
      */
-    private static class GetQueryKeyHandler extends AbstractResponseHandler<GetQueryKeyResult> {
+    private static class GetSecurityTokenHandler extends AbstractResponseHandler<GetSecurityTokenResult> {
         
         private Contact node;
         
-        GetQueryKeyHandler(Context context, Contact node) {
+        GetSecurityTokenHandler(Context context, Contact node) {
             super(context);
             
             this.node = node;
@@ -456,7 +456,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
                 context.getRouteTable().add(node);
             }
             
-            setReturnValue(new GetQueryKeyResult(response.getQueryKey()));
+            setReturnValue(new GetSecurityTokenResult(response.getSecurityToken()));
         }
         
         @Override
@@ -467,23 +467,23 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         @Override
         protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
             if (LOG.isErrorEnabled()) {
-                LOG.error("Getting the QueryKey from " + ContactUtils.toString(nodeId, dst) + " failed", e);
+                LOG.error("Getting the SecurityToken from " + ContactUtils.toString(nodeId, dst) + " failed", e);
             }
             
             setException(new DHTBackendException(nodeId, dst, message, e));
         }
     }
     
-    private static class GetQueryKeyResult implements Result {
+    private static class GetSecurityTokenResult implements Result {
         
-        private final QueryKey queryKey;
+        private final SecurityToken securityToken;
         
-        public GetQueryKeyResult(QueryKey queryKey) {
-            this.queryKey = queryKey;
+        public GetSecurityTokenResult(SecurityToken securityToken) {
+            this.securityToken = securityToken;
         }
         
-        public QueryKey getQueryKey() {
-            return queryKey;
+        public SecurityToken getSecurityToken() {
+            return securityToken;
         }
     }
 }

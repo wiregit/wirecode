@@ -29,8 +29,10 @@ import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.limewire.mojito.settings.MessageSettings;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -110,7 +112,8 @@ public class MessageID implements Comparable<MessageID>, Serializable {
         byte[] messageId = new byte[LENGTH];
         GENERATOR.nextBytes(messageId);
 
-        if (dst instanceof InetSocketAddress) {
+        if (MessageSettings.TAG_MESSAGE_ID.getValue() 
+                && dst instanceof InetSocketAddress) {
             byte[] queryKey = QueryKey.getQueryKey(dst).getBytes();
 
             // Obfuscate it with our random pad!
@@ -157,7 +160,9 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     /**
      * Extracts and returns the QueryKey from the GUID
      */
-    private QueryKey getQueryKey() {
+    private SecurityToken getSecurityToken() {
+        assert (MessageSettings.TAG_MESSAGE_ID.getValue());
+        
         byte[] queryKey = new byte[4];
 
         // De-Obfuscate it with our random pad!
@@ -171,12 +176,16 @@ public class MessageID implements Comparable<MessageID>, Serializable {
     /**
      * Returns whether or not we're the originator of the GUID.
      */
-    public boolean verifyQueryKey(SocketAddress src) {
+    public boolean verifySecurityToken(SocketAddress src) {
+        if (!MessageSettings.TAG_MESSAGE_ID.getValue()) {
+            return true;
+        }
+        
         if (!(src instanceof InetSocketAddress)) {
             return false;
         }
 
-        return getQueryKey().isFor(src);
+        return getSecurityToken().isFor(src);
     }
 
     public int compareTo(MessageID o) {

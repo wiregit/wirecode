@@ -37,8 +37,7 @@ import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.FindNodeLookupStatisticContainer;
-import org.limewire.security.QueryKey;
-
+import org.limewire.security.SecurityToken;
 
 /**
  * The FindNodeResponseHandler class implements FIND_NODE specific features.
@@ -106,7 +105,7 @@ public class FindNodeResponseHandler
         lookupStat.setHops(currentHop, false);
         lookupStat.setTime((int)time, false);
         
-        Map<Contact, QueryKey> nearest = getNearestContacts();
+        Map<Contact, SecurityToken> nearest = getNearestContacts();
         Collection<Contact> collisions = getCollisions();
         
         FindNodeResult result = new FindNodeResult(getLookupID(), nearest, 
@@ -122,7 +121,7 @@ public class FindNodeResponseHandler
      * Returns the k-closest Contacts sorted by their closeness
      * to the given lookup key
      */
-    private Map<Contact, QueryKey> getNearestContacts() {
+    private Map<Contact, SecurityToken> getNearestContacts() {
         return getContacts(getResultSetSize());
     }
     
@@ -130,7 +129,7 @@ public class FindNodeResponseHandler
      * Returns count number of Contacts sorted by their closeness
      * to the given lookup key
      */
-    private Map<Contact, QueryKey> getContacts(int count) {
+    private Map<Contact, SecurityToken> getContacts(int count) {
         if (count < 0) {
             count = responses.size();
         }
@@ -138,11 +137,11 @@ public class FindNodeResponseHandler
         final int maxCount = count;
         
         // Use a LinkedHashMap which preserves the insertion order...
-        final Map<Contact, QueryKey> nearest = new LinkedHashMap<Contact, QueryKey>();
+        final Map<Contact, SecurityToken> nearest = new LinkedHashMap<Contact, SecurityToken>();
         
-        responses.select(lookupId, new Cursor<KUID, Entry<Contact,QueryKey>>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, QueryKey>> entry) {
-                Entry<Contact, QueryKey> e = entry.getValue();
+        responses.select(lookupId, new Cursor<KUID, Entry<Contact,SecurityToken>>() {
+            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, SecurityToken>> entry) {
+                Entry<Contact, SecurityToken> e = entry.getValue();
                 nearest.put(e.getKey(), e.getValue());
                 
                 if (nearest.size() < maxCount) {
@@ -183,6 +182,4 @@ public class FindNodeResponseHandler
             throw new IllegalArgumentException("this is find node handler");
         return handleNodeResponse((FindNodeResponse)message);
     }
-    
-    
 }

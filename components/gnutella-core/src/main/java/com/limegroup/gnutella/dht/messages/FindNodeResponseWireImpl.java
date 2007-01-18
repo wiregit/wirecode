@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 
 public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeResponse> 
@@ -18,7 +18,7 @@ public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeRespon
         return delegate.getNodes();
     }
 
-    public QueryKey getQueryKey() {
-        return delegate.getQueryKey();
+    public SecurityToken getSecurityToken() {
+        return delegate.getSecurityToken();
     }
 }
