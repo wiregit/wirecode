@@ -122,9 +122,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     /** The total number of failed lookups */
     private int totalFailures = 0;
     
-    /** A flag that indicates whether or not the lookup has finished */
-    //private boolean finished = false;
-    
     /** 
      * Whether or not the (k+1)-closest Contact should be removed 
      * from the response Set 
@@ -187,6 +184,10 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
     }
     
+    /**
+     * Returns the default number of parallel lookums this
+     * handler maintains 
+     */
     protected abstract int getDefaultParallelism();
     
     /**
@@ -232,6 +233,9 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return routeTableFailures;
     }
     
+    /**
+     * Returns true if the lookup has timed out
+     */
     protected abstract boolean isTimeout(long time);
         
     /**
@@ -616,6 +620,9 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return requestWasSent;
     }
     
+    /**
+     * Creates and returns a LookupRequest message
+     */
     protected abstract LookupRequest createLookupRequest(SocketAddress addr);
     
     /**
