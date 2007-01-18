@@ -5,11 +5,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.security.SignatureVerifier;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.ProcessingQueue;
 
 /** A class that verifies secure messages sequentially. */
@@ -29,7 +33,7 @@ public class SecureMessageVerifier {
     
     /** Initializes the public key if one isn't set. */
     private void initializePublicKey() {
-        if(pubKey == null)
+        if(pubKey == null) 
             pubKey = createPublicKey();
     }
     
@@ -71,6 +75,15 @@ public class SecureMessageVerifier {
             return;
         }
         
+        SHA1 sha1 = new SHA1();
+        sha1.update(getKeyString().getBytes());
+        if (!Arrays.equals(sha1.digest(), 
+                Base32.decode(FilterSettings.MESSAGE_KEY_SHA1.getValue()))) {
+            LOG.warn("Cannot verify message with invalid key");
+            message.setSecureStatus(SecureMessage.INSECURE);
+            callback.handleSecureMessage(message, false);
+        } 
+        
         try {
             Signature verifier = Signature.getInstance("SHA1withDSA");
             verifier.initVerify(pubKey);
@@ -110,5 +123,4 @@ public class SecureMessageVerifier {
             verifyMessage(message, callback);
         }
     }
-
 }

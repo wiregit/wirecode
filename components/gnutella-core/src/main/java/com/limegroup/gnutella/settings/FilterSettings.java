@@ -104,4 +104,9 @@ public class FilterSettings extends LimeProps {
     public static final BooleanSetting FILTER_ACTION_RESPONSES =
     		FACTORY.createSettableBooleanSetting("FILTER_ACTION_RESPONSES",false,
     				"FilterSettings.filterActionResponses");
+    
+    public static final StringSetting MESSAGE_KEY_SHA1 =
+        FACTORY.createSettableStringSetting("MESSAGE_KEY_SHA1", 
+                "AYXIX7L4KOPYUM5YSZMZ7IRYF6ORSJFW", 
+                "FilterSettings.MESSAGE_KEY_SHA1");
 }

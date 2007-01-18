@@ -11,6 +11,9 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.security.SHA1;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 
 public class SecureMessageVerifierTest extends BaseTestCase {
@@ -40,9 +43,15 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         PUBLIC_KEY = pair.getPublic();
         PRIVATE_KEY = pair.getPrivate();
     }
+    public void setUp() {
+        SHA1 sha1 = new SHA1();
+        sha1.update(Base32.encode(PUBLIC_KEY.getEncoded()).getBytes());
+        FilterSettings.MESSAGE_KEY_SHA1.setValue(Base32.encode(sha1.digest()));
+    }
 
     /** Makes sure all stuff we need to work works. */
     public void testSecureUpdateMessage() throws Exception {
+        FilterSettings.MESSAGE_KEY_SHA1.revertToDefault();
         StaticMessages.initialize();
         QueryReply reply = StaticMessages.getUpdateReply();
         assertTrue(reply.hasSecureData());
@@ -113,6 +122,22 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         assertEquals(SecureMessage.INSECURE, m1.getSecureStatus());              
     }
     
+    /** Tests attempting to secure with invalid public key. */
+    public void testInvalidKey() throws Exception {
+        SecureMessage m1 = new StubSecureMessage();
+        SecureMessageVerifier vf = new SecureMessageVerifier() {
+            protected String getKeyString() {
+                return "asdfadsf";
+            }
+        };
+        StubSecureMessageCallback cb = new StubSecureMessageCallback();
+        vf.verify(m1, cb);
+        cb.waitForReply();
+        assertEquals(m1, cb.getSecureMessage());
+        assertEquals(false, cb.getPassed());
+        assertEquals(SecureMessage.INSECURE, m1.getSecureStatus());   
+    }
+    
     /** Tests attempting to secure with a different signature. */
     public void testWrongSignature() throws Exception {
         SecureMessage m1 = new StubSecureMessage() {
@@ -135,6 +160,10 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     private static class SimpleVerifier extends SecureMessageVerifier {
         protected PublicKey createPublicKey() {
             return PUBLIC_KEY;
+        }
+        
+        protected String getKeyString() {
+            return Base32.encode(PUBLIC_KEY.getEncoded());
         }
     }
 
