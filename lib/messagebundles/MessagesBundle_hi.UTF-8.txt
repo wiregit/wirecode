@@ -2323,6 +2323,8 @@ MESSAGE_CONTINUE_DOWNLOAD=क्या आप प्रतिष्ठापन 
 MESSAGE_SENSITIVE_SHARE_TOP=You are attempting to share a folder that is likely to contain sensitive information:
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
 MESSAGE_SENSITIVE_SHARE_BOTTOM=कोष्ठ को बांटने योग्य बनायें?
+#### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
+#? WARNING_INSTALLATION_CORRUPTED=
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the

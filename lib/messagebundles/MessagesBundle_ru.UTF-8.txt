@@ -2323,6 +2323,8 @@ MESSAGE_CONTINUE_DOWNLOAD=Вы хотите продолжить загрузк�
 MESSAGE_SENSITIVE_SHARE_TOP=Возможно, эта папка содержит важную информацию, к которой не следует открывать доступ:
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
 MESSAGE_SENSITIVE_SHARE_BOTTOM=Открыть доступ к этой папке?
+#### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
+#? WARNING_INSTALLATION_CORRUPTED=
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the

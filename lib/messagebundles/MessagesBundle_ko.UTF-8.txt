@@ -2325,6 +2325,8 @@ MESSAGE_CONTINUE_DOWNLOAD=다운로드를 계속하시겠습니까?
 MESSAGE_SENSITIVE_SHARE_TOP=기밀성의 높은 정보가 있을 수 있는 폴더를 공유하려고 하고 있습니다:
 #### MESSAGE_SENSITIVE_SHARE_BOTTOM=Share this folder?
 MESSAGE_SENSITIVE_SHARE_BOTTOM=이 폴더를 공유하시겠습니까?
+#### WARNING_INSTALLATION_CORRUPTED=<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b><br><br>Please visit <a href="http://www.limewire.com/corrupted">www.limewire.com</a> and download the newest official version of LimeWire.</html>
+#? WARNING_INSTALLATION_CORRUPTED=
 
 ################################################################################
 # Key/value pair for the message shown when LimeWire couldn't connect to the
