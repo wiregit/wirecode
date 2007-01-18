@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import com.limegroup.gnutella.io.WriteState;
+import org.limewire.nio.statemachine.WriteState;
+
 import com.limegroup.gnutella.statistics.Statistic;
 
 public abstract class WriteHeadersIOState extends WriteState {

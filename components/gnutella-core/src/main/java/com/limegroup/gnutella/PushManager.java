@@ -10,9 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.observer.ConnectObserver;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.Sockets;

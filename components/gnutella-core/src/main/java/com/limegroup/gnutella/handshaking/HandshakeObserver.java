@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.io.Shutdownable;
+import org.limewire.nio.observer.Shutdownable;
 
 public interface HandshakeObserver extends Shutdownable {
     public void handleNoGnutellaOk(int code, String msg);

@@ -14,9 +14,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.observer.ConnectObserver;
 
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 

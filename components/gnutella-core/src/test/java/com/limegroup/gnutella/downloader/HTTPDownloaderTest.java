@@ -6,12 +6,12 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 
 import org.limewire.collection.Interval;
+import org.limewire.nio.ReadBufferChannel;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.connection.ReadBufferChannel;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
 

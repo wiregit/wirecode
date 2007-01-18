@@ -7,16 +7,16 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Periodic;
 import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.DelayedBufferWriter;
+import org.limewire.nio.ThrottleWriter;
+import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.observer.IOErrorObserver;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.DelayedBufferWriter;
-import com.limegroup.gnutella.io.IOErrorObserver;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
-import com.limegroup.gnutella.util.Periodic;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 import com.limegroup.bittorrent.statistics.BandwidthStat;

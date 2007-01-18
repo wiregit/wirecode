@@ -13,6 +13,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 
 public class DHTNodeFetcherTest extends DHTTestCase {
     

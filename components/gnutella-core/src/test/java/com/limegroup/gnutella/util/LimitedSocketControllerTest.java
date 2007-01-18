@@ -5,9 +5,10 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.limewire.nio.observer.StubConnectObserver;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 public class LimitedSocketControllerTest extends LimeTestCase {

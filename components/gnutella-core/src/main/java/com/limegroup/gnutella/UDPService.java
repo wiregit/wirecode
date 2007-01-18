@@ -17,11 +17,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.observer.ReadWriteObserver;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;

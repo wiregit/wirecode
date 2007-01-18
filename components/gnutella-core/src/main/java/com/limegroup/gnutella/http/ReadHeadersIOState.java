@@ -6,9 +6,9 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.statemachine.ReadState;
 
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ReadState;
 import com.limegroup.gnutella.statistics.Statistic;
 
 public abstract class ReadHeadersIOState extends ReadState {

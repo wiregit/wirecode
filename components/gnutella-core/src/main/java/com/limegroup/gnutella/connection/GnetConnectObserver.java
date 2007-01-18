@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.io.Shutdownable;
+import org.limewire.nio.observer.Shutdownable;
 
 /**
  * A specialized ConnectObserver, with more callbacks for dealing

@@ -5,10 +5,10 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.AbstractNBSocket;
 
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.io.AbstractNBSocket;
 
 class IncomingBTHandshaker extends BTHandshaker {
 

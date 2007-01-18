@@ -4,11 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
+import org.limewire.nio.ReadBufferChannel;
 import org.limewire.util.ByteOrder;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.connection.ReadBufferChannel;
 
 /**
  * Tests for AsyncDimeRecordReader.

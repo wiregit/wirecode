@@ -5,7 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-import com.limegroup.gnutella.io.BufferUtils;
+import org.limewire.nio.BufferUtils;
+
 
 /**
  * Provides common functionality for objects that represent pieces of bencoded data.

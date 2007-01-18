@@ -11,16 +11,16 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
+import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.channel.ChannelWriter;
+import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestScatteringByteChannel;
+import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.observer.ChannelReadObserver;
 
 import com.limegroup.bittorrent.BTConnection;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.io.AbstractNBSocket;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestScatteringByteChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
 
 abstract class BTHandshaker implements  
 ChannelWriter, ChannelReadObserver, IpPort {

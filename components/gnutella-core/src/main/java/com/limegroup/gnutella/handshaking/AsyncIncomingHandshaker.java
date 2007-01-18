@@ -5,11 +5,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
+import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.statemachine.IOState;
+import org.limewire.nio.statemachine.IOStateMachine;
+import org.limewire.nio.statemachine.IOStateObserver;
+
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.io.IOState;
-import com.limegroup.gnutella.io.IOStateMachine;
-import com.limegroup.gnutella.io.IOStateObserver;
-import com.limegroup.gnutella.io.NIOMultiplexor;
 
 public class AsyncIncomingHandshaker implements Handshaker, IOStateObserver {
 

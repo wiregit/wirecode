@@ -5,9 +5,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
+import org.limewire.nio.statemachine.ReadState;
+
 import com.limegroup.gnutella.dime.AsyncDimeParser;
 import com.limegroup.gnutella.dime.DIMERecord;
-import com.limegroup.gnutella.io.ReadState;
 
 public class AsyncHashTreeHandler extends ReadState implements ThexReader {
     

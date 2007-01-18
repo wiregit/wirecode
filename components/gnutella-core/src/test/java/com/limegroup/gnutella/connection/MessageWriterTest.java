@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import org.limewire.nio.WriteBufferChannel;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;

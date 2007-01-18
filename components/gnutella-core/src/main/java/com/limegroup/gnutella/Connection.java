@@ -17,10 +17,13 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
+import org.limewire.io.UncompressingInputStream;
+import org.limewire.nio.observer.ConnectObserver;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -31,7 +34,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.Handshaker;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -44,9 +46,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
-import com.limegroup.gnutella.util.CompressingOutputStream;
 import com.limegroup.gnutella.util.Sockets;
-import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and

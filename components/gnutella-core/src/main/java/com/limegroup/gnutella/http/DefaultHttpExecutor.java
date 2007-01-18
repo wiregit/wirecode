@@ -7,8 +7,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.nio.observer.Shutdownable;
 
-import com.limegroup.gnutella.io.Shutdownable;
 
 /**
  * Default implementation of <tt>HttpExecutor</tt>.

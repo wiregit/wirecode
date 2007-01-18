@@ -4,8 +4,8 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.limewire.collection.Cancellable;
+import org.limewire.nio.observer.Shutdownable;
 
-import com.limegroup.gnutella.io.Shutdownable;
 
 /**
  * Something that executes HTTP requests using the http client library.

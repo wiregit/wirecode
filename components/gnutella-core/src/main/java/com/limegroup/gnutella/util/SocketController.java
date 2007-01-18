@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import com.limegroup.gnutella.io.ConnectObserver;
+import org.limewire.nio.observer.ConnectObserver;
+
 
 interface SocketController {
 

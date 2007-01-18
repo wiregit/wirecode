@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import com.limegroup.gnutella.io.BufferUtils;
+import org.limewire.nio.BufferUtils;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 

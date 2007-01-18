@@ -10,13 +10,14 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.TransportListener;
-import com.limegroup.gnutella.io.WriteObserver;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.observer.Shutdownable;
+import org.limewire.nio.observer.TransportListener;
+import org.limewire.nio.observer.WriteObserver;
+
 
 /**
  * Interface between reading channels & UDP's data.

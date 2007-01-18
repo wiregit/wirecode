@@ -10,15 +10,16 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.channel.ChannelReader;
+import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.observer.ChannelReadObserver;
+import org.limewire.nio.observer.StubConnectObserver;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelReader;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;

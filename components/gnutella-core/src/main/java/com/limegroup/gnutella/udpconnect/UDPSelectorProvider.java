@@ -8,7 +8,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 
-import com.limegroup.gnutella.io.TransportListener;
+import org.limewire.nio.observer.TransportListener;
+
 
 public class UDPSelectorProvider extends SelectorProvider {
 

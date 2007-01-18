@@ -6,10 +6,10 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.statemachine.ReadState;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ReadState;
 
 public class AsyncDimeRecordReader extends ReadState {
     

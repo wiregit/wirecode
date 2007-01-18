@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
 import org.limewire.collection.Cancellable;
+import org.limewire.nio.observer.Shutdownable;
 
-import com.limegroup.gnutella.io.Shutdownable;
 
 /**
  * A shutdownable that can notify other shutdownables when it is shutdown.

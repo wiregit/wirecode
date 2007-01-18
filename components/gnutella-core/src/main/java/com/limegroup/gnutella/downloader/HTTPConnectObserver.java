@@ -3,7 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.Socket;
 
-import com.limegroup.gnutella.io.ConnectObserver;
+import org.limewire.nio.observer.ConnectObserver;
+
 
 /**
  * Specialized base class for download-related Observers for better 
