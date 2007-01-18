@@ -92,7 +92,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             Collection<? extends DHTValueEntity> values) {
         this(context, null, null, values);
     }
-
     
     public StoreResponseHandler(Context context, Contact node, 
             SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
@@ -177,7 +176,12 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
     
     @Override
-    protected synchronized void response(ResponseMessage message, long time) throws IOException {
+    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
+        super.handleResponse(response, time);
+    }
+
+    @Override
+    protected void response(ResponseMessage message, long time) throws IOException {
         StoreResponse response = (StoreResponse)message;
         Collection<? extends Entry<KUID,Status>> status = response.getStatus();
         
@@ -192,16 +196,27 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
 
     @Override
-    protected synchronized void timeout(KUID nodeId, SocketAddress dst, 
+    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, 
+            RequestMessage request, long time) throws IOException {
+        super.handleTimeout(nodeId, dst, request, time);
+    }
+    
+    @Override
+    protected void timeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) throws IOException {
         
         activeProcesses.remove(nodeId).timeout(nodeId, dst, message, time); 
-        
         sendNextAndExitIfDone();
     }
     
     @Override
-    protected synchronized void error(KUID nodeId, SocketAddress dst, 
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, 
+            RequestMessage message, IOException e) {
+        super.handleError(nodeId, dst, message, e);
+    }
+    
+    @Override
+    protected void error(KUID nodeId, SocketAddress dst, 
             RequestMessage message, IOException e) {
         
         StoreProcess state = activeProcesses.remove(nodeId);
@@ -216,7 +231,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
      * Tries to maintain parallel store requests and fires
      * an event if storing is done
      */
-    private synchronized void sendNextAndExitIfDone() {
+    private void sendNextAndExitIfDone() {
         while(activeProcesses.size() < parallelism && processes.hasNext()) {
             StoreProcess process = processes.next();
             
@@ -240,7 +255,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     /**
      * Called if all values were stored
      */
-    private synchronized void done() {
+    private void done() {
         List<Contact> nodes = new ArrayList<Contact>();
         Set<DHTValueEntity> failed = new HashSet<DHTValueEntity>();
         
