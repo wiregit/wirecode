@@ -269,6 +269,9 @@ public class RouterService {
 	    MYGUID=myguid;
 	}
 
+    private static final NetworkUpdateSanityChecker networkSanityChecker = 
+        new NetworkUpdateSanityChecker();
+    
 	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
@@ -545,6 +548,10 @@ public class RouterService {
 	public static MessageRouter getMessageRouter() {
 		return router;
 	}
+    
+    public static NetworkUpdateSanityChecker getNetworkSanityChecker() {
+        return networkSanityChecker;
+    }
     
 	/**
 	 * Accessor for the <tt>FileManager</tt> instance in use.

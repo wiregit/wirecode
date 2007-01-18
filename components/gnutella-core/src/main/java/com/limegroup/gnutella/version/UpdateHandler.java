@@ -13,6 +13,7 @@ import java.util.Set;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.FileDesc;
@@ -132,7 +133,7 @@ public class UpdateHandler {
         LOG.trace("Initializing UpdateHandler");
         QUEUE.add(new Runnable() {
             public void run() {
-                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true);
+                handleDataInternal(FileUtils.readFileFully(getStoredFile()), true, null);
             }
         });
         
@@ -183,12 +184,12 @@ public class UpdateHandler {
      * (The actual processing is passed of to be run in a different thread.
      *  All notifications are processed in the same thread, sequentially.)
      */
-    public void handleNewData(final byte[] data) {
+    public void handleNewData(final byte[] data, final ReplyHandler handler) {
         if(data != null) {
             QUEUE.add(new Runnable() {
                 public void run() {
                     LOG.trace("Parsing new data...");
-                    handleDataInternal(data, false);
+                    handleDataInternal(data, false, handler);
                 }
             });
         }
@@ -214,18 +215,24 @@ public class UpdateHandler {
      *
      * (Processes the data immediately.)
      */
-    private void handleDataInternal(byte[] data, boolean fromDisk) {
+    private void handleDataInternal(byte[] data, boolean fromDisk, ReplyHandler handler) {
         if(data != null) {
             String xml = SignatureVerifier.getVerifiedData(data, KEY, "DSA", "SHA1");
             if(xml != null) {
+                if (!fromDisk)
+                    RouterService.getNetworkSanityChecker().handleValidResponse(handler, NetworkUpdateSanityChecker.VERSION);
                 UpdateCollection uc = UpdateCollection.create(xml);
                 if(uc.getId() > _lastId)
                     storeAndUpdate(data, uc, fromDisk);
             } else {
+                if (!fromDisk)
+                    RouterService.getNetworkSanityChecker().handleInvalidResponse(handler, NetworkUpdateSanityChecker.VERSION);
                 LOG.warn("Couldn't verify signature on data.");
             }
         } else {
             LOG.warn("No data to handle.");
+            if (!fromDisk)
+                RouterService.getNetworkSanityChecker().handleInvalidResponse(handler, NetworkUpdateSanityChecker.VERSION);
         }
     }
     

@@ -234,6 +234,8 @@ public class Main implements ActivityCallback, ErrorCallback {
         
     public void downloadsComplete() {}    
     
+    public void installationCorrupted() {}
+    
     public void fileManagerLoaded() {}    
     
     public void uploadsComplete() {}

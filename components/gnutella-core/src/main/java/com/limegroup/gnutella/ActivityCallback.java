@@ -52,6 +52,8 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener
      */
     public void disconnected();
     
+    public void installationCorrupted();
+    
 
     /**
      * Notifies the UI that a new query result has come in to the backend.

@@ -13,6 +13,8 @@ import java.util.Arrays;
 
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
@@ -133,17 +135,22 @@ public class SimppManager {
     /**
      * Called when we receive a new SIMPPVendorMessage, 
      */
-    public void checkAndUpdate(final byte[] simppPayload) { 
-        if(simppPayload == null)
+    public void checkAndUpdate(final ReplyHandler handler, final byte[] simppPayload) { 
+        if(simppPayload == null) {
+            RouterService.getNetworkSanityChecker().handleInvalidResponse(handler, NetworkUpdateSanityChecker.SIMPP);
             return;
+        }
         final int myVersion = _latestVersion;
         Runnable simppHandler = new Runnable() {
             public void run() {
                 
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 
-                if (!verifier.verifySource())
+                if (!verifier.verifySource()) {
+                    RouterService.getNetworkSanityChecker().handleInvalidResponse(handler, NetworkUpdateSanityChecker.SIMPP);
                     return;
+                } else
+                    RouterService.getNetworkSanityChecker().handleValidResponse(handler, NetworkUpdateSanityChecker.SIMPP);
                 
                 SimppParser parser=null;
                 try {

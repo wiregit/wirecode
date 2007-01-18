@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,21 +25,24 @@ import com.limegroup.gnutella.io.Shutdownable;
  */
 public class NetworkUpdateSanityChecker {
     
-    public static enum RequestType {
-        SIMPP, VERSION;
+    public static final Integer SIMPP = new Integer(0);
+    public static final Integer VERSION = new Integer(1);
+    private static final Set allTypes = new HashSet();
+    static {
+        allTypes.add(SIMPP);
+        allTypes.add(VERSION);
     }
-    private static final Set<RequestType> allTypes = EnumSet.allOf(RequestType.class);
     
     private static final Log LOG = LogFactory.getLog(NetworkUpdateSanityChecker.class);
     
     private static final int MAXIMUM_FAILURES = 20;
     private static final String MASK = "/255.255.0.0";
     
-    private final Map<RequestType, Map<ReplyHandler, Boolean>> requests =
-        new HashMap<RequestType, Map<ReplyHandler, Boolean>>(RequestType.values().length);
-    private final List<IP> failures = new ArrayList<IP>(MAXIMUM_FAILURES);
+     
+    private final Map/* <RequestType, Map<ReplyHandler, Boolean>> */ requests = new HashMap(2);
+    private final List/* <IP> */failures = new ArrayList(MAXIMUM_FAILURES);
     private boolean finished = false;
-    private Set<RequestType> successes = EnumSet.noneOf(RequestType.class);
+    private Set/*<RequestType>*/ successes = new HashSet();
     
     /**
      * Stores knowledge that we've requested a network-updatable component
@@ -46,7 +50,7 @@ public class NetworkUpdateSanityChecker {
      * 
      * @param handler
      */
-    public void handleNewRequest(ReplyHandler handler, RequestType type) {
+    public void handleNewRequest(ReplyHandler handler, Integer type) {
         if(LOG.isDebugEnabled())
             LOG.debug("Adding request to handler: " + handler);
         
@@ -66,7 +70,7 @@ public class NetworkUpdateSanityChecker {
      * 
      * @param handler
      */
-    public void handleValidResponse(ReplyHandler handler, RequestType type) {
+    public void handleValidResponse(ReplyHandler handler, Integer type) {
         if(LOG.isDebugEnabled())
             LOG.debug("Received valid response from handler: " + handler + "of type: " + type);
         synchronized(requests) {
@@ -91,7 +95,7 @@ public class NetworkUpdateSanityChecker {
      * 
      * @param handler
      */
-    public void handleInvalidResponse(ReplyHandler handler, RequestType type) {
+    public void handleInvalidResponse(ReplyHandler handler, Integer type) {
         synchronized(requests) {
             // If we had a request for this handler...
             if(!finished && removeRequest(handler, type)) {
@@ -102,7 +106,8 @@ public class NetworkUpdateSanityChecker {
                 boolean contained = false;
                 // See if we already had a failure in this range, if so
                 // then ignore it.
-                for(IP current : failures) {
+                for(Iterator iter = failures.iterator(); iter.hasNext();) {
+                    IP current = (IP) iter.next();
                     if(current.contains(ip)) {
                         if(LOG.isDebugEnabled())
                             LOG.debug("Already had a failure from range: " +    
@@ -134,10 +139,10 @@ public class NetworkUpdateSanityChecker {
     }
     
     /** Adds a single incoming request to the maps. */
-    private void addRequest(ReplyHandler handler, RequestType type) {
-        Map<ReplyHandler, Boolean> inner = requests.get(type);
+    private void addRequest(ReplyHandler handler, Integer type) {
+        Map /*<ReplyHandler, Boolean>*/ inner = (Map) requests.get(type);
         if(inner == null) {
-            inner = new WeakHashMap<ReplyHandler, Boolean>();
+            inner = new WeakHashMap /*<ReplyHandler, Boolean> */ ();
             requests.put(type, inner);
         }
         inner.put(handler, Boolean.TRUE);
@@ -147,8 +152,8 @@ public class NetworkUpdateSanityChecker {
      * Removes a request from the maps, returning an object if it was
      * contained.  Null if it wasn't.
      */
-    private boolean removeRequest(ReplyHandler handler, RequestType type) {
-        Map<ReplyHandler, Boolean> inner = requests.get(type);
+    private boolean removeRequest(ReplyHandler handler, Integer type) {
+        Map/*<ReplyHandler, Boolean>*/ inner = (Map) requests.get(type);
         if(inner == null)
             return false;
         else
@@ -156,3 +161,4 @@ public class NetworkUpdateSanityChecker {
     }
 
 }
+

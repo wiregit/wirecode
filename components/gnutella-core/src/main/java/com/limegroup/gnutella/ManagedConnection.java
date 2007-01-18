@@ -43,6 +43,7 @@ import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.io.DelayedBufferWriter;
 import com.limegroup.gnutella.io.NBThrottle;
 import com.limegroup.gnutella.io.NIOMultiplexor;
+import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.io.Throttle;
 import com.limegroup.gnutella.io.ThrottleWriter;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -114,7 +115,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, MessageReceiver, SentMessageHandler {
+	implements ReplyHandler, MessageReceiver, SentMessageHandler, Shutdownable {
     
     private static final Log LOG = LogFactory.getLog(ManagedConnection.class);
 
@@ -276,6 +277,8 @@ public class ManagedConnection extends Connection
     
     /** The number of queryReplies received through this connection */
     private volatile long queryReplies;
+    
+    private boolean receivedCapVM;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -754,6 +757,10 @@ public class ManagedConnection extends Connection
     public void flush() throws IOException {        
     }
 
+    public void shutdown() {
+        close();
+    }
+    
     public void close() {
         if(_outputRunner != null)
             _outputRunner.shutdown();
@@ -1062,7 +1069,9 @@ public class ManagedConnection extends Connection
         else if(vm instanceof CapabilitiesVM) {
             //we need to see if there is a new simpp version out there.
             CapabilitiesVM capVM = (CapabilitiesVM)vm;
-            if(capVM.supportsSIMPP() > SimppManager.instance().getVersion()) {
+            int smpV = capVM.supportsSIMPP();
+            if(smpV != -1 && (!receivedCapVM || smpV > SimppManager.instance().getVersion())) {
+                RouterService.getNetworkSanityChecker().handleNewRequest(this, NetworkUpdateSanityChecker.SIMPP);
                 //request the simpp message
                 SimppRequestVM simppReq = new SimppRequestVM();
                 send(simppReq);
@@ -1071,11 +1080,14 @@ public class ManagedConnection extends Connection
             // see if there's a new update message.
             int latestId = UpdateHandler.instance().getLatestId();
             int currentId = capVM.supportsUpdate();
-            if(currentId > latestId)
+            if(currentId != -1 && (!receivedCapVM || currentId > latestId)) {
+                RouterService.getNetworkSanityChecker().handleNewRequest(this, NetworkUpdateSanityChecker.VERSION);
                 send(new UpdateRequest());
+            }
             else if(currentId == latestId)
                 UpdateHandler.instance().handleUpdateAvailable(this, currentId);
-                
+            
+            receivedCapVM = true;
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        
             // If this is a ClientSupernodeConnection and the host supports

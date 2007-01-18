@@ -2064,8 +2064,8 @@ public abstract class MessageRouter {
      * to the settings as necessary, and cause new CapabilityVMs to be sent down
      * all connections.
      */
-    private void handleSimppVM(final SimppVM simppVM) {
-        SimppManager.instance().checkAndUpdate(simppVM.getPayload());
+    private void handleSimppVM(final SimppVM simppVM, ReplyHandler handler) {
+        SimppManager.instance().checkAndUpdate(handler, simppVM.getPayload());
     }
 
     /**
@@ -2089,7 +2089,7 @@ public abstract class MessageRouter {
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        UpdateHandler.instance().handleNewData(resp.getUpdate());
+        UpdateHandler.instance().handleNewData(resp.getUpdate(), handler);
     }
 
     /**
@@ -3019,7 +3019,7 @@ public abstract class MessageRouter {
     
     private class SimppVMHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleSimppVM((SimppVM)msg);
+            handleSimppVM((SimppVM)msg, handler);
         }
     }
     
