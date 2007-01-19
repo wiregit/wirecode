@@ -4,12 +4,12 @@ import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Periodic;
 import org.limewire.io.IOUtils;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.Periodic;
 
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>

@@ -3,7 +3,8 @@ package com.limegroup.gnutella.http;
 import java.io.IOException;
 import java.util.Map;
 
-import com.limegroup.gnutella.statistics.Statistic;
+import org.limewire.statistic.Statistic;
+
 
 public class SimpleReadHeaderState extends ReadHeadersIOState {
     

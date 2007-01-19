@@ -7,17 +7,18 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
 
+import org.limewire.nio.channel.ChannelReadObserver;
+import org.limewire.nio.channel.ChannelWriter;
+import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.observer.ReadObserver;
+import org.limewire.nio.observer.WriteObserver;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.connection.ReadBufferChannel;
-import com.limegroup.gnutella.connection.WriteBufferChannel;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestReadChannel;
-import com.limegroup.gnutella.io.InterestWriteChannel;
-import com.limegroup.gnutella.io.NIOMultiplexor;
-import com.limegroup.gnutella.io.ReadObserver;
-import com.limegroup.gnutella.io.WriteObserver;
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AsyncIncomingHandshakerTest extends LimeTestCase {

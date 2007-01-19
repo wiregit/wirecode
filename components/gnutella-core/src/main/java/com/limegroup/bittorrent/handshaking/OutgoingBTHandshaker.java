@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.AbstractNBSocket;
 
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.io.AbstractNBSocket;
 
 class OutgoingBTHandshaker extends BTHandshaker {
 	private static final Log LOG = LogFactory.getLog(OutgoingBTHandshaker.class);

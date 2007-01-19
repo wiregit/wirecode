@@ -24,6 +24,9 @@
 	<classpathentry path="components/collection/src/test/resources" output="components/collection/src/test/resources" kind="src"/>
 	<classpathentry path="components/common/src/main/resources" output="components/common/src/main/resources" kind="src"/>
 	<classpathentry path="components/common/src/test/resources" output="components/common/src/test/resources" kind="src"/>
+	<classpathentry path="components/nio/src/main/java" output="components/nio/build/classes" kind="src"/>
+	<classpathentry path="components/nio/src/test/java" output="components/nio/build/tests" kind="src"/>
+	<classpathentry path="components/statistic/src/main/java" output="components/statistic/build/classes" kind="src"/>
 	<classpathentry path="lib/jars/clink.jar" kind="lib"/>
 	<classpathentry path="lib/jars/commons-httpclient.jar" kind="lib"/>
 	<classpathentry path="lib/jars/commons-logging.jar" kind="lib"/>

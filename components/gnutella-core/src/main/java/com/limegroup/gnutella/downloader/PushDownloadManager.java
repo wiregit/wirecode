@@ -23,6 +23,11 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.channel.AbstractChannelInterestReader;
+import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.ConnectionAcceptor;
@@ -36,11 +41,6 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.io.AbstractChannelInterestRead;
-import com.limegroup.gnutella.io.BufferUtils;
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NIOMultiplexor;
-import com.limegroup.gnutella.io.Shutdownable;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -561,7 +561,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * Non-blocking read-channel to parse the rest of a GIV request
      * and hand it off to handleGIV.
      */
-    private class GivParser extends AbstractChannelInterestRead {
+    private class GivParser extends AbstractChannelInterestReader {
         private final Socket socket;
         private final StringBuilder givSB   = new StringBuilder();
         private final StringBuilder blankSB = new StringBuilder();

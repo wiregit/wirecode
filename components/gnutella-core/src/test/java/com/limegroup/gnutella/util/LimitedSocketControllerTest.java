@@ -7,8 +7,8 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.StubConnectObserver;
 
 public class LimitedSocketControllerTest extends LimeTestCase {
     

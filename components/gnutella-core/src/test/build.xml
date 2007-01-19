@@ -92,13 +92,6 @@
          <!-- point the defaultfileset to somewhere where no files are -->
          <do.clover-setup component="tests" defaultfileset="${limewire.components.all.home}">
  	        <locations>
- 	            <fileset dir="${limewire.components.common.src}" />
-     	        <fileset dir="${limewire.components.collection.src}"/>
-     	        <fileset dir="${limewire.components.security.src}" />
-     	        <fileset dir="${limewire.components.io.src}" />
-     	    	<fileset dir="${limewire.components.setting.src}" />
-			 	<fileset dir="${limewire.components.mojito.src}" />
-			 	<fileset dir="${limewire.components.mojito-ui.src}" />
  	            <fileset dir="${limewire.core.src}"/>
  			</locations>
  	    </do.clover-setup>

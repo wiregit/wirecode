@@ -15,6 +15,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.MessageListener;
@@ -22,7 +23,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPPinger;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.io.ConnectObserver;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.Sockets;

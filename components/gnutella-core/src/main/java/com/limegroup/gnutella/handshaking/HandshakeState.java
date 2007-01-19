@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import com.limegroup.gnutella.io.IOState;
+import org.limewire.nio.statemachine.IOState;
+
 
 /** Outlines all the states an asynchronous handshake can be in. */
 class HandshakeState {

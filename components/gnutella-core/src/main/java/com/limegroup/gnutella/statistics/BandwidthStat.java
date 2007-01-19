@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.BasicKilobytesStatistic;
+import org.limewire.statistic.Statistic;
+
 /**
  * This class contains a type-safe enumeration of all classes for
  * bandwidth data.

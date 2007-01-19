@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.statemachine.ReadState;
 
-import com.limegroup.gnutella.io.ReadState;
 
 /**
  * Parser for creating DIMERecords from non-blocking input.

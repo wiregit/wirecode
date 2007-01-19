@@ -2,7 +2,8 @@ package com.limegroup.gnutella.tigertree;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.io.IOState;
+import org.limewire.nio.statemachine.IOState;
+
 
 public interface ThexReader extends IOState {    
     public HashTree getHashTree() throws IOException;

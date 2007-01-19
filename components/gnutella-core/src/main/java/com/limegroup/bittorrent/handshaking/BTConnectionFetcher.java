@@ -12,9 +12,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Periodic;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.observer.Shutdownable;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.ManagedTorrent;
@@ -22,10 +26,6 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.AbstractNBSocket;
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.util.Periodic;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 

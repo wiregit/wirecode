@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.limewire.io.ByteBufferOutputStream;
+import org.limewire.nio.channel.ChannelWriter;
+import org.limewire.nio.channel.InterestWriteChannel;
 
-import com.limegroup.gnutella.io.ChannelWriter;
-import com.limegroup.gnutella.io.InterestWriteChannel;
 import com.limegroup.gnutella.messages.Message;
 
 /** 

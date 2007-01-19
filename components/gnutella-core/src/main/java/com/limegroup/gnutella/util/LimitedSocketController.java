@@ -8,10 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NBSocket;
-import com.limegroup.gnutella.io.Shutdownable;
-import com.limegroup.gnutella.io.SocketFactory;
+import org.limewire.nio.NBSocket;
+import org.limewire.nio.SocketFactory;
+import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.observer.Shutdownable;
+
 
 class LimitedSocketController extends SimpleSocketController {
 

@@ -6,14 +6,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.util.ByteOrder;
+
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.connection.ReadBufferChannel;
-import com.limegroup.gnutella.connection.WriteBufferChannel;
 
-import com.limegroup.gnutella.io.ByteBufferCache;
 
 /**
  * Tests some of the functionality of the Circular buffer.  

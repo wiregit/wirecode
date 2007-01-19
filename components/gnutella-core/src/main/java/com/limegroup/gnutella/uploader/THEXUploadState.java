@@ -6,14 +6,14 @@ import java.io.StringWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.BandwidthThrottle;
+import org.limewire.io.ThrottledOutputStream;
 
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
 
 /**
  * Sends the THEX tree as an HTTP message.

@@ -18,7 +18,9 @@
 	</target>
 	    
     <target name="compile" depends="mojito.compile">
-    	<do.compile component="mojito-ui"/>
+        <!-- No tests for now - when tests arrive, use compile instead of compile-src -->
+    	<!--<do.compile component="mojito-ui"/>-->
+    	<do.compile-src component="mojito-ui"/>
     </target>
 	
 	<target name="compile-src" depends="mojito.compile-src">

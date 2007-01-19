@@ -8,9 +8,9 @@ import java.net.Socket;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.io.ConnectObserver;
 
 /**
  * Factory for creating Sockets.

@@ -7,8 +7,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.io.NIOServerSocket;
-import com.limegroup.gnutella.io.NIOSocket;
+import org.limewire.nio.NIOServerSocket;
+import org.limewire.nio.NIOSocket;
+
 
 /** 
  * Returns two sockets A and B, so that the input of A is connected to 

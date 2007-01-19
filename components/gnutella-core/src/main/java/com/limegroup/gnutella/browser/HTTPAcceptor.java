@@ -10,12 +10,12 @@ import java.util.Date;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.SocketFactory;
+import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.io.AcceptObserver;
-import com.limegroup.gnutella.io.SocketFactory;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**

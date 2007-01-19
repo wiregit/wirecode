@@ -8,6 +8,7 @@ import java.io.Writer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.BandwidthThrottle;
 
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.URN;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.BandwidthThrottle;
 
 /**
  * An implementation of the UploadState interface for a normal upload situation,

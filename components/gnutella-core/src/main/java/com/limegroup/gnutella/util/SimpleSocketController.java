@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import com.limegroup.gnutella.io.ConnectObserver;
-import com.limegroup.gnutella.io.NBSocket;
-import com.limegroup.gnutella.io.SocketFactory;
+import org.limewire.nio.NBSocket;
+import org.limewire.nio.SocketFactory;
+import org.limewire.nio.observer.ConnectObserver;
+
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 class SimpleSocketController implements SocketController {    

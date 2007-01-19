@@ -6,9 +6,10 @@ import java.util.HashMap;
 
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.connection.ReadBufferChannel;
 
 /**
  * Tests for AsyncDimeRecordReader.

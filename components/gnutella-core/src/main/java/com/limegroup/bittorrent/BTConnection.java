@@ -15,13 +15,13 @@ import org.limewire.collection.BitSet;
 import org.limewire.collection.NECallable;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
+import org.limewire.nio.AbstractNBSocket;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.channel.ChannelReadObserver;
+import org.limewire.nio.channel.ThrottleReader;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.io.AbstractNBSocket;
-import com.limegroup.gnutella.io.ChannelReadObserver;
-import com.limegroup.gnutella.io.NIODispatcher;
-import com.limegroup.gnutella.io.ThrottleReader;
 import com.limegroup.bittorrent.reader.BTMessageReader;
 import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.bittorrent.disk.TorrentDiskManager;

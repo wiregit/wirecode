@@ -1,8 +1,9 @@
 package com.limegroup.bittorrent;
 
+import org.limewire.nio.observer.IOErrorObserver;
+
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.BandwidthTracker;
-import com.limegroup.gnutella.io.IOErrorObserver;
 
 /**
  * An interface describing a link between two BT hosts

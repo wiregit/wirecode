@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
@@ -33,7 +34,6 @@ import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 
 /**
  * The controller for the LimeWire Gnutella DHT. 

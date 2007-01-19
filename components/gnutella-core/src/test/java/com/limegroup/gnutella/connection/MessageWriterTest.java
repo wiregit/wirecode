@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

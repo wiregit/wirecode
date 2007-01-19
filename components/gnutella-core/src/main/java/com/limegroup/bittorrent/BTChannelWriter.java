@@ -1,9 +1,9 @@
 package com.limegroup.bittorrent;
 
 import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.nio.channel.ChannelWriter;
 
 import com.limegroup.bittorrent.messages.BTMessage;
-import com.limegroup.gnutella.io.ChannelWriter;
 
 /**
  * A <tt>ChannelWriter</tt> with some BT-specific functionality

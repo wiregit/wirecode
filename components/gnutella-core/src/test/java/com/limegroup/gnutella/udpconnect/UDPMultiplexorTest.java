@@ -9,9 +9,10 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
+import org.limewire.nio.observer.TransportListener;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.io.TransportListener;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class UDPMultiplexorTest extends LimeTestCase {

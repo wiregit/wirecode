@@ -17,8 +17,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.observer.TransportListener;
 
-import com.limegroup.gnutella.io.TransportListener;
 
 /** 
  *  Manage the assignment of connectionIDs and the routing of 

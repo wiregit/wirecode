@@ -16,11 +16,11 @@ import java.util.TreeSet;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.nio.NIOSocket;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.io.NIOSocket;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;

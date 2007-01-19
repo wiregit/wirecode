@@ -13,9 +13,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
-import com.limegroup.gnutella.io.StubConnectObserver;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.StubConnectObserver;
 
 public class ProxyTest extends LimeTestCase {
 

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.io.NBThrottle;
-import com.limegroup.gnutella.io.Throttle;
+import org.limewire.nio.NBThrottle;
+import org.limewire.nio.Throttle;
+
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 

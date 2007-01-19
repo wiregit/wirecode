@@ -10,6 +10,8 @@ import java.util.Properties;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.nio.NIOServerSocket;
+import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
 import junit.framework.Test;
@@ -19,8 +21,6 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.handshaking.StubHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.io.AcceptObserver;
-import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;

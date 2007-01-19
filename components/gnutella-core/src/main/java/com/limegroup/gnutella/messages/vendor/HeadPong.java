@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiRRIterator;
+import org.limewire.io.CountingOutputStream;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -41,7 +42,6 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.CountingOutputStream;
 
 /**
  * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,

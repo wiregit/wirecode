@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.io.Shutdownable;
+import org.limewire.nio.observer.Shutdownable;
+
 import com.limegroup.gnutella.messages.Message;
 
 /**

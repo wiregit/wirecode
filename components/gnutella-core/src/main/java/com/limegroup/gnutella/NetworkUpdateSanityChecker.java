@@ -10,9 +10,9 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.filters.IP;
-import com.limegroup.gnutella.io.Shutdownable;
 
 /**
  * A sanity checker for many different in-network verification

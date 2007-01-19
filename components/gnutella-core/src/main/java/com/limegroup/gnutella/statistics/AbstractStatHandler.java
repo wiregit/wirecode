@@ -1,5 +1,10 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.AdvancedKilobytesStatistic;
+import org.limewire.statistic.AdvancedStatistic;
+import org.limewire.statistic.Statistic;
+import org.limewire.statistic.StatisticsManager;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 

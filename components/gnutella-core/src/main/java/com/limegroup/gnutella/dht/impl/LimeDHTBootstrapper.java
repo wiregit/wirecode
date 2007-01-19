@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.FixedSizeLIFOSet;
 
 class LimeDHTBootstrapper implements DHTBootstrapper {
     

@@ -1,7 +1,8 @@
 package com.limegroup.bittorrent.handshaking;
 
+import org.limewire.nio.AbstractNBSocket;
+
 import com.limegroup.bittorrent.TorrentManager;
-import com.limegroup.gnutella.io.AbstractNBSocket;
 
 public class IncomingConnectionHandler {
 	private static IncomingConnectionHandler instance;

@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import com.limegroup.gnutella.statistics.Statistic;
+import org.limewire.statistic.Statistic;
+
 
 public class SimpleWriteHeaderState extends WriteHeadersIOState {
     

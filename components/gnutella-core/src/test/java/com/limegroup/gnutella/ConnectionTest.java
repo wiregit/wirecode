@@ -8,13 +8,13 @@ import java.util.Properties;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.nio.NIOServerSocket;
+import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.ErrorService;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
-import com.limegroup.gnutella.io.AcceptObserver;
-import com.limegroup.gnutella.io.NIOServerSocket;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
