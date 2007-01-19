@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.WriteBufferChannel;
-
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
@@ -14,6 +12,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

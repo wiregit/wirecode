@@ -6,8 +6,8 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ReadBufferChannel;
-import org.limewire.nio.WriteBufferChannel;
+import org.limewire.nio.channel.ReadBufferChannel;
+import org.limewire.nio.channel.WriteBufferChannel;
 import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.util.BaseTestCase;
 

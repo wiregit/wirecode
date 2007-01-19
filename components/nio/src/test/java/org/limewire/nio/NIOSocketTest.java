@@ -13,11 +13,11 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadChannel;
 import org.limewire.nio.channel.InterestWriteChannel;
-import org.limewire.nio.observer.ChannelReadObserver;
 import org.limewire.nio.observer.StubConnectObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;

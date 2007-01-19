@@ -12,12 +12,12 @@ import java.net.SocketTimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadChannel;
 import org.limewire.nio.channel.InterestWriteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
-import org.limewire.nio.observer.ChannelReadObserver;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.observer.ReadWriteObserver;

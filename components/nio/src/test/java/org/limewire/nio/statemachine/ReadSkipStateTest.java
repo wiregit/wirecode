@@ -6,7 +6,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ReadBufferChannel;
+import org.limewire.nio.channel.ReadBufferChannel;
 import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.util.BaseTestCase;
 

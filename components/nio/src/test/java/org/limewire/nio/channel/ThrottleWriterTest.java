@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,7 +6,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ThrottleWriter;
+import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.util.BaseTestCase;
 
 /**

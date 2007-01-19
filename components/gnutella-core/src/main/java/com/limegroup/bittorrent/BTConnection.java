@@ -17,8 +17,8 @@ import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.ThrottleReader;
-import org.limewire.nio.observer.ChannelReadObserver;
+import org.limewire.nio.channel.ChannelReadObserver;
+import org.limewire.nio.channel.ThrottleReader;
 
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;

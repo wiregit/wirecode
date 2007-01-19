@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.limewire.nio.statemachine.StubIOStateObserver;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -31,6 +30,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.StubIOStateObserver;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;

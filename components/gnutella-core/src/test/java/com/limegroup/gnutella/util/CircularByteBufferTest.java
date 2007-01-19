@@ -7,9 +7,10 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 import org.limewire.nio.ByteBufferCache;
-import org.limewire.nio.ReadBufferChannel;
-import org.limewire.nio.WriteBufferChannel;
 import org.limewire.util.ByteOrder;
+
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 
 import junit.framework.Test;
 

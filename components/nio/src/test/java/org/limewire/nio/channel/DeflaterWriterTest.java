@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -9,7 +9,7 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.nio.DeflaterWriter;
+import org.limewire.nio.channel.DeflaterWriter;
 import org.limewire.util.BaseTestCase;
 
 /**

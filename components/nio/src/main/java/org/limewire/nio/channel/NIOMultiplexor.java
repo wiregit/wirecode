@@ -1,6 +1,5 @@
 package org.limewire.nio.channel;
 
-import org.limewire.nio.observer.ChannelReadObserver;
 
 /**
  * Denotes the class can handle delegating ReadObserver events to

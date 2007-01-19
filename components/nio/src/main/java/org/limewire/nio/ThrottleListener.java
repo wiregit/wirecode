@@ -3,7 +3,7 @@ package org.limewire.nio;
 /**
  * Something that interfaces with a Throttle.
  */
-interface ThrottleListener {
+public interface ThrottleListener {
     
     /** Sets the attachment that the Throttle recognizes from this listener */
     void setAttachment(Object attachment);

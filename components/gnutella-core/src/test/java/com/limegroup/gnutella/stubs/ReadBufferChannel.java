@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package com.limegroup.gnutella.stubs;
 
 
 import java.io.IOException;

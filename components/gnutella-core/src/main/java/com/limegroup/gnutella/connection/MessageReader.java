@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.observer.ChannelReadObserver;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;

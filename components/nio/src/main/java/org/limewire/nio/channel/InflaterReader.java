@@ -1,12 +1,10 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import org.limewire.nio.channel.ChannelReader;
-import org.limewire.nio.channel.InterestReadChannel;
 
 
 

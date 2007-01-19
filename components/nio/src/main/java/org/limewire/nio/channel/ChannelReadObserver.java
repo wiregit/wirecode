@@ -1,6 +1,6 @@
-package org.limewire.nio.observer;
+package org.limewire.nio.channel;
 
-import org.limewire.nio.channel.ChannelReader;
+import org.limewire.nio.observer.ReadObserver;
 
 
 /**

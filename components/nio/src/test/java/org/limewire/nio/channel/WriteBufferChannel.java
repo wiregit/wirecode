@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 
 import java.io.IOException;

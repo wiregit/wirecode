@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 
-import org.limewire.nio.WriteBufferChannel;
 import org.limewire.nio.statemachine.IOState;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.stubs.WriteBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class WriteHandshakeStateTest extends LimeTestCase {

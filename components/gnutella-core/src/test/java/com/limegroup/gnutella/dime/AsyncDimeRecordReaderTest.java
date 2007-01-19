@@ -4,8 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.limewire.nio.ReadBufferChannel;
 import org.limewire.util.ByteOrder;
+
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
 import junit.framework.Test;
 

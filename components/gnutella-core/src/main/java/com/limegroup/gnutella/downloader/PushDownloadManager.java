@@ -23,8 +23,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.nio.AbstractChannelInterestRead;
 import org.limewire.nio.BufferUtils;
+import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
@@ -561,7 +561,7 @@ public class PushDownloadManager implements ConnectionAcceptor {
      * Non-blocking read-channel to parse the rest of a GIV request
      * and hand it off to handleGIV.
      */
-    private class GivParser extends AbstractChannelInterestRead {
+    private class GivParser extends AbstractChannelInterestReader {
         private final Socket socket;
         private final StringBuilder givSB   = new StringBuilder();
         private final StringBuilder blankSB = new StringBuilder();

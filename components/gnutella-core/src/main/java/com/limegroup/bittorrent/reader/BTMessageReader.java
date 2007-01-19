@@ -7,8 +7,8 @@ import java.nio.channels.WritableByteChannel;
 
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.observer.ChannelReadObserver;
 import org.limewire.nio.observer.IOErrorObserver;
 
 import com.limegroup.bittorrent.BTMessageHandler;

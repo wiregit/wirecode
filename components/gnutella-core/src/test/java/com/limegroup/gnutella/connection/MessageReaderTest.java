@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.limewire.nio.ReadBufferChannel;
 import org.limewire.nio.channel.InterestReadChannel;
 
 import junit.framework.Test;
@@ -21,6 +20,7 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**

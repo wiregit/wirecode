@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 
 import java.nio.ByteBuffer;
@@ -12,7 +12,6 @@ import java.util.concurrent.TimeoutException;
 import junit.framework.Test;
 
 import org.limewire.concurrent.SchedulingThreadPool;
-import org.limewire.nio.DelayedBufferWriter;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;

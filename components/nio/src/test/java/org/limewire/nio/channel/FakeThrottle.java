@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import org.limewire.nio.Throttle;
 import org.limewire.nio.ThrottleListener;

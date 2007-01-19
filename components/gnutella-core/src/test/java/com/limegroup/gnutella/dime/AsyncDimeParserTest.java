@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.limewire.nio.ReadBufferChannel;
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
 import junit.framework.Test;
 

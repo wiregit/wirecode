@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.InterestReadChannel;
 import org.limewire.nio.channel.InterestScatteringByteChannel;
-import org.limewire.nio.observer.ChannelReadObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.timeout.ReadTimeout;
 import org.limewire.nio.timeout.SoTimeout;

@@ -9,10 +9,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadChannel;
 import org.limewire.nio.channel.InterestWriteChannel;
-import org.limewire.nio.observer.ChannelReadObserver;
 
 /**
  * State machine for reading & writing.

@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,8 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
 import org.limewire.concurrent.SchedulingThreadPool;
-import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 

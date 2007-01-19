@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.nio.InflaterReader;
+import org.limewire.nio.channel.InflaterReader;
 import org.limewire.nio.channel.InterestReadChannel;
 import org.limewire.util.BaseTestCase;
 

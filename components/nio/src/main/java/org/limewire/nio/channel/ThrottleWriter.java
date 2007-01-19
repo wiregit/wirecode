@@ -1,11 +1,11 @@
-package org.limewire.nio;
+package org.limewire.nio.channel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 
-import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.Throttle;
+import org.limewire.nio.ThrottleListener;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
