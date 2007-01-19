@@ -12,24 +12,54 @@ import java.util.concurrent.TimeUnit;
 public class ExecutorsHelper {
     
     /**
-     * Creates a new 'ProcessingQueue'.
-     * A ProcessingQueue is an ExecutorService that will
-     * process all Runnables/Callables sequentially, creating
-     * a thread for processing only when it needs it.
+     * Creates a new "ProcessingQueue" using 
+     * {@link #daemonThreadFactory(String)) as thread factory.
      * 
-     * This kind of ExecutorService is ideal for long-lived tasks
-     * that require processing rarely.
+     * See {@link #newProcessingQueue(ThreadFactory)}.
      * 
-     * The threads will be created using a DefaultThreadFactory of
-     * the given name.
+     * @param name the name of the processing thread that is created 
+     * with the daemon thread factory.
      */
     public static ExecutorService newProcessingQueue(String name) {
-        ThreadPoolExecutor tpe =  new ThreadPoolExecutor(1, 1,
+        return newProcessingQueue(daemonThreadFactory(name));
+    }
+    
+    /**
+     * Creates a new "ProcessingQueue".
+     * 
+     * A ProcessingQueue is an ExecutorService that will process all Runnables/
+     * Callables sequentially, creating one thread for processing when it needs
+     * it.
+     * 
+     * See {@link #newSingleThreadExecutor(ThreadFactory)}.
+     * 
+     * @param factory the factory used for creating a new processing thread 
+     */
+    public static ExecutorService newProcessingQueue(ThreadFactory factory) {
+        return Executors.unconfigurableExecutorService(newSingleThreadExecutor(factory));
+    }
+    
+    /**
+     * A ProcessingQueue Executor is an ExecutorService that will process all Runnables/
+     * Callables sequentially, creating one thread for processing when it needs
+     * it.
+     * 
+     * This kind of Executor is ideal for long-lived tasks
+     * that require processing rarely.
+     * 
+     * If there are no tasks the thread will be terminated after a timeout of
+     * 5 seconds and a new one will be created when necessary.
+     * 
+     * @param factory
+     * @return
+     */
+    public static java.util.concurrent.ThreadPoolExecutor newSingleThreadExecutor(ThreadFactory factory) {
+        ThreadPoolExecutor tpe = new ThreadPoolExecutor(1, 1,
                 5L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
-                daemonThreadFactory(name));
+                factory);
         tpe.allowCoreThreadTimeOut(true);
-        return Executors.unconfigurableExecutorService(tpe);
+        return tpe;
     }
     
     /**

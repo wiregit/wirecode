@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +18,7 @@ import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.PowerOf2ByteArrayCache;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.util.FileUtils;
 
@@ -54,8 +53,7 @@ public class VerifyingFile {
     /**
      * The thread that does the actual verification & writing
      */
-    private static final ThreadPoolExecutor QUEUE = new ThreadPoolExecutor(
-            0, 1, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+    private static final ThreadPoolExecutor QUEUE = ExecutorsHelper.newSingleThreadExecutor(
             new ThreadFactory() {
                 public Thread newThread(Runnable r) {
                     Thread t = new ManagedThread(r, "BlockingVF");
