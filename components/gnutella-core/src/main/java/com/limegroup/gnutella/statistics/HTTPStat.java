@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.AdvancedStatistic;
+import org.limewire.statistic.Statistic;
+
 /**
  * This class contains a type-safe enumeration of statistics for HTTP
  * requests.  Each statistic maintains its own history, all messages 

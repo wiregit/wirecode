@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.Statistic;
+
 import com.limegroup.gnutella.messages.Message;
 
 /**

@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.AdvancedStatistic;
+import org.limewire.statistic.Statistic;
+
 /**
  * This class handles all statistics for connections.
  */

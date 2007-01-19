@@ -2,6 +2,8 @@ package com.limegroup.gnutella.statistics;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.statistic.BasicStatistic;
+import org.limewire.statistic.Statistic;
 
 import com.limegroup.gnutella.RouterService;
 

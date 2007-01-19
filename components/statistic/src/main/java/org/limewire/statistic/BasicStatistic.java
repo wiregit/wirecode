@@ -1,9 +1,10 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
+
 
 /**
  * Specialized subclass for recording basic statistics.
  */
-abstract class BasicStatistic extends AbstractStatistic {
+public abstract class BasicStatistic extends AbstractStatistic {
 
 	protected BasicStatistic() {
 		StatisticsManager.instance().addBasicStatistic(this);

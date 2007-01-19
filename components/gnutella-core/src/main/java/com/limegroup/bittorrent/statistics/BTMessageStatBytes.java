@@ -1,8 +1,8 @@
 package com.limegroup.bittorrent.statistics;
 
 //TODO: move the non-gnutella specific statistics code out of gnutella package
-import com.limegroup.gnutella.statistics.AdvancedKilobytesStatistic;
-import com.limegroup.gnutella.statistics.Statistic;
+import org.limewire.statistic.AdvancedKilobytesStatistic;
+import org.limewire.statistic.Statistic;
 
 /**
  * statistics for incoming and outgoing BT messages

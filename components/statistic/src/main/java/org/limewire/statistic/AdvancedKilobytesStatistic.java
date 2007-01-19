@@ -1,14 +1,14 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
 
 /**
- * Specialized subclass for recording advanced statistics.
+ * Specialized subclass for recording advanced kilobytes statistics.
  */
-public class AdvancedStatistic extends AbstractStatistic {
+public class AdvancedKilobytesStatistic extends AbstractKilobytesStatistic {
 
 	/**
 	 * Adds the statistic to the list of advanced statistics.
 	 */
-	protected AdvancedStatistic() {
+    public AdvancedKilobytesStatistic() {
 		StatisticsManager.instance().addAdvancedStatistic(this);
 	}
 
@@ -18,11 +18,11 @@ public class AdvancedStatistic extends AbstractStatistic {
 	 *
 	 * @param fileName the file name to write to
 	 */
-	protected AdvancedStatistic(String fileName) {
+    public AdvancedKilobytesStatistic(String fileName) {
 		StatisticsManager.instance().addAdvancedStatistic(this);
 		_fileName = fileName;
 	}
-
+	
 	public void incrementStat() {
 		// if we're not recording advanced stats, ignore the call
 		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
@@ -34,5 +34,5 @@ public class AdvancedStatistic extends AbstractStatistic {
 		// if we're not recording advanced stats, ignore the call
 		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
 		super.addData(data);
-	}
+	}	
 }

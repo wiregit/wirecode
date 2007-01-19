@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.NumericalStatistic;
+import org.limewire.statistic.Statistic;
+
 /**
  * This class handles all statistics for downloads that are
  * not based on time.

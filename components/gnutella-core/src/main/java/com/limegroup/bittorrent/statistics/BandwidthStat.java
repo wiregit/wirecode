@@ -1,7 +1,8 @@
 package com.limegroup.bittorrent.statistics;
 
-import com.limegroup.gnutella.statistics.BasicKilobytesStatistic;
-import com.limegroup.gnutella.statistics.Statistic;
+import org.limewire.statistic.BasicKilobytesStatistic;
+import org.limewire.statistic.Statistic;
+
 import com.limegroup.gnutella.statistics.BandwidthStat.DownstreamBandwidthStat;
 import com.limegroup.gnutella.statistics.BandwidthStat.UpstreamBandwidthStat;
 

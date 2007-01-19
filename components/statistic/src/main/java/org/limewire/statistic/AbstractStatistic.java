@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -72,11 +72,6 @@ public abstract class AbstractStatistic implements Statistic {
 	 * reflection.
 	 */
 	protected String _fileName;
-
-	/**
-	 * Constructs a new <tt>Statistic</tt> instance.
-	 */
-	protected AbstractStatistic() {}
 
 	// inherit doc comment
 	public double getTotal() {

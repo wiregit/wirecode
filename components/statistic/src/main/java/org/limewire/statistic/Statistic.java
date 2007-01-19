@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
 
 import java.io.IOException;
 import java.io.Writer;

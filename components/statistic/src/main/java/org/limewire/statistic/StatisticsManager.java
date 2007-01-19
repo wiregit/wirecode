@@ -1,9 +1,9 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.limegroup.gnutella.RouterService;
+import org.limewire.concurrent.SimpleTimer;
 
 /**
  * Class for managing statistics recording.
@@ -47,7 +47,7 @@ public final class StatisticsManager implements Runnable {
 	 * Constructor the the <tt>StatisticsManager</tt> -- only accessed once.
 	 */
 	private StatisticsManager() {
-		RouterService.schedule(this, 0, 1000);
+		SimpleTimer.sharedTimer().schedule(this, 0, 1000);
 	}
 
 	/**

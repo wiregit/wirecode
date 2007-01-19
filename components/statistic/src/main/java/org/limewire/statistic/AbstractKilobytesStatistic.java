@@ -1,4 +1,5 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
+
 
 /**
  * Specialized class for Gnutella message statistics.  This class modifies

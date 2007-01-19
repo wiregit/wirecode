@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.statistic.AdvancedKilobytesStatistic;
+import org.limewire.statistic.Statistic;
+
 
 /**
  * Class for recording all received message statistics by the number

@@ -1,4 +1,5 @@
-package com.limegroup.gnutella.statistics;
+package org.limewire.statistic;
+
 
 /**
  * Specialized statistics class that just records numerical statistics,
