@@ -223,7 +223,14 @@ public class Main {
         
         while(true) {
             System.out.print("[" + current + "] $ ");
-            String line = in.readLine().trim();
+            String line = in.readLine();
+            
+            // Null if app gets interrupted by Eclipse
+            if (line == null) {
+                break;
+            }
+            
+            line = line.trim();
             if (line.equals("")) {
                 continue;
             }

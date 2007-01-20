@@ -79,7 +79,7 @@ public class StatsRequestHandler extends AbstractRequestHandler {
         }
         
         StatsResponse response = context.getMessageHelper()
-            .createStatsResponse(message, writer.toString());
+            .createStatsResponse(message, writer.toString().getBytes("ISO-8859-1"));
         
         context.getMessageDispatcher().send(message.getContact(), response);
     }

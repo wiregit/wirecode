@@ -19,19 +19,25 @@
 
 package org.limewire.mojito.result;
 
+import java.io.UnsupportedEncodingException;
+
 public class StatsResult implements Result {
     
-    private final String statistics;
+    private final byte[] statistics;
     
-    public StatsResult(String statistics) {
+    public StatsResult(byte[] statistics) {
         this.statistics = statistics;
     }
     
-    public String getStatistics() {
+    public byte[] getStatistics() {
         return statistics;
     }
     
     public String toString() {
-        return statistics;
+        try {
+            return new String(statistics, "ISO-8859-1");
+        } catch (UnsupportedEncodingException err) {
+            throw new RuntimeException(err);
+        }
     }
 }

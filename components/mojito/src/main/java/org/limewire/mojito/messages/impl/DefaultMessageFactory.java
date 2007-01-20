@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 
 import org.limewire.io.ByteBufferInputStream;
 import org.limewire.io.ByteBufferOutputStream;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -125,6 +126,18 @@ public class DefaultMessageFactory implements MessageFactory {
         }
     }
     
+    public SecurityToken createSecurityToken(Contact dst) {
+        return context.getSecurityTokenProvider().getSecurityToken(dst.getContactAddress());
+    }
+    
+    public MessageID createMessageID(SocketAddress dst) {
+        if (!NetworkUtils.isValidSocketAddress(dst)) {
+            throw new IllegalArgumentException(dst + " is an invalid SocketAddress");
+        }
+        
+        return DefaultMessageID.createWithSocketAddress(dst);
+    }
+    
     public ByteBuffer writeMessage(SocketAddress dst, DHTMessage message) 
             throws IOException {
         ByteBufferOutputStream out = new ByteBufferOutputStream(640, true);
@@ -133,50 +146,50 @@ public class DefaultMessageFactory implements MessageFactory {
         return ((ByteBuffer)out.getBuffer().flip()).order(ByteOrder.BIG_ENDIAN);
     }
 
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
-        return new FindNodeRequestImpl(context, contact, messageId, lookupId);
+    public FindNodeRequest createFindNodeRequest(Contact contact, SocketAddress dst, KUID lookupId) {
+        return new FindNodeRequestImpl(context, contact, createMessageID(dst), lookupId);
     }
 
-    public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            SecurityToken securityToken, Collection<? extends Contact> nodes) {
-        return new FindNodeResponseImpl(context, contact, messageId, securityToken, nodes);
+    public FindNodeResponse createFindNodeResponse(Contact contact, Contact dst, 
+            MessageID messageId, Collection<? extends Contact> nodes) {
+        return new FindNodeResponseImpl(context, contact, messageId, createSecurityToken(dst), nodes);
     }
 
-    public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
+    public FindValueRequest createFindValueRequest(Contact contact, SocketAddress dst, 
             KUID lookupId, Collection<KUID> keys) {
-        return new FindValueRequestImpl(context, contact, messageId, lookupId, keys);
+        return new FindValueRequestImpl(context, contact, createMessageID(dst), lookupId, keys);
     }
 
-    public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
+    public FindValueResponse createFindValueResponse(Contact contact, Contact dst, 
+            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
         return new FindValueResponseImpl(context, contact, messageId, keys, values, requestLoad);
     }
 
-    public PingRequest createPingRequest(Contact contact, MessageID messageId) {
-        return new PingRequestImpl(context, contact, messageId);
+    public PingRequest createPingRequest(Contact contact, SocketAddress dst) {
+        return new PingRequestImpl(context, contact, createMessageID(dst));
     }
 
-    public PingResponse createPingResponse(Contact contact, MessageID messageId, 
-            SocketAddress externalAddress, BigInteger estimatedSize) {
+    public PingResponse createPingResponse(Contact contact, Contact dst, 
+            MessageID messageId, SocketAddress externalAddress, BigInteger estimatedSize) {
         return new PingResponseImpl(context, contact, messageId, externalAddress, estimatedSize);
     }
 
-    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, StatisticType stats) {
-        return new StatsRequestImpl(context, contact, messageId, stats);
+    public StatsRequest createStatsRequest(Contact contact, SocketAddress dst, StatisticType stats) {
+        return new StatsRequestImpl(context, contact, createMessageID(dst), stats);
     }
 
-    public StatsResponse createStatsResponse(Contact contact, MessageID messageId, 
-            String statistics) {
+    public StatsResponse createStatsResponse(Contact contact, Contact dst, 
+            MessageID messageId, byte[] statistics) {
         return new StatsResponseImpl(context, contact, messageId, statistics);
     }
 
-    public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
+    public StoreRequest createStoreRequest(Contact contact, SocketAddress dst, 
             SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
-        return new StoreRequestImpl(context, contact, messageId, securityToken, values);
+        return new StoreRequestImpl(context, contact, createMessageID(dst), securityToken, values);
     }
 
-    public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            Collection<? extends Entry<KUID, Status>> status) {
+    public StoreResponse createStoreResponse(Contact contact, Contact dst, 
+            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
         return new StoreResponseImpl(context, contact, messageId, status);
     }
 }

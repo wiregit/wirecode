@@ -20,7 +20,6 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +34,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.security.SecurityToken;
 
 
 /**
@@ -66,11 +64,8 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         // is delegating requests to this class!
         LookupRequest request = (LookupRequest)message;
 
-        KUID lookup = request.getLookupID();
-        
+        KUID lookupId = request.getLookupID();
         Contact node = request.getContact();
-        SocketAddress addr = node.getSourceAddress();
-        SecurityToken securityToken = context.getSecurityTokenProvider().getSecurityToken(addr);
         
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
@@ -86,7 +81,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
                 }
                 
             } else {
-                nodes = context.getRouteTable().select(lookup, 
+                nodes = context.getRouteTable().select(lookupId, 
                         KademliaSettings.REPLICATION_PARAMETER.getValue(), true);
             }
         }
@@ -102,7 +97,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         context.getNetworkStats().LOOKUP_REQUESTS.incrementStat();
         
         FindNodeResponse response = context.getMessageHelper()
-                    .createFindNodeResponse(request, securityToken, nodes);
+                    .createFindNodeResponse(request, nodes);
         
         context.getMessageDispatcher().send(node, response);
     }

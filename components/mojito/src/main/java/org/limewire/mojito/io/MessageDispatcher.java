@@ -63,7 +63,6 @@ import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.settings.MessageSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
@@ -491,16 +490,6 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Checks if we have ever sent a Request to the Node that
-     * sent us the Response.
-     */
-    private boolean verifySecurityToken(ResponseMessage response) {
-        MessageID messageId = response.getMessageID();
-        Contact node = response.getContact();
-        return messageId.verifySecurityToken(node.getContactAddress());
-    }
-    
-    /**
      * Handles a DHTMessage as read from Network
      */
     protected void handleMessage(DHTMessage message) {
@@ -518,6 +507,7 @@ public abstract class MessageDispatcher {
         Contact node = message.getContact();
         KUID nodeId = node.getNodeID();
         SocketAddress src = node.getContactAddress();
+        MessageID messageId = message.getMessageID();
         
         if (context.isLocalContactAddress(src)
                 || (context.isLocalNodeID(nodeId) 
@@ -568,24 +558,25 @@ public abstract class MessageDispatcher {
         if (message instanceof ResponseMessage) {
             ResponseMessage response = (ResponseMessage)message;
             
-            // Check the SecurityToken in the message ID to figure
-            // out whether or not we have ever sent a Request to that Host!
-            if (!verifySecurityToken(response)) {
+            // Check the SecurityToken in the MessageID to figure out
+            // whether or not we have ever sent a Request to that Host!
+            if (messageId.isTaggingSupported()
+                    && !messageId.isFor(src)) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn(response.getContact() + " sent us an unrequested response!");
+                    LOG.warn(response.getContact() + " sent us an unsolicited response: " + response);
                 }
                 return;
             }
-             
+            
             Receipt receipt = null;
             
             synchronized(getReceiptMapLock()) {
-                receipt = receiptMap.get(message.getMessageID());
+                receipt = receiptMap.get(messageId);
                 
                 if (receipt != null) {
                     receipt.received();
             
-                    // The QueryKey check should catch all malicious
+                    // The SecurityToken check should catch all malicious
                     // and some buggy Nodes. Do some additional sanity
                     // checks to make sure the NodeID, IP:Port and 
                     // response type have the extpected values.
@@ -601,8 +592,20 @@ public abstract class MessageDispatcher {
                     message.getContact().setRoundTripTime(receipt.time());
                     
                     // OK, all checks passed. We can remove the receipt now!
-                    receiptMap.remove(message.getMessageID());
+                    receiptMap.remove(messageId);
                 }
+            }
+            
+            // If it's a late response (the Receipt got evicted by the
+            // cleanup task) and tagging of MessageIDs is NOT supported
+            // than exit here as we're not able to verify if we've ever
+            // sent a request to the given Node. In other words it's an
+            // unsolicited response from our perspective!
+            if (receipt == null && !messageId.isTaggingSupported()) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(response.getContact() + " sent us an unsolicited response: " + response);
+                }
+                return;
             }
             
             processResponse(receipt, response);
@@ -950,13 +953,6 @@ public abstract class MessageDispatcher {
          */
         private void processLateResponse() {
             
-            // If it's a late response and we're not tagging MessageIDs
-            // then do not continue with processing as we're not able
-            // to figure out whether or not it's truly a late response!
-            if (!MessageSettings.TAG_MESSAGE_ID.getValue()) {
-                return;
-            }
-            
             Contact node = response.getContact();
             
             if (LOG.isTraceEnabled()) {
@@ -975,9 +971,7 @@ public abstract class MessageDispatcher {
             
             fireLateResponse(response);
             
-            if (!node.isFirewalled()) {
-                context.getRouteTable().add(node); // update
-            }
+            defaultHandler.handleLateResponse(response);
         }
     }
     

@@ -30,7 +30,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
-import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
@@ -137,8 +136,7 @@ class PingIteratorFactory {
             SocketAddress dst = node.getContactAddress();
             
             // Send a collision test ping instead of a regular ping
-            RequestMessage request = context.getMessageFactory().createPingRequest(
-                    sender, MessageID.createWithSocketAddress(dst));
+            RequestMessage request = context.getMessageFactory().createPingRequest(sender, dst);
             
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
         }

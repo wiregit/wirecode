@@ -22,6 +22,7 @@ package org.limewire.mojito.messages.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketAddress;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -41,10 +42,10 @@ import org.limewire.mojito.routing.Version;
 public class StatsResponseImpl extends AbstractResponseMessage
         implements StatsResponse {
 
-    private final String statistics;
+    private final byte[] statistics;
 
     public StatsResponseImpl(Context context, 
-            Contact contact, MessageID messageId, String statistics) {
+            Contact contact, MessageID messageId, byte[] statistics) {
         super(context, OpCode.STATS_RESPONSE, contact, messageId);
 
         this.statistics = statistics;
@@ -68,17 +69,17 @@ public class StatsResponseImpl extends AbstractResponseMessage
         gz.close();
         baos.close();
         
-        this.statistics = new String(baos.toByteArray());
+        this.statistics = baos.toByteArray();
     }
     
-    public String getStatistics() {
+    public byte[] getStatistics() {
         return statistics;
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GZIPOutputStream gz = new GZIPOutputStream(baos);
-        gz.write(statistics.getBytes());
+        gz.write(statistics);
         gz.close();
         byte[] s = baos.toByteArray();
         
@@ -86,6 +87,10 @@ public class StatsResponseImpl extends AbstractResponseMessage
     }
     
     public String toString() {
-        return "StatsResponse: " + statistics;
+        try {
+            return "StatsResponse: " + new String(statistics, "ISO-8859-1");
+        } catch (UnsupportedEncodingException err) {
+            throw new RuntimeException(err);
+        }
     }
 }

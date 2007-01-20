@@ -70,6 +70,14 @@ public class DefaultMessageHandler {
         addLiveContactInfo(message.getContact(), message);
     }
 
+    public void handleLateResponse(ResponseMessage message) {
+        Contact node = message.getContact();
+        
+        if (!node.isFirewalled()) {
+            context.getRouteTable().add(node); // update
+        }
+    }
+
     public void handleTimeout(KUID nodeId, SocketAddress dst, 
             RequestMessage message, long time) {
         context.getRouteTable().handleFailure(nodeId, dst);

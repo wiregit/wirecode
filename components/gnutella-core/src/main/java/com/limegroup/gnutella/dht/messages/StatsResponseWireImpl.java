@@ -9,7 +9,7 @@ public class StatsResponseWireImpl extends AbstractMessageWire<StatsResponse>
         super(delegate);
     }
 
-    public String getStatistics() {
+    public byte[] getStatistics() {
         return delegate.getStatistics();
     }
 }

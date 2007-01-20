@@ -94,7 +94,7 @@ public final class RouteTableSettings extends MojitoProps {
     
     /**
      * This setting is primarily for testing. It makes sure that
-     * the run-times of the RandomBucketRefreshers are uniformly
+     * the run-times of the BucketRefreshers are uniformly
      * distributed. 
      */
     public static final BooleanSetting UNIFORM_BUCKET_REFRESH_DISTRIBUTION

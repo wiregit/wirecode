@@ -48,6 +48,10 @@ public class MessageFactoryWire implements MessageFactory {
         this.delegate = delegate;
     }
     
+    public MessageID createMessageID(SocketAddress dst) {
+        return delegate.createMessageID(dst);
+    }
+
     public DHTMessage createMessage(SocketAddress src, ByteBuffer... data) 
             throws MessageFormatException, IOException {
         
@@ -82,59 +86,59 @@ public class MessageFactoryWire implements MessageFactory {
         return delegate.writeMessage(dst, message);
     }
     
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, KUID lookupId) {
+    public FindNodeRequest createFindNodeRequest(Contact src, SocketAddress dst, KUID lookupId) {
         return new FindNodeRequestWireImpl(
-                delegate.createFindNodeRequest(contact, messageId, lookupId));
+                delegate.createFindNodeRequest(src, dst, lookupId));
     }
 
-    public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            SecurityToken queryKey, Collection<? extends Contact> nodes) {
+    public FindNodeResponse createFindNodeResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<? extends Contact> nodes) {
         return new FindNodeResponseWireImpl(
-                delegate.createFindNodeResponse(contact, messageId, queryKey, nodes));
+                delegate.createFindNodeResponse(src, dst, messageId, nodes));
     }
 
-    public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
+    public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
             KUID lookupId, Collection<KUID> keys) {
         return new FindValueRequestWireImpl(
-                delegate.createFindValueRequest(contact, messageId, lookupId, keys));
+                delegate.createFindValueRequest(src, dst, lookupId, keys));
     }
 
-    public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
+    public FindValueResponse createFindValueResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
         return new FindValueResponseWireImpl(
-                delegate.createFindValueResponse(contact, messageId, keys, values, requestLoad));
+                delegate.createFindValueResponse(src, dst, messageId, keys, values, requestLoad));
     }
 
-    public PingRequest createPingRequest(Contact contact, MessageID messageId) {
+    public PingRequest createPingRequest(Contact src, SocketAddress dst) {
         return new PingRequestWireImpl(
-                delegate.createPingRequest(contact, messageId));
+                delegate.createPingRequest(src, dst));
     }
 
-    public PingResponse createPingResponse(Contact contact, MessageID messageId, 
-            SocketAddress externalAddress, BigInteger estimatedSize) {
+    public PingResponse createPingResponse(Contact src, Contact dst, 
+            MessageID messageId, SocketAddress externalAddress, BigInteger estimatedSize) {
         return new PingResponseWireImpl(
-                delegate.createPingResponse(contact, messageId, externalAddress, estimatedSize));
+                delegate.createPingResponse(src, dst, messageId, externalAddress, estimatedSize));
     }
 
-    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, StatisticType stats) {
+    public StatsRequest createStatsRequest(Contact src, SocketAddress dst, StatisticType stats) {
         return new StatsRequestWireImpl(
-                delegate.createStatsRequest(contact, messageId, stats));
+                delegate.createStatsRequest(src, dst, stats));
     }
 
-    public StatsResponse createStatsResponse(Contact contact, MessageID messageId, String statistics) {
+    public StatsResponse createStatsResponse(Contact src, Contact dst, MessageID messageId, byte[] statistics) {
         return new StatsResponseWireImpl(
-                delegate.createStatsResponse(contact, messageId, statistics));
+                delegate.createStatsResponse(src, dst, messageId, statistics));
     }
 
-    public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
-            SecurityToken queryKey, Collection<? extends DHTValueEntity> values) {
+    public StoreRequest createStoreRequest(Contact src, SocketAddress dst, 
+            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
         return new StoreRequestWireImpl(
-                delegate.createStoreRequest(contact, messageId, queryKey, values));
+                delegate.createStoreRequest(src, dst, securityToken, values));
     }
 
-    public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            Collection<? extends Entry<KUID, Status>> status) {
+    public StoreResponse createStoreResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
         return new StoreResponseWireImpl(
-                delegate.createStoreResponse(contact, messageId, status));
+                delegate.createStoreResponse(src, dst, messageId, status));
     }
 }

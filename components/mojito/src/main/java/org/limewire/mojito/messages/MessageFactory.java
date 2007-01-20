@@ -39,6 +39,13 @@ import org.limewire.security.SecurityToken;
 public interface MessageFactory {
 
     /**
+     * Creates and returns a MessageID. MessageID implementations
+     * that support tagging may use the given SocketAddress to tag
+     * and tie the MessageID to the specific Host.
+     */
+    public MessageID createMessageID(SocketAddress dst);
+    
+    /**
      * De-Serializes a DHTMessage from the given ByteBuffer array
      * and returns the message Object
      */
@@ -55,59 +62,89 @@ public interface MessageFactory {
     
     /**
      * Creates and returns a PingRequest Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination address to where the request will be send
      */
-    public PingRequest createPingRequest(Contact contact, MessageID messageId);
+    public PingRequest createPingRequest(Contact src, SocketAddress dst);
 
     /**
      * Creates and returns a PingResponse Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination information to where the request will be send
      */
-    public PingResponse createPingResponse(Contact contact, MessageID messageId, 
-            SocketAddress externalAddress, BigInteger estimatedSize);
+    public PingResponse createPingResponse(Contact src, Contact dst, 
+            MessageID messageId, SocketAddress externalAddress, BigInteger estimatedSize);
 
     /**
      * Creates and returns a FindNodeRequest Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination address to where the request will be send
      */
-    public FindNodeRequest createFindNodeRequest(Contact contact, MessageID messageId, 
-            KUID lookupId);
+    public FindNodeRequest createFindNodeRequest(Contact src, SocketAddress dst, KUID lookupId);
 
     /**
      * Creates and returns a FindNodeResponse Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination information to where the request will be send
      */
-    public FindNodeResponse createFindNodeResponse(Contact contact, MessageID messageId, 
-            SecurityToken securityToken, Collection<? extends Contact> nodes);
+    public FindNodeResponse createFindNodeResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<? extends Contact> nodes);
 
     /**
      * Creates and returns a FindValueRequest Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination address to where the request will be send
      */
-    public FindValueRequest createFindValueRequest(Contact contact, MessageID messageId, 
+    public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
             KUID lookupId, Collection<KUID> keys);
 
     /**
      * Creates and returns a FindValueResponse Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination information to where the request will be send
      */
-    public FindValueResponse createFindValueResponse(Contact contact, MessageID messageId, 
-            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad);
+    public FindValueResponse createFindValueResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad);
 
     /**
      * Creates and returns a StoreRequest Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination address to where the request will be send
      */
-    public StoreRequest createStoreRequest(Contact contact, MessageID messageId, 
+    public StoreRequest createStoreRequest(Contact src, SocketAddress dst, 
             SecurityToken securityToken, Collection<? extends DHTValueEntity> values);
 
     /**
      * Creates and returns a StoreResponse Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination information to where the request will be send
      */
-    public StoreResponse createStoreResponse(Contact contact, MessageID messageId, 
-            Collection<? extends Entry<KUID, Status>> status);
+    public StoreResponse createStoreResponse(Contact src, Contact dst, 
+            MessageID messageId, Collection<? extends Entry<KUID, Status>> status);
 
     /**
      * Creates and returns a StatsRequest Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination address to where the request will be send
      */
-    public StatsRequest createStatsRequest(Contact contact, MessageID messageId, 
+    public StatsRequest createStatsRequest(Contact src, SocketAddress dst, 
             StatisticType stats);
 
     /**
      * Creates and returns a StatsResponse Message
+     * 
+     * @param src The contact information of the issuing Node
+     * @param dst The destination information to where the request will be send
      */
-    public StatsResponse createStatsResponse(Contact contact, MessageID messageId, String statistics);
+    public StatsResponse createStatsResponse(Contact src, Contact dst, 
+            MessageID messageId, byte[] statistics);
 }

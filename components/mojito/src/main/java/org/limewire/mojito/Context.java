@@ -67,7 +67,6 @@ import org.limewire.mojito.manager.PingManager;
 import org.limewire.mojito.manager.StoreManager;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
-import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
@@ -831,7 +830,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                         // to shutdown. Send pings without tagging the MessageIDs
                         // and to register a response handler for the pings.
                         RequestMessage request = getMessageFactory()
-                            .createPingRequest(localNode, MessageID.createWithSocketAddress(null));
+                            .createPingRequest(localNode, node.getContactAddress());
                         
                         try {
                             messageDispatcher.send(node, request, null);

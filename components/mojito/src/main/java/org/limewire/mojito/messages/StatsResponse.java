@@ -27,5 +27,5 @@ public interface StatsResponse extends ResponseMessage {
     /**
      * Returns the remote Node's Statistics
      */
-    public String getStatistics();
+    public byte[] getStatistics();
 }

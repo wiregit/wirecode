@@ -11,7 +11,6 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.messages.MessageHelper;
-import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -80,7 +79,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.DEFAULT_FLAG);
             
             RequestMessage request = factory.createPingRequest(
-                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
+                    sender, new InetSocketAddress("www.google.com", 5000));
             sent = dispatcher.send(node, request, null);
             assertFalse(sent);
             
@@ -91,7 +90,7 @@ public class MessageDispatcherTest extends MojitoTestCase {
                     new InetSocketAddress("www.google.com", 5000), 0, Contact.FIREWALLED_FLAG);
             
             request = factory.createPingRequest(
-                    sender, MessageID.createWithSocketAddress(new InetSocketAddress("www.google.com", 5000)));
+                    sender, new InetSocketAddress("www.google.com", 5000));
             sent = dispatcher.send(node, request, null);
             assertTrue(sent);
             

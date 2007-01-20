@@ -41,6 +41,7 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
@@ -83,7 +84,7 @@ public class MessageInputStream extends DataInputStream {
      * Reads a MessageID from the InputStream 
      */
     public MessageID readMessageID() throws IOException {
-        return MessageID.createWithInputStream(this);
+        return DefaultMessageID.createWithInputStream(this);
     }
     
     /**
