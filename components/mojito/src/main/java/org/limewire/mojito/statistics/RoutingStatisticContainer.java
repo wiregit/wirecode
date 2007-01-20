@@ -27,6 +27,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
 import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
+import org.limewire.statistic.Statistic;
 
 
 public class RoutingStatisticContainer extends StatisticContainer {

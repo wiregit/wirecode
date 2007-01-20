@@ -21,6 +21,7 @@ package org.limewire.mojito.statistics;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.statistic.Statistic;
 
 public class FindNodeLookupStatisticContainer extends SingleLookupStatisticContainer {
     

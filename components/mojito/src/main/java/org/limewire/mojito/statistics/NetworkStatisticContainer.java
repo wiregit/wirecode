@@ -26,6 +26,8 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
 import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent.EventType;
+import org.limewire.statistic.AbstractStatistic;
+import org.limewire.statistic.Statistic;
 
 
 public class NetworkStatisticContainer extends StatisticContainer {

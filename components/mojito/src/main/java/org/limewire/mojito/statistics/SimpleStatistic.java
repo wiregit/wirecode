@@ -19,6 +19,8 @@
  
 package org.limewire.mojito.statistics;
 
+import org.limewire.statistic.AbstractStatistic;
+
 class SimpleStatistic extends AbstractStatistic {
     
     protected SimpleStatistic() {};
