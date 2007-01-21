@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
@@ -108,14 +108,14 @@ public class MessageInputStream extends DataInputStream {
     public DHTValueEntity readDHTValueEntity(Contact sender) throws IOException {
         Contact creator = readContact();
         KUID valueId = readKUID();
-        DHTValue value = readDHTValue();
+        DHTValueImpl value = readDHTValue();
         return new DHTValueEntity(creator, sender, valueId, value, false);
     }
     
     /**
      * 
      */
-    private DHTValue readDHTValue() throws IOException {
+    private DHTValueImpl readDHTValue() throws IOException {
         DHTValueType valueType = readValueType();
         Version version = readVersion();
         
@@ -126,7 +126,7 @@ public class MessageInputStream extends DataInputStream {
             readFully(data);
         }
         
-        return new DHTValue(valueType, version, data);
+        return new DHTValueImpl(valueType, version, data);
     }
     
     /**

@@ -55,6 +55,7 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
@@ -996,7 +997,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         // To remove a KeyValue you just store an empty value!
-        return put(key, DHTValue.EMPTY_VALUE);
+        return put(key, DHTValueImpl.EMPTY_VALUE);
     }
     
     /** 

@@ -37,9 +37,9 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
-import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.PingResult;
@@ -247,7 +247,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreResult evt = dht.put(key, new DHTValue(DHTValueType.TEST, Version.UNKNOWN, value)).get();
+            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());
