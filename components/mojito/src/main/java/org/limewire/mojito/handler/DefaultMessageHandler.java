@@ -157,28 +157,30 @@ public class DefaultMessageHandler {
             return;
         }
         
-        // Only do store forward if it is a new node in our routing table 
-        // (we are (re)connecting to the network) or a node that is reconnecting
-        Contact existing = routeTable.get(nodeId);
-        
-        if (existing == null 
-                || existing.getInstanceID() != node.getInstanceID()) {
+        if (KademliaSettings.STORE_FORWARD_ENABLED.getValue()) {
+            // Only do store forward if it is a new node in our routing table 
+            // (we are (re)connecting to the network) or a node that is reconnecting
+            Contact existing = routeTable.get(nodeId);
             
-            // Store forward only if we're bootstrapped
-            if (context.isBootstrapped()) {
-                int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-                //we select the 2*k closest nodes in order to also check those values
-                //where the local node is part of the k closest to the value but not part
-                //of the k closest to the new joining node.
-                List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
+            if (existing == null 
+                    || existing.getInstanceID() != node.getInstanceID()) {
                 
-                // Are we one of the K nearest Nodes to the contact?
-                if (containsNodeID(nodes, context.getLocalNodeID())) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
-                    }
+                // Store forward only if we're bootstrapped
+                if (context.isBootstrapped()) {
+                    int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+                    //we select the 2*k closest nodes in order to also check those values
+                    //where the local node is part of the k closest to the value but not part
+                    //of the k closest to the new joining node.
+                    List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
                     
-                    forwardOrRemoveValues(node, existing, message);
+                    // Are we one of the K nearest Nodes to the contact?
+                    if (containsNodeID(nodes, context.getLocalNodeID())) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Node " + node + " is new or has changed his instanceID, will check for store forward!");   
+                        }
+                        
+                        forwardOrRemoveValues(node, existing, message);
+                    }
                 }
             }
         }

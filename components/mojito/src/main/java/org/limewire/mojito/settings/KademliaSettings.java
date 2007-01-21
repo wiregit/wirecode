@@ -34,7 +34,7 @@ public class KademliaSettings extends MojitoProps {
      * The replication parameter is also known as K
      */
     public static final IntSetting REPLICATION_PARAMETER
-        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
+        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 8);
     
     /**
      * The number of parallel FIND_NODE lookups
@@ -111,4 +111,10 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final BooleanSetting DELETE_FURTHEST_CONTACT
         = FACTORY.createBooleanSetting("DELETE_FURTHEST_CONTACT", true);
+    
+    /**
+     * Whether or not store-forwading of values is enabled
+     */
+    public static final BooleanSetting STORE_FORWARD_ENABLED
+        = FACTORY.createBooleanSetting("STORE_FORWARD_ENABLED", true);
 }
