@@ -71,7 +71,7 @@
      </target>    
     
     <!-- TODO: implement -->
-	<target name="jar"/>
+	<target name="jar" />
     
     <!-- TODO: implement -->
     <target name="clean-dist"/>

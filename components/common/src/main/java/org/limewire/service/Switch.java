@@ -6,7 +6,11 @@ package org.limewire.service;
  * be retrieved and/or changed.
  */
 public interface Switch {
+    
+    /** Returns the current value of the switch. */
     public boolean getValue();
+    
+    /** Sets the new value of the switch. */
     public void setValue(boolean b);
 
 }
