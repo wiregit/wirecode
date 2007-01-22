@@ -28,8 +28,9 @@
     
     <target name="compile" depends="lw-common.compile, lw-collection.compile">
         <!-- no tests exist -->
-        <do.compile-src component="statistic"/>
 		<!-- <do.compile component="statistic"/> -->
+        <do.compile-src component="statistic"/>
+        <mkdir dir="${build.limewire.components.statistic.tests}"/>
     </target>
 	
 	<target name="compile-src" depends="lw-common.compile-src, lw-collection.compile-src">
@@ -43,7 +44,9 @@
 	<target name="compile-tests">
 	    <!-- no tests exist! -->
 		<!-- <do.compile-tests component="statistic"/> -->
+        <mkdir dir="${build.limewire.components.statistic.tests}"/>
 	</target>
+    
 	<target name="clean-tests">
 	    <do.clean-tests component="statistic"/>
 	</target>

@@ -136,9 +136,9 @@
 		        <fileset dir="${build.limewire.components.io.tests}" includes="**/*Test.class"/>
 		        <fileset dir="${build.limewire.components.nio.tests}" includes="**/*Test.class"/>
 		        <fileset dir="${build.limewire.components.setting.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.statistic.tests}" includes="**/*Test.class"/>
+		        <fileset dir="${build.limewire.components.statistic.tests}" includes="**/*Test.class"/> 
 				<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
-	        	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
+	           	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
 	         </testLocations>
 	    </do.test-all>
 	</target>

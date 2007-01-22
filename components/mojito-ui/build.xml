@@ -21,6 +21,7 @@
         <!-- No tests for now - when tests arrive, use compile instead of compile-src -->
     	<!--<do.compile component="mojito-ui"/>-->
     	<do.compile-src component="mojito-ui"/>
+        <mkdir dir="${build.limewire.components.mojito-ui.tests}"/>
     </target>
 	
 	<target name="compile-src" depends="mojito.compile-src">
@@ -34,6 +35,7 @@
 	<target name="compile-tests" depends="mojito.compile-tests">
 	   <!-- There are currently no mojito-ui tests. -->
 	   <!-- <do.compile-tests component="mojito-ui"/> -->
+        <mkdir dir="${build.limewire.components.mojito-ui.tests}"/>
 	</target>
 	
 	<target name="clean-tests" depends="mojito.clean-tests">

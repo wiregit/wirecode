@@ -201,7 +201,7 @@
 			<do.run-tests-batchunit 
 			                   haltonerror="true"
 						       haltonfailure="true"
-						       unit="@{path}/${class}.class"
+						       unit="@{path}/@{class}.class"
    			    			   component="@{component}"
 			/>
 			<do.tests2html     component="@{component}"/>
@@ -216,7 +216,7 @@
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
-			<do.run-tests-batchunit unit="@{path}/${package}/*Test.class"
+			<do.run-tests-batchunit unit="@{path}/@{package}/*Test.class"
 									component="@{component}"
 			    					forkmode="@{forkmode}"
 			/>

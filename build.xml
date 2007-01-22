@@ -7,7 +7,13 @@
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
     
-    <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
+    <target name="initialize"
+            depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
+        <property name="limewire.components.limewire.home"
+                  location="${limewire.home}"/>
+		<property name="limewire.components.tests.tests"
+        	      location="${limewire.components.tests.home}"/>
+        <do.setup-properties component="limewire"/>
     </target>
     
     <target name="compile"
@@ -24,7 +30,9 @@
     
     <target name="clean" 
             description="Cleans everything."
-            depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean"/>
+            depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean">
+        <do.clean component="limewire"/>
+    </target>
 	
 	<target name="clean-src"
 	        description="Cleans artifacts from compiling src."
@@ -32,10 +40,21 @@
     
 	<target name="clean-tests"
 	        description="Cleans artifacts from compiling tests."
-            depends="initialize, lw-components.clean-tests, lw-tests.clean"/>
+            depends="initialize, lw-components.clean-tests, lw-tests.clean">
+	    <do.clean-testData component="limewire"/>
+	</target>
         
-	<!-- TODO: implement -->
-    <target name="test-all"/>
+    <target name="test-all"
+        	description="Tests all components and LimeWire tests."
+        	depends="compile, lw-tests.test-all, lw-components.test-all">
+        <mkdir dir="${tests.limewire.components.limewire.xml}"/>
+        <do.tests2html component="limewire">
+            <more-xml-locations>
+                <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
+                <fileset dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
+			</more-xml-locations>
+    	</do.tests2html>
+    </target>
     
     <!-- TODO: implement -->
 	<target name="jar"/>

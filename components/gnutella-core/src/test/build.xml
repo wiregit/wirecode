@@ -45,12 +45,12 @@
 
     <target name="compile"
             description="compiles everything"
-            depends="initialize, lw-components.compile, compile-src, compile-tests"/>
+            depends="initialize, compile-src, compile-tests"/>
     
     
     <target name="compile-src" depends="initialize, lw-components.compile-src">
         <mkdir dir="${limewire.components.tests.src}"/> <!-- fake out the macro -->
-        <do.compile-src component="tests" excludes="macosx/**, windows/**">
+        <do.compile-src component="tests" excludes="macosx/**, windows/**, examples/**">
             <more-src-paths>
             	<pathelement location="${limewire.core.src}"/>
                 <pathelement location="${limewire.gui.src}"/>
@@ -64,7 +64,7 @@
     
 	<target name="test"
             description="Runs a single test. Requires: -Dclass=X.  Optional: -Dmodule=Y."
-            if="class" depends="initialize, compile">
+            if="class" depends="compile">
 	    <do.test component="tests"
 	             class="${class}"
 	             path="com/limegroup/${module}"/>
@@ -72,7 +72,7 @@
 	
 	<target name="test-package"
             description="Runs all tests in a package.  Requires: -Dpackage=X. Optional: -Dmodule=Y."
-            if="package" depends="initialize, compile">
+            if="package" depends="compile">
 	    <do.test-package component="tests"
 	                     package="${package}"
 	                     path="com/limegroup/${module}"
