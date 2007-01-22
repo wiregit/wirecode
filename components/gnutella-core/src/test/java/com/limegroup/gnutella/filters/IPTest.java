@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.filters;
 
+import org.limewire.io.IP;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

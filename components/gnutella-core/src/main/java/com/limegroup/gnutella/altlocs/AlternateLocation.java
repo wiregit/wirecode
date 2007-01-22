@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.StringTokenizer;
 
+import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
 import org.limewire.io.NetworkUtils;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;

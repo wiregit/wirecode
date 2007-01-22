@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.filters;
+package org.limewire.io;
 
 import org.limewire.util.ByteOrder;
 
@@ -15,8 +15,8 @@ import org.limewire.util.ByteOrder;
 public class IP {
     private static final String MSG = "Could not parse: ";
 
-    final int addr;
-    final int mask;
+    public final int addr;
+    public final int mask;
     
     /**
      * Creates an IP object out of a four byte array of the IP in

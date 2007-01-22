@@ -11,8 +11,7 @@ import java.util.WeakHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
-
-import com.limegroup.gnutella.filters.IP;
+import org.limewire.io.IP;
 
 /**
  * A sanity checker for many different in-network verification

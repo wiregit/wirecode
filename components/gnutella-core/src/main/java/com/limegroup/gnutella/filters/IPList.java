@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
 import org.limewire.collection.Trie.Cursor;
+import org.limewire.io.IP;
+import org.limewire.io.NetworkUtils;
+import org.limewire.util.ByteOrder;
 
 
 /**
@@ -79,6 +83,10 @@ public class IPList {
             ips.put(ip, ip);
             return;
         }
+        
+        if(!NetworkUtils.isValidAddress(ip)) {
+            return;
+        }
                 
         // If we already had it (or an address that contained it),
         // then don't include.  Also remove any IPs we encountered
@@ -106,6 +114,12 @@ public class IPList {
     public boolean contains(IP lookup) {
         IP ip = ips.select(lookup);        
         return ip != null && ip.contains(lookup);
+    }
+    
+    public boolean isValidFilter(boolean allowPrivateIPs) {
+        ValidFilter filter = new ValidFilter(allowPrivateIPs);
+        ips.traverse(filter);
+        return filter.isValid();
     }
     
     /**
@@ -149,6 +163,77 @@ public class IPList {
             return Integer.MAX_VALUE;
         else
             return ip.getDistanceTo(lookup);
+    }
+    
+    /**
+     *  A trie cursor that determines if the IP list contained in the
+     *  trie is valid or not. 
+     *  A list is considered invalid if :
+     *  1) It contains a private IP
+     *  2) It contains an invalid IP
+     *  3) It spans a range of hosts larger than the MAX_LIST_SPACE constant
+     *
+     */
+    private static class ValidFilter implements Trie.Cursor<IP, IP> {
+        
+        /** The space covered by private addresses */
+        private static final int INVALID_SPACE = 60882944;
+        
+        /** The total IP space available */
+        private static final long TOTAL_SPACE = (long)Math.pow(2,32) - INVALID_SPACE;
+        
+        /** The maximum IP space (in percent) for this IPList to be valid */
+        private static final float MAX_LIST_SPACE = 0.05f;
+        
+        private boolean isInvalid;
+        private long counter;
+        
+        private final boolean allowPrivateIPs;
+        
+        public boolean isValid() {
+            return !isInvalid && ((counter/(float)TOTAL_SPACE) < MAX_LIST_SPACE) ;
+        }
+        
+        public ValidFilter(boolean allowPrivateIPs) {
+            this.allowPrivateIPs = allowPrivateIPs;
+        }
+        
+        public SelectStatus select(Entry<? extends IP, ? extends IP> entry) {
+            IP key = entry.getKey();
+            byte[] buf = new byte[4];
+            ByteOrder.int2beb(key.addr,buf,0);
+            
+            if(!allowPrivateIPs && NetworkUtils.isPrivateAddress(buf)) {
+                isInvalid = true;
+                return SelectStatus.EXIT;
+            }
+            
+            counter += Math.pow(2,countBits(~key.mask));
+            return SelectStatus.CONTINUE;
+        }
+        
+        /**
+         * Counts number of 1 bits in a 32 bit unsigned number.
+         *
+         * @param x unsigned 32 bit number whose bits you wish to count.
+         *
+         * @return number of 1 bits in x.
+         * @author Roedy Green
+         */
+        private int countBits( int x ) {
+           // collapsing partial parallel sums method
+           // collapse 32x1 bit counts to 16x2 bit counts, mask 01010101
+           x = (x >>> 1 & 0x55555555) + (x & 0x55555555);
+           // collapse 16x2 bit counts to 8x4 bit counts, mask 00110011
+           x = (x >>> 2 & 0x33333333) + (x & 0x33333333);
+           // collapse 8x4 bit counts to 4x8 bit counts, mask 00001111
+           x = (x >>> 4 & 0x0f0f0f0f) + (x & 0x0f0f0f0f);
+           // collapse 4x8 bit counts to 2x16 bit counts
+           x = (x >>> 8 & 0x00ff00ff) + (x & 0x00ff00ff);
+           // collapse 2x16 bit counts to 1x32 bit count
+           return(x >>> 16) + (x & 0x0000ffff);
+       }
+        
     }
     
     /**

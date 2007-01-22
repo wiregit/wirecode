@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.filters;
 
+import org.limewire.io.IP;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -14,6 +16,35 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
+    }
+    
+    public void testIsValid() throws Exception {
+        IPList list = new IPList();
+        
+        //try a private address
+        list.add("192.168.1.1");
+        assertFalse(list.isValidFilter(false));
+        assertTrue(list.isValidFilter(true));
+        
+        //try filling up the space
+        list = new IPList();
+        list.add("*.*.*.*");
+        assertFalse(list.isValidFilter(false));
+        
+        //try below max space
+        list = new IPList();
+        list.add("1.*.*.*");
+        list.add("2.*.*.*");
+        list.add("3.*.*.*");
+        list.add("4.*.*.*");
+        list.add("5.*.*.*");
+        list.add("6.*.*.*");
+        assertTrue(list.isValidFilter(false));
+        //max space:
+        for(int i = 11; i < 20; i++) {
+            list.add(i+".*.*.*");
+        }
+        assertFalse(list.isValidFilter(false));
     }
     
     public void testContains() {

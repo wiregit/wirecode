@@ -91,6 +91,12 @@ public final class NetworkUtils {
 	    	addr[0]!=INVALID_ADDRESSES_BYTE[1];
     }
     
+    public static boolean isValidAddress(IP ip) {
+        int b = ip.addr >> 24;
+        return (b != INVALID_ADDRESSES_BYTE[0]) && 
+            (b != INVALID_ADDRESSES_BYTE[1]);
+    }
+    
     /**
      * Returns whether or not the specified InetAddress is valid.
      */

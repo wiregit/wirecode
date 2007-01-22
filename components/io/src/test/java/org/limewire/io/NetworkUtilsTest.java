@@ -142,6 +142,20 @@ public class NetworkUtilsTest extends BaseTestCase {
                        NetworkUtils.isPrivateAddress(address));
         }
     }
+    
+    public void testIsInvalidAddressWithIP() throws Exception {
+        IP ip = new IP("0.0.0.0");
+        assertFalse(NetworkUtils.isValidAddress(ip));
+        
+        ip = new IP("1.2.3.0");
+        assertTrue(NetworkUtils.isValidAddress(ip));
+        
+        ip = new IP("255.0.1.1");
+        assertFalse(NetworkUtils.isValidAddress(ip));
+        
+        ip = new IP("1.2.3.255");
+        assertTrue(NetworkUtils.isValidAddress(ip));
+    }
 
     /**
      * Test to make sure the method for checking for valid ports is working.

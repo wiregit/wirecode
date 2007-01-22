@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.messages.DHTMessage;
 
