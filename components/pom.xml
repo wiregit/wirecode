@@ -43,8 +43,10 @@
     <module>io</module>
     <module>mojito</module>
     <module>mojito-ui</module>
+    <module>nio</module>
     <module>security</module>
     <module>setting</module>
+    <module>statistic</module>
     <module>test-util</module>
   </modules>
 

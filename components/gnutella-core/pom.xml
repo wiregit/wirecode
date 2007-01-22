@@ -32,12 +32,22 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-nio</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-security</artifactId>
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-setting</artifactId>
+      <version>${limewire.version}</version>
+    </dependency> 
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-statistic</artifactId>
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
@@ -105,6 +115,15 @@
   <build>
     <sourceDirectory>${basedir}</sourceDirectory>
 	<plugins>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>examples/</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
 	  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-eclipse-plugin</artifactId>
