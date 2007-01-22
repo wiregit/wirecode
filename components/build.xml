@@ -32,12 +32,13 @@
 				<path refid="tests.limewire.components.mojito.classpath"/>
 				<path refid="tests.limewire.components.mojito-ui.classpath"/>
 			    <path refid="tests.limewire.components.test-util.classpath"/>
+			    <!-- Add as components are added. -->
 		    </tests-classpath>
-        </do.setup-properties>
+        </do.setup-properties>    
         
         <!-- setup a special property for the buildpath of each component combined. -->
         <path id="build.limewire.components.classes.core">
-            <pathelement location="${build.limewire.components.common.classes}"/>
+            <pathelement  location="${build.limewire.components.common.classes}"/>
             <pathelement location="${build.limewire.components.collection.classes}"/>
             <pathelement location="${build.limewire.components.security.classes}"/>
             <pathelement location="${build.limewire.components.io.classes}"/>
@@ -46,11 +47,14 @@
             <pathelement location="${build.limewire.components.statistic.classes}"/>
 			<pathelement location="${build.limewire.components.mojito.classes}"/>
             <!-- test-util not added purposely, as the classes are required for tests only -->
+            
+            <!-- Add as core components are added. -->
         </path>
 	
 		<path id="build.limewire.components.classes.ui">
 			<pathelement location="${build.limewire.components.mojito-ui.classes}"/>
 			<path refid="build.limewire.components.classes.core"/>
+		    <!-- Add as UI components are added. -->
         </path>
     </target>
 	
@@ -129,16 +133,17 @@
             depends="compile, compile-ui">
 	    <do.test-all component="all">
 	        <testLocations>
-		        <fileset dir="${build.limewire.components.test-util.tests}" includes="**/*Test.class"/>
-	            <fileset dir="${build.limewire.components.common.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.collection.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.security.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.io.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.nio.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.setting.tests}" includes="**/*Test.class"/>
-		        <fileset dir="${build.limewire.components.statistic.tests}" includes="**/*Test.class"/> 
-				<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
-	           	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
+	            <fileset dir="${build.limewire.components.test-util.tests}" includes="**/*Test.class"/>
+                <fileset dir="${build.limewire.components.common.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.collection.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.security.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.io.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.nio.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.setting.tests}" includes="**/*Test.class"/>
+    	        <fileset dir="${build.limewire.components.statistic.tests}" includes="**/*Test.class"/> 
+    			<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
+               	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
+	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
 	</target>
@@ -148,20 +153,16 @@
             depends="initialize, compile-src, compile-ui-src">
         <do.jar component="all" basedir="" resourcedir="" resexclude="**" excludes="**">
 			<more-jar-elements>
+			    <path refid="${limewire.components.all.runpath}"/>
 			    <fileset dir="${build.limewire.components.common.classes}" />
 	    	    <fileset dir="${limewire.components.common.src.resources}" />
 			    <fileset dir="${build.limewire.components.collection.classes}"/>
-    	    	<fileset dir="${limewire.components.collection.src.resources}" />
     	        <fileset dir="${build.limewire.components.security.classes}" />
-    	    	<fileset dir="${limewire.components.security.src.resources}" />
     	        <fileset dir="${build.limewire.components.io.classes}" />
-    	    	<fileset dir="${limewire.components.io.src.resources}" />
       	        <fileset dir="${build.limewire.components.nio.classes}" />
     	    	<fileset dir="${build.limewire.components.setting.classes}" />
-    	    	<fileset dir="${limewire.components.setting.src.resources}" />
     	    	<fileset dir="${build.limewire.components.statistic.classes}" />
-				<fileset dir="${limewire.components.mojito.src.resources}" />
-				<fileset dir="${limewire.components.mojito-ui.src.resources}" />
+			    <!-- Add as components & resources are added. -->
 			</more-jar-elements>
         </do.jar>
     </target>
@@ -183,6 +184,7 @@
     	    	<fileset dir="${limewire.components.statistic.src}" />
 				<fileset dir="${limewire.components.mojito.src}" />
 				<fileset dir="${limewire.components.mojito-ui.src}" />
+     		    <!-- Add as components are added -->
 	        </more-javadoc-elements>
 	    </do.javadoc>
 	</target>
@@ -208,6 +210,7 @@
     	    	<fileset dir="${limewire.components.statistic.src}" />	
 				<fileset dir="${limewire.components.mojito.src}" />	 
 				<fileset dir="${limewire.components.mojito-ui.src}" />	 
+	            <!-- Add as components are added. -->
 			</locations>
 	    </do.clover-setup>
 	</target>

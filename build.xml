@@ -7,6 +7,9 @@
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
     
+    <target name="clean-build-test" depends="initialize, clean, compile, test-all"/>
+    <target name="clean-build-quicktest" depends="initialize, clean, compile, test-components"/>
+    
     <target name="initialize"
             depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">
         <property name="limewire.components.limewire.home"
@@ -54,7 +57,18 @@
                 <fileset dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
 			</more-xml-locations>
     	</do.tests2html>
-    </target>
+    </target>    
+    
+    <target name="test-components"
+         	description="Tests all components"
+         	depends="compile, lw-components.test-all">
+         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
+         <do.tests2html component="limewire">
+             <more-xml-locations>
+                 <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
+ 			</more-xml-locations>
+     	</do.tests2html>
+     </target>    
     
     <!-- TODO: implement -->
 	<target name="jar"/>
