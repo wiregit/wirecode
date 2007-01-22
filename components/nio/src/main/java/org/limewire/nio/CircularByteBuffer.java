@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.nio;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -8,10 +8,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
-import org.limewire.nio.ByteBufferCache;
 import org.limewire.service.ErrorService;
-
-import com.limegroup.gnutella.Assert;
 
 /**
  * A circular buffer - allows to read and write to and from channels and other buffers
@@ -36,11 +33,11 @@ public class CircularByteBuffer {
     
     private void initBuffers() {
     	if (in == null) {
-    		Assert.that(out == null);
+    		assert out == null;
     		in = cache.getHeap(capacity);
     		out = in.asReadOnlyBuffer();
     	} else 
-    		Assert.that(out != null);
+    		assert out != null;
     }
 
     public final int remainingIn() {

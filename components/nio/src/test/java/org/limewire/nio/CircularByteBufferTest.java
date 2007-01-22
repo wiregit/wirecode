@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package org.limewire.nio;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -7,10 +7,11 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.CircularByteBuffer;
+import org.limewire.nio.channel.ReadBufferChannel;
+import org.limewire.nio.channel.WriteBufferChannel;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
-
-import com.limegroup.gnutella.stubs.ReadBufferChannel;
-import com.limegroup.gnutella.stubs.WriteBufferChannel;
 
 import junit.framework.Test;
 
@@ -20,7 +21,7 @@ import junit.framework.Test;
  * Tests some of the functionality of the Circular buffer.  
  *
  */
-public class CircularByteBufferTest extends LimeTestCase {
+public class CircularByteBufferTest extends BaseTestCase {
 
     public CircularByteBufferTest(String name) {
         super(name);
