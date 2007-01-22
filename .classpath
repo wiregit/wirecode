@@ -51,7 +51,6 @@
 	<classpathentry path="lib/jars/tritonus.jar" kind="lib"/>
 	<classpathentry path="lib/jars/vorbis.jar" kind="lib"/>
 	<classpathentry path="lib/jars/windows/jdic_stub.jar" kind="lib"/>
-	<classpathentry path="lib/jars/xml-apis.jar" kind="lib"/>
 	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
 	<classpathentry path="tests/lib/jaxen-core-1.0-fcs.jar" kind="lib"/>
 	<classpathentry path="tests/lib/jing.jar" kind="lib"/>
