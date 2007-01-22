@@ -47,6 +47,25 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertFalse(list.isValidFilter(false));
     }
     
+    public void testIPListLegacy() {
+        IPList iplist = new IPList();
+
+        iplist.add ("192.168.0.1/255.255.255.0");
+        iplist.add ("10.0.*.*");
+
+        assertTrue(!iplist.contains (new IP("192.168.1.2/255.255.255.0")));
+        assertTrue(iplist.contains (new IP("192.168.0.2")));
+        assertTrue(iplist.contains (new IP(bytes(192,168,0,2))));
+        assertTrue(iplist.contains (new IP("192.168.0.1")));
+        assertTrue(iplist.contains (new IP(bytes(192,168,0,1))));
+        assertTrue(!iplist.contains (new IP("192.168.1.1")));
+        assertTrue(!iplist.contains (new IP(bytes(192,168,1,1))));
+        assertTrue(iplist.contains (new IP("10.0.1.1")));
+        assertTrue(iplist.contains (new IP(bytes(10,0,1,1))));
+        assertTrue(!iplist.contains (new IP("10.1.0.1")));        
+        assertTrue(!iplist.contains (new IP(bytes(10,1,0,1))));
+    }
+    
     public void testContains() {
         IPList list = new IPList();
         
@@ -113,5 +132,9 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(list.contains(new IP("192.168.1.1")));
         assertTrue(list.contains(new IP("192.168.2.2")));
         assertTrue(list.contains(new IP("192.168.1.2")));
+    }
+    
+    private byte[] bytes(int one, int two, int three, int four) {
+        return new byte[] { (byte)one, (byte)two, (byte)three, (byte)four };
     }
 }
