@@ -153,7 +153,6 @@
             depends="initialize, compile-src, compile-ui-src">
         <do.jar component="all" basedir="" resourcedir="" resexclude="**" excludes="**">
 			<more-jar-elements>
-			    <path refid="${limewire.components.all.runpath}"/>
 			    <fileset dir="${build.limewire.components.common.classes}" />
 	    	    <fileset dir="${limewire.components.common.src.resources}" />
 			    <fileset dir="${build.limewire.components.collection.classes}"/>
