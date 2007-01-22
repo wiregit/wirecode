@@ -88,7 +88,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     /** Tests attempting to secure with no public key. */
     public void testNoPublicKey() throws Exception {
         SecureMessage m1 = new StubSecureMessage();
-        SecureMessageVerifier vf = new SecureMessageVerifier() {
+        SecureMessageVerifier vf = new SecureMessageVerifier("","") {
             protected PublicKey createPublicKey() {
                 return null;
             }
@@ -121,6 +121,20 @@ public class SecureMessageVerifierTest extends BaseTestCase {
 
     /** Verifier that'll use our fake public key. */
     private static class SimpleVerifier extends SecureMessageVerifier {
+        SimpleVerifier() {
+            super("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
+                    "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5" +
+                    "RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O" +
+                    "5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV" +
+                    "37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2B" +
+                    "BOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOE" +
+                    "EBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7Y" +
+                    "L7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76" +
+                    "Z5ESUA4BQUAAFAMBACDW4TNFXK772ZQN752VPKQSFXJWC6PPSIVTHKDNLRUIQ7UF" +
+                    "4J2NF6J2HC5LVC4FO4HYLWEWSB3DN767RXILP37KI5EDHMFAU6HIYVQTPM72WC7FW" +
+                    "SAES5K2KONXCW65VSREAPY7BF24MX72EEVCZHQOCWHW44N4RG5NPH2J4EELDPXMNR" +
+                    "WNYU22LLSAMBUBKW3KU4QCQXG7NNY", "Simple Verifier");
+        }
         protected PublicKey createPublicKey() {
             return PUBLIC_KEY;
         }
