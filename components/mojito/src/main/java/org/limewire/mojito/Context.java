@@ -823,8 +823,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 for (Contact node : nodes) {
                     if (!node.equals(localNode)) {
                         // We are not interested in the responses as we're going
-                        // to shutdown. Send pings without tagging the MessageIDs
-                        // and to register a response handler for the pings.
+                        // to shutdown. Send pings without a response handler.
                         RequestMessage request = getMessageFactory()
                             .createPingRequest(localNode, node.getContactAddress());
                         

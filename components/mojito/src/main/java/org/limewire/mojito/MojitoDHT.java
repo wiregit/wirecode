@@ -246,12 +246,12 @@ public interface MojitoDHT {
     public DHTFuture<StoreResult> remove(KUID key);
     
     /**
-     * 
+     * Sets the DHTExecutorService
      */
     public void setDHTExecutorService(DHTExecutorService executorService);
     
     /**
-     * 
+     * Returns the DHTExecutorService
      */
     public DHTExecutorService getDHTExecutorService();
 }
