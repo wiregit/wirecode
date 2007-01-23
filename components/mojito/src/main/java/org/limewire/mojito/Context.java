@@ -782,6 +782,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         valueManager.start();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#stop()
+     */
     public synchronized void stop() {
         if (!isRunning()) {
             if (LOG.isDebugEnabled()) {
@@ -920,14 +924,25 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return pingManager.collisionPing(nodes);
     }
     
+    /**
+     * A helper method that throws a NotBootstrappedException if
+     * Mojito is not bootstrapped
+     */
+    private void throwExceptionIfNotBootstrapped(String operation) throws NotBootstrappedException {
+        if (!isBootstrapped()) {
+            if (ContextSettings.THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED.getValue()) {
+                throw new NotBootstrappedException(getName(), operation);
+            } else if (LOG.isInfoEnabled()) {
+                LOG.info(NotBootstrappedException.getErrorMessage(getName(), operation));
+            }
+        }
+    }
+    
     /** 
      * Starts a value lookup for the given KUID 
      */
     public DHTFuture<FindValueResult> get(KUID key) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName(), "get()");
-        }
-        
+        throwExceptionIfNotBootstrapped("get()");
         return findValueManager.lookup(key);
     }
     
@@ -968,9 +983,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName(), "put()");
-        }
+        throwExceptionIfNotBootstrapped("put()");
         
         DHTValueEntity entity = new DHTValueEntity(
                 getLocalNode(), getLocalNode(), key, value, true);
@@ -983,9 +996,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#remove(com.limegroup.mojito.KUID)
      */
     public DHTFuture<StoreResult> remove(KUID key) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName(), "remove()");
-        }
+        throwExceptionIfNotBootstrapped("remove()");
         
         // To remove a KeyValue you just store an empty value!
         return put(key, DHTValueImpl.EMPTY_VALUE);
@@ -1003,10 +1014,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * valueId!
      */
     public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
-        if(!isBootstrapped()) {
-            throw new NotBootstrappedException(getName(), "store()");
-        }
-        
+        throwExceptionIfNotBootstrapped("store()");
         return storeManager.store(values);
     }
     

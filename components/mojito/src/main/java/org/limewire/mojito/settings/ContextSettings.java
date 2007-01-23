@@ -117,4 +117,12 @@ public class ContextSettings extends MojitoProps {
     public static Version getVersion() {
         return Version.valueOf(ContextSettings.VERSION.getValue());
     }
+    
+    /**
+     * Whether or not certain operations throw a NotBootstrappedException
+     * if Mojito is not bootstrapped. This setting is meant for testing!
+     * Do not change w/o having a good reason!
+     */
+    public static final BooleanSetting THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED
+        = FACTORY.createBooleanSetting("THROW_EXCEPTION_IF_NOT_BOOTSTRAPPED", true);
 }

@@ -27,7 +27,11 @@ package org.limewire.mojito.exceptions;
 public class NotBootstrappedException extends IllegalStateException {
     
     public NotBootstrappedException(String name, String operation) {
-        super(name + " is attempting to execute a " + operation 
-                + " while not bootstrapped to the network");
+        super(getErrorMessage(name, operation));
+    }
+    
+    public static String getErrorMessage(String name, String operation) {
+        return name + " is attempting to execute a " + operation 
+                    + " while not bootstrapped to the network";
     }
 }
