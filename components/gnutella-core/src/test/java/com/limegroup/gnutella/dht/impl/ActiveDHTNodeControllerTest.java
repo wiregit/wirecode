@@ -46,6 +46,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
+        DHTSettings.FORCE_DHT_CONNECT.setValue(true);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     public void testPersistence() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
         //first delete any previous file
-        File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "mojito.dat");
+        File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         //start the node controller
         ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
@@ -95,7 +96,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         controller.start();
         //bootstrap active node
         controller.addActiveDHTNode(new InetSocketAddress("localhost",3000));
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         //ask for active nodes -- should return itself and the bootstrap node
         List<IpPort> l = controller.getActiveDHTNodes(10);
         assertEquals(2, l.size());

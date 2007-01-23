@@ -13,7 +13,7 @@ import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.util.BaseTestCase;
+import org.limewire.mojito.settings.NetworkSettings;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -21,8 +21,9 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public abstract class DHTTestCase extends BaseTestCase {
+public abstract class DHTTestCase extends LimeTestCase {
     
     protected static final int PORT = 6667;
     
@@ -68,6 +69,7 @@ public abstract class DHTTestCase extends BaseTestCase {
         //dht settings:
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
+        NetworkSettings.TIMEOUT.setValue(500);
     }
     
     public static void globalTearDown() throws Exception {

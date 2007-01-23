@@ -16,7 +16,6 @@ import junit.framework.Test;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.NetworkUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
@@ -73,7 +72,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
 
     public void testRequestDHTHostsFromSingleHost() throws Exception {
         DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
-        
+        nodeFetcher.start();
         //request hosts
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_ACCESS[0].getLocalPort());
         nodeFetcher.requestDHTHosts(addr);
@@ -102,15 +101,14 @@ public class DHTNodeFetcherTest extends DHTTestCase {
                 Arrays.asList(ipp));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         reply.write(baos);
-        NetworkUtils.getByAddress(RouterService.getAddress());
         pack = new DatagramPacket(baos.toByteArray(), 
                 baos.toByteArray().length,
-                NetworkUtils.getByAddress(RouterService.getAddress()),
-                RouterService.getPort());
+                new InetSocketAddress("localhost", RouterService.getPort()));
         UDP_ACCESS[0].send(pack);
         //test the processing
         Thread.sleep(1000);
         Set<SocketAddress> hosts = dhtBootstrapper.getBootstrapHosts();
+        assertTrue(hosts.iterator().hasNext());
         assertEquals(ipp.getInetAddress(), ((InetSocketAddress)hosts.iterator().next()).getAddress());
         
         //now we should be able to send a ping again

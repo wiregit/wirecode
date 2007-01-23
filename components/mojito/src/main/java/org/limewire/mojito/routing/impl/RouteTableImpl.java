@@ -699,7 +699,8 @@ public class RouteTableImpl implements RouteTable {
                     
                     // Ignore all non-alive Contacts if only
                     // active Contacts are requested.
-                    // TODO: See LocalContact.isAlive() !!! 
+                    // We also ignore the local contact here (see LocalContact.isAlive)
+                    // because a node will always have himself in the routing table
                     if (activeContacts && !node.isAlive()) {
                         continue;
                     }

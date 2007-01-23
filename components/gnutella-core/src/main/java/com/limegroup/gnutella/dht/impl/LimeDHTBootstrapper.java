@@ -21,6 +21,7 @@ import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
+import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.dht.DHTBootstrapper;
@@ -158,12 +159,16 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
     public void stop() {
         synchronized (lock) {
             if (pingFuture != null) {
-                pingFuture.cancel(true);
+                try {
+                    pingFuture.cancel(true);
+                } catch (CancellationException ex) {}
                 pingFuture = null;
             }
             
             if (bootstrapFuture != null) {
-                bootstrapFuture.cancel(true);
+                try {
+                    bootstrapFuture.cancel(true);
+                } catch (CancellationException ex) {}
                 bootstrapFuture = null;
             }
             
@@ -348,7 +353,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
             synchronized (lock) {
                 pingFuture = null;
                 
-                if (e.getCause() instanceof DHTException) {
+                if (ExceptionUtils.isCausedBy(e, DHTException.class)) {
                     // Try to bootstrap from a SIMPP Host if
                     // bootstrapping from the RouteTable failed
                     // and try the hosts Set otherwise
@@ -358,11 +363,11 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                     } else {
                         retry();
                     }
-                } else {
+                } else if(!ExceptionUtils.isCausedBy(e, IllegalArgumentException.class)){
                     LOG.error("ExecutionException", e);
                     ErrorService.error(e);
                     stop();
-                }
+                } 
             }
         }
         
@@ -403,8 +408,10 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         public void handleFutureSuccess(BootstrapResult result) {
             synchronized (lock) {
                 bootstrapFuture = null;
-                
+
                 ResultType type = result.getResultType();
+                
+                LOG.debug("Future success type: "+ type);
                 switch(type) {
                     case BOOTSTRAP_SUCCEEDED:
                         finish();

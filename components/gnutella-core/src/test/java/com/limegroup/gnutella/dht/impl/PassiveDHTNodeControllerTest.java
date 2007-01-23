@@ -2,7 +2,6 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.io.File;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
 
 import junit.framework.Test;
@@ -12,12 +11,14 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.MojitoUtils;
 
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -46,16 +47,12 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     public void setUp() throws Exception {
         setSettings();
-        ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
-        RouterService.connect();   
-        
+        DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
     }
     
     public void tearDown() throws Exception {
-        RouterService.disconnect();
         Thread.sleep(300);
     }
     
@@ -70,38 +67,45 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         Contact localContact = context.getLocalNode();
         KUID nodeID = context.getLocalNodeID();
         RouteTable rt = context.getRouteTable();
+        rt.setContactPinger(new RouteTable.ContactPinger() {
+            public DHTFuture<PingResult> ping(Contact node) {
+                return null;
+            }
+        });
         //fill the routing table a bit
         fillRoutingTable(rt, 2*numPersistedNodes);
         controller.start();
+        Thread.sleep(5000);
         controller.stop();
         //now nodeID should have changed and we should have persisted SOME nodes
         controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         context = (Context) controller.getMojitoDHT();
         rt = context.getRouteTable();
         assertNotEquals(nodeID, context.getLocalNodeID());
-        assertFalse(context.getRouteTable().select(nodeID).equals(localContact));
+        assertFalse(rt.select(nodeID).equals(localContact));
         assertEquals(numPersistedNodes, context.getRouteTable().getActiveContacts().size());
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        PassiveControllerTest controller = new PassiveControllerTest(Vendor.UNKNOWN, Version.UNKNOWN);
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         controller.start();
         Context context = (Context) controller.getMojitoDHT();
         PassiveDHTNodeRouteTable rt = (PassiveDHTNodeRouteTable) context.getRouteTable();
         MojitoDHT dht;
         InetSocketAddress addr;
         for(int i = 0; i < 20; i++) {
-            dht = MojitoFactory.createDHT("Mojito"+i);
+            dht = MojitoFactory.createDHT("Mojito"+i, Vendor.UNKNOWN, Version.UNKNOWN);
             addr = new InetSocketAddress(2000+i);
             dht.bind(addr);
             dht.start();
+            MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost",BOOTSTRAP_DHT_PORT));
             DHT_LIST.add(dht);
-            controller.addLeafDHTNode("localhost", addr.getPort());
             Thread.sleep(300);
+            controller.addLeafDHTNode("localhost", addr.getPort());
         }
         assertTrue(rt.hasDHTLeaves());
-        assertEquals(rt.getDHTLeaves().size(), rt.getActiveContacts().size() - 1); //minus local node
+        assertEquals(rt.getDHTLeaves().size(), rt.getActiveContacts().size() - 2); //minus local node and bootstrap host
         //try removing nodes
         assertNotNull(controller.removeLeafDHTNode("localhost",2000));
         assertNotNull(controller.removeLeafDHTNode("localhost",2015));
@@ -109,9 +113,11 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2000)));
         assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2015)));
         assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
+        Thread.sleep(500);
         //see if removed from the DHT RT
         assertEquals(19, rt.getActiveContacts().size());
-        //getActive nodes should return leaf nodes
+        
+        //getActive nodes should return leaf nodes when node is bootstrapped
         List<IpPort> l = controller.getActiveDHTNodes(30);
         //and not local node
         Contact localNode = context.getLocalNode();
@@ -124,24 +130,5 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             found |= (ipp.getPort() == 2001);
         }
         assertTrue(found);
-    }
-    
-    private class PassiveControllerTest extends PassiveDHTNodeController {
-        
-        public PassiveControllerTest(Vendor vendor, Version version) {
-            super(vendor, version, dispatcherStub);
-        }
-
-        @Override
-        // Synchronize the method
-        protected synchronized void addLeafDHTNode(String host, int port) {
-            super.addLeafDHTNode(host, port);
-        }
-
-        @Override
-        // Synchronize the method
-        protected synchronized SocketAddress removeLeafDHTNode(String host, int port) {
-            return super.removeLeafDHTNode(host, port);
-        }
     }
 }

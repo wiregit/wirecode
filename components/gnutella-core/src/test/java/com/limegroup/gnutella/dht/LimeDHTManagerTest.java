@@ -12,9 +12,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class LimeDHTManagerTest extends DHTTestCase {
     
@@ -32,10 +30,6 @@ public class LimeDHTManagerTest extends DHTTestCase {
     }
     
     protected void setUp() throws Exception {
-        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
-        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        DHTSettings.FORCE_DHT_CONNECT.setValue(false);
-        ROUTER_SERVICE.start();
         //stop the nodeAssigner
         NodeAssigner na = 
             (NodeAssigner)PrivilegedAccessor.getValue(ROUTER_SERVICE, "nodeAssigner");
@@ -43,12 +37,13 @@ public class LimeDHTManagerTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
     }
 
-    public void tearDown() throws Exception{
+    public static void globalTearDown() throws Exception{
         //Ensure no more threads.
         RouterService.shutdown();
     }
     
     public void testLimeDHTManager() throws Exception{
+        DHTSettings.PERSIST_DHT.setValue(true);
         TestThreadPool threadPool = new TestThreadPool();
         LimeDHTManager manager = new LimeDHTManager(threadPool);
         assertFalse(manager.isRunning());
@@ -83,9 +78,8 @@ public class LimeDHTManagerTest extends DHTTestCase {
         manager.start(true);
         manager.start(false);
         manager.start(true);
-        manager.start(false);
-        manager.start(true);
-        Thread.sleep(500);
+        //give it enough time --> previous starts were offloaded to threadpool
+        Thread.sleep(10000);
         assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
         assertTrue(manager.isActiveNode());
     }

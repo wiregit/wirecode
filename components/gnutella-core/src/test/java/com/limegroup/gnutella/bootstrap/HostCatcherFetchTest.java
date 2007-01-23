@@ -29,12 +29,15 @@ public class HostCatcherFetchTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    public static void globalSetUp() throws Exception {
+        //we don't actually need the service, we just need it
+        // to start up the other services.
+        new RouterService( new ActivityCallbackStub() );
+    }
 
     public void setUp() throws Exception {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[0]);
-        // we don't actually need the service, we just need it
-        // to start up the other services.
-        new RouterService( new ActivityCallbackStub() );
 
         //Create special TestBootstrapServerManager to record GWebCache hits.
         gWebCache=new RecordingBootstrapServerManager();

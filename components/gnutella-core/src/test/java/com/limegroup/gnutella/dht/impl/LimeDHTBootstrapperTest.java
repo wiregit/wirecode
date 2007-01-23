@@ -14,7 +14,6 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
@@ -40,12 +39,6 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public static void globalSetUp() throws Exception {
-        NetworkSettings.TIMEOUT.setValue(500);
-        MojitoDHT dht = MojitoFactory.createDHT();
-        dhtContext = (Context)dht;
-    }
-
     @Override
     protected void setUp() throws Exception {
         setSettings();
@@ -74,11 +67,11 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         //now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue("ping future should be cancelled", future.isCancelled());
-        Thread.sleep(300);
+        Thread.sleep(200);
         future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
         assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
         //should be bootstrapping
-        assertTrue(dhtContext.isBootstrapping());
+        assertTrue(dhtContext.isBootstrapping() || dhtContext.isBootstrapped());
         //now try adding more hosts -- should keep them but not bootstrap
         for(int i = 0; i < 30; i++) {
             bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
