@@ -34,7 +34,7 @@ public class KademliaSettings extends MojitoProps {
      * The replication parameter is also known as K
      */
     public static final IntSetting REPLICATION_PARAMETER
-        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 8);
+        = FACTORY.createIntSetting("REPLICATION_PARAMETER", 20);
     
     /**
      * The number of parallel FIND_NODE lookups
