@@ -9,8 +9,8 @@ import java.util.Properties;
 
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.observer.WriteObserver;
@@ -201,12 +201,12 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
     }
 
     private static class MultiplexingSocket extends Socket implements NIOMultiplexor {
-        private InterestReadChannel baseReader;
-        private InterestWriteChannel baseWriter;
+        private InterestReadableByteChannel baseReader;
+        private InterestWritableByteChannel baseWriter;
         private ReadObserver reader;
         private WriteObserver writer;
         
-        MultiplexingSocket(InterestReadChannel baseReader, InterestWriteChannel baseWriter) {
+        MultiplexingSocket(InterestReadableByteChannel baseReader, InterestWritableByteChannel baseWriter) {
             this.baseReader = baseReader;
             this.baseWriter = baseWriter;
         }

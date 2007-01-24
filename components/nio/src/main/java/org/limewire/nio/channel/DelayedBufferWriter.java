@@ -18,7 +18,7 @@ import org.limewire.nio.observer.WriteObserver;
  * A Writer that stores data within a buffer and writes it out after some delay,
  * or if the buffer fills up.
  */
-public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel {
+public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteChannel {
 
     private static final Log LOG = LogFactory.getLog(DelayedBufferWriter.class);
 
@@ -26,7 +26,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     private final static int MAX_TIME = 200;
    
     /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel sink;
+    private volatile InterestWritableByteChannel sink;
     /** The next observer. */
     private volatile WriteObserver observer;
     
@@ -80,7 +80,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     	else 
     		this.observer = null;
     	
-        InterestWriteChannel source = sink;
+        InterestWritableByteChannel source = sink;
         if(source != null)
             source.interest(this, true); 
     }
@@ -99,12 +99,12 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     }
 
     /** Retreives the sink. */
-    public InterestWriteChannel getWriteChannel() {
+    public InterestWritableByteChannel getWriteChannel() {
         return sink;
     }
 
     /** Sets the sink. */
-    public void setWriteChannel(InterestWriteChannel newChannel) {
+    public void setWriteChannel(InterestWritableByteChannel newChannel) {
         sink = newChannel;
         newChannel.interest(this,true);
     }
@@ -206,7 +206,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     
     private void flush(long now) throws IOException {
         buf.flip();
-        InterestWriteChannel chan = sink;
+        InterestWritableByteChannel chan = sink;
         
         chan.write(buf);
 
@@ -230,7 +230,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWriteChannel 
     	public void run() {
     		DelayedBufferWriter me = DelayedBufferWriter.this;
     		synchronized(me) {
-    			InterestWriteChannel below = me.sink;
+    			InterestWritableByteChannel below = me.sink;
     			WriteObserver above = observer;
     			if (below != null && 
     					below.isOpen() && 

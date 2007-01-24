@@ -24,13 +24,13 @@ import java.util.zip.Inflater;
  * The source channel does not need to be set for construction.  However, before read(ByteBuffer)
  * is called, setReadChannel(ReadableByteChannel) must be called with a valid channel.
  */
-public class InflaterReader implements ChannelReader, InterestReadChannel {
+public class InflaterReader implements ChannelReader, InterestReadableByteChannel {
     
     /** the inflater that will do the decompressing for us */
     private Inflater inflater;
     
     /** the channel this reads from */
-    private InterestReadChannel channel;
+    private InterestReadableByteChannel channel;
     
     /** the temporary buffer that data from the channel goes to prior to inflating */
     private ByteBuffer data;
@@ -47,7 +47,7 @@ public class InflaterReader implements ChannelReader, InterestReadChannel {
     /**
      * Constructs a new InflaterReader with the given source channel & inflater.
      */
-    public InflaterReader(InterestReadChannel channel, Inflater inflater ) {        
+    public InflaterReader(InterestReadableByteChannel channel, Inflater inflater ) {        
         if(inflater == null)
             throw new NullPointerException("null inflater!");
 
@@ -59,7 +59,7 @@ public class InflaterReader implements ChannelReader, InterestReadChannel {
     /**
      * Sets the new channel.
      */
-    public void setReadChannel(InterestReadChannel channel) {
+    public void setReadChannel(InterestReadableByteChannel channel) {
         if(channel == null)
             throw new NullPointerException("cannot set null channel!");
 
@@ -67,7 +67,7 @@ public class InflaterReader implements ChannelReader, InterestReadChannel {
     }
     
     /** Gets the read channel */
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     

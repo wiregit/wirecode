@@ -13,7 +13,7 @@ import java.util.Random;
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 
 import junit.framework.Test;
 
@@ -254,12 +254,12 @@ public final class UDPConnectNIOTest extends LimeTestCase {
     
     private static class ReadTester implements ChannelReadObserver {
         
-        private InterestReadChannel source;
+        private InterestReadableByteChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);
         
         // ChannelReader methods.
-        public InterestReadChannel getReadChannel() { return source; }
-        public void setReadChannel(InterestReadChannel channel) { source = channel; }
+        public InterestReadableByteChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadableByteChannel channel) { source = channel; }
         
         // IOErrorObserver methods.
         public void handleIOException(IOException x) { fail(x); }
@@ -276,8 +276,8 @@ public final class UDPConnectNIOTest extends LimeTestCase {
         public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
     }
     
-    private static class ICROAdapter implements ChannelReadObserver, InterestReadChannel {
-        private InterestReadChannel source;
+    private static class ICROAdapter implements ChannelReadObserver, InterestReadableByteChannel {
+        private InterestReadableByteChannel source;
 
         private ByteBuffer buffer = ByteBuffer.allocate(1024);
         
@@ -285,11 +285,11 @@ public final class UDPConnectNIOTest extends LimeTestCase {
             return buffer;
         }
 
-        public InterestReadChannel getReadChannel() {
+        public InterestReadableByteChannel getReadChannel() {
             return source;
         }
 
-        public void setReadChannel(InterestReadChannel channel) {
+        public void setReadChannel(InterestReadableByteChannel channel) {
             source = channel;
         }
 
@@ -320,10 +320,10 @@ public final class UDPConnectNIOTest extends LimeTestCase {
         }
     }
     
-    private static class RCRAdapter implements ChannelReader, InterestReadChannel {
-        protected InterestReadChannel source;
-        public InterestReadChannel getReadChannel() { return source; }
-        public void setReadChannel(InterestReadChannel channel) { source = channel; }
+    private static class RCRAdapter implements ChannelReader, InterestReadableByteChannel {
+        protected InterestReadableByteChannel source;
+        public InterestReadableByteChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadableByteChannel channel) { source = channel; }
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }

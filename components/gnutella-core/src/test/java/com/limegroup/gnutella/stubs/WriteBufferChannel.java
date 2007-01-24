@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.WriteObserver;
 
 
-public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
+public class WriteBufferChannel implements ChannelWriter, InterestWritableByteChannel {
     private ByteBuffer buffer;
     private boolean closed = false;
-    public InterestWriteChannel channel;
+    public InterestWritableByteChannel channel;
     public WriteObserver observer;
     public boolean status;
     private boolean shutdown;
@@ -21,17 +21,17 @@ public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
         buffer = ByteBuffer.allocate(size);
     }
     
-    public WriteBufferChannel(ByteBuffer buffer, InterestWriteChannel channel) {
+    public WriteBufferChannel(ByteBuffer buffer, InterestWritableByteChannel channel) {
         this.buffer = buffer;
         this.channel = channel;
         channel.interest(this, true);
     }
     
-    public WriteBufferChannel(byte[] data, InterestWriteChannel channel) {
+    public WriteBufferChannel(byte[] data, InterestWritableByteChannel channel) {
         this(ByteBuffer.wrap(data), channel);
     }
     
-    public WriteBufferChannel(byte[] data, int off, int len, InterestWriteChannel channel) {
+    public WriteBufferChannel(byte[] data, int off, int len, InterestWritableByteChannel channel) {
         this(ByteBuffer.wrap(data, off, len), channel);
     }
     
@@ -39,7 +39,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
         this(0);
     }
     
-    public WriteBufferChannel(InterestWriteChannel channel) {
+    public WriteBufferChannel(InterestWritableByteChannel channel) {
         this(ByteBuffer.allocate(0), channel);
     }
     
@@ -111,11 +111,11 @@ public class WriteBufferChannel implements ChannelWriter, InterestWriteChannel {
         return status;
     }
     
-    public void setWriteChannel(InterestWriteChannel chan) {
+    public void setWriteChannel(InterestWritableByteChannel chan) {
         channel = chan;
     }
     
-    public InterestWriteChannel getWriteChannel() {
+    public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
     

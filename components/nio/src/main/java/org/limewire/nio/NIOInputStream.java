@@ -6,7 +6,7 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import org.limewire.nio.channel.ChannelReadObserver;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestScatteringByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.timeout.ReadTimeout;
@@ -29,7 +29,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     
     private final Shutdownable shutdownHandler;
     private final SoTimeout soTimeoutHandler;
-    private InterestReadChannel channel;
+    private InterestReadableByteChannel channel;
     private BufferInputStream source;
     private volatile Object bufferLock;
     private ByteBuffer buffer;
@@ -45,7 +45,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
      * @param shutdowner  Object to shutdown when the InputStream is closed.
      * @param channel     Channel to do reads from.
      */
-    NIOInputStream(SoTimeout soTimeouter, Shutdownable shutdowner, InterestReadChannel channel) {
+    NIOInputStream(SoTimeout soTimeouter, Shutdownable shutdowner, InterestReadableByteChannel channel) {
         this.soTimeoutHandler = soTimeouter;
         this.shutdownHandler = shutdowner;
         this.channel = channel;
@@ -165,11 +165,11 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
      */
     public void interest(boolean status) {}
     
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     
-    public void setReadChannel(InterestReadChannel newChannel) {
+    public void setReadChannel(InterestReadableByteChannel newChannel) {
         synchronized(bufferLock) {
             this.channel = newChannel;
             source.setReadChannel(newChannel);

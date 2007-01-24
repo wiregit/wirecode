@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.TransportListener;
 import org.limewire.nio.observer.WriteObserver;
@@ -27,8 +27,8 @@ import org.limewire.nio.observer.WriteObserver;
  * we can make it implement InterestReadChannel & InterestWriteChannel, so
  * we don't need the additional InterestAdapter.
  */
-class UDPSocketChannel extends SocketChannel implements InterestReadChannel,
-                                                        InterestWriteChannel,
+class UDPSocketChannel extends SocketChannel implements InterestReadableByteChannel,
+                                                        InterestWritableByteChannel,
                                                         ChunkReleaser {
     
     /** The processor this channel is writing to / reading from. */

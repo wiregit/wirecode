@@ -16,8 +16,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.StubConnectObserver;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.PrivilegedAccessor;
@@ -327,20 +327,20 @@ public final class NIOSocketTest extends BaseTestCase {
     @SuppressWarnings("unused")
     private static class WriteTester implements ChannelWriter {
         private ByteBuffer buffer;
-        private InterestWriteChannel channel;
+        private InterestWritableByteChannel channel;
 
-        public WriteTester(ByteBuffer buffer, InterestWriteChannel channel) {
+        public WriteTester(ByteBuffer buffer, InterestWritableByteChannel channel) {
             this.buffer = buffer;
             this.channel = channel;
             if(channel != null)
                 channel.interest(this, true);
         }
         
-        public WriteTester(byte[] data, InterestWriteChannel channel) {
+        public WriteTester(byte[] data, InterestWritableByteChannel channel) {
             this(ByteBuffer.wrap(data), channel);
         }
         
-        public WriteTester(byte[] data, int off, int len, InterestWriteChannel channel) {
+        public WriteTester(byte[] data, int off, int len, InterestWritableByteChannel channel) {
             this(ByteBuffer.wrap(data, off, len), channel);
         }
         
@@ -348,9 +348,9 @@ public final class NIOSocketTest extends BaseTestCase {
             this(ByteBuffer.allocate(0), null);
         }
         
-        public synchronized InterestWriteChannel getWriteChannel() { return channel; }
+        public synchronized InterestWritableByteChannel getWriteChannel() { return channel; }
         
-        public synchronized void setWriteChannel(InterestWriteChannel channel) {
+        public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
             this.channel = channel;
             channel.interest(this, true);
         }
@@ -369,12 +369,12 @@ public final class NIOSocketTest extends BaseTestCase {
     
     private static class ReadTester implements ChannelReadObserver {
         
-        private InterestReadChannel source;
+        private InterestReadableByteChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);
         
         // ChannelReader methods.
-        public InterestReadChannel getReadChannel() { return source; }
-        public void setReadChannel(InterestReadChannel channel) { source = channel; }
+        public InterestReadableByteChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadableByteChannel channel) { source = channel; }
         
         // IOErrorObserver methods.
         public void handleIOException(IOException x) { fail(x); }
@@ -391,8 +391,8 @@ public final class NIOSocketTest extends BaseTestCase {
         public ByteBuffer getRead() { return (ByteBuffer)readData.flip(); }
     }
     
-    private static class ICROAdapter implements ChannelReadObserver, InterestReadChannel {
-        private InterestReadChannel source;
+    private static class ICROAdapter implements ChannelReadObserver, InterestReadableByteChannel {
+        private InterestReadableByteChannel source;
 
         private ByteBuffer buffer = ByteBuffer.allocate(1024);
         
@@ -400,11 +400,11 @@ public final class NIOSocketTest extends BaseTestCase {
             return buffer;
         }
 
-        public InterestReadChannel getReadChannel() {
+        public InterestReadableByteChannel getReadChannel() {
             return source;
         }
 
-        public void setReadChannel(InterestReadChannel channel) {
+        public void setReadChannel(InterestReadableByteChannel channel) {
             source = channel;
         }
 
@@ -435,10 +435,10 @@ public final class NIOSocketTest extends BaseTestCase {
         }
     }
     
-    private static class RCRAdapter implements ChannelReader, InterestReadChannel {
-        protected InterestReadChannel source;
-        public InterestReadChannel getReadChannel() { return source; }
-        public void setReadChannel(InterestReadChannel channel) { source = channel; }
+    private static class RCRAdapter implements ChannelReader, InterestReadableByteChannel {
+        protected InterestReadableByteChannel source;
+        public InterestReadableByteChannel getReadChannel() { return source; }
+        public void setReadChannel(InterestReadableByteChannel channel) { source = channel; }
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }

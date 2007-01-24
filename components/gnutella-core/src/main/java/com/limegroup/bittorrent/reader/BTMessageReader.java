@@ -9,7 +9,7 @@ import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.CircularByteBuffer;
 import org.limewire.nio.channel.ChannelReadObserver;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.observer.IOErrorObserver;
 
 import com.limegroup.bittorrent.BTMessageHandler;
@@ -22,7 +22,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	private static final int BUFFER_SIZE = 2 * 1024;
 	
 	// the channel we read from
-	private InterestReadChannel _channel;
+	private InterestReadableByteChannel _channel;
 
 	/** Observer to notify in case of errors */
 	private final IOErrorObserver ioxObserver;
@@ -149,14 +149,14 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	/**
 	 * Implement ChannelReadObserver interface
 	 */
-	public void setReadChannel(InterestReadChannel newChannel) {
+	public void setReadChannel(InterestReadableByteChannel newChannel) {
 		_channel = newChannel;
 	}
 
 	/**
 	 * Implement ChannelReadObserver interface
 	 */
-	public InterestReadChannel getReadChannel() {
+	public InterestReadableByteChannel getReadChannel() {
 		return _channel;
 	}
 	

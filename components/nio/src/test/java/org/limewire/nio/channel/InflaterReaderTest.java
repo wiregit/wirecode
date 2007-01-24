@@ -12,7 +12,7 @@ import java.util.zip.Inflater;
 import junit.framework.Test;
 
 import org.limewire.nio.channel.InflaterReader;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.util.BaseTestCase;
 
 
@@ -42,7 +42,7 @@ public final class InflaterReaderTest extends BaseTestCase {
             fail("expected NPE");
         } catch(NullPointerException expected) {}
         
-        InterestReadChannel channel = new ReadBufferChannel(new byte[0]);
+        InterestReadableByteChannel channel = new ReadBufferChannel(new byte[0]);
         READER.setReadChannel(channel);
         assertSame(channel, READER.getReadChannel());
         
@@ -189,11 +189,11 @@ public final class InflaterReaderTest extends BaseTestCase {
         assertEquals("stream shouldn't have ended.", 0, READER.read(in));
     }
     
-    private InterestReadChannel channel(ByteBuffer buffer) throws Exception {
+    private InterestReadableByteChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
     }
     
-    private InterestReadChannel eof(ByteBuffer buffer) throws Exception {
+    private InterestReadableByteChannel eof(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer, true);
     }
     

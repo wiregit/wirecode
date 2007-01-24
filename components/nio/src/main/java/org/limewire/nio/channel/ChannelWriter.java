@@ -32,8 +32,8 @@ public interface ChannelWriter extends WriteObserver {
      * register interest with the newChannel if there is any data to be
      * written.
      */
-    void setWriteChannel(InterestWriteChannel newChannel);
+    void setWriteChannel(InterestWritableByteChannel newChannel);
     
     /** Gets the existing source channel. */
-    InterestWriteChannel getWriteChannel();
+    InterestWritableByteChannel getWriteChannel();
 }

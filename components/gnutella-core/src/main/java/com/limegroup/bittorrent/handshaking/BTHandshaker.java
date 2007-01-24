@@ -14,9 +14,9 @@ import org.limewire.io.IpPort;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestScatteringByteChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 
 import com.limegroup.bittorrent.BTConnection;
 import com.limegroup.bittorrent.ManagedTorrent;
@@ -35,7 +35,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	protected ByteBuffer [] incomingHandshake;
 	protected int currentBufIndex;
 	
-	protected InterestWriteChannel writeChannel;
+	protected InterestWritableByteChannel writeChannel;
 	protected InterestScatteringByteChannel readChannel;
 	
 	protected boolean incomingDone, finishingHandshakes;
@@ -158,20 +158,20 @@ ChannelWriter, ChannelReadObserver, IpPort {
 		sock.close();
 	}
 
-	public void setWriteChannel(InterestWriteChannel newChannel) {
+	public void setWriteChannel(InterestWritableByteChannel newChannel) {
 		writeChannel = newChannel;
 	}
 
-	public InterestWriteChannel getWriteChannel() {
+	public InterestWritableByteChannel getWriteChannel() {
 		return writeChannel;
 	}
 
-	public void setReadChannel(InterestReadChannel newChannel) {
+	public void setReadChannel(InterestReadableByteChannel newChannel) {
 		// if this throws we got problemos.
 		readChannel = (InterestScatteringByteChannel) newChannel;
 	}
 
-	public InterestReadChannel getReadChannel() {
+	public InterestReadableByteChannel getReadChannel() {
 		return readChannel;
 	}
 

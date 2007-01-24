@@ -10,8 +10,8 @@ import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.UnsupportedAddressTypeException;
 
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.ConnectObserver;
 
 /**
@@ -128,12 +128,12 @@ public class NIOSocket extends AbstractNBSocket {
     }
 
     /** Constructs an InterestReadChannel adapter around the SocketChannel. */
-    protected InterestReadChannel getBaseReadChannel() {
+    protected InterestReadableByteChannel getBaseReadChannel() {
         return new SocketInterestReadAdapter(channel);
     }
 
     /** Constructs an InterestWriteChannel adapter around the SocketChannel. */
-    protected InterestWriteChannel getBaseWriteChannel() {
+    protected InterestWritableByteChannel getBaseWriteChannel() {
         return new SocketInterestWriteAdapter(channel);
     }
 

@@ -15,12 +15,12 @@ import org.limewire.nio.observer.WriteObserver;
  * To work with the Throttle, this uses an attachment (which must be the same as the
  * attachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, ThrottleListener {
+public class ThrottleWriter implements ChannelWriter, InterestWritableByteChannel, ThrottleListener {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleWriter.class);
     
     /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
+    private volatile InterestWritableByteChannel channel;
     /** The last observer. */
     private volatile WriteObserver observer;
     /** The throttle we're using. */
@@ -44,18 +44,18 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
     /**
      * Constructs a new ThrottleWriter with the given throttle & channel.
      */
-    public ThrottleWriter(Throttle throttle, InterestWriteChannel channel) {
+    public ThrottleWriter(Throttle throttle, InterestWritableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
     }
     
     /** Retreives the sink. */
-    public InterestWriteChannel getWriteChannel() {
+    public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
     
     /** Sets the sink. */
-    public void setWriteChannel(InterestWriteChannel channel) {
+    public void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
         throttle.interest(this);
     }
@@ -107,7 +107,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
      * Only writes up to 'available' amount of data.
      */
     public int write(ByteBuffer buffer) throws IOException {
-        InterestWriteChannel chain = channel;
+        InterestWritableByteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no chain!");
             
@@ -161,7 +161,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWriteChannel, Thro
      * to return unwritten data back to the Throttle.
      */
     public boolean handleWrite() throws IOException {
-        InterestWriteChannel chain = channel;
+        InterestWritableByteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("writing with no source.");
         WriteObserver interested = observer;

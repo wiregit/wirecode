@@ -14,12 +14,12 @@ import org.limewire.nio.observer.WriteObserver;
  * A channel that deflates data written to it & writes the deflated
  * data to another sink.
  */
-public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
+public class DeflaterWriter implements ChannelWriter, InterestWritableByteChannel {
     
     //private static final Log LOG = LogFactory.getLog(DeflaterWriter.class);
     
     /** The channel to write to & interest on. */    
-    private volatile InterestWriteChannel channel;
+    private volatile InterestWritableByteChannel channel;
     /** The next observer. */
     private volatile WriteObserver observer;
     /** The buffer used for deflating into. */
@@ -44,7 +44,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     /**
      * Constructs a new DeflaterWriter with the given deflater & channel.
      */
-    public DeflaterWriter(Deflater deflater, InterestWriteChannel channel) {
+    public DeflaterWriter(Deflater deflater, InterestWritableByteChannel channel) {
         this.deflater = deflater;
         this.incoming = ByteBuffer.allocate(4 * 1024);
         this.outgoing = ByteBuffer.allocate(512);
@@ -53,12 +53,12 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
     }
     
     /** Retreives the sink. */
-    public InterestWriteChannel getWriteChannel() {
+    public InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
     
     /** Sets the sink. */
-    public void setWriteChannel(InterestWriteChannel channel) {
+    public void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
         channel.interest(this, true);
     }
@@ -81,7 +81,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
         // incoming.hasRemaining() || outgoing.hasRemaining(), but since
         // interest can be called in any thread, we'd have to introduce
         // locking around incoming & outgoing, which just isn't worth it.
-        InterestWriteChannel source = channel;
+        InterestWritableByteChannel source = channel;
         if(source != null)
             source.interest(this, true); 
     }
@@ -132,7 +132,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWriteChannel {
      * there is no more data to be written or the sink is full.
      */
     public boolean handleWrite() throws IOException {
-        InterestWriteChannel source = channel;
+        InterestWritableByteChannel source = channel;
         if(source == null)
             throw new IllegalStateException("writing with no source.");
             

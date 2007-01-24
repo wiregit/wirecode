@@ -7,7 +7,7 @@ import org.limewire.nio.BufferUtils;
 
 public abstract class AbstractChannelInterestReader implements ChannelReadObserver, InterestScatteringByteChannel {
     protected ByteBuffer buffer;
-    protected InterestReadChannel source;
+    protected InterestReadableByteChannel source;
     protected boolean shutdown;
     
     public AbstractChannelInterestReader() {
@@ -32,11 +32,11 @@ public abstract class AbstractChannelInterestReader implements ChannelReadObserv
         shutdown = true;
     }
 
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return source;
     }
 
-    public void setReadChannel(InterestReadChannel newChannel) {
+    public void setReadChannel(InterestReadableByteChannel newChannel) {
         this.source = newChannel;
     }
 

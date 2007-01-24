@@ -11,7 +11,7 @@ import org.limewire.collection.Periodic;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.DelayedBufferWriter;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.IOErrorObserver;
 
@@ -39,7 +39,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	private final ByteBuffer myKeepAlive = KEEP_ALIVE.duplicate();
 	
 	// InterestWriteChannel to write to.
-	private InterestWriteChannel _channel;
+	private InterestWritableByteChannel _channel;
 
 	// ByteBuffer storing the message currently being written
 	private final ByteBuffer[] _out = new ByteBuffer[2];
@@ -242,7 +242,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	/**
 	 * Implement ChannelWriter interface
 	 */
-	public void setWriteChannel(InterestWriteChannel newChannel) {
+	public void setWriteChannel(InterestWritableByteChannel newChannel) {
 		_channel = newChannel;
 		delayer.setWriteChannel(newChannel);
 	}
@@ -250,7 +250,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	/**
 	 * Implement ChannelWriter interface
 	 */
-	public InterestWriteChannel getWriteChannel() {
+	public InterestWritableByteChannel getWriteChannel() {
 		return _channel;
 	}
 

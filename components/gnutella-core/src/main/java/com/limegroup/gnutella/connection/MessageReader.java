@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.limewire.nio.channel.ChannelReadObserver;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -43,7 +43,7 @@ public class MessageReader implements ChannelReadObserver {
     /** the sole receiver of messages */
     private final MessageReceiver receiver;
     /** the source channel */
-    private InterestReadChannel channel;
+    private InterestReadableByteChannel channel;
     
     /** whether or not this reader has been shut down yet. */
     private boolean shutdown = false;
@@ -60,7 +60,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Constructs a new MessageReader with the given source channel & receiver.
      */
-    public MessageReader(InterestReadChannel channel, MessageReceiver receiver) {
+    public MessageReader(InterestReadableByteChannel channel, MessageReceiver receiver) {
         if(receiver == null)
             throw new NullPointerException("null receiver");
             
@@ -74,7 +74,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Sets the new channel to be reading from.
      */
-    public void setReadChannel(InterestReadChannel channel) {
+    public void setReadChannel(InterestReadableByteChannel channel) {
         if(channel == null)
             throw new NullPointerException("cannot set null channel!");
         
@@ -84,7 +84,7 @@ public class MessageReader implements ChannelReadObserver {
     /**
      * Gets the channel that is used for reading.
      */
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     

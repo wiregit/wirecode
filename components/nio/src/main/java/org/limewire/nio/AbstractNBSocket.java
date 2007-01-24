@@ -15,8 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.ReadObserver;
@@ -62,13 +62,13 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Retrieves the channel which should be used as the base channel
      * for all reading operations.
      */
-    protected abstract InterestReadChannel getBaseReadChannel();
+    protected abstract InterestReadableByteChannel getBaseReadChannel();
     
     /**
      * Retrives the channel which should be used as the base channel
      * for all writing operations.
      */
-    protected abstract InterestWriteChannel getBaseWriteChannel();
+    protected abstract InterestWritableByteChannel getBaseWriteChannel();
     
     /**
      * Performs any operations required for shutting down this socket.
@@ -132,14 +132,14 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     if(lastChannel instanceof ThrottleListener)
                     	((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
-                    if(oldReader instanceof InterestReadChannel && oldReader != newReader) {
-                        
-                        lastChannel.setReadChannel((InterestReadChannel)oldReader);
+                    
+                    if(oldReader instanceof InterestReadableByteChannel && oldReader != newReader) {
+                        lastChannel.setReadChannel((InterestReadableByteChannel)oldReader);
                         reader.handleRead(); // read up any buffered data.
                         oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
-                    InterestReadChannel source = getBaseReadChannel();
+                    InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
                     NIODispatcher.instance().interestRead(getChannel(), true);
                 } catch(IOException iox) {
@@ -178,7 +178,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                             ((ThrottleListener)lastChannel).setAttachment(AbstractNBSocket.this);
                     }
 
-                    InterestWriteChannel source = getBaseWriteChannel();
+                    InterestWritableByteChannel source = getBaseWriteChannel();
                     
                     synchronized(LOCK) {
                         lastChannel.setWriteChannel(source);

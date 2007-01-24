@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 
 import com.limegroup.gnutella.messages.Message;
 
@@ -47,7 +47,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     /**
      * The sink channel we write to & interest ourselves on.
      */
-    private InterestWriteChannel channel;
+    private InterestWritableByteChannel channel;
     
     /**
      * Whether or not we've flipped the data.  This is an optimization so
@@ -74,7 +74,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
      * Constructs a new MessageWriter that writes to the given sink.
      */
     public MessageWriter(ConnectionStats stats, MessageQueue queue,
-                         SentMessageHandler sendHandler, InterestWriteChannel sink) {
+                         SentMessageHandler sendHandler, InterestWritableByteChannel sink) {
         this.stats = stats;
         this.queue = queue;
         this.sendHandler = sendHandler;
@@ -83,12 +83,12 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     }
     
     /** The channel we're writing to. */
-    public synchronized InterestWriteChannel getWriteChannel() {
+    public synchronized InterestWritableByteChannel getWriteChannel() {
         return channel;
     }
     
     /** The channel we're writing to. */
-    public synchronized void setWriteChannel(InterestWriteChannel channel) {
+    public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
         channel.interest(this, true);
     }

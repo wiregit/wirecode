@@ -10,8 +10,8 @@ import java.nio.channels.SocketChannel;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.AbstractNBSocket;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
@@ -57,12 +57,12 @@ public class UDPConnection extends AbstractNBSocket {
     }
 
     /** Returns the UDPSocketChannel, since it already implements InterestReadChannel. */
-    protected InterestReadChannel getBaseReadChannel() {
+    protected InterestReadableByteChannel getBaseReadChannel() {
         return channel;
     }
     
     /** Returns the UDPSocketChannel, since it already implements InterestWriteChannel. */
-    protected InterestWriteChannel getBaseWriteChannel() {
+    protected InterestWritableByteChannel getBaseWriteChannel() {
         return channel;
     }
 

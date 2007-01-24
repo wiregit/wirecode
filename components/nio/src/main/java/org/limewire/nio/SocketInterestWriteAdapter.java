@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
@@ -14,7 +14,7 @@ import org.limewire.nio.observer.WriteObserver;
  * events to the last party that was interested.  All WritableByteChannel
  * calls are delegated to the SocketChannel.
  */
-class SocketInterestWriteAdapter implements InterestWriteChannel {
+class SocketInterestWriteAdapter implements InterestWritableByteChannel {
     
     /** the last party that was interested.  null if none. */
     private volatile WriteObserver interested;

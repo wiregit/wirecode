@@ -27,7 +27,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.channel.ThrottleReader;
 import org.limewire.nio.statemachine.IOState;
@@ -1610,7 +1610,7 @@ public class HTTPDownloader implements BandwidthTracker {
     				VerifyingFile.WriteRequest request = new VerifyingFile.WriteRequest(filePosition, dataStart, dataLength, buffer.array());
     				if(!_incompleteFile.writeBlock(request)) {
     					LOG.debug("Scheduling callback for write.");
-    					InterestReadChannel irc = (InterestReadChannel)rc;
+    					InterestReadableByteChannel irc = (InterestReadableByteChannel)rc;
     					irc.interest(false);
     					doingWrite = true;
     					_incompleteFile.registerWriteCallback(request,
@@ -1652,10 +1652,10 @@ public class HTTPDownloader implements BandwidthTracker {
     
     private static class DownloadRestarter implements VerifyingFile.WriteCallback {
         private final DownloadState downloader;
-        private final InterestReadChannel irc;
+        private final InterestReadableByteChannel irc;
         private final ByteBuffer buffer;
         
-        DownloadRestarter(InterestReadChannel irc, ByteBuffer buffer, DownloadState downloader) {
+        DownloadRestarter(InterestReadableByteChannel irc, ByteBuffer buffer, DownloadState downloader) {
             this.irc = irc;
             this.buffer = buffer;
             this.downloader = downloader;

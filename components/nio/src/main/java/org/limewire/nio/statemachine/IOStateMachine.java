@@ -11,13 +11,13 @@ import org.limewire.nio.BufferUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
-import org.limewire.nio.channel.InterestReadChannel;
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 
 /**
  * State machine for reading & writing.
  */
-public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadChannel {
+public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadableByteChannel {
     
     private static final Log LOG = LogFactory.getLog(IOStateMachine.class);
     
@@ -29,9 +29,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     /** The current state. */
     private IOState currentState;
     /** The sink we write to. */
-    private InterestWriteChannel writeSink;
+    private InterestWritableByteChannel writeSink;
     /** The sink we read from. */
-    private InterestReadChannel readSink;
+    private InterestReadableByteChannel readSink;
     /** The ByteBuffer to use for reading. */
     private ByteBuffer readBuffer;
     /** Whether or not we've shutdown this handshaker. */
@@ -233,21 +233,21 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
         }
     }
 
-    public InterestWriteChannel getWriteChannel() {
+    public InterestWritableByteChannel getWriteChannel() {
         return writeSink;
     }
 
-    public void setWriteChannel(InterestWriteChannel newChannel) {
+    public void setWriteChannel(InterestWritableByteChannel newChannel) {
         this.writeSink = newChannel;
         if(currentState != null)
             writeSink.interest(this, true);
     }
 
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return readSink;
     }
 
-    public void setReadChannel(InterestReadChannel newChannel) {
+    public void setReadChannel(InterestReadableByteChannel newChannel) {
         this.readSink = newChannel;
         if(currentState != null)
             readSink.interest(true); 

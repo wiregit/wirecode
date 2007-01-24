@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 
 import junit.framework.Test;
 
@@ -319,7 +319,7 @@ public final class MessageReaderTest extends LimeTestCase {
             fail("expected NPE");
         } catch(NullPointerException expected) {}
         
-        InterestReadChannel channel = new ReadBufferChannel();
+        InterestReadableByteChannel channel = new ReadBufferChannel();
         READER.setReadChannel(channel);
         assertSame(channel, READER.getReadChannel());
         
@@ -335,11 +335,11 @@ public final class MessageReaderTest extends LimeTestCase {
         assertNull(READER.getReadChannel());
     }
     
-    private InterestReadChannel channel(ByteBuffer buffer) throws Exception {
+    private InterestReadableByteChannel channel(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer);
     }
     
-    private InterestReadChannel eof(ByteBuffer buffer) throws Exception {
+    private InterestReadableByteChannel eof(ByteBuffer buffer) throws Exception {
         return new ReadBufferChannel(buffer, true);
     }
     

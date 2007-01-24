@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
@@ -18,7 +18,7 @@ import org.limewire.nio.observer.WriteObserver;
 class NIOOutputStream implements WriteObserver {
     
     private final Shutdownable handler;
-    private final InterestWriteChannel channel;
+    private final InterestWritableByteChannel channel;
     private BufferOutputStream sink;
     private volatile Object bufferLock;
     private ByteBuffer buffer;
@@ -28,7 +28,7 @@ class NIOOutputStream implements WriteObserver {
      * Constructs a new pipe to allow SocketChannel's reading to funnel
      * to a blocking InputStream.
      */
-    NIOOutputStream(Shutdownable handler, InterestWriteChannel channel) {
+    NIOOutputStream(Shutdownable handler, InterestWritableByteChannel channel) {
         this.handler = handler;
         this.channel = channel;
     }

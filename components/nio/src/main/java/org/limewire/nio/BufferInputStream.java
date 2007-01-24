@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.channel.InterestReadChannel;
+import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.timeout.ReadTimeout;
 
@@ -33,7 +33,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
     private final ByteBuffer buffer;
     
     /** the SelectableChannel that the buffer is read from. */
-    private InterestReadChannel channel;
+    private InterestReadableByteChannel channel;
     
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
@@ -46,14 +46,14 @@ class BufferInputStream extends InputStream implements Shutdownable {
      * using the given socket to retrieve the soTimeouts.
      */
     BufferInputStream(ByteBuffer buffer, ReadTimeout timeout, 
-                             Shutdownable shutdown, InterestReadChannel channel) {
+                             Shutdownable shutdown, InterestReadableByteChannel channel) {
         this.readTimeoutHandler = timeout;
         this.shutdownHandler = shutdown;
         this.buffer = buffer;
         this.channel = channel;
     }
     
-    void setReadChannel(InterestReadChannel newChannel) {
+    void setReadChannel(InterestReadableByteChannel newChannel) {
         synchronized(LOCK) {
             this.channel = newChannel;
         }

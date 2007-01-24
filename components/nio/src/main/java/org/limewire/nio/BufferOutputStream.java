@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.channel.InterestWriteChannel;
+import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 
@@ -32,7 +32,7 @@ import org.limewire.nio.observer.WriteObserver;
     private final ByteBuffer buffer;
     
     /** the InterestWriteChannel that the buffer is written from. */
-    private final InterestWriteChannel channel;
+    private final InterestWritableByteChannel channel;
     
     /** whether or not this stream has been shutdown. */
     private boolean shutdown = false;
@@ -41,7 +41,7 @@ import org.limewire.nio.observer.WriteObserver;
      * Constructs a new BufferOutputStream that writes data to the given buffer.
      */
     BufferOutputStream(ByteBuffer buffer, Shutdownable handler,
-                       WriteObserver observer, InterestWriteChannel channel) {
+                       WriteObserver observer, InterestWritableByteChannel channel) {
         this.handler = handler;
         this.buffer = buffer;
         this.channel = channel;

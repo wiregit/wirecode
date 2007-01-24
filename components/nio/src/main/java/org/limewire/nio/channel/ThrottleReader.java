@@ -15,12 +15,12 @@ import org.limewire.nio.ThrottleListener;
  * To work with the Throttle, this uses an attachment (which must be the same as the
  * attachment of the SelectionKey associated with the socket this is using).
  */
-public class ThrottleReader implements InterestReadChannel, ChannelReader, ThrottleListener {
+public class ThrottleReader implements InterestReadableByteChannel, ChannelReader, ThrottleListener {
     
     //private static final Log LOG = LogFactory.getLog(ThrottleReader.class);
     
     /** The channel to write to & interest on. */    
-    private volatile InterestReadChannel channel;
+    private volatile InterestReadableByteChannel channel;
     /** The throttle we're using. */
     private final Throttle throttle;
     /** The amount of data we were told we can read. */
@@ -42,18 +42,18 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
     /**
      * Constructs a new ThrottleWriter with the given throttle & channel.
      */
-    public ThrottleReader(Throttle throttle, InterestReadChannel channel) {
+    public ThrottleReader(Throttle throttle, InterestReadableByteChannel channel) {
         this.throttle = throttle;
         this.channel = channel;
     }
     
     /** Retreives the sink. */
-    public InterestReadChannel getReadChannel() {
+    public InterestReadableByteChannel getReadChannel() {
         return channel;
     }
     
     /** Sets the sink. */
-    public void setReadChannel(InterestReadChannel channel) {
+    public void setReadChannel(InterestReadableByteChannel channel) {
         this.channel = channel;
         throttle.interest(this);
     }
@@ -102,7 +102,7 @@ public class ThrottleReader implements InterestReadChannel, ChannelReader, Throt
      * Only reads up to 'available' amount of data.
      */
     public int read(ByteBuffer buffer) throws IOException {
-        InterestReadChannel chain = channel;
+        InterestReadableByteChannel chain = channel;
         if(chain == null)
             throw new IllegalStateException("reading with no chain!");
             
