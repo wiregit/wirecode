@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-
+/** Utility test-case class that others can extend for easier testing. */ 
 public abstract class BaseTestCase extends AssertComparisons {
     
     protected volatile static Class _testClass;
