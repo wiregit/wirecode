@@ -61,8 +61,6 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     
     private final PingIterator pinger;
     
-    private Object lock = new Object();
-    
     public PingResponseHandler(Context context, PingIterator pinger) {
         this(context, null, pinger);
     }
@@ -105,7 +103,7 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    protected void start() throws DHTException {
+    protected synchronized void start() throws DHTException {
         super.start();
         
         if (!pinger.hasNext()) {
@@ -113,21 +111,17 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
         }
         
         try {
-            synchronized (lock) {
-                pingNextAndThrowIfDone(new DHTException(
-                        "All SocketAddresses were invalid and there are no Hosts left to Ping"));
-            }
+            pingNextAndThrowIfDone(new DHTException(
+                "All SocketAddresses were invalid and there are no Hosts left to Ping"));
         } catch (IOException e) {
             throw new DHTException(e);
         }
     }
-
+    
     @Override
-    public void handleResponse(ResponseMessage response, long time) throws IOException {
-        synchronized (lock) {
-            response(response.getContact());
-            super.handleResponse(response, time);
-        }
+    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
+        response(response.getContact());
+        super.handleResponse(response, time);
     }
 
     @Override
@@ -168,11 +162,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
 
     @Override
-    public void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
-        synchronized (lock) {
-            failed(nodeId, dst);
-            super.handleTimeout(nodeId, dst, request, time);
-        }
+    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, RequestMessage request, long time) throws IOException {
+        failed(nodeId, dst);
+        super.handleTimeout(nodeId, dst, request, time);
     }
     
     @Override
@@ -191,11 +183,9 @@ public class PingResponseHandler extends AbstractResponseHandler<PingResult> {
     }
     
     @Override
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
-        synchronized (lock) {
-            failed(nodeId, dst);
-            super.handleError(nodeId, dst, message, e);
-        }
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+        failed(nodeId, dst);
+        super.handleError(nodeId, dst, message, e);
     }
 
     @Override

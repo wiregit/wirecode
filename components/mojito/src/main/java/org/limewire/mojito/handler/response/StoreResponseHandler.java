@@ -176,11 +176,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     }
     
     @Override
-    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
-        super.handleResponse(response, time);
-    }
-
-    @Override
     protected void response(ResponseMessage message, long time) throws IOException {
         StoreResponse response = (StoreResponse)message;
         Collection<? extends Entry<KUID,Status>> status = response.getStatus();
@@ -194,12 +189,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         sendNextAndExitIfDone();
     }
-
-    @Override
-    public synchronized void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage request, long time) throws IOException {
-        super.handleTimeout(nodeId, dst, request, time);
-    }
     
     @Override
     protected void timeout(KUID nodeId, SocketAddress dst, 
@@ -207,12 +196,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         activeProcesses.remove(nodeId).timeout(nodeId, dst, message, time); 
         sendNextAndExitIfDone();
-    }
-    
-    @Override
-    public synchronized void handleError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
-        super.handleError(nodeId, dst, message, e);
     }
     
     @Override

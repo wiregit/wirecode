@@ -128,9 +128,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
      */
     private boolean deleteFurthest = true;
     
-    /** A lock to manage parallel lookups */
-    private Object lock = new Object();
-    
     protected LookupResponseHandler(Context context, KUID lookupId) {
         super(context);
         
@@ -279,7 +276,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     }
     
     @Override
-    protected void start() throws DHTException {
+    protected synchronized void start() throws DHTException {
         super.start();
         
         // Get the closest Contacts from our RouteTable 
@@ -336,24 +333,15 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         
         // Go Go Go!
         startTime = System.currentTimeMillis();  
-        synchronized (lock) {
-            for(Contact node : alphaList) {
-                try {
-                    sendLookupRequest(node);
-                } catch (IOException err) {
-                    throw new DHTException(err);
-                }
+        for(Contact node : alphaList) {
+            try {
+                sendLookupRequest(node);
+            } catch (IOException err) {
+                throw new DHTException(err);
             }
-            
-            finishLookupIfDone();
         }
-    }
-
-    @Override
-    public void handleResponse(ResponseMessage response, long time) throws IOException {
-        synchronized (lock) {
-            super.handleResponse(response, time);
-        }
+        
+        finishLookupIfDone();
     }
     
     @Override
@@ -444,14 +432,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     private boolean isYetToBeQueried(Contact node) {
         return toQuery.containsKey(node.getNodeID());            
     }
-    
-    @Override
-    public void handleTimeout(KUID nodeId, SocketAddress dst, 
-            RequestMessage request, long time) throws IOException {
-        synchronized (lock) {
-            super.handleTimeout(nodeId, dst, request, time);            
-        }
-    }
 
     @Override
     protected void timeout(KUID nodeId, SocketAddress dst, 
@@ -480,14 +460,6 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         currentHop = hop.intValue();
         nextLookupStep();
         finishLookupIfDone();
-    }
-    
-    @Override
-    public void handleError(KUID nodeId, SocketAddress dst, 
-            RequestMessage message, IOException e) {
-        synchronized (lock) {
-            super.handleError(nodeId, dst, message, e);            
-        }
     }
 
     @Override

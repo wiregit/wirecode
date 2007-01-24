@@ -208,7 +208,7 @@ abstract class AbstractResponseHandler<V extends Result> implements CallableResp
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleResponse(com.limegroup.mojito.messages.ResponseMessage, long)
      */
-    public void handleResponse(ResponseMessage response, long time) throws IOException {
+    public synchronized void handleResponse(ResponseMessage response, long time) throws IOException {
         
         if (isCancelled() || isDone()) {
             return;
@@ -233,7 +233,7 @@ abstract class AbstractResponseHandler<V extends Result> implements CallableResp
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleTimeout(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, long)
      */
-    public void handleTimeout(KUID nodeId, 
+    public synchronized void handleTimeout(KUID nodeId, 
             SocketAddress dst, RequestMessage request, long time) throws IOException {
         
         if (isCancelled() || isDone()) {
@@ -279,7 +279,7 @@ abstract class AbstractResponseHandler<V extends Result> implements CallableResp
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleError(com.limegroup.mojito.KUID, java.net.SocketAddress, com.limegroup.mojito.messages.RequestMessage, java.lang.Exception)
      */
-    public void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+    public synchronized void handleError(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
         
         if (isCancelled() || isDone()) {
             return;
@@ -302,7 +302,7 @@ abstract class AbstractResponseHandler<V extends Result> implements CallableResp
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#handleTick()
      */
-    public void handleTick() {
+    public synchronized void handleTick() {
         
         if (isCancelled() || isDone()) {
             return;
