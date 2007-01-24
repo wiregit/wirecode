@@ -231,7 +231,7 @@ public class LimeTestSuite extends TestSuite {
 	/**
 	 * Returns a test which will fail and log a warning message.
 	 */
-	private static Test warning(final String message) {
+	public static Test warning(final String message) {
 		return new TestCase("warning") {
 			protected void runTest() {
 				fail(message);
@@ -242,7 +242,7 @@ public class LimeTestSuite extends TestSuite {
 	/**
 	 * Returns a test which will fail and log a warning message.
 	 */
-	private static Test warning(final String message, final Throwable thrown) {
+    public static Test warning(final String message, final Throwable thrown) {
 		return new BaseTestCase("warning") {
 		    public void preSetUp() {}
 		    public void postTearDown() {}
