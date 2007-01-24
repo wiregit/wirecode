@@ -233,7 +233,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         // that should turn interest on
         Thread.sleep(200);
         r.run();
-        assertTrue(sink.status);
+        assertTrue(sink.status); // TODO: fix
     }
     
     public void testFlushingCancelled() throws Exception {
