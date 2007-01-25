@@ -28,6 +28,8 @@ import org.limewire.util.PrivilegedAccessor;
 public final class NIOSocketTest extends BaseTestCase {
     
     private static final int PORT = 9999;
+    
+    private volatile static int blockFailTime = -1;
 
 	public NIOSocketTest(String name) {
 		super(name);
@@ -174,14 +176,15 @@ public final class NIOSocketTest extends BaseTestCase {
         NIOSocket socket = new NIOSocket();
         
         // Measure time for testNonBlockingConnectFailing()
-        //long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         try {
             socket.connect(new InetSocketAddress("www.google.com", 9999));
             fail("shouldn't have connected");
         } catch(ConnectException iox) {
             assertFalse(socket.isConnected());
         }
-        //long end = System.currentTimeMillis();
+        long end = System.currentTimeMillis();
+        blockFailTime = (int)(end - start);
         //System.out.println("Time: " + (end-start));
     }
     
@@ -218,8 +221,8 @@ public final class NIOSocketTest extends BaseTestCase {
         // set to about the same time that testBlockingConnectFailing() 
         // needs to pass the test which depends on the operatin system
         // and the remote host.
-        socket.connect(new InetSocketAddress("www.google.com", 9999), 90000, observer);
-        observer.waitForResponse(80000);
+        socket.connect(new InetSocketAddress("www.google.com", 9999), blockFailTime+11000, observer);
+        observer.waitForResponse(blockFailTime+1000);
         
         assertTrue(observer.isShutdown());
         assertNull(observer.getSocket());
