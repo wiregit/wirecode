@@ -300,7 +300,7 @@
 	        <junit printsummary="withOutAndErr"
 	    	       haltonfailure="@{haltOnFailure}"
 	    		   haltonerror="@{haltOnError}"
-	    		   failureproperty="testfailed"
+	    		   failureproperty="testsfailed"
 	    	       showoutput="true"
 	    	       fork="true"
 	           	   forkmode="@{forkmode}"
