@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -21,7 +23,6 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -40,6 +41,9 @@ public class SimppManager {
     private int _latestVersion;
     
     private static final String SIMPP_FILE = "simpp.xml";
+    
+    /** Listeners for simpp updates */
+    private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
     
     /**
      * The smallest version number of Simpp Messages. Any simpp message number
@@ -183,10 +187,9 @@ public class SimppManager {
                     if (save())
                         break;
                 }
-                // 5. Update the capabilities VM with the new version
-                CapabilitiesVM.reconstructInstance();
-                // 6. Send the new CapabilityVM to all our connections. 
-                RouterService.getConnectionManager().sendUpdatedCapabilities();
+                // 5. Notify listeners
+                for (SimppListener listener : listeners)
+                    listener.simppUpdated();
             }
         };
         _processingQueue.execute(simppHandler);
@@ -230,5 +233,13 @@ public class SimppManager {
         
         // if we couldn't rename the temp file, try again later.
         return FileUtils.forceRename(tmp,simpp);
+    }
+    
+    public void addListener(SimppListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeListener(SimppListener listener) {
+        listeners.remove(listener);
     }
 }
