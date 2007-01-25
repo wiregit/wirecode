@@ -101,4 +101,11 @@ public class FilterSettings extends LimeProps {
     public static final BooleanSetting FILTER_ACTION_RESPONSES =
     		FACTORY.createRemoteBooleanSetting("FILTER_ACTION_RESPONSES",false,
     				"FilterSettings.filterActionResponses");
+    
+    /**
+     * An array of ip addresses that LimeWire will respond to.  
+     */
+    public static final StringArraySetting CRAWLER_IP_ADDRESSES =
+        FACTORY.createRemoteStringArraySetting("CRAWLER_IPS", new String[]{"*.*.*.*"}, 
+                "FilterSettings.crawlerIps");
 }
