@@ -94,11 +94,11 @@
     	    </path>
         	
         	<path id="tests.limewire.components.@{component}.classpath">
-        	    <pathelement location="${cloverjar}"/>
-        		<path refid="build.limewire.components.@{component}.tests.classpath"/>
-        		<pathelement location="${build.limewire.components.@{component}.tests}"/>
         	    <pathelement location="${limewire.components.@{component}.src.resources}"/>
         	    <pathelement location="${limewire.components.@{component}.tests.resources}"/>
+        		<pathelement location="${build.limewire.components.@{component}.tests}"/>
+        		<path refid="build.limewire.components.@{component}.tests.classpath"/>
+           	    <pathelement location="${cloverjar}"/>
         	    <tests-classpath/>
         	</path>	
         </sequential>
@@ -315,7 +315,7 @@
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
 	    		
 	    		<formatter type="xml"/>
-	    		<formatter type="plain" usefile="false"/>
+	    		<formatter type="plain" usefile="false" unless="${noplainformatter}"/>
 	    		
 	    		<batchtest todir="${tests.limewire.components.@{component}.xml}">
 	    			<fileset dir="${build.limewire.components.@{component}.tests}">

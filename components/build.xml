@@ -118,19 +118,19 @@
 	
 	<target name="test"
             description="Runs a single test from one component. Requires: -Dclass=X and -Dcomponent=X."
-            if="class, component" depends="compile, compile-ui">
+            if="class, component" depends="compile, compile-ui, prep-tests">
 	    <do.test component="${component}" class="${class}"/>
 	</target>
 	
 	<target name="test-package"
             description="Runs all tests in a package of one component.  Requires: -Dpackage=X -Dcomponent=X."
-            if="package, component" depends="compile, compile-ui">
+            if="package, component" depends="compile, compile-ui, prep-tests">
 	    <do.test-package component="${component}" package="${package}"/>
 	</target>
 	
 	<target name="test-all" 
             description="Runs every test in every component."
-            depends="compile, compile-ui">
+            depends="compile, compile-ui, prep-tests">
 	    <do.test-all component="all">
 	        <testLocations>
 	            <fileset dir="${build.limewire.components.test-util.tests}" includes="**/*Test.class"/>
@@ -147,6 +147,11 @@
 	         </testLocations>
 	    </do.test-all>
 	</target>
+    
+    <target name="prep-tests">
+        <mkdir dir="${limewire.components.all.tests.resources}"/>
+        <copy file="${limewire.components.home}/log4j.properties" todir="${limewire.components.all.tests.resources}" overwrite="true"/>
+    </target>
 	    
     <target name="jar"
             description="Creates a jar file of the compiled source of every component."
