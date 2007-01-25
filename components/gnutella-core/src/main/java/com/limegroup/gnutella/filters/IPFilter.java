@@ -127,10 +127,6 @@ public final class IPFilter extends SpamFilter {
         goodHosts = newGood;
     }
     
-    public void simppUpdated() {
-        refreshHosts();
-    }
-    
     /** Determiens if any blacklisted hosts exist. */
     public boolean hasBlacklistedHosts() {
         return !badHosts.isEmpty() || !hostileHosts.isEmpty();

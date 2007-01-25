@@ -6,6 +6,10 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 
+/**
+ * Mojito DHT related settings.
+ * 
+ */
 public class DHTSettings extends LimeProps{
 
     private DHTSettings() {}
@@ -18,12 +22,14 @@ public class DHTSettings extends LimeProps{
 
     /**
      * Setting for whether or not we are active DHT capable.
+     * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting ACTIVE_DHT_CAPABLE =
         FACTORY.createExpirableBooleanSetting("EVER_DHT_CAPABLE", false);
     
     /**
-     * Setting to force DHT capability -- TODO for testing only - remove.
+     * Setting to force DHT capability
+     * WARNING : FOR TESTING ONLY -- DO NOT CHANGE
      */
     public static final BooleanSetting FORCE_DHT_CONNECT =
     	FACTORY.createRemoteBooleanSetting("FORCE_DHT_CONNECT", false, "DHTSettings.ForceDHTConnect");
@@ -36,15 +42,14 @@ public class DHTSettings extends LimeProps{
 
     /**
      * Setting for wether or not the DHT should be active at all.
+     * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting DISABLE_DHT_NETWORK =
         FACTORY.createRemoteBooleanSetting("DISABLE_DHT_NETWORK", true, "DHTSettings.DisableDHT");
     
     /**
      * Setting for the minimum average uptime (in ms) required to join the DHT.
-     * 
-     * TODO:rechange -- tests only!
-     * 
+     * WARNING : DO NOT MANUALLY CHANGE THIS 
      */
     public static final LongSetting MIN_DHT_AVG_UPTIME =
         FACTORY.createRemoteLongSetting("MIN_DHT_AVG_UPTIME",120*60*1000L,
@@ -52,8 +57,7 @@ public class DHTSettings extends LimeProps{
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT.
-     * 
-     * rechange -- tests only!
+     * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final LongSetting MIN_DHT_INITIAL_UPTIME =
         FACTORY.createRemoteLongSetting("MIN_DHT_INITIAL_UPTIME",120*60*1000L,
@@ -61,14 +65,14 @@ public class DHTSettings extends LimeProps{
     
     /**
      * Setting for whether or not an ultrapeer can join the DHT.
+     * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting EXCLUDE_ULTRAPEERS =
         FACTORY.createBooleanSetting("EXCLUDE_ULTRAPEERS", true);
     
     /**
      * Setting for the probability to switch from DHT node to Ultrapeer node
-     * 
-     * TODO: rechange -- tests only!
+     * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final FloatSetting DHT_TO_ULTRAPEER_PROBABILITY =
         FACTORY.createRemoteFloatSetting("DHT_TO_ULTRAPEER_PROBABILITY", 0.5F, "DHTSettings.DHTToUltrapeerProbability",0F,1F);
@@ -82,6 +86,8 @@ public class DHTSettings extends LimeProps{
     /**
      * Probabilistic logic for whether or not the node should join the DHT
      * (used for initial bootstrapping)
+     * WARNING : DO NOT MANUALLY CHANGE THIS
+     * 
      */
     public static final FloatSetting DHT_ACCEPT_PROBABILITY = 
         FACTORY.createRemoteFloatSetting("DHT_ACCEPT_PROBABILITY", 1F, "DHTSettings.DHTAcceptProbability", 0F, 1F);
@@ -114,5 +120,5 @@ public class DHTSettings extends LimeProps{
      * (it will not persist the entire RT)
      */
     public static final IntSetting NUM_PERSISTED_NODES = 
-        FACTORY.createIntSetting("MAX_PERSISTED_NODES", 20);
+        FACTORY.createIntSetting("MAX_PERSISTED_NODES", 40);
 }

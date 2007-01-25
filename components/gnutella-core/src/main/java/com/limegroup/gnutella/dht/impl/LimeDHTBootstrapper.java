@@ -31,9 +31,11 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 
-class LimeDHTBootstrapper implements DHTBootstrapper {
+class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
     
@@ -111,6 +113,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                 return;
             }
             
+            SimppManager.instance().addListener(this);
+            
             if (hosts.isEmpty()) {
                 tryBootstrapFromRouteTable();
             } else {
@@ -127,7 +131,6 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
      * @param hostAddress The SocketAddress of the new bootstrap host.
      */
     public void addBootstrapHost(SocketAddress hostAddress) {
-        
         synchronized (lock) {
             
             if (!getMojitoDHT().isRunning() || getMojitoDHT().isBootstrapped()) {
@@ -175,6 +178,8 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
             stopNodeFetcher();
             triedRouteTable = false;
             fromRouteTable = false;
+            
+            SimppManager.instance().removeListener(this);
         }
     }
     
@@ -280,10 +285,17 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
         }
     }
     
+    public void simppUpdated() {
+        SocketAddress simpp = null;
+        if((simpp = getSimppHost()) != null) {
+            addBootstrapHost(simpp);
+        }
+    }
+
     /**
      * Gets the SIMPP host responsible for the keyspace containing the local node ID
      * 
-     * TODO: public for testing only
+     * package access for testing only
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
@@ -355,7 +367,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper {
                 
                 if (ExceptionUtils.isCausedBy(e, DHTException.class)) {
                     // Try to bootstrap from a SIMPP Host if
-                    // bootstrapping from the RouteTable failed
+                    // bootstrapping failed
                     // and try the hosts Set otherwise
                     SocketAddress simpp = null;
                     if (fromRouteTable && (simpp = getSimppHost()) != null) {
