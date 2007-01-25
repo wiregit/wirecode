@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -257,7 +258,7 @@ public class NIODispatcherTest extends BaseTestCase {
         StubReadConnectObserver o1 = new StubReadConnectObserver();
         SocketChannel c1 = o1.getChannel();
         if(OSUtils.isLinux()) {
-            c1.connect(LISTEN_ADDR); // can't do a portion of the test on linux.
+            connect(c1, LISTEN_ADDR, o1); // can't do a portion of the test on linux.
         } else {
             o1.setReadTimeout(1000);
             NIODispatcher.instance().registerConnect(c1, o1, 1000);
@@ -298,7 +299,7 @@ public class NIODispatcherTest extends BaseTestCase {
         StubReadConnectObserver o1 = new StubReadConnectObserver();
         SocketChannel c1 = o1.getChannel();
         if(OSUtils.isLinux())
-            c1.connect(LISTEN_ADDR); // can't do a portion of the text on linux
+            connect(c1, LISTEN_ADDR, o1); // can't do a portion of the test on linux.
         else {
             NIODispatcher.instance().registerConnect(c1, o1, 1000);
             c1.connect(LISTEN_ADDR);
@@ -399,6 +400,15 @@ public class NIODispatcherTest extends BaseTestCase {
     	assertFalse(f.isDone());
     	assertTrue(executed.await(40,TimeUnit.MILLISECONDS));
     	assertTrue(f.isDone());
+    }
+    
+    private void connect(SocketChannel c, SocketAddress a, StubReadConnectObserver o) throws Exception {
+        if(!c.connect(a)) {
+            NIODispatcher.instance().registerConnect(c, o, 1000);
+            o.waitForEvent(1000);
+            assertEquals(c.socket(), o.getSocket());
+            assertTrue(c.isConnected());
+        }
     }
     
     private int interestOps(SelectableChannel channel) throws Exception {

@@ -9,12 +9,12 @@ import org.limewire.nio.timeout.ReadTimeout;
 
 public class StubReadObserver implements ReadObserver, ReadTimeout {
     
-    private long readTimeout = 0;
-    private boolean shutdown = false;
-    private IOException iox;
-    private SocketChannel channel;
+    private volatile long readTimeout = 0;
+    private volatile boolean shutdown = false;
+    private volatile IOException iox;
+    private volatile SocketChannel channel;
     private volatile int readsHandled;
-    private ByteBuffer buffer;
+    private volatile ByteBuffer buffer;
     
     public void setChannel(SocketChannel channel) {
         this.channel = channel;

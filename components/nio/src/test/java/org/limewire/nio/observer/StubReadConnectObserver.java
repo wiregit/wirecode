@@ -9,13 +9,13 @@ import org.limewire.nio.observer.ReadObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 
 public class StubReadConnectObserver implements ReadObserver, ConnectObserver, ReadTimeout {
-    private StubConnectObserver connectDelegate = new StubConnectObserver();
-    private StubReadObserver readDelegate = new StubReadObserver();
-    private IOException ioException;
-    private boolean shutdown;
-    private SocketChannel channel;
-    private long ioxTime;
-    private long lastReadTime;
+    private volatile StubConnectObserver connectDelegate = new StubConnectObserver();
+    private volatile StubReadObserver readDelegate = new StubReadObserver();
+    private volatile IOException ioException;
+    private volatile boolean shutdown;
+    private volatile SocketChannel channel;
+    private volatile long ioxTime;
+    private volatile long lastReadTime;
     
     public IOException getIoException() {
         return ioException;

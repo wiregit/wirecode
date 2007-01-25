@@ -221,6 +221,9 @@ public final class NIOSocketTest extends BaseTestCase {
         // set to about the same time that testBlockingConnectFailing() 
         // needs to pass the test which depends on the operatin system
         // and the remote host.
+        if(blockFailTime < 0)
+            blockFailTime = 80000; // if it wasn't set from above test, make one up. 
+        
         socket.connect(new InetSocketAddress("www.google.com", 9999), blockFailTime+11000, observer);
         observer.waitForResponse(blockFailTime+1000);
         

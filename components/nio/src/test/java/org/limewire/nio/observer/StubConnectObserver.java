@@ -7,10 +7,10 @@ import java.nio.channels.SocketChannel;
 import org.limewire.nio.observer.ConnectObserver;
 
 public class StubConnectObserver implements ConnectObserver {
-    private SocketChannel channel;
-    private Socket socket;
-    private IOException ioException;
-    private boolean shutdown;
+    private volatile SocketChannel channel;
+    private volatile Socket socket;
+    private volatile IOException ioException;
+    private volatile boolean shutdown;
     
     public SocketChannel getChannel() throws IOException {
         if(channel == null) {
