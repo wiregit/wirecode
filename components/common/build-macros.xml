@@ -315,7 +315,7 @@
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
 	    		
 	    		<formatter type="xml"/>
-	    		<formatter type="plain" usefile="false" unless="${noplainformatter}"/>
+	    		<formatter type="plain" usefile="false"/>
 	    		
 	    		<batchtest todir="${tests.limewire.components.@{component}.xml}">
 	    			<fileset dir="${build.limewire.components.@{component}.tests}">
