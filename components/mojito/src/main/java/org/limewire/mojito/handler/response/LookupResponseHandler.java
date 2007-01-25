@@ -116,8 +116,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     /** The time when this lookup started */
     private long startTime = -1L;
     
-    /** The number of Nodes from our RouteTable that failed  */
-    private int routeTableFailures = 0;
+    /** The number of Nodes from our RouteTable that failed */
+    private int routeTableFailureCount = 0;
     
     /** The total number of failed lookups */
     private int totalFailures = 0;
@@ -225,9 +225,10 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
     
     /**
      * Returns the number of Nodes from our RouteTable that failed
+     * to respond
      */
-    public int getRouteTableFailures() {
-        return routeTableFailures;
+    public int getRouteTableFailureCount() {
+        return routeTableFailureCount;
     }
     
     /**
@@ -290,22 +291,23 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
             nodes = context.getRouteTable().select(lookupId, getResultSetSize(), false);
         }
         
+        // Add the Nodes to the yet-to-be queried List and remember
+        // the IDs of the Nodes we selected from our RouteTable
         for(Contact node : nodes) {
             addYetToBeQueried(node, currentHop+1);
             routeTableNodes.add(node.getNodeID());
         }
         
-        // Mark the local node as queried 
-        // (we did a lookup on our own RouteTable)
+        // Mark the local node as queried (we did a lookup on our own RouteTable)
         addResponse(context.getLocalNode(), null);
         markAsQueried(context.getLocalNode());
         
         // Get the first round of alpha nodes and send them requests
         List<Contact> alphaList = TrieUtils.select(toQuery, lookupId, getParallelism());
         
-        //optimimize the first lookup step if we have enough parallel lookup slots
+        // Optimimize the first lookup step if we have enough parallel lookup slots
         if(alphaList.size() >= 3) {
-            //get the MRS node of the k closest nodes
+            // Get the MRS node of the k closest nodes
             nodes = BucketUtils.sort(nodes);
             Contact mrs = BucketUtils.getMostRecentlySeen(nodes);
             if(!alphaList.contains(mrs) && !context.isLocalNode(mrs)) {
@@ -452,7 +454,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
         
         if (routeTableNodes.contains(nodeId)) {
-            routeTableFailures++;
+            routeTableFailureCount++;
         }
         
         totalFailures++;

@@ -44,19 +44,19 @@ public class FindNodeResult implements Result {
     
     private final int hop;
     
-    private final int failures;
+    private final int routeTableFailureCount;
     
     public FindNodeResult(KUID lookupId, 
             Map<? extends Contact, ? extends SecurityToken> nodes, 
             Collection<? extends Contact> collisions,
-            long time, int hop, int failures) {
+            long time, int hop, int routeTableFailureCount) {
     	
         this.lookupId = lookupId;
         this.nodes = nodes;
         this.collisions = collisions;
         this.time = time;
         this.hop = hop;
-        this.failures = failures;
+        this.routeTableFailureCount = routeTableFailureCount;
     }
     
     /**
@@ -67,10 +67,11 @@ public class FindNodeResult implements Result {
     }
     
     /**
-     * Returns the number of failed hosts during this lookup
+     * Returns the number of Nodes that were in our RouteTable
+     * and that failed to respond.
      */
-    public int getFailureCount() {
-        return failures;
+    public int getRouteTableFailureCount() {
+        return routeTableFailureCount;
     }
     
     /**
@@ -81,7 +82,7 @@ public class FindNodeResult implements Result {
     }
     
     /**
-     * 
+     * Returns a Collection of Contacts that collide with our local Node ID
      */
     public Collection<? extends Contact> getCollisions() {
         return collisions;

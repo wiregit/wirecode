@@ -100,7 +100,7 @@ public class FindNodeResponseHandler
     @Override
     protected void finishLookup() {
         long time = getElapsedTime();
-        int routeTableFailures = getRouteTableFailures();
+        int routeTableFailureCount = getRouteTableFailureCount();
         
         lookupStat.setHops(currentHop, false);
         lookupStat.setTime((int)time, false);
@@ -109,7 +109,7 @@ public class FindNodeResponseHandler
         Collection<Contact> collisions = getCollisions();
         
         FindNodeResult result = new FindNodeResult(getLookupID(), nearest, 
-                collisions, time, currentHop, routeTableFailures);
+                collisions, time, currentHop, routeTableFailureCount);
         
         // We can use the result from a Node lookup to estimate the DHT size
         context.updateEstimatedSize(nearest.keySet());

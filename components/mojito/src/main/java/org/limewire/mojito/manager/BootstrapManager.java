@@ -285,7 +285,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         private boolean phaseTwo(Contact node) throws InterruptedException, DHTException {
             
             boolean foundNewContacts = false;
-            int failureCount = 0;
+            int routeTableFailureCount = 0;
             
             List<KUID> randomId = context.getRouteTable().getRefreshIDs(true);
             if(randomId.isEmpty()) {
@@ -297,9 +297,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 FindNodeResponseHandler handler 
                     = new FindNodeResponseHandler(context, nodeId);
                 FindNodeResult result = handler.call();
-                failureCount += result.getFailureCount();
+                routeTableFailureCount += result.getRouteTableFailureCount();
                         
-                if (failureCount >= maxBootstrapFailures) {
+                if (routeTableFailureCount >= maxBootstrapFailures) {
                     
                     // Did it happen again? If so give up!
                     if (retriedBootstrap) {
@@ -308,7 +308,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                     
                     // Fire a StaleRouteTableException otherwise...
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Too many failures: " + failureCount 
+                        LOG.debug("Too many failures: " + routeTableFailureCount 
                                 + ". Retrying bootstrap from phase 2");
                     }
                     
