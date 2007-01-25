@@ -64,6 +64,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
@@ -424,6 +426,11 @@ public class RouterService {
             RouterService.getIpFilter().refreshHosts(new IPFilter.IPFilterCallback() {
                 public void ipFiltersLoaded() {
                     adjustSpamFilters();
+                }
+            });
+            SimppManager.instance().addListener(new SimppListener() {
+                public void simppUpdated() {
+                    reloadIPFilter();
                 }
             });
   	        RouterService.getAcceptor().init();

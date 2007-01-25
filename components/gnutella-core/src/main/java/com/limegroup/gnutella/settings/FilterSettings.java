@@ -108,4 +108,11 @@ public class FilterSettings extends LimeProps {
     public static final StringArraySetting CRAWLER_IP_ADDRESSES =
         FACTORY.createRemoteStringArraySetting("CRAWLER_IPS", new String[]{"*.*.*.*"}, 
                 "FilterSettings.crawlerIps");
+    
+    /**
+     * An array of hostile ip addresses.   
+     */
+    public static final StringArraySetting HOSTILE_IPS =
+        FACTORY.createRemoteStringArraySetting("HOSTILE_IPS", new String[0], 
+        "FilterSettings.hostileIps");
 }

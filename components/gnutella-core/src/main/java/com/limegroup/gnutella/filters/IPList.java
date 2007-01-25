@@ -62,18 +62,21 @@ public class IPList {
         return ips.size();
     }
     
-    /** 
-     * Adds a certain IP to the IPList.
-     * @param ipStr a String containing the IP, see IP.java for formatting
-     */
     public void add(String ipStr) {
-	    IP ip;
+        IP ip;
         try {
             ip = new IP(ipStr);
         } catch (IllegalArgumentException e) {
             return;
         }
-        
+        add(ip);
+    }
+    
+    /** 
+     * Adds a certain IP to the IPList.
+     * @param ipStr a String containing the IP, see IP.java for formatting
+     */
+    public void add(IP ip) {
         // SPECIAL-CASE:
         // If the IP we're adding is the 'null' key (0.0.0.0/0.0.0.0)
         // then we must clear the trie.  The AddFilter trick will not

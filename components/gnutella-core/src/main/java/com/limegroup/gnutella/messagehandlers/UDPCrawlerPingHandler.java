@@ -31,7 +31,7 @@ public class UDPCrawlerPingHandler implements MessageHandler, SimppListener {
         IPList newCrawlers = new IPList();
         try {
             for (String ip : FilterSettings.CRAWLER_IP_ADDRESSES.getValue())
-                newCrawlers.add(ip);
+                newCrawlers.add(new IP(ip));
             if (newCrawlers.isValidFilter(false))
                 crawlers = newCrawlers;
         } catch (IllegalArgumentException badSimpp) {}

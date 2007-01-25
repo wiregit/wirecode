@@ -33,6 +33,7 @@ public final class IPFilter extends SpamFilter {
     
     private volatile IPList badHosts;
     private volatile IPList goodHosts;
+    private volatile IPList hostileHosts;
     
     private final ExecutorService IP_LOADER = ExecutorsHelper.newProcessingQueue("IpLoader");
 
@@ -49,6 +50,7 @@ public final class IPFilter extends SpamFilter {
             badHosts = new IPList();
             goodHosts = new IPList();
         }
+        hostileHosts = new IPList();
     }
     
     /**
@@ -59,6 +61,7 @@ public final class IPFilter extends SpamFilter {
         // setup some blank lists temporarily.
         badHosts = new IPList();
         goodHosts = new IPList();
+        hostileHosts = new IPList();
         
         refreshHosts(callback);
     }
@@ -110,24 +113,40 @@ public final class IPFilter extends SpamFilter {
             newGood.add(allHosts[i]);
         }
         
+        // Load hostile, making sure the list is valid
+        IPList newHostile = new IPList();
+        allHosts = FilterSettings.HOSTILE_IPS.getValue();
+        try {
+            for (String ip : allHosts)
+                newHostile.add(new IP(ip));
+            if (newHostile.isValidFilter(false))
+                hostileHosts = newHostile;
+        } catch (IllegalArgumentException badSimpp){}
+        
         badHosts = newBad;
         goodHosts = newGood;
     }
     
-    /** Determiens if any blacklisted hosts exist. */
-    public boolean hasBlacklistedHosts() {
-        return !badHosts.isEmpty();
+    public void simppUpdated() {
+        refreshHosts();
     }
     
-    /** Delegate method for badHosts.logMinDistanceTo(IP) */
+    /** Determiens if any blacklisted hosts exist. */
+    public boolean hasBlacklistedHosts() {
+        return !badHosts.isEmpty() || !hostileHosts.isEmpty();
+    }
+    
+    /** The logmin distance to bad or hostile ips. */
     public int logMinDistanceTo(byte[] addr) {
-        return badHosts.logMinDistanceTo(new IP(addr));
+        IP ip = new IP(addr);
+        return Math.min(badHosts.logMinDistanceTo(ip), hostileHosts.logMinDistanceTo(ip));
     }
     
     /** Determines if the given address is allowed. */
     public boolean allow(InetAddress addr) {
         IP ip = new IP(addr.getAddress());
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contains(ip) || 
+            !(badHosts.contains(ip) || hostileHosts.contains(ip));
     }
     
     /** Determines if the given IpPort is allowed. */
@@ -160,7 +179,8 @@ public final class IPFilter extends SpamFilter {
                 return false;
             }
         }        
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contains(ip) || 
+            !(badHosts.contains(ip) || hostileHosts.contains(ip));
     }
     
     /**
@@ -174,7 +194,8 @@ public final class IPFilter extends SpamFilter {
         } catch(IllegalArgumentException badHost) {
             return false;
         }
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contains(ip) || 
+            !(badHosts.contains(ip) || hostileHosts.contains(ip));
     }
     
     public boolean allow(SocketAddress addr) {
