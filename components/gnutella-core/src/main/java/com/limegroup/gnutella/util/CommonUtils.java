@@ -677,6 +677,19 @@ public final class CommonUtils {
     }
     
     /**
+     * Returns whether or not the current JVM is 1.6.x or later.
+     */
+    public static boolean isJava16OrLater() {
+        String version=CommonUtils.getJavaVersion();
+        return  !version.startsWith("1.5")
+        && !version.startsWith("1.4")
+        && !version.startsWith("1.3") 
+        && !version.startsWith("1.2") 
+        && !version.startsWith("1.1")  
+        && !version.startsWith("1.0");
+    }
+    
+    /**
      * Determines if your version of java is out of date.
      */
     public static boolean isJavaOutOfDate() {
