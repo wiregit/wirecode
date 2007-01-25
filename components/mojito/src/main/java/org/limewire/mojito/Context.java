@@ -142,7 +142,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     Context(String name, Vendor vendor, Version version, boolean firewalled) {
         this.name = name;
-        init(null, null);
+        init();
         
         getLocalNode().setVendor(vendor);
         getLocalNode().setVersion(version);
@@ -150,25 +150,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
     
     /**
-     * Constructor to create a Context from a pre-existing
-     * RouteTable and Database.
-     */
-    Context(String name, Vendor vendor, Version version, RouteTable routeTable, Database database) {
-        this.name = name;
-        
-        assert (routeTable != null);
-        assert (database != null);
-        
-        init(routeTable, database);
-        
-        getLocalNode().setVendor(vendor);
-        getLocalNode().setVersion(version);
-    }
-    
-    /**
      * Initializes the Context
      */
-    private void init(RouteTable routeTable, Database database) {
+    private void init() {
         PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
@@ -187,8 +171,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
         
-        setRouteTable(routeTable);
-        setDatabase(database, false);
+        setRouteTable(null);
+        setDatabase(null, false);
         
         initStats();
         
