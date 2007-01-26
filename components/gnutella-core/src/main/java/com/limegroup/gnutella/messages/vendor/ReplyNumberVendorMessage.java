@@ -1,16 +1,13 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".

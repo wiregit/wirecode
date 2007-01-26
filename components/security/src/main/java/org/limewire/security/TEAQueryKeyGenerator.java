@@ -95,8 +95,8 @@ import org.limewire.util.ByteOrder;
         // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
         // and encrypt it with our secret key material.
         byte[] bytes = new byte[8];
-        ByteOrder.int2leb(port, bytes, 0);
-        ByteOrder.int2leb(ipInt, bytes, 4);
+        ByteOrder.int2beb(port, bytes, 0);
+        ByteOrder.int2beb(ipInt, bytes, 4);
         
         return getKeyBytes(bytes);
     }
