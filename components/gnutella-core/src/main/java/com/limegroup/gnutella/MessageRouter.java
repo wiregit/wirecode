@@ -2047,7 +2047,7 @@ public abstract class MessageRouter {
         if(simppReq.getVersion() > SimppRequestVM.VERSION)
             return; //we are not going to deal with these types of requests. 
         byte[] simppBytes = SimppManager.instance().getSimppBytes();
-        if(simppBytes != null) {
+        if(simppBytes != null && simppBytes.length > 0) {
             SimppVM simppVM = new SimppVM(simppBytes);
             try {
                 handler.handleSimppVM(simppVM);
