@@ -1,12 +1,18 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.security.SecurityToken;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
@@ -26,10 +32,15 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  Note that this behavior of maintaining backwards compatiblity is really
  *  only necessary for UDP messages since in the UDP case there is probably no
  *  MessagesSupportedVM exchange.
+ *  
+ *  @version 3
+ *  
+ *  * Adds QueryKey to prevent clients from spoofing their ip and just sending
+ *  results back after a little while
  */
 public final class LimeACKVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     /**
      * Constructs a new LimeACKVendorMessage with data from the network.
@@ -47,6 +58,8 @@ public final class LimeACKVendorMessage extends VendorMessage {
         if ((getVersion() == 2) && (getPayload().length != 1))
             throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
+        if ((getVersion() == 3) && (getPayload().length <= 1))
+            throw new BadPacketException("VERSION 3 should have a query key");
     }
 
     /**
@@ -55,36 +68,68 @@ public final class LimeACKVendorMessage extends VendorMessage {
      *  for this query.  If you want more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
+     *  @param queryKey the query key that is sent along to make sure the 
+     *  opposite side is not spoofing their ip address
      */
     public LimeACKVendorMessage(GUID replyGUID, 
-                                int numResults) {
+                                int numResults, SecurityToken securityToken) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
-              derivePayload(numResults));
+              derivePayload(numResults, securityToken));
         setGUID(replyGUID);
     }
-
+    
     /** @return an int (0-255) representing the amount of results that a host
      *  wants for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
+    
+    /**
+     * @return the query key of the message if it has one or <code>null</code>
+     */
+    public byte[] getSecurityTokenBytes() {
+        if (getVersion() > 2) {
+            try {
+                GGEP ggep = new GGEP(getPayload(), 1);
+                if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                    return ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                }
+            }
+            catch (BadGGEPPropertyException corrupt) {} 
+            catch (BadGGEPBlockException e) {}
+        }
+        return null;
+    }
 
     /**
      * Constructs the payload for a LimeACKVendorMessage with the given
      * number of results.
      */
-    private static byte[] derivePayload(int numResults) {
-        if ((numResults < 0) || (numResults > 255))
-            throw new IllegalArgumentException("Number of results too big: " +
+    private static byte[] derivePayload(int numResults, SecurityToken securityToken) {
+        if ((numResults <= 0) || (numResults > 255))
+            throw new IllegalArgumentException("Number of results too big or too small: " +
                                                numResults);
-        byte[] payload = new byte[1];
+        if (securityToken == null) {
+            throw new NullPointerException("queryKey must not be null");
+        }
         byte[] bytes = new byte[2];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteOrder.short2leb((short) numResults, bytes, 0);
-        payload[0] = bytes[0];
-        return payload;
+        out.write(bytes[0]); 
+
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, securityToken.getBytes());
+        try {
+            ggep.write(out);
+        }
+        catch(IOException iox) {
+            ErrorService.error(iox); // impossible.
+        }
+        return out.toByteArray();
     }
 
+    // TODO fberger compare query keys?
     public boolean equals(Object other) {
         if (other instanceof LimeACKVendorMessage) {
             GUID myGuid = new GUID(getGUID());
@@ -110,4 +155,5 @@ public final class LimeACKVendorMessage extends VendorMessage {
     public void recordDrop() {
         super.recordDrop();
     }
+
 }

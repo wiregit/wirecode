@@ -6,7 +6,8 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 
 /**
- * A SecurityToken authenticates a host based on its IP:Port.
+ * A SecurityToken authenticates a host based on its IP:Port or a other
+ * pieces of data.
  */
 public interface SecurityToken {
     
@@ -49,6 +50,12 @@ public interface SecurityToken {
          * Creates and returns a SecurityToken for the given IP:Port
          */
         public SecurityToken getSecurityToken(InetAddress addr, int port);
+        
+        /**
+         * Returns a SecurityToken for the given data.
+         */
+        public SecurityToken getSecurityToken(byte[] data);
+        
     }
     
     /**
@@ -62,6 +69,10 @@ public interface SecurityToken {
         
         public SecurityToken getSecurityToken(InetAddress addr, int port) {
             return QueryKey.getQueryKey(addr, port);
+        }
+
+        public SecurityToken getSecurityToken(byte[] data) {
+            return QueryKey.getQueryKey(data);
         }
     }
 }
