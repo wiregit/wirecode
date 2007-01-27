@@ -218,7 +218,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 enqueueOutput(notifier);
                 
                 try {
-                    getDatagramChannelLock().wait(1000L);
+                    getDatagramChannelLock().wait(2000L);
                 } catch (InterruptedException e) {
                     LOG.error("InterruptedException", e);
                 }
@@ -399,12 +399,13 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 
                 try {
                     // WRITE
-                    boolean done = !handleWrite();
+                    /*boolean done = !handleWrite();
                     if (done && !isAccepting()) {
                         synchronized (getDatagramChannelLock()) {
                             getDatagramChannelLock().notifyAll();
                         }
-                    }
+                    }*/
+                    handleWrite();
                 } catch (IOException err) {
                     LOG.error("IOException-WRITE", err);
                 }
