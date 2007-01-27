@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.bencoding;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -68,7 +69,7 @@ class BELong extends Token<Long> {
             try {
                 int read = chan.read(buf);
                 if (read == -1) 
-                    throw new IOException("channel closed before end of integer token");
+                    throw new EOFException("Could not read Integer Token");
                 else if (read == 0) // no more to read - wait for next signal. 
                     return;
             } finally {

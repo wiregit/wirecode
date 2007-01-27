@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.bencoding;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -168,11 +169,10 @@ public abstract class Token<T> {
     	ByteBuffer one_byte = ByteBuffer.wrap(b);
     	int read = chan.read(one_byte);
     	if (read == 0)
-    		return null; // The channel gave us no data, so we have no parsed object to return
+    	    return null; // The channel gave us no data, so we have no parsed object to return
     	if (read == -1)
-    		throw new IOException("channel closed while trying to read next token");
-    		
-    		
+    	    throw new EOFException("Could not read next Token");
+        
         if (b[0] == I)
             return new BELong(chan);
         else if (b[0] == D)

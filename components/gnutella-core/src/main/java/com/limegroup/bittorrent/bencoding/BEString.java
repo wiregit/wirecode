@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent.bencoding;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -88,7 +89,7 @@ class BEString extends Token<byte[]> {
         int read = 0;
         while (buf.hasRemaining() && (read = chan.read(buf)) > 0);
         if (read == -1 && buf.hasRemaining())
-            throw new IOException("closed before end of String token");
+            throw new EOFException("Could not read String token");
     }
 
     /**
