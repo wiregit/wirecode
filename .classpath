@@ -41,7 +41,6 @@
 	<classpathentry path="lib/jars/jdic.jar" kind="lib"/>
 	<classpathentry path="lib/jars/jl011.jar" kind="lib"/>
 	<classpathentry path="lib/jars/jmdns.jar" kind="lib"/>
-	<classpathentry path="lib/jars/linux/jdic_stub.jar" kind="lib"/>
 	<classpathentry path="lib/jars/log4j.jar" kind="lib"/>
 	<classpathentry path="lib/jars/looks.jar" kind="lib"/>
 	<classpathentry path="lib/jars/mp3sp14.jar" kind="lib"/>
@@ -50,7 +49,6 @@
 	<classpathentry path="lib/jars/ProgressTabs.jar" kind="lib"/>
 	<classpathentry path="lib/jars/tritonus.jar" kind="lib"/>
 	<classpathentry path="lib/jars/vorbis.jar" kind="lib"/>
-	<classpathentry path="lib/jars/windows/jdic_stub.jar" kind="lib"/>
 	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
 	<classpathentry path="tests/lib/jaxen-core-1.0-fcs.jar" kind="lib"/>
 	<classpathentry path="tests/lib/jing.jar" kind="lib"/>
