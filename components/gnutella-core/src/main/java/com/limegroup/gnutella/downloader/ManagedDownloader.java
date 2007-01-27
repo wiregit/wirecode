@@ -602,8 +602,10 @@ public class ManagedDownloader extends AbstractDownloader
             propertiesMap.put(DEFAULT_FILENAME,"Unknown "+(++unknownIndex));
         }
         
-        if (propertiesMap.containsKey(ATTRIBUTES)) 
-            attributes = (Map<String, Serializable>) propertiesMap.get(ATTRIBUTES);
+        if (propertiesMap.containsKey(ATTRIBUTES))  {
+            attributes = GenericsUtils.scanForMap(propertiesMap.get(ATTRIBUTES),
+                    String.class, Serializable.class, GenericsUtils.ScanMode.REMOVE);
+        }
 
 	if (attributes == null)
 	    attributes = new HashMap<String, Serializable>();

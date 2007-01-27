@@ -176,20 +176,19 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 
 			public Boolean run() {
  				try {
-					Method getCleanerMethod = buffer.getClass().getMethod("cleaner",new Class[0]);
+					Method getCleanerMethod = buffer.getClass().getMethod("cleaner");
 					if (getCleanerMethod == null)
 						return false;
-
+                    
 					getCleanerMethod.setAccessible(true);
-
-					sun.misc.Cleaner cleaner =
-						(sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-
+                    
+                    Object cleaner = getCleanerMethod.invoke(buffer);
 					if (cleaner == null)
 						return false;
-					cleaner.clean();
+                    
+                    Method cleanMethod = cleaner.getClass().getMethod("clean");
+                    cleanMethod.invoke(cleaner);
 					return true;
-
 				} catch(SecurityException e) {
                     LOG.warn("security", e);
                 } catch (InvocationTargetException e) {

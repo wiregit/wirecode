@@ -265,7 +265,8 @@ public final class Launcher {
 	 * @throws <tt>IOException</tt> if an exception occurs loading the
 	 *         necessary classes
 	 */
-	private static void loadMacClasses() throws IOException {
+	@SuppressWarnings("unchecked")
+    private static void loadMacClasses() throws IOException {
 		try {
 			Class mrjAdapter = Class.forName("net.roydesign.mac.MRJAdapter");
 			_openURL = mrjAdapter.getDeclaredMethod("openURL", new Class[]{String.class});

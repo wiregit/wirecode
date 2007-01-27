@@ -17,6 +17,7 @@ public class UnitTestUtils {
         
     }
     
+    @SuppressWarnings("unchecked")
     public static void setBootstrapping(MojitoDHT dht, KUID nodeId) throws Exception {
         Context context = (Context)dht;
         Field bmField = Context.class.getDeclaredField("bootstrapManager");

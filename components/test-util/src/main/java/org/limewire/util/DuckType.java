@@ -19,6 +19,7 @@ public class DuckType implements InvocationHandler {
         this.objectClass = object.getClass();
     }
 
+    @SuppressWarnings("unchecked")
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Method realMethod = objectClass.getMethod(method.getName(), method.getParameterTypes());
         return realMethod.invoke(object, args);
@@ -47,6 +48,7 @@ public class DuckType implements InvocationHandler {
      * @param object The object to test
      * @return true if every method in intrface is present on object.  false otherwise
      */
+    @SuppressWarnings("unchecked")
     public static boolean instanceOf(Class intrface, Object object) {
         final Method[] methods = intrface.getMethods();
         Class candclass=object.getClass();

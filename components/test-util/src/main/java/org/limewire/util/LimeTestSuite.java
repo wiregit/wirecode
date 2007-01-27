@@ -153,6 +153,7 @@ public class LimeTestSuite extends TestSuite {
      * 
      * Throws NoSuchMethodException if none are found.
      */
+    @SuppressWarnings("unchecked")
 	public List getAllStaticMethods(Class entryClass, String methodName)
       throws NoSuchMethodException {
         List<Method> methods = new LinkedList<Method>();

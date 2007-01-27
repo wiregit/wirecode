@@ -254,6 +254,7 @@ public class PrivilegedAccessor {
      * @param methodName the name of the static method
      * @param the parameter classes
      */
+    @SuppressWarnings("unchecked")
     public static List<Method> getAllStaticMethods(Class entryClass,
                                            String methodName, 
                                            Class[] classTypes ) 
@@ -341,6 +342,7 @@ public class PrivilegedAccessor {
      * Return the named method with a method signature matching classTypes
      * from the given class.
      */
+    @SuppressWarnings("unchecked")
     private static Method getMethodImpl(Class thisClass, 
                                     String methodName, 
                                     Class[] classTypes) 

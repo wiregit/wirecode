@@ -96,6 +96,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         verifiedHosts = new TreeSet<RemoteFileDesc>(RFD_COMPARATOR);
     }
     
+    @SuppressWarnings("unchecked")
     public synchronized boolean addToPool(Collection<? extends RemoteFileDesc> c)  {
         List<? extends RemoteFileDesc> l;
         if (c instanceof List)
