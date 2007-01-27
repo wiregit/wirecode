@@ -32,10 +32,10 @@ import org.limewire.mojito.db.DHTValueBag;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.DHTMessage;
-import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.PingResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -43,7 +43,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
-
 
 
 /**
@@ -328,8 +327,8 @@ public class DefaultMessageHandler {
         
         if (!valuesToForward.isEmpty()) {
             SecurityToken securityToken = null;
-            if (message instanceof FindNodeResponse) {
-                securityToken = ((FindNodeResponse)message).getSecurityToken();
+            if (message instanceof SecurityTokenProvider) {
+                securityToken = ((SecurityTokenProvider)message).getSecurityToken();
                 
                 if (securityToken == null) {
                     if (LOG.isInfoEnabled()) {

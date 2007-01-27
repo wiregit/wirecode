@@ -24,6 +24,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -95,15 +97,16 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     protected void finishLookup() {
         long time = getElapsedTime();
         
-        Collection<FindValueResponse> responses = getValues();
+        Map<Contact, SecurityToken> path = getPath();
+        Collection<FindValueResponse> values = getValues();
         
-        if (responses.isEmpty()) {
+        if (values.isEmpty()) {
             lookupStat.FIND_VALUE_FAILURE.incrementStat();
         } else {
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
         
-        setReturnValue(new FindValueResult(context, getLookupID(), responses, time, currentHop));
+        setReturnValue(new FindValueResult(context, getLookupID(), path, values, time, currentHop));
     }
     
     /**
@@ -119,14 +122,16 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     }
     
     protected boolean nextStep(ResponseMessage message) throws IOException {
-        if (message instanceof FindNodeResponse) 
+        if (message instanceof FindNodeResponse) {
             return handleNodeResponse((FindNodeResponse)message);
+        }
         
-        if (!(message instanceof FindValueResponse))
+        if (!(message instanceof FindValueResponse)) {
             throw new IllegalArgumentException("this is a find value handler");
+        }
+        
         FindValueResponse response = (FindValueResponse)message;
         Contact sender = response.getContact();
-        
         
         Collection<KUID> keys = response.getKeys();
         Collection<? extends DHTValueEntity> values = response.getValues();
@@ -144,6 +149,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
             valueResponses = new ArrayList<FindValueResponse>();
         }
         
+        addToResponsePath(response);
         valueResponses.add(response);
         
         // Terminate the FIND_VALUE lookup if it isn't

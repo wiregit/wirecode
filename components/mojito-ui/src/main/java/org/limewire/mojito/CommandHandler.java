@@ -112,12 +112,7 @@ public class CommandHandler {
     }
     
     public static void info(MojitoDHT dht, String[] args, PrintWriter out) {
-        out.println("Local Node: " + ((Context)dht).getLocalNode());
-        out.println("Is running: " + dht.isRunning());
-        out.println("Database Size (Keys): " + ((Context)dht).getDatabase().getKeyCount());
-        out.println("Database Size (Values): " + ((Context)dht).getDatabase().getValueCount());
-        out.println("RouteTable Size: " + ((Context)dht).getRouteTable().size());
-        out.println("Estimated DHT Size: " + dht.size());
+        out.println(dht.toString());
     }
     
     public static void exhaustive(MojitoDHT dht, String[] args, PrintWriter out) {

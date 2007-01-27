@@ -32,11 +32,9 @@ import org.limewire.security.SecurityToken;
  * The FindNodeResult is fired when a FIND_NODE lookup
  * finishes
  */
-public class FindNodeResult implements Result {
+public class FindNodeResult extends LookupResult {
     
-    private final KUID lookupId;
-    
-    private final Map<? extends Contact, ? extends SecurityToken> nodes;
+    private final Map<? extends Contact, ? extends SecurityToken> path;
     
     private final Collection<? extends Contact> collisions;
     
@@ -47,38 +45,39 @@ public class FindNodeResult implements Result {
     private final int routeTableFailureCount;
     
     public FindNodeResult(KUID lookupId, 
-            Map<? extends Contact, ? extends SecurityToken> nodes, 
+            Map<? extends Contact, ? extends SecurityToken> path, 
             Collection<? extends Contact> collisions,
             long time, int hop, int routeTableFailureCount) {
-    	
-        this.lookupId = lookupId;
-        this.nodes = nodes;
+    	super(lookupId);
+        this.path = path;
         this.collisions = collisions;
         this.time = time;
         this.hop = hop;
         this.routeTableFailureCount = routeTableFailureCount;
     }
     
-    /**
-     * Returns the KUID we were looking for
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getPath()
      */
-    public KUID getLookupID() {
-        return lookupId;
+    public Collection<? extends Contact> getPath() {
+        return path.keySet();
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getSecurityToken(org.limewire.mojito.routing.Contact)
+     */
+    public SecurityToken getSecurityToken(Contact node) {
+        return path.get(node);
+    }
+        
     /**
      * Returns the number of Nodes that were in our RouteTable
      * and that failed to respond.
      */
     public int getRouteTableFailureCount() {
         return routeTableFailureCount;
-    }
-    
-    /**
-     * Returns a Map of Contacts and their QueryKeys
-     */
-    public Map<? extends Contact, ? extends SecurityToken> getNodes() {
-        return nodes;
     }
     
     /**
@@ -105,9 +104,9 @@ public class FindNodeResult implements Result {
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
+        buffer.append(getLookupID()).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");
         int i = 0;
-        for (Entry<? extends Contact, ? extends SecurityToken> entry : nodes.entrySet()) {
+        for (Entry<? extends Contact, ? extends SecurityToken> entry : path.entrySet()) {
             buffer.append(i++).append(": ").append(entry.getKey())
                 .append(", token=").append(entry.getValue()).append("\n");
         }

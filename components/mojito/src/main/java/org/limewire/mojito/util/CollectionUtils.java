@@ -19,10 +19,14 @@
  
 package org.limewire.mojito.util;
 
+import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
+
+import org.limewire.mojito.settings.KademliaSettings;
 
 /**
  * Miscellaneous utilities for Collections
@@ -59,5 +63,62 @@ public final class CollectionUtils {
             buffer.setLength(buffer.length()-1);
         }
         return buffer.toString();
+    }
+    
+    /**
+     * Returns an iterator that returns up to max number of elements from the
+     * Collection
+     */
+    private static <T> Iterator<T> iterator(final Collection<T> c, final int count) {
+        return new Iterator<T>() {
+            
+            private final Iterator<T> it = c.iterator();
+            
+            private int item = 0;
+            
+            public boolean hasNext() {
+                if (item >= count) {
+                    return false;
+                }
+                return it.hasNext();
+            }
+
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                item++;
+                return it.next();
+            }
+
+            public void remove() {
+                it.remove();
+                item--;
+            }
+        };
+    }
+    
+    /**
+     * Returns a sub-view of the given Collection that will only return 
+     * the first K elements
+     */
+    public static <T> Collection<T> getCollection(Collection<T> c) {
+        return getCollection(c, KademliaSettings.REPLICATION_PARAMETER.getValue());
+    }
+    
+    /**
+     * Returns a sub-view of the given Collection that will only return 
+     * the first count elements
+     */
+    public static <T> Collection<T> getCollection(final Collection<T> c, final int count) {
+        return new AbstractCollection<T>() {
+            public Iterator<T> iterator() {
+                return CollectionUtils.iterator(c, count);
+            }
+
+            public int size() {
+                return Math.min(c.size(), count);
+            }
+        };
     }
 }

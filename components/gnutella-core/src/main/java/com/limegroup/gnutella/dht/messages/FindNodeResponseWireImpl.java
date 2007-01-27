@@ -3,15 +3,17 @@ package com.limegroup.gnutella.dht.messages;
 import java.util.Collection;
 
 import org.limewire.mojito.messages.FindNodeResponse;
+import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 
 public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeResponse> 
-        implements FindNodeResponse {
+        implements FindNodeResponse, SecurityTokenProvider {
 
     FindNodeResponseWireImpl(FindNodeResponse delegate) {
         super(delegate);
+        assert (delegate instanceof SecurityTokenProvider);
     }
 
     public Collection<? extends Contact> getNodes() {
@@ -19,6 +21,6 @@ public class FindNodeResponseWireImpl extends AbstractMessageWire<FindNodeRespon
     }
 
     public SecurityToken getSecurityToken() {
-        return delegate.getSecurityToken();
+        return ((SecurityTokenProvider)delegate).getSecurityToken();
     }
 }

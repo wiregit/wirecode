@@ -117,4 +117,11 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final BooleanSetting STORE_FORWARD_ENABLED
         = FACTORY.createBooleanSetting("STORE_FORWARD_ENABLED", true);
+    
+    /**
+     * Use FIND_NODE (default) or FIND_VALUE to get the SecurityToken of
+     * a remote Node. 
+     */
+    public static final BooleanSetting FIND_NODE_FOR_SECURITY_TOKEN
+        = FACTORY.createBooleanSetting("FIND_NODE_FOR_SECURITY_TOKEN", true);
 }

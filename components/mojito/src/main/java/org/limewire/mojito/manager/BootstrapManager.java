@@ -21,7 +21,6 @@ package org.limewire.mojito.manager;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -42,7 +41,6 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.security.SecurityToken;
 
 /**
  * The BootstrapManager manages the entire bootstrap process.
@@ -149,7 +147,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         private long phaseOne;
         private long phaseTwo;
         
-        private boolean retriedBootstrap = false;
+        private boolean retriedToBootstrap = false;
         
         private final Contact node;
         
@@ -216,13 +214,13 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             }
             
             // Make sure we found some Nodes
-            Map<? extends Contact, ? extends SecurityToken> nodes = result.getNodes();
-            if (nodes == null || nodes.isEmpty()) {
+            Collection<? extends Contact> path = result.getPath();
+            if (path == null || path.isEmpty()) {
                 return false;
             }
             
             // But other than our local Node
-            if (nodes.size() == 1 && nodes.containsKey(context.getLocalNode())) {
+            if (path.size() == 1 && path.contains(context.getLocalNode())) {
                 return false;
             }
             
@@ -302,7 +300,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 if (routeTableFailureCount >= maxBootstrapFailures) {
                     
                     // Did it happen again? If so give up!
-                    if (retriedBootstrap) {
+                    if (retriedToBootstrap) {
                         return false;
                     }
                     
@@ -312,16 +310,38 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                                 + ". Retrying bootstrap from phase 2");
                     }
                     
-                    retriedBootstrap = true;
+                    retriedToBootstrap = true;
                     throw new StaleRouteTableException();
                     
-                } else if (!foundNewContacts && !result.getNodes().isEmpty()) {
+                } else if (!foundNewContacts && !result.getPath().isEmpty()) {
                     foundNewContacts = true;
                 }
             }
             return foundNewContacts;
         }
     }
+    
+    /*private boolean determinateIfBootstrapped() {
+        if (bootstrapped) {
+            return true;
+        }
+        
+        RouteTable routeTable = context.getRouteTable();
+        synchronized (routeTable) {
+            routeTable.purge();
+            List<Contact> active = routeTable.getActiveContacts();
+            int alive = 0;
+            for (Contact node : active) {
+                if (node.isAlive()) {
+                    alive++;
+                }
+            }
+            
+            float ratio = ((float)alive)/((float)active.size());
+            System.out.println("ratio: " + ratio);
+            return ratio >= 0.5f;
+        }
+    }/*
     
     /**
      * A bootstrap specific implementation of DHTFuture

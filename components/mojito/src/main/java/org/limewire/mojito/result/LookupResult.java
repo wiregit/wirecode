@@ -16,21 +16,27 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
- 
-package org.limewire.mojito.messages;
 
-import java.util.Collection;
+package org.limewire.mojito.result;
 
-import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.KUID;
 
 /**
- * An interface for FindNodeResponse implementations
+ * 
  */
-public interface FindNodeResponse extends LookupResponse {
+public abstract class LookupResult implements Result, LookupPath {
     
-    /**
-     * Returns the k-closest (or less) Node's to the
-     * KUID we were looking for
+    private final KUID lookupId;
+    
+    public LookupResult(KUID lookupId) {
+        this.lookupId = lookupId;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getLookupID()
      */
-    public Collection<? extends Contact> getNodes();
+    public KUID getLookupID() {
+        return lookupId;
+    }
 }

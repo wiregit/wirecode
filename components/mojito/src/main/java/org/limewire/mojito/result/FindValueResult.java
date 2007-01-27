@@ -22,6 +22,7 @@ package org.limewire.mojito.result;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -37,18 +38,19 @@ import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.security.SecurityToken;
 
 
 /**
  * The FindValueResult is fired when a FIND_VALUE lookup finishes
  */
-public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>> {
+public class FindValueResult extends LookupResult implements Iterable<Future<DHTValueEntity>> {
     
     private static final Log LOG = LogFactory.getLog(FindValueResult.class);
     
     private final Context context;
     
-    private final KUID lookupId;
+    private final Map<? extends Contact, ? extends SecurityToken> path;
     
     private final Collection<? extends FindValueResponse> responses;
     
@@ -58,21 +60,32 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
     
     public FindValueResult(Context context, 
     		KUID lookupId, 
-                Collection<? extends FindValueResponse> values, 
+            Map<? extends Contact, ? extends SecurityToken> path,
+            Collection<? extends FindValueResponse> responses, 
             long time, int hop) {
+        super(lookupId);
         
         this.context = context;
-        this.lookupId = lookupId;
-        this.responses = values;
+        this.path = path;
+        this.responses = responses;
         this.time = time;
         this.hop = hop;
     }
     
-    /**
-     * Returns the KUID we were looking for
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getPath()
      */
-    public KUID getLookupID() {
-        return lookupId;
+    public Collection<? extends Contact> getPath() {
+        return path.keySet();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getSecurityToken(org.limewire.mojito.routing.Contact)
+     */
+    public SecurityToken getSecurityToken(Contact node) {
+        return path.get(node);
     }
     
     /**
@@ -98,7 +111,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
     
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(lookupId).append(" (time=").append(time)
+        buffer.append(getLookupID()).append(" (time=").append(time)
             .append("ms, hop=").append(hop).append(")\n");
 
         if(responses.isEmpty()) {
@@ -201,7 +214,7 @@ public class FindValueResult implements Result, Iterable<Future<DHTValueEntity>>
                 KUID nodeId = keys.next();
                 
                 DHTFuture<GetValueResult> future 
-                    = context.get(node, lookupId, nodeId);
+                    = context.get(node, getLookupID(), nodeId);
                 
                 return new GetDHTValueFuture(future);
             }

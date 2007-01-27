@@ -28,6 +28,7 @@ import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.MessageID;
+import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.SecurityToken;
@@ -37,7 +38,7 @@ import org.limewire.security.SecurityToken;
  * An implementation of FindNodeResponse
  */
 public class FindNodeResponseImpl extends AbstractLookupResponse
-        implements FindNodeResponse {
+        implements FindNodeResponse, SecurityTokenProvider {
 
     private final SecurityToken securityToken;
 

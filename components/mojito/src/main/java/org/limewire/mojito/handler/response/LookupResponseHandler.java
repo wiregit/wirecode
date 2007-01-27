@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
+import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.DHTBackendException;
@@ -45,7 +47,8 @@ import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.result.Result;
+import org.limewire.mojito.messages.SecurityTokenProvider;
+import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.BucketUtils;
@@ -62,7 +65,7 @@ import org.limewire.security.SecurityToken;
  * 
  * Think of the LookupResponseHandler as some kind of State-Machine.
  */
-abstract class LookupResponseHandler<V extends Result> extends AbstractResponseHandler<V> {
+public abstract class LookupResponseHandler<V extends LookupResult> extends AbstractResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(LookupResponseHandler.class);
     
@@ -80,7 +83,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         = new PatriciaTrie<KUID, Contact>(KUID.KEY_ANALYZER);
     
     /** Trie of Contacts that did respond */
-    protected final Trie<KUID, Entry<Contact, SecurityToken>> responses 
+    protected final Trie<KUID, Entry<Contact, SecurityToken>> responsePath 
         = new PatriciaTrie<KUID, Entry<Contact, SecurityToken>>(KUID.KEY_ANALYZER);
     
     /** A Map we're using to count the number of hops */
@@ -299,7 +302,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
         
         // Mark the local node as queried (we did a lookup on our own RouteTable)
-        addResponse(context.getLocalNode(), null);
+        addToResponsePath(context.getLocalNode(), null);
         markAsQueried(context.getLocalNode());
         
         // Get the first round of alpha nodes and send them requests
@@ -361,8 +364,9 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         
         currentHop = hop.intValue();
         
-        if (nextStep(message)) 
+        if (nextStep(message)) {
             nextLookupStep();
+        }
         
         finishLookupIfDone();
     }
@@ -424,7 +428,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         }
         
         if (!nodes.isEmpty()) {
-            addResponse(sender, response.getSecurityToken());
+            addToResponsePath(response);
         }
         
         return true;
@@ -521,7 +525,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
             // probing for this condition, because in the case of a bootstrap lookup
             // we are actually updating the routing tables of the nodes we contact.
             } else if (!context.isLocalNodeID(lookupId) 
-                    && responses.containsKey(lookupId)) {
+                    && responsePath.containsKey(lookupId)) {
                 
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Lookup for " + lookupId + " terminates after "
@@ -533,8 +537,8 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
             }
         }
         
-        if (responses.size() >= getResultSetSize()) {
-            KUID worst = responses.select(furthestId).getKey().getNodeID();
+        if (responsePath.size() >= getResultSetSize()) {
+            KUID worst = responsePath.select(furthestId).getKey().getNodeID();
             
             KUID best = null;            
             if (!toQuery.isEmpty()) {
@@ -544,7 +548,7 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
             if (best == null || worst.isNearerTo(lookupId, best)) {
                 if (!hasActiveSearches()) {
                     if (LOG.isTraceEnabled()) {
-                        Contact bestResponse = responses.select(lookupId).getKey();
+                        Contact bestResponse = responsePath.select(lookupId).getKey();
                         LOG.trace("Lookup for " + lookupId + " terminates after "
                                 + currentHop + " hops, " + totalTime + "ms and " + queried.size() 
                                 + " queried Nodes with " + bestResponse + " as best match");
@@ -692,20 +696,71 @@ abstract class LookupResponseHandler<V extends Result> extends AbstractResponseH
         return true;
     }
     
+    protected void addToResponsePath(ResponseMessage response) {
+        Contact sender = response.getContact();
+        SecurityToken securityToken = null;
+        if (response instanceof SecurityTokenProvider) {
+            securityToken = ((SecurityTokenProvider)response).getSecurityToken();
+        }
+        addToResponsePath(sender, securityToken);
+    }
+    
     /** Adds the Contact-SecurityToken Tuple to the response Trie */
-    private void addResponse(Contact node, SecurityToken securityToken) {
+    private void addToResponsePath(Contact node, SecurityToken securityToken) {
         
         Entry<Contact,SecurityToken> entry 
             = new EntryImpl<Contact,SecurityToken>(node, securityToken, true);
         
-        responses.put(node.getNodeID(), entry);
+        responsePath.put(node.getNodeID(), entry);
         
         // We're only interested in the k-closest
         // Contacts so remove the worst ones
-        if (isDeleteFurthest() && responses.size() > getResultSetSize()) {
-            Contact worst = responses.select(furthestId).getKey();
-            responses.remove(worst.getNodeID());
+        if (isDeleteFurthest() && responsePath.size() > getResultSetSize()) {
+            Contact worst = responsePath.select(furthestId).getKey();
+            responsePath.remove(worst.getNodeID());
         }
+    }
+    
+    protected Map<Contact, SecurityToken> getPath() {
+        return getContacts(responsePath.size());
+    }
+    
+    /**
+     * Returns the k-closest Contacts sorted by their closeness
+     * to the given lookup key
+     */
+    protected Map<Contact, SecurityToken> getNearestContacts() {
+        return getContacts(getResultSetSize());
+    }
+    
+    /**
+     * Returns count number of Contacts sorted by their closeness
+     * to the given lookup key
+     */
+    protected Map<Contact, SecurityToken> getContacts(int count) {
+        if (count < 0) {
+            count = responsePath.size();
+        }
+        
+        final int maxCount = count;
+        
+        // Use a LinkedHashMap which preserves the insertion order...
+        final Map<Contact, SecurityToken> nearest = new LinkedHashMap<Contact, SecurityToken>();
+        
+        responsePath.select(lookupId, new Cursor<KUID, Entry<Contact,SecurityToken>>() {
+            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, SecurityToken>> entry) {
+                Entry<Contact, SecurityToken> e = entry.getValue();
+                nearest.put(e.getKey(), e.getValue());
+                
+                if (nearest.size() < maxCount) {
+                    return SelectStatus.CONTINUE;
+                }
+                
+                return SelectStatus.EXIT;
+            }
+        });
+        
+        return nearest;
     }
     
     public String toString() {

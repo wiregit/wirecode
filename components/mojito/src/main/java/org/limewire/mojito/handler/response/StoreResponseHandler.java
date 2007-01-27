@@ -42,13 +42,16 @@ import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
 
@@ -150,22 +153,20 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         } else {
             // Do a lookup for the k-closest Nodes where we're
             // going to store the value
-            FindNodeResponseHandler handler 
-                = new FindNodeResponseHandler(context, valueId);
+            LookupResponseHandler handler = createLookupResponseHandler();
             
             // Use only alive Contacts from the RouteTable
             handler.setSelectAliveNodesOnly(true);
             
-            Map<? extends Contact, ? extends SecurityToken> nodes = null;
+            LookupResult result = null;
             try {
-                nodes = handler.call().getNodes();
+                result = (LookupResult)handler.call();
             } catch (InterruptedException e) {
                 throw new DHTException(e);
             }
             
-            for (Entry<? extends Contact,? extends SecurityToken> entry : nodes.entrySet()) {
-                Contact node = entry.getKey();
-                SecurityToken securityToken = entry.getValue();
+            for (Contact node : CollectionUtils.getCollection(result.getPath())) {
+                SecurityToken securityToken = result.getSecurityToken(node);
                 processList.add(new StoreProcess(node, securityToken));
             }
             
@@ -173,6 +174,17 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         processes = processList.iterator();
         sendNextAndExitIfDone();
+    }
+    
+    private LookupResponseHandler createLookupResponseHandler() {
+        if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+            return new FindNodeResponseHandler(context, valueId);
+        } else {
+            FindValueResponseHandler handler 
+                = new FindValueResponseHandler(context, valueId);
+            
+            return handler;
+        }
     }
     
     @Override
@@ -405,8 +417,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
 
         @Override
         protected void start() throws DHTException {
-            RequestMessage request = context.getMessageHelper()
-                .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
+            RequestMessage request = createLookupRequest();
             
             try {
                 context.getMessageDispatcher().send(node, request, this);
@@ -415,46 +426,64 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
         }
         
+        private RequestMessage createLookupRequest() {
+            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+                return context.getMessageHelper()
+                        .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
+            } else {
+                Collection<KUID> noKeys = Collections.emptySet();
+                return context.getMessageHelper()
+                    .createFindValueRequest(node.getContactAddress(), node.getNodeID(), noKeys);
+            }
+        }
+        
         @Override
         protected void response(ResponseMessage message, long time) throws IOException {
             
-            FindNodeResponse response = (FindNodeResponse)message;
-            
-            Collection<? extends Contact> nodes = response.getNodes();
-            for(Contact node : nodes) {
+            if (message instanceof FindNodeResponse) {
+                FindNodeResponse response = (FindNodeResponse)message;
                 
-                if (!ContactUtils.isValidContact(response.getContact(), node)) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Dropping invalid Contact " + node);
-                    }
-                    continue;
-                }
-                
-                // Make sure we're not mixing IPv4 and IPv6 addresses.
-                // See RouteTableImpl.add() for more Info!
-                if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+                Collection<? extends Contact> nodes = response.getNodes();
+                for(Contact node : nodes) {
                     
-                    // Log as ERROR so that we're not missing this
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error(node + " is from a different IP address space than local Node");
+                    if (!ContactUtils.isValidContact(response.getContact(), node)) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Dropping invalid Contact " + node);
+                        }
+                        continue;
                     }
-                    continue;
-                }
-                
-                if (ContactUtils.isLocalContact(context, node, null)) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Dropping local Contact " + node);
+                    
+                    // Make sure we're not mixing IPv4 and IPv6 addresses.
+                    // See RouteTableImpl.add() for more Info!
+                    if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+                        
+                        // Log as ERROR so that we're not missing this
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error(node + " is from a different IP address space than local Node");
+                        }
+                        continue;
                     }
-                    continue;
+                    
+                    if (ContactUtils.isLocalContact(context, node, null)) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Dropping local Contact " + node);
+                        }
+                        continue;
+                    }
+                    
+                    // We did a FIND_NODE lookup use the info
+                    // to fill/update our routing table
+                    assert (node.isAlive() == false);
+                    context.getRouteTable().add(node);
                 }
-                
-                // We did a FIND_NODE lookup use the info
-                // to fill/update our routing table
-                assert (node.isAlive() == false);
-                context.getRouteTable().add(node);
             }
             
-            setReturnValue(new GetSecurityTokenResult(response.getSecurityToken()));
+            SecurityToken securityToken = null;
+            if (message instanceof SecurityTokenProvider) {
+                securityToken = ((SecurityTokenProvider)message).getSecurityToken();
+            }
+            
+            setReturnValue(new GetSecurityTokenResult(securityToken));
         }
         
         @Override

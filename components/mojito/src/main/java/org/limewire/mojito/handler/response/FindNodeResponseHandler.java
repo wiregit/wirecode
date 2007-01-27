@@ -22,11 +22,8 @@ package org.limewire.mojito.handler.response;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -105,54 +102,16 @@ public class FindNodeResponseHandler
         lookupStat.setHops(currentHop, false);
         lookupStat.setTime((int)time, false);
         
-        Map<Contact, SecurityToken> nearest = getNearestContacts();
+        Map<Contact, SecurityToken> path = getPath();
         Collection<Contact> collisions = getCollisions();
         
-        FindNodeResult result = new FindNodeResult(getLookupID(), nearest, 
+        FindNodeResult result = new FindNodeResult(getLookupID(), path, 
                 collisions, time, currentHop, routeTableFailureCount);
         
         // We can use the result from a Node lookup to estimate the DHT size
-        context.updateEstimatedSize(nearest.keySet());
+        context.updateEstimatedSize(path.keySet());
         
         setReturnValue(result);
-    }
-    
-    /**
-     * Returns the k-closest Contacts sorted by their closeness
-     * to the given lookup key
-     */
-    private Map<Contact, SecurityToken> getNearestContacts() {
-        return getContacts(getResultSetSize());
-    }
-    
-    /**
-     * Returns count number of Contacts sorted by their closeness
-     * to the given lookup key
-     */
-    private Map<Contact, SecurityToken> getContacts(int count) {
-        if (count < 0) {
-            count = responses.size();
-        }
-        
-        final int maxCount = count;
-        
-        // Use a LinkedHashMap which preserves the insertion order...
-        final Map<Contact, SecurityToken> nearest = new LinkedHashMap<Contact, SecurityToken>();
-        
-        responses.select(lookupId, new Cursor<KUID, Entry<Contact,SecurityToken>>() {
-            public SelectStatus select(Entry<? extends KUID, ? extends Entry<Contact, SecurityToken>> entry) {
-                Entry<Contact, SecurityToken> e = entry.getValue();
-                nearest.put(e.getKey(), e.getValue());
-                
-                if (nearest.size() < maxCount) {
-                    return SelectStatus.CONTINUE;
-                }
-                
-                return SelectStatus.EXIT;
-            }
-        });
-        
-        return nearest;
     }
     
     /**
