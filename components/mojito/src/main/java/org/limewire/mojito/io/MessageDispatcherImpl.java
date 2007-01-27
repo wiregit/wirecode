@@ -191,10 +191,32 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
             // Do not accept any new incoming Requests or Responses
             accepting = false;
             
-            // Signal the MessageDispatcher Thread that we're
-            // going to shutdown and wait for the MD to finish
-            // whatever it's doing...
             if (running) {
+                // The idea is to enqueue this fake Tag and to wait
+                // for the MessageDispatcher. Once it's being processed
+                // we know eveything in front of the queue was sent...
+                Tag notifer = new Tag(context.getLocalNode(), null) {
+                    @Override
+                    // Called right before send
+                    public boolean isCancelled() {
+                        synchronized (getDatagramChannelLock()) {
+                            getDatagramChannelLock().notifyAll();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    // Called in case of an error
+                    public void handleError(IOException e) {
+                        synchronized (getDatagramChannelLock()) {
+                            getDatagramChannelLock().notifyAll();
+                        }
+                        super.handleError(e);
+                    }
+                };
+                
+                enqueueOutput(notifer);
+                
                 try {
                     getDatagramChannelLock().wait(1000L);
                 } catch (InterruptedException e) {
