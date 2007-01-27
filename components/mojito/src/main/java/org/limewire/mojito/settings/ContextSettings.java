@@ -119,6 +119,12 @@ public class ContextSettings extends MojitoProps {
     }
     
     /**
+     * Whether or not we're sending a shutdown message
+     */
+    public static final BooleanSetting SEND_SHUTDOWN_MESSAGE
+        = FACTORY.createBooleanSetting("SEND_SHUTDOWN_MESSAGE", true);
+    
+    /**
      * Whether or not certain operations throw a NotBootstrappedException
      * if Mojito is not bootstrapped. This setting is meant for testing!
      * Do not change w/o having a good reason!

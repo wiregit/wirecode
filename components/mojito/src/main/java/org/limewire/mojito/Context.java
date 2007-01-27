@@ -790,7 +790,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         Contact localNode = getLocalNode();
         localNode.shutdown(true);
         
-        if (isBootstrapped()) {
+        if (isBootstrapped()
+                && ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
+            
             // We're nice guys and send shutdown messages to the 2*k-closest
             // Nodes which should help to reduce the overall latency.
             int m = KademliaSettings.SHUTDOWN_MULTIPLIER.getValue();
