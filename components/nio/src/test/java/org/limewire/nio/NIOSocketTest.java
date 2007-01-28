@@ -161,6 +161,8 @@ public final class NIOSocketTest extends BaseTestCase {
         assertSame(channel, ((SocketInterestReadAdapter)chain2.getReadChannel()).getChannel());        
         assertSame(chain2, chain1.getReadChannel());
         assertSame(chain1, entry.getReadChannel());
+        
+        socket.close();
     }
     
     public void testBlockingConnect() throws Exception {
@@ -185,6 +187,8 @@ public final class NIOSocketTest extends BaseTestCase {
         }
         long end = System.currentTimeMillis();
         blockFailTime = (int)(end - start);
+        
+        socket.close();
         //System.out.println("Time: " + (end-start));
     }
     
@@ -196,6 +200,8 @@ public final class NIOSocketTest extends BaseTestCase {
         } catch(SocketTimeoutException iox) {
             assertEquals("operation timed out (1000)", iox.getMessage());
         }
+        
+        socket.close();
     }
     
     public void testNonBlockingConnect() throws Exception {
@@ -231,6 +237,8 @@ public final class NIOSocketTest extends BaseTestCase {
         assertNull(observer.getSocket());
         assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
         assertFalse(socket.isConnected());
+        
+        socket.close();
     }
     
     public void testNonBlockingConnectTimesOut() throws Exception {
@@ -242,6 +250,8 @@ public final class NIOSocketTest extends BaseTestCase {
         assertNull(observer.getSocket());
         assertNull(observer.getIoException()); // NIOSocket swallows the IOX.
         assertFalse(socket.isConnected());
+        
+        socket.close();
     }
     
     public void testSoTimeoutUsedForNonBlockingRead() throws Exception {
@@ -264,6 +274,8 @@ public final class NIOSocketTest extends BaseTestCase {
             socket.setReadObserver(new ReadTester());
             Thread.sleep(2000);
             assertTrue(socket.isClosed()); // closed because we switched to NB reading w/ timeout set
+            
+            socket.close();
         } finally {
             server.close();
         }

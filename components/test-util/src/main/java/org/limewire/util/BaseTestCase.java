@@ -211,6 +211,15 @@ public abstract class BaseTestCase extends AssertComparisons {
         stopTestTimer();
     }
     
+    /** After all tearDown/postTearDown/globalTearDown teardowns. */
+    public static void afterAllTestsTearDown() throws Throwable {
+      //  System.out.println("After test wait...");
+        System.gc();
+      //  System.out.println("Did GC, listng threads & sleeping...");
+      //  System.out.println(CommonUtils.getAllStackTraces());
+      //  Thread.sleep(5000);
+    }
+    
     /**
      * Sets up the TimerTask to kill the running test after a certian amount of time.
      */

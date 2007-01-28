@@ -79,6 +79,7 @@ public class NIODispatcherTest extends BaseTestCase {
         assertEquals("operation timed out (3000)", iox.getMessage()); // stringent, but useful.
         assertTrue(observer.isShutdown());
         
+        channel.close();
     }
     
 
@@ -365,6 +366,8 @@ public class NIODispatcherTest extends BaseTestCase {
             NIODispatcher.instance().wakeup();
             observer.waitForEvent(2000);
             assertGreaterThanOrEquals(1, observer.getReadsHandled());
+            
+            channel.close();
         } finally {
             NIODispatcher.instance().removeSelector(stub);
         }
