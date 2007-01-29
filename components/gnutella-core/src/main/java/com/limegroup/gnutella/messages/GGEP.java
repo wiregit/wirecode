@@ -43,7 +43,7 @@ public class GGEP {
      * protocol version of oob messages that supports security tokens for
      * authentication.
      */
-    public static final String GGEP_HEADER_SECURITY_TOKEN = "SO";
+    public static final String GGEP_HEADER_SECURE_OOB = "SO";
     /** The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */

@@ -8,6 +8,9 @@ import java.net.SocketAddress;
 /**
  * A SecurityToken authenticates a host based on its IP:Port or a other
  * pieces of data.
+ * 
+ * TODO make api similar to MessageDigest so the secret byte can be updated
+ * by new input
  */
 public interface SecurityToken {
     

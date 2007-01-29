@@ -355,7 +355,8 @@ public class StandardMessageRouter extends MessageRouter {
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
-                                    boolean isFWTransfer) {
+                                    boolean isFWTransfer,
+                                    byte[] securityToken) {
         
         List<QueryReply> queryReplies = new ArrayList<QueryReply>();
         QueryReply queryReply = null;
@@ -465,7 +466,7 @@ public class StandardMessageRouter extends MessageRouter {
                                                 measuredSpeed, 
                                                 ChatSettings.CHAT_ENABLED.getValue(),
                                                 isFromMcast, isFWTransfer,
-                                                proxies);
+                                                proxies, securityToken);
                     queryReplies.add(queryReply);
                 }
             }
@@ -487,7 +488,7 @@ public class StandardMessageRouter extends MessageRouter {
                                         measuredSpeed, 
                                         ChatSettings.CHAT_ENABLED.getValue(),
                                         isFromMcast, isFWTransfer,
-                                        proxies);
+                                        proxies, securityToken);
             queryReplies.add(queryReply);
         }
 

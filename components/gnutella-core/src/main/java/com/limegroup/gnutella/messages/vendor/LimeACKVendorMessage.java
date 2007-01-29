@@ -119,7 +119,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
         out.write(bytes[0]); 
 
         GGEP ggep = new GGEP(true);
-        ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, securityToken.getBytes());
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
         try {
             ggep.write(out);
         }

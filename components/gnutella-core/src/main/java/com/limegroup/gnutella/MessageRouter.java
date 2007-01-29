@@ -1111,7 +1111,8 @@ public abstract class MessageRouter {
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
-
+        byte[] securityToken = ack.getSecurityTokenBytes();
+       
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
             int port = addr.getPort();
@@ -1120,13 +1121,14 @@ public abstract class MessageRouter {
             //node wants
             Iterable<QueryReply> iterable;
             if (ack.getNumResults() < bundle._responses.length) {
+                // TODO move selection to responseToQueryReplies methods for randomization
                 Response[] desired = new Response[ack.getNumResults()];
-                for (int i = 0; i < desired.length; i++)
-                    desired[i] = bundle._responses[i];
-                iterable = responsesToQueryReplies(desired, bundle._query, 1);
-            } else { 
+                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
                 iterable = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1);
+                        bundle._query, 1, securityToken);
+            } else { 
+                iterable = responsesToQueryReplies(bundle._responses,
+                                                   bundle._query, 1, securityToken);
             }
             
             //send the query replies
@@ -2289,7 +2291,7 @@ public abstract class MessageRouter {
      */
     public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                             QueryRequest queryRequest) {
-        return responsesToQueryReplies(responses, queryRequest, 10);
+        return responsesToQueryReplies(responses, queryRequest, 10, null);
     }
 
 
@@ -2304,11 +2306,12 @@ public abstract class MessageRouter {
      * @param queryRequest The query request corresponding to which we are
      * generating query replies.
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
+     * @param security token might be null
      * @return Iterable of QueryReply
      */
     private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT) {
+                                             final int REPLY_LIMIT, byte[] securityToken) {
         //List to store Query Replies
         List<QueryReply> queryReplies = new LinkedList<QueryReply>();
         
@@ -2406,7 +2409,7 @@ public abstract class MessageRouter {
                 createQueryReply(guid, ttl, speed, res, 
                                  _clientGUID, busy, uploaded, 
                                  measuredSpeed, mcast,
-                                 fwTransfer);
+                                 fwTransfer, securityToken);
 
             //add to the list
             queryReplies.addAll(replies);
@@ -2419,6 +2422,9 @@ public abstract class MessageRouter {
     /**
      * Abstract method for creating query hits.  Subclasses must specify
      * how this list is created.
+     * 
+     * @param securityToken might be null, otherwise must be sent in GGEP
+     * of QHD with header "SO"
      *
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
@@ -2429,7 +2435,8 @@ public abstract class MessageRouter {
                                              boolean uploaded, 
                                              boolean measuredSpeed, 
                                              boolean isFromMcast,
-                                             boolean shouldMarkForFWTransfer);
+                                             boolean shouldMarkForFWTransfer,
+                                             byte[] securityToken);
 
     /**
      * Handles a message to reset the query route table for the given

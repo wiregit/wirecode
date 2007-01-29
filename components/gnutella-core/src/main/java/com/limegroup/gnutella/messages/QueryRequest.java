@@ -114,7 +114,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private int _featureSelector = 0;
     
-    private boolean _hasSecuritTokenRequest;
+    private boolean _hasSecurityTokenRequest;
 
     /**
      * Whether or not the GGEP header for Do Not Proxy was found.
@@ -1273,8 +1273,8 @@ public class QueryRequest extends Message implements Serializable{
 
             // mark oob query to require support of security tokens
             if (canReceiveOutOfBandReplies) {
-                _hasSecuritTokenRequest = true;
-                ggepBlock.put(GGEP.GGEP_HEADER_SECURITY_TOKEN);
+                _hasSecurityTokenRequest = true;
+                ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
             }
             
             // if there are GGEP headers, write them out...
@@ -1363,9 +1363,9 @@ public class QueryRequest extends Message implements Serializable{
                         if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
                             _metaMask = null;
                     }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_SECURITY_TOKEN)) {
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                         // TODO fberger throw exception if oob is not supported?
-                        _hasSecuritTokenRequest = true;
+                        _hasSecurityTokenRequest = true;
                     }
                 } catch (BadGGEPPropertyException ignored) {}
             }
@@ -1623,7 +1623,7 @@ public class QueryRequest extends Message implements Serializable{
      * Returns true if the query request has a security token request.
      */
     public boolean hasSecurityTokenRequest() {
-        return _hasSecuritTokenRequest;
+        return _hasSecurityTokenRequest;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful
