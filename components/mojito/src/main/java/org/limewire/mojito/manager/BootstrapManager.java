@@ -122,14 +122,16 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         // Make sure there is only one bootstrap process active!
         // Having parallel bootstrap proccesses is too expensive!
         deregister();
+        
+        // Bootstrap...
         BootstrapProcess process = new BootstrapProcess(node);
-        BootstrapFuture f = new BootstrapFuture(process);
+        BootstrapFuture future = new BootstrapFuture(process);
         synchronized (this) {
-            future = f;
+            this.future = future;
         }
-        context.getDHTExecutorService().execute(f);
+        context.getDHTExecutorService().execute(future);
 
-        return f;
+        return future;
     }
     
     /**
@@ -168,7 +170,9 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         /**
-         * 
+         * Tries to bootstrap the local Node and returns true on
+         * success. If it fails due to a stale RouteTable it will
+         * prune the RouteTable and tries it again.
          */
         private boolean bootstrap() throws InterruptedException, DHTException {
             try {
@@ -186,11 +190,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
         
         /**
-         * 
-         * @param node
-         * @return
-         * @throws InterruptedException
-         * @throws DHTException
+         * Bootstrap from the given Node
          */
         private boolean bootstrap(Contact node) throws InterruptedException, DHTException {
             // Begin with a lookup for the local Node ID
