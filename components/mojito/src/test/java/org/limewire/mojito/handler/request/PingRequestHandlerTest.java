@@ -80,6 +80,9 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             
             try {
                 PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
+                assertFalse(dht1.isBootstrapped());
+                assertTrue(context1.isBootstrapping());
+                
                 fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
