@@ -59,6 +59,10 @@ public class ContextTest extends MojitoTestCase {
             MojitoDHT down = dhts.get(index);
             down.close();
             
+            // Give everybody a bit time to process the 
+            // shutdown message
+            Thread.sleep(2000);
+            
             // Check now if the expected number of Nodes
             // was notified about the shutdown
             int downCounter = 0;

@@ -218,7 +218,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 enqueueOutput(notifier);
                 
                 try {
-                    getDatagramChannelLock().wait(2000L);
+                    getDatagramChannelLock().wait(1000L);
                 } catch (InterruptedException e) {
                     LOG.error("InterruptedException", e);
                 }
