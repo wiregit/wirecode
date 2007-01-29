@@ -26,7 +26,7 @@ public class MessageFactory {
     private static final Log LOG = LogFactory.getLog(MessageFactory.class);
     
     /** Array of MessageParser(s) */
-    private static final MessageParser[] PARSERS = new MessageParser[0xFF];
+    private static final MessageParser[] PARSERS = new MessageParser[0xFF + 1];
     
     /**
      * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
