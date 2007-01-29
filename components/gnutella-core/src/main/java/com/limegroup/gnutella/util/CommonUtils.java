@@ -5,9 +5,11 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -845,7 +847,7 @@ public final class CommonUtils {
             // In some Java 1.4 implementations, System.getenv() is 
             // depricated with prejudice (throws java.lang.Error).
             if (isJava15OrLater()) {
-                appdata = System.getProperty("LIMEWIRE_PREFS_DIR", System.getenv("APPDATA"));
+                appdata = System.getenv("APPDATA");
             } else {
                 // null string will fall back on default
                 appdata = System.getProperty("LIMEWIRE_PREFS_DIR",null);
@@ -854,6 +856,9 @@ public final class CommonUtils {
             if ("%APPDATA%".equals(appdata)) {
                 appdata = null; // fall back on default
             }
+            
+            if (appdata != null)
+                appdata = stripQuotes(appdata);
             
             if (appdata != null && appdata.length() > 0) {
                 File tempSettingsDir = new File(appdata, "LimeWire");
@@ -867,7 +872,7 @@ public final class CommonUtils {
             }
         } else if(isMacOSX()) {
             settingsDir = new File(getUserHomeDir(), "Library/Preferences/LimeWire");
-        } 
+        }
       
         // Default behavior
         try {
@@ -876,6 +881,18 @@ public final class CommonUtils {
             throw new RuntimeException(e);
         }
         return settingsDir;
+    }
+    
+    private static String stripQuotes(String incoming) {
+        if(incoming == null || incoming.length() <= 2)
+            return incoming;
+        
+        incoming = incoming.trim();
+        if(incoming.startsWith("\""))
+            incoming = incoming.substring(1);
+        if(incoming.endsWith("\""))
+            incoming = incoming.substring(0, incoming.length()-1);
+        return incoming;
     }
 
     /**
