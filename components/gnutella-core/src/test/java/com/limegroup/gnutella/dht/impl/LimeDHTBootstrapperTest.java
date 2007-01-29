@@ -125,4 +125,17 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         port = addr.getPort();
         assertEquals(address+":"+port, hosts[2]);
     }
+    
+    public void testListenToSimppHosts() throws Exception {
+        bootstrapper.bootstrap();
+        Thread.sleep(200);
+        assertTrue(bootstrapper.isWaitingForNodes());
+        //add bootstrap host post- bootstrap()
+        DHTSettings.DHT_BOOTSTRAP_HOSTS.setValue(new String[] {"127.0.0.1:"+BOOTSTRAP_DHT_PORT});
+        //this should trigger bootstrapping
+        bootstrapper.simppUpdated();
+        Thread.sleep(2000);
+        assertFalse(bootstrapper.isWaitingForNodes());
+        assertTrue(dhtContext.isBootstrapped());
+    }
 }
