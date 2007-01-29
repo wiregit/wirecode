@@ -27,20 +27,22 @@ public class UnitTestUtils {
         Field futureField = BootstrapManager.class.getDeclaredField("future");
         futureField.setAccessible(true);
         
-        if (nodeId != null) {
-            Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
-            Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
-            con.setAccessible(true);
-            
-            Object future = con.newInstance(bootstrapManager, new Callable() { 
-                public Object call() { 
-                    throw new UnsupportedOperationException();
-                }
-            });
-            
-            futureField.set(bootstrapManager, future);
-        } else {
-            futureField.set(bootstrapManager, null);
+        synchronized (bootstrapManager) {
+            if (nodeId != null) {
+                Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
+                Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
+                con.setAccessible(true);
+                
+                Object future = con.newInstance(bootstrapManager, new Callable() { 
+                    public Object call() { 
+                        throw new UnsupportedOperationException();
+                    }
+                });
+                
+                futureField.set(bootstrapManager, future);
+            } else {
+                futureField.set(bootstrapManager, null);
+            }
         }
     }
     
