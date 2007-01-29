@@ -337,6 +337,7 @@ public final class LimeWireUtils {
         if (OSUtils.isWindows()) {
             String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
             if (appdata != null && appdata.length() > 0) {
+                appdata = stripQuotes(appdata);
                 File tempSettingsDir = new File(appdata, "LimeWire");
                 if (tempSettingsDir.isDirectory() || !settingsDir.exists()) {
                     try {
@@ -357,6 +358,19 @@ public final class LimeWireUtils {
             throw new RuntimeException(e);
         }
         return settingsDir;
+    }
+    
+    /** Strips out any quotes that we left on the data. */
+    private static String stripQuotes(String incoming) {
+        if (incoming == null || incoming.length() <= 2)
+            return incoming;
+
+        incoming = incoming.trim();
+        if (incoming.startsWith("\""))
+            incoming = incoming.substring(1);
+        if (incoming.endsWith("\""))
+            incoming = incoming.substring(0, incoming.length() - 1);
+        return incoming;
     }
     
     /**
