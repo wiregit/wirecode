@@ -33,13 +33,6 @@ public class CommonUtils {
     
 
     /**
-     * Returns the version of java we're using.
-     */
-    public static String getJavaVersion() {
-    	return System.getProperty("java.version");
-    }
-
-    /**
      * Returns the user home directory.
      *
      * @return the <tt>File</tt> instance denoting the abstract pathname of

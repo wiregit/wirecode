@@ -2,6 +2,7 @@ package com.limegroup.gnutella.version;
 
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.Version;
 
 import junit.framework.Test;
 

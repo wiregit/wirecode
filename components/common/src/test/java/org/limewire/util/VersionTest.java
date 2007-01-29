@@ -1,10 +1,8 @@
-package com.limegroup.gnutella.version;
+package org.limewire.util;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
-
-public final class VersionTest extends LimeTestCase {
+public final class VersionTest extends BaseTestCase {
 
 	public VersionTest(String name) {
 		super(name);

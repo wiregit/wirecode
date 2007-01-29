@@ -17,9 +17,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
+import org.limewire.util.VersionUtils;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.DownloadManager;
@@ -270,7 +272,7 @@ public class UpdateHandler {
 
         Version javaV = null;        
         try {
-            javaV = new Version(CommonUtils.getJavaVersion());
+            javaV = new Version(VersionUtils.getJavaVersion());
         } catch(VersionFormatException vfe) {
             LOG.warn("Invalid java version", vfe);
         }

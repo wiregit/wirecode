@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.VersionUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -369,7 +370,7 @@ public final class LimeWireUtils {
         url += "pro="   + LimeWireUtils.isPro() + 
                "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
                "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
-               "&jv="   + EncodingUtils.encode(CommonUtils.getJavaVersion()) +
+               "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
                "&os="   + EncodingUtils.encode(OSUtils.getOS()) +
                "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
                "&guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString());

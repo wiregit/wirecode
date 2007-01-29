@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.version;
+package org.limewire.util;
 
 /**
  * Enscapulates a version, allowing easy compareTos.

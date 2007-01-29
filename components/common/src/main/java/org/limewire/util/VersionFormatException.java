@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.version;
+package org.limewire.util;
 
 public class VersionFormatException extends Exception {
     

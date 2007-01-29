@@ -2,6 +2,7 @@ package com.limegroup.gnutella.version;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.Version;
 
 import com.limegroup.gnutella.URN;
 
