@@ -195,23 +195,15 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
                 // The idea is to enqueue this fake Tag and to wait
                 // for the MessageDispatcher. Once it's being processed
                 // we know eveything in front of the queue was sent...
+                // This is specific to MessageDispatcherImpl!
                 Tag notifier = new Tag(context.getLocalNode(), null) {
-                    @Override
                     // Called right before send
+                    @Override
                     public boolean isCancelled() {
                         synchronized (getDatagramChannelLock()) {
                             getDatagramChannelLock().notifyAll();
                         }
                         return true;
-                    }
-
-                    @Override
-                    // Called in case of an error
-                    public void handleError(IOException e) {
-                        synchronized (getDatagramChannelLock()) {
-                            getDatagramChannelLock().notifyAll();
-                        }
-                        super.handleError(e);
                     }
                 };
                 
