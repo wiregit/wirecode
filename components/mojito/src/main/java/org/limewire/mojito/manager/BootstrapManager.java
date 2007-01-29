@@ -183,7 +183,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 // The RouteTable is stale! Remove all non-alive Contacts,
                 // rebuild the RouteTable and start over!
                 context.getRouteTable().purge();
-                return bootstrap();
+                return bootstrap(node);
             }
             
             return false;
