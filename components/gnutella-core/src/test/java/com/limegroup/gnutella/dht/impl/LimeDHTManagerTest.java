@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
 

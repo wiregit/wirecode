@@ -586,7 +586,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     
     public void testMsgDHTStatus() throws Exception {
         PrivilegedAccessor.setValue(ROUTER_SERVICE, "dhtManager", new DHTManagerStub());
-        UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte)0x20);
+        UDPCrawlerPing msgDHTStatus = new UDPCrawlerPing(new GUID(GUID.makeGuid()),3,3,(byte) (0x1 << 6));
         UDPCrawlerPong pong = new UDPCrawlerPong(msgDHTStatus);
         byte[] payload = pong.getPayload();
         byte format =  (byte) (payload[2] & UDPCrawlerPing.FEATURE_MASK);
