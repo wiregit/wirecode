@@ -26,23 +26,7 @@ public final class VersionTest extends BaseTestCase {
 	    } catch(VersionFormatException expected) {}
 	        
         try {
-            new Version("1");
-            fail("invalid v");
-        } catch(VersionFormatException expected) {}
-            
-        try {
-            new Version("1.2");
-            fail("invalid v");
-        } catch(VersionFormatException expected) {}
-            
-        
-        try {
-            new Version("1.3.a");
-            fail("invalid v");
-        } catch(VersionFormatException expected) {}
-            
-        try {
-            new Version("1.a.3");
+            new Version("1a");
             fail("invalid v");
         } catch(VersionFormatException expected) {}
             
@@ -50,23 +34,50 @@ public final class VersionTest extends BaseTestCase {
             new Version("1.a");
             fail("invalid v");
         } catch(VersionFormatException expected) {}
+
+        try {
+            new Version("1.2a");
+            fail("invalid v");
+        } catch(VersionFormatException expected) {}
+        
+        
+        try {
+            new Version("1.2.a");
+            fail("invalid v");
+        } catch(VersionFormatException expected) {}
+            
+        try {
+            new Version("1.a.3");
+            fail("invalid v");
+        } catch(VersionFormatException expected) {}
+    }
+    
+    private void check(String v, int M, int m, int s, int r) throws Exception {
+        Version vrs = new Version(v);
+        assertEquals(M, vrs.getMajor());
+        assertEquals(m, vrs.getMinor());
+        assertEquals(s, vrs.getService());
+        assertEquals(r, vrs.getRevision());
     }
     
     public void testValidVersion() throws Exception {
-        new Version("0.0.0");
-        new Version("1.2.3");
-        new Version("10.2.3052");
-        new Version("10.2.3_05");
-        new Version("2.1.81");
-        new Version("4.6.0 Pro");
-        new Version("4.6.0jum");
-        new Version("4.6.0_01");
-        new Version("4.6.0jum233");
-        new Version("4.6.0 666");
-        new Version("4.6.0_01abc");
-        new Version("1.5.0b56");
-        new Version("1.5.0_01");
-        new Version("1.5.0_02");
+        check("0.0.0", 0, 0, 0, 0);
+        check("1.2.3", 1, 2, 3, 0);
+        check("10.2.3052", 10, 2, 3052, 0);
+        check("10.2.3_05", 10, 2, 3, 5);
+        check("2.1.81", 2, 1, 81, 0);
+        check("4.6.0 Pro", 4, 6, 0, 0);
+        check("4.6.0jum", 4, 6, 0, 0);
+        check("4.6.0jum233", 4, 6, 0, 233);
+        check("4.6.0_01", 4, 6, 0, 1);
+        check("4.6.0_01abc", 4, 6, 0, 1);
+        check("1.5.0b56", 1, 5, 0, 56);
+        check("1.5.0_01", 1, 5, 0, 1);
+        check("1.5.0_02", 1, 5, 0, 2);
+        check("1", 1, 0, 0, 0);
+        check("1.2", 1, 2, 0, 0);
+        check("1.2.3.4a", 1, 2, 3, 4);
+        check("1.2.3.4a5", 1, 2, 3, 4);
     }
     
     public void testComparingVersions() throws Exception {
