@@ -32,12 +32,12 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.exceptions.DHTException;
+import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.service.ErrorService;
-
 
 
 /**
@@ -95,11 +95,15 @@ public class DHTValueManager implements Runnable {
         synchronized (republishTask) {
             // There is no point in running the DHTValueManager
             // if we're not bootstrapped!
-            if (!context.isBootstrapped() || context.isBootstrapping()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " is not bootstrapped");
+            BootstrapManager bootstrapManager = context.getBootstrapManager();
+            synchronized (bootstrapManager) {
+                if (!bootstrapManager.isBootstrapped() 
+                        || bootstrapManager.isBootstrapping()) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info(context.getName() + " is not bootstrapped");
+                    }
+                    return;
                 }
-                return;
             }
             
             // Republish but make sure the task from the previous
