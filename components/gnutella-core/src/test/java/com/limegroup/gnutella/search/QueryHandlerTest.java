@@ -44,13 +44,15 @@ public final class QueryHandlerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    public static void globalSetUp()  {
+        new RouterService(new ActivityCallbackStub());
+    }
 
     /**
      * Tests the method for sending an individual query to a 
      * single connections.
      */
     public void testSendQueryToHost() throws Exception {
-        new RouterService(new ActivityCallbackStub());
         ReplyHandler rh = new UltrapeerConnection();        
         QueryRequest query = QueryRequest.createQuery("test", (byte)1);
         QueryHandler qh = 
@@ -138,7 +140,6 @@ public final class QueryHandlerTest extends LimeTestCase {
      * expected.
      */
     public void testPublicSendQuery() throws Exception {
-        new RouterService(new ActivityCallbackStub());
         assertNotNull("should have a message router", RouterService.getMessageRouter());
 
         List connections = new LinkedList();
@@ -247,7 +248,6 @@ public final class QueryHandlerTest extends LimeTestCase {
      * basics of query dispatching are working correctly.
      */
     public void testPrivateSendQuery() throws Exception {
-        new RouterService(new ActivityCallbackStub());
         assertNotNull("should have a message router", RouterService.getMessageRouter());
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 

@@ -25,7 +25,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 @SuppressWarnings("unchecked")
 public class SearchResultHandlerTest extends LimeTestCase {
     
-    private StubCallback callback = new StubCallback();
+    private static StubCallback callback = new StubCallback();
 
     public SearchResultHandlerTest(String name) {
         super(name);
@@ -39,8 +39,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() throws Exception {
+    public static void globalSetUp()  {
         new RouterService(callback);
+    }
+    
+    public void setUp() throws Exception {
         PrivilegedAccessor.setValue(RouterService.class, "VERIFIER", new StubVerifier());
     }
     

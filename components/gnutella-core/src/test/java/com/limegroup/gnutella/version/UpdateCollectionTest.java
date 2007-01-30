@@ -1,13 +1,12 @@
 package com.limegroup.gnutella.version;
 
+import junit.framework.Test;
+
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.Version;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public final class UpdateCollectionTest extends LimeTestCase {
 
@@ -363,7 +362,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(LimeWireUtils.class, "setOperatingSystems", null);
+        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems", null);
     }
             
 }

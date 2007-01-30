@@ -25,6 +25,8 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
     
     private static final String filePath = "com/limegroup/gnutella/downloader/";
+    
+    private static TestActivityCallback callback;
 
     public OldDownloadsTest(String name) {
         super(name);
@@ -36,6 +38,11 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     public static Test suite() {
         return buildTestSuite(OldDownloadsTest.class);
+    }
+    
+    public static void globalSetUp() throws Exception {
+        callback = new TestActivityCallback();
+        new RouterService( callback );
     }
 
     public void testLegacy() throws Exception {
@@ -51,8 +58,6 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         //Build part of backend 
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         DownloadSettings.MAX_SIM_DOWNLOAD.setValue(0);
-        TestActivityCallback callback=new TestActivityCallback();
-        new RouterService(callback);
         DownloadManager dm = RouterService.getDownloadManager();
         dm.initialize();
         assertTrue("unable to read snapshot!",
@@ -69,7 +74,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     /**
      * Records lists of downloads
      */
-    class TestActivityCallback extends ActivityCallbackStub {
+    static class TestActivityCallback extends ActivityCallbackStub {
         List /* of Downloader */ downloaders=new LinkedList();
     
         public void addDownload(Downloader d) {

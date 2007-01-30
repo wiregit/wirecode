@@ -12,13 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -34,7 +35,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 @SuppressWarnings("unchecked")
 public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -964,7 +964,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
      */
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(LimeWireUtils.class, "setOperatingSystems", null);
+        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems", null);
     }
     
     //helper function to create queryrequest with I18N

@@ -50,11 +50,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);
     	someFileMatches.add(APP_TXT);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/BaseTestCase.java"), textFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/GUIBaseTestCase.java"), textFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestSuite.java"), appTorrentFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         RouterService.getFileManager().addFileAlways(textFile);
         RouterService.getFileManager().addFileAlways(torrentFile);
         RouterService.getFileManager().addFileAlways(userTorrentFile);

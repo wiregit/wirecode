@@ -38,6 +38,10 @@ public class HostCatcherTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    public static void globalSetUp() throws Exception {
+        new RouterService( new ActivityCallbackStub() );
+    }
+    
     /**
      * Returns a new HostCatcher connected to stubs. YOU MAY WANT TO CALL EXPIRE to force bootstrap pongs.
      */
@@ -47,7 +51,6 @@ public class HostCatcherTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*" });
 
         HostCatcher.DEBUG = true;
-        new RouterService(new ActivityCallbackStub());
 
         hc = new HostCatcher();
         hc.initialize();		

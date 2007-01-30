@@ -62,8 +62,6 @@ public class NodeAssignerTest extends LimeTestCase {
 
     protected void setUp() throws Exception {
         setSettings();
-        ROUTER_SERVICE =
-            new RouterService(new ActivityCallbackStub());
         ASSIGNER = new NodeAssigner(BW, BW, RouterService.getConnectionManager());
 
     }

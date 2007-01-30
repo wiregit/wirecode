@@ -32,13 +32,16 @@ public class QueryDispatcherTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }    
+    
+    public static void globalSetUp()  {
+        new RouterService(new ActivityCallbackStub());
+    }
 
     /**
      * Test to make sure that <tt>ReplyHandler</tt>s are removed correctly
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
-        new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");
@@ -97,7 +100,6 @@ public class QueryDispatcherTest extends LimeTestCase {
      * removed correctly
      */
     public void testRemoveStoppedQuery() throws Exception {
-        new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
         
         Map queries = (Map)PrivilegedAccessor.getValue(qd, "QUERIES");

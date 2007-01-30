@@ -4,12 +4,11 @@ import java.io.File;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-
-import junit.framework.Test;
 
 /**
  * Tests certain features of CommonUtils
@@ -86,15 +85,15 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.LimeTestCase {
 	 */
 	public void testCommonUtilsConvertFileName() throws Exception {
 		char[] illegalChars = 
-			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
 												"ILLEGAL_CHARS_ANY_OS");
 
 		char[] illegalCharsUnix = 
-			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
 												"ILLEGAL_CHARS_UNIX");
 
 		char[] illegalCharsWindows = 
-			(char[])PrivilegedAccessor.getValue(LimeWireUtils.class, 
+			(char[])PrivilegedAccessor.getValue(CommonUtils.class, 
 												"ILLEGAL_CHARS_WINDOWS");
 
 		runCharTest(illegalChars);

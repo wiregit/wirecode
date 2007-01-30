@@ -35,15 +35,15 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;
 
 @SuppressWarnings("unchecked")
-public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class UploaderTest extends LimeTestCase {
 
-    private ActivityCallback ac;
     private static FileManager fm;
-    private RouterService rs;
+    private static RouterService rs;
     private UploadManager upManager;
     private RemoteFileDesc rfd1;
     private RemoteFileDesc rfd2;
@@ -51,11 +51,24 @@ public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
     private RemoteFileDesc rfd4;
     private RemoteFileDesc rfd5;
     private URN urn1,urn2,urn3,urn4,urn5;
+    
+    public UploaderTest(String name) {
+        super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(UploaderTest.class);
+    }
 
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    public static void globalSetUp() throws Exception {
+        rs = new RouterService( new ActivityCallbackStub() );
+    }
 
     public void setUp() throws Exception {
-        ac = new ActivityCallbackStub();
-        
         Map urns = new HashMap();
         Vector descs = new Vector();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
@@ -106,7 +119,6 @@ public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
         
         fm = new FileManagerStub(urns,descs);
-        rs = new RouterService(ac);
         RouterService.getContentManager().initialize();
         upManager = new UploadManager(new UploadSlotManager());
 
@@ -115,25 +127,15 @@ public class UploaderTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         fm.get(0);
     }
-
-    public UploaderTest(String name) {
-        super(name);
-    }
-
+    
     public void tearDown() {
-        ac = null;
         fm = null;
-        rs = null;
         upManager = null;
         rfd1 = null;
         rfd2 = null;
         rfd3 = null;
         rfd4 = null;
         rfd5 = null;
-    }
-
-    public static Test suite() {
-        return buildTestSuite(UploaderTest.class);
     }
 
     /**

@@ -100,7 +100,7 @@ public class HeadTest extends LimeTestCase {
 	    
 	    MessageRouterStub mrStub = new MessageRouterStub();
 	    
-	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
+	    PrivilegedAccessor.setValue(RouterService.class,"messageRouter",mrStub);
 	    
 	    ManagedConnectionStub mStub = new ManagedConnectionStub();
 	    final Set conns = new HashSet();

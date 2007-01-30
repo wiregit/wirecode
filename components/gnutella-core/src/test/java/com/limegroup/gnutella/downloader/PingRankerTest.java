@@ -72,7 +72,7 @@ public class PingRankerTest extends LimeTestCase {
         pinger.hosts.clear();
         ranker = new PingRanker();
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
-        PrivilegedAccessor.setValue(RouterService.class,"router", new MessageRouterStub());
+        PrivilegedAccessor.setValue(RouterService.class,"messageRouter", new MessageRouterStub());
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
         ranker.setMeshHandler(new MockMesh(ranker));
         DownloadSettings.WORKER_INTERVAL.setValue(-1);

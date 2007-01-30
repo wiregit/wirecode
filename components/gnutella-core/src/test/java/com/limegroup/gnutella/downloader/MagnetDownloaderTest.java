@@ -68,7 +68,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
         PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
-        PrivilegedAccessor.setValue(RouterService.class,"router",router);
+        PrivilegedAccessor.setValue(RouterService.class,"messageRouter",router);
     }
 
     public void testInvalidMagnetDownloads() throws Exception {

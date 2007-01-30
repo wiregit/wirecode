@@ -41,7 +41,7 @@ public final class PingerTest extends LimeTestCase {
     public void testPeriodicUltrapeerPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
         ConnectionManager cm = new UltrapeerConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "router", mr);
+        PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = Pinger.instance();
         pinger.start();
@@ -65,7 +65,7 @@ public final class PingerTest extends LimeTestCase {
     public void testPeriodicLeafPings() throws Exception {
         TestMessageRouter mr = new TestMessageRouter();
         ConnectionManager cm = new LeafConnectionManager();
-        PrivilegedAccessor.setValue(RouterService.class, "router", mr);
+        PrivilegedAccessor.setValue(RouterService.class, "messageRouter", mr);
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);
         Pinger pinger = Pinger.instance();
         pinger.start();
