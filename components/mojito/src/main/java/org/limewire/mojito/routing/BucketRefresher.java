@@ -33,6 +33,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.RouteTableSettings;
@@ -99,34 +100,38 @@ public class BucketRefresher implements Runnable {
             // pointless. Try to bootstrap from the RouteTable if 
             // it's possible.
             
-            if (!context.isBootstrapped()) {
-                if (!context.isBootstrapping()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Bootstrap " + context.getName());
-                    }
-                    
-                    // If we are not bootstrapped and have some 
-                    // Nodes in our RouteTable, try to bootstrap
-                    // from the RouteTable
-                    
-                    DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
-                        @Override
-                        public void handleFutureSuccess(PingResult result) {
-                            context.bootstrap(result.getContact());
+            BootstrapManager bootstrapManager = context.getBootstrapManager();
+            synchronized (bootstrapManager) {
+                if (!bootstrapManager.isBootstrapped()) {
+                    if (!bootstrapManager.isBootstrapping()) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Bootstrap " + context.getName());
                         }
-                    };
-                    
-                    DHTFuture<PingResult> future = context.findActiveContact();
-                    future.addDHTFutureListener(listener);
-                } else {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(context.getName() + " is bootstrapping");
+                        
+                        // If we are not bootstrapped and have some 
+                        // Nodes in our RouteTable, try to bootstrap
+                        // from the RouteTable
+                        
+                        DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+                            @Override
+                            public void handleFutureSuccess(PingResult result) {
+                                context.bootstrap(result.getContact());
+                            }
+                        };
+                        
+                        DHTFuture<PingResult> future = context.findActiveContact();
+                        future.addDHTFutureListener(listener);
+                    } else {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info(context.getName() + " is bootstrapping");
+                        }
                     }
+                    
+                    // In any case exit here!
+                    return;
                 }
-                
-                // In any case exit here!
-                return;
             }
+            
             
             // Refresh but make sure the task from the previous
             // run() call has finished as we don't want to run

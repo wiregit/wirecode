@@ -663,6 +663,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     }
 
     /**
+     * Returns the BootstrapManager
+     */
+    public BootstrapManager getBootstrapManager() {
+        return bootstrapManager;
+    }
+    
+    /**
      * Returns whether or not the MojitoDHT is bootstrapping
      */
     public synchronized boolean isBootstrapping() {

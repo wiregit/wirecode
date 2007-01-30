@@ -56,8 +56,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      */
     private BootstrapFuture future;
     
-    /** Whether or not we're bootstrapped */
-    private volatile boolean bootstrapped = false;
+    /** 
+     * A flag for whether or not we're bootstrapped 
+     */
+    private boolean bootstrapped = false;
     
     public BootstrapManager(Context context) {
         super(context);
@@ -78,7 +80,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * Returns true if this Node has bootstrapped successfully
      */
-    public boolean isBootstrapped() {
+    public synchronized boolean isBootstrapped() {
         return bootstrapped;
     }
     
@@ -86,7 +88,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
      * An internal method to set the bootsrapped flag.
      * Meant for internal use only.
      */
-    public void setBootstrapped(boolean bootstrapped) {
+    public synchronized void setBootstrapped(boolean bootstrapped) {
         this.bootstrapped = bootstrapped;
     }
     
@@ -162,7 +164,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
             ResultType type = ResultType.BOOTSTRAP_FAILED;
             
             if (bootstrap()) {
-                bootstrapped = true;
+                setBootstrapped(true);
                 type = ResultType.BOOTSTRAP_SUCCEEDED;
             }
             

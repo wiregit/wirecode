@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import junit.framework.TestSuite;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
@@ -74,7 +73,7 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 PrivilegedAccessor.getValue(context1, "bucketRefresher");
             bucketRefresher.stop();
             
-            UnitTestUtils.setBootstrapping(dht1, KUID.createRandomID());
+            UnitTestUtils.setBootstrapping(dht1, true);
             assertFalse(dht1.isBootstrapped());
             assertTrue(context1.isBootstrapping());
             

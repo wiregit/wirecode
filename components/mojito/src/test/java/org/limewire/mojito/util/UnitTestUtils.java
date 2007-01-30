@@ -18,7 +18,7 @@ public class UnitTestUtils {
     }
     
     @SuppressWarnings("unchecked")
-    public static void setBootstrapping(MojitoDHT dht, KUID nodeId) throws Exception {
+    public static void setBootstrapping(MojitoDHT dht, boolean bootstrapping) throws Exception {
         Context context = (Context)dht;
         Field bmField = Context.class.getDeclaredField("bootstrapManager");
         bmField.setAccessible(true);
@@ -28,7 +28,7 @@ public class UnitTestUtils {
         futureField.setAccessible(true);
         
         synchronized (bootstrapManager) {
-            if (nodeId != null) {
+            if (bootstrapping) {
                 Class clazz = Class.forName("org.limewire.mojito.manager.BootstrapManager$BootstrapFuture");
                 Constructor con = clazz.getDeclaredConstructor(BootstrapManager.class, Callable.class);
                 con.setAccessible(true);
