@@ -36,7 +36,7 @@ import org.limewire.mojito.util.MojitoUtils;
 
 public class CollisionTest extends MojitoTestCase {
     
-    private static final int PORT = 4000;
+    private static final int PORT = 3000;
     
     public CollisionTest(String name) {
         super(name);
