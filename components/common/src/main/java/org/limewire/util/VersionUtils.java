@@ -26,7 +26,7 @@ public class VersionUtils {
         try {
             Version java = new Version(getJavaVersion());
             Version given = new Version(version);
-            return java.compareTo(given) == 1;
+            return java.compareTo(given) >= 1;
         } catch(VersionFormatException vfe) {
             return false;
         }
@@ -39,7 +39,7 @@ public class VersionUtils {
         try {
             Version java = new Version(getJavaVersion());
             Version given = new Version(version);
-            return java.compareTo(given) >= 1;
+            return java.compareTo(given) >= 0;
         } catch(VersionFormatException vfe) {
             return false;
         }
