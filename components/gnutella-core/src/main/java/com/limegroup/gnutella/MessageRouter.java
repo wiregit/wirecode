@@ -1111,6 +1111,8 @@ public abstract class MessageRouter {
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
+        
+        // array is null for old oob messages, it will just be ignored then
         byte[] securityToken = ack.getSecurityTokenBytes();
        
         if ((bundle != null) && (ack.getNumResults() > 0)) {

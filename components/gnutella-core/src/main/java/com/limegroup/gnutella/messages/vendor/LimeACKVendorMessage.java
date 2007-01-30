@@ -35,13 +35,15 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  
  *  @version 3
  *  
- *  * Adds QueryKey to prevent clients from spoofing their ip and just sending
+ *  * Adds a security token to prevent clients from spoofing their ip and just sending
  *  results back after a little while
  */
 public final class LimeACKVendorMessage extends VendorMessage {
 
     public static final int VERSION = 3;
 
+    private static final int PAYLOAD_MIN_LENGTH_V3 = derivePayload(255, new byte[1]).length;
+    
     /**
      * Constructs a new LimeACKVendorMessage with data from the network.
      */
@@ -58,8 +60,8 @@ public final class LimeACKVendorMessage extends VendorMessage {
         if ((getVersion() == 2) && (getPayload().length != 1))
             throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
-        if ((getVersion() == 3) && (getPayload().length <= 1))
-            throw new BadPacketException("VERSION 3 should have a query key");
+        if ((getVersion() == 3) && (getPayload().length < PAYLOAD_MIN_LENGTH_V3))
+            throw new BadPacketException("VERSION 3 should have a GGEP");
     }
 
     /**
@@ -74,7 +76,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
     public LimeACKVendorMessage(GUID replyGUID, 
                                 int numResults, SecurityToken securityToken) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
-              derivePayload(numResults, securityToken));
+              derivePayload(numResults, securityToken.getBytes()));
         setGUID(replyGUID);
     }
     
@@ -92,8 +94,8 @@ public final class LimeACKVendorMessage extends VendorMessage {
         if (getVersion() > 2) {
             try {
                 GGEP ggep = new GGEP(getPayload(), 1);
-                if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                    return ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                    return ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
                 }
             }
             catch (BadGGEPPropertyException corrupt) {} 
@@ -106,12 +108,12 @@ public final class LimeACKVendorMessage extends VendorMessage {
      * Constructs the payload for a LimeACKVendorMessage with the given
      * number of results.
      */
-    private static byte[] derivePayload(int numResults, SecurityToken securityToken) {
+    private static byte[] derivePayload(int numResults, byte[] securityTokenBytes) {
         if ((numResults <= 0) || (numResults > 255))
             throw new IllegalArgumentException("Number of results too big or too small: " +
                                                numResults);
-        if (securityToken == null) {
-            throw new NullPointerException("queryKey must not be null");
+        if (securityTokenBytes == null || securityTokenBytes.length == 0) {
+            throw new NullPointerException("security token bytes must not be null and not zero length");
         }
         byte[] bytes = new byte[2];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -119,7 +121,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
         out.write(bytes[0]); 
 
         GGEP ggep = new GGEP(true);
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityTokenBytes);
         try {
             ggep.write(out);
         }

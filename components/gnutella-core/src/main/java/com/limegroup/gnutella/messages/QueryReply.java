@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
-import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
