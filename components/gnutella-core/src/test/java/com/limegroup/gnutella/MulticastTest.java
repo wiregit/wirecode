@@ -117,6 +117,8 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER.multicasted.clear();
         U_HANDLER.unicasted.clear();
         
+        //sleep a little bit to allow file manager to process files to be added
+        Thread.sleep(500);
         assertEquals("unexpected number of shared files", 1,
             FMAN.getNumFiles() );
 	}

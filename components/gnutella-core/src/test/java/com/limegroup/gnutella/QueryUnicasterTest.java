@@ -42,9 +42,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 
     private final int NUM_UDP_LOOPS = 25;
     
-    private final RouterService _rs = new RouterService(new
-                                                        ActivityCallbackStub(),
-                                                        new MessageRouterStub());
+    private static RouterService _rs;
 
     private boolean _shouldRun = true;
     private boolean shouldRun() {
@@ -67,17 +65,24 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() throws Exception {
+    public static void globalSetUp() throws Exception {
+        _rs = new RouterService(new
+                ActivityCallbackStub(),
+                new MessageRouterStub());
         _rs.start();
-
+    }
+    
+    public void setUp() throws Exception {
         QueryUnicaster qu = QueryUnicaster.instance();        
         PrivilegedAccessor.invokeMethod( qu, "resetUnicastEndpointsAndQueries", null );
        
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
     }
-
     
+    protected void tearDown() throws Exception {
+    }
+
     public void testConstruction() {
         QueryUnicaster qu = QueryUnicaster.instance();
         

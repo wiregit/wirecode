@@ -47,7 +47,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
         mp3 = 
-        CommonUtils.getResourceFile("com/limegroup/gnutella/ByteOrderTest.java");
+        CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java");
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "meta audio.mp3"));
         mp3 = 
