@@ -129,7 +129,7 @@ public class PingManager extends AbstractManager<PingResult> {
      * @param key The remote Node's address
      */
     private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, PingIterator pinger) {
-        PingFuture future;
+        PingFuture future = null;
         synchronized (futureMap) {
             future = (key != null ? futureMap.get(key) : null);
 
@@ -140,10 +140,12 @@ public class PingManager extends AbstractManager<PingResult> {
                 if (key != null) {
                     futureMap.put(key, future);
                 }
+                
+                networkStats.PINGS_SENT.incrementStat();
+                context.getDHTExecutorService().execute(future);
             }
         }
-        networkStats.PINGS_SENT.incrementStat();
-        context.getDHTExecutorService().execute(future);
+        
         return future;
     }
     

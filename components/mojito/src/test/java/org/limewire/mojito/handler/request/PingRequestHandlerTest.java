@@ -9,7 +9,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.ContextSettings;
@@ -37,6 +36,8 @@ public class PingRequestHandlerTest extends MojitoTestCase {
     }
 
     public void testPingRequest() throws Exception {
+        final long waitForFutureDone = 250; // ms
+        
         NetworkSettings.MAX_ERRORS.setValue(0);
         NetworkSettings.TIMEOUT.setValue(250);
         
@@ -54,14 +55,19 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             dht2.start();
             
             // Regular Ping
-            DHTFuture<PingResult> future1 = null;
             try {
-                future1 = dht2.ping(new InetSocketAddress("localhost", 2000));
-                PingResult result = future1.get();
+                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
                 assertNotNull(result);
             } catch (ExecutionException err) {
                 fail(err);
             }
+            
+            // FutureTask.get() returns before FutureTask.done()
+            // is called. We use the done() method internally to
+            // deregister ping tasks. If done() doesn't get called
+            // before we're doing out next ping it will return the
+            // same Future handle (i.e. there's no ping sent!)...
+            Thread.sleep(waitForFutureDone);
             
             // A Node that's bootstrapping should not respond to
             // Pings to prevent other Nodes from seleting it as
@@ -73,15 +79,15 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             assertTrue(dht1.isBootstrapping());
             
             try {
-                DHTFuture<PingResult> future2 = dht2.ping(new InetSocketAddress("localhost", 2000));
-                PingResult result = future2.get();
+                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
                 assertFalse(dht1.isBootstrapped());
                 assertTrue(dht1.isBootstrapping());
-                
-                fail("DHT-1 did respond to our request " + result + " " + (future1==future2));
+                fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
             }
+            
+            Thread.sleep(waitForFutureDone);
             
             // next collision Ping. Different Node IDs -> should not work (same as above)
             context1.setContactAddress(new InetSocketAddress("localhost", 2000));
@@ -99,6 +105,8 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 fail("Should not have thrown an IllegalArgumentException", err);
             }
             
+            Thread.sleep(waitForFutureDone);
+            
             // Re-Enable local assertion to make sure you can't create
             // malfored collision pings like above
             ContextSettings.ASSERT_COLLISION_PING.setValue(true);
@@ -109,6 +117,8 @@ public class PingRequestHandlerTest extends MojitoTestCase {
                 assertTrue(expected.getCause() instanceof DHTException);
             } catch (IllegalArgumentException expected) {
             }
+            
+            Thread.sleep(waitForFutureDone);
             
             // Set DHT-2's Node ID to DHT-1 and try again. This should work!
             UnitTestUtils.setNodeID(dht2, dht1.getLocalNodeID());

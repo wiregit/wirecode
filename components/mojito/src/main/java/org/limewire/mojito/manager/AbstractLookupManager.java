@@ -61,7 +61,7 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
      * number of results
      */
     private DHTFuture<V> lookup(KUID lookupId, int count) {
-        LookupFuture future;
+        LookupFuture future = null;
         synchronized(futureMap) {
             future = futureMap.get(lookupId);
             if (future == null) {
@@ -69,11 +69,10 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
-                
-            } else
-                return future;
+                context.getDHTExecutorService().execute(future);
+            }
         }
-        context.getDHTExecutorService().execute(future);
+        
         return future;
     }
     
