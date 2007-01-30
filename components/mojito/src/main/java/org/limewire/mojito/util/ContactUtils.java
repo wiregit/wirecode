@@ -36,6 +36,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.impl.LocalContact;
 
 
 /**
@@ -251,9 +252,14 @@ public final class ContactUtils {
     }
 
     /**
-     * 
+     * Takes the given Contact and returns a version of it that
+     * can be used to test for Node ID collisions
      */
     public static Contact createCollisionPingSender(Contact localNode) {
+        if (!(localNode instanceof LocalContact)) {
+            throw new IllegalArgumentException("Contact must be an instance of LocalContact: " + localNode);
+        }
+
         // The idea is to invert our local Node ID so that the
         // other Node doesn't get the impression we're trying
         // to spoof anything and we don't want that the other
@@ -270,20 +276,23 @@ public final class ContactUtils {
         return sender;
     }
 
-    public static boolean isCollisionPingSender(KUID nodeId, Contact sender) {
+    /**
+     * Returns true if the given Contact is a collsion ping sender
+     */
+    public static boolean isCollisionPingSender(KUID localNodeId, Contact sender) {
         // The sender must be firewalled!
         if (!sender.isFirewalled()) {
             return false;
         }
         
         // See createCollisionPingSender(...)
-        KUID expectedSenderId = nodeId.invert();
+        KUID expectedSenderId = localNodeId.invert();
         return expectedSenderId.equals(sender.getNodeID());
     }
     
     /**
      * Returns the most recently seen contact from the list.
-     * Use BucketUtils.sort() prior to calling this Method!
+     * Use ContactUtils.sort() prior to calling this Method!
      */
     public static <T extends Contact> Contact getMostRecentlySeen(List<T> nodes) {
         assert (nodes.get(0).getTimeStamp() >= nodes.get(nodes.size()-1).getTimeStamp());
@@ -292,7 +301,7 @@ public final class ContactUtils {
 
     /**
      * Returns the least recently seen contact from the list.
-     * Use BucketUtils.sort() prior to calling this Method!
+     * Use ContactUtils.sort() prior to calling this Method!
      */
     public static <T extends Contact> Contact getLeastRecentlySeen(List<T> nodes) {
         assert (nodes.get(nodes.size()-1).getTimeStamp() <= nodes.get(0).getTimeStamp());
