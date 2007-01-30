@@ -32,20 +32,73 @@ import org.limewire.mojito.routing.Contact;
  */
 public final class BucketUtils {
     
-    public static final Comparator<Contact> MRS_COMPARATOR = new Comparator<Contact>() {
+    /**
+     * A helper method to compare longs.
+     */
+    private static int compareLong(long a, long b) {
+        if (a < b) {
+            return -1;
+        } else if (a > b) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * A Comparator that orders a Collection of Contacts from
+     * most recently seen to least recently seen.
+     */
+    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR = new Comparator<Contact>() {
         public int compare(Contact a, Contact b) {
-            long t1 = a.getTimeStamp();
-            long t2 = b.getTimeStamp();
-            if (t1 == t2) {
-                return 0;
-            } else if (t1 > t2) {
-                return -1;
-            } else {
+            // Note: There's a minus sign to change the order from
+            // 'small to big' to 'big to small' values
+            return -compareLong(a.getTimeStamp(), b.getTimeStamp());
+        }
+    };
+    
+    /**
+     * A Comparator that orders a Collection of Buckets by their
+     * depth in a Tree.
+     */
+    public static final Comparator<Bucket> BUCKET_DEPTH_COMPARATOR = new Comparator<Bucket>() {
+        public int compare(Bucket o1, Bucket o2) {
+            return o1.getDepth() - o2.getDepth();
+        }
+    };
+    
+    /**
+     * A Comparator that orders a Collection of Contacts from alive
+     * to failed. The sub-set of alive Contacts is ordered from most
+     * recently seen to least recently seen and the sub-set of failed
+     * Contacts is ordered by least recently failed to most recently
+     * failed.
+     */
+    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR = new Comparator<Contact>() {
+        public int compare(Contact a, Contact b) {
+            // If neither a not b has failed then use the standard
+            // most recently seen (MRS) comparator
+            if (!a.hasFailed() && !b.hasFailed()) {
+                return CONTACT_MRS_COMPARATOR.compare(a, b);
+            
+            // If a has failed and b hasn't then move a to the
+            // end of the collection
+            } else if (a.hasFailed() && !b.hasFailed()) {
                 return 1;
+            
+            // If a hasn't failed and b has then move b to
+            // the end of the collection
+            } else if (!a.hasFailed() && b.hasFailed()) {
+                return -1;
+            
+            // If both have failed then order by least recently 
+            // failed to most recently failed
+            } else { 
+                return compareLong(a.getLastFailedTime(), b.getLastFailedTime());
             }
         }
     };
-        
+    
     private BucketUtils() {}
     
     /**
@@ -66,20 +119,29 @@ public final class BucketUtils {
         return nodes.get(nodes.size()-1);
     }
     
+    /**
+     * Sorts the given List of Contacts from most recently seen to 
+     * least recently seen.
+     */
     public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes) {
         return sort(nodes);
     }
     
+    /**
+     * Sorts the given List of Contacts from most recently seen to 
+     * least recently seen and returns a sub-list with at most
+     * count number of elements.
+     */
     public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes, int count) {
         return sort(nodes).subList(0, Math.min(count, nodes.size()));
     }
     
     /**
-     * Sorts the contacts from most recently seen to
+     * Sorts the Contacts from most recently seen to
      * least recently seen
      */
     public static <T extends Contact> List<T> sort(List<T> nodes) {
-        Collections.sort(nodes, MRS_COMPARATOR);
+        Collections.sort(nodes, CONTACT_MRS_COMPARATOR);
         return nodes;
     }
     
@@ -90,59 +152,16 @@ public final class BucketUtils {
      * Used when loading the routing table if our nodeID has changed
      */
     public static <T extends Contact> List<T> sortAliveToFailed(List<T> nodes) {
-        Collections.sort(nodes, new Comparator<Contact>() {
-            public int compare(Contact a, Contact b) {
-                long t1, t2;
-                if (!a.hasFailed() && !b.hasFailed()) {
-                    t1 = a.getTimeStamp();
-                    t2 = b.getTimeStamp();
-                    if (t1 == t2) {
-                        return 0;
-                    } else if (t1 > t2) {
-                        return -1;
-                    } else {
-                        return 1;
-                    }
-                } else if (a.hasFailed() && !b.hasFailed()) {
-                    return 1;
-                } else if (!a.hasFailed() && b.hasFailed()) {
-                    return -1;
-                } else { //a has failed and b has failed
-                    //order by least recently failed to most recently failed
-                    t1 = a.getLastFailedTime();
-                    t2 = b.getLastFailedTime();
-                    if (t1 == t2) {
-                        return 0;
-                    } else if (t1 > t2) {
-                        return 1;
-                    } else {
-                        return -1;
-                    }
-                }
-            }
-        });
+        Collections.sort(nodes, CONTACT_ALIVE_TO_FAILED_COMPARATOR);
         return nodes;
     }
     
     /**
      * Sort this list of Buckets by depth. Used for things such as 
      * building a binary tree out of this list of buckets.
-     * 
      */
     public static <T extends Bucket> List<T> sortByDepth(List<T> buckets){
-        Collections.sort(buckets, new Comparator<T>() {
-            public int compare(T o1, T o2) {
-                int depth1 = o1.getDepth();
-                int depth2 = o2.getDepth();
-                if(depth1 == depth2) {
-                    return 0;
-                } else if(depth1 > depth2) {
-                    return 1;
-                } else 
-                    return -1;
-            }
-            
-        });
+        Collections.sort(buckets, BUCKET_DEPTH_COMPARATOR);
         return buckets;
     }
 }

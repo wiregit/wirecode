@@ -858,7 +858,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private Set<Contact> getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
         List<Contact> contactList = getRouteTable().getActiveContacts();
-        Collections.sort(contactList, BucketUtils.MRS_COMPARATOR);
+        Collections.sort(contactList, BucketUtils.CONTACT_MRS_COMPARATOR);
         nodes.addAll(contactList);
         nodes.remove(getLocalNode());
         return nodes;
