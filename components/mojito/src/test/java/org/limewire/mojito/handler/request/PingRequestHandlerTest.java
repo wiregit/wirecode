@@ -9,6 +9,7 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.settings.ContextSettings;
@@ -53,8 +54,10 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             dht2.start();
             
             // Regular Ping
+            DHTFuture<PingResult> future1 = null;
             try {
-                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
+                future1 = dht2.ping(new InetSocketAddress("localhost", 2000));
+                PingResult result = future1.get();
                 assertNotNull(result);
             } catch (ExecutionException err) {
                 fail(err);
@@ -70,11 +73,12 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             assertTrue(dht1.isBootstrapping());
             
             try {
-                PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
+                DHTFuture<PingResult> future2 = dht2.ping(new InetSocketAddress("localhost", 2000));
+                PingResult result = future2.get();
                 assertFalse(dht1.isBootstrapped());
                 assertTrue(dht1.isBootstrapping());
                 
-                fail("DHT-1 did respond to our request " + result);
+                fail("DHT-1 did respond to our request " + result + " " + (future1==future2));
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
             }
