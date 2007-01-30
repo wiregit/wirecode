@@ -23,7 +23,7 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.BucketUtils;
+import org.limewire.mojito.util.ContactUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -146,7 +146,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                                     new FileOutputStream(FILE))));
                 
                 // Sort by MRS
-                contacts = BucketUtils.sort(contacts);
+                contacts = ContactUtils.sort(contacts);
                 
                 // Save only some Nodes
                 contacts = contacts.subList(0, 

@@ -32,8 +32,8 @@ import org.limewire.mojito.messages.LookupRequest;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito.util.ContactUtils;
 
 
 /**
@@ -70,7 +70,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                nodes = BucketUtils.getMostRecentlySeenContacts(
+                nodes = ContactUtils.getMostRecentlySeenContacts(
                             context.getRouteTable().getContacts(), 
                             KademliaSettings.REPLICATION_PARAMETER.getValue());
                 

@@ -51,7 +51,6 @@ import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.result.LookupResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
@@ -311,8 +310,8 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
         // Optimimize the first lookup step if we have enough parallel lookup slots
         if(alphaList.size() >= 3) {
             // Get the MRS node of the k closest nodes
-            nodes = BucketUtils.sort(nodes);
-            Contact mrs = BucketUtils.getMostRecentlySeen(nodes);
+            nodes = ContactUtils.sort(nodes);
+            Contact mrs = ContactUtils.getMostRecentlySeen(nodes);
             if(!alphaList.contains(mrs) && !context.isLocalNode(mrs)) {
                 // If list is full, remove last element and add the MRS node
                 if (alphaList.size() >= getParallelism()) {

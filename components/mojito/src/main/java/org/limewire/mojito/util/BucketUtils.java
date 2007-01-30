@@ -24,38 +24,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.mojito.routing.Bucket;
-import org.limewire.mojito.routing.Contact;
 
 
 /**
  * Miscellaneous utilities for Buckets
  */
 public final class BucketUtils {
-    
-    /**
-     * A helper method to compare longs.
-     */
-    private static int compareLong(long a, long b) {
-        if (a < b) {
-            return -1;
-        } else if (a > b) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-    
-    /**
-     * A Comparator that orders a Collection of Contacts from
-     * most recently seen to least recently seen.
-     */
-    public static final Comparator<Contact> CONTACT_MRS_COMPARATOR = new Comparator<Contact>() {
-        public int compare(Contact a, Contact b) {
-            // Note: There's a minus sign to change the order from
-            // 'small to big' to 'big to small' values
-            return -compareLong(a.getTimeStamp(), b.getTimeStamp());
-        }
-    };
     
     /**
      * A Comparator that orders a Collection of Buckets by their
@@ -67,94 +41,7 @@ public final class BucketUtils {
         }
     };
     
-    /**
-     * A Comparator that orders a Collection of Contacts from alive
-     * to failed. The sub-set of alive Contacts is ordered from most
-     * recently seen to least recently seen and the sub-set of failed
-     * Contacts is ordered by least recently failed to most recently
-     * failed.
-     */
-    public static final Comparator<Contact> CONTACT_ALIVE_TO_FAILED_COMPARATOR = new Comparator<Contact>() {
-        public int compare(Contact a, Contact b) {
-            // If neither a not b has failed then use the standard
-            // most recently seen (MRS) comparator
-            if (!a.hasFailed() && !b.hasFailed()) {
-                return CONTACT_MRS_COMPARATOR.compare(a, b);
-            
-            // If a has failed and b hasn't then move a to the
-            // end of the collection
-            } else if (a.hasFailed() && !b.hasFailed()) {
-                return 1;
-            
-            // If a hasn't failed and b has then move b to
-            // the end of the collection
-            } else if (!a.hasFailed() && b.hasFailed()) {
-                return -1;
-            
-            // If both have failed then order by least recently 
-            // failed to most recently failed
-            } else { 
-                return compareLong(a.getLastFailedTime(), b.getLastFailedTime());
-            }
-        }
-    };
-    
     private BucketUtils() {}
-    
-    /**
-     * Returns the most recently seen contact from the list.
-     * Use BucketUtils.sort() prior to calling this Method!
-     */
-    public static <T extends Contact> Contact getMostRecentlySeen(List<T> nodes) {
-        assert (nodes.get(0).getTimeStamp() >= nodes.get(nodes.size()-1).getTimeStamp());
-        return nodes.get(0);
-    }
-    
-    /**
-     * Returns the least recently seen contact from the list.
-     * Use BucketUtils.sort() prior to calling this Method!
-     */
-    public static <T extends Contact> Contact getLeastRecentlySeen(List<T> nodes) {
-        assert (nodes.get(nodes.size()-1).getTimeStamp() <= nodes.get(0).getTimeStamp());
-        return nodes.get(nodes.size()-1);
-    }
-    
-    /**
-     * Sorts the given List of Contacts from most recently seen to 
-     * least recently seen.
-     */
-    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes) {
-        return sort(nodes);
-    }
-    
-    /**
-     * Sorts the given List of Contacts from most recently seen to 
-     * least recently seen and returns a sub-list with at most
-     * count number of elements.
-     */
-    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes, int count) {
-        return sort(nodes).subList(0, Math.min(count, nodes.size()));
-    }
-    
-    /**
-     * Sorts the Contacts from most recently seen to
-     * least recently seen
-     */
-    public static <T extends Contact> List<T> sort(List<T> nodes) {
-        Collections.sort(nodes, CONTACT_MRS_COMPARATOR);
-        return nodes;
-    }
-    
-    /**
-     * Sorts the contacts from most recently seen to
-     * least recently seen based on their timestamp and last failed time.
-     * 
-     * Used when loading the routing table if our nodeID has changed
-     */
-    public static <T extends Contact> List<T> sortAliveToFailed(List<T> nodes) {
-        Collections.sort(nodes, CONTACT_ALIVE_TO_FAILED_COMPARATOR);
-        return nodes;
-    }
     
     /**
      * Sort this list of Buckets by depth. Used for things such as 

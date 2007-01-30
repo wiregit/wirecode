@@ -83,7 +83,7 @@ import org.limewire.mojito.statistics.DatabaseStatisticContainer;
 import org.limewire.mojito.statistics.GlobalLookupStatisticContainer;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.statistics.RoutingStatisticContainer;
-import org.limewire.mojito.util.BucketUtils;
+import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
 import org.limewire.mojito.util.DatabaseUtils;
@@ -858,7 +858,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private Set<Contact> getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
         List<Contact> contactList = getRouteTable().getActiveContacts();
-        Collections.sort(contactList, BucketUtils.CONTACT_MRS_COMPARATOR);
+        Collections.sort(contactList, ContactUtils.CONTACT_MRS_COMPARATOR);
         nodes.addAll(contactList);
         nodes.remove(getLocalNode());
         return nodes;

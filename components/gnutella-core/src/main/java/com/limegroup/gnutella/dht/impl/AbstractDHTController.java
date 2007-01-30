@@ -20,7 +20,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.statistics.DHTStatsManager;
-import org.limewire.mojito.util.BucketUtils;
+import org.limewire.mojito.util.ContactUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RouterService;
@@ -184,7 +184,7 @@ abstract class AbstractDHTController implements DHTController {
      */
     protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
         Context dhtContext = (Context)dht; 
-        List<Contact> nodes = BucketUtils.getMostRecentlySeenContacts(
+        List<Contact> nodes = ContactUtils.getMostRecentlySeenContacts(
                 dhtContext.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
         
         KUID localNode = dhtContext.getLocalNodeID();

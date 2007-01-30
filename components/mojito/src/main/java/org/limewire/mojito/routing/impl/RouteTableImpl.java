@@ -49,7 +49,6 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.RouteTable.RouteTableEvent.EventType;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.BucketUtils;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
@@ -959,13 +958,13 @@ public class RouteTableImpl implements RouteTable {
         
         // Get the active Contacts
         List<Contact> activeNodes = getActiveContacts();
-        activeNodes = BucketUtils.sortAliveToFailed(activeNodes);
+        activeNodes = ContactUtils.sortAliveToFailed(activeNodes);
         
         // Get the cached Contacts
         List<Contact> cachedNodes = null;
         if (isTrueRebuild) {
             cachedNodes = getCachedContacts();
-            cachedNodes = BucketUtils.sort(cachedNodes);
+            cachedNodes = ContactUtils.sort(cachedNodes);
         }
         
         // We count on the fact that getActiveContacts() and 
