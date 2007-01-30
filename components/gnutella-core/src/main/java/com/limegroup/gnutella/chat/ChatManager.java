@@ -45,31 +45,29 @@ public final class ChatManager implements ConnectionAcceptor {
 		return CHAT_MANAGER;
 	}
 
-	private ChatManager() {
-		RouterService.getConnectionDispatcher().
-		addConnectionAcceptor(this,
-				new String[]{"CHAT"},
-				false,
-				false);
+	ChatManager() {
 	}
-	
-	/** 
-	 * Accepts the given socket for a one-to-one
-	 * chat connection, like an instant messanger.
-	 */
-	public void accept(Socket socket) {
-        Thread.currentThread().setName("IncomingChatThread");
-		// the Acceptor class recieved a message already, 
-		// and asks the ChatManager to create an InstantMessager
-		boolean allowChats = ChatSettings.CHAT_ENABLED.getValue();
 
-		// see if chatting is turned off
-		if (! allowChats) {
+    public void initialize() {
+        RouterService.getConnectionDispatcher().
+        addConnectionAcceptor(this,
+                new String[]{"CHAT"},
+                false,
+                false);
+    }
+    
+	/**
+     * Invoked by the acceptor to notify this class of a new connection. Accepts
+     * the given socket for a one-to-one chat connection, like an instant
+     * messenger.
+     */
+	public void accept(Socket socket) {
+		boolean allowChats = ChatSettings.CHAT_ENABLED.getValue();
+		if (!allowChats) {
 		    IOUtils.close(socket);
 			return;
 		}
 
-		// do a check to see it the host has been blocked
         if(!RouterService.getIpFilter().allow(socket.getInetAddress())) {
             IOUtils.close(socket);
             return;

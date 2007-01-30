@@ -556,7 +556,11 @@ public class RouterService {
             LOG.trace("START loading StaticMessages");
             StaticMessages.initialize();
             LOG.trace("END loading StaticMessages");
-            
+
+            LOG.trace("START ChatManager");
+            ChatManager.instance().initialize();
+            LOG.trace("END ChatManager");
+
             if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
                 startManualGCThread();
             

@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
@@ -49,7 +48,6 @@ public class InstantMessenger implements Chatter {
 		_out=new BufferedWriter(osw);
 		InputStream istream = _socket.getInputStream();
 		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
-		readHeader();
 	}
 
 	/** constructor for an outgoing chat request */
@@ -214,44 +212,42 @@ public class InstantMessenger implements Chatter {
 		}
 
 		public void run() {
+		    try {
+		        if(_outgoing) {
+		            OutgoingInitializer();
+		        } else {
+		            readHeader();
+		        }
+		    } catch (IOException e) {
+		        _activityCallback.chatUnavailable(_chatter);
+		        return;
+		    }
 
-            try {
-                if(_outgoing) {
-                    try {
-                        OutgoingInitializer();
-                    } catch (IOException e) {
-                        _activityCallback.chatUnavailable(_chatter);
-                        return;
-                    }
-                }
-                while (true){
-                    String str;
-                    try {
-                        // read into a buffer off of the socket
-                        // until a "\r" or a "\n" has been 
-                        // reached. then alert the gui to 
-                        // write to the screen.
-                        str = _reader.readLine();
-                        synchronized(InstantMessenger.this) {
-                            if( ( str == null ) || (str == "") )
-                                throw new IOException();
-                            _message += str;
-                            _activityCallback.receiveMessage(_chatter);
-                        } 
-                        
-                    } catch (IOException e) {
-                        // if an exception was thrown, then 
-                        // the socket was closed, and the chat
-                        // was terminated.
-                        // return;
-                        _activityCallback.chatUnavailable(_chatter);
-                        
-                        break;
-                    }                     
-                }
-            } catch(Throwable t) {
-                ErrorService.error(t);
-            }
+		    while (true){
+		        String str;
+		        try {
+		            // read into a buffer off of the socket
+		            // until a "\r" or a "\n" has been 
+		            // reached. then alert the gui to 
+		            // write to the screen.
+		            str = _reader.readLine();
+		            synchronized(InstantMessenger.this) {
+		                if( ( str == null ) || (str == "") )
+		                    throw new IOException();
+		                _message += str;
+		                _activityCallback.receiveMessage(_chatter);
+		            } 
+
+		        } catch (IOException e) {
+		            // if an exception was thrown, then 
+		            // the socket was closed, and the chat
+		            // was terminated.
+		            // return;
+		            _activityCallback.chatUnavailable(_chatter);
+
+		            break;
+		        }                     
+		    }
 		}
 		
 	}
