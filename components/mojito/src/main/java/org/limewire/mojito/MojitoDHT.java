@@ -137,6 +137,11 @@ public interface MojitoDHT {
     public void close();
     
     /**
+     * Returns whether or not the MojitoDHT is bootstrapping
+     */
+    public boolean isBootstrapping();
+    
+    /**
      * Returns whether or not this DHT is bootstrapped
      */
     public boolean isBootstrapped();

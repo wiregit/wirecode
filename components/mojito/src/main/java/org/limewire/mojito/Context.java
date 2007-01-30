@@ -669,8 +669,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return bootstrapManager;
     }
     
-    /**
-     * Returns whether or not the MojitoDHT is bootstrapping
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#isBootstrapping()
      */
     public synchronized boolean isBootstrapping() {
         return isRunning() && bootstrapManager.isBootstrapping();

@@ -70,17 +70,17 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // Stop the BucketRefresher to prevent it from calling
             // bootstrap
             BucketRefresher bucketRefresher = (BucketRefresher)
-                PrivilegedAccessor.getValue(context1, "bucketRefresher");
+                PrivilegedAccessor.getValue(dht1, "bucketRefresher");
             bucketRefresher.stop();
             
             UnitTestUtils.setBootstrapping(dht1, true);
             assertFalse(dht1.isBootstrapped());
-            assertTrue(context1.isBootstrapping());
+            assertTrue(dht1.isBootstrapping());
             
             try {
                 PingResult result = dht2.ping(new InetSocketAddress("localhost", 2000)).get();
                 assertFalse(dht1.isBootstrapped());
-                assertTrue(context1.isBootstrapping());
+                assertTrue(dht1.isBootstrapping());
                 
                 fail("DHT-1 did respond to our request " + result);
             } catch (ExecutionException expected) {
