@@ -11,11 +11,9 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.routing.BucketRefresher;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.util.UnitTestUtils;
-import org.limewire.util.PrivilegedAccessor;
 
 public class PingRequestHandlerTest extends MojitoTestCase {
     
@@ -67,12 +65,6 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             // their initial bootstrap Node
             Context context1 = (Context)dht1;
             
-            // Stop the BucketRefresher to prevent it from calling
-            // bootstrap
-            BucketRefresher bucketRefresher = (BucketRefresher)
-                PrivilegedAccessor.getValue(dht1, "bucketRefresher");
-            bucketRefresher.stop();
-            
             UnitTestUtils.setBootstrapping(dht1, true);
             assertFalse(dht1.isBootstrapped());
             assertTrue(dht1.isBootstrapping());
@@ -86,9 +78,6 @@ public class PingRequestHandlerTest extends MojitoTestCase {
             } catch (ExecutionException expected) {
                 assertTrue(expected.getCause() instanceof DHTException);
             }
-            
-            // And start it again
-            bucketRefresher.start();
             
             // next collision Ping. Different Node IDs -> should not work (same as above)
             context1.setContactAddress(new InetSocketAddress("localhost", 2000));
