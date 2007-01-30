@@ -129,6 +129,8 @@ public class CacheForwardTest extends MojitoTestCase {
     
     public void testCacheForward() throws Exception {
         
+        final long waitForNodes = 500; // ms
+        
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
@@ -157,6 +159,9 @@ public class CacheForwardTest extends MojitoTestCase {
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
+            
+            // Give everybody time to process the store request
+            Thread.sleep(waitForNodes);
             
             // And check the initial state
             Context closest = null;
@@ -189,7 +194,10 @@ public class CacheForwardTest extends MojitoTestCase {
             nearest.bind(new InetSocketAddress("localhost", PORT+1000));
             nearest.start();
             bootstrap(nearest, dhts.values());
-            Thread.sleep(250);
+            
+            // Give everybody time to figure out whether to forward
+            // a value or to remove it
+            Thread.sleep(waitForNodes);
 
             // The 'furthest' Node should no longer have the value
             assertEquals(1, nearest.getValues().size());
@@ -229,7 +237,10 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, nearest.getDatabase().getKeyCount());
             assertEquals(0, nearest.getDatabase().getValueCount());
             bootstrap(nearest, dhts.values());
-            Thread.sleep(250);
+            
+            // Give everybody time to figure out whether to forward
+            // a value or to remove it
+            Thread.sleep(waitForNodes);
             
             assertEquals(0, nearest.getDatabase().getKeyCount());
             assertEquals(0, nearest.getDatabase().getValueCount());
@@ -238,7 +249,10 @@ public class CacheForwardTest extends MojitoTestCase {
             // value again!
             nearest.getLocalNode().nextInstanceID();
             bootstrap(nearest, dhts.values());
-            Thread.sleep(250);
+            
+            // Give everybody time to figure out whether to forward
+            // a value or to remove it
+            Thread.sleep(waitForNodes);
             
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
@@ -270,14 +284,14 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
             bootstrap(middle, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             assertEquals(0, middle.getDatabase().getKeyCount());
             assertEquals(0, middle.getDatabase().getValueCount());
             
             middle.getLocalNode().nextInstanceID();
             bootstrap(middle, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
@@ -294,7 +308,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // and it shouldn't get the value
             furthest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
@@ -323,7 +337,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
             bootstrap(furthest, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             assertEquals(0, furthest.getDatabase().getKeyCount());
             assertEquals(0, furthest.getDatabase().getValueCount());
@@ -331,7 +345,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // Change the instanceId 
             furthest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             // And we should have the value now
             assertEquals(1, furthest.getDatabase().getKeyCount());
@@ -347,7 +361,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             nearest.getLocalNode().nextInstanceID();
             bootstrap(furthest, dhts.values());
-            Thread.sleep(250);
+            Thread.sleep(waitForNodes);
             
             // Check the final state. k Nodes should have the value!
             int count = 0;
