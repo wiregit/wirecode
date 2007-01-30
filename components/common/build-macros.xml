@@ -76,6 +76,8 @@
             		  location="${dist.limewire.components.@{component}.home}/javadoc"/>
             <property name="dist.limewire.components.@{component}.jar"
             		  location="${dist.limewire.components.@{component}.home}/lw-@{component}.jar"/>
+            
+            <property name="tests.writetofileonly" value="false"/>
        	
         	<path id="build.limewire.components.@{component}.classpath">
         	    <src-classpath/>
@@ -226,8 +228,8 @@
 	
 	<macrodef name="do.test-all" description="Runs all tests.">
 	    <attribute name="component"/>
-	    <element name="testLocations"     optional="true"/>
-	    <attribute name="forkmode" default="once"/>
+	    <element name="testLocations"  optional="true"/>
+	    <attribute name="forkmode"     default="once"/>
 	    <sequential>
 	        <do.clean-testData      component="@{component}"/>
 	        <do.tests-init          component="@{component}"/>
@@ -315,7 +317,7 @@
 	    		<classpath refid="tests.limewire.components.@{component}.classpath"/>
 	    		
 	    		<formatter type="xml"/>
-	    		<formatter type="plain" usefile="false"/>
+	    		<formatter type="plain" usefile="${tests.writetofileonly}"/>
 	    		
 	    		<batchtest todir="${tests.limewire.components.@{component}.xml}">
 	    			<fileset dir="${build.limewire.components.@{component}.tests}">
