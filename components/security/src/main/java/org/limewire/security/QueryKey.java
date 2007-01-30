@@ -285,6 +285,10 @@ public final class QueryKey implements SecurityToken {
         return new QueryKey(keyGen.getKeyBytes(ip, port), true);
     }
 
+    public static QueryKey getQueryKey(byte[] data) {
+        return new QueryKey(getSecretKey().getKeyBytes(data), true);
+    }
+    
     /**
      * Returns the current SecretKey and creates a new
      * key if necessary

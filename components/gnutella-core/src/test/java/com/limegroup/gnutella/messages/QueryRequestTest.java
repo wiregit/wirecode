@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
@@ -1076,5 +1077,50 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
         assertTrue(proxy.desiresOutOfBandReplies());
+    }
+    
+    /**
+     * Tests if the security token key is set for oob query requests and that
+     * it's not set otherwise.
+     * @throws UnknownHostException 
+     */
+    public void testOOBSecurityTokenSet() throws BadPacketException, UnknownHostException {
+        // oob set
+        QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertTrue(request.hasSecurityTokenRequest());
+        
+        QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        
+        request = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
+        assertTrue(request.hasSecurityTokenRequest());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        
+        request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        assertTrue(request.hasSecurityTokenRequest());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        
+        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertTrue(request.hasSecurityTokenRequest());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        
+        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertTrue(request.hasSecurityTokenRequest());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        
+        // oob not set
+        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (QueryKey)null, true, Message.N_TCP, false, 0);
+        assertFalse(request.hasSecurityTokenRequest());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertFalse(fromNetwork.hasSecurityTokenRequest());
     }
 }

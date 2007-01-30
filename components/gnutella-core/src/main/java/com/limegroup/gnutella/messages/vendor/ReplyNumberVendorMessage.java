@@ -28,7 +28,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
     
     /**
      * whether we can receive unsolicited udp
@@ -52,6 +52,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         if ((getVersion() == 2) && (getPayload().length != 2))
             throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
+        // loosen the condition on the message size to allow this message version
+        // to have a GGEP in the future
+        if ((getVersion() == 3) && (getPayload().length < 2))
+            throw new BadPacketException("VERSION 3 should have a GGEP header: " +
+                    getPayload().length);
     }
 
     /**
@@ -88,13 +93,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         if ((numResults < 1) || (numResults > 255))
             throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
-        byte[] payload = new byte[2];
         byte[] bytes = new byte[2];
         ByteOrder.short2leb((short) numResults, bytes, 0);
-        payload[0] = bytes[0];
-        payload[1] = RouterService.canReceiveUnsolicited() ?
-        		UNSOLICITED : 0x0;
-        return payload;
+        bytes[1] = RouterService.canReceiveUnsolicited() ? UNSOLICITED : 0x0;
+        
+        return bytes;
     }
 
     public boolean equals(Object other) {

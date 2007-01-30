@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
@@ -23,6 +24,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -33,9 +36,8 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -61,6 +63,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private QueryReply.GGEPUtil _ggepUtil = new QueryReply.GGEPUtil();
     private FileManager fman = null;
     private Object loaded = new Object();
+    
+    private byte[] _token; 
     
 	/**
 	 * Constructs a new test instance for query replies.
@@ -97,7 +101,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
-	    
+	
+        byte[] data = new byte[16];
+        new Random().nextBytes(data);
+        _token = data;
 	}
 		
 
@@ -455,7 +462,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         byte[] bytes=out.toByteArray();
         int ggepLen = _ggepUtil.getQRGGEP(true, false, false,
-                                          new HashSet()).length;
+                                          new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
@@ -499,7 +506,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         bytes=out.toByteArray();
         ggepLen = _ggepUtil.getQRGGEP(true, false, false,
-                                      new HashSet()).length;
+                                      new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals(
@@ -554,7 +561,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         bytes=out.toByteArray();
         ggepLen = _ggepUtil.getQRGGEP(true, false, true,
-                                      proxies).length;
+                                      proxies, null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals(
@@ -648,7 +655,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         try {
             // this shouldn't even work....
             testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,
-                                                    new HashSet()), 
+                                                    new HashSet(), null), 
                                 0, null);
             assertTrue(false);
         }
@@ -656,7 +663,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // test just BH GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,
-                                                new HashSet()), 
+                                                new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -664,7 +671,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // test just multicast GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,
-                                                new HashSet()), 
+                                                new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -672,12 +679,43 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // test combo GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,
-                                                new HashSet()),
+                                                new HashSet(), null),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
+    }
+    
+    public void testGGEPUtilWritesSecurityToken() throws Exception {
+        // assert token is written
+        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, _token), 0, null);
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
+        assertEquals(_token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
+        
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, _token), 0, null);
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
+        assertEquals(_token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
+        
+        Set<IpPort> proxies = new HashSet<IpPort>();
+        proxies.add(new Endpoint("127.0.0.1:6464"));
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, _token), 0, null);
+        assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
+        assertEquals(_token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
+        
+        // assert token is not written
+        try {
+            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, null), 0, null);
+            fail("exception should have been thrown");
+        }
+        catch (BadGGEPBlockException bgbe) {
+        }
+                
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, null), 0, null);
+        assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
+        
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, null), 0, null);
+        assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
     }
 
     public void testBasicPushProxyGGEP() throws Exception {
@@ -703,7 +741,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     fwTransfer, proxies), 
+                                                     fwTransfer, proxies, null), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
@@ -1103,6 +1141,26 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(SecureMessage.FAILED, reply.getSecureStatus());
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(SecureMessage.SECURE, reply.getSecureStatus());
+    }
+    
+    public void testSecurityTokenBytesSetAndParsed() throws IllegalArgumentException, IOException, BadPacketException {
+        Response r = new Response(0, 1, "test");
+        QueryReply query = new QueryReply(GUID.makeGuid(), (byte)1, 1459, 
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r },
+                GUID.makeGuid(), new byte[0], false, false, false, false, false,
+                false, false, IpPort.EMPTY_SET, _token);
+                
+        assertEquals(_token, query.getSecurityTokenBytes());
+        
+        // test copy constructor preserves security bytes
+        query = new QueryReply(GUID.makeGuid(), query);
+        assertEquals(_token, query.getSecurityTokenBytes());
+        
+        // test network constructor
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        query.writePayload(out);
+        query = new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, out.toByteArray());
+        assertEquals(_token, query.getSecurityTokenBytes());
     }
     
     private void runSignatureTest(QueryReply reply, int[] indexes, byte[] payload) throws Exception {

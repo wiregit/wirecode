@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.messagehandlers;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -11,6 +14,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
+import org.limewire.security.QueryKey;
+import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
@@ -56,7 +61,7 @@ public class OOBHandler implements MessageHandler, Runnable {
 			return;
 		
 		LimeACKVendorMessage ack =
-			new LimeACKVendorMessage(g, toRequest);
+			new LimeACKVendorMessage(g, toRequest, QueryKey.getQueryKey(createMessageKeyData(handler, msg.getGUID(), toRequest)));
 		synchronized(OOBSessions) {
 			// remove is necessary to refresh the timestamp.
 			Integer previous = OOBSessions.remove(session);
@@ -69,6 +74,25 @@ public class OOBHandler implements MessageHandler, Runnable {
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
 	}
+    
+    private static byte[] createMessageKeyData(ReplyHandler replyHandler, byte[] guid, int requestNum) {
+        if (requestNum <= 0 || requestNum > 255) {
+            throw new IllegalArgumentException("requestNum to small or too large " + requestNum);
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(23);
+        DataOutputStream data = new DataOutputStream(baos);
+        try {
+            data.writeInt(replyHandler.getPort());
+            // TODO fberger convert to ipv6
+            data.write(replyHandler.getInetAddress().getAddress());
+            data.writeShort(requestNum);
+            data.write(guid);
+        }
+        catch (IOException ie) {
+            ErrorService.error(ie);
+        }
+        return baos.toByteArray();
+    }
 	
 	private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
         if(LOG.isTraceEnabled())

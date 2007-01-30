@@ -62,6 +62,7 @@ class QueryReplyData {
     /** The xml chunk that contains metadata about xml responses*/  
     private volatile byte[] xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;  
     
+    private volatile byte[] securityTokenBytes = null;
 
     public int getBusyFlag() {
         return busyFlag;
@@ -199,4 +200,11 @@ class QueryReplyData {
         this.xmlBytes = xmlBytes;
     }
     
+    public void setSecurityTokenBytes(byte[] securityTokenBytes) {
+        this.securityTokenBytes = securityTokenBytes;
+    }
+    
+    public byte[] getSecurityTokenBytes() {
+        return securityTokenBytes;
+    }
 }

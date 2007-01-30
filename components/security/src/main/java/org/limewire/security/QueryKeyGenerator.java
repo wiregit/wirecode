@@ -33,9 +33,21 @@ public interface QueryKeyGenerator {
     public byte[] getKeyBytes(InetAddress ip, int port);
     
     /**
+     * Uses secret keys to generate a message authentication code.
+     */
+    public byte[] getKeyBytes(byte[] data);
+    
+    /**
      * Returns true if the algorithm and secret keys of this instance were
      * used to generate keyBytes from ip and port.
      * 
      */
     public boolean checkKeyBytes(byte[] keyBytes, InetAddress ip, int port);
+    
+    /**
+     * Returns true if the algorithm and secret keys of this instance
+     * were used to generate the message authentication code 
+     * <code>keyBytes</code> from <code>data</code>.
+     */
+    public boolean checkKeyBytes(byte[] keyBytes, byte[] data);
 }

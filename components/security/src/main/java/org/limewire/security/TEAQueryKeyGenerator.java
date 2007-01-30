@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
+import org.limewire.util.ByteOrder;
+
 
 /* package */ class TEAQueryKeyGenerator implements QueryKeyGenerator {
 
@@ -72,6 +74,10 @@ import java.util.Arrays;
         return Arrays.equals(keyBytes, getKeyBytes(ip, port));
     }
     
+    public boolean checkKeyBytes(byte[] keyBytes, byte[] data) {
+        return Arrays.equals(keyBytes, getKeyBytes(data));
+    }
+    
     /** Returns the raw bytes for a QueryKey, which will not contain
      *  0x1C and 0x00, to accomidate clients that poorly parse GGEP.
      */
@@ -88,7 +94,20 @@ import java.util.Arrays;
         
         // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
         // and encrypt it with our secret key material.
-        long key64 = encrypt((((long)port) << 32) | (ipInt & 0xFFFFFFFFL));
+        byte[] bytes = new byte[8];
+        ByteOrder.int2beb(port, bytes, 0);
+        ByteOrder.int2beb(ipInt, bytes, 4);
+        
+        return getKeyBytes(bytes);
+    }
+    
+    /**
+     * Returns the raw bytes for a QueryKey, which will not contain
+     * 0x1C and 0x00, to accomidate clients that poorly parse GGEP.
+     */
+    public byte[] getKeyBytes(byte[] data) {
+        
+        long key64 = encryptCBCCMAC(data);
         
         // 32-bit QK gives attackers the least amount of information
         // about our secret key while still not making it worth their
@@ -111,9 +130,19 @@ import java.util.Arrays;
             }
         }
                               
-        return qkBytes;
+        return qkBytes;   
     }
     
+    /**
+     * Encrypts the array of data using CBC-MAC with TEA as the block cipher. 
+     */
+    final long encryptCBCCMAC(byte[] data) {
+        long tag = 0;
+        for (int i = 0; i < data.length; i += 8) {
+            tag = encrypt(tag ^ ByteOrder.leb2long(data, i, Math.min(8, data.length - i)));
+        }
+        return tag;
+    }
 
     /**
      * Encrypts a 64-bit value using the TEA block cipher.
@@ -126,7 +155,7 @@ import java.util.Arrays;
      * @return block encrypted using the secret key material
      *     within this class.
      */
-    private final long encrypt(long block) {
+    final long encrypt(long block) {
         block = (block << PRE_ROTATE) | (block >>> (64 - PRE_ROTATE));
 
         // Pre-encryption whitening
@@ -148,5 +177,6 @@ import java.util.Arrays;
         // Post-encryption cyclic shift
         return (block << POST_ROTATE) | (block >>> (64 - POST_ROTATE));
     }
+
     
 }

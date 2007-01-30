@@ -113,6 +113,8 @@ public class QueryRequest extends Message implements Serializable{
      * The feature that this query is.
      */
     private int _featureSelector = 0;
+    
+    private boolean _hasSecurityTokenRequest;
 
     /**
      * Whether or not the GGEP header for Do Not Proxy was found.
@@ -1269,9 +1271,14 @@ public class QueryRequest extends Message implements Serializable{
             if (_metaMask != null)
                 ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
 
+            // mark oob query to require support of security tokens
+            if (canReceiveOutOfBandReplies) {
+                _hasSecurityTokenRequest = true;
+                ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
+            }
+            
             // if there are GGEP headers, write them out...
-            if ((this.QUERY_KEY != null) || (_featureSelector > 0) ||
-                _doNotProxy || (_metaMask != null)) {
+            if (!ggepBlock.isEmpty()) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
@@ -1355,6 +1362,10 @@ public class QueryRequest extends Message implements Serializable{
                         // if the value is something we can't handle, don't even set it
                         if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
                             _metaMask = null;
+                    }
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                        // TODO fberger throw exception if oob is not supported?
+                        _hasSecurityTokenRequest = true;
                     }
                 } catch (BadGGEPPropertyException ignored) {}
             }
@@ -1606,6 +1617,13 @@ public class QueryRequest extends Message implements Serializable{
      */
     public int getFeatureSelector() {
         return _featureSelector;
+    }
+    
+    /**
+     * Returns true if the query request has a security token request.
+     */
+    public boolean hasSecurityTokenRequest() {
+        return _hasSecurityTokenRequest;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful

@@ -8,7 +8,7 @@ import org.limewire.util.ByteOrder;
 
 
 /**
- * A 16-bit globally unique ID.  Immutable.<p>
+ * A 16-byte globally unique ID.  Immutable.<p>
  *
  * Let the bytes of a GUID G be labelled G[0]..G[15].  All bytes are unsigned.
  * Let a "short" be a 2 byte little-endian** unsigned number.  Let AB be the
