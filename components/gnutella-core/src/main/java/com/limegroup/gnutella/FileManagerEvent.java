@@ -9,34 +9,28 @@ import java.util.EventObject;
  * the front end about add, remove, rename and change
  * events in the Library.
  */
+@SuppressWarnings("serial")
 public class FileManagerEvent extends EventObject {
     
-    public static final int ADD     = 1;
-    public static final int REMOVE  = 2;
-    public static final int RENAME  = 3;
-    public static final int CHANGE  = 4;
-    public static final int FAILED  = 5;
-    public static final int ALREADY_SHARED = 6;
-    public static final int ADD_FOLDER = 7;
-    public static final int REMOVE_FOLDER = 8;
+    public static enum Type {
+        ADD,
+        REMOVE,
+        RENAME,
+        CHANGE,
+        FAILED,
+        ALREADY_SHARED,
+        ADD_FOLDER,
+        REMOVE_FOLDER;
+    }
     
-    private final int kind;
+    private final Type kind;
     private final FileDesc[] fds;
     private final File[] files;
 
     /**
-     * Constructs a FileManagerEvent with a single FD.
-     * Useful for 'ADD' & 'REMOVE' events.
-     */    
-    public FileManagerEvent(FileManager manager, int kind, FileDesc fd) {
-        this(manager, kind, new FileDesc[] { fd });
-    }
-    
-    /**
-     * Constructs a FileManagerEvent with multiple FDs.
-     * Useful for 'RENAME' & 'CHANGE' events.
+     * Constructs a FileManagerEvent
      */
-    public FileManagerEvent(FileManager manager, int kind, FileDesc[] fds) {
+    public FileManagerEvent(FileManager manager, Type kind, FileDesc... fds) {
         super(manager);
         this.kind = kind;
         this.fds = fds;
@@ -44,32 +38,16 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Constructs a FileManagerEvent with a single File.
-     * Useful for 'FAILED', 'ALREADY_SHARED', 'REMOVE_FOLDER' events.
-     */
-    public FileManagerEvent(FileManager manager, int kind, File file) {
-        this(manager, kind, new File[] { file } );
-    }
-    
-    /**
-     * Constructs a FileManagerEvent with a File & its parent.
-     * Useful for 'ADD_FOLDER' events.
-     */
-    public FileManagerEvent(FileManager manager, int kind, File folder, File parent) {
-        this(manager, kind, new File[] { folder, parent });
-    }
-    
-    /**
      * Constructs a FileManagerEvent with a bunch of files.
      */
-    public FileManagerEvent(FileManager manager, int kind, File[] files) {
+    public FileManagerEvent(FileManager manager, Type kind, File... files) {
         super(manager);
         this.kind = kind;
         this.files = files;
         this.fds = null;
     }
     
-    public int getKind() {
+    public Type getKind() {
         return kind;
     }
     
@@ -93,14 +71,14 @@ public class FileManagerEvent extends EventObject {
      * Returns true if this event is an ADD event
      */
     public boolean isAddEvent() {
-        return (kind==ADD);
+        return (kind.equals(Type.ADD));
     }
     
     /**
      * Returns true if this event is a REMOVE event
      */
     public boolean isRemoveEvent() {
-        return (kind==REMOVE);
+        return (kind.equals(Type.REMOVE));
     }
     
     /**
@@ -108,7 +86,7 @@ public class FileManagerEvent extends EventObject {
      * event
      */
     public boolean isRenameEvent() {
-        return (kind==RENAME);
+        return (kind.equals(Type.RENAME));
     }
     
     /**
@@ -116,14 +94,14 @@ public class FileManagerEvent extends EventObject {
      * when ID3 Tags changed) event.
      */
     public boolean isChangeEvent() {
-        return (kind==CHANGE);
+        return (kind.equals(Type.CHANGE));
     }
     
     /**
      * Returns true if this is a FAILED add event (ie, addFile failed).
      */
     public boolean isFailedEvent() {
-        return (kind==FAILED);
+        return (kind.equals(Type.FAILED));
     }
 
     /**
@@ -131,55 +109,25 @@ public class FileManagerEvent extends EventObject {
      * (ie, an addFile event was ignored because the file was already shared)
      */
     public boolean isAlreadySharedEvent() {
-        return (kind==ALREADY_SHARED);
+        return (kind.equals(Type.ALREADY_SHARED));
     }
     
     /**
      * Returns true if this is a ADD_FOLDER event.
      */
     public boolean isAddFolderEvent() {
-        return kind == ADD_FOLDER;
+        return kind.equals(Type.ADD_FOLDER);
     }
     
     /**
      * Returns true if this is a REMOVE_FOLDER event;
      */
     public boolean isRemoveFolderEvent() {
-        return kind == REMOVE_FOLDER;
+        return kind.equals(Type.REMOVE_FOLDER);
     }
     
     public String toString() {
-        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=");
-        
-        switch(kind) {
-            case ADD:
-                buffer.append("ADD");
-                break;
-            case REMOVE:
-                buffer.append("REMOVE");
-                break;
-            case RENAME:
-                buffer.append("RENAME");
-                break;
-            case CHANGE:
-                buffer.append("CHANGE");
-                break;
-            case FAILED:
-                buffer.append("FAILED");
-                break;
-            case ALREADY_SHARED:
-                buffer.append("ALREADY_SHARED");
-                break;
-            case ADD_FOLDER:
-                buffer.append("ADD_FOLDER");
-                break;
-            case REMOVE_FOLDER:
-                buffer.append("REMOVE_FOLDER");
-                break;
-            default:
-                buffer.append("UNKNOWN");
-                break;
-        }
+        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(kind);
         
         if (fds != null) {
             buffer.append(", fds=").append(fds.length).append("\n");

@@ -23,6 +23,7 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
@@ -162,13 +163,9 @@ public class MetaFileManager extends FileManager {
                         ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
                         ctCache.commitTime(fd.getSHA1Urn());
                     }
-                    newEvt = new FileManagerEvent(MetaFileManager.this, 
-                                       FileManagerEvent.CHANGE, 
-                                       new FileDesc[]{removed,fd});
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.CHANGE, removed, fd);
                 } else {
-                    newEvt = new FileManagerEvent(MetaFileManager.this, 
-                                       FileManagerEvent.REMOVE,
-                                       removed);
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.REMOVE, removed);
                 }
                 dispatchFileEvent(newEvt);
             }
