@@ -131,7 +131,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
         return out.toByteArray();
     }
 
-    // TODO fberger compare query keys?
+    // TODO fberger compare security tokens?
     public boolean equals(Object other) {
         if (other instanceof LimeACKVendorMessage) {
             GUID myGuid = new GUID(getGUID());

@@ -888,7 +888,13 @@ public class ManagedConnection extends Connection
         // 4) We must be able to OOB and have great success rate.
         if (remoteHostSupportsLeafGuidance() < 1) return query;
         if (query.desiresOutOfBandReplies()) return query;
-        if (query.doNotProxy()) return query;
+        // only check new version of do not proxy:
+        // old clients always default to false for the old doNotProxy version
+        // so we proxied for them and will still proxy for them with new protocol
+        // check for new clients if proxying is disabled for them which might be 
+        // the case in the future
+        if (query.doNotProxyV3()) return query;
+        
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;

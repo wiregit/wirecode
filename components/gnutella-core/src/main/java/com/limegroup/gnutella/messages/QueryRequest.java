@@ -117,9 +117,16 @@ public class QueryRequest extends Message implements Serializable{
     private boolean _hasSecurityTokenRequest;
 
     /**
-     * Whether or not the GGEP header for Do Not Proxy was found.
+     * Whether or not the GGEP header for Do Not Proxy was found. Defaults
+     * to true in new clients and should only be set differently from
+     * network constructor.
      */
-    private boolean _doNotProxy = false;
+    private boolean _doNotProxyV2 = true;
+    /**
+     * Whether or not the GGEP header for Do Not Proxy for protocol version 3
+     * was found.
+     */
+    private boolean _doNotProxyV3 = false;
 
     // HUGE v0.93 fields
     /** 
@@ -673,19 +680,18 @@ public class QueryRequest extends Message implements Serializable{
         if (guid.length != 16)
             throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        // i can't just call a new constructor, i have to recreate stuff
-        byte[] newPayload = new byte[qr.PAYLOAD.length];
-        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
-        
-        try {
-            return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                                      newPayload, qr.getNetwork());
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
-        }
-	}
-
+        QueryRequest copy = new QueryRequest(guid, qr.getTTL(), qr.getMinSpeed(), 
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                // can receive oob now
+                true,
+                qr.getFeatureSelector(), qr.doNotProxyV3(),
+                qr.getMetaMask(), false /* query string is already normalized */);
+        copy.setHops(qr.getHops());
+        return copy;
+    }
+    
 	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
 	 *
@@ -1170,8 +1176,7 @@ public class QueryRequest extends Message implements Serializable{
             
             if (!canReceiveOutOfBandReplies) 
                 minSpeed |= SPECIAL_XML_MASK;
-            else // bit 10 flags out-of-band support
-                minSpeed |= SPECIAL_OUTOFBAND_MASK;
+            // don't mark old oob flag anymore
         }
 
         MIN_SPEED = minSpeed;
@@ -1207,7 +1212,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 
         this.QUERY_KEY = queryKey;
-        this._doNotProxy = doNotProxy;
+        this._doNotProxyV3 = doNotProxy;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -1264,8 +1269,17 @@ public class QueryRequest extends Message implements Serializable{
                 ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
             // add a GGEP-block if we shouldn't proxy
-            if (doNotProxy)
-                ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+            if (_doNotProxyV2) {
+                if (_doNotProxyV3) {
+                    // for newer versions we specify which version should not
+                    // be proxied
+                    ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY, 3);
+                }
+                else {
+                    // for version two, just setting the key means to not proxy
+                    ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+                }
+            }
 
             // add a meta flag
             if (_metaMask != null)
@@ -1355,8 +1369,15 @@ public class QueryRequest extends Message implements Serializable{
                     }
                     if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                         _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
-                        _doNotProxy = true;
+                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
+                        _doNotProxyV2 = true;
+                        try {
+                            if (ggep.getInt(GGEP.GGEP_HEADER_NO_PROXY) == 3) {
+                                _doNotProxyV3 = true;
+                            }
+                        }
+                        catch (BadGGEPPropertyException bgpe) { }
+                    }
                     if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
                         _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
                         // if the value is something we can't handle, don't even set it
@@ -1484,7 +1505,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Helper method used internally for getting the rich query string.
      */
-    private String getRichQueryString() {
+    /* package for tests */ String getRichQueryString() {
         if( XML_DOC == null )
             return null;
         else
@@ -1578,17 +1599,29 @@ public class QueryRequest extends Message implements Serializable{
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return false;
+        return desiresOutOfBandRepliesV3();
     }
-
+    
+    public boolean desiresOutOfBandRepliesV3() {
+        return hasSecurityTokenRequest();
+    }
 
     /**
-     * Returns true if the query source does not want you to proxy for it.
+     * Returns true if the query source does not want you to proxy for it for
+     * protocol version 2 of oob queries.
      */
-    public boolean doNotProxy() {
-        return _doNotProxy;
+    public boolean doNotProxyV2() {
+        return _doNotProxyV2;
     }
-
+    
+    /**
+     * Returns true if the query source does not want you to proxy for it for
+     * the current protocol version of oob queries.
+     */
+    public boolean doNotProxyV3() {
+        return _doNotProxyV3;
+    }
+    
     /**
      * Returns true if this query is for 'What is new?' content, i.e. usually
      * the top 3 YOUNGEST files in your library.

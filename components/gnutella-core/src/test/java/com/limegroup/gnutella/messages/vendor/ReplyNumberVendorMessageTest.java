@@ -12,12 +12,12 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
     }
     
     public void testNumResults() {
-        ReplyNumberVendorMessage msg = new ReplyNumberVendorMessage(new GUID(), 10);
+        ReplyNumberVendorMessage msg = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(), 10);
         assertEquals(10, msg.getNumResults());
         
         for (int illegalResultNum : new int[] { 256, 0, -1 }) {
             try { 
-                msg = new ReplyNumberVendorMessage(new GUID(), illegalResultNum);
+                msg = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(), illegalResultNum);
                 fail("Expected illegal argument exception for result: " + illegalResultNum);
             }
             catch (IllegalArgumentException iae) {
@@ -32,6 +32,21 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
             fail("BadPacketException expected, message too large");
         }
         catch (BadPacketException e) {
+        }
+    }
+    
+    public void testOldVersionIsNotAcceptedFromNetwork() {
+        try {
+            new ReplyNumberVendorMessage(GUID.makeGuid(), (byte)0x01, (byte)0x01, 2, new byte[2]);
+            fail("Old message versions should not be accpeted");            
+        }
+        catch (BadPacketException bpe) {
+        }
+        try {
+            new ReplyNumberVendorMessage(GUID.makeGuid(), (byte)0x01, (byte)0x01, 1, new byte[2]);
+            fail("Old message versions should not be accpeted");            
+        }
+        catch (BadPacketException bpe) {
         }
     }
 

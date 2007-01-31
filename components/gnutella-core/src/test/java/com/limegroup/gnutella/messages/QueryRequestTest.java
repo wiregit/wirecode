@@ -1077,6 +1077,48 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
         assertTrue(proxy.desiresOutOfBandReplies());
+        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.doNotProxyV2());
+        assertFalse(proxy.doNotProxyV3());
+        
+        assertEquals(query.getQuery(), proxy.getQuery());
+        assertEquals(query.canDoFirewalledTransfer(), proxy.canDoFirewalledTransfer());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getTTL(), proxy.getTTL());
+        
+        // compare with network constructor, almost as it was done before
+        QueryRequest proxy2 = createProxyQueryWithNetworkConstructor(query, query.getGUID()); 
+        
+        assertEquals(proxy, proxy2);
+        assertEquals(proxy.getPayload(), proxy2.getPayload());
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        proxy.write(out);
+        byte[] proxyBytes = out.toByteArray();
+        out.reset();
+        proxy2.write(out);
+        assertEquals(proxyBytes, out.toByteArray());
+    }
+    
+    private static QueryRequest createProxyQueryWithNetworkConstructor(QueryRequest qr, byte[] guid) {
+        if (guid.length != 16)
+            throw new IllegalArgumentException("bad guid size: " + guid.length);
+
+        QueryRequest copy = new QueryRequest(guid, qr.getTTL(), qr.getMinSpeed(), 
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                // can receive oob now
+                true,
+                qr.getFeatureSelector(), qr.doNotProxyV3(),
+                qr.getMetaMask(), false /* query string is already normalized */);
+        
+        try {
+            return QueryRequest.createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
+                                      copy.getPayload(), qr.getNetwork());
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
+        }
     }
     
     /**
