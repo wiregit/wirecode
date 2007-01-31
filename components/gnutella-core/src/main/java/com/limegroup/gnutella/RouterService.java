@@ -365,7 +365,7 @@ public class RouterService {
 	 */
   	public RouterService(ActivityCallback callback, MessageRouter router) {
 		RouterService.callback = callback;
-        fileManager.registerFileManagerEventListener(callback);
+        fileManager.addFileEventListener(callback);
         RouterService.setMessageRouter(router);
         
         manager.addEventListener(callback);

@@ -722,7 +722,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testSpecialApplicationShare() throws Exception{
         File specialShare = createNewNamedTestFile(10, "shared", FileManager.APPLICATION_SPECIAL_SHARE);
         MultiListener listener = new MultiListener();
-        fman.registerFileManagerEventListener(listener);
+        fman.addFileEventListener(listener);
         waitForLoad();
         //should not have dipatched an event for the folder
         for(FileManagerEvent fevt: listener.getFileManagerEventList()) {

@@ -2273,21 +2273,27 @@ public abstract class FileManager {
     /**
      * registers a listener for FileManagerEvents
      */
-    public void registerFileManagerEventListener(FileEventListener listener) {
+    public void addFileEventListener(FileEventListener listener) {
+        if (listener == null) {
+            throw new NullPointerException("FileEventListener is null");
+        }
         eventListeners.addIfAbsent(listener);
     }
 
     /**
      * unregisters a listener for FileManagerEvents
      */
-    public void unregisterFileManagerEventListener(FileEventListener listener) {
+    public void removeFileEventListener(FileEventListener listener) {
+        if (listener == null) {
+            throw new NullPointerException("FileEventListener is null");
+        }
         eventListeners.remove(listener);
     }
 
     /**
      * dispatches a FileManagerEvent to any registered listeners 
      */
-    public void dispatchFileEvent(FileManagerEvent evt) {
+    protected void dispatchFileEvent(FileManagerEvent evt) {
         for(FileEventListener listener : eventListeners) {
             listener.handleFileEvent(evt);
         }
