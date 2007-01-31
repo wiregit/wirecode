@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AbstractDHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.exceptions.CollisionException;
 import org.limewire.mojito.exceptions.DHTException;
@@ -348,7 +348,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
     /**
      * A bootstrap specific implementation of DHTFuture
      */
-    private class BootstrapFuture extends AbstractDHTFuture<BootstrapResult> {
+    private class BootstrapFuture extends DHTFutureTask<BootstrapResult> {
         
         private BootstrapFuture(Callable<BootstrapResult> task) {
             super(task);

@@ -30,12 +30,12 @@ import java.util.concurrent.FutureTask;
 /**
  * An abstract implementation of DHTFuture
  */
-public class AbstractDHTFuture<V> extends FutureTask<V> implements DHTFuture<V> {
+public class DHTFutureTask<V> extends FutureTask<V> implements DHTFuture<V> {
 
     private List<DHTFutureListener<V>> listeners 
         = new ArrayList<DHTFutureListener<V>>();
     
-    protected AbstractDHTFuture(Callable<V> callable) {
+    protected DHTFutureTask(Callable<V> callable) {
         super(callable);
     }
     

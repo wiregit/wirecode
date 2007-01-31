@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AbstractDHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.Result;
 
@@ -87,7 +87,7 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
     /**
      * A lookup specific implementation of DHTFuture
      */
-    private class LookupFuture extends AbstractDHTFuture<V> {
+    private class LookupFuture extends DHTFutureTask<V> {
 
         private final KUID lookupId;
         

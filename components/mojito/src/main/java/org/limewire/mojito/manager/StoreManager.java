@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.AbstractDHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.handler.response.StoreResponseHandler;
@@ -69,7 +69,7 @@ public class StoreManager extends AbstractManager<StoreResult> {
     /**
      * A store specific implementation of DHTFuture
      */
-    private class StoreFuture extends AbstractDHTFuture<StoreResult> {
+    private class StoreFuture extends DHTFutureTask<StoreResult> {
         
         public StoreFuture(Callable<StoreResult> callable) {
             super(callable);

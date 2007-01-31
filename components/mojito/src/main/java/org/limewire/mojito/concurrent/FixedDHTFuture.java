@@ -29,12 +29,12 @@ import org.limewire.mojito.util.OnewayExchanger;
 
 /**
  * A FixedDHTFuture is hard coded to return a value or
- * throw an Exception.
+ * to throw an Exception.
  */
 public class FixedDHTFuture<T> implements DHTFuture<T> {
     
-    private OnewayExchanger<T, ExecutionException> exchanger 
-        = new OnewayExchanger<T, ExecutionException>();
+    private final OnewayExchanger<T, ExecutionException> exchanger 
+        = new OnewayExchanger<T, ExecutionException>(true);
     
     public FixedDHTFuture(T value) {
         exchanger.setValue(value);

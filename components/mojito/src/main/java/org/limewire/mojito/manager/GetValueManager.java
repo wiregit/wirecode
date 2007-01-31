@@ -23,7 +23,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AbstractDHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.handler.response.GetValueResponseHandler;
 import org.limewire.mojito.result.GetValueResult;
@@ -58,7 +58,7 @@ public class GetValueManager extends AbstractManager<GetValueResult> {
     /**
      * A "get value" specific implementation of DHTFuture
      */
-    private class GetValueFuture extends AbstractDHTFuture<GetValueResult> {
+    private class GetValueFuture extends DHTFutureTask<GetValueResult> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
             super(callable);

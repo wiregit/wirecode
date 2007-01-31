@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.AbstractDHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
@@ -152,7 +152,7 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * A ping specific implementation of DHTFuture 
      */
-    private class PingFuture extends AbstractDHTFuture<PingResult> {
+    private class PingFuture extends DHTFutureTask<PingResult> {
 
         private final SocketAddress key;
         
