@@ -11,22 +11,21 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
@@ -87,7 +86,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 	}
     
     public static void globalSetUp() throws Exception {
-        (new RouterService(new ActivityCallbackStub())).start();
+        LimeCoreGlue.install();
     }
 
     public void setUp() {
