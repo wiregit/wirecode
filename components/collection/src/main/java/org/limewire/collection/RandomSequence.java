@@ -14,8 +14,9 @@ import java.util.NoSuchElementException;
  * Thx to Cyclonus for the pow2 hint
  */
 public class RandomSequence implements Iterable<Integer> {
-    private final int end, pow2, a;
-    private int seed;
+    private final int end;
+    private final long pow2, a;
+    private long seed;
     
     public RandomSequence(int end) {
         this.end = end;
@@ -45,7 +46,7 @@ public class RandomSequence implements Iterable<Integer> {
         do {
             seed = (a * seed + 3 ) % pow2;
         } while (seed >= end);
-        return seed;
+        return (int)seed;
     }
     
     public Iterator<Integer> iterator() {
