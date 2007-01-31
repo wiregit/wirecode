@@ -82,7 +82,7 @@ public class NIOServerSocketTest extends BaseTestCase {
     
     private int interestOps(Socket socket) throws Exception {
         // peeks into the NIODispatcher to get the Selector so we can assert the interetOps
-        Selector selector = (Selector)PrivilegedAccessor.getValue(NIODispatcher.instance(), "selector");
+        Selector selector = (Selector)PrivilegedAccessor.getValue(NIODispatcher.instance(), "primarySelector");
         return socket.getChannel().keyFor(selector).interestOps();
     }
     

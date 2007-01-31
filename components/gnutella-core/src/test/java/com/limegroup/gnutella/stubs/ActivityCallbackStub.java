@@ -54,6 +54,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void downloadsComplete() { }
     public void uploadsComplete() { }
     public void error(int errorCode) { }
+    public void installationCorrupted(){}
     public void error(int errorCode, Throwable t) { }
     public void error(Throwable t) { }
     public void promptAboutCorruptDownload(Downloader dloader) {

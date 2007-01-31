@@ -114,6 +114,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         ConnectionSettings.PROXY_HOST.setValue("127.0.0.1");
         ConnectionSettings.PROXY_PORT.setValue(LISTEN_PORT);
         ConnectionSettings.CONNECTION_METHOD.setValue(ConnectionSettings.C_SOCKS5_PROXY);
+        ConnectionSettings.USE_PROXY_FOR_PRIVATE.setValue(true);
         
         StubConnectObserver o1 = new StubConnectObserver();
         CONTROLLER.connect(LISTEN_ADDR, 0, o1);

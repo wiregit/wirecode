@@ -54,7 +54,7 @@ public final class ServerSideInitialMessagesTest extends ServerSideTestCase {
     // ======================================================
     public void testInitialPeerMessages() throws Exception{
         Connection up=ULTRAPEER[0];
-        Thread.sleep( 5*1000 );
+        Thread.sleep( 11*1000 );
         parseWaitingMessages( up );
 
         // Check that initial messages are sent & received correctly
