@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
+import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueManager;
@@ -976,12 +977,25 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
-        throwExceptionIfNotBootstrapped("put()");
+        if (!isRunning()) {
+            throw new IllegalStateException(getName() + " is not running");
+        }
         
         DHTValueEntity entity = new DHTValueEntity(
                 getLocalNode(), getLocalNode(), key, value, true);
         database.store(entity);
-        return store(entity);
+        
+        // If we're bootstrapped then store the value immediately
+        if (isBootstrapped()) {
+            return store(entity);
+            
+        // And if we're not bootstrapped then return a fake Future
+        // and let the DHTValueManager do its work once we're bootstrapped
+        } else {
+            Exception ex = new NotBootstrappedException(
+                    getName(), value.isEmpty() ? "remove()" : "put()");
+            return new FixedDHTFuture<StoreResult>(ex);
+        }
     }
     
     /*
@@ -989,8 +1003,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#remove(com.limegroup.mojito.KUID)
      */
     public DHTFuture<StoreResult> remove(KUID key) {
-        throwExceptionIfNotBootstrapped("remove()");
-        
         // To remove a KeyValue you just store an empty value!
         return put(key, DHTValueImpl.EMPTY_VALUE);
     }
