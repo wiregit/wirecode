@@ -12,7 +12,6 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTTestCase;
-import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class LimeDHTManagerTest extends DHTTestCase {
@@ -47,66 +46,75 @@ public class LimeDHTManagerTest extends DHTTestCase {
         DHTSettings.PERSIST_DHT.setValue(true);
         TestThreadPool threadPool = new TestThreadPool();
         LimeDHTManager manager = new LimeDHTManager(threadPool);
-        assertFalse(manager.isRunning());
-        assertFalse(manager.isBootstrapped());
-        assertFalse(manager.isWaitingForNodes());
-        assertEquals(0, manager.getActiveDHTNodes(10).size());
         
-        manager.start(true);
-        assertEquals(1, threadPool.getRunners().size());
-        Thread.sleep(200);
-        assertTrue(manager.isRunning());
-        assertTrue(manager.isActiveNode());
-        KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
-        //try starting again
-        manager.start(true);
-        Thread.sleep(200);
-        assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-        //try switching mode
-        manager.start(false);
-        Thread.sleep(200);
-        assertFalse(manager.isActiveNode());
-        assertTrue(manager.isRunning());
-        KUID passiveLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
-        assertNotEquals(activeLocalNodeID, passiveLocalNodeID);
-        manager.start(false);
-        Thread.sleep(200);
-        assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-        manager.addressChanged();
-        Thread.sleep(200);
-        assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-        //try switching multiple times
-        manager.start(true);
-        manager.start(false);
-        manager.start(true);
-        //give it enough time --> previous starts were offloaded to threadpool
-        Thread.sleep(10000);
-        assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-        assertTrue(manager.isActiveNode());
+        try {
+            assertFalse(manager.isRunning());
+            assertFalse(manager.isBootstrapped());
+            assertFalse(manager.isWaitingForNodes());
+            assertEquals(0, manager.getActiveDHTNodes(10).size());
+            
+            manager.start(true);
+            assertEquals(1, threadPool.getRunners().size());
+            Thread.sleep(200);
+            assertTrue(manager.isRunning());
+            assertTrue(manager.isActiveNode());
+            KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
+            //try starting again
+            manager.start(true);
+            Thread.sleep(200);
+            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            //try switching mode
+            manager.start(false);
+            Thread.sleep(200);
+            assertFalse(manager.isActiveNode());
+            assertTrue(manager.isRunning());
+            KUID passiveLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
+            assertNotEquals(activeLocalNodeID, passiveLocalNodeID);
+            manager.start(false);
+            Thread.sleep(200);
+            assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            manager.addressChanged();
+            Thread.sleep(200);
+            assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            //try switching multiple times
+            manager.start(true);
+            manager.start(false);
+            manager.start(true);
+            //give it enough time --> previous starts were offloaded to threadpool
+            Thread.sleep(10000);
+            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            assertTrue(manager.isActiveNode());
+        } finally {
+            manager.stop();
+        }
     }
     
     public void testStopStartLimeDHTManager() throws Exception{
         TestThreadPool threadPool = new TestThreadPool();
         LimeDHTManager manager = new LimeDHTManager(threadPool);
-        manager.start(true);
-        manager.stop();
-        Thread.sleep(200);
-        assertFalse(manager.isRunning());
-        manager.start(true);
-        Thread.sleep(200);
-        assertTrue(manager.isRunning());
-        assertTrue(manager.isActiveNode());
-        manager.start(false);
-        Thread.sleep(200);
-        assertFalse(manager.isActiveNode());
-        assertTrue(manager.isRunning());
-        manager.start(true);
-        manager.start(false);
-        manager.start(true);
-        manager.stop();
-        assertFalse(manager.isRunning());
-        Thread.sleep(500);
-        assertFalse(manager.isRunning());
+        try {
+            manager.start(true);
+            manager.stop();
+            Thread.sleep(200);
+            assertFalse(manager.isRunning());
+            manager.start(true);
+            Thread.sleep(200);
+            assertTrue(manager.isRunning());
+            assertTrue(manager.isActiveNode());
+            manager.start(false);
+            Thread.sleep(200);
+            assertFalse(manager.isActiveNode());
+            assertTrue(manager.isRunning());
+            manager.start(true);
+            manager.start(false);
+            manager.start(true);
+            manager.stop();
+            assertFalse(manager.isRunning());
+            Thread.sleep(500);
+            assertFalse(manager.isRunning());
+        } finally {
+            manager.stop();
+        }
     }
     
     private class TestThreadPool extends SimpleTimer{
@@ -125,7 +133,5 @@ public class LimeDHTManagerTest extends DHTTestCase {
         public List<Runnable> getRunners() {
             return runners;
         }
-        
     }
-    
 }

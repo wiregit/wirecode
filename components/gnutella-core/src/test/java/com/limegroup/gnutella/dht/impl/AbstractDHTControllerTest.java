@@ -69,37 +69,39 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         
         AbstractDHTController controller = new ActiveDHTNodeController(
                 Vendor.valueOf(1), Version.valueOf(1), new DHTManagerStub());
-        
-        controller.start();
-        MojitoDHTStub dht = new MojitoDHTStub();
-        PrivilegedAccessor.setValue(controller, "dht", dht);
-        
-        DHTSettings.DHT_NODE_ADDER_DELAY.setValue(50);
-        for(int i = 0; i < 20; i++) {
-            controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
+        try {
+            controller.start();
+            MojitoDHTStub dht = new MojitoDHTStub();
+            PrivilegedAccessor.setValue(controller, "dht", dht);
+            
+            DHTSettings.DHT_NODE_ADDER_DELAY.setValue(50);
+            for(int i = 0; i < 20; i++) {
+                controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
+            }
+            Thread.sleep(500);
+            //should have started the Random node adder
+            RandomNodeAdder nodeAdder = controller.getRandomNodeAdder();
+            assertNotNull(nodeAdder);
+            assertTrue("Node adder should be running", nodeAdder.isRunning());
+            //should have pinged all hosts
+            assertEquals(20, dht.getPingedNodesList().size());
+            assertEquals(new InetSocketAddress("localhost", 2000), dht.getPingedNodesList().get(19));
+            
+            //try cancelling node adder and starting it again
+            controller.stop();
+            assertFalse("Node adder should not be running", nodeAdder.isRunning());
+            controller.start();
+            PrivilegedAccessor.setValue(controller, "dht", dht);
+            for(int i = 0; i < 100; i++) {
+                controller.addActiveDHTNode(new InetSocketAddress("localhost", 2100+i));
+            }
+            //see if the nodes were pinged
+            Thread.sleep(500);
+            assertEquals(50, dht.getPingedNodesList().size());
+            assertEquals(new InetSocketAddress("localhost", 2199), dht.getPingedNodesList().get(20));
+        } finally {
+            controller.stop();
         }
-        Thread.sleep(500);
-        //should have started the Random node adder
-        RandomNodeAdder nodeAdder = controller.getRandomNodeAdder();
-        assertNotNull(nodeAdder);
-        assertTrue("Node adder should be running", nodeAdder.isRunning());
-        //should have pinged all hosts
-        assertEquals(20, dht.getPingedNodesList().size());
-        assertEquals(new InetSocketAddress("localhost", 2000), dht.getPingedNodesList().get(19));
-        
-        //try cancelling node adder and starting it again
-        controller.stop();
-        assertFalse("Node adder should not be running", nodeAdder.isRunning());
-        controller.start();
-        PrivilegedAccessor.setValue(controller, "dht", dht);
-        for(int i = 0; i < 100; i++) {
-            controller.addActiveDHTNode(new InetSocketAddress("localhost", 2100+i));
-        }
-        //see if the nodes were pinged
-        Thread.sleep(500);
-        assertEquals(50, dht.getPingedNodesList().size());
-        assertEquals(new InetSocketAddress("localhost", 2199), dht.getPingedNodesList().get(20));
-        
     }
     
     private class MojitoDHTStub implements MojitoDHT {
