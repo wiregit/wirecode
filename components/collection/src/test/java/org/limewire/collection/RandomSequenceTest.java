@@ -28,14 +28,12 @@ public class RandomSequenceTest extends BaseTestCase {
     }
     
     public static void testDifferent() throws Exception {
-        /*
-         * this test will fail 1/2.5 million runs.
-         */
+        final int HOST_CATCHER_SIZE = 200;
         String out1 = ""; 
         String out2 = "";
 
         // iterations over the same sequence are identical
-        RandomSequence r = new RandomSequence(10000);
+        RandomSequence r = new RandomSequence(HOST_CATCHER_SIZE);
         for (int i : r)
             out1 = out1 +" "+ i;
         for (int i : r)
@@ -43,10 +41,12 @@ public class RandomSequenceTest extends BaseTestCase {
         assertEquals(out1, out2);
 
         // but iterations over different sequences are not
-        r = new RandomSequence(10000);
+        r = new RandomSequence(HOST_CATCHER_SIZE);
         out2 = "";
         for (int i : r)
             out2 = out2 +" "+ i;
+        
+        // Note: with this set size, 1 in 10K sequences will be the same
         assertNotEquals(out1, out2);
     }
 }
