@@ -7,8 +7,8 @@
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
     
+    <target name="clean-build" depends="initialize, clean, compile"/>
     <target name="clean-build-test" depends="initialize, clean, compile, test-all"/>
-    <target name="clean-build-quicktest" depends="initialize, clean, compile, test-components"/>
     
     <target name="initialize"
             depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize">

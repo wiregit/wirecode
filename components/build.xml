@@ -148,6 +148,10 @@
 	    </do.test-all>
 	</target>
     
+    <target name="clean-test-all"
+    		description="Cleans and then runs every test."
+            depends="initialize, clean, test-all"/>
+    
     <target name="prep-tests">
         <mkdir dir="${limewire.components.all.tests.resources}"/>
         <copy file="${limewire.components.home}/log4j.properties" todir="${limewire.components.all.tests.resources}" overwrite="true"/>
