@@ -40,6 +40,7 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         lookups.put("com.limegroup.gnutella.downloader.Interval", "org.limewire.collection.Interval");
         lookups.put("com.limegroup.gnutella.util.IntervalSet", "org.limewire.collection.IntervalSet");
         lookups.put("com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator", "org.limewire.collection.Comparators$CaseInsensitiveStringComparator");
+        lookups.put("com.limegroup.gnutella.util.StringComparator", "org.limewire.collection.StringComparator");
     }
      
     /** 

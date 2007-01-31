@@ -44,9 +44,10 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         callback = new TestActivityCallback();
         new RouterService( callback );
     }
-
+    
     public void testLegacy() throws Exception {
         doTest("downloads_30.dat","mpg4_golem160x90first120.avi",2777638);
+        callback.clearDownloaders();
         doTest("downloads_233.dat", "Test1.mp3", 1922612);
         //doTest("downloads_224.dat");  //Has XML serialization problem
         //doTest("downloads_202.dat");  //Has XML serialization problem
@@ -83,6 +84,10 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     
         public void removeDownload(Downloader d) {
             downloaders.remove(d);
+        }
+        
+        public void clearDownloaders() {
+            downloaders.clear();
         }
     }
 }

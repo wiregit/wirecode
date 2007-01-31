@@ -33,6 +33,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -45,12 +46,12 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 @SuppressWarnings( { "unchecked", "cast" } )
 public class RequeryDownloadTest 
-    extends com.limegroup.gnutella.util.LimeTestCase {
+    extends LimeTestCase {
 
     /** The main test fixture.  Contains the incomplete file and hash below. */
     private DownloadManager _mgr; 
     /** Where to send and receive messages */
-    private TestMessageRouter _router;
+    private static TestMessageRouter _router;
     /** The simulated downloads.dat file.  Used only to build _mgr. */
     private File _snapshot;
     /** The name of the completed file. */
@@ -68,7 +69,7 @@ public class RequeryDownloadTest
     
     private static final int PORT = 6939;
 
-    class TestMessageRouter extends MessageRouterStub {
+    static class TestMessageRouter extends MessageRouterStub {
         List /* of QueryMessage */ broadcasts=new LinkedList();
 		public void sendDynamicQuery(QueryRequest query) {
             broadcasts.add(query);
@@ -85,16 +86,20 @@ public class RequeryDownloadTest
     public static Test suite() {
         return buildTestSuite(RequeryDownloadTest.class);
     }
+    
+    public static void globalSetUp() throws Exception {
+        ManagedDownloader.NO_DELAY = true;
+        ConnectionSettings.NUM_CONNECTIONS.setValue(0);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.PORT.setValue(PORT);
+        
+        _router= new TestMessageRouter();
+        new RouterService(new ActivityCallbackStub(), _router);    
+    }
 
     public void setUp() throws Exception {
-        ManagedDownloader.NO_DELAY = true;
-		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		ConnectionSettings.PORT.setValue(PORT);
-        
-        _router=new TestMessageRouter();
-        new RouterService(new ActivityCallbackStub(), _router);        
+           
         RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
         PrivilegedAccessor.setValue(
             RouterService.class, "manager", new ConnectionManagerStub());
