@@ -84,7 +84,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      * Notifies the GUI that the user is attempting to share a sensitive
      * directory.  Returns true if the sensitive directory should be shared. 
      */
-    public boolean warnAboutSharingSensitiveDirectory(final File dir);
+    public boolean warnAboutSharingSensitiveDirectory(File dir);
     
     /**
      * Notifies the GUI when a FileDesc was either added, removed, 
@@ -150,7 +150,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
 	 * @param magnets
 	 * @return true if the callback handles the magnet links
 	 */
-	public boolean handleMagnets(final MagnetOptions[] magnets);
+	public boolean handleMagnets(MagnetOptions[] magnets);
 	
 	/**
 	 * Indicates that the firewalled state of this has changed. 
