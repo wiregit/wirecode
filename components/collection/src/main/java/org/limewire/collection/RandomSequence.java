@@ -31,7 +31,7 @@ public class RandomSequence implements Iterable<Integer> {
         long pow = 1;
         while (pow < end)
             pow <<= 1;
-        pow2 = pow;
+        pow2 = pow - 1;
         a = (((int)(Math.random() * (pow2 >> 2))) << 2) + 1;
         seed = (int)(Math.random() * end);
     }
@@ -44,7 +44,7 @@ public class RandomSequence implements Iterable<Integer> {
             return 0;
         
         do {
-            seed = (a * seed + 3 ) % pow2;
+            seed = (a * seed + 3 ) & pow2;
         } while (seed >= end);
         return (int)seed;
     }
