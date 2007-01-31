@@ -30,17 +30,17 @@ public class RandomSequenceTest extends BaseTestCase {
     public static void testDifferent() throws Exception {
         String out1 = "";
         String out2 = "";
-        
+
         // iterations over the same sequence are identical
-        RandomSequence r = new RandomSequence(10);
+        RandomSequence r = new RandomSequence(100);
         for (int i : r)
-            out1 = out1 + i;
+            out1 = out1 +" "+ i;
         for (int i : r)
-            out2 = out2 + i;
+            out2 = out2 +" "+ i;
         assertEquals(out1, out2);
-        
+
         // but iterations over different sequences are not
-        r = new RandomSequence(10);
+        r = new RandomSequence(100);
         out2 = "";
         for (int i : r)
             out2 = out2 + i;
