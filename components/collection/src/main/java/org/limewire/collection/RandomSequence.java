@@ -28,7 +28,7 @@ public class RandomSequence implements Iterable<Integer> {
             return;
         }
         
-        int pow = 1;
+        long pow = 1;
         while (pow < end)
             pow <<= 1;
         pow2 = pow;
