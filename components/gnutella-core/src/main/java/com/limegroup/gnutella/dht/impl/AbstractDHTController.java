@@ -19,6 +19,8 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Vendor;
+import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.service.ErrorService;
@@ -62,12 +64,7 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * The instance of the DHT
      */
-    private MojitoDHT dht;
-    
-    /**
-     * Whether or not the DHT controlled by this controller is running.
-     */
-    private boolean running = false;
+    protected final MojitoDHT dht;
 
     /**
      * The DHT bootstrapper instance.
@@ -77,20 +74,34 @@ abstract class AbstractDHTController implements DHTController {
     /**
      * The random node adder.
      */
-    private final RandomNodeAdder dhtNodeAdder;
+    private final RandomNodeAdder dhtNodeAdder = new RandomNodeAdder();
     
     /**
      * The DHT event dispatcher
      */
-    private final EventDispatcher<DHTEvent, DHTEventListener> dhtEventDispatcher;
+    private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
     
-    public AbstractDHTController(EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
-        dhtNodeAdder = new RandomNodeAdder();
-        dhtEventDispatcher = dispatcher;
+    public AbstractDHTController(Vendor vendor, Version version, 
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+        this.dht = createMojitoDHT(vendor, version);
+        
+        assert (dht != null);
+        dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
+        dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
+            public Thread newThread(Runnable runnable) {
+                return new ManagedThread(runnable);
+            }
+        });
+        dht.setHostFilter(new DHTFilterDelegate());
+        
+        this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
+        this.dispatcher = dispatcher;
+        
         DHTStatsManager.clear();
     }
 
+    protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
+    
     /**
      * Start the Mojito DHT and connects it to the network in either passive mode
      * or active mode if we are not firewalled.
@@ -115,9 +126,8 @@ abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
-            running = true;
             bootstrapper.bootstrap();
-            dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
+            dispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
         } catch (IOException err) {
             LOG.error(err);
             ErrorService.error(err);
@@ -130,19 +140,14 @@ abstract class AbstractDHTController implements DHTController {
      * to bootstrap from for the next session.
      * 
      */
-    public void stop(){
-        running = false;
-        
+    public void stop() {
         LOG.debug("Shutting down DHT Controller");
         
         bootstrapper.stop();
         dhtNodeAdder.stop();
+        dht.close();
         
-        if (dht != null) {
-            dht.close();
-        }
-        
-        dhtEventDispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
+        dispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
     }
     
     /**
@@ -199,7 +204,7 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     public boolean isRunning() {
-        return running;
+        return dht.isRunning();
     }
     
     public boolean isBootstrapped() {
@@ -208,24 +213,6 @@ abstract class AbstractDHTController implements DHTController {
 
     public boolean isWaitingForNodes() {
         return bootstrapper.isWaitingForNodes();
-    }
-    
-    /**
-     * Sets the MojitoDHT instance. Meant to be called once!
-     */
-    protected void setMojitoDHT(MojitoDHT dht) {
-        
-        assert (this.dht == null);
-        
-        dht.setMessageDispatcher(LimeMessageDispatcherImpl.class);
-        dht.getDHTExecutorService().setThreadFactory(new ThreadFactory() {
-            public Thread newThread(Runnable runnable) {
-                return new ManagedThread(runnable);
-            }
-        });
-        dht.setHostFilter(new DHTFilterDelegate());
-        
-        this.dht = dht;
     }
     
     public MojitoDHT getMojitoDHT() {
@@ -325,7 +312,7 @@ abstract class AbstractDHTController implements DHTController {
             List<SocketAddress> nodes = null;
             synchronized (this) {
                 
-                if(!running) {
+                if(!isRunning()) {
                     return;
                 }
                 

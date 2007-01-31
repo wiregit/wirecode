@@ -59,13 +59,15 @@ class PassiveDHTNodeController extends AbstractDHTController{
     
     public PassiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-
-        super(dispatcher);
+        super(vendor, version, dispatcher);
+    }
+    
+    @Override
+    protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
         
         limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
-        setMojitoDHT(dht);
         
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {
@@ -85,8 +87,11 @@ class PassiveDHTNodeController extends AbstractDHTController{
                 IOUtils.close(ois);
             }
         }
+        
+        return dht;
     }
-    
+
+
     /**
      * This method first adds the given host to the list of bootstrap nodes and 
      * then adds it to this passive node's routing table.

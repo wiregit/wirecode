@@ -48,8 +48,11 @@ class ActiveDHTNodeController extends AbstractDHTController {
     
     public ActiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(dispatcher);
-        
+        super(vendor, version, dispatcher);
+    }
+    
+    @Override
+    protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         
         if (DHTSettings.PERSIST_DHT.getValue() && 
@@ -74,9 +77,9 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 IOUtils.close(in);
             }
         }
-        
-        setMojitoDHT(dht);
+        return dht;
     }
+
 
     /**
      * @see AbstractDHTController.start
