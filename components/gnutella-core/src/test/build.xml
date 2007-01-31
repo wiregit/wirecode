@@ -32,9 +32,9 @@
 	
             </src-classpath>
 			<tests-classpath>
-            	<path refid="tests.limewire.components.all.classpath"/>
-			    <pathelement location="${limewire.lib.messagebundles}"/>
 			    <pathelement location="${limewire.components.tests.home}"/>
+			    <path refid="tests.limewire.components.all.classpath"/>
+			    <pathelement location="${limewire.lib.messagebundles}"/>
 		    </tests-classpath>
         </do.setup-properties>
     </target>
