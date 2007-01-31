@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.TreeMap;
 
 import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.util.COBSUtil;
@@ -362,7 +364,20 @@ public class GGEP {
             }
         }
     }
-
+    
+    /**
+     * Returns the GGEP as a byte array
+     * @return an empty array if GGEP is empty
+     */
+    public byte[] toByteArray() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            write(out);
+        } catch (IOException e) {
+            ErrorService.error(e);
+        }
+        return out.toByteArray();
+    }
 
     private final boolean shouldCOBSEncode(byte[] data) {
         // if nulls are allowed from construction time and if nulls are present

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -131,15 +132,15 @@ public final class LimeACKVendorMessage extends VendorMessage {
         return out.toByteArray();
     }
 
-    // TODO fberger compare security tokens?
     public boolean equals(Object other) {
         if (other instanceof LimeACKVendorMessage) {
+            LimeACKVendorMessage o = (LimeACKVendorMessage)other;
             GUID myGuid = new GUID(getGUID());
-            GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
-            int otherResults = 
-                ((LimeACKVendorMessage) other).getNumResults();
+            GUID otherGuid = new GUID(o.getGUID());
+            int otherResults = o.getNumResults();
             return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
+                    Arrays.equals(getSecurityTokenBytes(), o.getSecurityTokenBytes()) && 
                     super.equals(other));
         }
         return false;

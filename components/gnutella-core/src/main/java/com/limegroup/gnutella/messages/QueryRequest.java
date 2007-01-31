@@ -680,17 +680,31 @@ public class QueryRequest extends Message implements Serializable{
         if (guid.length != 16)
             throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        QueryRequest copy = new QueryRequest(guid, qr.getTTL(), qr.getMinSpeed(), 
-                qr.getQuery(), qr.getRichQueryString(), 
-                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
-                // can receive oob now
-                true,
-                qr.getFeatureSelector(), qr.doNotProxyV3(),
-                qr.getMetaMask(), false /* query string is already normalized */);
-        copy.setHops(qr.getHops());
-        return copy;
-    }
+        // i can't just call a new constructor, since there might be stuff in
+        // the payload we don't understand and would get lost
+        byte[] newPayload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        // disable old out of bounds if there
+        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        GGEP ggep = new GGEP(true);
+        // disable proxying for old protocol version
+        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
+        // signal oob capability
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
+        
+        try {
+            newPayload = patchInGGEP(newPayload, ggep);
+        } catch (BadPacketException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+        
+        try {
+            return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
+                                      newPayload, qr.getNetwork());
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
+        }
+	}
     
 	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
@@ -1345,93 +1359,46 @@ public class QueryRequest extends Message implements Serializable{
 			throw new BadPacketException("no payload");
 		}
 		PAYLOAD=payload;
-		String tempQuery = "";
-		String tempRichQuery = "";
-		int tempMinSpeed = 0;
-		Set<URN> tempQueryUrns = null;
-		Set<URN.Type> tempRequestedUrnTypes = null;
-        QueryKey tempQueryKey = null;
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
-			short sp = ByteOrder.leb2short(bais);
-			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(readNullTerminatedBytes(bais), "UTF-8");
-            // handle extensions, which include rich query and URN stuff
-            byte[] extsBytes = readNullTerminatedBytes(bais);
-            HUGEExtension huge = new HUGEExtension(extsBytes);
-            GGEP ggep = huge.getGGEP();
-
-            if(ggep != null) {
-                try {
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                        byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                        tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
-                    }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                        _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
-                        _doNotProxyV2 = true;
-                        try {
-                            if (ggep.getInt(GGEP.GGEP_HEADER_NO_PROXY) == 3) {
-                                _doNotProxyV3 = true;
-                            }
-                        }
-                        catch (BadGGEPPropertyException bgpe) { }
-                    }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                        _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                        // if the value is something we can't handle, don't even set it
-                        if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
-                            _metaMask = null;
-                    }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
-                        // TODO fberger throw exception if oob is not supported?
-                        _hasSecurityTokenRequest = true;
-                    }
-                } catch (BadGGEPPropertyException ignored) {}
-            }
-
-            tempQueryUrns = huge.getURNS();
-            tempRequestedUrnTypes = huge.getURNTypes();
-            for(String currMiscBlock : huge.getMiscBlocks()) {
-                if(!tempRichQuery.equals(""))
-                    break;
-                if (currMiscBlock.startsWith("<?xml"))
-                    tempRichQuery = currMiscBlock;                
-            }
-        } catch(UnsupportedEncodingException uee) {
-            //couldn't build query from network due to unsupportedencodingexception
-            //so throw a BadPacketException 
-            throw new BadPacketException(uee.getMessage());
-        } catch (IOException ioe) {
-            ErrorService.error(ioe);
-        }
-		QUERY = tempQuery;
+		
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+        
+		QUERY = parser.query;
 	    LimeXMLDocument tempDoc = null;
 	    try {
-	        tempDoc = new LimeXMLDocument(tempRichQuery);
+	        tempDoc = new LimeXMLDocument(parser.richQuery);
         } catch(SAXException ignored) {
         } catch(SchemaNotFoundException ignored) {
         } catch(IOException ignored) {
         }
         this.XML_DOC = tempDoc;
-		MIN_SPEED = tempMinSpeed;
-		if(tempQueryUrns == null) {
+		MIN_SPEED = parser.minSpeed;
+        
+		_featureSelector = parser.featureSelector;
+        
+        _doNotProxyV2 = parser.doNotProxyV2;
+        
+        _doNotProxyV3 = parser.doNotProxyV3;
+        
+        _metaMask = parser.metaMask;
+        
+        _hasSecurityTokenRequest = parser.hasSecurityTokenRequest;
+        
+		if(parser.queryUrns == null) {
 			QUERY_URNS =Collections.emptySet(); 
 		}
 		else {
-			QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+			QUERY_URNS = Collections.unmodifiableSet(parser.queryUrns);
 		}
-		if(tempRequestedUrnTypes == null) {
+		if(parser.requestedUrnTypes == null) {
 			REQUESTED_URN_TYPES = Collections.emptySet();
 		}
 		else {
 			REQUESTED_URN_TYPES =
-			    Collections.unmodifiableSet(tempRequestedUrnTypes);
+			    Collections.unmodifiableSet(parser.requestedUrnTypes);
 		}	
-        QUERY_KEY = tempQueryKey;
+        QUERY_KEY = parser.queryKey;
 		if(QUERY.length() == 0 &&
-		   tempRichQuery.length() == 0 &&
+		   parser.richQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
 		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
@@ -1442,10 +1409,10 @@ public class QueryRequest extends Message implements Serializable{
             throw new BadPacketException("query too big: " + QUERY);
         }        
 
-        if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
+        if(parser.richQuery.length() > MAX_XML_QUERY_LENGTH) {
             ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             //throw BadPacketException.XML_QUERY_TOO_BIG;
-            throw new BadPacketException("xml too big: " + tempRichQuery);
+            throw new BadPacketException("xml too big: " + parser.richQuery);
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
@@ -1839,7 +1806,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * @effects utility function to read null-terminated byte[] from stream
      */
-    protected byte[] readNullTerminatedBytes(InputStream is) 
+    protected static byte[] readNullTerminatedBytes(InputStream is) 
         throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i;
@@ -1890,4 +1857,136 @@ public class QueryRequest extends Message implements Serializable{
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
+    
+    static byte[] patchInGGEP(byte[] payload, GGEP ggep) throws BadPacketException {
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+        HUGEExtension huge = parser.huge;
+        if (huge != null) {
+            GGEP existing = huge.getGGEP();
+            if (existing != null) {
+                existing.merge(ggep);
+                return insertGGEP(payload, parser.hugeStart + huge.getGGEPStart(), parser.hugeStart + huge.getGGEPEnd(), existing);
+            }
+            else {
+                return insertGGEP(payload, payload.length, payload.length, ggep);
+            }
+        }
+        else {
+            return insertGGEP(payload, payload.length, payload.length, ggep);
+        }
+    }
+    
+    private static byte[] insertGGEP(byte[] payload, int start, int end, GGEP ggep) {
+        byte[] ggepBytes = ggep.toByteArray(); 
+        byte[] newPayload = new byte[payload.length + ggepBytes.length - (end - start)];
+        
+        System.arraycopy(payload, 0, newPayload, 0, start);
+        System.arraycopy(ggepBytes, 0, newPayload, start, ggepBytes.length);
+        
+        if (end < payload.length) {
+            System.arraycopy(payload, end, newPayload, start + ggepBytes.length, payload.length - end);
+        }
+        
+        return newPayload;
+    }
+    
+    private static class QueryRequestPayloadParser {
+
+        String query = "";
+        String richQuery = "";
+        int minSpeed = 0;
+        Set<URN> queryUrns = null;
+        Set<URN.Type> requestedUrnTypes = null;
+        QueryKey queryKey = null;
+        
+        HUGEExtension huge;
+        
+        int featureSelector;
+        
+        boolean doNotProxyV2;
+        
+        boolean doNotProxyV3;
+        
+        Integer metaMask;
+        
+        boolean hasSecurityTokenRequest;
+        
+        int hugeStart;
+        
+        int hugeEnd;
+        
+        public QueryRequestPayloadParser(byte[] payload) throws BadPacketException {
+            try {
+                PositionByteArrayInputStream bais = new PositionByteArrayInputStream(payload);
+                short sp = ByteOrder.leb2short(bais);
+                minSpeed = ByteOrder.ushort2int(sp);
+                query = new String(readNullTerminatedBytes(bais), "UTF-8");
+                 
+                // handle extensions, which include rich query and URN stuff
+                hugeStart = bais.getPos();
+                byte[] extsBytes = readNullTerminatedBytes(bais);
+                huge = new HUGEExtension(extsBytes);
+                hugeEnd = bais.getPos();
+                GGEP ggep = huge.getGGEP();
+
+                if(ggep != null) {
+                    try {
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                            byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                            queryKey = QueryKey.getQueryKey(qkBytes, false);
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
+                            featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
+                            doNotProxyV2 = true;
+                            try {
+                                if (ggep.getInt(GGEP.GGEP_HEADER_NO_PROXY) == 3) {
+                                    doNotProxyV3 = true;
+                                }
+                            }
+                            catch (BadGGEPPropertyException bgpe) { }
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                            metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                            // if the value is something we can't handle, don't even set it
+                            if ((metaMask.intValue() < 4) || (metaMask.intValue() > 248))
+                                metaMask = null;
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                            hasSecurityTokenRequest = true;
+                        }
+                    } catch (BadGGEPPropertyException ignored) {}
+                }
+
+                queryUrns = huge.getURNS();
+                requestedUrnTypes = huge.getURNTypes();
+                for(String currMiscBlock : huge.getMiscBlocks()) {
+                    if(!richQuery.equals(""))
+                        break;
+                    if (currMiscBlock.startsWith("<?xml"))
+                        richQuery = currMiscBlock;                
+                }
+            } catch(UnsupportedEncodingException uee) {
+                //couldn't build query from network due to unsupportedencodingexception
+                //so throw a BadPacketException 
+                throw new BadPacketException(uee.getMessage());
+            } catch (IOException ioe) {
+                ErrorService.error(ioe);
+            }
+        }
+        
+        private static class PositionByteArrayInputStream extends ByteArrayInputStream {
+
+            public PositionByteArrayInputStream(byte[] buf) {
+                super(buf);
+            }
+            
+            public int getPos() {
+                return pos;
+            }
+            
+        }
+        
+    }
+    
 }

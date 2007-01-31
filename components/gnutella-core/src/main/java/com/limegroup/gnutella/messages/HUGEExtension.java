@@ -23,12 +23,23 @@ public class HUGEExtension {
     private Set<URN.Type> _urnTypes = null;
     private Set<String> _miscBlocks = null;
     // -----------------------------------------
+    private int ggepStart;
+    private int ggepEnd;
 
     /** @return the set of GGEP Objects in this HUGE extension.
      */
     public GGEP getGGEP() {
         return _ggep;
     }
+    
+    public int getGGEPStart() {
+        return ggepStart;
+    }
+    
+    public int getGGEPEnd() {
+        return ggepEnd;
+    }
+    
     /** @return the set of URN Objects in this HUGE extension.
      */
     public Set<URN> getURNS() {
@@ -62,6 +73,7 @@ public class HUGEExtension {
             
             // HANDLE GGEP STUFF
             if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
+                ggepStart = currIndex;
                 int[] endIndex = new int[1];
                 endIndex[0] = currIndex+1;
                 try {
@@ -71,7 +83,7 @@ public class HUGEExtension {
                     else
                         _ggep.merge(ggep);
                 } catch (BadGGEPBlockException ignored) {}
-                currIndex = endIndex[0];
+                ggepEnd = currIndex = endIndex[0];
             } else { // HANDLE HUGE STUFF
                 int delimIndex = currIndex;
                 while ((delimIndex < extsBytes.length) 

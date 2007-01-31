@@ -1085,40 +1085,45 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.canDoFirewalledTransfer(), proxy.canDoFirewalledTransfer());
         assertEquals(query.getHops(), proxy.getHops());
         assertEquals(query.getTTL(), proxy.getTTL());
-        
-        // compare with network constructor, almost as it was done before
-        QueryRequest proxy2 = createProxyQueryWithNetworkConstructor(query, query.getGUID()); 
-        
-        assertEquals(proxy, proxy2);
-        assertEquals(proxy.getPayload(), proxy2.getPayload());
-        
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        proxy.write(out);
-        byte[] proxyBytes = out.toByteArray();
-        out.reset();
-        proxy2.write(out);
-        assertEquals(proxyBytes, out.toByteArray());
     }
     
-    private static QueryRequest createProxyQueryWithNetworkConstructor(QueryRequest qr, byte[] guid) {
-        if (guid.length != 16)
-            throw new IllegalArgumentException("bad guid size: " + guid.length);
-
-        QueryRequest copy = new QueryRequest(guid, qr.getTTL(), qr.getMinSpeed(), 
-                qr.getQuery(), qr.getRichQueryString(), 
-                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
-                // can receive oob now
-                true,
-                qr.getFeatureSelector(), qr.doNotProxyV3(),
-                qr.getMetaMask(), false /* query string is already normalized */);
+    public void testPatchInGGEP() throws Exception {
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
         
-        try {
-            return QueryRequest.createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                                      copy.getPayload(), qr.getNetwork());
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
-        }
+        // payload without ggep and huge
+        byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
+        
+        QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.doNotProxyV2());
+        assertFalse(query.doNotProxyV3());
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
+        byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxyV2());
+        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        
+        // payload with multiple ggeps
+        payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertTrue(query.doNotProxyV2());
+        assertFalse(query.doNotProxyV3());
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxyV2());
+        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        assertTrue(proxy.desiresOutOfBandRepliesV3());
     }
     
     /**
