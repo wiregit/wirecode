@@ -139,7 +139,7 @@ public class CacheForwardTest extends MojitoTestCase {
         try {
             for (int i = 0; i < 3*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", PORT + i));
+                dht.bind(PORT + i);
                 dht.start();
                 
                 if (i > 0) {
@@ -191,7 +191,7 @@ public class CacheForwardTest extends MojitoTestCase {
             m.setAccessible(true);
             m.invoke(nearest, new Object[]{valueId});
             
-            nearest.bind(new InetSocketAddress("localhost", PORT+1000));
+            nearest.bind(PORT+500);
             nearest.start();
             bootstrap(nearest, dhts.values());
             
