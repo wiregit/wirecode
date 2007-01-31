@@ -88,18 +88,13 @@ public class RequeryDownloadTest
     }
     
     public static void globalSetUp() throws Exception {
-        ManagedDownloader.NO_DELAY = true;
-        ConnectionSettings.NUM_CONNECTIONS.setValue(0);
-        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PORT.setValue(PORT);
-        
+        setSettings();
         _router= new TestMessageRouter();
         new RouterService(new ActivityCallbackStub(), _router);    
     }
 
     public void setUp() throws Exception {
-           
+        setSettings();
         RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
         PrivilegedAccessor.setValue(
             RouterService.class, "manager", new ConnectionManagerStub());
@@ -121,6 +116,14 @@ public class RequeryDownloadTest
         
         new File( getSaveDirectory(), _filename).delete();
     }    
+    
+    private static void setSettings() {
+        ManagedDownloader.NO_DELAY = true;
+        ConnectionSettings.NUM_CONNECTIONS.setValue(0);
+        ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.PORT.setValue(PORT);
+    }
 
     /** Creates a downloads.dat file named SNAPSHOT with a faked up
      *  IncompleteFileManager in it.  All of this because we can't access

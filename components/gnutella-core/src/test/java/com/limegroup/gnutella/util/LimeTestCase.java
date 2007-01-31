@@ -23,6 +23,7 @@ import org.limewire.util.SystemUtils;
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnCallback;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -200,6 +201,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Ensures that no settings are saved.
      */
     public static void setupSettings() throws Exception{
+        LimeCoreGlue.install();
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
         ConnectionSettings.DISABLE_UPNP.setValue(true);

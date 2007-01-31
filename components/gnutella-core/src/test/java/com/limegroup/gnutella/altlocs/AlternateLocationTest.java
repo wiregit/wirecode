@@ -20,7 +20,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -85,10 +84,6 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 		junit.textui.TestRunner.run(suite());
 	}
     
-    public static void globalSetUp() throws Exception {
-        LimeCoreGlue.install();
-    }
-
     public void setUp() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
     }
