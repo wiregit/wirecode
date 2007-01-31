@@ -22,9 +22,11 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
@@ -83,6 +85,10 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Lim
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+    
+    public static void globalSetUp() throws Exception {
+        (new RouterService(new ActivityCallbackStub())).start();
+    }
 
     public void setUp() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
