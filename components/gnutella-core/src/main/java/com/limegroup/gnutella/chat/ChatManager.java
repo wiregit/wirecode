@@ -3,8 +3,6 @@ package com.limegroup.gnutella.chat;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.collection.Comparators;
@@ -35,8 +33,8 @@ public final class ChatManager implements ConnectionAcceptor {
 	/** 
 	 * <tt>List</tt> of InstantMessenger objects.
 	 */
-	private List<InstantMessenger> _chatsInProgress 
-		= Collections.synchronizedList(new LinkedList<InstantMessenger>());
+//	private List<InstantMessenger> _chatsInProgress 
+//		= Collections.synchronizedList(new LinkedList<InstantMessenger>());
 
 	/**
 	 * Instance accessor for the <tt>ChatManager</tt>.
@@ -73,13 +71,10 @@ public final class ChatManager implements ConnectionAcceptor {
             return;
         }
         
-		try {
-			ActivityCallback callback = RouterService.getCallback();
-			InstantMessenger im = new InstantMessenger(socket, this, callback);
-			// insert the newly created InstantMessager into the list
-			_chatsInProgress.add(im);
-			callback.acceptChat(im);
-			im.start();
+        ActivityCallback callback = RouterService.getCallback();
+        InstantMessenger im = new InstantMessenger(socket, this, callback);
+        try {
+            im.start();
 		} catch (IOException e) {
             IOUtils.close(socket);
 		}
@@ -92,23 +87,23 @@ public final class ChatManager implements ConnectionAcceptor {
 	 * the connection has died.
 	 */
 	public Chatter request(String host, int port) {
-		InstantMessenger im = null;
-		ActivityCallback callback = 
-		    RouterService.getCallback();
-		im = new InstantMessenger(host, port, this, callback);
-		// insert the newly created InstantMessager into the list
-		_chatsInProgress.add(im);
-		im.start();
-		return im;
+        ActivityCallback callback = RouterService.getCallback();
+        InstantMessenger im = new InstantMessenger(host, port, this, callback);
+        try {
+            im.start();
+        } catch (IOException e) {
+            // ignore
+        }
+        return im;
 	}
 
-	/** 
-	 * Remove the instance of chat from the list of chats
-	 * in progress.
-	 */
-	public void removeChat(InstantMessenger chat) {
-		_chatsInProgress.remove(chat);
-	}
+//	/** 
+//	 * Remove the instance of chat from the list of chats
+//	 * in progress.
+//	 */
+//	public void removeChat(InstantMessenger chat) {
+//		_chatsInProgress.remove(chat);
+//	}
 
 	/** blocks incoming connections from a particular ip address  */
 	public void blockHost(String host) {

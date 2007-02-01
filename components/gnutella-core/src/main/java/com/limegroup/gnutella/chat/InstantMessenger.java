@@ -1,257 +1,337 @@
 package com.limegroup.gnutella.chat;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.limewire.concurrent.ThreadExecutor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.BufferUtils;
+import org.limewire.nio.channel.AbstractChannelInterestReader;
+import org.limewire.nio.channel.AbstractChannelInterestWriter;
+import org.limewire.nio.channel.NIOMultiplexor;
+import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.statemachine.IOState;
+import org.limewire.nio.statemachine.IOStateMachine;
+import org.limewire.nio.statemachine.IOStateObserver;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.http.SimpleHTTPHeaderValue;
+import com.limegroup.gnutella.http.SimpleReadHeaderState;
+import com.limegroup.gnutella.http.SimpleWriteHeaderState;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
- * this class is a subclass of Chat, also implementing
- * Chatter interface.  it is a one-to-one instant message
- * style chat implementation.
+ * This class implements a simple chat protocol that allows to exchange text
+ * messages over a socket connection.
  * 
- *@author rsoule
+ * <p>
+ * The protocol is similar to a Gnutella handshake:
+ * 
+ * <pre>
+ *      -&gt; CHAT CONNECT/0.1
+ *      -&gt; User-Agent: LimeWire @version@
+ *      -&gt;
+ *      &lt;- CHAT/0.1 200 OK
+ *      &lt;-
+ *      -&gt; CHAT/0.1 200 OK
+ *      -&gt;
+ *      -&gt; [message]\r\n
+ *      &lt;- [message]\r\n
+ *      ...
+ * </pre>
  */
 public class InstantMessenger implements Chatter {
 
-	// Attributes
-	private Socket _socket;
-	private BufferedReader _reader;
-	private BufferedWriter _out;
-	private String _host;
-	private int _port;
-	private String _message = "";
-	private ActivityCallback _activityCallback;
-	private ChatManager  _manager;
-	private boolean _outgoing = false;
+    private static final Log LOG = LogFactory.getLog(InstantMessenger.class);
 
-	/** constructor for an incoming chat request */
-	public InstantMessenger(Socket socket, ChatManager manager, 
-							ActivityCallback callback) throws IOException {
-		_manager = manager;
-		_socket = socket;
-		_port = socket.getPort();
-		_host = _socket.getInetAddress().getHostAddress();
-		_activityCallback = callback;
-		OutputStream os = _socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-		_out=new BufferedWriter(osw);
-		InputStream istream = _socket.getInputStream();
-		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
-	}
+    private static final String CHAT_CONNECT = "CHAT CONNECT/0.1";
 
-	/** constructor for an outgoing chat request */
-	public InstantMessenger(String host, int port, ChatManager manager,
-							ActivityCallback callback) {
-		_host = host;
-		_port = port;
-		_manager = manager;
-		_activityCallback = callback;
-		_outgoing = true;
-	}
+    private static final String CHAT_OK = "CHAT/0.1 200 OK";
 
-	/** this is only called for outgoing connections, so that the
-		creation of the socket will be in the thread */
-	private void OutgoingInitializer() throws IOException  {
-		_socket =  new Socket(_host, _port);
-		_socket.setSoTimeout(Constants.TIMEOUT);
-		OutputStream os = _socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-		_out=new BufferedWriter(osw);
-		// CHAT protocal :
-		// First we send the Chat connect string, followed by 
-		// any number of '\r\n' terminated header strings, 
-		// followed by a singe '\r\n'
-        _out.write("CHAT CONNECT/0.1\r\n");
-        _out.write("User-Agent: "+LimeWireUtils.getVendor()+"\r\n");
-        _out.write("\r\n");
-		_out.flush();
-		// next we expect to read 'CHAT/0.1 200 OK' followed 
-		// by headers, and then a blank line.
-		// TODO: Add socket timeouts.
-		InputStream istream = _socket.getInputStream();
-		_reader = new BufferedReader(new InputStreamReader(istream, "UTF-8"));
-		// we are being lazy here: not actually checking for the 
-		// header, and reading until a blank line
-		while (true) {
-			String str = _reader.readLine();
-			if (str == null) 
-				return;
-			if (str.equals("")) 
-				break;
-		}
-		// finally, we send 
-        _out.write("CHAT/0.1 200 OK\r\n");
-        _out.write("\r\n");
-		_out.flush();
-		_socket.setSoTimeout(0);
-		_activityCallback.acceptChat(this);
-	}
+    private static final String CHARSET = "UTF-8";
 
-	/** starts the chatting */
-	public void start() {
-		MessageReader messageReader = new MessageReader(this);
-        ThreadExecutor.startThread(messageReader, "MessageReader");
+    private Socket socket;
 
-	}
+    private final String host;
 
-	/** stop the chat, and close the connections 
-	 * this is always safe to call, but it is recommended
-	 * that the gui try to encourage the user not to call 
-	 * this
-	 */
-	public void stop() {
-		_manager.removeChat(this);
-		try {
-			_out.close();
-			_socket.close();
-		} catch (IOException e) {
-		}
-	}
+    private final int port;
 
-	/** 
-	 * send a message accross the socket to the other host 
-	 * as with stop, this is alway safe to call, but it is
-	 * recommended that the gui discourage the user from
-	 * calling it when a connection is not yet established.
-	 */
-	public void send(String message) {
-		try {
-			_out.write(message+"\n");
-			_out.flush();
-		} catch (IOException e) {
-		    // TODO: shouldn't we perform some cleanup here??  Shouldn't we 
-            // remove this instant messenger from the current chat sessions??
-		}
-	}
+    private String lastMessage = "";
 
-	/** returns the host name to which the 
-		socket is connected */
-	public String getHost() {
-		return _host;
-	}
+    private ActivityCallback callback;
 
-	/** returns the port to which the socket is
-		connected */
-	public int getPort() {
-		return _port;
-	}
+    private ChatManager manager;
 
-	public synchronized String getMessage() {
-		String str = _message;
-		_message = "";
-		return str;
-	}
-	
-	public void blockHost(String host) {
-		_manager.blockHost(host);
-	}
+    private IOStateMachine shaker;
 
-	/** Reads the header information from the chat
-		request.  At the moment, the header information
-		is pretty useless */
-	public void readHeader() throws IOException {
-		_socket.setSoTimeout(Constants.TIMEOUT);
-		// For the Server side of the chat protocal:
-		// We expect to be recieving 'CHAT CONNECT/0.1'
-		// but 'CHAT' has been consumed by acceptor.
-		// then, headers, followed by a blank line.
-		// we are going to be lazy, and just read until
-		// the blank line.
-		while (true) {
-			String str = _reader.readLine();
-			if (str == null) 
-				return;
-			if (str.equals("")) 
-				break;
-		}
-		// then we want to send 'CHAT/0.1 200 OK'
-		_out.write("CHAT/0.1 200 OK\r\n");
-		_out.write("\r\n");
-		_out.flush();
+    private MessageReceiver receiver;
 
-		// Now we expect to read 'CHAT/0.1 200 OK'
-		// followed by headers, followed by a blank line.
-		// once again we will be lazy, and just read until
-		// a blank line. 
-		// TODO: add socket timeouts.
-		while (true) {
-			String str = _reader.readLine();
-			if (str == null) 
-				return;
-			if (str.equals("")) 
-				break;
-		}
+    private MessageSender sender;
 
-		_socket.setSoTimeout(0);
-	}
+    private boolean outgoing;
 
+    /**
+     * Constructor for an incoming chat request.
+     */
+    public InstantMessenger(Socket socket, ChatManager manager,
+            ActivityCallback callback) {
+        this.manager = manager;
+        this.socket = socket;
+        this.port = socket.getPort();
+        this.host = socket.getInetAddress().getHostAddress();
+        this.callback = callback;
+    }
 
-	/**
-	 * a private class that handles the thread for reading
-	 * off of the socket.
-	 *
-	 *@author rsoule
-	 */
-	
-	private class MessageReader implements Runnable {
-		Chatter _chatter;
-		
-		public MessageReader(Chatter chatter) {
-			_chatter = chatter;
-		}
+    /**
+     * Constructor for an outgoing chat request
+     */
+    public InstantMessenger(final String host, final int port,
+            ChatManager manager, ActivityCallback callback) {
+        this.host = host;
+        this.port = port;
+        this.manager = manager;
+        this.callback = callback;
+        this.outgoing = true;
+    }
 
-		public void run() {
-		    try {
-		        if(_outgoing) {
-		            OutgoingInitializer();
-		        } else {
-		            readHeader();
-		        }
-		    } catch (IOException e) {
-		        _activityCallback.chatUnavailable(_chatter);
-		        return;
-		    }
+    public void start() throws IOException {
+        if (outgoing) {
+            // TODO since callback.acceptChat() is called only if the handshake
+            // is successful so the user does not get any feedback in case of 
+            // failure
+            Sockets.connect(host, port, Constants.TIMEOUT,
+                    new ConnectObserver() {
 
-		    while (true){
-		        String str;
-		        try {
-		            // read into a buffer off of the socket
-		            // until a "\r" or a "\n" has been 
-		            // reached. then alert the gui to 
-		            // write to the screen.
-		            str = _reader.readLine();
-		            synchronized(InstantMessenger.this) {
-		                if( ( str == null ) || (str == "") )
-		                    throw new IOException();
-		                _message += str;
-		                _activityCallback.receiveMessage(_chatter);
-		            } 
+                        public void handleConnect(Socket socket)
+                                throws IOException {
+                            InstantMessenger.this.socket = socket;
+                            shake(createOutgoingShakeStates());
+                        }
 
-		        } catch (IOException e) {
-		            // if an exception was thrown, then 
-		            // the socket was closed, and the chat
-		            // was terminated.
-		            // return;
-		            _activityCallback.chatUnavailable(_chatter);
+                        public void handleIOException(IOException e) {
+                            LOG.error("Unexpected exception", e);
+                        }
 
-		            break;
-		        }                     
-		    }
-		}
-		
-	}
+                        public void shutdown() {
+                            LOG.warn("Could not establish chat connection to "
+                                    + host + ":" + port);
+                        }
 
+                    });
+        } else {
+            shake(createIncomingShakeStates());
+        }
+    }
 
+    /**
+     * send a message accross the socket to the other host as with stop, this is
+     * alway safe to call, but it is recommended that the gui discourage the
+     * user from calling it when a connection is not yet established.
+     */
+    public void send(String message) {
+        try {
+            sender.sendMessage(message + "\n");
+        } catch (IOException e) {
+            stop();
+        }
+    }
+
+    /**
+     * Returns the host name to which the socket is connected.
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /**
+     * Returns the port to which the socket is connected.
+     */
+    public int getPort() {
+        return port;
+    }
+
+    public synchronized String getMessage() {
+        String str = lastMessage;
+        lastMessage = "";
+        return str;
+    }
+
+    public void blockHost(String host) {
+        manager.blockHost(host);
+    }
+
+    private List<IOState> createIncomingShakeStates() {
+        List<IOState> states = new ArrayList<IOState>(3);
+        states.add(new ReadChatConnectHeaderState());
+        states.add(new SimpleWriteHeaderState(CHAT_OK,
+                new HashMap<HTTPHeaderName, HTTPHeaderValue>(), null));
+        states.add(new ReadChatHeaderState());
+        return states;
+    }
+
+    private List<IOState> createOutgoingShakeStates() {
+        Map<HTTPHeaderName, HTTPHeaderValue> headers = new HashMap<HTTPHeaderName, HTTPHeaderValue>();
+        headers.put(HTTPHeaderName.USER_AGENT, new SimpleHTTPHeaderValue(
+                LimeWireUtils.getVendor()));
+
+        List<IOState> states = new ArrayList<IOState>(3);
+        states.add(new SimpleWriteHeaderState(CHAT_CONNECT, headers, null));
+        states.add(new ReadChatHeaderState());
+        states.add(new SimpleWriteHeaderState(CHAT_OK,
+                new HashMap<HTTPHeaderName, HTTPHeaderValue>(), null));
+        return states;
+    }
+
+    /**
+     * Invoked when the handshake completes.
+     */
+    private void handshakeCompleted() {
+        callback.acceptChat(this);
+
+        try {
+            socket.setSoTimeout(0);
+        } catch (SocketException e) {
+            LOG.warn("Could not set socket timeout", e);
+        }
+
+        receiver = new MessageReceiver();
+        sender = new MessageSender();
+
+        ((NIOMultiplexor) socket).setReadObserver(receiver);
+        ((NIOMultiplexor) socket).setWriteObserver(sender);
+    }
+
+    private void handleIOException(IOException e) {
+        callback.chatErrorMessage(this, e.getMessage());
+        stop();
+    }
+
+    private void shake(List<IOState> states) throws SocketException {
+        this.shaker = new IOStateMachine(new IOStateObserver() {
+            public void handleStatesFinished() {
+                handshakeCompleted();
+            }
+
+            public void handleIOException(IOException e) {
+                InstantMessenger.this.handleIOException(e);
+            }
+
+            public void shutdown() {
+                // ignore
+            }
+        }, states);
+
+        socket.setSoTimeout(Constants.TIMEOUT);
+        ((NIOMultiplexor) socket).setReadObserver(shaker);
+        ((NIOMultiplexor) socket).setWriteObserver(shaker);
+    }
+
+    private class MessageReceiver extends AbstractChannelInterestReader {
+
+        @Override
+        protected int getBufferSize() {
+            return 1024;
+        }
+
+        @Override
+        public void handleIOException(IOException e) {
+            InstantMessenger.this.handleIOException(e);
+        }
+
+        public void handleRead() throws IOException {
+            interest(true);
+
+            int read = 0;
+            while (buffer.hasRemaining() && (read = source.read(buffer)) > 0)
+                ;
+            if (buffer.position() == 0) {
+                if (read == -1)
+                    close();
+                return;
+            }
+
+            buffer.flip();
+            StringBuilder sb = new StringBuilder();
+            while (BufferUtils.readLine(buffer, sb)) {
+                InstantMessenger.this.lastMessage = sb.toString();
+                callback.receiveMessage(InstantMessenger.this);
+            }
+
+            if (buffer.hasRemaining()) {
+                buffer.compact();
+            } else {
+                buffer.clear();
+            }
+        }
+    }
+
+    private class MessageSender extends AbstractChannelInterestWriter {
+
+        public MessageSender() {
+            super(1024);
+        }
+
+        @Override
+        public void handleIOException(IOException e) {
+            InstantMessenger.this.handleIOException(e);
+        }
+
+        public void sendMessage(String message) throws IOException {
+            put(message.getBytes(CHARSET));
+        }
+
+    }
+
+    private class ReadChatConnectHeaderState extends SimpleReadHeaderState {
+
+        public ReadChatConnectHeaderState() {
+            super(null, ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue(),
+                    ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue());
+        }
+
+        @Override
+        protected void processConnectLine() throws IOException {
+            System.out.println(connectLine);
+        }
+    }
+
+    private class ReadChatHeaderState extends SimpleReadHeaderState {
+
+        public ReadChatHeaderState() {
+            super(null, ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue(),
+                    ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue());
+        }
+
+        @Override
+        protected void processConnectLine() throws IOException {
+            if (!connectLine.equals(CHAT_OK)) {
+                throw new IOException("Invalid handshake: " + connectLine);
+            }
+        }
+    }
+
+    /**
+     * Stop the chat, and close the connections this is always safe to call.
+     */
+    public void stop() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.warn("Error closing chat connection", e);
+            }
+        }
+        callback.chatUnavailable(this);
+    }
 
 }
