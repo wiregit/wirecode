@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.URN;
@@ -23,21 +25,28 @@ public class HUGEExtension {
     private Set<URN.Type> _urnTypes = null;
     private Set<String> _miscBlocks = null;
     // -----------------------------------------
-    private int ggepStart;
-    private int ggepEnd;
+    
+    private List<GGEPBlock> _ggepBlocks = null;
 
-    /** @return the set of GGEP Objects in this HUGE extension.
+    /**
+     *  @return the merged GGEP of all GGEPs in this HUGE extension or null
+     *  if no GGEPs were found
      */
     public GGEP getGGEP() {
         return _ggep;
     }
     
-    public int getGGEPStart() {
-        return ggepStart;
-    }
-    
-    public int getGGEPEnd() {
-        return ggepEnd;
+    /**
+     * Returns unmodifiable list of GGEP blocks.
+     * @return empty list if there no GGEP blocks were found
+     */
+    public List<GGEPBlock> getGGEPBlocks() {
+        if (_ggepBlocks == null) {
+            return Collections.emptyList();
+        }
+        else {
+            return Collections.unmodifiableList(_ggepBlocks);
+        }
     }
     
     /** @return the set of URN Objects in this HUGE extension.
@@ -73,17 +82,21 @@ public class HUGEExtension {
             
             // HANDLE GGEP STUFF
             if (extsBytes[currIndex] == GGEP.GGEP_PREFIX_MAGIC_NUMBER) {
-                ggepStart = currIndex;
+                int start = currIndex;
                 int[] endIndex = new int[1];
                 endIndex[0] = currIndex+1;
                 try {
                     GGEP ggep = new GGEP(extsBytes, currIndex, endIndex);
-                    if (_ggep == null)
-                        _ggep = ggep;
-                    else
-                        _ggep.merge(ggep);
+                    if (_ggep == null) {
+                        _ggep = new GGEP(true);
+                    }
+                    _ggep.merge(ggep);
+                    if (_ggepBlocks == null) {
+                        _ggepBlocks = new ArrayList<GGEPBlock>(2);
+                    }
+                    _ggepBlocks.add(new GGEPBlock(ggep, start, endIndex[0]));
                 } catch (BadGGEPBlockException ignored) {}
-                ggepEnd = currIndex = endIndex[0];
+                currIndex = endIndex[0];
             } else { // HANDLE HUGE STUFF
                 int delimIndex = currIndex;
                 while ((delimIndex < extsBytes.length) 
@@ -118,4 +131,35 @@ public class HUGEExtension {
         }        
     }
 
+    /**
+     * Represents a single ggep block in the HUGE extension block.
+     */
+    public static class GGEPBlock {
+
+        private int start;
+        
+        private int end;
+        
+        private GGEP ggep;
+        
+        public GGEPBlock(GGEP ggep, int start, int end) {
+            this.ggep = ggep;
+            this.start = start;
+            this.end = end;
+        }
+        
+        public GGEP getGGEP() {
+            return ggep;
+        }
+        
+        public int getStartPos() {
+            return start;
+        }
+        
+        public int getEndPos() {
+            return end;
+        }
+        
+    }
+    
 }

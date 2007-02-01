@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.limewire.security.QueryKey;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
 
 import junit.framework.Test;
@@ -19,6 +20,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -1124,14 +1126,93 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(proxy.doNotProxyV3());
         assertTrue(proxy.desiresOutOfBandReplies());
         assertTrue(proxy.desiresOutOfBandRepliesV3());
+        
+
+        // unknown gem
+        PositionByteArrayOutputStream out = new PositionByteArrayOutputStream();
+        int minspeed = new Random().nextInt();
+        minspeed &= QueryRequest.SPECIAL_OUTOFBAND_MASK;
+        ByteOrder.short2leb((short)minspeed, out); // write minspeed
+        out.write("query".getBytes("UTF-8"));              // write query
+        out.write(0);                             // null
+        int startGem = out.getPos();
+        byte[] gemBytes = "unknowngem".getBytes("UTF-8"); 
+        out.write(gemBytes);
+        out.write(0x1c);
+        
+        payload = out.toByteArray();
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxyV2());
+        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        // verfiy unknown gem is still there
+        byte[] part = new byte[gemBytes.length];
+        System.arraycopy(newPayload, startGem, part, 0, part.length);
+        assertEquals(gemBytes, part);
+        
+        // unknown gem + GGEP with unknown keys
+        GGEP unknownKeysGGEP = new GGEP(false);
+        unknownKeysGGEP.put("FB", "BF");
+        unknownKeysGGEP.put("uk");
+        unknownKeysGGEP.write(out);
+        
+        payload = out.toByteArray();
+        
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxyV2());
+        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        System.arraycopy(newPayload, startGem, part, 0, part.length);
+        assertEquals(gemBytes, part);
+        
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(newPayload);
+        GGEP parsedGGEP = parser.huge.getGGEP();
+        assertEquals("BF", parsedGGEP.getString("FB"));
+        assertTrue(parsedGGEP.hasKey("uk"));
     }
     
+    public void testIsPayloadModifiable() throws BadPacketException {
+        QueryRequest query = QueryRequest.createQuery("query");
+        assertTrue(query.isPayloadModifiable());
+        
+        query = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), query.getPayload(), 0);
+        assertTrue(query.isPayloadModifiable());
+        
+        // patch in non-modifiability
+        GGEP ggep = new GGEP();
+        ggep.put(GGEP.GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD);
+        query = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), QueryRequest.patchInGGEP(query.getPayload(), ggep), 0);
+        assertFalse(query.isPayloadModifiable());
+        
+        try {
+            QueryRequest.createProxyQuery(query, GUID.makeGuid());
+            fail("should not be able to create proxy queries from unmodifiable payload");
+        }
+        catch (IllegalArgumentException iae) {
+        }
+    }
+    
+
     /**
      * Tests if the security token key is set for oob query requests and that
      * it's not set otherwise.
-     * @throws UnknownHostException 
+     * @throws  
      */
-    public void testOOBSecurityTokenSet() throws BadPacketException, UnknownHostException {
+    public void testOOBSecurityTokenSet() throws Exception {
         // oob set
         QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
         assertTrue(request.hasSecurityTokenRequest());
@@ -1169,5 +1250,14 @@ public final class QueryRequestTest extends LimeTestCase {
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
         assertFalse(fromNetwork.hasSecurityTokenRequest());
+        
+    }
+    
+    static class PositionByteArrayOutputStream extends ByteArrayOutputStream {
+
+        public int getPos() {
+            return count;
+        }
+        
     }
 }

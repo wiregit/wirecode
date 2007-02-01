@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.limewire.security.QueryKey;
@@ -28,6 +29,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -128,6 +130,8 @@ public class QueryRequest extends Message implements Serializable{
      */
     private boolean _doNotProxyV3 = false;
 
+    private boolean _isPayloadModifiable = true;
+    
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
@@ -679,6 +683,10 @@ public class QueryRequest extends Message implements Serializable{
 	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
         if (guid.length != 16)
             throw new IllegalArgumentException("bad guid size: " + guid.length);
+        
+        if (!qr.isPayloadModifiable()) {
+            throw new IllegalArgumentException("payload is not modifiable " + qr);
+        }
 
         // i can't just call a new constructor, since there might be stuff in
         // the payload we don't understand and would get lost
@@ -686,7 +694,7 @@ public class QueryRequest extends Message implements Serializable{
         System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
         // disable old out of bounds if there
         newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        GGEP ggep = new GGEP(true);
+        GGEP ggep = new GGEP(false);
         // disable proxying for old protocol version
         ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
         // signal oob capability
@@ -1383,6 +1391,8 @@ public class QueryRequest extends Message implements Serializable{
         
         _hasSecurityTokenRequest = parser.hasSecurityTokenRequest;
         
+        _isPayloadModifiable = parser.isPayloadModifiable;
+        
 		if(parser.queryUrns == null) {
 			QUERY_URNS =Collections.emptySet(); 
 		}
@@ -1587,6 +1597,14 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean doNotProxyV3() {
         return _doNotProxyV3;
+    }
+    
+    /**
+     * Return whether or not the payload of the query may be modified
+     * when rerouting or proxying it.
+     */
+    public boolean isPayloadModifiable() {
+        return _isPayloadModifiable;
     }
     
     /**
@@ -1857,15 +1875,24 @@ public class QueryRequest extends Message implements Serializable{
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
-    
+
+
     static byte[] patchInGGEP(byte[] payload, GGEP ggep) throws BadPacketException {
         QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
         HUGEExtension huge = parser.huge;
         if (huge != null) {
-            GGEP existing = huge.getGGEP();
-            if (existing != null) {
-                existing.merge(ggep);
-                return insertGGEP(payload, parser.hugeStart + huge.getGGEPStart(), parser.hugeStart + huge.getGGEPEnd(), existing);
+            // we write in the last modifiable block if available, so our
+            // values are still there in the merged version that is read back 
+            // from the network: this is not good
+            // TODO fberger
+            GGEPBlock block = getLastModifiableBlock(huge.getGGEPBlocks());
+            if (block != null) {
+                GGEP merge = new GGEP(false);
+                // first merge in original block and then ours, to make sure
+                // values are overwritten
+                merge.merge(block.getGGEP());
+                merge.merge(ggep);
+                return insertGGEP(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge);
             }
             else {
                 return insertGGEP(payload, payload.length, payload.length, ggep);
@@ -1874,6 +1901,20 @@ public class QueryRequest extends Message implements Serializable{
         else {
             return insertGGEP(payload, payload.length, payload.length, ggep);
         }
+    }
+    
+    /**
+     * Return the last modifiable GGEPBlock in the list or null if there
+     * is none or if the list is empty.
+     */
+    private static GGEPBlock getLastModifiableBlock(List<GGEPBlock> blocks) {
+        GGEPBlock last = null;
+        for (GGEPBlock block : blocks) {
+            if (!block.getGGEP().hasKey(GGEP.GGEP_HEADER_DO_NOT_MODIFY_GGEP)) {
+                last = block;
+            }
+        }
+        return last;
     }
     
     private static byte[] insertGGEP(byte[] payload, int start, int end, GGEP ggep) {
@@ -1890,7 +1931,7 @@ public class QueryRequest extends Message implements Serializable{
         return newPayload;
     }
     
-    private static class QueryRequestPayloadParser {
+    static class QueryRequestPayloadParser {
 
         String query = "";
         String richQuery = "";
@@ -1914,6 +1955,8 @@ public class QueryRequest extends Message implements Serializable{
         int hugeStart;
         
         int hugeEnd;
+        
+        boolean isPayloadModifiable = true;
         
         public QueryRequestPayloadParser(byte[] payload) throws BadPacketException {
             try {
@@ -1955,6 +1998,9 @@ public class QueryRequest extends Message implements Serializable{
                         if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                             hasSecurityTokenRequest = true;
                         }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD)) {
+                            isPayloadModifiable = false;
+                        }
                     } catch (BadGGEPPropertyException ignored) {}
                 }
 
@@ -1975,7 +2021,7 @@ public class QueryRequest extends Message implements Serializable{
             }
         }
         
-        private static class PositionByteArrayInputStream extends ByteArrayInputStream {
+        static class PositionByteArrayInputStream extends ByteArrayInputStream {
 
             public PositionByteArrayInputStream(byte[] buf) {
                 super(buf);

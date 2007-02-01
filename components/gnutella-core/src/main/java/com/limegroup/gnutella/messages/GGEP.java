@@ -92,6 +92,16 @@ public class GGEP {
     public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
     /** The extension header (key) indiciating the value has a signature in it. */
     public static final String GGEP_HEADER_SIGNATURE = "SIG";
+    
+    /** 
+     * The extension header indicating that the payload of the message should
+     * not be modified. 
+     */
+    public static final String GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD = "NMP";
+    /**
+     * The extension header indicating that a GGEP should not be modified.
+     */
+    public static final String GGEP_HEADER_DO_NOT_MODIFY_GGEP = "NMG";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
