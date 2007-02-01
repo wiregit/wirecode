@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.AbstractChannelInterestWriter;
@@ -38,16 +39,16 @@ import com.limegroup.gnutella.util.Sockets;
  * The protocol is similar to a Gnutella handshake:
  * 
  * <pre>
- *      -&gt; CHAT CONNECT/0.1
- *      -&gt; User-Agent: LimeWire @version@
- *      -&gt;
- *      &lt;- CHAT/0.1 200 OK
- *      &lt;-
- *      -&gt; CHAT/0.1 200 OK
- *      -&gt;
- *      -&gt; [message]\r\n
- *      &lt;- [message]\r\n
- *      ...
+ *       -&gt; CHAT CONNECT/0.1
+ *       -&gt; User-Agent: LimeWire @version@
+ *       -&gt;
+ *       &lt;- CHAT/0.1 200 OK
+ *       &lt;-
+ *       -&gt; CHAT/0.1 200 OK
+ *       -&gt;
+ *       -&gt; [message]\r\n
+ *       &lt;- [message]\r\n
+ *       ...
  * </pre>
  */
 public class InstantMessenger implements Chatter {
@@ -58,6 +59,8 @@ public class InstantMessenger implements Chatter {
 
     private static final String CHAT_OK = "CHAT/0.1 200 OK";
 
+    private static final String CONNECT = "CONNECT/0.1";
+    
     private static final String CHARSET = "UTF-8";
 
     private Socket socket;
@@ -65,8 +68,6 @@ public class InstantMessenger implements Chatter {
     private final String host;
 
     private final int port;
-
-    private String lastMessage = "";
 
     private ActivityCallback callback;
 
@@ -79,6 +80,8 @@ public class InstantMessenger implements Chatter {
     private MessageSender sender;
 
     private boolean outgoing;
+
+    private boolean stopped;
 
     /**
      * Constructor for an incoming chat request.
@@ -104,30 +107,34 @@ public class InstantMessenger implements Chatter {
         this.outgoing = true;
     }
 
-    public void start() throws IOException {
+    public void start() {
         if (outgoing) {
-            // TODO since callback.acceptChat() is called only if the handshake
-            // is successful so the user does not get any feedback in case of 
-            // failure
-            Sockets.connect(host, port, Constants.TIMEOUT,
-                    new ConnectObserver() {
+            try {
+                Sockets.connect(host, port, Constants.TIMEOUT,
+                        new ConnectObserver() {
+                            public void handleConnect(Socket socket)
+                                    throws IOException {
+                                InstantMessenger.this.socket = socket;
+                                shake(createOutgoingShakeStates());
+                            }
 
-                        public void handleConnect(Socket socket)
-                                throws IOException {
-                            InstantMessenger.this.socket = socket;
-                            shake(createOutgoingShakeStates());
-                        }
+                            public void handleIOException(IOException e) {
+                                LOG.error("Unexpected exception", e);
+                                handleException(e);
+                            }
 
-                        public void handleIOException(IOException e) {
-                            LOG.error("Unexpected exception", e);
-                        }
+                            public void shutdown() {
+                                LOG.warn("Could not establish chat connection to "
+                                        + host + ":" + port);
+                                stop();
+                            }
 
-                        public void shutdown() {
-                            LOG.warn("Could not establish chat connection to "
-                                    + host + ":" + port);
-                        }
-
-                    });
+                        });
+            } catch (IOException e) {
+                // should never happen since we are connecting in the background
+                LOG.warn("Unexpected exception", e);
+                handleException(e);
+            }
         } else {
             shake(createIncomingShakeStates());
         }
@@ -138,12 +145,14 @@ public class InstantMessenger implements Chatter {
      * alway safe to call, but it is recommended that the gui discourage the
      * user from calling it when a connection is not yet established.
      */
-    public void send(String message) {
+    public boolean send(String message) {
         try {
             sender.sendMessage(message + "\n");
         } catch (IOException e) {
             stop();
+            return false;
         }
+        return true;
     }
 
     /**
@@ -158,12 +167,6 @@ public class InstantMessenger implements Chatter {
      */
     public int getPort() {
         return port;
-    }
-
-    public synchronized String getMessage() {
-        String str = lastMessage;
-        lastMessage = "";
-        return str;
     }
 
     public void blockHost(String host) {
@@ -211,27 +214,31 @@ public class InstantMessenger implements Chatter {
         ((NIOMultiplexor) socket).setWriteObserver(sender);
     }
 
-    private void handleIOException(IOException e) {
+    private void handleException(IOException e) {
         callback.chatErrorMessage(this, e.getMessage());
         stop();
     }
 
-    private void shake(List<IOState> states) throws SocketException {
+    private void shake(List<IOState> states) {
         this.shaker = new IOStateMachine(new IOStateObserver() {
             public void handleStatesFinished() {
                 handshakeCompleted();
             }
 
             public void handleIOException(IOException e) {
-                InstantMessenger.this.handleIOException(e);
+                handleException(e);
             }
 
             public void shutdown() {
-                // ignore
+                stop();
             }
         }, states);
 
-        socket.setSoTimeout(Constants.TIMEOUT);
+        try {
+            socket.setSoTimeout(Constants.TIMEOUT);
+        } catch (SocketException e) {
+            LOG.warn("Could not set socket timeout", e);
+        }
         ((NIOMultiplexor) socket).setReadObserver(shaker);
         ((NIOMultiplexor) socket).setWriteObserver(shaker);
     }
@@ -245,12 +252,10 @@ public class InstantMessenger implements Chatter {
 
         @Override
         public void handleIOException(IOException e) {
-            InstantMessenger.this.handleIOException(e);
+            handleException(e);
         }
 
         public void handleRead() throws IOException {
-            interest(true);
-
             int read = 0;
             while (buffer.hasRemaining() && (read = source.read(buffer)) > 0)
                 ;
@@ -263,8 +268,7 @@ public class InstantMessenger implements Chatter {
             buffer.flip();
             StringBuilder sb = new StringBuilder();
             while (BufferUtils.readLine(buffer, sb)) {
-                InstantMessenger.this.lastMessage = sb.toString();
-                callback.receiveMessage(InstantMessenger.this);
+                callback.receiveMessage(InstantMessenger.this, sb.toString());
             }
 
             if (buffer.hasRemaining()) {
@@ -272,6 +276,12 @@ public class InstantMessenger implements Chatter {
             } else {
                 buffer.clear();
             }
+        }
+        
+        @Override
+        public void shutdown() {
+            LOG.error("reader shutdown");
+            stop();
         }
     }
 
@@ -283,13 +293,19 @@ public class InstantMessenger implements Chatter {
 
         @Override
         public void handleIOException(IOException e) {
-            InstantMessenger.this.handleIOException(e);
+            InstantMessenger.this.handleException(e);
         }
 
         public void sendMessage(String message) throws IOException {
             put(message.getBytes(CHARSET));
         }
 
+        @Override
+        public void shutdown() {
+            LOG.error("writer shutdown");
+            stop();
+        }
+        
     }
 
     private class ReadChatConnectHeaderState extends SimpleReadHeaderState {
@@ -301,7 +317,9 @@ public class InstantMessenger implements Chatter {
 
         @Override
         protected void processConnectLine() throws IOException {
-            System.out.println(connectLine);
+            if (!CONNECT.equals(connectLine)) {
+                throw new IOException("Invalid handshake: " + connectLine);
+            }
         }
     }
 
@@ -314,7 +332,7 @@ public class InstantMessenger implements Chatter {
 
         @Override
         protected void processConnectLine() throws IOException {
-            if (!connectLine.equals(CHAT_OK)) {
+            if (!CHAT_OK.equals(connectLine)) {
                 throw new IOException("Invalid handshake: " + connectLine);
             }
         }
@@ -324,12 +342,16 @@ public class InstantMessenger implements Chatter {
      * Stop the chat, and close the connections this is always safe to call.
      */
     public void stop() {
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                LOG.warn("Error closing chat connection", e);
+        synchronized (this) {
+            if (stopped) {
+                return;
             }
+            stopped = true;
+        }
+        
+        if (socket != null) {
+            IOUtils.close(socket);
+            socket = null;
         }
         callback.chatUnavailable(this);
     }

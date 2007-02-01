@@ -43,7 +43,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void addUpload(Uploader u) { }
     public void removeUpload(Uploader u) { }    	
 	public void acceptChat(Chatter ctr) { }
-	public void receiveMessage(Chatter chr) { }	
+	public void receiveMessage(Chatter chr, String message) { }	
 	public void chatUnavailable(Chatter chatter) { }	
 	public void chatErrorMessage(Chatter chatter, String str) { }
     public void addSharedDirectory(final File directory, final File parent) { }

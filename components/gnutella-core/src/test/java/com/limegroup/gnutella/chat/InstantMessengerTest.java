@@ -155,8 +155,8 @@ public class InstantMessengerTest extends BaseTestCase {
         }
         
         @Override
-        public synchronized void receiveMessage(Chatter chatter) {
-            message = chatter.getMessage();
+        public synchronized void receiveMessage(Chatter chatter, String message) {
+            this.message = message;
             notify();
         }
         

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.chat;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
@@ -73,11 +72,7 @@ public final class ChatManager implements ConnectionAcceptor {
         
         ActivityCallback callback = RouterService.getCallback();
         InstantMessenger im = new InstantMessenger(socket, this, callback);
-        try {
-            im.start();
-		} catch (IOException e) {
-            IOUtils.close(socket);
-		}
+        im.start();
 	}
 
 	/** 
@@ -89,11 +84,6 @@ public final class ChatManager implements ConnectionAcceptor {
 	public Chatter request(String host, int port) {
         ActivityCallback callback = RouterService.getCallback();
         InstantMessenger im = new InstantMessenger(host, port, this, callback);
-        try {
-            im.start();
-        } catch (IOException e) {
-            // ignore
-        }
         return im;
 	}
 

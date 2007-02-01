@@ -347,7 +347,7 @@ public class Main {
             return false;
         }
 
-        public void receiveMessage(Chatter chr) {
+        public void receiveMessage(Chatter chr, String message) {
         }
 
         public void removeUpload(Uploader u) {
