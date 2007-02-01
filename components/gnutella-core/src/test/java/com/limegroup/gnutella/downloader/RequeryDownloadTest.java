@@ -75,6 +75,10 @@ public class RequeryDownloadTest
             broadcasts.add(query);
             super.sendDynamicQuery(query); //add GUID to route table
         }
+        
+        public void clearBroadcasts() { 
+            broadcasts.clear();
+        }
     }
 
     //////////////////////////// Fixtures /////////////////////////
@@ -89,8 +93,10 @@ public class RequeryDownloadTest
     
     public static void globalSetUp() throws Exception {
         setSettings();
-        _router= new TestMessageRouter();
-        new RouterService(new ActivityCallbackStub(), _router);    
+        
+        _router=new TestMessageRouter();
+        new RouterService(new ActivityCallbackStub(), _router);  
+        _router.initialize();
     }
 
     public void setUp() throws Exception {
@@ -98,7 +104,6 @@ public class RequeryDownloadTest
         RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
         PrivilegedAccessor.setValue(
             RouterService.class, "manager", new ConnectionManagerStub());
-        _router.initialize();
         _queryRouteTable = 
             (RouteTable) PrivilegedAccessor.getValue(_router, 
                                                      "_queryRouteTable");
@@ -111,7 +116,6 @@ public class RequeryDownloadTest
         assertTrue("Couldn't read snapshot file", ok);
         _uploader=new TestUploader("uploader 6666", 6666);
         _uploader.setRate(Integer.MAX_VALUE);
-        
         RouterService.getDownloadManager().clearAllDownloads();
         
         new File( getSaveDirectory(), _filename).delete();
@@ -179,6 +183,7 @@ public class RequeryDownloadTest
     }
        
     public void tearDown() {
+        _router.clearBroadcasts();
         _uploader.stopThread();
         if (_incompleteFile != null )
             _incompleteFile.delete();
