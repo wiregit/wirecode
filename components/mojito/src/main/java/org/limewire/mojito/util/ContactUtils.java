@@ -310,24 +310,15 @@ public final class ContactUtils {
 
     /**
      * Sorts the given List of Contacts from most recently seen to 
-     * least recently seen.
-     */
-    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes) {
-        return ContactUtils.sort(nodes);
-    }
-
-    /**
-     * Sorts the given List of Contacts from most recently seen to 
      * least recently seen and returns a sub-list with at most
      * count number of elements.
      */
-    public static <T extends Contact> List<T> getMostRecentlySeenContacts(List<T> nodes, int count) {
-        return ContactUtils.sort(nodes).subList(0, Math.min(count, nodes.size()));
+    public static <T extends Contact> List<T> sort(List<T> nodes, int count) {
+        return sort(nodes).subList(0, Math.min(count, nodes.size()));
     }
 
     /**
-     * Sorts the Contacts from most recently seen to
-     * least recently seen
+     * Sorts the Contacts from most recently seen to least recently seen
      */
     public static <T extends Contact> List<T> sort(List<T> nodes) {
         Collections.sort(nodes, CONTACT_MRS_COMPARATOR);

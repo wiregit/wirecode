@@ -70,7 +70,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         List<Contact> nodes = Collections.emptyList();
         if (!context.isBootstrapping()) {
             if(context.isFirewalled()) {
-                nodes = ContactUtils.getMostRecentlySeenContacts(
+                nodes = ContactUtils.sort(
                             context.getRouteTable().getContacts(), 
                             KademliaSettings.REPLICATION_PARAMETER.getValue());
                 

@@ -67,10 +67,8 @@ class ActiveDHTNodeController extends AbstractDHTController {
                 RouteTable routeTable = (RouteTable)in.readObject();
                 Database database = (Database)in.readObject();
 
-                synchronized (dht) {
-                    dht.setRouteTable(routeTable);
-                    dht.setDatabase(database);
-                }
+                dht.setRouteTable(routeTable);
+                dht.setDatabase(database);
                 
             } catch (Throwable ignored) {
             } finally {
@@ -121,7 +119,6 @@ class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureOutputStream(
                                 new FileOutputStream(FILE))));
                 
-                MojitoDHT dht = getMojitoDHT();
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
                     out.writeObject(dht.getDatabase());
@@ -169,7 +166,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     }
 
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
-        if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
+        if(!isRunning() || !dht.isBootstrapped()) {
             return Collections.emptyList();
         }
         //return our MRS nodes. We should be first in the list

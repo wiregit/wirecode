@@ -50,12 +50,15 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 class PassiveDHTNodeController extends AbstractDHTController{
     
-    private PassiveDHTNodeRouteTable limeDHTRouteTable;
-    
     /**
      * The file to persist the list of host
      */
     private static final File FILE = new File(LimeWireUtils.getUserSettingsDir(), "passive.mojito");
+    
+    /**
+     * A RouteTable for passive Nodes
+     */
+    private PassiveDHTNodeRouteTable limeDHTRouteTable;
     
     public PassiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
@@ -105,7 +108,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
             return;
         }
         
-        InetSocketAddress addr = new InetSocketAddress(host, port);
+        SocketAddress addr = new InetSocketAddress(host, port);
         //add to bootstrap nodes if we need to.
         addActiveDHTNode(addr, false);
         //add to our DHT leaves
@@ -150,12 +153,9 @@ class PassiveDHTNodeController extends AbstractDHTController{
                                 new SecureOutputStream(
                                     new FileOutputStream(FILE))));
                 
-                // Sort by MRS
-                contacts = ContactUtils.sort(contacts);
+                // Sort by MRS and save only some Nodes
+                contacts = ContactUtils.sort(contacts, DHTSettings.NUM_PERSISTED_NODES.getValue());
                 
-                // Save only some Nodes
-                contacts = contacts.subList(0, 
-                        Math.min(DHTSettings.NUM_PERSISTED_NODES.getValue(), contacts.size()));
                 KUID localNodeID = getMojitoDHT().getLocalNodeID();
                 for(Contact node : contacts) {
                     if(!node.getNodeID().equals(localNodeID)) {
