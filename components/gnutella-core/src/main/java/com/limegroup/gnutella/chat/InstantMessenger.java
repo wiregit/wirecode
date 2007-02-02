@@ -88,6 +88,10 @@ public class InstantMessenger implements Chatter {
      */
     public InstantMessenger(Socket socket, ChatManager manager,
             ActivityCallback callback) {
+        if (socket == null || manager == null || callback == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.manager = manager;
         this.socket = socket;
         this.port = socket.getPort();
@@ -100,6 +104,10 @@ public class InstantMessenger implements Chatter {
      */
     public InstantMessenger(final String host, final int port,
             ChatManager manager, ActivityCallback callback) {
+        if (host == null || manager == null || callback == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.host = host;
         this.port = port;
         this.manager = manager;
@@ -355,6 +363,14 @@ public class InstantMessenger implements Chatter {
             socket = null;
         }
         callback.chatUnavailable(this);
+    }
+
+    public boolean isOutgoing() {
+        return outgoing;
+    }
+
+    public synchronized boolean isConnected() {
+        return !stopped;
     }
 
 }

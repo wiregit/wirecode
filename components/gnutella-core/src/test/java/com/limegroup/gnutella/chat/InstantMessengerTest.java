@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.chat;
 
-import java.net.ServerSocket;
-
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
@@ -15,13 +13,8 @@ public class InstantMessengerTest extends BaseTestCase {
 
     private static final int CHAT_PORT = 9999;
     private static Acceptor acceptThread;
-    private ChatManager chatManager;
-    private MyActivityCallback outCallback;
-//    private MyActivityCallback inCallback;
-//    private ManagedThread listenerThread;
-    private InstantMessenger incoming;
-    private InstantMessenger outgoing;
-    private ServerSocket listenerSocket;
+    private MyActivityCallback callback;
+    private InstantMessenger messenger;
     
     public InstantMessengerTest(String name) {
         super(name);
@@ -36,7 +29,7 @@ public class InstantMessengerTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        doSettings();
         
         new RouterService(new MyActivityCallback());
         //RouterService.getConnectionManager().initialize();
@@ -52,80 +45,44 @@ public class InstantMessengerTest extends BaseTestCase {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {}                
     }
+
+    public static void globealTearDown() throws Exception {
+        acceptThread.setListeningPort(0);
+    }
+    
+    private static void doSettings() {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+    }
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        acceptThread.setListeningPort(CHAT_PORT);
+        doSettings();
         
-        chatManager = new ChatManager();
-        outCallback = new MyActivityCallback();
-//        inCallback = new MyActivityCallback();
+        acceptThread.setListeningPort(CHAT_PORT);
     }
     
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
 
-        acceptThread.setListeningPort(0);
-        
-        if (incoming != null) {
+        if (messenger != null) {
             try {
-                incoming.stop();
-            } catch (Exception e) {
-            }
-        }
-        
-        if (outgoing != null) {
-            try {
-                outgoing.stop();
-            } catch (Exception e) {
-            }
-        }
-        
-        if (listenerSocket != null) {
-            try {
-                listenerSocket.close();
+                messenger.stop();
             } catch (Exception e) {
             }
         }
     }
-    
-//    public void testDirectChat() throws Exception {
-//        listenerThread = new ManagedThread(new Runnable() {
-//            public void run() {
-//                try {
-//                    listenerSocket = new ServerSocket(CHAT_PORT);
-//                    Socket socket = listenerSocket.accept();
-//                    
-//                    incoming = new InstantMessenger(socket, chatManager, inCallback);
-//                    incoming.start();
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }            
-//        });
-//        listenerThread.start();
-//        
-//        outgoing = new InstantMessenger("localhost", CHAT_PORT, chatManager, outCallback);
-//        outgoing.start();
-//        Thread.sleep(1000);
-//        assertTrue("Could not establish connection", outCallback.acceptChat);
-//
-//        sendMessage("foo", outgoing, inCallback);
-//        sendMessage("bar", outgoing, inCallback);
-//        sendMessage("baz", incoming, outCallback);
-//        sendMessage("Umlaut\u00E4", outgoing, inCallback);
-//    }
-    
+      
     public void testChatThroughAcceptor() throws Exception {
-        outgoing = new InstantMessenger("localhost", CHAT_PORT, chatManager, outCallback);
-        outgoing.start();
-        Thread.sleep(1000);
-        assertTrue("Could not establish connection", outCallback.acceptChat); 
-        sendMessage("foo", outgoing, (MyActivityCallback) RouterService.getCallback());
-        sendMessage("bar", outgoing, (MyActivityCallback) RouterService.getCallback());
+        callback = new MyActivityCallback();
+        messenger = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), callback);
+        messenger.start();
+        Thread.sleep(500);
+        assertTrue("Could not establish connection", callback.acceptChat); 
+        sendMessage("foo", messenger, (MyActivityCallback) RouterService.getCallback());
+        sendMessage("bar", messenger, (MyActivityCallback) RouterService.getCallback());
     }
     
     private void sendMessage(String message, InstantMessenger sender, MyActivityCallback receiver) {

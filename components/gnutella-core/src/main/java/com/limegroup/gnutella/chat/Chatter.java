@@ -32,5 +32,9 @@ public interface Chatter {
     public void blockHost(String host);
 
     public void start();
+
+    public boolean isOutgoing();
+
+    public boolean isConnected();
     
 }
