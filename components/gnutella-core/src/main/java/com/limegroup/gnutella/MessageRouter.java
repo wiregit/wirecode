@@ -32,6 +32,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -1113,7 +1114,7 @@ public abstract class MessageRouter {
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
         
         // array is null for old oob messages, it will just be ignored then
-        byte[] securityToken = ack.getSecurityTokenBytes();
+        SecurityToken securityToken = ack.getSecurityToken();
        
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
@@ -2313,7 +2314,7 @@ public abstract class MessageRouter {
      */
     private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT, byte[] securityToken) {
+                                             final int REPLY_LIMIT, SecurityToken securityToken) {
         //List to store Query Replies
         List<QueryReply> queryReplies = new LinkedList<QueryReply>();
         
@@ -2438,7 +2439,7 @@ public abstract class MessageRouter {
                                              boolean measuredSpeed, 
                                              boolean isFromMcast,
                                              boolean shouldMarkForFWTransfer,
-                                             byte[] securityToken);
+                                             SecurityToken securityToken);
 
     /**
      * Handles a message to reset the query route table for the given

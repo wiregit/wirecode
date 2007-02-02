@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
 import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
@@ -51,26 +52,15 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
-		OOBSession session = new OOBSession(
-				g,
-				handler.getInetAddress(),
-				handler.getPort());
-		
+	
 		int toRequest = router.getNumOOBToRequest(msg, handler);
 		if (toRequest <= 0)
 			return;
 		
 		LimeACKVendorMessage ack =
-			new LimeACKVendorMessage(g, toRequest, QueryKey.getQueryKey(createMessageKeyData(handler, msg.getGUID(), toRequest)));
-		synchronized(OOBSessions) {
-			// remove is necessary to refresh the timestamp.
-			Integer previous = OOBSessions.remove(session);
-			if (previous == null)
-				previous = toRequest;
-			else
-				previous += toRequest;
-			OOBSessions.put(session, previous);
-		}
+			new LimeACKVendorMessage(g, toRequest, 
+                    QueryKey.getQueryKey(createMessageKeyData(handler, msg.getGUID(), toRequest)));
+        
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
 	}
@@ -98,48 +88,55 @@ public class OOBHandler implements MessageHandler, Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
-        ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
         // only account for OOB stuff if this was response to a 
         // OOB query, multicast stuff is sent over UDP too....
-        if (!reply.isReplyToMulticastQuery()) {
-            int numResps = reply.getResultCount();
-            OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-            GUID guid = new GUID(reply.getGUID());
-            OOBSession session = new OOBSession(
-                    guid,
-            		handler.getInetAddress(),
-            		handler.getPort());
+        if (reply.isReplyToMulticastQuery()) {
+            return;
+        }
+        
+        if (!verifyReply(reply, handler)) {
+            LOG.trace("Didn't request any OOB replies for this GUID from host");
+            // TODO fberger spammer, handle somehow
+            return;
+        }
+        
+        ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
+        
+        int numResps = reply.getResultCount();
+        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+        GUID guid = new GUID(reply.getGUID());
+        
+        OOBSession session = new OOBSession(guid, handler.getInetAddress(),
+                handler.getPort());
             
-            // Allow the router to handle the query reply in the
-            // following scenarios:
-            // a) We sent a Reply# message requesting the results,
-            //    and it sent back <= the number of results we
-            //    wanted.
-            // b) We sent a directed unicast query to that host
-            //    using this specific query GUID.
-    
-            Integer numRequested = OOBSessions.get(session);
-            if (numRequested == null) {
-                LOG.trace("Didn't request any OOB replies for this GUID from host");
-                if(!router.isHostUnicastQueried(guid, session)) {
-                    LOG.trace("Didn't directly unicast this host with this GUID");
-                    return;
-                }
+        // Allow the router to handle the query reply in the
+        // following scenarios:
+        // a) We sent a Reply# message requesting the results,
+        //    and it sent back <= the number of results we
+        //    wanted.
+        // b) We sent a directed unicast query to that host
+        //    using this specific query GUID.
+        Integer numRequested = OOBSessions.get(session);
+        if (numRequested == null) {
+            if(!router.isHostUnicastQueried(guid, session)) {
+                LOG.trace("Didn't directly unicast this host with this GUID");
+                return;
+            }
+        } 
+        else {
+            numRequested -= numResps;
+            if (numRequested > 0) {
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Requested more than got (" + numRequested + " left over)");
+                OOBSessions.put(session, numRequested);
             } else {
-                numRequested -= numResps;
-                if (numRequested > 0) {
+                OOBSessions.remove(session);
+                if (numRequested < 0) { // too many, ignore.
                     if(LOG.isTraceEnabled())
-                        LOG.trace("Requested more than got (" + numRequested + " left over)");
-                	OOBSessions.put(session, numRequested);
-                } else {
-                	OOBSessions.remove(session);
-                	if (numRequested < 0) { // too many, ignore.
-                        if(LOG.isTraceEnabled())
-                            LOG.trace("Received more than requested (by" + (-numRequested) + ")");
-                		if(!router.isHostUnicastQueried(guid, session)) {
-                            LOG.trace("Didn't directly unicast this host with this GUID");
-                            return;
-                        }
+                        LOG.trace("Received more than requested (by" + (-numRequested) + ")");
+                    if(!router.isHostUnicastQueried(guid, session)) {
+                        LOG.trace("Didn't directly unicast this host with this GUID");
+                        return;
                     }
                 }
             }
@@ -149,13 +146,24 @@ public class OOBHandler implements MessageHandler, Runnable {
         router.handleQueryReply(reply, handler);
 	}
 	
-	private class OOBSession implements IpPort {
+	private boolean verifyReply(QueryReply reply, ReplyHandler handler) {
+	    SecurityToken securitToken = reply.getSecurityToken();
+        if (securitToken== null) {
+            return false;
+        }
+        
+        // TODO fberger
+        return false;
+	}
+
+    private class OOBSession implements IpPort {
     	private final GUID g;
     	private final InetAddress addr;
     	private final int port;
     	private final int hashCode;
     	private final long now;
-    	OOBSession(GUID g, InetAddress addr, int port) {
+    	
+        OOBSession(GUID g, InetAddress addr, int port) {
     		this.g = g;
     		this.addr = addr;
     		this.port = port;

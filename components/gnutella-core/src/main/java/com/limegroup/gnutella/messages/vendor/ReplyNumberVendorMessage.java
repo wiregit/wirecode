@@ -63,6 +63,14 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         setGUID(replyGUID);
     }
     
+    /**
+     * Constructs a new ReplyNumberVendorMessage with the current version
+     * number.
+     */
+    public ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+        this(replyGUID, VERSION, numResults);
+    }
+    
     public static ReplyNumberVendorMessage createV2ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
         return new ReplyNumberVendorMessage(replyGUID, 2, numResults);
     }

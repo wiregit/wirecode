@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -356,7 +357,7 @@ public class StandardMessageRouter extends MessageRouter {
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
                                     boolean isFWTransfer,
-                                    byte[] securityToken) {
+                                    SecurityToken securityToken) {
         
         List<QueryReply> queryReplies = new ArrayList<QueryReply>();
         QueryReply queryReply = null;

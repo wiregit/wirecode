@@ -702,13 +702,8 @@ public class QueryRequest extends Message implements Serializable{
         
         try {
             newPayload = patchInGGEP(newPayload, ggep);
-        } catch (BadPacketException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        
-        try {
             return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                                      newPayload, qr.getNetwork());
+                    newPayload, qr.getNetwork());
         } catch (BadPacketException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
@@ -721,11 +716,23 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> with no OOB marking
 	 */
 	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
+        if (!qr.isPayloadModifiable()) {
+            throw new IllegalArgumentException("payload is not modifiable " + qr);
+        }
+        
         //modify the payload to not be OOB.
         byte[] newPayload = new byte[qr.PAYLOAD.length];
         System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
         newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
         newPayload[0] |= SPECIAL_XML_MASK;
+        
+        // TODO fberger
+        GGEP ggep = new GGEP(false);
+        // disable proxying for old protocol version
+        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
+        // signal oob capability
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
+        
         
         try {
             return createNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
@@ -1889,7 +1896,7 @@ public class QueryRequest extends Message implements Serializable{
             if (block != null) {
                 GGEP merge = new GGEP(false);
                 // first merge in original block and then ours, to make sure
-                // values are overwritten
+                // our values prevail
                 merge.merge(block.getGGEP());
                 merge.merge(ggep);
                 return insertGGEP(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge);

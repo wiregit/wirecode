@@ -895,6 +895,9 @@ public class ManagedConnection extends Connection
         // the case in the future
         if (query.doNotProxyV3()) return query;
         
+        // can't proxy if payload should not be modified
+        if (!query.isPayloadModifiable()) return query;
+        
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;

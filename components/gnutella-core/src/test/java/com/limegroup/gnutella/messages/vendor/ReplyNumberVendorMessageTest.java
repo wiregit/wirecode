@@ -1,9 +1,16 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.MessageFactory;
 
 public class ReplyNumberVendorMessageTest extends BaseTestCase {
 
@@ -49,5 +56,110 @@ public class ReplyNumberVendorMessageTest extends BaseTestCase {
         catch (BadPacketException bpe) {
         }
     }
+    
+    public void testReplyNumber() throws Exception {
+        try {
+            GUID g = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(g, 0);
+            assertTrue(false);
+        } catch(IllegalArgumentException expected) {}
+        try {
+            GUID g = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(g, 256);
+            assertTrue(false);
+        } catch(IllegalArgumentException expected) {}
+
+        for (int i = 1; i < 256; i++) {
+            GUID guid = new GUID(GUID.makeGuid());
+            ReplyNumberVendorMessage vm = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(guid,
+                                                                       i);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
+            assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            ByteArrayInputStream bais = 
+                new ByteArrayInputStream(baos.toByteArray());
+            ReplyNumberVendorMessage vmRead = 
+                (ReplyNumberVendorMessage) MessageFactory.read(bais);
+            assertEquals(vm, vmRead);
+            assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
+            assertEquals("after Read guids aren't equal!", guid, 
+                         new GUID(vmRead.getGUID()));
+        }
+
+        // test that the VM can be backwards compatible....
+        byte[] payload = null;
+        ReplyNumberVendorMessage vm = null;
+        
+        // first test that it needs a payload of at least size 1
+        payload = new byte[0];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 0, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // first test that version 1 needs a payload of only size 1
+        payload = new byte[2];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 1, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {};
+
+        // test that it cannot handle version2 2
+        payload = new byte[2];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 2, payload);
+            assertTrue(false);
+        }
+        catch (BadPacketException expected) {
+            
+        }
+        
+        //test that it can handle versions other than 1
+        payload = new byte[3];
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                                              (byte) 0, 3, payload);
+            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
+        }
+        catch (BadPacketException expected) {
+            assertTrue(false);
+        }
+        
+        //test un/solicited byte
+        UDPService service = RouterService.getUdpService();
+        PrivilegedAccessor.setValue(
+                service,"_acceptedUnsolicitedIncoming",new Boolean(false));
+        
+        vm = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        assertFalse(vm.canReceiveUnsolicited());
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
+        assertFalse(vm2.canReceiveUnsolicited());
+        
+        PrivilegedAccessor.setValue(
+                service,"_acceptedUnsolicitedIncoming",new Boolean(true));
+        
+        vm = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
+        assertTrue(vm.canReceiveUnsolicited());
+        
+        baos = new ByteArrayOutputStream();
+        vm.write(baos);
+        bais = new ByteArrayInputStream(baos.toByteArray());
+        vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
+        assertTrue(vm2.canReceiveUnsolicited());
+        
+        
+    }
+
+
 
 }

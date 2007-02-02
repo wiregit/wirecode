@@ -4,17 +4,16 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.security.QueryKey;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;

@@ -3,6 +3,8 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.Arrays;
 
 import org.limewire.security.SecurityToken;
@@ -89,14 +91,14 @@ public final class LimeACKVendorMessage extends VendorMessage {
     }
     
     /**
-     * @return the query key of the message if it has one or <code>null</code>
+     * @return the security token of the message if it has one or <code>null</code>
      */
-    public byte[] getSecurityTokenBytes() {
+    public SecurityToken getSecurityToken() {
         if (getVersion() > 2) {
             try {
                 GGEP ggep = new GGEP(getPayload(), 1);
                 if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
-                    return ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                    return new UnknownSecurityToken(ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB));
                 }
             }
             catch (BadGGEPPropertyException corrupt) {} 
@@ -140,10 +142,14 @@ public final class LimeACKVendorMessage extends VendorMessage {
             int otherResults = o.getNumResults();
             return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
-                    Arrays.equals(getSecurityTokenBytes(), o.getSecurityTokenBytes()) && 
+                    areEqual(getSecurityToken(), o.getSecurityToken()) &&
                     super.equals(other));
         }
         return false;
+    }
+    
+    private final boolean areEqual(Object o1, Object o2) {
+        return o1 == o2 || (o1 != null && o2 != null && o1.equals(o2));
     }
 
     /** Overridden purely for stats handling.
@@ -159,4 +165,43 @@ public final class LimeACKVendorMessage extends VendorMessage {
         super.recordDrop();
     }
 
+    // TODO fberger remove this with new security token impl
+    private static class UnknownSecurityToken implements SecurityToken {
+
+        private byte[] bytes;
+        
+        public UnknownSecurityToken(byte[] bytes) {
+            this.bytes = bytes;
+        }
+        
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public boolean isFor(SocketAddress addr) {
+            return false;
+        }
+
+        public boolean isFor(InetAddress addr, int port) {
+            return false;
+        }
+
+        public boolean isFor(byte[] data) {
+            return false;
+        }
+
+        public void write(OutputStream out) throws IOException {
+            out.write(getBytes());
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SecurityToken) {
+                return Arrays.equals(bytes, ((SecurityToken)obj).getBytes());
+            }
+            return false;
+        }
+        
+    }
+    
 }

@@ -15,11 +15,6 @@ import java.net.SocketAddress;
 public interface SecurityToken {
     
     /**
-     * Returns the length of the SecurityToken in byte
-     */
-    public int getTokenLength();
-    
-    /**
      * Returns the SecurityToken as byte array
      */
     public byte[] getBytes();

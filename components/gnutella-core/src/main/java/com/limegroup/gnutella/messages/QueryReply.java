@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -24,6 +25,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -292,7 +294,7 @@ public class QueryReply extends Message implements SecureMessage {
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
             boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies, 
-            byte[] securityToken) 
+            SecurityToken securityToken) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -366,7 +368,7 @@ public class QueryReply extends Message implements SecureMessage {
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
-             Set<? extends IpPort> proxies, byte[] securityToken) {
+             Set<? extends IpPort> proxies, SecurityToken securityToken) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -392,7 +394,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setXmlBytes(xmlBytes);
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
-        _data.setSecurityTokenBytes(securityToken);
+        _data.setSecurityToken(securityToken);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -821,9 +823,9 @@ public class QueryReply extends Message implements SecureMessage {
      * Returns the message authentication bytes that were sent along with
      * this query reply or null the none have been sent.
      */
-    public byte[] getSecurityTokenBytes() {
+    public SecurityToken getSecurityToken() {
         parseResults();
-        return _data.getSecurityTokenBytes();
+        return _data.getSecurityToken();
     }
     
     /**
@@ -1081,7 +1083,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setSupportsBrowseHost(supportsBrowseHostT);
             _data.setReplyToMulticast(replyToMulticastT);
             _data.setProxies(proxies);
-            _data.setSecurityTokenBytes(securityToken);
+            _data.setSecurityToken(new UnknownSecurityToken(securityToken));
             
             _data.setHostData(new HostData(this));
 
@@ -1294,7 +1296,7 @@ public class QueryReply extends Message implements SecureMessage {
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
                                 Set<? extends IpPort> proxies,
-                                byte[] securityToken) {
+                                SecurityToken securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
             // we have specific field values so we can't use precached ggeps
             if ((proxies != null && !proxies.isEmpty()) || securityToken != null) {
@@ -1310,7 +1312,7 @@ public class QueryReply extends Message implements SecureMessage {
                     retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
                                 new byte[] {UDPConnection.VERSION});
                 if (securityToken != null) {
-                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken);
+                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
                 }
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
@@ -1390,6 +1392,44 @@ public class QueryReply extends Message implements SecureMessage {
                  } catch (BadGGEPPropertyException bad) {}
             }
             return proxies != null ? proxies : IpPort.EMPTY_SET;
+        }
+    }
+    
+    // TODO fberger remove this with new security token impl
+    private static class UnknownSecurityToken implements SecurityToken {
+
+        private byte[] bytes;
+        
+        public UnknownSecurityToken(byte[] bytes) {
+            this.bytes = bytes;
+        }
+        
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public boolean isFor(SocketAddress addr) {
+            return false;
+        }
+
+        public boolean isFor(InetAddress addr, int port) {
+            return false;
+        }
+
+        public boolean isFor(byte[] data) {
+            return false;
+        }
+
+        public void write(OutputStream out) throws IOException {
+            out.write(getBytes());
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SecurityToken) {
+                return Arrays.equals(bytes, ((SecurityToken)obj).getBytes());
+            }
+            return false;
         }
     }
 }

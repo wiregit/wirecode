@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -44,6 +46,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
 
+    private SecurityToken token;
+    
     /**
      * Ultrapeer 1 UDP connection.
      */
@@ -51,6 +55,11 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     public ServerSideOutOfBandReplyTest(String name) {
         super(name);
+    }
+    
+    @Override
+    public void setUp() throws Exception {
+        token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 7097);
     }
     
     public static Test suite() {
@@ -232,7 +241,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()),
-                                     reply.getNumResults());
+                                     reply.getNumResults(), token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
@@ -347,7 +356,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()), 1);
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
@@ -440,7 +449,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()), 0);
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
@@ -510,7 +519,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
-                                     reply.getNumResults());
+                                     reply.getNumResults(), token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
