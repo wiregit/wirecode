@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
-import org.limewire.nio.channel.AbstractChannelInterestWriter;
+import org.limewire.nio.channel.AbstractChannelWriter;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.statemachine.IOState;
@@ -259,12 +259,15 @@ public class InstantMessenger implements Chatter {
             int read = 0;
             while (buffer.hasRemaining() && (read = source.read(buffer)) > 0)
                 ;
-            if (buffer.position() == 0) {
-                if (read == -1)
-                    close();
-                return;
+                
+            flushBuffer();
+            
+            if (read == -1) {
+                stop();
             }
+        }
 
+        private void flushBuffer() {
             buffer.flip();
             StringBuilder sb = new StringBuilder();
             while (BufferUtils.readLine(buffer, sb)) {
@@ -280,12 +283,11 @@ public class InstantMessenger implements Chatter {
         
         @Override
         public void shutdown() {
-            LOG.error("reader shutdown");
             stop();
         }
     }
 
-    private class MessageSender extends AbstractChannelInterestWriter {
+    private class MessageSender extends AbstractChannelWriter {
 
         public MessageSender() {
             super(1024);
@@ -302,7 +304,6 @@ public class InstantMessenger implements Chatter {
 
         @Override
         public void shutdown() {
-            LOG.error("writer shutdown");
             stop();
         }
         
@@ -349,7 +350,7 @@ public class InstantMessenger implements Chatter {
             stopped = true;
         }
         
-        if (socket != null) {
+        if (socket != null && !socket.isClosed()) {
             IOUtils.close(socket);
             socket = null;
         }

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 /** 
  * A simple channel that buffers data in a <code>ByteBuffer</code>. 
  */
-public abstract class AbstractChannelInterestWriter implements ChannelWriter {
+public abstract class AbstractChannelWriter implements ChannelWriter {
     
     /**
      * The sink channel we write to & interest ourselves on.
@@ -18,7 +18,7 @@ public abstract class AbstractChannelInterestWriter implements ChannelWriter {
     
     protected boolean shutdown;
     
-    public AbstractChannelInterestWriter(int bufferSize) {
+    public AbstractChannelWriter(int bufferSize) {
         buffer = ByteBuffer.allocate(bufferSize);
     }
     
@@ -60,9 +60,8 @@ public abstract class AbstractChannelInterestWriter implements ChannelWriter {
             throw new IllegalStateException("writing with no source.");
             
         buffer.flip();
-        if (buffer.hasRemaining()) {
-            channel.write(buffer);
-        }
+        while (buffer.hasRemaining() && channel.write(buffer) > 0)
+            ;
         
         boolean remaining = buffer.hasRemaining();
         if (remaining) {
