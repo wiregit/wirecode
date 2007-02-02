@@ -228,9 +228,9 @@ public class CommonUtils {
                     bos.write(buffer, 0, c);
     		}
     		while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
-    		
-    	} catch(IOException e) {	
-            e.printStackTrace();
+            
+            bos.flush();
+    	} catch(IOException e) {
     		//if there is any error, delete any portion of file that did write
     		newFile.delete();
     	} finally {

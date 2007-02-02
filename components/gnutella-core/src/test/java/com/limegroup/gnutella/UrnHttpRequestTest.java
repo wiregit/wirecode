@@ -80,6 +80,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
 											 new File(TEMP_DIR, files[i].getName() + ".tmp"));
     		}		
         }
+        
+        Thread.sleep(1000); // let the file copying flush to the OS
 
 		ROUTER_SERVICE.start();
 
