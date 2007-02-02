@@ -29,8 +29,8 @@
             <src-classpath>
                 <fileset dir="${limewire.components.tests.home}/lib" includes="*.jar"/>
                 <path refid="build.limewire.code.classpath"/>
-	
             </src-classpath>
+                
 			<tests-classpath>
 			    <pathelement location="${limewire.components.tests.home}"/>
 			    <path refid="tests.limewire.components.all.classpath"/>

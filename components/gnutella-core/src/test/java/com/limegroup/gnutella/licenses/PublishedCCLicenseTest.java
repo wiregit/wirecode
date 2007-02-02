@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
+import java.io.File;
 import java.io.StringReader;
 
 import javax.swing.text.html.HTMLEditorKit;
@@ -8,6 +9,7 @@ import javax.swing.text.html.HTMLEditorKit.Parser;
 import junit.framework.Test;
 
 import org.cyberneko.relaxng.parsers.SAXParser;
+import org.limewire.util.CommonUtils;
 import org.xml.sax.InputSource;
 
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -79,9 +81,11 @@ public class PublishedCCLicenseTest extends LimeTestCase {
         // bug in MinekiNeko prevents use of compact schema.  use regular schema instead
         //		parser.setFeature("http://cyberneko.org/xml/features/relaxng/compact-syntax", true);
 
+        File f = CommonUtils.getResourceFile("lib/xml/schemas/ccverificationrdf-schema.rng");
+        assertTrue(f.exists()); // must have rng to validate.
 		parser.setProperty(
 				"http://cyberneko.org/xml/properties/relaxng/schema-location",
-				"lib/xml/schemas/ccverificationrdf-schema.rng");
+				f.getAbsoluteFile().toURI());
 		parser.parse(new InputSource(new StringReader(rdf)));
 
 	}

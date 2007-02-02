@@ -72,6 +72,14 @@
         <fail if="testsfailed" message="One or more tests failed!"/>
     </target>    
     
+    <target name="test-one-lw"
+         	description="Tests a single test in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dclass="
+         	depends="compile, lw-tests.test"/>
+    
+    <target name="test-pkg-lw"
+         	description="Tests a single package in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dpackage="
+         	depends="compile, lw-tests.test-package"/>
+    
     <!-- TODO: implement -->
 	<target name="jar" />
     
