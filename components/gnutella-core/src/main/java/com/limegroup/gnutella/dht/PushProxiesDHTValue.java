@@ -39,7 +39,7 @@ public class PushProxiesDHTValue implements DHTValue {
     
     private final Version version;
     
-    private final Set<IpPort> proxies;
+    private final Set<? extends IpPort> proxies;
     
     private PushProxiesDHTValue() {
         this.valueType = PUSH_PROXIES;
@@ -47,18 +47,17 @@ public class PushProxiesDHTValue implements DHTValue {
         this.proxies = null;
     }
     
-    @SuppressWarnings("unchecked")
     public PushProxiesDHTValue(Set<? extends IpPort> proxies) {
         this.valueType = PUSH_PROXIES;
         this.version = VERSION;
-        this.proxies = (Set<IpPort>)proxies;
+        this.proxies = proxies;
     }
     
     PushProxiesDHTValue(DHTValueType valueType, Version version, byte[] data) throws DHTValueException {
         this.valueType = valueType;
         this.version = version;
         
-        this.proxies = new IpPortSet();
+        Set<IpPort> proxies = new IpPortSet();
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
         
         try {
@@ -76,9 +75,11 @@ public class PushProxiesDHTValue implements DHTValue {
         } finally {
             IOUtils.close(in);
         }
+        
+        this.proxies = proxies;
     }
     
-    public Set<IpPort> getProxies() {
+    public Set<? extends IpPort> getProxies() {
         return proxies;
     }
     
@@ -118,7 +119,7 @@ public class PushProxiesDHTValue implements DHTValue {
     }
     
     private byte[] value() {
-        Set<IpPort> proxies = getProxies();
+        Set<? extends IpPort> proxies = getProxies();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
         
@@ -141,7 +142,7 @@ public class PushProxiesDHTValue implements DHTValue {
         return baos.toByteArray();
     }
     
-    // TODO leaving as the code might be handy, will remove later
+    // TODO leaving as the code might be handy
     @Deprecated
     private static class LocalDHTValue extends PushProxiesDHTValue {
         
@@ -150,7 +151,7 @@ public class PushProxiesDHTValue implements DHTValue {
         private LocalDHTValue() {}
         
         @Override
-        public Set<IpPort> getProxies() {
+        public Set<? extends IpPort> getProxies() {
             return PushEndpointForSelf.instance().getProxies();
         }
         
