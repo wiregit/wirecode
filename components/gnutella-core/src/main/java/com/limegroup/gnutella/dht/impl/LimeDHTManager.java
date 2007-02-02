@@ -6,7 +6,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;

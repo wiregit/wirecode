@@ -28,6 +28,11 @@ import org.limewire.mojito.routing.Version;
 public interface DHTValue extends Serializable {
 
     /**
+     * An empty value
+     */
+    public static final DHTValue EMPTY_VALUE = new EmptyDHTValue();
+    
+    /**
      * Returns the type of the value
      */
     public DHTValueType getValueType();
@@ -38,28 +43,50 @@ public interface DHTValue extends Serializable {
     public Version getVersion();
 
     /**
-     * 
-     */
-    public void writeValue(OutputStream out) throws IOException;
-
-    /**
      * Returns the actual value (a copy) as bytes
      */
     public byte[] getValue();
 
     /**
-     * Returns the actual value (a copy) as bytes
+     * 
      */
-    public byte[] getValue(byte[] dst, int offset, int length);
-
-    /**
-     * Returns the size of the value in bytes
-     */
-    public int size();
+    public void write(OutputStream out) throws IOException;
 
     /**
      * Returns true if this is an empty value
      */
     public boolean isEmpty();
 
+    /**
+     * 
+     */
+    static class EmptyDHTValue implements DHTValue {
+        
+        private static final long serialVersionUID = 4690500560328936523L;
+
+        private static final byte[] EMPTY = new byte[0];
+        
+        private EmptyDHTValue() {
+            
+        }
+        
+        public byte[] getValue() {
+            return EMPTY;
+        }
+        
+        public void write(OutputStream out) throws IOException {
+        }
+
+        public DHTValueType getValueType() {
+            return DHTValueType.BINARY;
+        }
+
+        public Version getVersion() {
+            return Version.UNKNOWN;
+        }
+
+        public boolean isEmpty() {
+            return true;
+        }
+    }
 }

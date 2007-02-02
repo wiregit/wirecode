@@ -31,6 +31,7 @@ import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTFilterDelegate;
+import com.limegroup.gnutella.dht.LimeDHTValueFactory;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -93,6 +94,7 @@ abstract class AbstractDHTController implements DHTController {
             }
         });
         dht.setHostFilter(new DHTFilterDelegate());
+        dht.setDHTValueFactory(new LimeDHTValueFactory());
         
         this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
         this.dispatcher = dispatcher;

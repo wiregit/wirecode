@@ -63,7 +63,7 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         
         this.requestLoad = in.readFloat();
         this.keys = in.readKUIDs();
-        this.values = in.readDHTValueEntities(getContact());
+        this.values = in.readDHTValueEntities(getContact(), context.getDHTValueFactory());
     }
     
     public Collection<KUID> getKeys() {

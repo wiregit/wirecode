@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 

@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +31,15 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPortImpl;
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -58,6 +71,8 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.dht.AltLocDHTValue;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1803,7 +1818,61 @@ public class ManagedDownloader extends AbstractDownloader
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
 
+        /*DHTManager dhtManager = RouterService.getDHTManager();
+        synchronized (dhtManager) {
+            if (dhtManager.isBootstrapped()) {
+                KUID key = KUID.createWithBytes(getSHA1Urn().getBytes());
+                DHTFuture<FindValueResult> future = dhtManager.get(key);
+                
+                DHTFutureListener<FindValueResult> listener = new DHTFutureAdapter<FindValueResult>() {
+                    @Override
+                    public void handleFutureSuccess(FindValueResult result) {
+                        resume(result);
+                    }
+                };
+                
+                future.addDHTFutureListener(listener);
+            }
+        }*/
+        
         return true;
+    }
+    
+    private void resume(FindValueResult result) {
+        RemoteFileDesc original = null;
+        for (RemoteFileDesc rfd : currentRFDs) {
+            original = rfd;
+            break;
+        }
+        
+        if (original == null) {
+            return;
+        }
+        
+        for (Future<DHTValueEntity> future : result) {
+            try {
+                DHTValueEntity entity = future.get();
+                DHTValue value = entity.getValue();
+                if (value instanceof AltLocDHTValue) {
+                    AltLocDHTValue altLoc = (AltLocDHTValue)value;
+                    Contact creator = entity.getCreator();
+                    
+                    if (creator.isFirewalled()) {
+                        continue;
+                    }
+                    
+                    InetAddress addr = ((InetSocketAddress)creator.getContactAddress()).getAddress();
+                    int port = altLoc.getPort();
+                    
+                    RemoteFileDesc rfd = new RemoteFileDesc(original, 
+                            new IpPortImpl(addr, addr.getHostName(), port));
+                    
+                    addDownload(rfd, false);
+                }
+            } catch (ExecutionException e) {
+            } catch (InterruptedException e) {
+            }
+        }
     }
     
     /**

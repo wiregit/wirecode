@@ -18,6 +18,7 @@ import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
@@ -245,6 +246,13 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
+        }
+
+        public DHTValueFactory getDHTValueFactory() {
+            return null;
+        }
+
+        public void setDHTValueFactory(DHTValueFactory valueFactory) {
         }
     }
 }

@@ -46,10 +46,11 @@ import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -138,6 +139,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The provider interface to create SecurityTokens */
     private volatile SecurityToken.TokenProvider tokenProvider;
     
+    /** The factory we're using to create DHTValues */
+    private DHTValueFactory valueFactory;
+    
     /**
      * Constructor to create a new Context
      */
@@ -171,6 +175,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
+        valueFactory = new DefaultDHTValueFactory();
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -560,6 +565,26 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     public void setHostFilter(HostFilter hostFilter) {
         database.setHostFilter(hostFilter);
         messageDispatcher.setFilter(hostFilter);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#setDHTValueFactory(org.limewire.mojito.db.DHTValueFactory)
+     */
+    public synchronized void setDHTValueFactory(DHTValueFactory valueFactory) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot switch DHTValueFactory while " + getName() + " is running");
+        }
+        
+        this.valueFactory = valueFactory;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getDHTValueFactory()
+     */
+    public DHTValueFactory getDHTValueFactory() {
+        return valueFactory;
     }
     
     /**
@@ -1004,7 +1029,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTFuture<StoreResult> remove(KUID key) {
         // To remove a KeyValue you just store an empty value!
-        return put(key, DHTValueImpl.EMPTY_VALUE);
+        return put(key, DHTValue.EMPTY_VALUE);
     }
     
     /** 
