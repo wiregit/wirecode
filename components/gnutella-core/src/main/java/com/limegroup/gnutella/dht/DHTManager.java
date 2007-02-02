@@ -4,15 +4,19 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NodeAssigner;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -170,4 +174,24 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * Returns the Vendor code of this Node
      */
     public Version getVersion();
+    
+    /**
+     * Queries the DHT for the given URN
+     */
+    public DHTFuture<FindValueResult> getAltLocs(URN urn);
+    
+    /**
+     * Queries the DHT for the given GUID
+     */
+    public DHTFuture<FindValueResult> getPushProxies(GUID guid);
+    
+    /**
+     * Stores an AltLoc of the given FileDesc
+     */
+    public DHTFuture<StoreResult> putAltLoc(FileDesc fd);
+    
+    /**
+     * Stores a Set of proxies under the given SHA-1(GUID)
+     */
+    public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies);
 }

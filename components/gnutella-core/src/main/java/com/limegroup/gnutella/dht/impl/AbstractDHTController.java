@@ -33,7 +33,7 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTFilterDelegate;
 import com.limegroup.gnutella.dht.LimeDHTValueFactory;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -129,7 +129,7 @@ abstract class AbstractDHTController implements DHTController {
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             bootstrapper.bootstrap();
-            dispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
+            dispatcher.dispatchEvent(new DHTEvent(this, Type.STARTING));
         } catch (IOException err) {
             LOG.error(err);
             ErrorService.error(err);
@@ -149,7 +149,7 @@ abstract class AbstractDHTController implements DHTController {
         dhtNodeAdder.stop();
         dht.close();
         
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
     }
     
     /**

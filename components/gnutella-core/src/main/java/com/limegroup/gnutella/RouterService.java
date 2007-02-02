@@ -1786,7 +1786,8 @@ public class RouterService {
     public static boolean isDHTNode() {
         if(dhtManager != null) {
             return dhtManager.isRunning();
-        } else return false;
+        } 
+        return false;
     }
     
     /**
@@ -1806,7 +1807,9 @@ public class RouterService {
         if(dhtManager != null) {
             return (dhtManager.isRunning()
                     && dhtManager.isBootstrapped());
-        } else return false;
+        }
+        
+        return false;
     }
     
 	/**

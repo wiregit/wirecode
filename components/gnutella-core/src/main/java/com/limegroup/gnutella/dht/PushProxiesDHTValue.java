@@ -28,7 +28,8 @@ public class PushProxiesDHTValue implements DHTValue {
     
     private static final long serialVersionUID = -8565050579104508260L;
     
-    public static final DHTValue LOCAL = new LocalDHTValue();
+    @Deprecated
+    public static final DHTValue MY_PUSH_PROXIES = new LocalDHTValue();
     
     public static final DHTValueType PUSH_PROXIES = DHTValueType.valueOf("PROX");
     
@@ -44,6 +45,13 @@ public class PushProxiesDHTValue implements DHTValue {
         this.valueType = PUSH_PROXIES;
         this.version = VERSION;
         this.proxies = null;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public PushProxiesDHTValue(Set<? extends IpPort> proxies) {
+        this.valueType = PUSH_PROXIES;
+        this.version = VERSION;
+        this.proxies = (Set<IpPort>)proxies;
     }
     
     PushProxiesDHTValue(DHTValueType valueType, Version version, byte[] data) throws DHTValueException {
@@ -133,6 +141,8 @@ public class PushProxiesDHTValue implements DHTValue {
         return baos.toByteArray();
     }
     
+    // TODO leaving as the code might be handy, will remove later
+    @Deprecated
     private static class LocalDHTValue extends PushProxiesDHTValue {
         
         private static final long serialVersionUID = -3105395767814243136L;

@@ -32,7 +32,6 @@ import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
@@ -1818,13 +1817,14 @@ public class ManagedDownloader extends AbstractDownloader
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
 
-        /*DHTManager dhtManager = RouterService.getDHTManager();
+        // TODO this is just for now. Makes testing easier...
+        DHTManager dhtManager = RouterService.getDHTManager();
         synchronized (dhtManager) {
             if (dhtManager.isBootstrapped()) {
-                KUID key = KUID.createWithBytes(getSHA1Urn().getBytes());
-                DHTFuture<FindValueResult> future = dhtManager.get(key);
+                DHTFuture<FindValueResult> future = dhtManager.getAltLocs(getSHA1Urn());
                 
-                DHTFutureListener<FindValueResult> listener = new DHTFutureAdapter<FindValueResult>() {
+                DHTFutureListener<FindValueResult> listener 
+                        = new DHTFutureAdapter<FindValueResult>() {
                     @Override
                     public void handleFutureSuccess(FindValueResult result) {
                         resume(result);
@@ -1833,7 +1833,7 @@ public class ManagedDownloader extends AbstractDownloader
                 
                 future.addDHTFutureListener(listener);
             }
-        }*/
+        }
         
         return true;
     }
@@ -1857,17 +1857,25 @@ public class ManagedDownloader extends AbstractDownloader
                     AltLocDHTValue altLoc = (AltLocDHTValue)value;
                     Contact creator = entity.getCreator();
                     
-                    if (creator.isFirewalled()) {
-                        continue;
-                    }
-                    
                     InetAddress addr = ((InetSocketAddress)creator.getContactAddress()).getAddress();
                     int port = altLoc.getPort();
                     
-                    RemoteFileDesc rfd = new RemoteFileDesc(original, 
-                            new IpPortImpl(addr, addr.getHostName(), port));
+                    RemoteFileDesc rfd = null;
                     
-                    addDownload(rfd, false);
+                    if (altLoc.isFirewalled()) {
+                        int pushProxyPort = altLoc.getPort();
+                        // GUID + port = Has the file
+                        // addr + pushProxyPort = Push Proxy of the 
+                        //                        guy who has the File
+                        // TODO implement, do we need more information
+                        // to download the File?
+                    } else {
+                        rfd = new RemoteFileDesc(original, new IpPortImpl(addr, port));
+                    }
+                    
+                    if (rfd != null) {
+                        addDownload(rfd, false);
+                    }
                 }
             } catch (ExecutionException e) {
             } catch (InterruptedException e) {

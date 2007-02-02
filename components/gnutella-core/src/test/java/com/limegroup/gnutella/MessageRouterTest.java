@@ -19,6 +19,9 @@ import org.limewire.collection.NameValue;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
@@ -914,6 +917,22 @@ public final class MessageRouterTest extends LimeTestCase {
         }
 
         public void removeEventListener(DHTEventListener listener) {
+        }
+        
+        public DHTFuture<FindValueResult> getAltLocs(URN urn) {
+            return null;
+        }
+
+        public DHTFuture<FindValueResult> getPushProxies(GUID guid) {
+            return null;
+        }
+
+        public DHTFuture<StoreResult> putAltLoc(FileDesc fd) {
+            return null;
+        }
+
+        public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {
+            return null;
         }
     }
 }

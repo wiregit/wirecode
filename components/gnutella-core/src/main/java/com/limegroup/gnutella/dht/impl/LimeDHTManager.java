@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.dht.impl;
 
 import java.net.SocketAddress;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.concurrent.SchedulingThreadPool;
@@ -10,15 +13,22 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.AltLocDHTValue;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.PushProxiesDHTValue;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -231,5 +241,50 @@ public class LimeDHTManager implements DHTManager {
     
     public Version getVersion() {
         return version;
+    }
+    
+    public DHTFuture<FindValueResult> getAltLocs(URN urn) {
+        return getMojitoDHT().get(toKUID(urn));
+    }
+    
+    public DHTFuture<FindValueResult> getPushProxies(GUID guid) {
+        return getMojitoDHT().get(toKUID(guid));
+    }
+    
+    public DHTFuture<StoreResult> putAltLoc(FileDesc fd) {
+        KUID key = toKUID(fd.getSHA1Urn());
+        return getMojitoDHT().put(key, AltLocDHTValue.LOCAL_HOST);
+    }
+    
+    public DHTFuture<StoreResult> putAltLoc(URN urn, GUID guid, int port) {
+        if (!RouterService.getConnectionManager().isActiveSupernode()) {
+            throw new IllegalStateException("This method works only if we are an Ultrapeer");
+        }
+        
+        KUID key = toKUID(urn);
+        return getMojitoDHT().put(key, new AltLocDHTValue(guid, port));
+    }
+    
+    public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {
+        KUID key = toKUID(guid);
+        return getMojitoDHT().put(key, new PushProxiesDHTValue(proxies));
+    }
+    
+    private static KUID toKUID(URN urn) {
+        if (!urn.isSHA1()) {
+            throw new IllegalArgumentException("Expected a SHA-1 URN: " + urn);
+        }
+        return KUID.createWithBytes(urn.getBytes());
+    }
+    
+    private static KUID toKUID(GUID guid) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            md.update(guid.bytes());
+            byte[] digest = md.digest();
+            return KUID.createWithBytes(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
