@@ -1727,6 +1727,8 @@ public class RouterService {
     
 	/**
 	 * Creates and returns a new chat to the given host and port.
+     * 
+     * <p>{@link Chatter#start()} needs to be invoked to initiate the connection. 
 	 */
 	public static Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);

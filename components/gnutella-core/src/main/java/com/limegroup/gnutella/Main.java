@@ -223,7 +223,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 
     public void acceptChat(Chatter chat) {}
 
-    public void receiveMessage(Chatter chat) {}
+    public void receiveMessage(Chatter chat, String message) {}
     
     public void chatUnavailable(Chatter chatter) {}
 

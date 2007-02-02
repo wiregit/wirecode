@@ -53,11 +53,15 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
     /** Remove an uploader from the upload window. */
     public void removeUpload(Uploader u);    
 
-	/** Add a new incoming chat connection */
+	/**
+     * Add a new incoming chat connection. This is invoked when the handshake
+     * for a connection has been completed and the connection is ready for
+     * sending and receiving of messages.
+     */
 	public void acceptChat(Chatter ctr);
 
-    /** A new message is available from the given chatter */
-	public void receiveMessage(Chatter chr);
+    /** A new message is available from the given chatter. */
+	public void receiveMessage(Chatter chr, String messsage);
 
 	/** The given chatter is no longer available */
 	public void chatUnavailable(Chatter chatter);
