@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -1408,18 +1407,10 @@ public class QueryReply extends Message implements SecureMessage {
             return bytes;
         }
 
-        public boolean isFor(SocketAddress addr) {
+        public boolean isFor(SecurityToken.TokenData data) {
             return false;
         }
-
-        public boolean isFor(InetAddress addr, int port) {
-            return false;
-        }
-
-        public boolean isFor(byte[] data) {
-            return false;
-        }
-
+        
         public void write(OutputStream out) throws IOException {
             out.write(getBytes());
         }

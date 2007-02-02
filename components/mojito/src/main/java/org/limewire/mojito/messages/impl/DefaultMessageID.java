@@ -195,7 +195,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             return false;
         }
 
-        return getSecurityToken().isFor(src);
+        return getSecurityToken().isFor(new QueryKey.GUESSTokenData(src));
     }
     
     public int compareTo(DefaultMessageID o) {

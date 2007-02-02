@@ -59,29 +59,36 @@ public class OOBHandler implements MessageHandler, Runnable {
 		
 		LimeACKVendorMessage ack =
 			new LimeACKVendorMessage(g, toRequest, 
-                    QueryKey.getQueryKey(createMessageKeyData(handler, msg.getGUID(), toRequest)));
+                    QueryKey.getQueryKey(new OOBTokenData(handler, msg.getGUID(), toRequest), true));
         
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
 	}
     
-    private static byte[] createMessageKeyData(ReplyHandler replyHandler, byte[] guid, int requestNum) {
-        if (requestNum <= 0 || requestNum > 255) {
-            throw new IllegalArgumentException("requestNum to small or too large " + requestNum);
+    private static class OOBTokenData implements SecurityToken.TokenData {
+        final byte [] data;
+        OOBTokenData(ReplyHandler replyHandler, byte [] guid, int requestNum) {
+            if (requestNum <= 0 || requestNum > 255) {
+                throw new IllegalArgumentException("requestNum to small or too large " + requestNum);
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(23);
+            DataOutputStream data = new DataOutputStream(baos);
+            try {
+                data.writeInt(replyHandler.getPort());
+                // TODO fberger convert to ipv6
+                data.write(replyHandler.getInetAddress().getAddress());
+                data.writeShort(requestNum);
+                data.write(guid);
+            }
+            catch (IOException ie) {
+                ErrorService.error(ie);
+            }
+            this.data = baos.toByteArray();
+            
         }
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(23);
-        DataOutputStream data = new DataOutputStream(baos);
-        try {
-            data.writeInt(replyHandler.getPort());
-            // TODO fberger convert to ipv6
-            data.write(replyHandler.getInetAddress().getAddress());
-            data.writeShort(requestNum);
-            data.write(guid);
+        public byte [] getData() {
+            return data;
         }
-        catch (IOException ie) {
-            ErrorService.error(ie);
-        }
-        return baos.toByteArray();
     }
 	
 	private void handleOOBReply(QueryReply reply, ReplyHandler handler) {

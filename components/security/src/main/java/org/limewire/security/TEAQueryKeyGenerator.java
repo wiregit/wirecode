@@ -1,9 +1,8 @@
 package org.limewire.security;
 
-import java.net.InetAddress;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
+import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.ByteOrder;
 
 
@@ -68,45 +67,12 @@ import org.limewire.util.ByteOrder;
         LK0 = k0; LK1 = k1; RK0 = k2; RK1 = k3;
     }
     
-    /** Checks that this instance was used to create keyBytes from ip and port.*/
-    public boolean checkKeyBytes(byte[] keyBytes, InetAddress ip, int port) {
-        // This only works because this.getKeyBytes(ip,port) is deterministic.
-        return Arrays.equals(keyBytes, getKeyBytes(ip, port));
-    }
-    
-    public boolean checkKeyBytes(byte[] keyBytes, byte[] data) {
-        return Arrays.equals(keyBytes, getKeyBytes(data));
-    }
-    
-    /** Returns the raw bytes for a QueryKey, which will not contain
-     *  0x1C and 0x00, to accomidate clients that poorly parse GGEP.
-     */
-    public byte[] getKeyBytes(InetAddress ip, int port) {
-        // get all the input bytes....
-        byte[] ipBytes = ip.getAddress();
-        int ipInt = 0;
-        // Load the first 4 bytes into ipInt in little-endian order,
-        // with the twist that any negative bytes end up flipping
-        // all of the higher order bits, but we don't care.
-        for(int i=3; i >= 0; --i) {
-            ipInt ^= ipBytes[i] << (i << 3);
-        }
-        
-        // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
-        // and encrypt it with our secret key material.
-        byte[] bytes = new byte[8];
-        ByteOrder.int2beb(port, bytes, 0);
-        ByteOrder.int2beb(ipInt, bytes, 4);
-        
-        return getKeyBytes(bytes);
-    }
-    
     /**
      * Returns the raw bytes for a QueryKey, which will not contain
      * 0x1C and 0x00, to accomidate clients that poorly parse GGEP.
      */
-    public byte[] getKeyBytes(byte[] data) {
-        
+    public byte[] getKeyBytes(TokenData tokenData) {
+        byte [] data = tokenData.getData();
         long key64 = encryptCBCCMAC(data);
         
         // 32-bit QK gives attackers the least amount of information
@@ -177,6 +143,4 @@ import org.limewire.util.ByteOrder;
         // Post-encryption cyclic shift
         return (block << POST_ROTATE) | (block >>> (64 - POST_ROTATE));
     }
-
-    
 }

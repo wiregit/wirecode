@@ -1,6 +1,6 @@
 package org.limewire.security;
 
-import java.net.InetAddress;
+import org.limewire.security.SecurityToken.TokenData;
 
 /**
  * An interface that represents the embodiment of an algorithm and
@@ -30,24 +30,5 @@ public interface QueryKeyGenerator {
      * Uses secret keys to generate a byte array from an InetAddres and
      * a port number.
      */
-    public byte[] getKeyBytes(InetAddress ip, int port);
-    
-    /**
-     * Uses secret keys to generate a message authentication code.
-     */
-    public byte[] getKeyBytes(byte[] data);
-    
-    /**
-     * Returns true if the algorithm and secret keys of this instance were
-     * used to generate keyBytes from ip and port.
-     * 
-     */
-    public boolean checkKeyBytes(byte[] keyBytes, InetAddress ip, int port);
-    
-    /**
-     * Returns true if the algorithm and secret keys of this instance
-     * were used to generate the message authentication code 
-     * <code>keyBytes</code> from <code>data</code>.
-     */
-    public boolean checkKeyBytes(byte[] keyBytes, byte[] data);
+    public byte[] getKeyBytes(TokenData data);
 }

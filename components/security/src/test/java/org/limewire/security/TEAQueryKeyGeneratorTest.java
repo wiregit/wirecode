@@ -4,6 +4,7 @@ package org.limewire.security;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.limewire.security.TEAQueryKeyGenerator;
@@ -38,7 +39,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         for(int i=20; i > 0; --i) {
             TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(addresses[j], 1024 + i);
+                byte[] keyBytes = key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
                 for(int k=keyBytes.length-1; k >= 0; --k) {
                     int keyByte = keyBytes[k];
                     if (keyByte == 0x00 || keyByte == 0x1C) {
@@ -68,8 +69,8 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         for(int i=20; i > 0; --i) {
             TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(addresses[j], 1024 + i);
-                if (! key.checkKeyBytes(keyBytes, addresses[j], 1024 + i)) {
+                byte[] keyBytes = key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
+                if (! Arrays.equals(keyBytes, key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i)))) {
                     byte[] printBuf = new byte[keyBytes.length+1];
                     System.arraycopy(keyBytes, 0, printBuf, 1, keyBytes.length);
                     printBuf[0] = (byte) 1;
@@ -203,7 +204,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
                 right >>>= 8;
             }
             
-            byte[] resultBytes = getKeyBytes(InetAddress.getByAddress(ipBytes), left);
+            byte[] resultBytes = getKeyBytes(new QueryKey.GUESSTokenData(InetAddress.getByAddress(ipBytes), left));
             
             int byteCount = resultBytes.length;
             int result = 0;

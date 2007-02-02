@@ -3,8 +3,6 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.Arrays;
 
 import org.limewire.security.SecurityToken;
@@ -178,15 +176,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
             return bytes;
         }
 
-        public boolean isFor(SocketAddress addr) {
-            return false;
-        }
-
-        public boolean isFor(InetAddress addr, int port) {
-            return false;
-        }
-
-        public boolean isFor(byte[] data) {
+        public boolean isFor(SecurityToken.TokenData data) {
             return false;
         }
 
