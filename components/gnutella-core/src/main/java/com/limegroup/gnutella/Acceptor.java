@@ -574,9 +574,9 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             setAddress(localAddress);
 
             try {
-                _socket.setSoTimeout(Constants.TIMEOUT);
+                client.setSoTimeout(Constants.TIMEOUT);
             } catch (SocketException se) {
-                IOUtils.close(_socket);
+                IOUtils.close(client);
                 return;
             }
 
