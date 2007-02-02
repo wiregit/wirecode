@@ -185,15 +185,16 @@ public class CommonUtils {
     	if(newFile == null) newFile = new File(".", fileName);
     
     	// return quickly if the file is already there, no copy necessary
-    	if( !forceOverwrite && newFile.exists() ) return;
-    	String parentString = newFile.getParent();
-        if(parentString == null) {
+    	if( !forceOverwrite && newFile.exists() )
             return;
-        }
+        
+    	String parentString = newFile.getParent();
+        if(parentString == null)
+            return;
+        
     	File parentFile = new File(parentString);
-    	if(!parentFile.isDirectory()) {
+    	if(!parentFile.isDirectory())
     		parentFile.mkdirs();
-    	}
     
     	ClassLoader cl = CommonUtils.class.getClassLoader();			
     	
@@ -229,6 +230,7 @@ public class CommonUtils {
     		while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
     		
     	} catch(IOException e) {	
+            e.printStackTrace();
     		//if there is any error, delete any portion of file that did write
     		newFile.delete();
     	} finally {
