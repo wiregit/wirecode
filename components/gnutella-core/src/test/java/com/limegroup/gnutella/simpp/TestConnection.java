@@ -7,10 +7,11 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 
+import org.limewire.concurrent.ManagedThread;
 import org.limewire.service.ErrorService;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
-public class TestConnection {
+public class TestConnection extends AssertComparisons {
 
     private Socket _socket;
     
@@ -55,6 +56,7 @@ public class TestConnection {
     
     public TestConnection(int simppNumber, boolean expectSimppReq, 
                boolean sendSimppData, int capabilitySimpp) throws IOException {
+        super("FakeTest");
         _simppData = readCorrectFile(simppNumber);
         _expectSimppRequest = expectSimppReq;
         _sendSimppData = sendSimppData;
@@ -63,7 +65,7 @@ public class TestConnection {
     }
 
     public void start() {
-        Thread t = new Thread() {
+        Thread t = new ManagedThread() {
             public void run() {
                 //Make an out going connection to the machine
                 try {
@@ -73,7 +75,7 @@ public class TestConnection {
                     if(!_causeError) //if not expected, show errorservice
                         ErrorService.error(iox);
                 }        
-            }//end of run
+            }
         };
         t.setDaemon(true);
         t.start();
@@ -134,12 +136,12 @@ public class TestConnection {
             message = LimeTestCase.getFirstInstanceOfMessage(
                                            _socket, SimppRequestVM.class, 2000);
         } catch (BadPacketException bpx) {
-            Assert.that(false, "limewire sent message with BPX");
+            fail("limewire sent message with BPX");
         }
         if(_expectSimppRequest)
-            Assert.that(message != null, "should have gotten simpp message");
+            assertNotNull("should have gotten simpp message", message);
         else
-            Assert.that(message == null, "shouldn't have gotten simpp message");
+            assertNull("shouldn't have gotten simpp message", message);
 
         //send back the simppdata if reqd. 
         if( _sendSimppData) {//we dont want 
@@ -159,8 +161,7 @@ public class TestConnection {
         try {
             return  CapabilitiesVMStubHelper.makeCapVM(_capabilitySimppNo);
         } catch (Exception e) {
-            Assert.that(false, 
-                "couldn't set up test -- failed to manipulate CapabilitiesVM");
+            fail("couldn't set up test -- failed to manipulate CapabilitiesVM");
         }
         return null;
     }
@@ -211,7 +212,7 @@ public class TestConnection {
         else if(fileVersion == SimppManagerTest.BELOW_MIN)
             file = CommonUtils.getResourceFile(simppDir+"belowMinFile.xml");
         else
-            Assert.that(false,"simpp version set to illegal value");
+            fail("simpp version set to illegal value");
         
         //read the bytes of the file and close it. 
         RandomAccessFile raf = new RandomAccessFile(file,"r");
