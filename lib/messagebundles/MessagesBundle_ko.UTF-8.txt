@@ -2131,6 +2131,10 @@ CHAT_STOP_BUTTON_TIP=호스트와의 채팅 종료
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=채팅 상대
+#### CHAT_CONNECTION_ERROR=A connection error has occurred
+#? CHAT_CONNECTION_ERROR=
+#### CHAT_MESSAGE_ERROR=Could not send chat message
+#? CHAT_MESSAGE_ERROR=
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
 CHAT_HOST_UNAVAILABLE=호스트가 이용할 수 없습니다
 #### CHAT_YOU=You

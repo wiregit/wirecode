@@ -2129,6 +2129,10 @@ CHAT_STOP_BUTTON_TIP=Ba�lant� sahibi ile sohbeti kes
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 CHAT_WITH_LABEL=Sohbet edilen
+#### CHAT_CONNECTION_ERROR=A connection error has occurred
+#? CHAT_CONNECTION_ERROR=
+#### CHAT_MESSAGE_ERROR=Could not send chat message
+#? CHAT_MESSAGE_ERROR=
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
 CHAT_HOST_UNAVAILABLE=Ba�lant� sahibi bulunam�
 #### CHAT_YOU=You

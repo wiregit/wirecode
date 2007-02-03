@@ -2129,6 +2129,10 @@ STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=ਤੁਆੱਡਾ ਕਨੈੱਕ�
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
 #? CHAT_WITH_LABEL=
+#### CHAT_CONNECTION_ERROR=A connection error has occurred
+#? CHAT_CONNECTION_ERROR=
+#### CHAT_MESSAGE_ERROR=Could not send chat message
+#? CHAT_MESSAGE_ERROR=
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
 #? CHAT_HOST_UNAVAILABLE=
 #### CHAT_YOU=You
