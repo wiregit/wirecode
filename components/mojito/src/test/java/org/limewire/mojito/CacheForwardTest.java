@@ -102,7 +102,7 @@ public class CacheForwardTest extends MojitoTestCase {
             assertFalse(context2.isBootstrapping());
             
             // Get the SecurityToken...
-            Class clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetSecurityTokenHandler");
+            Class clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenHandler");
             Constructor<Callable<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
@@ -111,7 +111,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             try {
                 Result result = handler.call();
-                clazz = Class.forName("org.limewire.mojito.handler.response.StoreResponseHandler$GetSecurityTokenResult");
+                clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenResult");
                 Method m = clazz.getDeclaredMethod("getSecurityToken", new Class[0]);
                 m.setAccessible(true);
                 

@@ -330,7 +330,8 @@ public class DefaultMessageHandler {
             if (message instanceof SecurityTokenProvider) {
                 securityToken = ((SecurityTokenProvider)message).getSecurityToken();
                 
-                if (securityToken == null) {
+                if (securityToken == null
+                        && KademliaSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info(node + " sent us a null SecurityToken");
                     }
