@@ -214,6 +214,11 @@ public interface MojitoDHT {
     public DHTFuture<BootstrapResult> bootstrap(Contact node);
     
     /**
+     * 
+     */
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst);
+    
+    /**
      * Tries to ping Contacts in the RouteTable. You may use
      * this method to find a remote Node from where you can
      * bootstrap your MojitoDHT instance.

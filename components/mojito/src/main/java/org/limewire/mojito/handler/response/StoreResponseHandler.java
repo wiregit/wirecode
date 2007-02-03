@@ -37,50 +37,28 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
-import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
-import org.limewire.mojito.messages.SecurityTokenProvider;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.Status;
-import org.limewire.mojito.result.LookupResult;
-import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.CollectionUtils;
-import org.limewire.mojito.util.ContactUtils;
 import org.limewire.security.SecurityToken;
-
 
 /**
  * The StoreResponseHandler class handles/manages storing of
  * DHTValues on remote Nodes
  */
 public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
-
+    
     private static final Log LOG = LogFactory.getLog(StoreResponseHandler.class);
     
-    /** The ID of the Value */
-    private KUID valueId;
+    private final Collection<? extends DHTValueEntity> values;
     
-    /** 
-     * The remote Node wehere to store the Value(s). 
-     * Can be null.
-     */
-    private final Contact node;
-    
-    /** The SecurityToken we have to use. Can be null. */
-    private SecurityToken securityToken;
-    
-    /** The Value(s) we're going to store */
-    private Collection<? extends DHTValueEntity> values;
-    
-    /** A list of StoreProcesses. One StoreProcess per Contact */
-    private List<StoreProcess> processList = new ArrayList<StoreProcess>();
+    private final List<StoreProcess> processList = new ArrayList<StoreProcess>();
     
     /** An Iterator of StoreProcesses (see processList) */
     private Iterator<StoreProcess> processes = null;
@@ -92,99 +70,27 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
     private final int parallelism = KademliaSettings.PARALLEL_STORES.getValue();
     
     public StoreResponseHandler(Context context, 
-            Collection<? extends DHTValueEntity> values) {
-        this(context, null, null, values);
-    }
-    
-    public StoreResponseHandler(Context context, Contact node, 
-            SecurityToken securityToken, Collection<? extends DHTValueEntity> values) {
+            Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path, 
+                    Collection<? extends DHTValueEntity> values) {
         super(context);
         
-        assert (values != null && !values.isEmpty());
-        
-        this.node = node;
-        this.securityToken = securityToken;
         this.values = values;
         
-        if (!isSingleNodeStore()) {
-            for (DHTValueEntity value : values) {
-                if (valueId == null) {
-                    valueId = value.getKey();
-                }
-                
-                if (!valueId.equals(value.getKey())) {
-                    throw new IllegalArgumentException("All DHTValues must have the same Value ID");
-                }
+        if (path.size() > KademliaSettings.REPLICATION_PARAMETER.getValue()) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Path is longer than K: " + path.size() 
+                        + " > " + KademliaSettings.REPLICATION_PARAMETER.getValue());
             }
+        }
+        
+        for (Entry<? extends Contact, ? extends SecurityToken> entry : path) {
+            processList.add(new StoreProcess(entry));
         }
     }
     
-    /**
-     * Returns true if this handler is storing the DHTValues
-     * at a single Node in the DHT
-     */
-    private boolean isSingleNodeStore() {
-        return node != null;
-    }
-    
-    @Override
-    protected synchronized void start() throws DHTException {
-        super.start();
-        
-        if (isSingleNodeStore()) {
-            
-            // Get the SecurityToken if we don't have it
-            if (securityToken == null) {
-                GetSecurityTokenHandler handler = new GetSecurityTokenHandler(context, node);
-                
-                try {
-                    securityToken = handler.call().getSecurityToken();
-                } catch (InterruptedException e) {
-                    throw new DHTException(e);
-                }
-            }
-            
-            if (securityToken == null) {
-                throw new IllegalStateException("SecurityToken is null");
-            }
-            
-            processList.add(new StoreProcess(node, securityToken));
-            
-        } else {
-            // Do a lookup for the k-closest Nodes where we're
-            // going to store the value
-            LookupResponseHandler handler = createLookupResponseHandler();
-            
-            // Use only alive Contacts from the RouteTable
-            handler.setSelectAliveNodesOnly(true);
-            
-            LookupResult result = null;
-            try {
-                result = (LookupResult)handler.call();
-            } catch (InterruptedException e) {
-                throw new DHTException(e);
-            }
-            
-            for (Contact node : CollectionUtils.getCollection(result.getPath())) {
-                SecurityToken securityToken = result.getSecurityToken(node);
-                processList.add(new StoreProcess(node, securityToken));
-            }
-            
-        }
-        
+    public synchronized void start() throws DHTException {
         processes = processList.iterator();
         sendNextAndExitIfDone();
-    }
-    
-    private LookupResponseHandler createLookupResponseHandler() {
-        if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
-            return new FindNodeResponseHandler(context, valueId);
-        } else {
-            FindValueResponseHandler handler 
-                = new FindValueResponseHandler(context, valueId);
-            
-            return handler;
-        }
     }
     
     @Override
@@ -306,9 +212,9 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         /** A reference to an Exception that iterrupted this store process */
         private Exception exception;
         
-        private StoreProcess(Contact node, SecurityToken securityToken) {
-            this.node = node;
-            this.securityToken = securityToken;
+        private StoreProcess(Entry<? extends Contact, ? extends SecurityToken> entry) {
+            this.node = entry.getKey();
+            this.securityToken = entry.getValue();
             
             Iterable<? extends DHTValueEntity> it = values;
             if (context.isLocalNode(node)) {
@@ -399,118 +305,6 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
             }
             
             return failed;
-        }
-    }
-    
-    /**
-     * GetSecurityTokenHandler tries to get the SecurityToken of a Node
-     */
-    private static class GetSecurityTokenHandler extends AbstractResponseHandler<GetSecurityTokenResult> {
-        
-        private Contact node;
-        
-        GetSecurityTokenHandler(Context context, Contact node) {
-            super(context);
-            
-            this.node = node;
-        }
-
-        @Override
-        protected void start() throws DHTException {
-            RequestMessage request = createLookupRequest();
-            
-            try {
-                context.getMessageDispatcher().send(node, request, this);
-            } catch (IOException err) {
-                throw new DHTException(err);
-            }
-        }
-        
-        private RequestMessage createLookupRequest() {
-            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
-                return context.getMessageHelper()
-                        .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
-            } else {
-                Collection<KUID> noKeys = Collections.emptySet();
-                return context.getMessageHelper()
-                    .createFindValueRequest(node.getContactAddress(), node.getNodeID(), noKeys);
-            }
-        }
-        
-        @Override
-        protected void response(ResponseMessage message, long time) throws IOException {
-            
-            if (message instanceof FindNodeResponse) {
-                FindNodeResponse response = (FindNodeResponse)message;
-                
-                Collection<? extends Contact> nodes = response.getNodes();
-                for(Contact node : nodes) {
-                    
-                    if (!ContactUtils.isValidContact(response.getContact(), node)) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Dropping invalid Contact " + node);
-                        }
-                        continue;
-                    }
-                    
-                    // Make sure we're not mixing IPv4 and IPv6 addresses.
-                    // See RouteTableImpl.add() for more Info!
-                    if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
-                        
-                        // Log as ERROR so that we're not missing this
-                        if (LOG.isErrorEnabled()) {
-                            LOG.error(node + " is from a different IP address space than local Node");
-                        }
-                        continue;
-                    }
-                    
-                    if (ContactUtils.isLocalContact(context, node, null)) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("Dropping local Contact " + node);
-                        }
-                        continue;
-                    }
-                    
-                    // We did a FIND_NODE lookup use the info
-                    // to fill/update our routing table
-                    assert (node.isAlive() == false);
-                    context.getRouteTable().add(node);
-                }
-            }
-            
-            SecurityToken securityToken = null;
-            if (message instanceof SecurityTokenProvider) {
-                securityToken = ((SecurityTokenProvider)message).getSecurityToken();
-            }
-            
-            setReturnValue(new GetSecurityTokenResult(securityToken));
-        }
-        
-        @Override
-        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
-            fireTimeoutException(nodeId, dst, message, time);
-        }
-
-        @Override
-        protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Getting the SecurityToken from " + ContactUtils.toString(nodeId, dst) + " failed", e);
-            }
-            
-            setException(new DHTBackendException(nodeId, dst, message, e));
-        }
-    }
-    
-    private static class GetSecurityTokenResult implements Result {
-        
-        private final SecurityToken securityToken;
-        
-        public GetSecurityTokenResult(SecurityToken securityToken) {
-            this.securityToken = securityToken;
-        }
-        
-        public SecurityToken getSecurityToken() {
-            return securityToken;
         }
     }
 }

@@ -19,18 +19,40 @@
 
 package org.limewire.mojito.manager;
 
+import java.io.IOException;
+import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.exceptions.DHTBackendException;
+import org.limewire.mojito.exceptions.DHTException;
+import org.limewire.mojito.handler.response.AbstractResponseHandler;
+import org.limewire.mojito.handler.response.FindNodeResponseHandler;
+import org.limewire.mojito.handler.response.FindValueResponseHandler;
+import org.limewire.mojito.handler.response.LookupResponseHandler;
 import org.limewire.mojito.handler.response.StoreResponseHandler;
+import org.limewire.mojito.messages.FindNodeResponse;
+import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.messages.ResponseMessage;
+import org.limewire.mojito.messages.SecurityTokenProvider;
+import org.limewire.mojito.result.LookupResult;
+import org.limewire.mojito.result.Result;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
-
 
 /**
  * The StoreManager class manages 
@@ -46,8 +68,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
      * must have the same valueId!
      */
     public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
-        StoreResponseHandler handler = new StoreResponseHandler(context, values);
-        StoreFuture future = new StoreFuture(handler);
+        StoreTask task = new StoreTask(context, values);
+        StoreFuture future = new StoreFuture(task);
         
         context.getDHTExecutorService().execute(future);
         return future;
@@ -59,9 +81,11 @@ public class StoreManager extends AbstractManager<StoreResult> {
     public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {
         
-        StoreResponseHandler handler 
-            = new StoreResponseHandler(context, node, securityToken, values);
-        StoreFuture future = new StoreFuture(handler);
+        Entry<Contact, SecurityToken> entry 
+            = new EntryImpl<Contact, SecurityToken>(node, securityToken);
+        StoreTask task = new StoreTask(context, entry, values);
+        
+        StoreFuture future = new StoreFuture(task);
         context.getDHTExecutorService().execute(future);
         return future;
     }
@@ -73,6 +97,225 @@ public class StoreManager extends AbstractManager<StoreResult> {
         
         public StoreFuture(Callable<StoreResult> callable) {
             super(callable);
+        }
+    }
+    
+    /**
+     * A store operation is a two step operation. The first step is finding 
+     * the k-closest Nodes and the second step is the actual storing. This 
+     * class combines both operations to a single Callable.
+     */
+    private static class StoreTask implements Callable<StoreResult> {
+        
+        private final KUID valueId;
+        
+        private final Context context;
+        
+        private final Entry<? extends Contact, ? extends SecurityToken> node;
+        
+        private final Collection<? extends DHTValueEntity> values;
+        
+        public StoreTask(Context context, Collection<? extends DHTValueEntity> values) {
+            this(context, null, values);
+        }
+        
+        public StoreTask(Context context,
+                Entry<? extends Contact, ? extends SecurityToken> node,
+                Collection<? extends DHTValueEntity> values) {
+            
+            this.context = context;
+            this.values = values;
+            this.node = node;
+            
+            if (node != null && node.getKey() == null) {
+                throw new IllegalArgumentException("Contact is null");
+            }
+            
+            if (values.isEmpty()) {
+                throw new IllegalArgumentException("No Values to store");
+            }
+            
+            KUID valueId = null;
+            if (node == null) {
+                for (DHTValueEntity value : values) {
+                    if (valueId == null) {
+                        valueId = value.getKey();
+                    }
+                    
+                    if (!valueId.equals(value.getKey())) {
+                        throw new IllegalArgumentException("All DHTValues must have the same Value ID");
+                    }
+                }
+            }
+            
+            this.valueId = valueId;
+        }
+        
+        public StoreResult call() throws InterruptedException, DHTException {
+            Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> path = null;
+            
+            // Regular store operation
+            if (node == null) {
+                // Do a lookup for the k-closest Nodes where we're
+                // going to store the value
+                LookupResponseHandler handler = createLookupResponseHandler();
+                
+                // Use only alive Contacts from the RouteTable
+                handler.setSelectAliveNodesOnly(true);
+                
+                path = CollectionUtils.getCollection(
+                            ((LookupResult)handler.call()).getEntryPath());
+            
+            // Get the SecurityToken and store the value(s) 
+            // at the given Node 
+            } else if (node.getValue() == null
+                    && KademliaSettings.STORE_REQUIRES_SECURITY_TOKEN.getValue()) {
+                GetSecurityTokenHandler handler 
+                    = new GetSecurityTokenHandler(context, node.getKey());
+                SecurityToken securityToken = handler.call().getSecurityToken();
+                
+                if (securityToken == null) {
+                    throw new DHTException("Coult not get SecurityToken from " + node);
+                }
+                
+                Entry<Contact, SecurityToken> entry 
+                    = new EntryImpl<Contact, SecurityToken>(node.getKey(), securityToken);
+                path = Collections.singleton(entry);
+          
+            // Store the value(s) and the given Node
+            } else {
+                path = Collections.singleton(node);
+            }
+            
+            // And store the values along the path
+            StoreResponseHandler storeHandler 
+                = new StoreResponseHandler(context, path, values);
+            
+            return storeHandler.call();
+        }
+        
+        private LookupResponseHandler createLookupResponseHandler() {
+            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+                return new FindNodeResponseHandler(context, valueId);
+            } else {
+                FindValueResponseHandler handler 
+                    = new FindValueResponseHandler(context, valueId);
+                
+                return handler;
+            }
+        }
+    }
+    
+    /**
+     * GetSecurityTokenHandler tries to get the SecurityToken of a Node
+     */
+    private static class GetSecurityTokenHandler extends AbstractResponseHandler<GetSecurityTokenResult> {
+        
+        private static final Log LOG = LogFactory.getLog(GetSecurityTokenHandler.class);
+        
+        private final Contact node;
+        
+        private GetSecurityTokenHandler(Context context, Contact node) {
+            super(context);
+            this.node = node;
+        }
+
+        @Override
+        protected void start() throws DHTException {
+            RequestMessage request = createLookupRequest();
+            
+            try {
+                context.getMessageDispatcher().send(node, request, this);
+            } catch (IOException err) {
+                throw new DHTException(err);
+            }
+        }
+        
+        private RequestMessage createLookupRequest() {
+            if (KademliaSettings.FIND_NODE_FOR_SECURITY_TOKEN.getValue()) {
+                return context.getMessageHelper()
+                        .createFindNodeRequest(node.getContactAddress(), node.getNodeID());
+            } else {
+                Collection<KUID> noKeys = Collections.emptySet();
+                return context.getMessageHelper()
+                    .createFindValueRequest(node.getContactAddress(), node.getNodeID(), noKeys);
+            }
+        }
+        
+        @Override
+        protected void response(ResponseMessage message, long time) throws IOException {
+            
+            if (message instanceof FindNodeResponse) {
+                FindNodeResponse response = (FindNodeResponse)message;
+                
+                Collection<? extends Contact> nodes = response.getNodes();
+                for(Contact node : nodes) {
+                    
+                    if (!ContactUtils.isValidContact(response.getContact(), node)) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Dropping invalid Contact " + node);
+                        }
+                        continue;
+                    }
+                    
+                    // Make sure we're not mixing IPv4 and IPv6 addresses.
+                    // See RouteTableImpl.add() for more Info!
+                    if (!ContactUtils.isSameAddressSpace(context.getLocalNode(), node)) {
+                        
+                        // Log as ERROR so that we're not missing this
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error(node + " is from a different IP address space than local Node");
+                        }
+                        continue;
+                    }
+                    
+                    if (ContactUtils.isLocalContact(context, node, null)) {
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Dropping local Contact " + node);
+                        }
+                        continue;
+                    }
+                    
+                    // We did a FIND_NODE lookup use the info
+                    // to fill/update our routing table
+                    assert (node.isAlive() == false);
+                    context.getRouteTable().add(node);
+                }
+            }
+            
+            SecurityToken securityToken = null;
+            if (message instanceof SecurityTokenProvider) {
+                securityToken = ((SecurityTokenProvider)message).getSecurityToken();
+            }
+            
+            setReturnValue(new GetSecurityTokenResult(securityToken));
+        }
+        
+        @Override
+        protected void timeout(KUID nodeId, SocketAddress dst, RequestMessage message, long time) throws IOException {
+            fireTimeoutException(nodeId, dst, message, time);
+        }
+
+        @Override
+        protected void error(KUID nodeId, SocketAddress dst, RequestMessage message, IOException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Getting the SecurityToken from " + ContactUtils.toString(nodeId, dst) + " failed", e);
+            }
+            
+            setException(new DHTBackendException(nodeId, dst, message, e));
+        }
+    }
+    
+    private static class GetSecurityTokenResult implements Result {
+        
+        private final SecurityToken securityToken;
+        
+        public GetSecurityTokenResult(SecurityToken securityToken) {
+            this.securityToken = securityToken;
+        }
+        
+        public SecurityToken getSecurityToken() {
+            return securityToken;
         }
     }
 }

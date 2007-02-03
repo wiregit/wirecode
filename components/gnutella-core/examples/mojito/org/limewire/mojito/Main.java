@@ -164,6 +164,7 @@ public class Main {
             start = 1;
             
             // 1...n bootstraps from 0
+            //bootstrapHost = new InetSocketAddress("localhost", port);
             bootstrapHost = new InetSocketAddress("localhost", port);
         }
         
@@ -172,7 +173,8 @@ public class Main {
                 MojitoDHT dht = dhts.get(i);
                 dht.start();
                 
-                BootstrapResult result = MojitoUtils.bootstrap(dht, bootstrapHost).get();
+                //BootstrapResult result = MojitoUtils.bootstrap(dht, bootstrapHost).get();
+                BootstrapResult result = dht.bootstrap(bootstrapHost).get();
                 
                 time += result.getTotalTime();
                 

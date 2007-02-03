@@ -124,4 +124,10 @@ public class KademliaSettings extends MojitoProps {
      */
     public static final BooleanSetting FIND_NODE_FOR_SECURITY_TOKEN
         = FACTORY.createBooleanSetting("FIND_NODE_FOR_SECURITY_TOKEN", true);
+    
+    /**
+     * Whether or not SecurityTokens are required for storing values
+     */
+    public static final BooleanSetting STORE_REQUIRES_SECURITY_TOKEN
+        = FACTORY.createBooleanSetting("STORE_REQUIRES_SECURITY_TOKEN", true);
 }

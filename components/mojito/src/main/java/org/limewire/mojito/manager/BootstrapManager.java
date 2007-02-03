@@ -19,8 +19,10 @@
 
 package org.limewire.mojito.manager;
 
+import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -28,12 +30,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.exceptions.CollisionException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
 import org.limewire.mojito.handler.response.FindNodeResponseHandler;
+import org.limewire.mojito.handler.response.PingResponseHandler;
+import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
@@ -134,6 +138,48 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         context.getDHTExecutorService().execute(future);
 
         return future;
+    }
+    
+    /**
+     * Bootstraps the local Node from the given Contact
+     */
+    public DHTFuture<BootstrapResult> bootstrap(Set<? extends SocketAddress> dst) {
+        if (dst == null) {
+            throw new NullPointerException("Set<SocketAddress> is null");
+        }
+        
+        // Make sure there is only one bootstrap process active!
+        // Having parallel bootstrap proccesses is too expensive!
+        deregister();
+        
+        // Bootstrap...
+        PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(dst);
+        FindContactProcess process = new FindContactProcess(pinger);
+        BootstrapFuture future = new BootstrapFuture(process);
+        synchronized (this) {
+            this.future = future;
+        }
+        context.getDHTExecutorService().execute(future);
+
+        return future;
+    }
+    
+    private class FindContactProcess implements Callable<BootstrapResult> {
+        
+        private final PingIterator pinger;
+        
+        private FindContactProcess(PingIterator pinger) {
+            this.pinger = pinger;
+        }
+        
+        public BootstrapResult call() throws InterruptedException, DHTException {
+            PingResponseHandler pingHandler = new PingResponseHandler(context, pinger);
+            pingHandler.setMaxErrors(0); // Do not retry
+            
+            Contact node = pingHandler.call().getContact();
+            BootstrapProcess bootstrapProcess = new BootstrapProcess(node);
+            return bootstrapProcess.call();
+        }
     }
     
     /**

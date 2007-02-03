@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -88,6 +89,14 @@ public class FindValueResult extends LookupResult implements Iterable<Future<DHT
         return path.get(node);
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getEntryPath()
+     */
+    public Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> getEntryPath() {
+        return path.entrySet();
+    }
+
     /**
      * Returns an Iterator of Futures that return the DHTValue(s)
      */

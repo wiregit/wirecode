@@ -71,7 +71,15 @@ public class FindNodeResult extends LookupResult {
     public SecurityToken getSecurityToken(Contact node) {
         return path.get(node);
     }
-        
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.result.LookupPath#getEntryPath()
+     */
+    public Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> getEntryPath() {
+        return path.entrySet();
+    }
+    
     /**
      * Returns the number of Nodes that were in our RouteTable
      * and that failed to respond.

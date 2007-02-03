@@ -974,6 +974,14 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     /*
      * (non-Javadoc)
+     * @see com.limegroup.mojito.MojitoDHT#bootstrap(com.limegroup.mojito.routing.Contact)
+     */
+    public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
+        return bootstrapManager.bootstrap(Collections.singleton(dst));
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value) {

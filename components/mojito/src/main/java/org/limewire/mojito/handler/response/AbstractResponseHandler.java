@@ -46,7 +46,7 @@ import org.limewire.mojito.util.OnewayExchanger;
 /**
  * An abstract base class for ResponseHandlers
  */
-abstract class AbstractResponseHandler<V extends Result> implements CallableResponseHandler<V> {
+public abstract class AbstractResponseHandler<V extends Result> implements CallableResponseHandler<V> {
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     

@@ -235,6 +235,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
             return null;
         }
 
+        public DHTFuture<BootstrapResult> bootstrap(SocketAddress dst) {
+            return null;
+        }
+        
         public DHTFuture<PingResult> findActiveContact() {
             return null;
         }

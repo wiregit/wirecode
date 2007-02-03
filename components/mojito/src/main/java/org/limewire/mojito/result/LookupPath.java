@@ -20,13 +20,15 @@
 package org.limewire.mojito.result;
 
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
 /**
- * 
+ * A LookupPath is the result of a lookup. Depending on the
+ * lookup configuration it's maybe not the full path.
  */
 public interface LookupPath {
     
@@ -45,4 +47,9 @@ public interface LookupPath {
      * Returns SecurityToken for the given Contact
      */
     public SecurityToken getSecurityToken(Contact node);
+    
+    /**
+     * Returns the lookup path as a Collection of Contact & SecurityToken entries
+     */
+    public Collection<? extends Entry<? extends Contact, ? extends SecurityToken>> getEntryPath();
 }
