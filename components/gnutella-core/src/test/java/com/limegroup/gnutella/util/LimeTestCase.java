@@ -201,7 +201,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Ensures that no settings are saved.
      */
     public static void setupSettings() throws Exception{
-        LimeCoreGlue.install();
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
         ConnectionSettings.DISABLE_UPNP.setValue(true);
@@ -214,6 +213,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
+        LimeCoreGlue.install();
     }
     
     /**
