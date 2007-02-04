@@ -7,12 +7,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -24,6 +28,8 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * Consult WRMXML.isValid() to see if the given XML was valid.
  */
 public class WRMXML {
+    
+    private static final Log LOG = LogFactory.getLog(WRMXML.class);
     
     public static final String PROTECTED = "licensed: ";
     
@@ -89,6 +95,7 @@ public class WRMXML {
         try {
         	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         	InputSource is = new InputSource(new StringReader(xml));
+            parser.setErrorHandler(new LogErrorHandler());
             d = parser.parse(is);
         } catch (IOException ioe) {
             return;
@@ -194,5 +201,20 @@ public class WRMXML {
                 _signatureValue = value;
         }
     }
+    
+    private static final class LogErrorHandler implements ErrorHandler {
+        public void error(SAXParseException exception) throws SAXException {
+            LOG.error("Parse error", exception);
+        }
+
+        public void fatalError(SAXParseException exception) throws SAXException {
+            LOG.error("Parse fatal error", exception);
+            throw exception;
+        }
+
+        public void warning(SAXParseException exception) throws SAXException {
+            LOG.error("Parse warning", exception);
+        }
+    }    
     
 }

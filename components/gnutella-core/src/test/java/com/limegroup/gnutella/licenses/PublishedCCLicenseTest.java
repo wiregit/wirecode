@@ -8,13 +8,20 @@ import javax.swing.text.html.HTMLEditorKit.Parser;
 
 import junit.framework.Test;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.cyberneko.relaxng.parsers.SAXParser;
 import org.limewire.util.CommonUtils;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class PublishedCCLicenseTest extends LimeTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(PublishedCCLicenseTest.class);
     
     /** Standard constructors */
     public PublishedCCLicenseTest(String name) {
@@ -62,7 +69,6 @@ public class PublishedCCLicenseTest extends LimeTestCase {
 			// wait for parser to finish
 			while ( rdf == null ) {
 				try {
-					System.err.println("about to wait");
 					rdfLock.wait();
 				} catch (InterruptedException e) {
 				}
@@ -74,6 +80,22 @@ public class PublishedCCLicenseTest extends LimeTestCase {
 
 		// set up ManekiNeko parser
 		SAXParser parser = new SAXParser();
+        parser.setErrorHandler(new ErrorHandler() {
+            public void error(SAXParseException exception) throws SAXException {
+                LOG.error("error in sax", exception);
+                
+            }
+
+            public void fatalError(SAXParseException exception) throws SAXException {
+                LOG.fatal("error in sax", exception);
+                throw exception;
+            }
+
+            public void warning(SAXParseException exception) throws SAXException {
+                LOG.warn("error in sax", exception);
+            }
+            
+        });
 
 		parser.setFeature("http://xml.org/sax/features/namespaces", true);
 		parser.setFeature("http://xml.org/sax/features/validation", true);

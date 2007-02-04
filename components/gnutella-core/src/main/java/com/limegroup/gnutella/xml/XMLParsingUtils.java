@@ -190,5 +190,10 @@ public class XMLParsingUtils {
         public void warning(SAXParseException e) throws SAXException {
             LOG.warn("parse warning", e);
         }
+        
+        @Override
+        public void error(SAXParseException e) throws SAXException {
+            LOG.error("Parsing error", e);
+        }
     }
 }

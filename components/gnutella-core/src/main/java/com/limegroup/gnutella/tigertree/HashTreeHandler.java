@@ -23,8 +23,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
@@ -393,6 +395,7 @@ class HashTreeHandler {
             	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             	InputSource is = new InputSource(new StringReader(data));
             	parser.setEntityResolver(new Resolver());
+                parser.setErrorHandler(new LogErrorHandler());
                 doc = parser.parse(is);
             } catch (IOException ioe) {
                 LOG.debug(ioe);
@@ -472,6 +475,21 @@ class HashTreeHandler {
 
         }
     }
+    
+    private static final class LogErrorHandler implements ErrorHandler {
+        public void error(SAXParseException exception) throws SAXException {
+            LOG.error("Parse error", exception);
+        }
+
+        public void fatalError(SAXParseException exception) throws SAXException {
+            LOG.error("Parse fatal error", exception);
+            throw exception;
+        }
+
+        public void warning(SAXParseException exception) throws SAXException {
+            LOG.error("Parse warning", exception);
+        }
+    }    
     
     /**
      * A custom EntityResolver so we don't hit a website for resolving.

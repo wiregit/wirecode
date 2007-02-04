@@ -13,8 +13,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -53,6 +55,7 @@ public class SimppParser {
         try {
         	DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         	InputSource inputSource = new InputSource(new StringReader(xmlStr));
+            builder.setErrorHandler(new LogErrorHandler());
         	d = builder.parse(inputSource);
         } catch (ParserConfigurationException ouch) {
         	return;
@@ -81,5 +84,20 @@ public class SimppParser {
             }
         }//end of for -- done all child nodes
     }
+    
+    private static final class LogErrorHandler implements ErrorHandler {
+        public void error(SAXParseException exception) throws SAXException {
+            LOG.error("Parse error", exception);
+        }
+
+        public void fatalError(SAXParseException exception) throws SAXException {
+            LOG.error("Parse fatal error", exception);
+            throw exception;
+        }
+
+        public void warning(SAXParseException exception) throws SAXException {
+            LOG.error("Parse warning", exception);
+        }
+    }    
     
 }
