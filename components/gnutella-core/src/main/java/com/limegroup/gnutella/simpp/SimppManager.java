@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.FileUtils;
-import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
@@ -81,11 +80,7 @@ public class SimppManager {
             SimppParser parser = null;
             try {
                 parser = new SimppParser(verifier.getVerifiedData());
-            } catch(SAXException sx) {
-                LOG.error("Unable to parse simpp data on disk", sx);
-                problem = true;
-                return;
-            } catch (IOException iox) {
+            }catch (IOException iox) {
                 LOG.error("IOX parsing simpp on disk", iox);
                 problem = true;
                 return;
@@ -161,9 +156,6 @@ public class SimppManager {
                 SimppParser parser=null;
                 try {
                     parser = new SimppParser(verifier.getVerifiedData());
-                } catch(SAXException sx) {
-                    LOG.error("SAX error reading network simpp", sx);
-                    return;
                 } catch(IOException iox) {
                     LOG.error("IOX parsing network simpp", iox);
                     return;

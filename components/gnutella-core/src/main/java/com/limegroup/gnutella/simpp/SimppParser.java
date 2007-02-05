@@ -1,22 +1,14 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.IOException;
-import java.io.StringReader;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -34,7 +26,7 @@ public class SimppParser {
     //Format of dataBytes:
     //<xml for version related info with one tag containing all the props data>
     //TODO1: Change the way this is parsed as per the format described above. 
-    public SimppParser(byte[] dataBytes) throws SAXException, IOException {
+    public SimppParser(byte[] dataBytes) throws IOException {
         parseInfo(new String(dataBytes, "UTF-8"));
     }
     
@@ -48,21 +40,10 @@ public class SimppParser {
 
     ///////////////////////////private helpers////////////////////////
 
-    private void parseInfo(String xmlStr) throws SAXException, IOException {
+    private void parseInfo(String xmlStr) throws IOException {
         if(xmlStr == null || xmlStr.equals(""))
-            throw new SAXException("null xml for version info");
-        Document d = null;
-        try {
-        	DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        	InputSource inputSource = new InputSource(new StringReader(xmlStr));
-            builder.setErrorHandler(new LogErrorHandler());
-        	d = builder.parse(inputSource);
-        } catch (ParserConfigurationException ouch) {
-        	return;
-        }
-        
-        if(d == null)
-            throw new SAXException("parsed documemt is null");
+            throw new IOException("null xml for version info");
+        Document d = XMLUtils.getDocument(xmlStr, LOG);
         Element docElement = d.getDocumentElement();
         NodeList children = docElement.getChildNodes();
         int len = children.getLength();
@@ -84,20 +65,4 @@ public class SimppParser {
             }
         }//end of for -- done all child nodes
     }
-    
-    private static final class LogErrorHandler implements ErrorHandler {
-        public void error(SAXParseException exception) throws SAXException {
-            LOG.error("Parse error", exception);
-        }
-
-        public void fatalError(SAXParseException exception) throws SAXException {
-            LOG.error("Parse fatal error", exception);
-            throw exception;
-        }
-
-        public void warning(SAXParseException exception) throws SAXException {
-            LOG.error("Parse warning", exception);
-        }
-    }    
-    
 }

@@ -1,22 +1,14 @@
 package com.limegroup.gnutella.metadata;
 
 import java.io.IOException;
-import java.io.StringReader;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
@@ -91,18 +83,11 @@ public class WRMXML {
     
     /** Parses the content encryption XML. */
     protected void parse(String xml) {
-    	Document d = null;
+    	Document d;
         try {
-        	DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        	InputSource is = new InputSource(new StringReader(xml));
-            parser.setErrorHandler(new LogErrorHandler());
-            d = parser.parse(is);
+        	d = XMLUtils.getDocument(xml, LOG);
         } catch (IOException ioe) {
             return;
-        } catch (SAXException saxe) {
-            return;
-        } catch (ParserConfigurationException pce) {
-        	return;
         }
         
         parseDocument(d.getDocumentElement());
@@ -201,20 +186,4 @@ public class WRMXML {
                 _signatureValue = value;
         }
     }
-    
-    private static final class LogErrorHandler implements ErrorHandler {
-        public void error(SAXParseException exception) throws SAXException {
-            LOG.error("Parse error", exception);
-        }
-
-        public void fatalError(SAXParseException exception) throws SAXException {
-            LOG.error("Parse fatal error", exception);
-            throw exception;
-        }
-
-        public void warning(SAXParseException exception) throws SAXException {
-            LOG.error("Parse warning", exception);
-        }
-    }    
-    
 }

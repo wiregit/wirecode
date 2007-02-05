@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
-import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
@@ -64,8 +63,6 @@ public class UpdateManager {
                     UpdateFileParser parser = new UpdateFileParser(xml);
                     latestVersion = parser.getVersion();
                     isValid = true;
-                } catch(SAXException sax) {
-                    LOG.error("invalid update xml", sax);
                 } catch(IOException iox) {
                     LOG.error("iox updating", iox);
                 }
@@ -162,10 +159,6 @@ public class UpdateManager {
                     LOG.warn("iox on network, on disk, who knows??", iox);
                     //IOException - reading from socket, writing to disk etc.
                     return;
-                } catch(SAXException sx) {
-                    LOG.error("invalid xml", sx);
-                    //SAXException - parsing the xml
-                    return; //We can't continue...forget it.
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 } finally {
