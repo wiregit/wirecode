@@ -23,7 +23,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.AltLocDHTValue;
+import com.limegroup.gnutella.dht.AltLocDHTValueImpl;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -253,16 +253,16 @@ public class LimeDHTManager implements DHTManager {
     
     public DHTFuture<StoreResult> putAltLoc(FileDesc fd) {
         KUID key = toKUID(fd.getSHA1Urn());
-        return getMojitoDHT().put(key, AltLocDHTValue.LOCAL_HOST);
+        return getMojitoDHT().put(key, AltLocDHTValueImpl.LOCAL_HOST);
     }
     
-    public DHTFuture<StoreResult> putAltLoc(URN urn, GUID guid, int port) {
+    public DHTFuture<StoreResult> putAltLoc(URN urn, GUID guid, IpPort ipp, int features, int fwtVersion) {
         if (!RouterService.getConnectionManager().isActiveSupernode()) {
             throw new IllegalStateException("This method works only if we are an Ultrapeer");
         }
         
         KUID key = toKUID(urn);
-        return getMojitoDHT().put(key, new AltLocDHTValue(guid, port));
+        return getMojitoDHT().put(key, AltLocDHTValueImpl.createProxyValue(guid, ipp, features, fwtVersion));
     }
     
     public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {

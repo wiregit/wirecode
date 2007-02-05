@@ -10,8 +10,8 @@ import org.limewire.mojito.routing.Version;
 public class LimeDHTValueFactory implements DHTValueFactory {
     
     public DHTValue createDHTValue(DHTValueType type, Version version, byte[] value) throws DHTValueException {
-        if (type.equals(AltLocDHTValue.ALT_LOC)) {
-            return new AltLocDHTValue(type, version, value);
+        if (type.equals(AltLocDHTValueImpl.ALT_LOC)) {
+            return AltLocDHTValueImpl.createFromData(type, version, value);
         } else if (type.equals(PushProxiesDHTValue.PUSH_PROXIES)) {
             return new PushProxiesDHTValue(type, version, value);
         }

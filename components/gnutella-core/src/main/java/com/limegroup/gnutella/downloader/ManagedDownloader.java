@@ -31,6 +31,7 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
@@ -54,6 +55,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.RouterService;
@@ -70,6 +72,7 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.dht.AltLocDHTValueImpl;
 import com.limegroup.gnutella.dht.AltLocDHTValue;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -1857,20 +1860,35 @@ public class ManagedDownloader extends AbstractDownloader
                     AltLocDHTValue altLoc = (AltLocDHTValue)value;
                     Contact creator = entity.getCreator();
                     
-                    InetAddress addr = ((InetSocketAddress)creator.getContactAddress()).getAddress();
-                    int port = altLoc.getPort();
+                    // The IP-Address of the Value creator. It can be
+                    // two things! It's either the address of the Host
+                    // who has the actual file (a non-firewalled Node that's
+                    // connected to the DHT) or it's the address of a
+                    // Node's Ultrapeer who published the value for the
+                    // firewalled Node.
+                    InetAddress addr = ((InetSocketAddress)
+                            creator.getContactAddress()).getAddress();
                     
                     RemoteFileDesc rfd = null;
                     
                     if (altLoc.isFirewalled()) {
-                        int pushProxyPort = altLoc.getPort();
-                        // GUID + port = Has the file
-                        // addr + pushProxyPort = Push Proxy of the 
-                        //                        guy who has the File
-                        // TODO implement, do we need more information
-                        // to download the File?
+                        // The firewalled Leaf
+                        byte[] guid = altLoc.getGUID();
+                        int features = altLoc.getFeatures();
+                        int fwtVersion = altLoc.getFwtVersion();
+                        IpPort ipp = new IpPortImpl(altLoc.getInetAddress(), altLoc.getPort());
+                        
+                        // Its Ultrapeer that published the Value. If they're 
+                        // still connected then we're pretty much done. If no
+                        // you must probably do a second lookup for SHA-1(GUID)
+                        // to find the Leaf's Push Proxies
+                        IpPort proxy = new IpPortImpl(addr, altLoc.getPushProxyPort());
+                        
+                        rfd = new RemoteFileDesc(original, new PushEndpoint(
+                                guid, Collections.singleton(proxy), features, fwtVersion, ipp));
+                        
                     } else {
-                        rfd = new RemoteFileDesc(original, new IpPortImpl(addr, port));
+                        rfd = new RemoteFileDesc(original, new IpPortImpl(addr, altLoc.getPort()));
                     }
                     
                     if (rfd != null) {
