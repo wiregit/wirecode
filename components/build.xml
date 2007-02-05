@@ -18,8 +18,9 @@
 	<import file="mojito-ui/build.xml"/>
 	<import file="nio/build.xml"/>
     <import file="statistic/build.xml"/>
+    <import file="resources/build.xml"/>
 	
-    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize">
+    <target name="initialize" depends="lw-setting.initialize, lw-statistic.initialize, lw-nio.initialize, lw-io.initialize, lw-security.initialize, lw-collection.initialize, lw-common.initialize, lw-test-util.initialize, mojito.initialize, mojito-ui.initialize, lw-resources.initialize">
         <do.setup-properties component="all">
 			<tests-classpath>
             	<path refid="tests.limewire.components.common.classpath"/>
@@ -32,13 +33,14 @@
 				<path refid="tests.limewire.components.mojito.classpath"/>
 				<path refid="tests.limewire.components.mojito-ui.classpath"/>
 			    <path refid="tests.limewire.components.test-util.classpath"/>
+			    <path refid="tests.limewire.components.resources.classpath"/>
 			    <!-- Add as components are added. -->
 		    </tests-classpath>
         </do.setup-properties>    
         
         <!-- setup a special property for the buildpath of each component combined. -->
         <path id="build.limewire.components.classes.core">
-            <pathelement  location="${build.limewire.components.common.classes}"/>
+            <pathelement location="${build.limewire.components.common.classes}"/>
             <pathelement location="${build.limewire.components.collection.classes}"/>
             <pathelement location="${build.limewire.components.security.classes}"/>
             <pathelement location="${build.limewire.components.io.classes}"/>
@@ -53,6 +55,7 @@
 	
 		<path id="build.limewire.components.classes.ui">
 			<pathelement location="${build.limewire.components.mojito-ui.classes}"/>
+			<pathelement location="${build.limewire.components.resources.classes}"/>
 			<path refid="build.limewire.components.classes.core"/>
 		    <!-- Add as UI components are added. -->
         </path>
@@ -172,6 +175,7 @@
       	        <fileset dir="${build.limewire.components.nio.classes}" />
     	    	<fileset dir="${build.limewire.components.setting.classes}" />
     	    	<fileset dir="${build.limewire.components.statistic.classes}" />
+    	    	<fileset dir="${limewire.components.resources.src.resources}" />
 			    <!-- Add as components & resources are added. -->
 			</more-jar-elements>
         </do.jar>

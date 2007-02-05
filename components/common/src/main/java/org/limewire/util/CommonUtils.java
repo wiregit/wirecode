@@ -149,7 +149,7 @@ public class CommonUtils {
      * the jar file. If the file already exists, no copy is performed.
      *
      * @param fileName the name of the file to copy, relative to the jar 
-     *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     *  file -- such as "org/limewire/gui/images/image.gif"
      */
     public static void copyResourceFile(final String fileName) {
         copyResourceFile(fileName, null);
@@ -160,7 +160,7 @@ public class CommonUtils {
      * the jar file. If the file already exists, no copy is performed.
      *
      * @param fileName the name of the file to copy, relative to the jar
-     *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     *  file -- such as "org/limewire/gui/images/image.gif"
      * @param newFile the new <tt>File</tt> instance where the resource file
      *  will be copied to
      */
@@ -173,7 +173,7 @@ public class CommonUtils {
      * the jar file. If the file already exists, no copy is performed.
      *
      * @param fileName the name of the file to copy, relative to the jar 
-     *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     *  file -- such as "org/limewire/gui/images/image.gif"
      * @param newFile the new <tt>File</tt> instance where the resource file
      *  will be copied to -- if this argument is null, the file will be
      *  copied to the current directory
