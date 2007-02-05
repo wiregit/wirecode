@@ -320,8 +320,8 @@ public class HeadPong extends VendorMessage {
                         didNotSendPushAltLocs = !writePushLocs(caos,push.iterator());
                     }
                 } else {
-                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,true);
-                    AlternateLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,false);
+                    AlternateLocationCollection push = RouterService.getAltlocManager().getPush(urn,false);
+                    AlternateLocationCollection fwt = RouterService.getAltlocManager().getPush(urn,true);
                     synchronized(push) {
                         synchronized(fwt) {
                             didNotSendPushAltLocs = 
