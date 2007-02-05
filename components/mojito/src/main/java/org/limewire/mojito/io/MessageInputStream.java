@@ -47,6 +47,7 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.EntryImpl;
+import org.limewire.security.AbstractQueryKey;
 import org.limewire.security.QueryKey;
 
 
@@ -246,7 +247,7 @@ public class MessageInputStream extends DataInputStream {
     /**
      * Reads a QueryKey from the InputStream 
      */
-    public QueryKey readQueryKey() throws IOException {
+    public AbstractQueryKey readQueryKey() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
             return null;
@@ -254,7 +255,7 @@ public class MessageInputStream extends DataInputStream {
         
         byte[] securityToken = new byte[length];
         readFully(securityToken, 0, securityToken.length);
-        return QueryKey.getQueryKey(securityToken, true);
+        return new QueryKey(securityToken, true);
     }
     
     /**

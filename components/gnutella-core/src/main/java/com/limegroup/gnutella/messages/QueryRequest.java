@@ -1983,7 +1983,7 @@ public class QueryRequest extends Message implements Serializable{
                     try {
                         if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                             byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                            queryKey = QueryKey.getQueryKey(qkBytes, false);
+                            queryKey = new QueryKey(qkBytes, false);
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                             featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);

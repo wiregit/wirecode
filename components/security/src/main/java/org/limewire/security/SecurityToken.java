@@ -52,7 +52,7 @@ public interface SecurityToken {
     public static class QueryKeyProvider implements TokenProvider {
 
         public SecurityToken getSecurityToken(TokenData data) {
-            return QueryKey.getQueryKey(data, true);
+            return new QueryKey(data, true);
         }
         
         public TokenData getTokenData(SocketAddress addr) {

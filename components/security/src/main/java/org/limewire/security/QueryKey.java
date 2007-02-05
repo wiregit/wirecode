@@ -1,7 +1,5 @@
 package org.limewire.security;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -10,7 +8,6 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.SimpleTimer;
 import org.limewire.util.ByteOrder;
 
 /**
@@ -31,14 +28,10 @@ import org.limewire.util.ByteOrder;
  * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
  * to use your new QueryKeyGenerator implementation. 
  */
-public final class QueryKey implements SecurityToken {
+public final class QueryKey extends AbstractQueryKey {
 
     private static final Log LOG = LogFactory.getLog(QueryKey.class);
     
-    /**
-     * The keychain with the private keys.
-     */
-    private static volatile QKGeneratorKeychain keychain = new SimpleKeychain();
     
     /** As detailed by the GUESS spec.
      */
@@ -46,18 +39,13 @@ public final class QueryKey implements SecurityToken {
     /** As detailed by the GUESS spec.
      */
     public static final int MAX_QK_SIZE_IN_BYTES = 16;
-
-    /** The Query Key.  MIN_QK_SIZE_IN_BYTES <=_queryKey.length <=
-     *  MAX_QK_SIZE_IN_BYTES
-     */
-    private byte[] _queryKey;
     
     /**
      * Cached value to make hashCode() much faster.
      */
     private final int _hashCode;
 
-    private QueryKey(byte[] key, boolean prepareForNet) throws IllegalArgumentException {
+    public QueryKey(byte[] key, boolean prepareForNet) throws IllegalArgumentException {
         if(!isValidQueryKeyBytes(key))
             throw new IllegalArgumentException();
         key = key.clone();
@@ -91,12 +79,6 @@ public final class QueryKey implements SecurityToken {
         _hashCode = code;
     }
     
-    public static void setSettingsProvider(SettingsProvider provider) {
-        keychain = new QKGeneratorRotator(SimpleTimer.sharedTimer(),
-                new TEAFactory(),
-                provider);
-    }
-    
     /*
      * (non-Javadoc)
      * @see org.limewire.security.SecurityToken#isFor(java.net.SocketAddress)
@@ -115,22 +97,6 @@ public final class QueryKey implements SecurityToken {
         return isFor(new GUESSTokenData(ip, port));
     }
     
-    public boolean isFor(TokenData data) {
-        for (QueryKeyGenerator validKey : keychain.getValidQueryKeyGenerators()) {
-            if (Arrays.equals(validKey.getKeyBytes(data), _queryKey)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("QueryKey valid:"+this);
-                }
-                return true;
-            }
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("QueryKey corrupt or expired:"+this);
-        }
-        return false;
-    }
-
     public boolean equals(Object o) {
         if (o.hashCode() != _hashCode)
             return false;
@@ -146,28 +112,10 @@ public final class QueryKey implements SecurityToken {
 
     /*
      * (non-Javadoc)
-     * @see org.limewire.security.SecurityToken#write(java.io.OutputStream)
-     */
-    public void write(OutputStream out) throws IOException {
-        out.write(_queryKey);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see org.limewire.security.SecurityToken#getTokenLength()
      */
     public int getTokenLength() {
         return _queryKey.length;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.security.SecurityToken#getBytes()
-     */
-    public byte[] getBytes() {
-        byte[] b = new byte[_queryKey.length];
-        System.arraycopy(_queryKey, 0, b, 0, _queryKey.length);
-        return b;
     }
     
     /** Returns a String with the QueryKey represented in hexadecimal.
@@ -189,20 +137,6 @@ public final class QueryKey implements SecurityToken {
     }
 
 
-    /** Use this method to construct Query Keys that you get from network
-     *  commerce.  If you are using this for testing purposes, be aware that
-     *  QueryKey in QueryRequests cannot contain the GEM extension delimiter 
-     *  0x1c or nulls, so send true as the second param...
-     *  
-     *  
-     *  @param networkQK the bytes you want to make a QueryKey.
-     *  @param prepareForNet true to prepare the QueryKey for net transport.
-     */    
-    public static QueryKey getQueryKey(byte[] networkQK, boolean prepareForNet) 
-            throws IllegalArgumentException {
-        return new QueryKey(networkQK, prepareForNet);
-    }
-
     /** Generates a QueryKey for a given SocketAddress.
      *  For a given SocketAddress, using a different SecretKey and/or SecretPad
      *  will result in a different QueryKey.  The return value is constructed
@@ -211,10 +145,9 @@ public final class QueryKey implements SecurityToken {
      * @param ip the IP address of the other node
      * @param port the port of the other node
      */
-    public static QueryKey getQueryKey(SocketAddress address) {
-        InetAddress ip = ((InetSocketAddress)address).getAddress();
-        int port = ((InetSocketAddress)address).getPort();
-        return getQueryKey(ip, port);
+    public QueryKey (SocketAddress address) {
+        this(((InetSocketAddress)address).getAddress(),
+                ((InetSocketAddress)address).getPort());
     }
     
     /** Generates a QueryKey for a given IP:Port combo.
@@ -225,13 +158,12 @@ public final class QueryKey implements SecurityToken {
      * @param ip the IP address of the other node
      * @param port the port of the other node
      */
-    public static QueryKey getQueryKey(InetAddress ip, int port) {
-        return new QueryKey(keychain.getSecretKey().getKeyBytes(
-                new GUESSTokenData(ip,port)), true);
+    public QueryKey (InetAddress ip, int port) {
+        this(QueryKeySmith.getDefaultKeySmith().getKeyBytes(new GUESSTokenData(ip,port)), true);
     }
 
-    public static QueryKey getQueryKey(TokenData data, boolean prepareForNet) {
-        return new QueryKey(keychain.getSecretKey().getKeyBytes(data), prepareForNet);
+    public QueryKey (TokenData data, boolean prepareForNet) {
+        this(QueryKeySmith.getDefaultKeySmith().getKeyBytes(data), prepareForNet);
     }
     
     /** Generates a QueryKey for a given IP:Port combo.
@@ -242,13 +174,10 @@ public final class QueryKey implements SecurityToken {
      * @param ip the IP address of the other node
      * @param port the port of the other node
      */
-    public static QueryKey getQueryKey(InetAddress ip, int port,
+    public QueryKey (InetAddress ip, int port,
                                        QueryKeyGenerator keyGen) {
-        return new QueryKey(keyGen.getKeyBytes(new GUESSTokenData(ip, port)), true);
+        this(keyGen.getKeyBytes(new GUESSTokenData(ip, port)), true);
     }
-
-    // -------------------------------------------
-    // -- FACTORY METHOD
     
     /** Returns a new QueryKeyGenerator with random secret key(s),
      *  using the default QueryKeyGenerator implementation.
@@ -257,43 +186,19 @@ public final class QueryKey implements SecurityToken {
         return new TEAQueryKeyGenerator();
     }
     
-    
-    private static class TEAFactory implements QKGeneratorFactory {
-        public QueryKeyGenerator createQueryKeyGenerator() {
-            return createKeyGenerator();
-        }
-    }
-    
     /**
-     * A simple keychain that does not expire its keys.
+     * Token data necessary for the creation of Query keys for the
+     * GUESS protocol.
      */
-    private static class SimpleKeychain implements QKGeneratorKeychain {
-        private final QueryKeyGenerator []keys = 
-            new QueryKeyGenerator[]{new TEAQueryKeyGenerator()};
-        public QueryKeyGenerator[] getValidQueryKeyGenerators() {
-            return keys;
-        }
-        
-        public QueryKeyGenerator getSecretKey() {
-            return keys[0];
-        }
-    }
-    
     public static class GUESSTokenData implements TokenData {
-        private final InetAddress addr;
-        private final int port;
+        private final byte[] data;
         
         public GUESSTokenData(SocketAddress address) {
-            this.addr =((InetSocketAddress)address).getAddress();
-            this.port = ((InetSocketAddress)address).getPort();
+            this(((InetSocketAddress)address).getAddress(),
+            ((InetSocketAddress)address).getPort());
         }
         
         public GUESSTokenData(InetAddress addr, int port) {
-            this.addr = addr;
-            this.port = port;
-        }
-        
-        public byte [] getData() {
             // get all the input bytes....
             byte[] ipBytes = addr.getAddress();
             int ipInt = 0;
@@ -306,10 +211,14 @@ public final class QueryKey implements SecurityToken {
             
             // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
             // and encrypt it with our secret key material.
-            byte[] bytes = new byte[8];
-            ByteOrder.int2beb(port, bytes, 0);
-            ByteOrder.int2beb(ipInt, bytes, 4);
-            return bytes;
+            data = new byte[8];
+            ByteOrder.int2beb(port, data, 0);
+            ByteOrder.int2beb(ipInt, data, 4);
+            
+        }
+        
+        public byte [] getData() {
+            return data;
         }
     }
 }

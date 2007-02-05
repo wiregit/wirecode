@@ -112,7 +112,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] queryKey = QueryKey.getQueryKey(dst).getBytes();
+            byte[] queryKey = (new QueryKey(dst)).getBytes();
 
             // Obfuscate it with our random pad!
             for(int i = 0; i < RANDOM_PAD.length; i++) {
@@ -175,7 +175,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             queryKey[i] = (byte)(messageId[i] ^ RANDOM_PAD[i]);
         }
 
-        return QueryKey.getQueryKey(queryKey, true);
+        return new QueryKey(queryKey, true);
     }
     
     /*

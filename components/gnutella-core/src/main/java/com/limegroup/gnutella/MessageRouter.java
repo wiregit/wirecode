@@ -968,7 +968,7 @@ public abstract class MessageRouter {
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
-        QueryKey key = QueryKey.getQueryKey(address, port);
+        QueryKey key = new QueryKey(address, port);
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
