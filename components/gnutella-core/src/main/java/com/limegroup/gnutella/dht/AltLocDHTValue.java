@@ -12,12 +12,12 @@ import org.limewire.mojito.routing.Version;
 public interface AltLocDHTValue extends DHTValue {
     
     /**
-     * 
+     * DHTValueType for AltLocs
      */
     public static final DHTValueType ALT_LOC = DHTValueType.valueOf("ALOC");
     
     /**
-     * 
+     * Version of AltLocDHTValue
      */
     public static final Version VERSION = Version.valueOf(0, 0);
     

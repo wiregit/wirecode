@@ -28,7 +28,7 @@ import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.PushProxiesDHTValue;
+import com.limegroup.gnutella.dht.PushProxiesDHTValueImpl;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -267,7 +267,7 @@ public class LimeDHTManager implements DHTManager {
     
     public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {
         KUID key = toKUID(guid);
-        return getMojitoDHT().put(key, new PushProxiesDHTValue(proxies));
+        return getMojitoDHT().put(key, PushProxiesDHTValueImpl.createProxyValue(proxies));
     }
     
     private static KUID toKUID(URN urn) {

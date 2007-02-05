@@ -49,13 +49,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     private final int pushProxyPort;
     
     /**
-     * 
-     */
-    public static DHTValue createLocalHost() {
-        return LOCAL_HOST;
-    }
-    
-    /**
      * Firewalled leaf Nodes use their Ultrapeer to perform DHT operations.
      * 
      * (L)     (L)
