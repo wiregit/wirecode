@@ -20,8 +20,8 @@ public class Pools {
     
     private static final Log LOG = LogFactory.getLog(Pools.class);
     
-    private static ObjectPool<Deflater> deflaterPool;
-    private static ObjectPool<Inflater> inflaterPool;
+    private static volatile ObjectPool<Deflater> deflaterPool;
+    private static volatile ObjectPool<Inflater> inflaterPool;
     
     private Pools() {}
     

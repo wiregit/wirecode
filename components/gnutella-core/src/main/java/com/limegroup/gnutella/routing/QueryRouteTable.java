@@ -109,7 +109,7 @@ public class QueryRouteTable {
     /** The uncompressor. This state must be maintained to implement chunked
      *  PATCH messages.  (You may need data from message N-1 to apply the patch
      *  in message N.) */
-    private Inflater uncompressor;
+    private volatile Inflater uncompressor;
     
     /** A cleaner to ensure we return the uncompressor. */
     private Cleaner cleaner;
@@ -726,7 +726,7 @@ public class QueryRouteTable {
         
         protected void finalize() {
             Inflater inf = qrt.uncompressor;
-            if(inf != null);
+            if(inf != null)
                 Pools.getInflaterPool().returnObject(inf);
         }
     }
