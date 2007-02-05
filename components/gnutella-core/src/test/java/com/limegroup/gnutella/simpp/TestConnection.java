@@ -116,8 +116,28 @@ public class TestConnection extends AssertComparisons {
         os.write("GNUTELLA/0.6 200 OK \r\n".getBytes());
         os.write("\r\n".getBytes());
         //Handshake complete
+        //Make sure initial SIMPP behavior is correct
+        checkInitialSimppBehavior(is, os);
         //Make sure Simpp code is behaving correctly.
         checkSimppBehaviour(is, os);
+    }
+    
+    private void checkInitialSimppBehavior(InputStream is, OutputStream os) 
+            throws IOException {
+        //This method checks that the initial simpp request is always followed
+        //by a response.
+        CapabilitiesVM capVM = makeCapabilitiesVM();
+        capVM.write(os);
+        os.flush();
+        //Read the first message of type SimppRequest
+        Message message = null;
+        try {
+            message = LimeTestCase.getFirstInstanceOfMessage(
+                                           _socket, SimppRequestVM.class, 2000);
+        } catch (BadPacketException bpx) {
+            fail("limewire sent message with BPX");
+        }
+        assertNotNull("should have gotten simpp message", message);
     }
     
     private void checkSimppBehaviour(InputStream is, OutputStream os) 

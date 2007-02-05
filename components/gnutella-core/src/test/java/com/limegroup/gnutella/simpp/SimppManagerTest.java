@@ -81,6 +81,9 @@ public class SimppManagerTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         setSettings();
+        
+        //Make sure we have no remaining connections from previous tests
+        assertFalse(RouterService.isConnected());
     }
     
     private static void setSettings() throws Exception {
@@ -311,7 +314,9 @@ public class SimppManagerTest extends LimeTestCase {
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
-        conn.killConnection();
+        
+        //we should have been disconnected
+        assertFalse(RouterService.isConnected());
     }
 
     public void testTamperedSimppDataRejected() throws Exception  {
@@ -329,7 +334,9 @@ public class SimppManagerTest extends LimeTestCase {
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
-        conn.killConnection();
+        
+        //we should have been disconnected
+        assertFalse(RouterService.isConnected());
     }
 
     public void testBadSimppXMLRejected() throws Exception  {
@@ -346,6 +353,7 @@ public class SimppManagerTest extends LimeTestCase {
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
+
         conn.killConnection();
     }
 
@@ -363,14 +371,14 @@ public class SimppManagerTest extends LimeTestCase {
         SimppManager man = SimppManager.instance();
         assertEquals("Simpp manager did not update simpp version", 
                                                      MIDDLE, man.getVersion());
-        conn.killConnection();
+        //we should have been disconnected
+        assertFalse(RouterService.isConnected());
     }
 
     public void testSimppTakesEffect() throws Exception {
         //1. Test that Simpp files read off disk take effect. 
         changeSimppFile(OLD_SIMPP_FILE);
-        resetSettingmanager();
-        Thread.sleep(1000);
+        updateSimppSettings();
 
         assertEquals("base case did not revert to defaults",12, 
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
@@ -384,13 +392,13 @@ public class SimppManagerTest extends LimeTestCase {
         assertEquals("test_upload setting not changed to simpp value", 15,
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
+        conn.killConnection();
     }
 
     public void testSimppSettingObeysMax() throws Exception {
         changeSimppFile(OLD_SIMPP_FILE);
-        Thread.sleep(1000);
+        updateSimppSettings();
         
-        resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
@@ -403,13 +411,13 @@ public class SimppManagerTest extends LimeTestCase {
                      SimppManagerTestSettings.MAX_SETTING,
                      SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
+        conn.killConnection();
     }
 
     public void testSimppSettingObeysMin() throws Exception {
         changeSimppFile(OLD_SIMPP_FILE);
-        Thread.sleep(1000);
-
-        resetSettingmanager();
+        updateSimppSettings();
+        
         assertEquals("base case did not revert to defaults",12, 
                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
@@ -423,6 +431,7 @@ public class SimppManagerTest extends LimeTestCase {
                SimppManagerTestSettings.MIN_SETTING,
                SimppManagerTestSettings.TEST_UPLOAD_SETTING.getValue());
         
+        conn.killConnection();
     }
 
     public void testIOXLeavesSimppUnchanged() throws Exception {
@@ -459,10 +468,8 @@ public class SimppManagerTest extends LimeTestCase {
         CapabilitiesVM.instance();
     }
     
-    private static void resetSettingmanager() throws Exception {
-        PrivilegedAccessor.setValue(SimppSettingsManager.class,
-                                                          "INSTANCE", null);
-        SimppSettingsManager.instance();
+    private static void updateSimppSettings() throws Exception {
+        SimppSettingsManager.instance().updateSimppSettings(SimppManager.instance().getPropsString());
     }
     
 }
