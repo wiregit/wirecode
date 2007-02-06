@@ -387,7 +387,7 @@ public class VerifyingFile {
         }
     }
 
-    public String dumpState() {
+    public synchronized String dumpState() {
         return "verified:"+verifiedBlocks+"\npartial:"+partialBlocks+
             "\ndiscarded:"+savedCorruptBlocks+
         	"\npending:"+pendingBlocks+"\nleased:"+leasedBlocks;
