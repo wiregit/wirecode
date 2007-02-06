@@ -33,5 +33,5 @@ public class ConsoleSettings extends LimeProps {
      * Whether or not to show a text input field in the Console
      */
     public static final BooleanSetting SHOW_INPUT_FIELD
-        = FACTORY.createBooleanSetting("SHOW_INPUT_FIELD", true);
+        = FACTORY.createBooleanSetting("SHOW_INPUT_FIELD", false);
 }
