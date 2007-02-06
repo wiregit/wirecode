@@ -175,6 +175,8 @@
       	        <fileset dir="${build.limewire.components.nio.classes}" />
     	    	<fileset dir="${build.limewire.components.setting.classes}" />
     	    	<fileset dir="${build.limewire.components.statistic.classes}" />
+    	    	<fileset dir="${build.limewire.components.mojito.classes}" />
+    	    	<fileset dir="${build.limewire.components.mojito-ui.classes}" />
     	    	<fileset dir="${limewire.components.resources.src.resources}" />
 			    <!-- Add as components & resources are added. -->
 			</more-jar-elements>
