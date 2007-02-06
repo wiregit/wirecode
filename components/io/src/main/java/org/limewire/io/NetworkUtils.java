@@ -509,12 +509,24 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static boolean isSameAddressSpace(InetAddress a, InetAddress b) {
-        if (a instanceof Inet4Address) {
-            return (b instanceof Inet4Address);
-        } else /*if (a instanceof Inet6Address)*/ {
-            return (b instanceof Inet6Address);
-        }/* else {
+        if (a == null || b == null) {
             return false;
-        }*/
+        }
+        
+        boolean aIPv4 = (a instanceof Inet4Address);
+        boolean bIPv4 = (b instanceof Inet4Address);
+        
+        // Both are either IPv4 or IPv6
+        if ((aIPv4 && bIPv4) || (!aIPv4 && !bIPv4)) {
+            return true;
+            
+        // If 'a' is IPv4 then 'b' must be an IPv4 compatible address
+        } else if (aIPv4) {
+            return ((Inet6Address)b).isIPv4CompatibleAddress();
+            
+        // Else if 'b' is IPv4 then 'a' must be an IPv4 compatible address
+        } else {
+            return ((Inet6Address)a).isIPv4CompatibleAddress();
+        }
     }
 }
