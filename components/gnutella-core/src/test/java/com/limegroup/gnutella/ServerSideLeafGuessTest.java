@@ -231,7 +231,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testBadQueryKey() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
 
-        QueryKey qkToUse = QueryKey.getQueryKey(localHost, 0);
+        QueryKey qkToUse = new QueryKey(localHost, 0);
         assertNotNull(qkToUse);
 
         {

@@ -59,7 +59,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 7097);
+        token = new QueryKey(InetAddress.getLocalHost(), 7097);
     }
     
     public static Test suite() {
@@ -449,7 +449,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());

@@ -106,7 +106,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	
         byte[] data = new byte[16];
         new Random().nextBytes(data);
-        _token = QueryKey.getQueryKey(data, false);
+        _token = new QueryKey(data, false);
 	}
 		
 

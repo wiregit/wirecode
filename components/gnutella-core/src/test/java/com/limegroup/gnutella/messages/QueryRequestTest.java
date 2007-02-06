@@ -70,7 +70,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                QueryKey qk = QueryKey.getQueryKey(bytes, true);
+                QueryKey qk = new QueryKey(bytes, true);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(false); // do COBS
@@ -484,7 +484,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * Tests constructor that only takes a string and a query key.
 	 */
 	public void testStringQueryKeyConstructor() {
-		QueryKey key = QueryKey.getQueryKey(GUID.makeGuid(), true);
+		QueryKey key = new QueryKey(GUID.makeGuid(), true);
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 

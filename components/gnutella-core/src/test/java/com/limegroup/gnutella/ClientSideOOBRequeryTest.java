@@ -856,8 +856,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // send back a query key
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
-                                           SERVER_PORT);
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(), SERVER_PORT);
         {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
@@ -1025,7 +1024,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         // Prepopulate Query Keys
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
@@ -1349,7 +1348,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // Prepopulate Query Keys
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < (UDP_ACCESS.length/2); i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};

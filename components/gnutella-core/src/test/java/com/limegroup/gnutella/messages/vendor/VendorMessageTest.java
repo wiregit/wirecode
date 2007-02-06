@@ -36,7 +36,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
 
     @Override
     protected void setUp() throws Exception {
-        token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 7090);
+        token = new QueryKey(InetAddress.getLocalHost(), 7090);
     }
 
     public static void main(String[] args) {

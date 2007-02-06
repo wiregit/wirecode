@@ -358,9 +358,9 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                         if (pr.isQueryKeyRequest()) {
                             // send a QueryKey back!!!
                             QueryKey qk = 
-                                QueryKey.getQueryKey(datagram.getAddress(),
-                                                     datagram.getPort(),
-                                                     secretKey);
+                                new QueryKey(datagram.getAddress(),
+                                        datagram.getPort(),
+                                        secretKey);
                             
                             PingReply pRep = 
                                 PingReply.createQueryKeyReply(pr.getGUID(), 

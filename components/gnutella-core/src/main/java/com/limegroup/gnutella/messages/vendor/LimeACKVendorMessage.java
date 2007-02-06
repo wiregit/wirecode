@@ -142,14 +142,14 @@ public final class LimeACKVendorMessage extends VendorMessage {
             int otherResults = o.getNumResults();
             return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
-                    areEqual(getSecurityToken(), o.getSecurityToken()) &&
+                    areEqualTokens(getSecurityToken(), o.getSecurityToken()) &&
                     super.equals(other));
         }
         return false;
     }
     
-    private final boolean areEqual(Object o1, Object o2) {
-        return o1 == o2 || (o1 != null && o2 != null && o1.equals(o2));
+    private final boolean areEqualTokens(SecurityToken t1, SecurityToken t2) {
+        return t1 == t2 || (t1 != null && t2 != null && Arrays.equals(t1.getBytes(), t2.getBytes()));
     }
 
     /** Overridden purely for stats handling.
