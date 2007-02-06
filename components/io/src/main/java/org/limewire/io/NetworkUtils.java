@@ -520,15 +520,17 @@ public final class NetworkUtils {
     
     public static byte[] getIPV6AddressBytes(InetAddress address) {
         byte[] bytes = address.getAddress();
-        if (bytes.length == 16) {
+        switch (bytes.length) {
+        case 16:
             return bytes;
-        }
-        else {
+        case 4:
             byte[] result = new byte[16];
             result[10] = (byte) 0xff;
             result[11] = (byte) 0xff;
             System.arraycopy(bytes, 0, result, 12, bytes.length);
             return result;
+        default:
+            throw new IllegalArgumentException("unhandled address length");
         }
     }
 }
