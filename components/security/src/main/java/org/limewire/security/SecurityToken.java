@@ -11,7 +11,7 @@ import java.net.SocketAddress;
  * TODO make api similar to MessageDigest so the secret byte can be updated
  * by new input
  */
-public interface SecurityToken {
+public interface SecurityToken<T extends SecurityToken.TokenData> {
     
     /**
      * Returns the SecurityToken as byte array
@@ -26,7 +26,7 @@ public interface SecurityToken {
     /** 
      * Validates that a SecurityToken was generated for the given TokenData
      */
-    public boolean isFor(TokenData data);
+    public boolean isFor(T data);
     
     /**
      * The TokenProvider is a factory interface to create SecurityTokens
@@ -36,10 +36,7 @@ public interface SecurityToken {
         /**
          * Creates and returns a SecurityToken for the given SocketAddress
          */
-        public SecurityToken getSecurityToken(TokenData data);
-        
-        public TokenData getTokenData(SocketAddress addr);
-        
+        public SecurityToken getSecurityToken(SocketAddress addr);
     }
     
     public static interface TokenData {
@@ -51,12 +48,8 @@ public interface SecurityToken {
      */
     public static class QueryKeyProvider implements TokenProvider {
 
-        public SecurityToken getSecurityToken(TokenData data) {
-            return new QueryKey(data, true);
-        }
-        
-        public TokenData getTokenData(SocketAddress addr) {
-            return new QueryKey.GUESSTokenData(addr);
+        public SecurityToken getSecurityToken(SocketAddress addr) {
+            return new QueryKey(addr);
         }
     }
 }

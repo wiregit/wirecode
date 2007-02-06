@@ -1,11 +1,12 @@
 package org.limewire.security;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.security.SecurityToken.TokenData;
+
 
 /**
  * This class manages the crypto aspects of the query key 
@@ -49,27 +50,18 @@ public class QueryKeySmith {
     /**
      * @return the cryptographical output from the provided data.
      */
-    public byte [] getKeyBytes(TokenData data) {
+    public <T extends SecurityToken.TokenData>byte [] getKeyBytes(T data) {
         return keychain.getSecretKey().getKeyBytes(data);
     }
     
     /**
      * @return true if the provided data matches the token data.
      */
-    public boolean isFor(byte [] toCheck, TokenData data) {
-        for (QueryKeyGenerator validKey : keychain.getValidQueryKeyGenerators()) {
-            if (Arrays.equals(validKey.getKeyBytes(data), toCheck)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid data: "+data);
-                }
-                return true;
-            }
-        }
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Data corrupt or expired:"+data);
-        }
-        return false;
+    public <T extends SecurityToken.TokenData>Iterable<byte []> getAllBytes(T data) {
+        List<byte []> l = new ArrayList<byte[]>(2);
+        for (QueryKeyGenerator validKey : keychain.getValidQueryKeyGenerators()) 
+            l.add(validKey.getKeyBytes(data));
+        return l;
     }
     
     /**

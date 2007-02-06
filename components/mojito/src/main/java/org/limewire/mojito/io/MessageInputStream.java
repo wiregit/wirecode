@@ -255,7 +255,7 @@ public class MessageInputStream extends DataInputStream {
         
         byte[] securityToken = new byte[length];
         readFully(securityToken, 0, securityToken.length);
-        return new QueryKey(securityToken, true);
+        return new QueryKey(securityToken);
     }
     
     /**

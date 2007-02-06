@@ -763,7 +763,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                     byte[] bytes = 
                         ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
                     if(QueryKey.isValidQueryKeyBytes(bytes))
-                        key = new QueryKey(bytes, false);
+                        key = new QueryKey(bytes);
                 } catch (BadGGEPPropertyException corrupt) {}
             }
             

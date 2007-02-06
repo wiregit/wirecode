@@ -22,12 +22,12 @@ public class QueryKeyTest extends BaseTestCase {
 
     public void testConstruction() throws Exception {
         try {
-            new QueryKey(new byte[3], false);
+            new QueryKey(new byte[3]);
             fail("exception should have been thrown.");
         }
         catch (IllegalArgumentException ignored) {}
         try {
-            new QueryKey(new byte[17], false);
+            new QueryKey(new byte[17]);
             fail("exception should have been thrown.");
         }
         catch (IllegalArgumentException ignored) {}
@@ -42,7 +42,7 @@ public class QueryKeyTest extends BaseTestCase {
         AbstractQueryKey key1 = null, key2 = null, key3 = null;
         key1 = new QueryKey(qk, true);
         key2 = new QueryKey(qk, true);
-        key3 = new QueryKey(qk, false);
+        key3 = new QueryKey(qk);
         assertEquals(key1,key2);
         assertNotEquals(key1,key3);
         assertEquals(key1.hashCode(), key2.hashCode());

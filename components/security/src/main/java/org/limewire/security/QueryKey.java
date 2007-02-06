@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.ByteOrder;
 
 /**
@@ -28,7 +29,7 @@ import org.limewire.util.ByteOrder;
  * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
  * to use your new QueryKeyGenerator implementation. 
  */
-public final class QueryKey extends AbstractQueryKey {
+public final class QueryKey extends AbstractQueryKey<TokenData> {
 
     private static final Log LOG = LogFactory.getLog(QueryKey.class);
     
@@ -45,21 +46,13 @@ public final class QueryKey extends AbstractQueryKey {
      */
     private final int _hashCode;
 
-    public QueryKey(byte[] key, boolean prepareForNet) throws IllegalArgumentException {
-        if(!isValidQueryKeyBytes(key))
-            throw new IllegalArgumentException();
-        key = key.clone();
+    public QueryKey(byte[] key) {
+        super(key.clone());
         
-        if (prepareForNet)  {
-            for (int i = key.length - 1; i >= 0; --i) {
-                // The old prepareForNetwork() seemed to leave cobbs encoding to get
-                // of nulls?  TODO: is it okay to leave nulls alone?
-                if (key[i] == 0x1c) {
-                    key[i] = (byte) (0xFA);
-                }
-            }
-        }
-        
+        _hashCode = genHashCode(getBytes());
+    }
+    
+    private int genHashCode(byte [] key) {
         // TODO: Can't we use Arrays.hashCode(byte[]) ???
         // While we have key in the CPU data cache, calculate _hashCode
         int code = 0x5A5A5A5A;
@@ -74,10 +67,20 @@ public final class QueryKey extends AbstractQueryKey {
             // Left circular shift (rotate) code by 5 bits
             code = (code >>> 27) | (code << 5);
         }
-        
-        _queryKey = key;
-        _hashCode = code;
+        return code;
     }
+    
+    protected byte [] getFromMAC(byte [] key, TokenData ignored) {
+        for (int i = key.length - 1; i >= 0; --i) {
+            // The old prepareForNetwork() seemed to leave cobbs encoding to get
+            // of nulls?  TODO: is it okay to leave nulls alone?
+            if (key[i] == 0x1c) {
+                key[i] = (byte) (0xFA);
+            }
+        }
+        return key;
+    }
+    
     
     /*
      * (non-Javadoc)
@@ -103,25 +106,17 @@ public final class QueryKey extends AbstractQueryKey {
         if (!(o instanceof QueryKey))
             return false;
         QueryKey other = (QueryKey) o;
-        return Arrays.equals(_queryKey, other._queryKey);
+        return Arrays.equals(getBytes(), other.getBytes());
     }
 
     public int hashCode() {
        return _hashCode;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.security.SecurityToken#getTokenLength()
-     */
-    public int getTokenLength() {
-        return _queryKey.length;
-    }
-    
     /** Returns a String with the QueryKey represented in hexadecimal.
      */
     public String toString() {
-        return "{Query Key: " + (new BigInteger(1, _queryKey)).toString(16) + "}";
+        return "{Query Key: " + (new BigInteger(1, getBytes())).toString(16) + "}";
     }
 
     //--------------------------------------
@@ -134,6 +129,10 @@ public final class QueryKey extends AbstractQueryKey {
         return key != null &&
                key.length >= MIN_QK_SIZE_IN_BYTES &&
                key.length <= MAX_QK_SIZE_IN_BYTES;
+    }
+    
+    protected boolean isValidBytes(byte [] key) {
+        return isValidQueryKeyBytes(key);
     }
 
 
@@ -159,24 +158,12 @@ public final class QueryKey extends AbstractQueryKey {
      * @param port the port of the other node
      */
     public QueryKey (InetAddress ip, int port) {
-        this(QueryKeySmith.getDefaultKeySmith().getKeyBytes(new GUESSTokenData(ip,port)), true);
-    }
-
-    public QueryKey (TokenData data, boolean prepareForNet) {
-        this(QueryKeySmith.getDefaultKeySmith().getKeyBytes(data), prepareForNet);
+        this(new GUESSTokenData(ip,port));
     }
     
-    /** Generates a QueryKey for a given IP:Port combo.
-     *  For a given IP:Port combo, using a different QueryKeyGenerator
-     *  will result in a different QueryKey.  The return value is constructed
-     *  with prepareForNet equal to true.
-     *
-     * @param ip the IP address of the other node
-     * @param port the port of the other node
-     */
-    public QueryKey (InetAddress ip, int port,
-                                       QueryKeyGenerator keyGen) {
-        this(keyGen.getKeyBytes(new GUESSTokenData(ip, port)), true);
+    public QueryKey(TokenData data) {
+        super(data);
+        _hashCode = genHashCode(getBytes());
     }
     
     /** Returns a new QueryKeyGenerator with random secret key(s),
@@ -190,7 +177,7 @@ public final class QueryKey extends AbstractQueryKey {
      * Token data necessary for the creation of Query keys for the
      * GUESS protocol.
      */
-    public static class GUESSTokenData implements TokenData {
+    public static class GUESSTokenData implements SecurityToken.TokenData {
         private final byte[] data;
         
         public GUESSTokenData(SocketAddress address) {

@@ -30,6 +30,7 @@ import java.util.Random;
 
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.security.AbstractQueryKey;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecurityToken;
 
@@ -167,15 +168,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     /**
      * Extracts and returns the QueryKey from the GUID
      */
-    private SecurityToken getSecurityToken() {
+    private SecurityToken<PingTokenData> getSecurityToken() {
         byte[] queryKey = new byte[4];
 
-        // De-Obfuscate it with our random pad!
-        for(int i = 0; i < RANDOM_PAD.length; i++) {
-            queryKey[i] = (byte)(messageId[i] ^ RANDOM_PAD[i]);
-        }
+        System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
 
-        return new QueryKey(queryKey, true);
+        return new PingQueryKey(queryKey);
     }
     
     /*
@@ -195,7 +193,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             return false;
         }
 
-        return getSecurityToken().isFor(new QueryKey.GUESSTokenData(src));
+        return getSecurityToken().isFor(new PingTokenData(src));
     }
     
     public int compareTo(DefaultMessageID o) {
@@ -242,5 +240,32 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
     public String toString() {
         return "MessageID: " + toHexString();
+    }
+    
+    private static class PingTokenData extends QueryKey.GUESSTokenData {
+        PingTokenData(SocketAddress addr) {
+            super(addr);
+        }
+        
+        public byte [] getData() {
+            byte [] ret = super.getData();
+            for (int i = 0; i < RANDOM_PAD.length; i++)
+                ret[i] ^= RANDOM_PAD[i];
+            return ret;
+        }
+    }
+    private static class PingQueryKey extends AbstractQueryKey<PingTokenData> {
+        
+        public PingQueryKey(byte[] network) {
+            super(network);
+        }
+
+        public PingQueryKey(PingTokenData data) {
+            super(data);
+        }
+
+        protected byte [] getFromMAC(byte [] mac, PingTokenData ignored) {
+            return mac;
+        }
     }
 }

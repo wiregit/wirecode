@@ -54,7 +54,6 @@ import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.SecurityToken;
-import org.limewire.security.SecurityToken.TokenProvider;
 
 
 /**
@@ -128,8 +127,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
     
     public SecurityToken createSecurityToken(Contact dst) {
-        TokenProvider provider = context.getSecurityTokenProvider(); 
-        return provider.getSecurityToken(provider.getTokenData(dst.getContactAddress()));
+        return context.getSecurityTokenProvider().getSecurityToken(dst.getContactAddress()); 
     }
     
     public MessageID createMessageID(SocketAddress dst) {
