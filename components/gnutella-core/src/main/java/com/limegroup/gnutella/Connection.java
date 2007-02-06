@@ -117,8 +117,8 @@ public class Connection implements IpPort {
     private final String _host;
     private int _port;
     protected volatile Socket _socket;
-    private InputStream _in;
-    private OutputStream _out;
+    private volatile InputStream _in;
+    private volatile OutputStream _out;
     private final boolean OUTGOING;
     
     /**
@@ -129,7 +129,7 @@ public class Connection implements IpPort {
      *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
      *   Inflater.getTotalIn  -- The number of COMPRESSED bytes
      */
-    protected Inflater _inflater;
+    protected volatile Inflater _inflater;
     
     /**
      * The Deflater to use for deflating written streams, initialized
@@ -142,7 +142,7 @@ public class Connection implements IpPort {
      *   Deflater.getTotalOut -- The number of COMPRESSED bytes
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
-    protected Deflater _deflater;
+    protected volatile Deflater _deflater;
     
     /**
      * The number of bytes sent to the output stream.
