@@ -464,35 +464,6 @@ public class UpdateManagerTest extends LimeTestCase {
                                               "2.9.3", man.getVersion());
    }
     
-    
-    public void testUpdateMessageDelayed() throws Exception {
-    	removeConnections();
-        //Note:If the update file does not contain the timestamp attibute, the
-        //UpdateManager assumes it is the current time. We can use this to test
-        //that there is a delay in our displaying the message
-        testCallback = true;
-        updateVersion = OLD;
-        changeUpdateFile();        
-        TestConnection conn = null;
-        try {
-            conn = new TestConnection(6682, "3.6.3", NEW);//no timestamp
-        } catch (IOException e) {
-            fail("could not setup test");
-        }
-        conn.start();
-        long startTime = System.currentTimeMillis();
-        synchronized(lock) {
-            try {
-                lock.wait(DELAY);
-            } catch (InterruptedException ix) {}
-            if(System.currentTimeMillis() == startTime)
-                fail("GUI notified too soon");
-            else if(System.currentTimeMillis() > startTime+DELAY)
-                fail("GUI notified too late");
-        }
-        testCallback = false;
-    }
-
     /**
     * puts an update file in the user pref dir based on updateVersion and set
     * the UpdateManager.INSTANCE to null so the new file is parsed everytime we

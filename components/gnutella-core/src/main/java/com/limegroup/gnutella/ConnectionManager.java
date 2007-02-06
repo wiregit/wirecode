@@ -2177,7 +2177,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
 
         public void handleConnect() {
             try {
-                if(completeInitializeExternallyGeneratedConnection(connection));
+                if(completeInitializeExternallyGeneratedConnection(connection))
                     startConnection(connection);
             } catch(IOException ignored) {
                 LOG.warn("Failed to complete initialization", ignored);
