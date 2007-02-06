@@ -517,4 +517,18 @@ public final class NetworkUtils {
             return false;
         }*/
     }
+    
+    public static byte[] getIPV6AddressBytes(InetAddress address) {
+        byte[] bytes = address.getAddress();
+        if (bytes.length == 16) {
+            return bytes;
+        }
+        else {
+            byte[] result = new byte[16];
+            result[10] = (byte) 0xff;
+            result[11] = (byte) 0xff;
+            System.arraycopy(bytes, 0, result, 12, bytes.length);
+            return result;
+        }
+    }
 }

@@ -634,7 +634,7 @@ public class Response {
     public int hashCode() {
         //Good enough for the moment
         // TODO:: IMPROVE THIS HASHCODE!!
-        return getName().hashCode()+(int)getSize()+(int)getIndex();
+        return  31 * 31 * getName().hashCode() + 31 * (int)getSize()+(int)getIndex();
     }
 
 	/**

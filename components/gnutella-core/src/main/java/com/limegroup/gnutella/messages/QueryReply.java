@@ -34,6 +34,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -1023,6 +1024,9 @@ public class QueryReply extends Message implements SecureMessage {
                             proxies = _ggepUtil.getPushProxies(ggep);
                             if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                                 securityToken = ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                                if (securityToken.length == 0) {
+                                    throw new BadPacketException("Message had empty OOB security token");
+                                }
                             }
                         } catch (BadGGEPPropertyException bgpe) {
                         }
@@ -1082,7 +1086,9 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setSupportsBrowseHost(supportsBrowseHostT);
             _data.setReplyToMulticast(replyToMulticastT);
             _data.setProxies(proxies);
-            _data.setSecurityToken(new UnknownSecurityToken(securityToken));
+            if (securityToken != null) {
+                _data.setSecurityToken(new OOBQueryKey(securityToken));
+            }
             
             _data.setHostData(new HostData(this));
 
@@ -1391,36 +1397,6 @@ public class QueryReply extends Message implements SecureMessage {
                  } catch (BadGGEPPropertyException bad) {}
             }
             return proxies != null ? proxies : IpPort.EMPTY_SET;
-        }
-    }
-    
-    // TODO fberger remove this with new security token impl
-    private static class UnknownSecurityToken implements SecurityToken {
-
-        private byte[] bytes;
-        
-        public UnknownSecurityToken(byte[] bytes) {
-            this.bytes = bytes;
-        }
-        
-        public byte[] getBytes() {
-            return bytes;
-        }
-
-        public boolean isFor(SecurityToken.TokenData data) {
-            return false;
-        }
-        
-        public void write(OutputStream out) throws IOException {
-            out.write(getBytes());
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof SecurityToken) {
-                return Arrays.equals(bytes, ((SecurityToken)obj).getBytes());
-            }
-            return false;
         }
     }
 }

@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -16,7 +17,7 @@ import com.limegroup.gnutella.ReplyHandler;
  * Data necessary to build a QueryKey for the OOB protocol (<tt>OOBQueryKey</tt>)
  *
  */
-class OOBTokenData implements SecurityToken.TokenData {
+public class OOBTokenData implements SecurityToken.TokenData {
     private final int numRequests;
     private final byte [] data;
     OOBTokenData(ReplyHandler replyHandler, byte [] guid, int numRequests) {
@@ -27,9 +28,8 @@ class OOBTokenData implements SecurityToken.TokenData {
         DataOutputStream data = new DataOutputStream(baos);
         try {
             data.writeInt(replyHandler.getPort());
-            // TODO fberger convert to ipv6
-            data.write(replyHandler.getInetAddress().getAddress());
-            data.writeShort(numRequests);
+            data.write(NetworkUtils.getIPV6AddressBytes(replyHandler.getInetAddress()));
+            data.write(numRequests);
             data.write(guid);
         }
         catch (IOException ie) {

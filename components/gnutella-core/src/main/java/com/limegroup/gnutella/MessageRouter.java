@@ -164,7 +164,7 @@ public abstract class MessageRouter {
 
     /** How long to buffer up out-of-band replies.
      */
-    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    private static final long CLEAR_TIME = 2 * 60 * 1000; // 2 minutes
 
     /** Time between sending HopsFlow messages.
      */
@@ -1160,11 +1160,9 @@ public abstract class MessageRouter {
     		if (!reply.canReceiveUnsolicited())
     			return -1;
     		
-    		DownloadManager dManager = RouterService.getDownloadManager();
     		// only store result if it is being shown to the user or if a
     		// file with the same guid is being downloaded
-    		if (!_callback.isQueryAlive(qGUID) && 
-    				!dManager.isGuidForQueryDownloading(qGUID))
+    		if (!isQueryAlive(qGUID))
     			return -1;
     		
     		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
@@ -1185,6 +1183,15 @@ public abstract class MessageRouter {
     	
     	return reply.getNumResults();
     	
+    }
+    
+    /**
+     * Returns whether the callback still expects more results for this search
+     * or whether there is a download query active for this guid.
+     */
+    public boolean isQueryAlive(GUID guid) {
+        DownloadManager dManager = RouterService.getDownloadManager();
+        return _callback.isQueryAlive(guid) && dManager.isGuidForQueryDownloading(guid); 
     }
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -

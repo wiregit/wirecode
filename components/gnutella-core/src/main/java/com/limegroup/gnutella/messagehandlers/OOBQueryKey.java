@@ -7,10 +7,10 @@ import org.limewire.security.QueryKeySmith;
  * A query key to be used in the OOB v3 protocol.
  *
  */
-class OOBQueryKey extends AbstractQueryKey {
+public class OOBQueryKey extends AbstractQueryKey {
 
     /** The size of the query key */
-    private static final int SIZE = 7;
+    private static final int SIZE = 5;
     
     /** The number of results requested by the requestor */
     private final int numResults;
@@ -33,8 +33,11 @@ class OOBQueryKey extends AbstractQueryKey {
      * byte is the # of results, the rest are the checksum to verify against.
      */
     public OOBQueryKey(byte [] network) {
-        if (network == null || network.length != SIZE)
-            throw new IllegalArgumentException();
+        if (network == null)
+            throw new NullPointerException("network must not be null");
+        if (network.length == 0) {
+            throw new IllegalArgumentException("network must have non-zero length");
+        }
         _queryKey = network;
         this.numResults = network[0];
     }

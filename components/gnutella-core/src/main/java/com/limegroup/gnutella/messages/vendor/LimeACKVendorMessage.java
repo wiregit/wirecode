@@ -10,6 +10,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -96,6 +97,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
             try {
                 GGEP ggep = new GGEP(getPayload(), 1);
                 if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                    // we return a oob query key, but cannot verify it when it is not from us
                     return new UnknownSecurityToken(ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB));
                 }
             }
@@ -163,33 +165,24 @@ public final class LimeACKVendorMessage extends VendorMessage {
         super.recordDrop();
     }
 
-    // TODO fberger remove this with new security token impl
-    private static class UnknownSecurityToken implements SecurityToken {
+    private class UnknownSecurityToken implements SecurityToken {
 
-        private byte[] bytes;
+        private final byte[] data;
         
-        public UnknownSecurityToken(byte[] bytes) {
-            this.bytes = bytes;
+        public UnknownSecurityToken(byte[] data) {
+            this.data = data;
         }
         
         public byte[] getBytes() {
-            return bytes;
+            return data;
         }
 
-        public boolean isFor(SecurityToken.TokenData data) {
+        public boolean isFor(TokenData data) {
             return false;
         }
 
         public void write(OutputStream out) throws IOException {
-            out.write(getBytes());
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof SecurityToken) {
-                return Arrays.equals(bytes, ((SecurityToken)obj).getBytes());
-            }
-            return false;
+            out.write(data);            
         }
         
     }

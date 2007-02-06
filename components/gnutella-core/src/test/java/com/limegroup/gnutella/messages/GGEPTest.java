@@ -747,6 +747,17 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
     	byte[] value2 = ggep2.getBytes("TEST");
     	assertEquals(value.length, value2.length);
     }
+    
+    /**
+     * Test if empty GGEP values can be written and read.
+     */
+    public void testEmptyGGEPValues() {
+        GGEP ggep = new GGEP();
+        ggep.put("EM", new byte[0]);
+        
+        byte[] read = ggep.get("EM");
+        assertEquals(0, read.length);
+    }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
