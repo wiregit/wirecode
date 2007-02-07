@@ -49,8 +49,10 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.RepublishManager;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
+import org.limewire.mojito.db.impl.DefaultRepublishManager;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -88,7 +90,6 @@ import org.limewire.mojito.statistics.RoutingStatisticContainer;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.DHTSizeEstimator;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.security.SecurityToken;
 
@@ -142,6 +143,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The factory we're using to create DHTValues */
     private DHTValueFactory valueFactory;
     
+    private volatile RepublishManager republishManager;
+    
     /**
      * Constructor to create a new Context
      */
@@ -176,6 +179,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
         valueFactory = new DefaultDHTValueFactory();
+        republishManager = new DefaultRepublishManager();
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -507,7 +511,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 // which case the other guys will send us the values
                 // anyways as from there perspective we're just a new
                 // node.
-                } else if (!remove && !DatabaseUtils.isExpired(getRouteTable(), entity)) {
+                } else if (!remove && !republishManager.isExpired(this, entity)) {
                     database.store(entity);
                 }
             }
@@ -678,6 +682,25 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public DHTExecutorService getDHTExecutorService() {
         return executorService;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#setRepublishManager(org.limewire.mojito.db.RepublishManager)
+     */
+    public void setRepublishManager(RepublishManager republishManager) {
+        if (republishManager == null) {
+            republishManager = new DefaultRepublishManager();
+        }
+        this.republishManager = republishManager;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getRepublishManager()
+     */
+    public RepublishManager getRepublishManager() {
+        return republishManager;
     }
     
     /*
@@ -997,28 +1020,48 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return bootstrapManager.bootstrap(node);
     }
     
+    /**
+     * A helper method to create DHTValueEntities
+     */
+    public DHTValueEntity createDHTValueEntity(KUID key, DHTValue value) {
+        return new DHTValueEntity(getLocalNode(), getLocalNode(), key, value, true);
+    }
+    
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#put(com.limegroup.mojito.KUID, com.limegroup.mojito.db.DHTValue)
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+        return put(createDHTValueEntity(key, value), true);
+    }
+    
+    /**
+     * @param entity The value to store
+     * @param immediateStore Whether or not to store the value immediately
+     */
+    public DHTFuture<StoreResult> put(DHTValueEntity entity, boolean immediateStore) {
         if (!isRunning()) {
             throw new IllegalStateException(getName() + " is not running");
         }
         
-        DHTValueEntity entity = new DHTValueEntity(
-                getLocalNode(), getLocalNode(), key, value, true);
         database.store(entity);
         
         // If we're bootstrapped then store the value immediately
+        // or let the DHTValueManager do its work
         if (isBootstrapped()) {
-            return store(entity);
+            if (immediateStore) {
+                return store(entity);
+            } else {
+                Exception ex = new Exception(getName() 
+                            + ": Stroring is handled by DHTValueManager");
+                return new FixedDHTFuture<StoreResult>(ex);
+            }
             
         // And if we're not bootstrapped then return a fake Future
         // and let the DHTValueManager do its work once we're bootstrapped
         } else {
-            Exception ex = new NotBootstrappedException(
-                    getName(), value.isEmpty() ? "remove()" : "put()");
+            String operation = entity.getValue().isEmpty() ? "remove()" : "put()";
+            Exception ex = new NotBootstrappedException(getName(), operation);
             return new FixedDHTFuture<StoreResult>(ex);
         }
     }
