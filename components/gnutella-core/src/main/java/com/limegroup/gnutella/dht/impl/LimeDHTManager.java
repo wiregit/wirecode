@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.dht.impl;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +13,8 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValueBag;
+import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
@@ -20,6 +23,7 @@ import org.limewire.mojito.settings.ContextSettings;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -243,6 +247,11 @@ public class LimeDHTManager implements DHTManager {
         return version;
     }
     
+    /*
+     * The following methods are just prototypes. They'll
+     * be moved to somewhere else if necessary!
+     */
+    
     public DHTFuture<FindValueResult> getAltLocs(URN urn) {
         return getMojitoDHT().get(toKUID(urn));
     }
@@ -270,14 +279,14 @@ public class LimeDHTManager implements DHTManager {
         return getMojitoDHT().put(key, PushProxiesDHTValueImpl.createProxyValue(proxies));
     }
     
-    private static KUID toKUID(URN urn) {
+    public static KUID toKUID(URN urn) {
         if (!urn.isSHA1()) {
             throw new IllegalArgumentException("Expected a SHA-1 URN: " + urn);
         }
         return KUID.createWithBytes(urn.getBytes());
     }
     
-    private static KUID toKUID(GUID guid) {
+    public static KUID toKUID(GUID guid) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             md.update(guid.bytes());
@@ -285,6 +294,42 @@ public class LimeDHTManager implements DHTManager {
             return KUID.createWithBytes(digest);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
+        }
+    }
+    
+    public static URN toURN(KUID kuid) {
+        try {
+            return URN.createSHA1UrnFromBytes(kuid.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static boolean isRare(FileDesc fd) {
+        long time = fd.getLastAttemptedUploadTime();
+        return (System.currentTimeMillis() - time >= 0);
+    }
+    
+    public void publish() {
+        FileDesc[] fds = RouterService.getFileManager().getAllSharedFileDescriptors();
+        
+        MojitoDHT dht = getMojitoDHT();
+        Database database = dht.getDatabase();
+        synchronized (database) {
+            for (FileDesc fd : fds) {
+                if (fd instanceof IncompleteFileDesc) {
+                    continue;
+                }
+                
+                boolean rare = isRare(fd);
+                KUID key = toKUID(fd.getSHA1Urn());
+                DHTValueBag bag = database.get(key);
+                if (bag == null && rare) {
+                    dht.put(key, AltLocDHTValueImpl.LOCAL_HOST);
+                } else if (bag != null && !rare){
+                    dht.remove(key);
+                }
+            }
         }
     }
 }

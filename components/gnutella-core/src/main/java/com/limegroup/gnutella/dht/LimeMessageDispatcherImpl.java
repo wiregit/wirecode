@@ -108,14 +108,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     @Override
     public synchronized void stop() {
         running = false;
+        super.stop();
         
         // Remove the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
         for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
             messageRouter.setUDPMessageHandler(clazz, null);
         }
-        
-        super.stop();
     }
 
     /* 
