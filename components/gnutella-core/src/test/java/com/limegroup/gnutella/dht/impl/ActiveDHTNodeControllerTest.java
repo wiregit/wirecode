@@ -16,6 +16,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.Contact.State;
 import org.limewire.mojito.routing.impl.RemoteContact;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.DHTEvent;
@@ -24,7 +25,6 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
@@ -56,7 +56,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     public void testPersistence() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
         //first delete any previous file
-        File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "active.mojito");
+        File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         //start the node controller
         ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);

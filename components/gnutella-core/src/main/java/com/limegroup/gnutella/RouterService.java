@@ -116,6 +116,10 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 public class RouterService {
     
     private static final Log LOG = LogFactory.getLog(RouterService.class);
+    
+    static {
+        LimeCoreGlue.preinstall();
+    }
 
 	/**
 	 * <tt>FileManager</tt> instance that manages access to shared files.

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
+import org.limewire.util.CommonUtils;
+
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
@@ -28,7 +30,7 @@ public class UpdateFileState extends UploadState {
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
         //If any of this throws an exception, we will not send the headers.
-        File f = new File(LimeWireUtils.getUserSettingsDir(),"update.xml");
+        File f = new File(CommonUtils.getUserSettingsDir(),"update.xml");
         RandomAccessFile raf = new RandomAccessFile(f,"r");
         int len = (int)raf.length();//not a very long file so no risk
         updateContents = new byte[len];

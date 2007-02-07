@@ -21,6 +21,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
 import com.limegroup.gnutella.util.TestConnection;
@@ -659,7 +659,7 @@ public final class MessageRouterTest extends LimeTestCase {
         StubRouter stub = new StubRouter();
         //first set up a DHT node and add it to the manager
         //remove any previous data
-        File mojitoFile = new File(LimeWireUtils.getUserSettingsDir(), "mojito.dat");
+        File mojitoFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         if(mojitoFile.exists()) {
             mojitoFile.delete();
         }

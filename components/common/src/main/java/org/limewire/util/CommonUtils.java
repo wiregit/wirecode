@@ -31,6 +31,8 @@ public class CommonUtils {
     };
     private static final char[] ILLEGAL_CHARS_MACOS = {':'};
     
+    /** The location where settings are stored. */
+    private static volatile File settingsDirectory = null;
 
     /**
      * Returns the user home directory.
@@ -368,4 +370,64 @@ public class CommonUtils {
         return name;
     }
 
+    /**
+     * Returns the user's current working directory as a <tt>File</tt>
+     * instance, or <tt>null</tt> if the property is not set.
+     *
+     * @return the user's current working directory as a <tt>File</tt>
+     *  instance, or <tt>null</tt> if the property is not set
+     */
+    public static File getCurrentDirectory() {
+    	return new File(System.getProperty("user.dir"));
+    }
+    
+    /**
+     * Validates a potential settings directory.
+     * This returns the validated directory, or throws an IOException
+     * if it can't be validated.
+     */
+    public static File validateSettingsDirectory(File dir) throws IOException {
+        dir = dir.getAbsoluteFile();        
+        if(!dir.isDirectory()) {
+            dir.delete(); // delete whatever it may have been
+            if(!dir.mkdirs()) 
+                throw new IOException("could not create preferences directory: " + dir);
+        }
+
+        if(!dir.canWrite())
+            throw new IOException("settings dir not writable");
+
+        if(!dir.canRead())
+            throw new IOException("settings dir not readable");
+        
+        return dir;
+    }
+    
+    /**
+     * Sets the new settings directory.
+     * The settings directory cannot be set more than once.
+     * 
+     * If the directory can't be set (because it isn't a folder, can't be made into
+     * a folder, or isn't readable and writable), an IOException is thrown.
+     * 
+     * @param settingsDir
+     * @throws IOException
+     */
+    public static void setUserSettingsDir(File settingsDir) throws IOException {
+        if(settingsDirectory != null)
+            throw new IllegalStateException("settings directory already set!");
+        settingsDirectory = validateSettingsDirectory(settingsDir);
+    }
+
+    /**
+     * Returns the directory where all user settings should be stored.  This
+     * is where all application data should be stored.  If the directory is not
+     * set, this returns the user's home directory.
+     */
+    public synchronized static File getUserSettingsDir() {  
+        if(settingsDirectory != null)
+            return settingsDirectory;
+        else
+            return getUserHomeDir();
+    }
 }

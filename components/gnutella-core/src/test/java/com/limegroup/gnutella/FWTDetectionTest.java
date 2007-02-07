@@ -18,6 +18,7 @@ import java.util.List;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * this class tests that the node properly detects if it is
@@ -87,7 +87,7 @@ public class FWTDetectionTest extends LimeTestCase {
         cmStub.setConnected(false);
         assertFalse(RouterService.isConnected());
         
-        gnet = new File(LimeWireUtils.getUserSettingsDir(),"gnutella.net");
+        gnet = new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
                 
     }
     

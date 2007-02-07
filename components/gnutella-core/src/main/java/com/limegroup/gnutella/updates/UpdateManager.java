@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
@@ -52,7 +53,7 @@ public class UpdateManager {
     private UpdateManager() {
         latestVersion = "0.0.0";
         
-        byte[] content = FileUtils.readFileFully(new File(LimeWireUtils.getUserSettingsDir(),"update.xml"));
+        byte[] content = FileUtils.readFileFully(new File(CommonUtils.getUserSettingsDir(),"update.xml"));
         if(content != null) {
             //we dont really need to verify, but we may as well...so here goes.
             UpdateMessageVerifier verifier = new UpdateMessageVerifier(content, true);//from disk
@@ -221,7 +222,7 @@ public class UpdateManager {
      *  writes data to signed_updateFile
      */ 
     private void commitVersionFile(byte[] data) throws IOException {
-        boolean ret = FileUtils.verySafeSave(LimeWireUtils.getUserSettingsDir(), "update.xml", data);
+        boolean ret = FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), "update.xml", data);
         if(!ret)
             throw new IOException("couldn't safely save!");
     }

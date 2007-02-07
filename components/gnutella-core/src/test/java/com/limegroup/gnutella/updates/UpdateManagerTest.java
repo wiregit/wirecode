@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
@@ -62,8 +62,6 @@ public class UpdateManagerTest extends LimeTestCase {
     private static boolean testCallback = false;
     
     private static final Object lock = new Object();
-
-    private static final long DELAY = 60l*1000;//1 min
     
     private static final String defaultVersion = "0.0.0";
     

@@ -11,7 +11,6 @@ import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
@@ -65,7 +64,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
      * Tests the FileDesc construcotor for valid arguments
      */
     public void testValidConstructorArguments() throws Exception {
-        File current = LimeWireUtils.getCurrentDirectory();
+        File current = CommonUtils.getCurrentDirectory();
         File parDir = current.getParentFile(); 
         File[] allFiles = parDir.listFiles(); 
         List fileList = new ArrayList(); 

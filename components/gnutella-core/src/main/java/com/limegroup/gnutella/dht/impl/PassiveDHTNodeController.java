@@ -24,6 +24,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Controlls a passive DHT node. 
@@ -53,7 +53,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
     /**
      * The file to persist the list of host
      */
-    private static final File FILE = new File(LimeWireUtils.getUserSettingsDir(), "passive.mojito");
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "passive.mojito");
     
     /**
      * A RouteTable for passive Nodes

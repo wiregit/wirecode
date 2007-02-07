@@ -2,6 +2,8 @@ package com.limegroup.gnutella.util;
 
 import java.util.Enumeration;
 
+import org.limewire.util.CommonUtils;
+
 import com.apple.cocoa.foundation.NSMutableArray;
 import com.apple.cocoa.foundation.NSMutableDictionary;
 import com.apple.cocoa.foundation.NSObject;
@@ -172,7 +174,7 @@ public class MacOSXUtils {
      */
     private static String getAppDir() {
         String appDir = "/Applications/LimeWire/";
-        String path = LimeWireUtils.getCurrentDirectory().getPath();
+        String path = CommonUtils.getCurrentDirectory().getPath();
         int app = path.indexOf("LimeWire.app");
         if(app != -1)
             appDir = path.substring(0, app);

@@ -22,6 +22,7 @@ import org.limewire.mojito.db.Database;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Controlls an active DHT node.
@@ -44,7 +44,7 @@ class ActiveDHTNodeController extends AbstractDHTController {
     /**
      * The file to persist this Mojito DHT
      */
-    private static final File FILE = new File(LimeWireUtils.getUserSettingsDir(), "active.mojito");
+    private static final File FILE = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
     
     public ActiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {

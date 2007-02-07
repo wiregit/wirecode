@@ -8,11 +8,11 @@ import java.util.Random;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
+import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class MiscTests extends LimeTestCase {
     
@@ -31,7 +31,7 @@ public class MiscTests extends LimeTestCase {
         assertTrue(reply.hasSecureData());
 
         SecureMessageVerifier verifier =
-            new SecureMessageVerifier(new File(LimeWireUtils.getUserSettingsDir(), "secureMessage.key"));
+            new SecureMessageVerifier(new File(CommonUtils.getUserSettingsDir(), "secureMessage.key"));
         StubSecureMessageCallback callback = new StubSecureMessageCallback();
         verifier.verify(reply, callback);
         callback.waitForReply();

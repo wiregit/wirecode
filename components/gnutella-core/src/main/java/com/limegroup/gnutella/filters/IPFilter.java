@@ -17,13 +17,13 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.messages.DHTMessage;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -93,7 +93,7 @@ public final class IPFilter extends SpamFilter {
         }
         
         // Load data from hostiles.txt...
-        File hostiles = new File(LimeWireUtils.getUserSettingsDir(), "hostiles.txt");
+        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(hostiles));

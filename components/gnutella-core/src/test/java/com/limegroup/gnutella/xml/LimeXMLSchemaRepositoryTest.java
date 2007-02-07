@@ -5,7 +5,6 @@ import org.limewire.util.CommonUtils;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Expand;
 
 
@@ -29,7 +28,7 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
 	public void setUp() throws Exception {
 	    Expand.expandFile(
             CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
-            LimeWireUtils.getUserSettingsDir()
+            CommonUtils.getUserSettingsDir()
         );
     }
     

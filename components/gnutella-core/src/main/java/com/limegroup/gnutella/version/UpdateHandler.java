@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IpPort;
 import org.limewire.security.SignatureVerifier;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.Version;
@@ -257,7 +258,7 @@ public class UpdateHandler {
         _lastBytes = data;
         
         if(!fromDisk) {
-            FileUtils.verySafeSave(LimeWireUtils.getUserSettingsDir(), FILENAME, data);
+            FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
             CapabilitiesVM.reconstructInstance();
             RouterService.getConnectionManager().sendUpdatedCapabilities();
         }
@@ -628,7 +629,7 @@ public class UpdateHandler {
      * Simple accessor for the stored file.
      */
     private File getStoredFile() {
-        return new File(LimeWireUtils.getUserSettingsDir(), FILENAME);
+        return new File(CommonUtils.getUserSettingsDir(), FILENAME);
     }
     
     /**

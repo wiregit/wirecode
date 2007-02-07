@@ -16,10 +16,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -34,7 +34,7 @@ class ContentCache {
     
     /** File where the licenses are serialized. */
     private final File CACHE_FILE =
-        new File(LimeWireUtils.getUserSettingsDir(), "responses.cache");
+        new File(CommonUtils.getUserSettingsDir(), "responses.cache");
     
     /** Map of SHA1 to Responses. */
     private Map<URN, ContentResponseData> responses = new HashMap<URN, ContentResponseData>();    

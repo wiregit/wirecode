@@ -33,6 +33,7 @@ import org.limewire.collection.RandomOrderHashSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
 
@@ -1297,7 +1297,7 @@ public class HostCatcher {
     }
 
     private File getHostsFile() {
-        return new File(LimeWireUtils.getUserSettingsDir(),"gnutella.net");
+        return new File(CommonUtils.getUserSettingsDir(),"gnutella.net");
     }
     
     /**

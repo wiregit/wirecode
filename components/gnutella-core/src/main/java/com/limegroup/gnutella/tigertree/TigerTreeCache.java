@@ -18,13 +18,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * @author Gregorio Roper
@@ -61,7 +61,7 @@ public final class TigerTreeCache {
      * File where the Mapping SHA1->TIGERTREE is stored
      */
     private static final File CACHE_FILE =
-        new File(LimeWireUtils.getUserSettingsDir(), "ttree.cache");
+        new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
         
     /**
      * Whether or not data dirtied since the last time we saved.

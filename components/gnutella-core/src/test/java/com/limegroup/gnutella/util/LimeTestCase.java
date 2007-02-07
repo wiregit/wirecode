@@ -255,8 +255,10 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _xmlDataDir.mkdirs();
         _xmlSchemasDir.mkdirs();
         
-        PrivilegedAccessor.setValue(LimeWireUtils.class,
-                                    "SETTINGS_DIRECTORY",
+        // set the settings directory, then immediately change it.
+        LimeCoreGlue.preinstall();
+        PrivilegedAccessor.setValue(CommonUtils.class,
+                                    "settingsDirectory",
                                     _settingsDir);
 
         File f = getRootDir();

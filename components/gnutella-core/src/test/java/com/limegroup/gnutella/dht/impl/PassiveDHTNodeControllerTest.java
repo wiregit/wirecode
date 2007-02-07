@@ -19,6 +19,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.MojitoUtils;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
@@ -27,7 +28,6 @@ import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
@@ -61,7 +61,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         int numPersistedNodes = DHTSettings.NUM_PERSISTED_NODES.getValue();
         DHTSettings.PERSIST_DHT.setValue(true);
         //first delete any previous file
-        File dhtFile = new File(LimeWireUtils.getUserSettingsDir(), "mojito.dat");
+        File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");
         dhtFile.delete();
         PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         try {

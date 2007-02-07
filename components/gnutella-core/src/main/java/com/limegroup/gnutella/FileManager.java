@@ -26,6 +26,7 @@ import org.limewire.collection.MultiCollection;
 import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.ByteOrder;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
@@ -40,7 +41,6 @@ import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -78,14 +78,14 @@ public abstract class FileManager {
         PROGRAM_SHARE = forceShare;
         
         forceShare = 
-            new File(LimeWireUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
+            new File(CommonUtils.getUserSettingsDir(), ".NetworkShare").getAbsoluteFile();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);
         } catch(IOException ignored) {}
         PREFERENCE_SHARE = forceShare;
         
         forceShare = 
-            new File(LimeWireUtils.getUserSettingsDir(), ".AppSpecialShare").getAbsoluteFile();
+            new File(CommonUtils.getUserSettingsDir(), ".AppSpecialShare").getAbsoluteFile();
         forceShare.mkdir();
         try {
             forceShare = FileUtils.getCanonicalFile(forceShare);

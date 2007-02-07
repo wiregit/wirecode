@@ -6,8 +6,8 @@ import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.util.CommonUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * Settings to deal with bugs
@@ -42,7 +42,7 @@ public class BugSettings extends LimeProps {
      */
     public static final FileSetting BUG_LOG_FILE =
         FACTORY.createFileSetting("BUG_LOG_FILE",
-            new File(LimeWireUtils.getUserSettingsDir(), "bugs.log"));
+            new File(CommonUtils.getUserSettingsDir(), "bugs.log"));
             
     /**
      * Setting for the maximum filesize of the buglog.
@@ -56,7 +56,7 @@ public class BugSettings extends LimeProps {
      */
     public static final FileSetting BUG_INFO_FILE =
         FACTORY.createFileSetting("BUG_INFO_FILE",
-            new File(LimeWireUtils.getUserSettingsDir(), "bugs.data"));
+            new File(CommonUtils.getUserSettingsDir(), "bugs.data"));
             
     /**
      * Setting for the last version that should send bugs.

@@ -23,6 +23,7 @@ import java.io.File;
 
 import org.limewire.setting.AbstractSettings;
 import org.limewire.setting.SettingsFactory;
+import org.limewire.util.CommonUtils;
 
 
 /**
@@ -39,8 +40,7 @@ public class MojitoProps extends AbstractSettings {
     // This is protected so that subclasses can extend from it, but
     // subclasses should NEVER instantiate a copy themselves.
     protected MojitoProps() {
-        //TODO: change to LimeWireUtils.getUserSettingsDir()
-        super(new File(System.getProperty("user.home"), "mojito.props"), "Mojito properties file");
+        super(new File(CommonUtils.getUserSettingsDir(), "mojito.props"), "Mojito properties file");
         assert (getClass() == MojitoProps.class);
     }
     

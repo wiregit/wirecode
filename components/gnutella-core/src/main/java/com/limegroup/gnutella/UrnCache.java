@@ -23,10 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)
@@ -45,13 +45,13 @@ public final class UrnCache {
      * File where urns (currently SHA1 urns) for files are stored.
      */
     private static final File URN_CACHE_FILE = 
-        new File(LimeWireUtils.getUserSettingsDir(), "fileurns.cache");
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.cache");
 
     /**
      * Last good version of above.
      */
     private static final File URN_CACHE_BACKUP_FILE = 
-        new File(LimeWireUtils.getUserSettingsDir(), "fileurns.bak");
+        new File(CommonUtils.getUserSettingsDir(), "fileurns.bak");
 
     /**
      * UrnCache instance variable.  LOCKING: obtain UrnCache.class.

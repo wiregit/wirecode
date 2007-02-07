@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.VersionUtils;
@@ -83,22 +84,10 @@ public final class LimeWireUtils {
 
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".limewire";
 
-	/**
-	 * Constant for the current running directory.
-	 */
-	private static final File CURRENT_DIRECTORY =
-		new File(System.getProperty("user.dir"));
-
     /**
      * Variable for whether or not this is a PRO version of LimeWire. 
      */
     private static boolean _isPro = false;
-    
-    /**
-     * Variable for the settings directory.
-     */
-    private static File SETTINGS_DIRECTORY = null;
-
 
 	/**
 	 * Make sure the constructor can never be called.
@@ -265,52 +254,11 @@ public final class LimeWireUtils {
 	public static String getHttpServer() {
 		return HTTP_SERVER;
 	}
-
-	/**
-	 * Returns the user's current working directory as a <tt>File</tt>
-	 * instance, or <tt>null</tt> if the property is not set.
-	 *
-	 * @return the user's current working directory as a <tt>File</tt>
-	 *  instance, or <tt>null</tt> if the property is not set
-	 */
-	public static File getCurrentDirectory() {
-		return CURRENT_DIRECTORY;
-	}
-
-    private static synchronized void setUserSettingsDir(File settingsDir) throws IOException, SecurityException {
-        settingsDir = settingsDir.getAbsoluteFile();
-        
-        if(!settingsDir.isDirectory()) {
-            settingsDir.delete(); // delete whatever it may have been
-            if(!settingsDir.mkdirs()) {
-                String msg = "could not create preferences directory: "+
-                    settingsDir;
-                throw new IOException(msg);
-            }
-        }
-
-        if(!settingsDir.canWrite()) {
-            throw new IOException("settings dir not writable");
-        }
-
-        if(!settingsDir.canRead()) {
-            throw new IOException("settings dir not readable");
-        }
-        
-        // cache the directory.
-        SETTINGS_DIRECTORY = settingsDir;
-    }
+      
     /**
-     * Returns the directory where all user settings should be stored.  This
-     * is where all application data should be stored.  If the directory does
-     * does not already exist, this attempts to create the directory, although
-     * this is not guaranteed to succeed.
-     *
-     * @return the <tt>File</tt> instance denoting the user's home 
-     *  directory for the application, or <tt>null</tt> if that directory 
-	 *  does not exist
+     * Returns the location where the user settings directory should be placed.
      */
-    public synchronized static File getUserSettingsDir() {
+    public static File getRequestedUserSettingsLocation() {
         // LOGIC:
         
         // On all platforms other than Windows or OSX,
@@ -328,20 +276,20 @@ public final class LimeWireUtils {
         // If using a) or b), and neither of those directories exist, but c)
         // does, then c) is used.  Once a) or b) exist, they are used indefinitely.
         // If neither a), b) nor c) exist, then the former is created in preference of
-        // of a), then b).
-        
-        if ( SETTINGS_DIRECTORY != null )
-            return SETTINGS_DIRECTORY;
-        
-        File settingsDir = new File(CommonUtils.getUserHomeDir(), LIMEWIRE_PREFS_DIR_NAME);
+        // of a), then b).        
+        File userDir = CommonUtils.getUserHomeDir();
+        if(userDir != null && userDir.exists())
+            FileUtils.setWriteable(userDir);
+        File settingsDir = new File(userDir, LIMEWIRE_PREFS_DIR_NAME);
         if (OSUtils.isWindows()) {
             String appdata = System.getProperty("LIMEWIRE_PREFS_DIR", SystemUtils.getSpecialPath("ApplicationData"));
             if (appdata != null && appdata.length() > 0) {
                 appdata = stripQuotes(appdata);
                 File tempSettingsDir = new File(appdata, "LimeWire");
                 if (tempSettingsDir.isDirectory() || !settingsDir.exists()) {
+                    FileUtils.setWriteable(new File(appdata));
                     try {
-                        setUserSettingsDir(tempSettingsDir);
+                        CommonUtils.validateSettingsDirectory(tempSettingsDir);
                         return tempSettingsDir;
                     } catch (IOException e) { // Ignore errors and fall back on default
                     } catch (SecurityException e) {} // Ignore errors and fall back on default
@@ -351,12 +299,6 @@ public final class LimeWireUtils {
             settingsDir = new File(CommonUtils.getUserHomeDir(), "Library/Preferences/LimeWire");
         } 
       
-        // Default behavior
-        try {
-            setUserSettingsDir(settingsDir);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         return settingsDir;
     }
     
