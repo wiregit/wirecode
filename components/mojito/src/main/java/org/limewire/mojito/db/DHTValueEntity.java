@@ -191,6 +191,14 @@ public class DHTValueEntity implements Map.Entry<KUID, DHTValue>, Serializable {
     }
     
     /**
+     * Returns true if this an entity for a local value
+     * and has been published at least once
+     */
+    public boolean hasBeenPublished() {
+        return localValue && publishTime > 0L; 
+    }
+    
+    /**
      * Returns true if this is a local value
      */
     public boolean isLocalValue() {

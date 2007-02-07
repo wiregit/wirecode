@@ -207,7 +207,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         return false;
     }
     
-    protected boolean isLocal() {
+    public boolean isLocalAltLoc() {
         return false;
     }
     
@@ -224,7 +224,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
                 .append(", pushProxyPort=").append(getPushProxyPort());
         }
         
-        if (isLocal()) {
+        if (isLocalAltLoc()) {
             buffer.append(", local=true");
         }
         
@@ -306,7 +306,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         }
 
         @Override
-        protected boolean isLocal() {
+        public boolean isLocalAltLoc() {
             return true;
         }
     }

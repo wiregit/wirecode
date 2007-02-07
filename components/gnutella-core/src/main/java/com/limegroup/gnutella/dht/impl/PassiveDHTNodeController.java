@@ -72,6 +72,10 @@ class PassiveDHTNodeController extends AbstractDHTController{
         limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
         
+        // We're an Ultrapeer and there are some special 
+        // republishing rules for our firewalled leaf Nodes.
+        dht.setRepublishManager(new PassiveDHTNodeRepublishManager());
+        
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {
             ObjectInputStream ois = null;

@@ -68,4 +68,9 @@ public interface AltLocDHTValue extends DHTValue {
      * this is a firewalled AltLoc!
      */
     public int getPushProxyPort();
+    
+    /**
+     * Returns true if this AltLoc represents the localhost
+     */
+    public boolean isLocalAltLoc();
 }
