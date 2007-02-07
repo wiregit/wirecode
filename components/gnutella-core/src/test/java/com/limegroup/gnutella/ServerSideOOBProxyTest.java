@@ -12,9 +12,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.security.SecurityToken;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -351,12 +352,15 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             Response[] res = new Response[1];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10, 10, "stanford1");
+            
+            
+            SecurityToken token = exchangeRNVMACK(proxiedGuid);
+            assertNotNull(token);
+            
             Message m = 
                 new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
-            
-            exchangeRNVMACK(proxiedGuid);
+                               true, false, false, null, token);
             
             // send off the reply
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -377,6 +381,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
                          "stanford1");
             assertEquals(2, queryRep.getTTL());
             assertEquals(1, queryRep.getHops());
+            assertEquals(token.getBytes(), queryRep.getSecurityToken());
         }
         // 3) shut off the query, make sure the OOB is bypassed but TCP is still
         // sent
@@ -494,7 +499,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         } catch (IOException expected){}
     }
 
-    private void exchangeRNVMACK(byte[] guid) throws Exception {
+    private SecurityToken exchangeRNVMACK(byte[] guid) throws Exception {
     	// send a ReplyNumberVM
     	ReplyNumberVendorMessage replyNum = 
     		new ReplyNumberVendorMessage(new GUID(guid), 1);
@@ -524,6 +529,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     	}
     	assertEquals(new GUID(guid), new GUID(ack.getGUID()));
     	assertEquals(1, ack.getNumResults());
+        return ack.getSecurityToken();
     }
 
     // tests that the expirer works

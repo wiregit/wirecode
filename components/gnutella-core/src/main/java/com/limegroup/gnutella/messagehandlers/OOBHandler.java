@@ -69,17 +69,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
-        // only account for OOB stuff if this was response to a 
-        // OOB query, multicast stuff is sent over UDP too....
-        if (reply.isReplyToMulticastQuery()) {
-            return;
-        }
-        
         // if query is not of interest anymore return
         GUID queryGUID = new GUID(reply.getGUID());
-        if (!router.isQueryAlive(queryGUID)) {
-            return;
-        }
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
@@ -116,21 +107,18 @@ public class OOBHandler implements MessageHandler, Runnable {
                 // parsing of query reply already done here in message dispatcher thread
                 try {
                     int added = session.countAddedResponses(reply.getResultsArray());
-                    if (added == 0) {
-                        return;
+                    if (added > 0) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Handling the reply.");
+                        }
+                        router.handleQueryReply(reply, handler);
                     }
-                } catch (BadPacketException e) {
+                } 
+                catch (BadPacketException e) {
                     // ignore packet
-                    return;
                 }
             }
-            else {
-                return;
-            }
         }
-            
-        LOG.trace("Handling the reply.");
-        router.handleQueryReply(reply, handler);
 	}
     
     private final OOBSession getCanonicalSession(OOBSession session) {
