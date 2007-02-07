@@ -145,21 +145,32 @@ public class OOBHandlerTest extends LimeTestCase {
     	// double check we sent back an ack
     	SecurityToken token = assertACKSent(replyHandler, 10);
     	
+        router.reply = null;
+        
         // send reply, only then session objects are created
         QueryReply reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token);
         handler.handleMessage(reply, null, replyHandler);
         assertNotNull(router.reply);
+        
         router.reply = null;
-        
-    	// but they don't send the last 5 in time
-    	router.timeToExpire = 50;
-    	Thread.sleep(100);
-    	handler.run();
-        
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 5);
         handler.handleMessage(reply, null, replyHandler);
-    	    	
-    	// should be ignored.
-    	assertNull(router.reply);
+        assertNotNull(router.reply);
+
+        // the next ones should be ignored since there is a full session for them
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 10);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // session is cleared by signaling that there is no query alive for it anymore
+        callback.isAlive = false;
+        handler.run();
+
+        // message is accepted again since we pretend there is an alive query for it
+        callback.isAlive = true;
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
     }
     
     public void testAddsRNVMs() throws Exception {
@@ -221,18 +232,17 @@ public class OOBHandlerTest extends LimeTestCase {
             callback.isAlive = true;
         }
         
-        // send 5 other ones, marked by offset it again, now that search is alive again
+        // send 5 other ones, marked by new offset again, now that search is alive again
         reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 5);
         handler.handleMessage(reply, null, replyHandler);
         assertSame(reply, router.reply);
         
-        // and now send the old ones again after expiration
-        router.timeToExpire = 50;
-        Thread.sleep(100);
+        // and now send the old ones again after expiration that does nothing
         handler.run();
         
+        router.reply = null;
         handler.handleMessage(reply, null, replyHandler);
-        assertSame(reply, router.reply);
+        assertNull(router.reply);
     }
     
     public void testDuplicatePacketsIgnored() {
@@ -285,15 +295,12 @@ public class OOBHandlerTest extends LimeTestCase {
     private static class MyMessageRouter extends MessageRouterStub {
     	volatile QueryReply reply;
     	volatile int numToRequest;
-    	volatile long timeToExpire;
+
 		@Override
 		public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
 			return numToRequest;
 		}
-		@Override
-		public long getOOBExpireTime() {
-			return timeToExpire;
-		}
+		
 		@Override
 		public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
 			this.reply = queryReply;
@@ -326,7 +333,7 @@ public class OOBHandlerTest extends LimeTestCase {
     private static class QueryAliveDownloadManager extends DownloadManagerStub {
         @Override
         public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-            return true;
+            return false;
         }
     }
 }

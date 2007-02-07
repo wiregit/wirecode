@@ -489,7 +489,7 @@ public abstract class MessageRouter {
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
-        setUDPMessageHandler(QueryReply.class, oobHandler);
+        setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
@@ -2920,10 +2920,6 @@ public abstract class MessageRouter {
         }
     }
     
-    public long getOOBExpireTime() {
-    	return CLEAR_TIME;
-    }
-    
     /*
      * ===================================================
      *                   "REGULAR" HANDLER
@@ -3215,5 +3211,31 @@ public abstract class MessageRouter {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, handler);
         }
+    }
+ 
+    /**
+     * This class handles UDP query replies and forwards them to the 
+     * {@link OOBHandler} if they are not replies to multicast or unicast
+     * queries.
+     */
+    public class UDPQueryReplyHandler implements MessageHandler {
+
+        private final OOBHandler oobHandler;
+        
+        public UDPQueryReplyHandler(OOBHandler oobHandler) {
+            this.oobHandler = oobHandler;
+        }
+        
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            QueryReply reply = (QueryReply)msg;
+            if (reply.isReplyToMulticastQuery()
+                    || isHostUnicastQueried(new GUID(reply.getGUID()), handler)) {
+                handleQueryReply(reply, handler);
+            }
+            else {
+                oobHandler.handleMessage(msg, addr, handler);
+            }
+        }
+        
     }
 }

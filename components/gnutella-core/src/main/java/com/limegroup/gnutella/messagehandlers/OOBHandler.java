@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.messagehandlers;
 
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntSet;
-import org.limewire.io.IpPort;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
@@ -78,7 +76,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
         
         // if query is not of interest anymore return
-        if (!router.isQueryAlive(new GUID(reply.getGUID()))) {
+        GUID queryGUID = new GUID(reply.getGUID());
+        if (!router.isQueryAlive(queryGUID)) {
             return;
         }
         
@@ -95,8 +94,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
-        OOBSession session = new OOBSession(token, handler.getInetAddress(),
-                handler.getPort(), requestedResponseCount);
+        OOBSession session = new OOBSession(token, requestedResponseCount, queryGUID);
             
         // Allow the router to handle the query reply in the
         // following scenarios:
@@ -127,12 +125,7 @@ public class OOBHandler implements MessageHandler, Runnable {
                 }
             }
             else {
-                if(LOG.isTraceEnabled())
-                    LOG.trace("Received more than requested (by" + (-remainingCount) + ") in first reply");
-                if(!router.isHostUnicastQueried(new GUID(reply.getGUID()), session)) {
-                    LOG.trace("Didn't directly unicast this host with this GUID");
-                    return;
-                }
+                return;
             }
         }
             
@@ -168,31 +161,26 @@ public class OOBHandler implements MessageHandler, Runnable {
         return null;
 	}
 
-    private class OOBSession implements IpPort {
+    private class OOBSession {
     	
         private final SecurityToken token;
         
-    	private long lastResponseReceivedTime;
-        
         private final int hashCode;
-        
-        private final InetAddress addr;
-        
-        private final int port;
         
         private final IntSet responseHashCodes;
         
         private int responseCount = 0;
         
         private final int requestedResponseCount;
+        
+        private final GUID guid;
     	
-        public OOBSession(SecurityToken token, InetAddress addr, int port, int requestedResponseCount) {
+        public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
             this.token = token;
-            this.addr = addr;
-            this.port = port;    		
             this.hashCode = Arrays.hashCode(token.getBytes());
             this.requestedResponseCount = requestedResponseCount;
             this.responseHashCodes = new IntSet(requestedResponseCount);
+            this.guid = guid;
     	}
     	
         public int hashCode() {
@@ -200,8 +188,7 @@ public class OOBHandler implements MessageHandler, Runnable {
     	}
     	
         /**
-         * Counts the responses uniquely and as a side effect updates
-         * the timestamp of when the last responses came in 
+         * Counts the responses uniquely. 
          */
         public int countAddedResponses(Response[] responses) {
             int added = 0;
@@ -215,7 +202,6 @@ public class OOBHandler implements MessageHandler, Runnable {
                     added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
                 }
             }
-            lastResponseReceivedTime = System.currentTimeMillis();
             return added;
         }
         
@@ -230,29 +216,16 @@ public class OOBHandler implements MessageHandler, Runnable {
     		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
     	
-    	public boolean isExpired(long now) {
-    		return now - this.lastResponseReceivedTime > router.getOOBExpireTime();
-    	}
-
-        public String getAddress() {
-            return addr.getHostAddress();
-        }
-
-        public InetAddress getInetAddress() {
-            return addr;
-        }
-
-        public int getPort() {
-            return port;
+        public boolean queryIsAlive() {
+            return router.isQueryAlive(guid);
         }
 	}
 	
 	private void expire() {
-		long now = System.currentTimeMillis();
 		synchronized (OOBSessions) {
 			for (Iterator<Map.Entry<OOBSession, OOBSession>> iter = 
 			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
-			    if (iter.next().getKey().isExpired(now))
+			    if (!iter.next().getKey().queryIsAlive())
 			        iter.remove();
 			}
 		}

@@ -4,10 +4,9 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.QueryKey;
-import org.limewire.util.BaseTestCase;
-
 import junit.framework.Test;
+
+import org.limewire.util.BaseTestCase;
 
 
 public class QueryKeyTest extends BaseTestCase {
@@ -24,12 +23,12 @@ public class QueryKeyTest extends BaseTestCase {
             new QueryKey(new byte[3]);
             fail("exception should have been thrown.");
         }
-        catch (IllegalArgumentException ignored) {}
+        catch (InvalidSecurityTokenException ignored) {}
         try {
             new QueryKey(new byte[17]);
             fail("exception should have been thrown.");
         }
-        catch (IllegalArgumentException ignored) {}
+        catch (InvalidSecurityTokenException ignored) {}
         
         byte[] qk = new byte[8];
         Random rand = new Random();
