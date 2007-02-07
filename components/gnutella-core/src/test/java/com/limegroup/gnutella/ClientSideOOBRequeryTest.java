@@ -899,8 +899,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     Set queryURNs = qReq.getQueryUrns();
                     gotQuery = queryURNs.contains(urn);
                     if (gotQuery) {
-                        gotQuery = qk.equals(qReq.getQueryKey());
-                        if(gotQuery)
+                        gotQuery = qReq.getQueryKey().isFor(InetAddress.getLocalHost(), SERVER_PORT);
+                        if (gotQuery)
                             urnQueryGUID = qReq.getGUID();
                     }
                 }
@@ -1067,7 +1067,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                         Set queryURNs = qReq.getQueryUrns();
                         gotQuery = queryURNs.contains(urn);
                         if (gotQuery)
-                            gotQuery = qk.equals(qReq.getQueryKey());
+                            gotQuery = qReq.getQueryKey().isFor(InetAddress.getLocalHost(), SERVER_PORT);
                     }
                 }
                 catch (InterruptedIOException iioe) {

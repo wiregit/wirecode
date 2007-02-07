@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntSet;
 import org.limewire.io.IpPort;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
@@ -149,14 +150,20 @@ public class OOBHandler implements MessageHandler, Runnable {
     }
 	
 	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
-	    SecurityToken securityToken = reply.getSecurityToken();
-        if (securityToken == null) {
+	    byte[] securityBytes = reply.getSecurityToken();
+        if (securityBytes == null) {
             return null;
         }
-        
-        OOBTokenData data = new OOBTokenData(handler, reply.getGUID(), securityToken.getBytes()[0] & 0xFF);
-        if (securityToken.isFor(data)) {
-            return securityToken;
+
+        try {
+            OOBQueryKey oobKey = new OOBQueryKey(securityBytes);
+            OOBTokenData data = new OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
+            if (oobKey.isFor(data)) {
+                return oobKey;
+            }
+        }
+        catch (InvalidSecurityTokenException e) {
+            // invalid security token echoed back
         }
         return null;
 	}

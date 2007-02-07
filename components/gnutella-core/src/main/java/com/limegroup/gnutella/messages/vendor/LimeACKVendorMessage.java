@@ -10,7 +10,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;

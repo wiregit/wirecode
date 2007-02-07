@@ -106,7 +106,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	
         byte[] data = new byte[16];
         new Random().nextBytes(data);
-        _token = new QueryKey(data, false);
+        _token = new QueryKey(data);
 	}
 		
 
@@ -1152,17 +1152,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 GUID.makeGuid(), new byte[0], false, false, false, false, false,
                 false, false, IpPort.EMPTY_SET, _token);
                 
-        assertEquals(_token.getBytes(), query.getSecurityToken().getBytes());
+        assertEquals(_token.getBytes(), query.getSecurityToken());
         
         // test copy constructor preserves security bytes
         query = new QueryReply(GUID.makeGuid(), query);
-        assertEquals(_token.getBytes(), query.getSecurityToken().getBytes());
+        assertEquals(_token.getBytes(), query.getSecurityToken());
         
         // test network constructor
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         query.writePayload(out);
         query = new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, out.toByteArray());
-        assertEquals(_token.getBytes(), query.getSecurityToken().getBytes());
+        assertEquals(_token.getBytes(), query.getSecurityToken());
     }
     
     private void runSignatureTest(QueryReply reply, int[] indexes, byte[] payload) throws Exception {

@@ -119,7 +119,7 @@ public class GUESSServerSideTest extends LimeTestCase {
 
 		QueryRequest crapQuery = 
 			QueryRequest.createQueryKeyQuery("susheel", 
-											 new QueryKey(fakeQueryKey, true));
+											 new QueryKey(fakeQueryKey));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
 		//                   false, null, null, 

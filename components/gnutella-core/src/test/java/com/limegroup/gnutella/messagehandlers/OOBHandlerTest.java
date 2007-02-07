@@ -5,6 +5,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
@@ -82,7 +83,7 @@ public class OOBHandlerTest extends LimeTestCase {
         // and we request all of them
         router.numToRequest = 10;
         handler.handleMessage(rnvm,null,replyHandler);
-        SecurityToken token = assertACKSent(replyHandler, 10);
+        assertACKSent(replyHandler, 10);
         
         // first send back only 8 results - those should be accepted
         QueryReply reply = getReplyWithResults(g.bytes(), 10,address.getAddress(), null);
@@ -90,19 +91,19 @@ public class OOBHandlerTest extends LimeTestCase {
         assertNotSame(reply, router.reply);
     }
     
-    public void testMessagesWithDifferentTokenAreDiscarded() {
+    public void testMessagesWithDifferentTokenAreDiscarded() throws InvalidSecurityTokenException {
         //a host claims to have 10 results
         ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
         
         // and we request all of them
         router.numToRequest = 10;
         handler.handleMessage(rnvm,null,replyHandler);
-        SecurityToken token = assertACKSent(replyHandler, 10);
+        assertACKSent(replyHandler, 10);
         
         
         byte[] bytes = new byte[8];
         new Random().nextBytes(bytes);
-        SecurityToken tokenFake = new QueryKey(bytes, true);
+        SecurityToken tokenFake = new QueryKey(bytes);
         
         // first send back only 8 results - those should be accepted
         QueryReply reply = getReplyWithResults(g.bytes(), 10,address.getAddress(), tokenFake);
@@ -179,14 +180,18 @@ public class OOBHandlerTest extends LimeTestCase {
     	
     	// then we receive the second rnvm and want only 15/20
     	replyHandler.m = null;
-    	router.numToRequest = 15;
+    	router.numToRequest = 5;
     	handler.handleMessage(second, null, replyHandler);
-    	SecurityToken token2 = assertACKSent(replyHandler, 15);
+    	SecurityToken token2 = assertACKSent(replyHandler, 5);
     	
     	// if we get back a reply with 25 results we should accept it.
-    	QueryReply reply = getReplyWithResults(g.bytes(), 25, address.getAddress(), token2);
+    	QueryReply reply = getReplyWithResults(g.bytes(), 10 , address.getAddress(), token1);
     	handler.handleMessage(reply, null, replyHandler);
     	assertSame(reply, router.reply);
+        
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token2, 10);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
     }
     
     public void testDiscardedWithoutAliveQuery() throws InterruptedException {

@@ -490,6 +490,12 @@ public class GUID implements Comparable<GUID> {
         public boolean shouldExpire(long now) {
             return now - _creationTime >= MAX_LIFE;
         }
+        
+        @Override
+        public String toString() {
+            return _guid.toString();
+        }
+        
     }
 
 

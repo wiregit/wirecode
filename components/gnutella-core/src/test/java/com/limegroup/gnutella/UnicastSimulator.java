@@ -15,7 +15,6 @@ import java.util.Random;
 
 import org.limewire.io.IOUtils;
 import org.limewire.security.QueryKey;
-import org.limewire.security.QueryKeyGenerator;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -170,7 +169,6 @@ public class UnicastSimulator {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -187,8 +185,7 @@ public class UnicastSimulator {
                             ((QueryRequest)message).getQueryKey();
                         QueryKey computed = 
                             new QueryKey(datagram.getAddress(),
-                                    datagram.getPort(),
-                                    secretKey);
+                                    datagram.getPort());
                         if (!computed.equals(queryKey))
                             continue; // querykey is invalid!!
                         byte[] inGUID = ((QueryRequest)message).getGUID();
@@ -217,8 +214,7 @@ public class UnicastSimulator {
                             // send a QueryKey back!!!
                             QueryKey qk = 
                                 new QueryKey(datagram.getAddress(),
-                                        datagram.getPort(),
-                                        secretKey);
+                                        datagram.getPort());
                             PingReply pRep =
                                 PingReply.createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,

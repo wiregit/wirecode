@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import org.limewire.security.AbstractQueryKey;
+import org.limewire.security.InvalidSecurityTokenException;
 
 /**
  * A query key to be used in the OOB v3 protocol.
@@ -19,8 +20,9 @@ public class OOBQueryKey extends AbstractQueryKey<OOBTokenData> {
     /**
      * Creates a key from data received from the network.  The first
      * byte is the # of results, the rest are the checksum to verify against.
+     * @throws InvalidSecurityTokenException 
      */
-    public OOBQueryKey(byte [] network) {
+    public OOBQueryKey(byte [] network) throws InvalidSecurityTokenException {
         super(network);
     }
     

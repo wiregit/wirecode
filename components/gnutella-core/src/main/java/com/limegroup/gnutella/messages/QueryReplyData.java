@@ -4,7 +4,6 @@ package com.limegroup.gnutella.messages;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.search.HostData;
@@ -63,7 +62,7 @@ class QueryReplyData {
     /** The xml chunk that contains metadata about xml responses*/  
     private volatile byte[] xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;  
     
-    private volatile SecurityToken securityToken = null;
+    private volatile byte[] securityToken = null;
 
     public int getBusyFlag() {
         return busyFlag;
@@ -201,11 +200,11 @@ class QueryReplyData {
         this.xmlBytes = xmlBytes;
     }
     
-    public void setSecurityToken(SecurityToken securityToken) {
+    public void setSecurityToken(byte[] securityToken) {
         this.securityToken = securityToken;
     }
     
-    public SecurityToken getSecurityToken() {
+    public byte[] getSecurityToken() {
         return securityToken;
     }
 }

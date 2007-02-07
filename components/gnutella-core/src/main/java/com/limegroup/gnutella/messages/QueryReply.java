@@ -34,7 +34,6 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -394,7 +393,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setXmlBytes(xmlBytes);
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
-        _data.setSecurityToken(securityToken);
+        _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -823,7 +822,7 @@ public class QueryReply extends Message implements SecureMessage {
      * Returns the message authentication bytes that were sent along with
      * this query reply or null the none have been sent.
      */
-    public SecurityToken getSecurityToken() {
+    public byte[] getSecurityToken() {
         parseResults();
         return _data.getSecurityToken();
     }
@@ -1024,7 +1023,7 @@ public class QueryReply extends Message implements SecureMessage {
                             proxies = _ggepUtil.getPushProxies(ggep);
                             if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                                 securityToken = ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
-                                if (securityToken.length == 0) {
+                                if (securityToken == null || securityToken.length == 0) {
                                     throw new BadPacketException("Message had empty OOB security token");
                                 }
                             }
@@ -1087,7 +1086,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setReplyToMulticast(replyToMulticastT);
             _data.setProxies(proxies);
             if (securityToken != null) {
-                _data.setSecurityToken(new OOBQueryKey(securityToken));
+                _data.setSecurityToken(securityToken);
             }
             
             _data.setHostData(new HostData(this));

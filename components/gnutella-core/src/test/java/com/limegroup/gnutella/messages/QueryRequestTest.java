@@ -11,6 +11,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
@@ -70,7 +71,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                QueryKey qk = new QueryKey(bytes, true);
+                QueryKey qk = new QueryKey(bytes);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(false); // do COBS
@@ -482,9 +483,10 @@ public final class QueryRequestTest extends LimeTestCase {
 
 	/**
 	 * Tests constructor that only takes a string and a query key.
+	 * @throws InvalidSecurityTokenException 
 	 */
-	public void testStringQueryKeyConstructor() {
-		QueryKey key = new QueryKey(GUID.makeGuid(), true);
+	public void testStringQueryKeyConstructor() throws InvalidSecurityTokenException {
+		QueryKey key = new QueryKey(GUID.makeGuid());
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 

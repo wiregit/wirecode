@@ -236,9 +236,9 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
         {
             // we shouldn't get any response to our query...
-            QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
+            QueryRequest badQuery = QueryRequest.createQueryKeyQuery("susheel", 
                                                                       qkToUse);
-            send(goodQuery, localHost, SERVER_PORT);
+            send(badQuery, localHost, SERVER_PORT);
             
             try {
                 // now we should NOT get an ack            

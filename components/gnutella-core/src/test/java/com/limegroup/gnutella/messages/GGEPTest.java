@@ -758,6 +758,12 @@ public class GGEPTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] read = ggep.get("EM");
         assertEquals(0, read.length);
     }
+    
+    public void testNullGGEPValues() {
+        GGEP ggep = new GGEP();
+        ggep.put("EM", (byte[])null);
+        assertNull(ggep.get("EM"));
+    }
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());

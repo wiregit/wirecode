@@ -3,18 +3,13 @@ package org.limewire.security;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.SimpleTimer;
-
 
 /**
  * This class manages the crypto aspects of the query key 
  * infrastructure.
  */
 public class QueryKeySmith {
-
-    private static final Log LOG = LogFactory.getLog(QueryKeySmith.class);
 
     private volatile static QueryKeySmith defaultKeySmith = new QueryKeySmith();
 

@@ -1113,7 +1113,7 @@ public abstract class MessageRouter {
                                                     TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
         
-        // array is null for old oob messages, it will just be ignored then
+        // token is null for old oob messages, it will just be ignored then
         SecurityToken securityToken = ack.getSecurityToken();
        
         if ((bundle != null) && (ack.getNumResults() > 0)) {
@@ -1191,7 +1191,7 @@ public abstract class MessageRouter {
      */
     public boolean isQueryAlive(GUID guid) {
         DownloadManager dManager = RouterService.getDownloadManager();
-        return _callback.isQueryAlive(guid) && dManager.isGuidForQueryDownloading(guid); 
+        return _callback.isQueryAlive(guid) || dManager.isGuidForQueryDownloading(guid); 
     }
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -

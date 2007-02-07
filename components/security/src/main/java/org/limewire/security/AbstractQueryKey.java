@@ -19,9 +19,9 @@ public abstract class AbstractQueryKey<T extends SecurityToken.TokenData> implem
         _queryKey = getFromMAC(QueryKeySmith.getDefaultKeySmith().getKeyBytes(data), data);
     }
     
-    protected AbstractQueryKey(byte [] network) {
+    protected AbstractQueryKey(byte [] network) throws InvalidSecurityTokenException {
         if (!isValidBytes(network))
-            throw new IllegalArgumentException();
+            throw new InvalidSecurityTokenException("invalid data: " + Arrays.toString(network));
         
         _queryKey = network;
     }
@@ -45,7 +45,8 @@ public abstract class AbstractQueryKey<T extends SecurityToken.TokenData> implem
         return b;
     }
     
-    /**
+    
+   /**
      * @param MAC the calculated cryptographic MAC
      * @param data the <tt>TokenData</tt> this QueryKey is created from.
      * @return the payload of this QueryKey as it will appear on the network
@@ -54,6 +55,21 @@ public abstract class AbstractQueryKey<T extends SecurityToken.TokenData> implem
     
     protected boolean isValidBytes(byte [] network) {
         return network != null && network.length > 0;
+    }
+       
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SecurityToken) {
+            SecurityToken t = (SecurityToken)obj;
+            return Arrays.equals(_queryKey, t.getBytes());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(_queryKey);
     }
 
 }

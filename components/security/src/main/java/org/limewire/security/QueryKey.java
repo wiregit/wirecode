@@ -4,10 +4,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.ByteOrder;
 
@@ -31,9 +28,6 @@ import org.limewire.util.ByteOrder;
  */
 public final class QueryKey extends AbstractQueryKey<TokenData> {
 
-    private static final Log LOG = LogFactory.getLog(QueryKey.class);
-    
-    
     /** As detailed by the GUESS spec.
      */
     public static final int MIN_QK_SIZE_IN_BYTES = 4;
@@ -46,9 +40,8 @@ public final class QueryKey extends AbstractQueryKey<TokenData> {
      */
     private final int _hashCode;
 
-    public QueryKey(byte[] key) {
+    public QueryKey(byte[] key) throws InvalidSecurityTokenException {
         super(key.clone());
-        
         _hashCode = genHashCode(getBytes());
     }
     
@@ -100,15 +93,6 @@ public final class QueryKey extends AbstractQueryKey<TokenData> {
         return isFor(new GUESSTokenData(ip, port));
     }
     
-    public boolean equals(Object o) {
-        if (o.hashCode() != _hashCode)
-            return false;
-        if (!(o instanceof QueryKey))
-            return false;
-        QueryKey other = (QueryKey) o;
-        return Arrays.equals(getBytes(), other.getBytes());
-    }
-
     public int hashCode() {
        return _hashCode;
     }

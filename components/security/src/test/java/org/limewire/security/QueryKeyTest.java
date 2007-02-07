@@ -40,8 +40,8 @@ public class QueryKeyTest extends BaseTestCase {
             Arrays.sort(qk);
         }
         AbstractQueryKey key1 = null, key2 = null, key3 = null;
-        key1 = new QueryKey(qk, true);
-        key2 = new QueryKey(qk, true);
+        key1 = new QueryKey(qk);
+        key2 = new QueryKey(qk);
         key3 = new QueryKey(qk);
         assertEquals(key1,key2);
         assertNotEquals(key1,key3);
