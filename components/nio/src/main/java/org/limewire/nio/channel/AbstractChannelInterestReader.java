@@ -10,11 +10,9 @@ public abstract class AbstractChannelInterestReader implements ChannelReadObserv
     protected InterestReadableByteChannel source;
     protected boolean shutdown;
     
-    public AbstractChannelInterestReader() {
-        buffer = ByteBuffer.allocate(getBufferSize());
+    public AbstractChannelInterestReader(int bufferSize) {
+        buffer = ByteBuffer.allocate(bufferSize);
     }
-    
-    protected abstract int getBufferSize();
 
     public int read(ByteBuffer dst) {
         return BufferUtils.transfer(buffer, dst);

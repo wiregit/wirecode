@@ -286,6 +286,15 @@ public abstract class BaseTestCase extends AssertComparisons {
     public void error(Throwable ex, String detail) {
         ex = new UnexpectedExceptionError(detail, ex); // remember the detail & stack trace of the ErrorService.
         if ( _testThread != Thread.currentThread() ) {
+            // the Eclipse JUnit plug-in does not report multiple errors per test case: 
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
+            // print out stack trace to make debugging of uncauhgt exceptions easier
+            for (StackTraceElement item : _testThread.getStackTrace()) {
+                if (item.getClassName().contains("org.eclipse")) {
+                    ex.printStackTrace();
+                    break;
+                }
+            }
             _testResult.addError(this, ex);
             _testThread.interrupt();
         } else {

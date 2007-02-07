@@ -569,11 +569,9 @@ public class PushDownloadManager implements ConnectionAcceptor {
         private GIVLine giv;
         
         GivParser(Socket socket) {
+            super(1024);
+            
             this.socket = socket;
-        }
-
-        protected int getBufferSize() {
-            return 1024;
         }
 
         public void handleRead() throws IOException {

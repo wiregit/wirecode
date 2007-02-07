@@ -686,14 +686,11 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
         private final String allowedWord;
         
         AsyncConnectionDispatcher(Socket client, String allowedWord) {
-            super();
+            // + 1 for whitespace
+            super(RouterService.getConnectionDispatcher().getMaximumWordSize() + 1);
+            
             this.client = client;
             this.allowedWord = allowedWord;
-        }
-        
-        protected int getBufferSize() {
-            // + 1 for whitespace
-            return RouterService.getConnectionDispatcher().getMaximumWordSize() + 1;
         }
         
         public void shutdown() {
