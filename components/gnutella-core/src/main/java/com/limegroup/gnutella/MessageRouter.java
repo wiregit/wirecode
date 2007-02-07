@@ -164,7 +164,7 @@ public abstract class MessageRouter {
 
     /** How long to buffer up out-of-band replies.
      */
-    private static final long CLEAR_TIME = 2 * 60 * 1000; // 2 minutes
+    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
 
     /** Time between sending HopsFlow messages.
      */

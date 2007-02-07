@@ -56,11 +56,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         super(name);
     }
     
-    @Override
-    public void setUp() throws Exception {
-        
-    }
-    
     public static Test suite() {
         return buildTestSuite(ServerSideOutOfBandReplyTest.class);
     }    
