@@ -53,7 +53,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     /**
      * An array of Messages this MessageHandler supports
      */
-    private static final Class[] MESSAGE_TYPES = {
+    private static final Class[] UDP_MESSAGE_TYPES = {
         PingRequestWireImpl.class,
         PingResponseWireImpl.class,
         StoreRequestWireImpl.class,
@@ -97,7 +97,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public synchronized void start() {
         // Install the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        for (Class<? extends Message> clazz : MESSAGE_TYPES) {
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
             messageRouter.setUDPMessageHandler(clazz, this);
         }
         
@@ -111,7 +111,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
         
         // Remove the Message handlers
         MessageRouter messageRouter = RouterService.getMessageRouter();
-        for (Class<? extends Message> clazz : MESSAGE_TYPES) {
+        for (Class<? extends Message> clazz : UDP_MESSAGE_TYPES) {
             messageRouter.setUDPMessageHandler(clazz, null);
         }
         
