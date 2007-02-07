@@ -364,7 +364,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
         OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), reply.getNumResults()));
+                pack.getPort(), reply.getGUID(), 1));
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
         ack.write(baos);
@@ -394,6 +394,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         SecurityToken<OOBTokenData> receivedToken = new OOBQueryKey(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
+        assertEquals(1, receivedToken.getBytes()[0] & 0XFF);
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -464,9 +465,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
-                pack.getPort(), reply.getGUID(), reply.getNumResults()));
+                pack.getPort(), reply.getGUID(), 0));
         LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());

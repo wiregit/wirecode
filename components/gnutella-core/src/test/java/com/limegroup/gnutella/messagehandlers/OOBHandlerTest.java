@@ -75,7 +75,6 @@ public class OOBHandlerTest extends LimeTestCase {
     	assertNull(router.reply);
     }
     
-    // TODO fberger
     public void testMessagesWithoutEchoedTokenAreDiscarded() {
         // a host claims to have 10 results
         ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
@@ -85,8 +84,8 @@ public class OOBHandlerTest extends LimeTestCase {
         handler.handleMessage(rnvm,null,replyHandler);
         assertACKSent(replyHandler, 10);
         
-        // first send back only 8 results - those should be accepted
-        QueryReply reply = getReplyWithResults(g.bytes(), 10,address.getAddress(), null);
+        // first send back only 10 results without token - those should be discarded
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress(), null);
         handler.handleMessage(reply, null, replyHandler);
         assertNotSame(reply, router.reply);
     }
@@ -105,8 +104,8 @@ public class OOBHandlerTest extends LimeTestCase {
         new Random().nextBytes(bytes);
         SecurityToken tokenFake = new QueryKey(bytes);
         
-        // first send back only 8 results - those should be accepted
-        QueryReply reply = getReplyWithResults(g.bytes(), 10,address.getAddress(), tokenFake);
+        // send back messages with fake token
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress(), tokenFake);
         handler.handleMessage(reply, null, replyHandler);
         assertNotSame(reply, router.reply);
     }

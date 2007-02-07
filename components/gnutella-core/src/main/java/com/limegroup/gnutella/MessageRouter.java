@@ -1127,7 +1127,7 @@ public abstract class MessageRouter {
                 // TODO move selection to responseToQueryReplies methods for randomization
                 Response[] desired = new Response[ack.getNumResults()];
                 System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
-                iterable = responsesToQueryReplies(bundle._responses, 
+                iterable = responsesToQueryReplies(desired, 
                         bundle._query, 1, securityToken);
             } else { 
                 iterable = responsesToQueryReplies(bundle._responses,

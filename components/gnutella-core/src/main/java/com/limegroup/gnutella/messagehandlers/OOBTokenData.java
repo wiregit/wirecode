@@ -28,7 +28,7 @@ public class OOBTokenData implements SecurityToken.TokenData {
     }
     
     public OOBTokenData(InetAddress address, int port, byte[] guid, int numRequests) {
-        if (numRequests <= 0 || numRequests > 255) {
+        if (numRequests < 0 || numRequests > 255) {
             throw new IllegalArgumentException("requestNum to small or too large " + numRequests);
         }
         ByteArrayOutputStream baos = new ByteArrayOutputStream(35);

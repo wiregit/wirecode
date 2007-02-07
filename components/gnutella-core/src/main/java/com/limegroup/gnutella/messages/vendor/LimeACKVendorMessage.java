@@ -111,7 +111,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
      * number of results.
      */
     private static byte[] derivePayload(int numResults, byte[] securityTokenBytes) {
-        if ((numResults <= 0) || (numResults > 255))
+        if ((numResults < 0) || (numResults > 255))
             throw new IllegalArgumentException("Number of results too big or too small: " +
                                                numResults);
         if (securityTokenBytes == null || securityTokenBytes.length == 0) {
