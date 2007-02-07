@@ -59,11 +59,13 @@ public class LimeDHTManagerTest extends DHTTestCase {
             assertTrue(manager.isRunning());
             assertTrue(manager.isActiveNode());
             KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
-            //try starting again
+            
+            // Rry starting again
             manager.start(true);
             Thread.sleep(200);
             assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-            //try switching mode
+            
+            // Try switching mode
             manager.start(false);
             Thread.sleep(200);
             assertFalse(manager.isActiveNode());
@@ -76,14 +78,23 @@ public class LimeDHTManagerTest extends DHTTestCase {
             manager.addressChanged();
             Thread.sleep(200);
             assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
-            //try switching multiple times
+            
+            // Try switching multiple times (does some Disk I/O)
             manager.start(true);
             manager.start(false);
             manager.start(true);
-            //give it enough time --> previous starts were offloaded to threadpool
+            
+            // Give it enough time --> previous starts were offloaded to threadpool
             Thread.sleep(10000);
-            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            
+            // We should be in active mode
             assertTrue(manager.isActiveNode());
+            
+            // The Node ID should be something else than passiveLocalNodeID
+            assertNotEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
+            
+            // The Node ID should be (but it's not guaranteed) equals to activeLocalNodeID
+            assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
         } finally {
             manager.stop();
         }

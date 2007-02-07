@@ -56,18 +56,17 @@ public class LimeDHTManager implements DHTManager {
      * */
     private SchedulingThreadPool threadPool;
     
-    private volatile boolean stopped;
+    private boolean stopped = false;
     
     public LimeDHTManager(SchedulingThreadPool threadPool) {
         this.threadPool = threadPool;
     }
     
-    public void start(final boolean activeMode) {
+    public synchronized void start(final boolean activeMode) {
         
         stopped = false;
-        Runnable r = new Runnable() {
+        Runnable task = new Runnable() {
             public void run() {
-                
                 synchronized(LimeDHTManager.this) {
                     //could have been stopped before this gets executed
                     if(stopped) {
@@ -92,7 +91,7 @@ public class LimeDHTManager implements DHTManager {
                 }
             }
         };
-        threadPool.invokeLater(r);
+        threadPool.invokeLater(task);
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
