@@ -36,7 +36,6 @@ import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
-import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.service.ErrorService;
 
 
@@ -198,24 +197,28 @@ public class DHTValueManager implements Runnable {
                     return false;
                 }
                 
-                if (entity.isLocalValue()) {
-                    if (!entity.isRepublishingRequired()) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(entity + " does not require republishing");
-                        }
-                        return false;
+                RepublishManager republishManager 
+                    = context.getRepublishManager();
+                
+                // Check if the value is expired? If so remove it!
+                if (republishManager.isExpired(context, entity)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(entity + " is expired!");
                     }
-                } else {
-                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace(entity + " is expired!");
-                        }
-                        
-                        database.remove(entity);
-                        databaseStats.EXPIRED_VALUES.incrementStat();
-                        return false;
+                    
+                    database.remove(entity);
+                    databaseStats.EXPIRED_VALUES.incrementStat();
+                    return false;
+                
+                // Is republishing required? If NO then continue with the
+                // next value
+                } else if (!republishManager.isRepublishingRequired(context, entity)) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(entity + " does not require republishing");
                     }
-                }
+                    return false;
+                    
+                } 
             }
             
             databaseStats.REPUBLISHED_VALUES.incrementStat();

@@ -30,7 +30,9 @@ import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.RepublishManager;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -206,6 +208,26 @@ public interface MojitoDHT {
      * Returns the Database
      */
     public Database getDatabase();
+    
+    /**
+     * 
+     */
+    public void setDHTValueFactory(DHTValueFactory valueFactory);
+    
+    /**
+     * 
+     */
+    public DHTValueFactory getDHTValueFactory();
+    
+    /**
+     * 
+     */
+    public void setRepublishManager(RepublishManager republishManager);
+    
+    /**
+     * 
+     */
+    public RepublishManager getRepublishManager();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use

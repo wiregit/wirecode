@@ -94,7 +94,7 @@ public class DHTValueTest extends MojitoTestCase {
             // Pre-Condition
             assertEquals(0, value.getLocationCount());
             assertEquals(0L, value.getPublishTime());
-            assertTrue(value.isRepublishingRequired());
+            assertTrue(first.getRepublishManager().isRepublishingRequired((Context)first, value));
             
             // Store...
             StoreResult result = ((Context)first).store(value).get();
@@ -106,7 +106,7 @@ public class DHTValueTest extends MojitoTestCase {
             assertSame(value, result.getSucceeded().iterator().next());
             assertEquals(k, value.getLocationCount());
             assertGreaterThanOrEquals(time, value.getPublishTime());
-            assertFalse(value.isRepublishingRequired());
+            assertFalse(first.getRepublishManager().isRepublishingRequired((Context)first, value));
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {

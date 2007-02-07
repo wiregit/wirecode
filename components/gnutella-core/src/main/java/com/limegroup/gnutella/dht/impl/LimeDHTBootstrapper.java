@@ -29,7 +29,7 @@ import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -264,7 +264,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      */
     private void finish() {
         controller.sendUpdatedCapabilities();
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.CONNECTED));
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**

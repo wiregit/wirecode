@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +31,15 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
+import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -42,6 +55,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RemoteHostData;
 import com.limegroup.gnutella.RouterService;
@@ -58,6 +72,9 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.dht.AltLocDHTValueImpl;
+import com.limegroup.gnutella.dht.AltLocDHTValue;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1803,7 +1820,85 @@ public class ManagedDownloader extends AbstractDownloader
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
 
+        // TODO this is just for now. Makes testing easier...
+        DHTManager dhtManager = RouterService.getDHTManager();
+        synchronized (dhtManager) {
+            if (dhtManager.isBootstrapped()) {
+                DHTFuture<FindValueResult> future = dhtManager.getAltLocs(getSHA1Urn());
+                
+                DHTFutureListener<FindValueResult> listener 
+                        = new DHTFutureAdapter<FindValueResult>() {
+                    @Override
+                    public void handleFutureSuccess(FindValueResult result) {
+                        resume(result);
+                    }
+                };
+                
+                future.addDHTFutureListener(listener);
+            }
+        }
+        
         return true;
+    }
+    
+    private void resume(FindValueResult result) {
+        RemoteFileDesc original = null;
+        for (RemoteFileDesc rfd : currentRFDs) {
+            original = rfd;
+            break;
+        }
+        
+        if (original == null) {
+            return;
+        }
+        
+        for (Future<DHTValueEntity> future : result) {
+            try {
+                DHTValueEntity entity = future.get();
+                DHTValue value = entity.getValue();
+                if (value instanceof AltLocDHTValue) {
+                    AltLocDHTValue altLoc = (AltLocDHTValue)value;
+                    Contact creator = entity.getCreator();
+                    
+                    // The IP-Address of the Value creator. It can be
+                    // two things! It's either the address of the Host
+                    // who has the actual file (a non-firewalled Node that's
+                    // connected to the DHT) or it's the address of a
+                    // Node's Ultrapeer who published the value for the
+                    // firewalled Node.
+                    InetAddress addr = ((InetSocketAddress)
+                            creator.getContactAddress()).getAddress();
+                    
+                    RemoteFileDesc rfd = null;
+                    
+                    if (altLoc.isFirewalled()) {
+                        // The firewalled Leaf
+                        byte[] guid = altLoc.getGUID();
+                        int features = altLoc.getFeatures();
+                        int fwtVersion = altLoc.getFwtVersion();
+                        IpPort ipp = new IpPortImpl(altLoc.getInetAddress(), altLoc.getPort());
+                        
+                        // Its Ultrapeer that published the Value. If they're 
+                        // still connected then we're pretty much done. If no
+                        // you must probably do a second lookup for SHA-1(GUID)
+                        // to find the Leaf's Push Proxies
+                        IpPort proxy = new IpPortImpl(addr, altLoc.getPushProxyPort());
+                        
+                        rfd = new RemoteFileDesc(original, new PushEndpoint(
+                                guid, Collections.singleton(proxy), features, fwtVersion, ipp));
+                        
+                    } else {
+                        rfd = new RemoteFileDesc(original, new IpPortImpl(addr, altLoc.getPort()));
+                    }
+                    
+                    if (rfd != null) {
+                        addDownload(rfd, false);
+                    }
+                }
+            } catch (ExecutionException e) {
+            } catch (InterruptedException e) {
+            }
+        }
     }
     
     /**

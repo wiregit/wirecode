@@ -2,12 +2,19 @@ package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 
 public class DHTManagerStub implements DHTManager {
@@ -50,5 +57,21 @@ public class DHTManagerStub implements DHTManager {
     
     public Version getVersion() {
         return Version.UNKNOWN;
+    }
+
+    public DHTFuture<FindValueResult> getAltLocs(URN urn) {
+        return null;
+    }
+
+    public DHTFuture<FindValueResult> getPushProxies(GUID guid) {
+        return null;
+    }
+
+    public DHTFuture<StoreResult> putAltLoc(FileDesc fd) {
+        return null;
+    }
+    
+    public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {
+        return null;
     }
 }

@@ -4,20 +4,20 @@ import java.util.EventObject;
 
 public class DHTEvent extends EventObject {
     
-    public static enum EventType {
+    public static enum Type {
         STARTING,
         CONNECTED,
         STOPPED;
     }
     
-    private final EventType type;
+    private final Type type;
 
-    public DHTEvent(Object source, EventType type) {
+    public DHTEvent(Object source, Type type) {
         super(source);
         this.type = type;
     }
 
-    public EventType getType() {
+    public Type getType() {
         return type;
     }
 }

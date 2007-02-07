@@ -1,21 +1,38 @@
 package com.limegroup.gnutella.dht.impl;
 
+import java.io.IOException;
 import java.net.SocketAddress;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValueBag;
+import org.limewire.mojito.db.Database;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.AltLocDHTValueImpl;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.PushProxiesDHTValueImpl;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -227,5 +244,91 @@ public class LimeDHTManager implements DHTManager {
     
     public Version getVersion() {
         return version;
+    }
+    
+    /*
+     * The following methods are just prototypes. They'll
+     * be moved to somewhere else if necessary!
+     */
+    
+    public DHTFuture<FindValueResult> getAltLocs(URN urn) {
+        return getMojitoDHT().get(toKUID(urn));
+    }
+    
+    public DHTFuture<FindValueResult> getPushProxies(GUID guid) {
+        return getMojitoDHT().get(toKUID(guid));
+    }
+    
+    public DHTFuture<StoreResult> putAltLoc(FileDesc fd) {
+        KUID key = toKUID(fd.getSHA1Urn());
+        return getMojitoDHT().put(key, AltLocDHTValueImpl.LOCAL_HOST);
+    }
+    
+    public DHTFuture<StoreResult> putAltLoc(URN urn, GUID guid, IpPort ipp, int features, int fwtVersion) {
+        if (!RouterService.getConnectionManager().isActiveSupernode()) {
+            throw new IllegalStateException("This method works only if we are an Ultrapeer");
+        }
+        
+        KUID key = toKUID(urn);
+        return getMojitoDHT().put(key, AltLocDHTValueImpl.createProxyValue(guid, ipp, features, fwtVersion));
+    }
+    
+    public DHTFuture<StoreResult> putPushProxy(GUID guid, Set<? extends IpPort> proxies) {
+        KUID key = toKUID(guid);
+        return getMojitoDHT().put(key, PushProxiesDHTValueImpl.createProxyValue(proxies));
+    }
+    
+    public static KUID toKUID(URN urn) {
+        if (!urn.isSHA1()) {
+            throw new IllegalArgumentException("Expected a SHA-1 URN: " + urn);
+        }
+        return KUID.createWithBytes(urn.getBytes());
+    }
+    
+    public static KUID toKUID(GUID guid) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            md.update(guid.bytes());
+            byte[] digest = md.digest();
+            return KUID.createWithBytes(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static URN toURN(KUID kuid) {
+        try {
+            return URN.createSHA1UrnFromBytes(kuid.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public static boolean isRare(FileDesc fd) {
+        long time = fd.getLastAttemptedUploadTime();
+        return (System.currentTimeMillis() - time >= 0);
+    }
+    
+    public void publish() {
+        FileDesc[] fds = RouterService.getFileManager().getAllSharedFileDescriptors();
+        
+        MojitoDHT dht = getMojitoDHT();
+        Database database = dht.getDatabase();
+        synchronized (database) {
+            for (FileDesc fd : fds) {
+                if (fd instanceof IncompleteFileDesc) {
+                    continue;
+                }
+                
+                boolean rare = isRare(fd);
+                KUID key = toKUID(fd.getSHA1Urn());
+                DHTValueBag bag = database.get(key);
+                if (bag == null && rare) {
+                    dht.put(key, AltLocDHTValueImpl.LOCAL_HOST);
+                } else if (bag != null && !rare){
+                    dht.remove(key);
+                }
+            }
+        }
     }
 }

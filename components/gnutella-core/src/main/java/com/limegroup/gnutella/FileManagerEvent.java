@@ -120,10 +120,17 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Returns true if this is a REMOVE_FOLDER event;
+     * Returns true if this is a REMOVE_FOLDER event
      */
     public boolean isRemoveFolderEvent() {
         return kind.equals(Type.REMOVE_FOLDER);
+    }
+    
+    /**
+     * Returns true of this is neither a ADD_FOLDER nor REMOVE_FOLDER event
+     */
+    public boolean isFileEvent() {
+        return !isAddFolderEvent() && !isRemoveFolderEvent();
     }
     
     public String toString() {

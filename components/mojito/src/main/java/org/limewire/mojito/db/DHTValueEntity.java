@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.util.DatabaseUtils;
 
 
 /**
@@ -192,6 +191,14 @@ public class DHTValueEntity implements Map.Entry<KUID, DHTValue>, Serializable {
     }
     
     /**
+     * Returns true if this an entity for a local value
+     * and has been published at least once
+     */
+    public boolean hasBeenPublished() {
+        return localValue && publishTime > 0L; 
+    }
+    
+    /**
      * Returns true if this is a local value
      */
     public boolean isLocalValue() {
@@ -209,21 +216,6 @@ public class DHTValueEntity implements Map.Entry<KUID, DHTValue>, Serializable {
         }
         
         return creator.equals(sender);
-    }
-    
-    /**
-     * Returns true if this value needs to be republished
-     */
-    public boolean isRepublishingRequired() {
-        if (!isLocalValue()) {
-            return false;
-        }
-        
-        if (publishTime == 0L) {
-            return true;
-        }
-        
-        return DatabaseUtils.isRepublishingRequired(publishTime, locationCount);
     }
     
     public int hashCode() {
