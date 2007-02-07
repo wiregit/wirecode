@@ -504,7 +504,8 @@ public final class NetworkUtils {
     }
     
     /**
-     * Returns true if both InetAddresses are either IPv4 or IPv6 addresses
+     * Returns true if both InetAddresses are compatible (IPv4 and IPv4,
+     * IPv6 and IPv6 or IPv4 and an IPv4 compatible IPv6 address).
      * 
      * This method is IPv6 compliant
      */
@@ -513,20 +514,23 @@ public final class NetworkUtils {
             return false;
         }
         
-        boolean aIPv4 = (a instanceof Inet4Address);
-        boolean bIPv4 = (b instanceof Inet4Address);
-        
         // Both are either IPv4 or IPv6
-        if ((aIPv4 && bIPv4) || (!aIPv4 && !bIPv4)) {
+        if ((a instanceof Inet4Address && b instanceof Inet4Address)
+                || (a instanceof Inet6Address && b instanceof Inet6Address)) {
             return true;
             
-        // If 'a' is IPv4 then 'b' must be an IPv4 compatible address
-        } else if (aIPv4) {
+        // Is 'b' IPv4 compatible?
+        } else if (a instanceof Inet4Address && b instanceof Inet6Address) {
             return ((Inet6Address)b).isIPv4CompatibleAddress();
-            
-        // Else if 'b' is IPv4 then 'a' must be an IPv4 compatible address
-        } else {
+        
+        // Is 'a' IPv4 compatible?
+        } else if (a instanceof Inet6Address && b instanceof Inet4Address) {
             return ((Inet6Address)a).isIPv4CompatibleAddress();
         }
+        
+        // No clue! This method works only with known InetAddress
+        // implementations!
+        // TODO: Add support for vaporware like IPv9 :)
+        throw new IllegalArgumentException(a + " and/or " + b + " are unknown InetAddress instances");
     }
 }
