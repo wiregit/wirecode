@@ -9,6 +9,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 /* This extends BaseTestCase on purpose!  We don't want the overhead of LimeTestCase! */
@@ -39,15 +40,17 @@ public class LimeCoreGlueTest extends BaseTestCase {
         
         List<Class> nextLoaded = getLoadedClasses();
         
-        String[] expected = {"com.limegroup.gnutella.LimeCoreGlue", 
+        List<String> expected = new LinkedList<String>(Arrays.asList(new String[]
+                            {"com.limegroup.gnutella.LimeCoreGlue", 
                              "org.limewire.setting.RemoteSettingManager",
                              "org.limewire.io.LocalSocketAddressProvider",
                              "org.limewire.security.QueryKey$SettingsProvider", 
                              "com.limegroup.gnutella.util.LimeWireUtils", 
                              "org.limewire.util.CommonUtils", 
                              "org.limewire.util.FileUtils", 
-                             "org.limewire.util.OSUtils", 
-                             "org.limewire.util.SystemUtils"};
+                             "org.limewire.util.OSUtils"}));
+        if(OSUtils.isWindows() || OSUtils.isMacOSX())
+            expected.add("org.limewire.util.SystemUtils");
         
         removeClasses(nextLoaded, expected);
         
@@ -75,19 +78,18 @@ public class LimeCoreGlueTest extends BaseTestCase {
         return false;
     }
     
-    private void removeClasses(List<Class> classes, String[] expected) {
-        List<String> want = new LinkedList<String>(Arrays.asList(expected));
+    private void removeClasses(List<Class> classes, List<String> expected) {
         for(Iterator<Class> i = classes.iterator(); i.hasNext(); ) {
             Class next = i.next();
-            if(want.contains(next.getName())) {
+            if(expected.contains(next.getName())) {
                 i.remove();
-                want.remove(next.getName());
+                expected.remove(next.getName());
             }
             
-            if(want.isEmpty())
+            if(expected.isEmpty())
                 break;
         }
-        if(!want.isEmpty())
-            fail("didn't find all expected classes: " + want);
+        if(!expected.isEmpty())
+            fail("didn't find all expected classes: " + expected);
     }
 }

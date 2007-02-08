@@ -90,4 +90,8 @@ public final class UISettings extends LimeProps {
 	 */
 	public static final IntSetting UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION =
 		FACTORY.createIntSetting("UI_MONITOR_UPLOAD_TAB_DIVIDER_LOCATION", 300);
+    
+    /** Setting for if native icons should be preloaded. */
+    public static final BooleanSetting PRELOAD_NATIVE_ICONS =
+        FACTORY.createBooleanSetting("PRELOAD_NATIVE_ICONS", true);
 }

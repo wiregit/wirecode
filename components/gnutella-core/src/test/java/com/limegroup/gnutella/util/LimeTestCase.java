@@ -39,6 +39,7 @@ import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UISettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 @SuppressWarnings("unchecked")
@@ -211,6 +212,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SharingSettings.setSaveDirectory(_savedDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
+        UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
         LimeCoreGlue.install();
