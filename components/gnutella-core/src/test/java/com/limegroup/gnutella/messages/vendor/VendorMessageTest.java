@@ -339,7 +339,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         catch (BadPacketException expected) {};
 
         // test that it can handle versions other than 1
-        payload = new byte[3];
+        payload = new byte[7];
         try {
             vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
                                               (byte) 0, 3, payload);

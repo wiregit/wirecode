@@ -77,6 +77,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
                                 int numResults) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, OLD_VERSION,
                 derivePayload(numResults));
+        setGUID(replyGUID);
     }
     
     /**
