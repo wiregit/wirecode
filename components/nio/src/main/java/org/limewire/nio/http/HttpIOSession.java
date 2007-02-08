@@ -43,6 +43,7 @@ public class HttpIOSession implements IOSession {
 
     public void close() {
         socket.close();
+        channel.shutdown();
     }
 
     public Object getAttribute(String name) {

@@ -25,9 +25,7 @@ import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.NHttpClientConnection;
 import org.apache.http.nio.NHttpClientHandler;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -51,7 +49,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public class HttpIOReactorTest extends BaseTestCase {
 
     private static final int ACCEPTOR_PORT = 9999;
-    private static Acceptor acceptThread;
+    private static Acceptor acceptor;
     
     public HttpIOReactorTest(String name) {
         super(name);
@@ -68,9 +66,9 @@ public class HttpIOReactorTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
         
-        acceptThread = new Acceptor();
-        acceptThread.start();
-        acceptThread.setListeningPort(ACCEPTOR_PORT);
+        acceptor = new Acceptor();
+        acceptor.start();
+        acceptor.setListeningPort(ACCEPTOR_PORT);
         
         // Give thread time to find and open it's sockets.   This race condition
         // is tolerated in order to speed up LimeWire startup
@@ -80,7 +78,7 @@ public class HttpIOReactorTest extends BaseTestCase {
     }
 
     public static void globealTearDown() throws Exception {
-        acceptThread.setListeningPort(0);
+        acceptor.setListeningPort(0);
     }
 
     public void testGet() throws Exception {
@@ -93,15 +91,16 @@ public class HttpIOReactorTest extends BaseTestCase {
             .setBooleanParameter(HttpConnectionParams.TCP_NODELAY, true)
             .setParameter(HttpProtocolParams.USER_AGENT, "LimeWire");
 
-        ConnectingIOReactor ioReactor = new HttpIOReactor(params);
+        HttpIOReactor ioReactor = new HttpIOReactor(params);
         MyNHttpClientHandler handler = new MyNHttpClientHandler(params);
         IOEventDispatch ioEventDispatch = new DefaultClientIOEventDispatch(handler, params);
         ioReactor.execute(ioEventDispatch);
         
-        SessionRequest request = ioReactor.connect(
+        HttpSessionRequest request = ioReactor.createSession(
                 new InetSocketAddress("www.limewire.com", 80), 
                 null, 
                 new HttpHost("www.limewire.com"));
+        ioReactor.connect(request);
         
         synchronized (handler) {
             handler.wait();

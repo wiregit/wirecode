@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.nio.http;
 
 import java.io.IOException;
@@ -13,27 +10,38 @@ import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 
-public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWriter {
+/**
+ * A read/write channel implementation that forwards all requests received from
+ * HttpComponent to LimeWire's NIO layer.
+ */
+public class HttpChannel implements ByteChannel, ChannelReadObserver,
+        ChannelWriter {
 
     private HttpIOSession session;
+
     private boolean closed;
+
     private IOEventDispatch eventDispatch;
+
     private InterestReadableByteChannel readSource;
+
     private InterestWritableByteChannel writeSource;
+
     private boolean writeInterest;
+
     private boolean readInterest;
 
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch) {
         this.session = session;
         this.eventDispatch = eventDispatch;
     }
-    
+
     public int read(ByteBuffer buffer) throws IOException {
         return readSource.read(buffer);
     }
 
     public void close() throws IOException {
-        closed = true;
+        shutdown();
     }
 
     public boolean isOpen() {
@@ -41,7 +49,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWri
     }
 
     public int write(ByteBuffer buffer) throws IOException {
-        return writeSource.write(buffer); 
+        return writeSource.write(buffer);
     }
 
     public void handleRead() throws IOException {
@@ -53,7 +61,8 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWri
     }
 
     public void shutdown() {
-        HttpIOReactor.LOG.error("Shutdown");
+        closed = true;
+        eventDispatch.disconnected(session);
     }
 
     public InterestReadableByteChannel getReadChannel() {
@@ -62,13 +71,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWri
 
     public void setReadChannel(InterestReadableByteChannel source) {
         this.readSource = source;
-        this.readSource.interest(readInterest); 
+        this.readSource.interest(readInterest);
     }
 
     public synchronized InterestWritableByteChannel getWriteChannel() {
         return writeSource;
     }
-    
+
     public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
         this.writeSource = channel;
         this.writeSource.interest(this, writeInterest);
@@ -92,5 +101,5 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver, ChannelWri
             writeSource.interest(this, status);
         }
     }
-    
+
 }
