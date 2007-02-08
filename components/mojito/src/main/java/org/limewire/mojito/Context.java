@@ -1024,7 +1024,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * A helper method to create DHTValueEntities
      */
     public DHTValueEntity createDHTValueEntity(KUID key, DHTValue value) {
-        return new DHTValueEntity(getLocalNode(), getLocalNode(), key, value, true);
+        return valueFactory.createDHTValueEntity(getLocalNode(), getLocalNode(), key, value, true);
     }
     
     /*
@@ -1060,6 +1060,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             if (immediateStore) {
                 return store(entity);
             } else {
+                // TODO throw a specific exception
                 Exception ex = new Exception(getName() 
                             + ": Stroring is handled by DHTValueManager");
                 return new FixedDHTFuture<StoreResult>(ex);

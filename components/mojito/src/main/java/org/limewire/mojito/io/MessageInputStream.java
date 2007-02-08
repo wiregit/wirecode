@@ -102,7 +102,7 @@ public class MessageInputStream extends DataInputStream {
     }
     
     /**
-     * Reads a DHTValue from the InputStream 
+     * Reads a DHTValueEntity from the InputStream 
      * 
      * @param sender The Contact that send us the DHTValue
      */
@@ -110,11 +110,11 @@ public class MessageInputStream extends DataInputStream {
         Contact creator = readContact();
         KUID valueId = readKUID();
         DHTValue value = readDHTValue(factory);
-        return new DHTValueEntity(creator, sender, valueId, value, false);
+        return factory.createDHTValueEntity(creator, sender, valueId, value, false);
     }
     
     /**
-     * 
+     * Reads a DHTValue from the InputStream 
      */
     private DHTValue readDHTValue(DHTValueFactory factory) throws IOException {
         DHTValueType valueType = readValueType();

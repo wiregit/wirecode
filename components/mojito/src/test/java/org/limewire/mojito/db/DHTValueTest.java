@@ -30,6 +30,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
+import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
@@ -87,7 +88,7 @@ public class DHTValueTest extends MojitoTestCase {
             byte[] b = "Hello World".getBytes();
             
             long time = System.currentTimeMillis();
-            DHTValueEntity value = new DHTValueEntity(
+            DHTValueEntity value = new DHTValueEntityImpl(
                     first.getLocalNode(), first.getLocalNode(), key, 
                         new DHTValueImpl(type, version, b), true);
             

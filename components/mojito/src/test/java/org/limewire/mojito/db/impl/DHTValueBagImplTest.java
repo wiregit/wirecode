@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
@@ -94,12 +93,12 @@ public class DHTValueBagImplTest extends MojitoTestCase {
         		KUID.createRandomID(), addr, 0, Contact.DEFAULT_FLAG);   
         
         try {
-            bag.add(new DHTValueEntity(creator, sender, KUID.createRandomID(), 
+            bag.add(new DHTValueEntityImpl(creator, sender, KUID.createRandomID(), 
                         new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false));
         	assertTrue("Should have thrown an exception: wrong KUID", false);
         } catch(IllegalArgumentException ex) {}
         
-        bag.add(new DHTValueEntity(creator, sender, valueId, 
+        bag.add(new DHTValueEntityImpl(creator, sender, valueId, 
                     new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false));
         
         assertEquals(1, bag.size());

@@ -25,239 +25,83 @@ import java.util.Map;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
-
 /**
  * A DHTValueEntity
  */
-public class DHTValueEntity implements Map.Entry<KUID, DHTValue>, Serializable {
-    
-    private static final long serialVersionUID = 2007158043378144871L;
-
-    /**
-     * The creator of the value
-     */
-    private final Contact creator;
-    
-    /**
-     * The sender of the value (store forward)
-     */
-    private final Contact sender;
-    
-    /**
-     * The (primary) key of the value
-     */
-    private final KUID primaryKey;
-    
-    /**
-     * The secondary key of the value
-     */
-    private final KUID secondaryKey;
-    
-    /**
-     * The actual value
-     */
-    private final DHTValue value;
-    
-    /**
-     * Whether or not this is a local value
-     */
-    private final boolean localValue;
-    
-    /**
-     * The time when this value was created (local time)
-     */
-    private final long creationTime = System.currentTimeMillis();
-    
-    /**
-     * If it's a non-local value we don't care about this
-     * value as we're not republishing non-local values!
-     * 
-     * If it's a local value we assume it gets published
-     * as soon as the value was created.
-     */
-    private transient long publishTime = 0L;
-    
-    /**
-     * The number of locations where this value was stored
-     */
-    private transient int locationCount = 0;
-    
-    /**
-     * The hash code of this entity
-     */
-    private final int hashCode;
-    
-    /**
-     * 
-     */
-    public DHTValueEntity(Contact creator, Contact sender, 
-            KUID primaryKey, DHTValue value, boolean localValue) {
-        this(creator, sender, primaryKey, creator.getNodeID(), value, localValue);
-    }
-    
-    /**
-     * 
-     */
-    private DHTValueEntity(Contact creator, Contact sender, 
-            KUID primaryKey, KUID secondaryKey, DHTValue value, boolean localValue) {
-        this.creator = creator;
-        this.sender = sender;
-        this.primaryKey = primaryKey;
-        this.secondaryKey = secondaryKey;
-        this.value = value;
-        this.localValue = localValue;
-        
-        this.hashCode = 17*primaryKey.hashCode() + secondaryKey.hashCode();
-    }
+public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable {
     
     /**
      * Returns the creator of this value
      */
-    public Contact getCreator() {
-        return creator;
-    }
+    public Contact getCreator();
     
     /**
      * Returns the sender of this value
      */
-    public Contact getSender() {
-        return sender;
-    }
+    public Contact getSender();
     
     /**
      * Returns the primary key of this value
      */
-    public KUID getKey() {
-        return primaryKey;
-    }
+    public KUID getKey();
     
     /**
      * Returns the secondary key of this value
      */
-    public KUID getSecondaryKey() {
-        return secondaryKey;
-    }
+    public KUID getSecondaryKey();
     
     /**
      * Returns the value
      */
-    public DHTValue getValue() {
-        return value;
-    }
+    public DHTValue getValue();
     
     /**
      * This is an unsupported operation and throws thus
      * an UnsupportedOperationException
      */
-    public DHTValue setValue(DHTValue value) {
-        throw new UnsupportedOperationException();
-    }
+    public DHTValue setValue(DHTValue value);
 
     /**
      * Returns the creation time
      */
-    public long getCreationTime() {
-        return creationTime;
-    }
+    public long getCreationTime();
     
     /**
      * Returns the time when this value was published
      */
-    public long getPublishTime() {
-        return publishTime;
-    }
+    public long getPublishTime();
     
     /**
      * Returns the number of locations where this value is stored
      */
-    public int getLocationCount() {
-        return locationCount;
-    }
+    public int getLocationCount();
     
     /**
      * Sets the number of locations where this value is stored
      */
-    public void setLocationCount(int locationCount) {
-        if (locationCount < 0) {
-            throw new IllegalArgumentException("locations: " + locationCount);
-        }
-        
-        if (!isLocalValue()) {
-            return;
-        }
-        
-        this.locationCount = locationCount;
-        this.publishTime = System.currentTimeMillis();
-    }
+    public void setLocationCount(int locationCount);
     
     /**
      * Returns true if this an entity for a local value
      * and has been published at least once
      */
-    public boolean hasBeenPublished() {
-        return localValue && publishTime > 0L; 
-    }
+    public boolean hasBeenPublished();
     
     /**
      * Returns true if this is a local value
      */
-    public boolean isLocalValue() {
-        return localValue;
-    }
+    public boolean isLocalValue();
     
     /**
      * Returns true if this value was stored directly
      * by the creator of the value (that means creator
      * and sender are the same).
      */
-    public boolean isDirect() {
-        if (isLocalValue()) {
-            return true;
-        }
-        
-        return creator.equals(sender);
-    }
-    
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        } else if (!(o instanceof DHTValueEntity)) {
-            return false;
-        }
-        
-        DHTValueEntity other = (DHTValueEntity)o;
-        return primaryKey.equals(other.primaryKey)
-                    && secondaryKey.equals(other.secondaryKey);
-    }
+    public boolean isDirect();
     
     /**
      * Creates a new DHTValueEntity with the given new creator
      * if this is a local value
      */
-    public DHTValueEntity changeCreator(Contact creator) {
-        if (!isLocalValue()) {
-            throw new UnsupportedOperationException();
-        }
-        
-        return new DHTValueEntity(
-                creator, creator, primaryKey, secondaryKey, value, true);
-    }
-    
-    public String toString() {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("Creator: ").append(creator).append("\n");
-        buffer.append("Sender: ").append(sender).append("\n");
-        buffer.append("Primary Key: ").append(primaryKey).append("\n");
-        buffer.append("Secondary Key: ").append(secondaryKey).append("\n");
-        buffer.append("Local: ").append(localValue).append("\n");
-        buffer.append("Locations: ").append(locationCount).append("\n");
-        buffer.append("Creation time: ").append(creationTime).append("\n");
-        buffer.append("Publish time: ").append(publishTime).append("\n");
-        buffer.append("---\n").append(value).append("\n");
-        return buffer.toString();
-    }
+    public DHTValueEntity changeCreator(Contact creator);
 }

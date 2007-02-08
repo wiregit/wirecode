@@ -19,16 +19,35 @@
 
 package org.limewire.mojito.db;
 
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.exceptions.DHTValueException;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 
 /**
- * 
+ * A factory interface to create DHTValues and DHTValueEntities
  */
 public interface DHTValueFactory {
     
     /**
+     * Creates a DHTValueIdentity
      * 
+     * @param creator The creator of the value
+     * @param sender The sender of the value (creator and sender are
+     * different if a value was store forwarded)
+     * @param primaryKey The primary key of the value
+     * @param value The aactual value
+     * @param localValue Indicates if it's a local or remote value
+     */
+    public DHTValueEntity createDHTValueEntity(Contact creator, Contact sender, 
+            KUID primaryKey, DHTValue value, boolean localValue);
+    
+    /**
+     * Creates a DHTValue
+     * 
+     * @param type The type of the value
+     * @param version The version of the value
+     * @param value The actual value
      */
     public DHTValue createDHTValue(DHTValueType type, Version version, byte[] value) throws DHTValueException;
 }
