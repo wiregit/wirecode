@@ -35,7 +35,13 @@ public class OOBTokenData implements SecurityToken.TokenData {
         DataOutputStream data = new DataOutputStream(baos);
         try {
             data.writeShort(port);
-            data.write(NetworkUtils.getIPV6AddressBytes(address));
+            if (NetworkUtils.isIPv6Compatible(address)) {
+                data.write(NetworkUtils.getIPv6AddressBytes(address));
+            }
+            else {
+                // unkown inet address, write its full address bytes
+                data.write(address.getAddress());
+            }
             data.write(numRequests);
             data.write(guid);
         }

@@ -518,7 +518,11 @@ public final class NetworkUtils {
         }*/
     }
     
-    public static byte[] getIPV6AddressBytes(InetAddress address) {
+    /**
+     * Returns the IPv6 address bytes of IPv6 and IPv4 IP addresses. 
+     * @throws IllegalArgumentException if given a different address type
+     */
+    public static byte[] getIPv6AddressBytes(InetAddress address) {
         byte[] bytes = address.getAddress();
         switch (bytes.length) {
         case 16:
@@ -532,5 +536,13 @@ public final class NetworkUtils {
         default:
             throw new IllegalArgumentException("unhandled address length");
         }
+    }
+    
+    /**
+     * Returns true if an IPv6 representation of <code>address</code> exists.
+     */
+    public static boolean isIPv6Compatible(InetAddress address) {
+        int length = address.getAddress().length;
+        return length == 4 || length == 16;
     }
 }

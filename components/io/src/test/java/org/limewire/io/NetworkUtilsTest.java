@@ -229,7 +229,7 @@ public class NetworkUtilsTest extends BaseTestCase {
         for (String name : new String[] { "127.0.0.1", "255.255.255.0", 
                 "192.168.0.1", "128.0.245.90" }) {
             InetAddress addr = InetAddress.getByName(name);
-            byte[] bytes = NetworkUtils.getIPV6AddressBytes(addr);
+            byte[] bytes = NetworkUtils.getIPv6AddressBytes(addr);
             assertEquals(16, bytes.length);
             InetAddress res = InetAddress.getByAddress(bytes); 
             assertTrue(res instanceof Inet4Address);
@@ -240,7 +240,7 @@ public class NetworkUtilsTest extends BaseTestCase {
                 "[2001:0db8:0000:0000:0000:0000:1428:57ab]",
                 "[2001:0db8::1428:57ab]"}) {
             InetAddress addr = InetAddress.getByName(name);
-            byte[] bytes = NetworkUtils.getIPV6AddressBytes(addr);
+            byte[] bytes = NetworkUtils.getIPv6AddressBytes(addr);
             assertEquals(addr.getAddress(), bytes);
             InetAddress res = InetAddress.getByAddress(bytes);
             assertTrue(res instanceof Inet6Address);
