@@ -25,7 +25,7 @@ public class DHTSettings extends LimeProps{
      * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting ACTIVE_DHT_CAPABLE =
-        FACTORY.createExpirableBooleanSetting("EVER_DHT_CAPABLE", false);
+        FACTORY.createExpirableBooleanSetting("ACTIVE_DHT_CAPABLE", false);
     
     /**
      * Setting to force DHT capability
@@ -52,16 +52,16 @@ public class DHTSettings extends LimeProps{
      * WARNING : DO NOT MANUALLY CHANGE THIS 
      */
     public static final LongSetting MIN_DHT_AVG_UPTIME =
-        FACTORY.createRemoteLongSetting("MIN_DHT_AVG_UPTIME",120*60*1000L,
-                "DHTSettings.MinDHTAvgUptime",0*60*1000L,48*3600*1000L);
+        FACTORY.createRemoteLongSetting("MIN_DHT_AVG_UPTIME", 120*60*1000L,
+                "DHTSettings.MinDHTAvgUptime", 5L*60L*1000L, 48*3600*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT.
      * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final LongSetting MIN_DHT_INITIAL_UPTIME =
-        FACTORY.createRemoteLongSetting("MIN_DHT_INITIAL_UPTIME",120*60*1000L,
-                "DHTSettings.MinDHTInitialUptime",0*60*1000L,48*3600*1000L);
+        FACTORY.createRemoteLongSetting("MIN_DHT_INITIAL_UPTIME", 120*60*1000L,
+                "DHTSettings.MinDHTInitialUptime", 5L*60L*1000L, 48*3600*1000L);
     
     /**
      * Setting for whether or not an ultrapeer can join the DHT.
@@ -98,7 +98,7 @@ public class DHTSettings extends LimeProps{
     public static final LongSetting DHT_NODE_FETCHER_TIME =
         //30 minutes for now
         FACTORY.createRemoteLongSetting("DHT_NODE_FETCHER_TIME", 
-                30L * 60L * 1000L, "DHTSettings.DHTNodeFetcherTime", 0L, 60L * 60L * 1000L); 
+                30L * 60L * 1000L, "DHTSettings.DHTNodeFetcherTime", 60L * 1000L, 60L * 60L * 1000L); 
     
     /**
      * The maximum amount of time for which we will ping the network for DHT nodes
@@ -113,7 +113,7 @@ public class DHTSettings extends LimeProps{
     public static final LongSetting DHT_NODE_ADDER_DELAY =
         //30 minutes for now
         FACTORY.createRemoteLongSetting("DHT_NODE_ADDER_TIME", 
-                30L * 60L * 1000L, "DHTSettings.DHTNodeAdderTime", 0L, 24L * 60L * 60L * 1000L); 
+                30L * 60L * 1000L, "DHTSettings.DHTNodeAdderTime", 30L * 1000L, 24L * 60L * 60L * 1000L); 
     
     /**
      * Setting for the number of persisted DHT nodes if this node is a passive DHT node
