@@ -114,7 +114,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private int _featureSelector = 0;
 
-    private boolean _hasSecurityTokenRequest;
+    private boolean _isSecurityTokenRequested;
     
     /**
      * Whether or not the GGEP header for Do Not Proxy was found.
@@ -1359,7 +1359,7 @@ public class QueryRequest extends Message implements Serializable{
                             _metaMask = null;
                     }
                     if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB))
-                        _hasSecurityTokenRequest = true;
+                        _isSecurityTokenRequested = true;
                 } catch (BadGGEPPropertyException ignored) {}
             }
 
@@ -1571,11 +1571,7 @@ public class QueryRequest extends Message implements Serializable{
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return desiresOutOfBandRepliesV3();
-    }
-
-    public boolean desiresOutOfBandRepliesV3() {
-        return hasSecurityTokenRequest();
+        return isSecurityTokenRequired();
     }
 
     /**
@@ -1618,8 +1614,8 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Returns true if the query request has a security token request.
      */
-    public boolean hasSecurityTokenRequest() {
-        return _hasSecurityTokenRequest;
+    public boolean isSecurityTokenRequired() {
+        return _isSecurityTokenRequested;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful
