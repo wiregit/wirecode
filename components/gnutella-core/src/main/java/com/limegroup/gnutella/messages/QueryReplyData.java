@@ -60,7 +60,10 @@ class QueryReplyData {
     private volatile SecureGGEPData secureGGEP;
     
     /** The xml chunk that contains metadata about xml responses*/  
-    private volatile byte[] xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;  
+    private volatile byte[] xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
+    
+    /** A secure token, if any */
+    private volatile byte[] securityToken = null;
     
 
     public int getBusyFlag() {
@@ -199,4 +202,11 @@ class QueryReplyData {
         this.xmlBytes = xmlBytes;
     }
     
+    public void setSecurityToken(byte[] securityToken) {
+        this.securityToken = securityToken;
+    }
+    
+    public byte[] getSecurityToken() {
+        return securityToken;
+    }
 }

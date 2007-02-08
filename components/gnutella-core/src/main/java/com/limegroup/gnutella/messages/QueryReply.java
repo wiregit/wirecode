@@ -262,7 +262,7 @@ public class QueryReply extends Message implements SecureMessage {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
-             supportsFWTransfer, proxies, null);
+             supportsFWTransfer, proxies, securityToken);
     }
 
 
@@ -356,6 +356,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setXmlBytes(xmlBytes);
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
+        _data.setSecurityToken(securityToken);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -781,6 +782,15 @@ public class QueryReply extends Message implements SecureMessage {
     }
     
     /**
+     * Returns the message authentication bytes that were sent along with
+     * this query reply or null the none have been sent.
+     */
+    public byte[] getSecurityToken() {
+        parseResults();
+        return _data.getSecurityToken();
+    }
+    
+    /**
      * Returns the HostData object describing information
      * about this QueryReply.
      */
@@ -925,6 +935,7 @@ public class QueryReply extends Message implements SecureMessage {
             boolean supportsChatT=false;
             boolean supportsBrowseHostT=false;
             boolean replyToMulticastT=false;
+            byte [] securityToken = null;
             Set<IpPort> proxies=null;
             
             //a) extract vendor code
@@ -973,6 +984,12 @@ public class QueryReply extends Message implements SecureMessage {
                             }
                             replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
                             proxies = _ggepUtil.getPushProxies(ggep);
+                            if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                                securityToken = ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                                if (securityToken == null || securityToken.length == 0) {
+                                    throw new BadPacketException("Message had empty OOB security token");
+                                }
+                            }
                         } catch (BadGGEPPropertyException bgpe) {
                         }
                     }
@@ -1034,7 +1051,8 @@ public class QueryReply extends Message implements SecureMessage {
                 _data.setProxies(IpPort.EMPTY_SET);
             else
                 _data.setProxies(proxies);
-            
+            if (securityToken != null)
+                _data.setSecurityToken(securityToken);
             _data.setHostData(new HostData(this));
 
         } catch (BadPacketException e) {
@@ -1248,7 +1266,9 @@ public class QueryReply extends Message implements SecureMessage {
                                 Set<? extends IpPort> proxies,
                                 byte [] securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
-            if ((proxies != null) && (proxies.size() > 0)) {
+            if (((proxies != null) && (proxies.size() > 0)) || securityToken != null) {
+                if (proxies == null)
+                    proxies = Collections.emptySet();
                 final int MAX_PROXIES = 4;
                 GGEP retGGEP = new GGEP();
 
