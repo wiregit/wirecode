@@ -28,6 +28,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
+    public static final int OLD_VERSION = 2;
     public static final int VERSION = 3;
     
     /**
@@ -43,10 +44,19 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
               payload);
+        if (getPayload().length < 1)
+            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
+                                         getPayload().length);
+        if ((getVersion() == 1) && (getPayload().length != 1))
+            throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
+        if ((getVersion() == OLD_VERSION) && (getPayload().length != 2))
+            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
+                                         getPayload().length);
         // loosen the condition on the message size to allow this message version
         // to have a GGEP in the future
-        if ((getVersion() != 3) || (getPayload().length < 2))
-            throw new BadPacketException("VERSION 3 should have a GGEP header: " +
+        if ((getVersion() == VERSION) && getPayload().length < 2)
+            throw new BadPacketException("VERSION 3 UNSUPPORTED PAYLOAD LEN: " +
                     getPayload().length);
     }
 
@@ -72,11 +82,11 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
     }
     
     public static ReplyNumberVendorMessage createV2ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        return new ReplyNumberVendorMessage(replyGUID, 2, numResults);
+        return new ReplyNumberVendorMessage(replyGUID, OLD_VERSION, numResults);
     }
     
     public static ReplyNumberVendorMessage  createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        return new ReplyNumberVendorMessage(replyGUID, 3, numResults);
+        return new ReplyNumberVendorMessage(replyGUID, VERSION, numResults);
     }
 
     /** @return an int (1-255) representing the amount of results that a host
