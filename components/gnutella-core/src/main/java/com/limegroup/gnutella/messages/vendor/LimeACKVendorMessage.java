@@ -132,6 +132,9 @@ public final class LimeACKVendorMessage extends VendorMessage {
     }
     
     private static byte[] derivePayloadV3(int numResults, byte[] securityTokenBytes) {
+        if ((numResults <= 0) || (numResults > 255))
+            throw new IllegalArgumentException("Number of results too big: " +
+                                               numResults);
         byte[] bytes = new byte[2];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteOrder.short2leb((short) numResults, bytes, 0);
