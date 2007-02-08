@@ -22,6 +22,8 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
+import sun.nio.cs.ext.ISCII91;
+
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
@@ -1574,16 +1576,34 @@ public class QueryRequest extends Message implements Serializable{
 
 
     /**
-     * Returns true if the query source can accept out-of-band replies.  Use
-     * getReplyAddress() and getReplyPort() if this is true to know where to
-     * it.  Always send XML if you are sending an out-of-band reply.
+     * Returns true if the query source can accept out-of-band replies for
+     * any supported protocol version.
+     * 
+     * Use getReplyAddress() and getReplyPort() if this is true to know where to
+     * it. Always send XML if you are sending an out-of-band reply.
      */
     public boolean desiresOutOfBandReplies() {
+        return desiresOutOfBandRepliesV2() || desiresOutOfBandRepliesV3();
+    }
+    
+    /**
+     * Returns true if sender desires out-of-band replies for protocol version
+     * 2.
+     */
+    public boolean desiresOutOfBandRepliesV2() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return isSecurityTokenRequired();
+        return false;
+    }
+    
+    /**
+     * Returns true if sender desires out-of-band replies for protocol version
+     * 3.
+     */
+    public boolean desiresOutOfBandRepliesV3() {
+        return isSecurityTokenRequired(); 
     }
     
     /**
