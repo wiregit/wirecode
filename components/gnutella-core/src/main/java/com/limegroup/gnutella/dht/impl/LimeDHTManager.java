@@ -3,8 +3,8 @@ package com.limegroup.gnutella.dht.impl;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
-import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
@@ -50,16 +50,23 @@ public class LimeDHTManager implements DHTManager {
         new CopyOnWriteArrayList<DHTEventListener>();
     
     /** 
-     * Thread pool used to execute blocking DHT methods, such
+     * The executor to use to execute blocking DHT methods, such
      * as stopping or starting a Mojito instance (which perform 
      * network and disk I/O). 
      * */
-    private SchedulingThreadPool threadPool;
+    private Executor executor;
     
     private boolean stopped = false;
     
-    public LimeDHTManager(SchedulingThreadPool threadPool) {
-        this.threadPool = threadPool;
+    /**
+     * Constructs the LimeDHTManager, using the given Executor
+     * to invoke blocking methods.  The executor MUST be single-threaded,
+     * otherwise there will be failures.
+     * 
+     * @param service
+     */
+    public LimeDHTManager(Executor service) {
+        this.executor = service;
     }
     
     public synchronized void start(final boolean activeMode) {
@@ -91,11 +98,11 @@ public class LimeDHTManager implements DHTManager {
                 }
             }
         };
-        threadPool.invokeLater(task);
+        executor.execute(task);
     }
     
     public void addActiveDHTNode(final SocketAddress hostAddress) {
-        threadPool.invokeLater(new Runnable() {
+        executor.execute(new Runnable() {
             public void run() {
                 synchronized(LimeDHTManager.this) {
                     controller.addActiveDHTNode(hostAddress);
@@ -105,7 +112,7 @@ public class LimeDHTManager implements DHTManager {
     }
     
     public void addPassiveDHTNode(final SocketAddress hostAddress) {
-        threadPool.invokeLater(new Runnable() {
+        executor.execute(new Runnable() {
             public void run() {
                 synchronized(LimeDHTManager.this) {
                     controller.addPassiveDHTNode(hostAddress);
@@ -117,7 +124,7 @@ public class LimeDHTManager implements DHTManager {
     public void addressChanged() {
         // Do this in a different thread as there are some blocking
         //disk and network ops.
-        threadPool.invokeLater(new Runnable() {
+        executor.execute(new Runnable() {
             public void run() {
                 synchronized(LimeDHTManager.this) {
                     if(!controller.isRunning()) {
@@ -218,7 +225,7 @@ public class LimeDHTManager implements DHTManager {
                 }
             };
         }
-        threadPool.invokeLater(r);
+        executor.execute(r);
     }
     
     public Vendor getVendor() {

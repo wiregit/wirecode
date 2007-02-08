@@ -19,6 +19,7 @@ import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.concurrent.ThreadExecutor;
@@ -265,7 +266,7 @@ public class RouterService {
      * Initialize the class that manages the DHT.
      */
     private static DHTManager dhtManager = 
-        new LimeDHTManager(getSchedulingThreadPool());
+        new LimeDHTManager(ExecutorsHelper.newProcessingQueue("DHT-Processor"));
     
     private static MessageDispatcher messageDispatcher;
     

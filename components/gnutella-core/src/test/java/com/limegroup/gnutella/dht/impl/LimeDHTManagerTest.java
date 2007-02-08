@@ -2,10 +2,12 @@ package com.limegroup.gnutella.dht.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import junit.framework.Test;
 
-import org.limewire.concurrent.SimpleTimer;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.mojito.KUID;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -44,8 +46,8 @@ public class LimeDHTManagerTest extends DHTTestCase {
     
     public void testLimeDHTManager() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
-        TestThreadPool threadPool = new TestThreadPool();
-        LimeDHTManager manager = new LimeDHTManager(threadPool);
+        TestExecutor executor = new TestExecutor();
+        LimeDHTManager manager = new LimeDHTManager(executor);
         
         try {
             assertFalse(manager.isRunning());
@@ -54,7 +56,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
             assertEquals(0, manager.getActiveDHTNodes(10).size());
             
             manager.start(true);
-            assertEquals(1, threadPool.getRunners().size());
+            assertEquals(1, executor.getRunners().size());
             Thread.sleep(200);
             assertTrue(manager.isRunning());
             assertTrue(manager.isActiveNode());
@@ -101,8 +103,8 @@ public class LimeDHTManagerTest extends DHTTestCase {
     }
     
     public void testStopStartLimeDHTManager() throws Exception{
-        TestThreadPool threadPool = new TestThreadPool();
-        LimeDHTManager manager = new LimeDHTManager(threadPool);
+        TestExecutor executor = new TestExecutor();
+        LimeDHTManager manager = new LimeDHTManager(executor);
         try {
             manager.start(true);
             manager.stop();
@@ -128,21 +130,18 @@ public class LimeDHTManagerTest extends DHTTestCase {
         }
     }
     
-    private class TestThreadPool extends SimpleTimer{
-        
+    private class TestExecutor implements Executor {
         private List<Runnable> runners = new ArrayList<Runnable>();
-        
-        public TestThreadPool() {
-            super(true);
-        };
-
-        public void invokeLater(Runnable runner) {
-            runners.add(runner);
-            super.invokeLater(runner);
-        }
+        private ExecutorService service = ExecutorsHelper.newProcessingQueue("DHT-TestExecutor");
         
         public List<Runnable> getRunners() {
             return runners;
+        }
+
+        public void execute(Runnable command) {
+            runners.add(command);
+            service.execute(command);
+            
         }
     }
 }
