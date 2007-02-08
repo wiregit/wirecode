@@ -185,7 +185,7 @@ public class QueryReply extends Message implements SecureMessage {
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
-             supportsChat, isMulticastReply, IpPort.EMPTY_SET, null);
+             supportsChat, isMulticastReply, IpPort.EMPTY_SET);
     }
 
     /** 
@@ -217,13 +217,12 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, Set<? extends IpPort> proxies,
-            byte [] securityToken) 
+            boolean isMulticastReply, Set<? extends IpPort> proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
-             false, proxies, securityToken);
+             false, proxies, null);
     }
 
 

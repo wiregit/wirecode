@@ -230,7 +230,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 9000, myIP(), 0, res, 
                            clientGUID, new byte[0], true, false, true,
-                           true, false, false, true, proxies);
+                           true, false, false, true, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 

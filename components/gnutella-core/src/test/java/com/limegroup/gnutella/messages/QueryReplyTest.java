@@ -911,7 +911,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           proxies, null);
+                                           proxies);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qr.write(baos);
@@ -980,7 +980,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                                            6346, IP, 0, hits,
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null, null);			    
+                                           null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
@@ -1038,7 +1038,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                                            6346, IP, 0, hits,
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null, null);			    
+                                           null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
