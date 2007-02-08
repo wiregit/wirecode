@@ -121,7 +121,7 @@ public class QueryReply extends Message implements SecureMessage {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
-             false, IpPort.EMPTY_SET);
+             false, IpPort.EMPTY_SET, null);
     }
 
 
@@ -150,7 +150,7 @@ public class QueryReply extends Message implements SecureMessage {
              DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply, false, IpPort.EMPTY_SET);
+             true, isMulticastReply, false, IpPort.EMPTY_SET, null);
     }
 
 
@@ -185,7 +185,7 @@ public class QueryReply extends Message implements SecureMessage {
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
-             supportsChat, isMulticastReply, IpPort.EMPTY_SET);
+             supportsChat, isMulticastReply, IpPort.EMPTY_SET, null);
     }
 
     /** 
@@ -217,12 +217,13 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, Set<? extends IpPort> proxies) 
+            boolean isMulticastReply, Set<? extends IpPort> proxies,
+            byte [] securityToken) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
-             false, proxies);
+             false, proxies, securityToken);
     }
 
 
@@ -255,12 +256,13 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies) 
+            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies,
+            byte [] securityToken) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
-             supportsFWTransfer, proxies);
+             supportsFWTransfer, proxies, null);
     }
 
 
@@ -328,7 +330,7 @@ public class QueryReply extends Message implements SecureMessage {
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
-             Set<? extends IpPort> proxies) {
+             Set<? extends IpPort> proxies, byte [] securityToken) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -371,7 +373,7 @@ public class QueryReply extends Message implements SecureMessage {
                 r.writeToStream(baos);
             }
             //Write QHD if desired
-            if (includeQHD) {
+            if (includeQHD || securityToken != null) {
                 //a) vendor code.  This is hardcoded here for simplicity,
                 //efficiency, and to prevent character decoding problems.  If you
                 //change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
@@ -387,7 +389,7 @@ public class QueryReply extends Message implements SecureMessage {
                 // size of standard, no options, ggep block...
                 int ggepLen=
                     _ggepUtil.getQRGGEP(false, false, false,
-                                        IpPort.EMPTY_SET).length;
+                                        IpPort.EMPTY_SET, null).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -404,7 +406,7 @@ public class QueryReply extends Message implements SecureMessage {
                            | (finishedUpload ? UPLOADED_MASK : 0)
                            | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
                            | (supportsBH || isMulticastReply || hasProxies ||
-                              supportsFWTransfer ? 
+                              (supportsFWTransfer || securityToken != null) ? 
                               GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
                 baos.write(flags);
                 baos.write(controls);
@@ -424,7 +426,7 @@ public class QueryReply extends Message implements SecureMessage {
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
                                                        isMulticastReply,
                                                        supportsFWTransfer,
-                                                       proxies);
+                                                       proxies, securityToken);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
                 writeSecureGGEP(baos, xmlBytes);
@@ -1243,7 +1245,8 @@ public class QueryReply extends Message implements SecureMessage {
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
-                                Set<? extends IpPort> proxies) {
+                                Set<? extends IpPort> proxies,
+                                byte [] securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
             if ((proxies != null) && (proxies.size() > 0)) {
                 final int MAX_PROXIES = 4;
@@ -1257,6 +1260,8 @@ public class QueryReply extends Message implements SecureMessage {
                 if (supportsFWTransfer)
                     retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
                                 new byte[] {UDPConnection.VERSION});
+                if (securityToken != null)
+                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken);
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();

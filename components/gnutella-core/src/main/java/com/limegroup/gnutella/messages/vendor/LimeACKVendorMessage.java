@@ -1,12 +1,18 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.security.SecurityToken;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
@@ -26,10 +32,19 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  Note that this behavior of maintaining backwards compatiblity is really
  *  only necessary for UDP messages since in the UDP case there is probably no
  *  MessagesSupportedVM exchange.
+ *   
+ *   @version 3
+ *  
+ *  Adds a security token to prevent clients from spoofing their ip and just sending
+ *  results back after a little while
  */
 public final class LimeACKVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
+    
+    public static final int OLD_VERSION = 2;
+    
+    private static final int PAYLOAD_MIN_LENGTH_V3 = derivePayloadV3(255, new byte[1]).length;
 
     /**
      * Constructs a new LimeACKVendorMessage with data from the network.
@@ -44,9 +59,11 @@ public final class LimeACKVendorMessage extends VendorMessage {
         if (getPayload().length < 1)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          getPayload().length);
-        if ((getVersion() == 2) && (getPayload().length != 1))
+        if ((getVersion() == OLD_VERSION) && (getPayload().length != 1))
             throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
+        if ((getVersion() == VERSION) && (getPayload().length < PAYLOAD_MIN_LENGTH_V3))
+            throw new BadPacketException("VERSION 3 should have a GGEP");
     }
 
     /**
@@ -58,8 +75,18 @@ public final class LimeACKVendorMessage extends VendorMessage {
      */
     public LimeACKVendorMessage(GUID replyGUID, 
                                 int numResults) {
+        super(F_LIME_VENDOR_ID, F_LIME_ACK, OLD_VERSION,
+                derivePayload(numResults));
+    }
+    
+    /**
+     * Constructs a V3 LimeACKVendor message to be sent out.
+     * @param securityToken the token to prevent spoofing.
+     */
+    public LimeACKVendorMessage(GUID replyGUID, 
+            int numResults, SecurityToken securityToken) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
-              derivePayload(numResults));
+                derivePayloadV3(numResults,securityToken.getBytes()));
         setGUID(replyGUID);
     }
 
@@ -70,6 +97,24 @@ public final class LimeACKVendorMessage extends VendorMessage {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
 
+    /**
+     * @return the security token of the message if it has one or <code>null</code>
+     */
+    public byte [] getSecurityToken() {
+        if (getVersion() > OLD_VERSION) {
+            try {
+                GGEP ggep = new GGEP(getPayload(), 1);
+                if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                    // we return a oob query key, but cannot verify it when it is not from us
+                    return ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                }
+            }
+            catch (BadGGEPPropertyException corrupt) {} 
+            catch (BadGGEPBlockException e) {}
+        }
+        return null;
+    }
+    
     /**
      * Constructs the payload for a LimeACKVendorMessage with the given
      * number of results.
@@ -83,6 +128,23 @@ public final class LimeACKVendorMessage extends VendorMessage {
         ByteOrder.short2leb((short) numResults, bytes, 0);
         payload[0] = bytes[0];
         return payload;
+    }
+    
+    private static byte[] derivePayloadV3(int numResults, byte[] securityTokenBytes) {
+        byte[] bytes = new byte[2];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteOrder.short2leb((short) numResults, bytes, 0);
+        out.write(bytes[0]); 
+
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityTokenBytes);
+        try {
+            ggep.write(out);
+        }
+        catch(IOException iox) {
+            ErrorService.error(iox); // impossible.
+        }
+        return out.toByteArray();
     }
 
     public boolean equals(Object other) {
