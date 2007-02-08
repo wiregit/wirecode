@@ -113,8 +113,8 @@ public class QueryRequest extends Message implements Serializable{
      * The feature that this query is.
      */
     private int _featureSelector = 0;
-
-    private boolean _isSecurityTokenRequested;
+    
+    private boolean _isSecurityTokenRequired;
     
     /**
      * Whether or not the GGEP header for Do Not Proxy was found.
@@ -1359,7 +1359,7 @@ public class QueryRequest extends Message implements Serializable{
                             _metaMask = null;
                     }
                     if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB))
-                        _isSecurityTokenRequested = true;
+                        _isSecurityTokenRequired = true;
                 } catch (BadGGEPPropertyException ignored) {}
             }
 
@@ -1562,25 +1562,43 @@ public class QueryRequest extends Message implements Serializable{
 
 
     /**
-     * Returns true if the query source can accept out-of-band replies.  Use
-     * getReplyAddress() and getReplyPort() if this is true to know where to
-     * it.  Always send XML if you are sending an out-of-band reply.
+     * Returns true if the query source can accept out-of-band replies for
+     * any supported protocol version.
+     * 
+     * Use getReplyAddress() and getReplyPort() if this is true to know where to
+     * it. Always send XML if you are sending an out-of-band reply.
      */
     public boolean desiresOutOfBandReplies() {
+        return desiresOutOfBandRepliesV2() || desiresOutOfBandRepliesV3();
+    }
+    
+    /**
+     * Returns true if sender desires out-of-band replies for protocol version
+     * 2.
+     */
+    public boolean desiresOutOfBandRepliesV2() {
         if ((MIN_SPEED & SPECIAL_MINSPEED_MASK) > 0) {
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return isSecurityTokenRequired();
+        return false;
     }
-
+    
+    /**
+     * Returns true if sender desires out-of-band replies for protocol version
+     * 3.
+     */
+    public boolean desiresOutOfBandRepliesV3() {
+        return _isSecurityTokenRequired; 
+    }
+    
     /**
      * Returns true if the query source does not want you to proxy for it.
      */
     public boolean doNotProxy() {
         return _doNotProxy;
     }
-
+    
     /**
      * Returns true if this query is for 'What is new?' content, i.e. usually
      * the top 3 YOUNGEST files in your library.
@@ -1611,13 +1629,6 @@ public class QueryRequest extends Message implements Serializable{
         return _featureSelector;
     }
     
-    /**
-     * Returns true if the query request has a security token request.
-     */
-    public boolean isSecurityTokenRequired() {
-        return _isSecurityTokenRequested;
-    }
-
     /** Returns the address to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.
      */
