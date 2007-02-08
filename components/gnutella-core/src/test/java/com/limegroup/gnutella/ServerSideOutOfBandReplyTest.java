@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramPacket;
@@ -12,6 +13,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Random;
 
+import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -44,6 +50,12 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
 
+    static String _path = "com"+File.separator+"limegroup"+ File.separator+"gnutella"+File.separator;
+
+    static File _fileWithSOFlag = CommonUtils.getResourceFile(_path + "queryWithSOFlag.bin");
+    
+    static File _fileWithSO = CommonUtils.getResourceFile(_path + "queryWithSO.bin");
+    
     /**
      * Ultrapeer 1 UDP connection.
      */
@@ -104,7 +116,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
         
         DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket();
+        UDP_ACCESS = new DatagramSocket(10000);
         drainAll();
 
         QueryRequest query = 
@@ -301,6 +313,160 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
 
     }
+    
+    public void testSORequestAndMinSpeedOOBMask() throws Exception {
+        drainAll();
+        
+        byte[] rawMessage = FileUtils.readFileFully(_fileWithSOFlag);
+        // enocode
+        System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
+        ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+        
+        
+        DatagramPacket pack = null;
+
+        QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+        assertTrue(query.desiresOutOfBandReplies());
+        assertTrue(query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+        
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER[1].send(query);
+        ULTRAPEER[1].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = MessageFactory.read(in);
+        }
+
+        // make sure the GUID is correct
+        assertEquals(query.getGUID(), message.getGUID());
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertEquals(1, reply.getNumResults());
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
+
+        // ok - we should ACK the ReplyNumberVM and NOT get a reply
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        SecurityToken token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 10000);
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 
+                                     reply.getNumResults(), token);
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        while (!(message instanceof QueryReply)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = MessageFactory.read(in);
+        }
+
+        QueryReply qReply = (QueryReply)message;
+        assertEquals(query.getGUID(), qReply.getGUID());
+        assertEquals(token.getBytes(), qReply.getSecurityToken());
+    }
+    
+    // tests 
+    public void testSORequestNoMinSpeedOOBMask() throws Exception {
+        drainAll();
+        
+        byte[] rawMessage = FileUtils.readFileFully(_fileWithSO);
+        // enocode
+        System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
+        ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+        
+        
+        DatagramPacket pack = null;
+
+        QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+        assertTrue(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+        
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER[1].send(query);
+        ULTRAPEER[1].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = MessageFactory.read(in);
+        }
+
+        // make sure the GUID is correct
+        assertEquals(query.getGUID(), message.getGUID());
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
+        assertEquals(1, reply.getNumResults());
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
+
+        // ok - we should ACK the ReplyNumberVM and NOT get a reply
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        SecurityToken token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 10000);
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()), 
+                                     reply.getNumResults(), token);
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+
+        while (!(message instanceof QueryReply)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = MessageFactory.read(in);
+        }
+
+        QueryReply qReply = (QueryReply)message;
+        assertEquals(query.getGUID(), qReply.getGUID());
+        assertEquals(token.getBytes(), qReply.getSecurityToken());
+    }
+    
 
     // makes sure that if we ack back with less results than what the server
     // has we only get back what we asked for.
@@ -655,6 +821,5 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertNotNull(getFirstQueryReply(ULTRAPEER[1]));
     }
 
-    
 
 }
