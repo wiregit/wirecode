@@ -162,6 +162,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         private final int requestedResponseCount;
         
         private final GUID guid;
+        
+        private long lastResultsReceivedTimeStamp;
     	
         public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
             this.token = token;
@@ -190,6 +192,7 @@ public class OOBHandler implements MessageHandler, Runnable {
                     added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
                 }
             }
+            lastResultsReceivedTimeStamp = System.currentTimeMillis();
             return added;
         }
         
@@ -204,16 +207,21 @@ public class OOBHandler implements MessageHandler, Runnable {
     		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
     	
-        public boolean queryIsAlive() {
-            return router.isQueryAlive(guid);
+        public boolean isExpired(long now) {
+            // if the query is alive (which is only the case if it originated from this peer)
+            // it takes precedence and the session does
+            // not expire, otherwise just rely on the timeout
+            return !router.isQueryAlive(guid) 
+                && (now - lastResultsReceivedTimeStamp) > router.getOOBExpireTime();
         }
 	}
 	
 	private void expire() {
+        long now = System.currentTimeMillis();
 		synchronized (OOBSessions) {
 			for (Iterator<Map.Entry<OOBSession, OOBSession>> iter = 
 			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
-			    if (!iter.next().getKey().queryIsAlive())
+			    if (iter.next().getKey().isExpired(now))
 			        iter.remove();
 			}
 		}

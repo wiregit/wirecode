@@ -165,6 +165,11 @@ public abstract class MessageRouter {
     /** How long to buffer up out-of-band replies.
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    
+    /**
+     * The amount of time after which to expire an OOBSession.
+     */
+    private static final long OOB_SESSION_EXPIRE_TIME = 2 * 60 * 1000;
 
     /** Time between sending HopsFlow messages.
      */
@@ -2918,6 +2923,14 @@ public abstract class MessageRouter {
                 }
             }
         }
+    }
+    
+    /**
+     * Time after which an OOB session should be expired.
+     * @return
+     */
+    public long getOOBExpireTime() {
+    	return OOB_SESSION_EXPIRE_TIME;
     }
     
     /*

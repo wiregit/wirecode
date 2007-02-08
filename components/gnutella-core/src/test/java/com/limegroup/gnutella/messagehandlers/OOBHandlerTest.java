@@ -10,7 +10,6 @@ import org.limewire.security.QueryKey;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.DownloadManagerStub;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
@@ -44,7 +43,6 @@ public class OOBHandlerTest extends LimeTestCase {
     public void setUp() throws Exception {
         callback = new QueryAliveCallback();
         PrivilegedAccessor.setValue(RouterService.class, "callback", callback);
-        PrivilegedAccessor.setValue(RouterService.class , "downloadManager", new QueryAliveDownloadManager());
         router = new MyMessageRouter();
         router.initialize();
     	handler = new OOBHandler(router);
@@ -135,7 +133,7 @@ public class OOBHandlerTest extends LimeTestCase {
     	assertSame(reply, router.reply);
     }
     
-    public void testSessionsExpire() throws Exception {
+    public void testSessionsExpireBecauseOfAliveQuery() throws Exception {
     	// a host claims to have 10 results
     	ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
     	router.numToRequest = 10;
@@ -169,7 +167,76 @@ public class OOBHandlerTest extends LimeTestCase {
         // message is accepted again since we pretend there is an alive query for it
         callback.isAlive = true;
         handler.handleMessage(reply, null, replyHandler);
-        assertNotNull(router.reply);
+        assertSame(reply, router.reply);
+        
+        
+    }
+    
+    public void testSessionsExpireBecauseOfTimeout() throws InterruptedException {
+        // test timeout based expiration
+        // disable query alive in callback for that
+        callback.isAlive = false;
+        router.timeToExpire = 50;
+        router.reply = null;
+        
+        // send reply number message
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        router.reply = null;
+        QueryReply reply = getReplyWithResults(g.bytes(), 8, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 4, address.getAddress(), token, 8);
+        
+        // should be discarded, too many results
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // sleep to let session expire
+        Thread.sleep(100);
+        handler.run();
+        
+        // send again, now it should be accepted
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+    }
+    
+    public void testQueryIsAliveOverridesSessionTimeout() throws InterruptedException {
+        callback.isAlive = true;
+        router.timeToExpire = 50;
+        router.reply = null;
+        
+//      send reply number message
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        router.reply = null;
+        QueryReply reply = getReplyWithResults(g.bytes(), 8, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 4, address.getAddress(), token, 8);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // run timeout, but should be still discarded, since query is alive
+        Thread.sleep(100);
+        handler.run();
+        
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
     }
     
     public void testAddsRNVMs() throws Exception {
@@ -294,12 +361,16 @@ public class OOBHandlerTest extends LimeTestCase {
     private static class MyMessageRouter extends MessageRouterStub {
     	volatile QueryReply reply;
     	volatile int numToRequest;
-
+    	volatile long timeToExpire;
 		@Override
 		public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
 			return numToRequest;
 		}
 		
+		@Override
+		public long getOOBExpireTime() {
+			return timeToExpire;
+		}
 		@Override
 		public void handleQueryReply(QueryReply queryReply, ReplyHandler handler) {
 			this.reply = queryReply;
@@ -326,13 +397,6 @@ public class OOBHandlerTest extends LimeTestCase {
         @Override
         public boolean isQueryAlive(GUID guid) {
             return isAlive;
-        }
-    }
-    
-    private static class QueryAliveDownloadManager extends DownloadManagerStub {
-        @Override
-        public synchronized boolean isGuidForQueryDownloading(GUID guid) {
-            return false;
         }
     }
 }
