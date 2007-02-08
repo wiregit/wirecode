@@ -21,13 +21,18 @@ package org.limewire.mojito.db;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
@@ -36,6 +41,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.util.HostFilter;
 
@@ -360,6 +366,91 @@ public class DatabaseTest extends MojitoTestCase {
         database.store(value6);
         assertEquals(0, database.getKeyCount());
         assertEquals(0, database.getValueCount());
+    }
+    
+    /**
+     * A Database is a Set of DHTValueBags. Each Bag is a Set of
+     * DHTValueEntities.
+     * 
+     * If you iterate over the Bag and remove items from the Bag
+     * you leak Bag references because they're not removed from
+     * the Database
+     * 
+     * If you iterate over the Bag and remove items from the Database
+     * you don't leak references but run into a ConcurrentModificationException.
+     * 
+     * Solution: Get a copy of the Bag and remove the items from the Database
+     * 
+     * Better solution: It'd be nice if the Bag is holding a reference to its
+     * Database and cleanup itself once it's empty. There are however all kinds
+     * of side effects if you start adding items straight to the Bag instead
+     * of using the Database interface and so on.
+     * 
+     * This test represents the current implemenetation. If you implement the
+     * "better solution" this test will fail!
+     */
+    public void testMultiRemove() {
+        MojitoDHT dht = MojitoFactory.createDHT();
+        
+        Database database = dht.getDatabase();
+        
+        KUID key = KUID.createRandomID();
+        
+        Contact c1 = ContactFactory.createUnknownContact(ContextSettings.getVendor(), 
+                ContextSettings.getVersion(), KUID.createRandomID(), 
+                new InetSocketAddress("localhost", 1000));
+        
+        Contact c2 = ContactFactory.createUnknownContact(ContextSettings.getVendor(), 
+                ContextSettings.getVersion(), KUID.createRandomID(), 
+                new InetSocketAddress("localhost", 2000));
+        
+        DHTValue value = new DHTValueImpl(DHTValueType.BINARY, Version.UNKNOWN, new byte[1]);
+        DHTValueEntity entity1 = new DHTValueEntity(
+                dht.getLocalNode(), dht.getLocalNode(), key, value, true);
+        
+        DHTValueEntity entity2 = new DHTValueEntity(c1, c1, key, value, false);
+        DHTValueEntity entity3 = new DHTValueEntity(c2, c2, key, value, false);
+        
+        database.store(entity1);
+        database.store(entity2);
+        database.store(entity3);
+        
+        assertEquals(3, database.getValueCount());
+        
+        DHTValueBag bag = database.get(key);
+        assertNotNull(bag);
+        assertEquals(3, bag.size());
+       
+        // Cannot Iterate over Bag and remove items from
+        // the Database
+        try {
+            synchronized (bag.getValuesLock()) {
+                for (DHTValueEntity e : bag.getAllValues()) {
+                    database.remove(e);
+                }
+            }
+            fail("Should have failed");
+        } catch (ConcurrentModificationException expected) {
+        }
+        
+        assertEquals(2, bag.size());
+        
+        // Get a copy of the Bag
+        List<DHTValueEntity> entities = null;
+        synchronized (bag.getValuesLock()) {
+            entities = new ArrayList<DHTValueEntity>(bag.getAllValues());
+        }
+        
+        // Remove elements from the Database
+        for (DHTValueEntity e : entities) {
+            database.remove(e);
+        }
+        
+        assertEquals(0, database.getValueCount());
+        assertEquals(0, bag.size());
+        
+        // The Bag should be gone
+        assertNull(database.get(key));
     }
     
     public void testFloodDatabase() {
