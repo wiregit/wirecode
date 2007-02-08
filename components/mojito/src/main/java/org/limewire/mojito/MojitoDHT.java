@@ -23,13 +23,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
-import java.util.Collection;
-import java.util.Set;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.RepublishManager;
@@ -251,16 +248,6 @@ public interface MojitoDHT {
      * Tries to ping the given address
      */
     public DHTFuture<PingResult> ping(SocketAddress dst);
-    
-    /**
-     * Returns a Set of all keys in the Database
-     */
-    public Set<KUID> keySet();
-    
-    /**
-     * Returns a Collection of all values in the Database
-     */
-    public Collection<DHTValueEntity> getValues();
     
     /**
      * Tries to find the value for the given key

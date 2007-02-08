@@ -24,7 +24,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -329,7 +328,7 @@ public class DatabaseImpl implements Database {
      */
     private void banContact(Contact contact) {
         // Remove all values by this contact
-        for(DHTValueEntity entity: values()) {
+        for(DHTValueEntity entity: values(Selector.REMOTE_VALUES)) {
             if(entity.getCreator().equals(contact)) {
                 remove(entity);
             }
@@ -369,21 +368,31 @@ public class DatabaseImpl implements Database {
      * @see com.limegroup.mojito.db.Database#keySet()
      */
     public synchronized Set<KUID> keySet() {
-        return Collections.unmodifiableSet(new HashSet<KUID>(database.keySet()));
+        return new HashSet<KUID>(database.keySet());
     }
 
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#values()
      */
-    public synchronized Collection<DHTValueEntity> values() {
-        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
+    public synchronized Collection<DHTValueEntity> values(Selector selector) {
+        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>(getKeyCount() * 2);
         for (DHTValueBag bag : database.values()) {
             synchronized(bag.getValuesLock()) {
-                values.addAll(bag.getAllValues());
+                for (DHTValueEntity entity : bag.getAllValues()) {
+                    if (selector.equals(Selector.ALL_VALUES)) {
+                        values.add(entity);
+                    } else if (entity.isLocalValue() 
+                            && selector.equals(Selector.LOCAL_VALUES)) {
+                        values.add(entity);
+                    } else if (!entity.isLocalValue() 
+                            && selector.equals(Selector.REMOTE_VALUES)) {
+                        values.add(entity);
+                    }
+                }
             }
         }
-        return Collections.unmodifiableList(values);
+        return values;
     }
     
     public synchronized String toString() {

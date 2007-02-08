@@ -50,6 +50,7 @@ import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.RepublishManager;
+import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
 import org.limewire.mojito.db.impl.DefaultRepublishManager;
@@ -492,7 +493,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             
             // Get a copy of all values
             Collection<DHTValueEntity> values 
-                = new ArrayList<DHTValueEntity>(database.values());
+                = new ArrayList<DHTValueEntity>(database.values(Selector.ALL_VALUES));
             
             // Clear the Database
             database.clear();
@@ -1108,25 +1109,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             Collection<? extends DHTValueEntity> values) {
         
         return storeManager.store(node, securityToken, values);
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#keySet()
-     */
-    public Set<KUID> keySet() {
-        return getDatabase().keySet();
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.MojitoDHT#getValues()
-     */
-    public Collection<DHTValueEntity> getValues() {
-        Database database = getDatabase();
-        synchronized (database) {
-            return new ArrayList<DHTValueEntity>(database.values());
-        }
     }
     
     /*

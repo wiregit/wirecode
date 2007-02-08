@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.StoreResult;
@@ -149,7 +150,7 @@ public class DHTValueManager implements Runnable {
          */
         public synchronized void republish() {
             Database database = context.getDatabase();
-            Collection<DHTValueEntity> c = database.values();
+            Collection<DHTValueEntity> c = database.values(Selector.ALL_VALUES);
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " + c.size() + " DHTValues to process");
@@ -217,7 +218,6 @@ public class DHTValueManager implements Runnable {
                         LOG.trace(entity + " does not require republishing");
                     }
                     return false;
-                    
                 } 
             }
             
