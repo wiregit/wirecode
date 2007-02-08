@@ -307,16 +307,20 @@ public class DefaultMessageHandler {
                             if (bag != null) {
                                 // bag->database does not happen
                                 // because the database monitor is already held.
+                                List<DHTValueEntity> entities = null;
                                 synchronized(bag.getValuesLock()) {
-                                    for (DHTValueEntity value : bag.getAllValues()) {
-                                        if (!value.isLocalValue()) {
-                                            //System.out.println("REMOVING: " + value + "\n");
-                                            
-                                            database.remove(value);
-                                            deletedCount++;
-                                        }
+                                    entities = new ArrayList<DHTValueEntity>(bag.getAllValues());
+                                }
+                                
+                                for (DHTValueEntity value : entities) {
+                                    if (!value.isLocalValue()) {
+                                        //System.out.println("REMOVING: " + value + "\n");
+                                        
+                                        database.remove(value);
+                                        deletedCount++;
                                     }
                                 }
+                                
                                 databaseStats.STORE_FORWARD_REMOVALS.addData(deletedCount);
                             }
                         }
