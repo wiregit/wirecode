@@ -1080,7 +1080,7 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.isSecurityTokenRequired());
         assertTrue(proxy.doNotProxyV2());
         assertFalse(proxy.doNotProxyV3());
         
@@ -1102,7 +1102,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(query.doNotProxyV2());
         assertFalse(query.doNotProxyV3());
         assertFalse(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.isSecurityTokenRequired());
         
         byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
@@ -1110,7 +1110,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(proxy.doNotProxyV2());
         assertFalse(proxy.doNotProxyV3());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.isSecurityTokenRequired());
         
         // payload with multiple ggeps
         payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
@@ -1118,7 +1118,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(query.doNotProxyV2());
         assertFalse(query.doNotProxyV3());
         assertFalse(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.isSecurityTokenRequired());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
@@ -1126,7 +1126,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(proxy.doNotProxyV2());
         assertFalse(proxy.doNotProxyV3());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.isSecurityTokenRequired());
         
 
         // unknown gem
@@ -1144,7 +1144,7 @@ public final class QueryRequestTest extends LimeTestCase {
         payload = out.toByteArray();
         query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
         assertFalse(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.isSecurityTokenRequired());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
@@ -1152,7 +1152,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(proxy.doNotProxyV2());
         assertFalse(proxy.doNotProxyV3());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.isSecurityTokenRequired());
         // verfiy unknown gem is still there
         byte[] part = new byte[gemBytes.length];
         System.arraycopy(newPayload, startGem, part, 0, part.length);
@@ -1168,7 +1168,7 @@ public final class QueryRequestTest extends LimeTestCase {
         
         query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
         assertFalse(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.isSecurityTokenRequired());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
@@ -1176,7 +1176,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(proxy.doNotProxyV2());
         assertFalse(proxy.doNotProxyV3());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.desiresOutOfBandRepliesV3());
+        assertTrue(proxy.isSecurityTokenRequired());
         System.arraycopy(newPayload, startGem, part, 0, part.length);
         assertEquals(gemBytes, part);
         
@@ -1216,41 +1216,41 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testOOBSecurityTokenSet() throws Exception {
         // oob set
         QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
-        assertTrue(request.hasSecurityTokenRequest());
+        assertTrue(request.isSecurityTokenRequired());
         
         QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
-        assertTrue(request.hasSecurityTokenRequest());
+        assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
-        assertTrue(request.hasSecurityTokenRequest());
+        assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
-        assertTrue(request.hasSecurityTokenRequest());
+        assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        assertTrue(fromNetwork.isSecurityTokenRequired());
         
         request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
-        assertTrue(request.hasSecurityTokenRequest());
+        assertTrue(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertTrue(fromNetwork.hasSecurityTokenRequest());
+        assertTrue(fromNetwork.isSecurityTokenRequired());
         
         // oob not set
         request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (QueryKey)null, true, Message.N_TCP, false, 0);
-        assertFalse(request.hasSecurityTokenRequest());
+        assertFalse(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
-        assertFalse(fromNetwork.hasSecurityTokenRequest());
+        assertFalse(fromNetwork.isSecurityTokenRequired());
         
     }
     

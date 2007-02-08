@@ -304,7 +304,7 @@ public class StandardMessageRouter extends MessageRouter {
                     // wants the whole shebang
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
-                    ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
+                    ReplyNumberVendorMessage vm = query.isSecurityTokenRequired() ?
                             ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
                                 ReplyNumberVendorMessage.createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
                     UDPService.instance().send(vm, addr, port);

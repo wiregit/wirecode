@@ -116,7 +116,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private int _featureSelector = 0;
     
-    private boolean _hasSecurityTokenRequest;
+    private boolean _isSecurityTokenRequired;
 
     /**
      * Whether or not the GGEP header for Do Not Proxy was found. Defaults
@@ -1316,7 +1316,7 @@ public class QueryRequest extends Message implements Serializable{
 
             // mark oob query to require support of security tokens
             if (canReceiveOutOfBandReplies) {
-                _hasSecurityTokenRequest = true;
+                _isSecurityTokenRequired = true;
                 ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
             }
             
@@ -1396,7 +1396,7 @@ public class QueryRequest extends Message implements Serializable{
         
         _metaMask = parser.metaMask;
         
-        _hasSecurityTokenRequest = parser.hasSecurityTokenRequest;
+        _isSecurityTokenRequired = parser.hasSecurityTokenRequest;
         
         _isPayloadModifiable = parser.isPayloadModifiable;
         
@@ -1583,13 +1583,9 @@ public class QueryRequest extends Message implements Serializable{
             if ((MIN_SPEED & SPECIAL_OUTOFBAND_MASK) > 0)
                 return true;
         }
-        return desiresOutOfBandRepliesV3();
+        return isSecurityTokenRequired();
     }
     
-    public boolean desiresOutOfBandRepliesV3() {
-        return hasSecurityTokenRequest();
-    }
-
     /**
      * Returns true if the query source does not want you to proxy for it for
      * protocol version 2 of oob queries.
@@ -1645,10 +1641,11 @@ public class QueryRequest extends Message implements Serializable{
     }
     
     /**
-     * Returns true if the query request has a security token request.
+     * Returns true if the query request has a security token request,
+     * this implies the sender requests OOB replies, protocol version 3.
      */
-    public boolean hasSecurityTokenRequest() {
-        return _hasSecurityTokenRequest;
+    public boolean isSecurityTokenRequired() {
+        return _isSecurityTokenRequired;
     }
 
     /** Returns the address to send a out-of-band reply to.  Only useful
