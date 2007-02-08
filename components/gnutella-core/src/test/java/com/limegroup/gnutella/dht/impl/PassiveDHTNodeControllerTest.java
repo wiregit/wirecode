@@ -122,7 +122,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
             Thread.sleep(500);
             //see if removed from the DHT RT
-            assertEquals(19, rt.getActiveContacts().size());
+            assertEquals(20, rt.getActiveContacts().size());
             
             //getActive nodes should return leaf nodes when node is bootstrapped
             List<IpPort> l = controller.getActiveDHTNodes(30);
