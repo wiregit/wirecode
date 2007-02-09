@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
+import java.security.KeyPair;
 import java.util.Collection;
 import java.util.Set;
 
@@ -64,6 +65,16 @@ public interface MojitoDHT {
      * Returns the version of the DHT
      */
     public Version getVersion();
+    
+    /**
+     * 
+     */
+    public void setKeyPair(KeyPair keyPair);
+    
+    /**
+     * 
+     */
+    public KeyPair getKeyPair();
     
     /**
      * Returns the DHT stats

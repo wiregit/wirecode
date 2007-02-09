@@ -103,9 +103,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * The name of this Mojito instance
      */
-    private String name;
+    private final String name;
     
-    private KeyPair masterKeyPair;
+    private volatile KeyPair keyPair;
     
     private Database database;
     private RouteTable routeTable;
@@ -167,7 +167,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         } catch (IOException e) {
             LOG.debug("IOException", e);
         } 
-        masterKeyPair = new KeyPair(masterKey, null);
+        keyPair = new KeyPair(masterKey, null);
         
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
@@ -237,25 +237,28 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Returns the master public key
      */
-    public PublicKey getMasterKey() {
-        if (masterKeyPair != null) {
-            return masterKeyPair.getPublic();
+    public PublicKey getPublicKey() {
+        KeyPair keyPair = this.keyPair;
+        if (keyPair != null) {
+            return keyPair.getPublic();
         }
         return null;
     }
     
-    /**
-     * Returns the master key pair (public + private key)
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#getKeyPair()
      */
-    public KeyPair getMasterKeyPair() {
-        return masterKeyPair;
+    public KeyPair getKeyPair() {
+        return keyPair;
     }
     
-    /**
-     * Sets the master key pair
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#setKeyPair(java.security.KeyPair)
      */
-    public void setMasterKeyPair(KeyPair masterKeyPair) {
-        this.masterKeyPair = masterKeyPair;
+    public void setKeyPair(KeyPair keyPair) {
+        this.keyPair = keyPair;
     }
     
     /*

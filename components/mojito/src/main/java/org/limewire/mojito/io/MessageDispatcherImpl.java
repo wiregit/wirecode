@@ -286,7 +286,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         // NOTE: LimeDHTMessageDispatcher is using a different implementation!
         //       This is the stand alone implementation!
         
-        final PublicKey pubKey = context.getMasterKey();
+        final PublicKey pubKey = context.getPublicKey();
         if (pubKey == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping SecureMessage " 

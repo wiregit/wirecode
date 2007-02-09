@@ -158,7 +158,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     @Override
     protected void verify(SecureMessage secureMessage, SecureMessageCallback smc) {
-        PublicKey pubKey = context.getMasterKey();
+        PublicKey pubKey = context.getPublicKey();
         if (pubKey == null) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Dropping SecureMessage " 

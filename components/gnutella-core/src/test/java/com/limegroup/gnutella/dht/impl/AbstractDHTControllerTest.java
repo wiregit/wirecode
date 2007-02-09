@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -249,6 +250,13 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
             return null;
+        }
+
+        public KeyPair getKeyPair() {
+            return null;
+        }
+
+        public void setKeyPair(KeyPair keyPair) {
         }
     }
 }
