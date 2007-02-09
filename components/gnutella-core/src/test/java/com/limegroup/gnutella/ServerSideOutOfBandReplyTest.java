@@ -123,6 +123,10 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             QueryRequest.createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
+        assertTrue(query.desiresOutOfBandReplies());
+        assertTrue(query.desiresOutOfBandRepliesV2());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
         query.hop();
 
         // we needed to hop the message because we need to make it seem that it
@@ -154,6 +158,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
+        // test that we receive old version
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
         assertTrue(reply.canReceiveUnsolicited());
         
         //rince and repeat, this time pretend to be firewalled
@@ -162,6 +168,10 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             QueryRequest.createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
+        assertTrue(query.desiresOutOfBandReplies());
+        assertTrue(query.desiresOutOfBandRepliesV2());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+        
         query.hop();
         
         UDPService service = RouterService.getUdpService();
@@ -201,6 +211,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
         assertFalse(reply.canReceiveUnsolicited());
+        // test that we receive old version
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
         
         //restore our un-firewalled status and repeat
         query = 
@@ -239,6 +251,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
         assertTrue(reply.canReceiveUnsolicited());
+        // test that we receive old version
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
         
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -268,6 +282,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
         assertEquals(1, ((QueryReply)message).getResultCount());
+        // security token is null for old protocol version
+        assertNull(((QueryReply)message).getSecurityToken());
 
         //2) null out 'message' so we can get the next reply....
         message = null;
@@ -287,6 +303,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
         assertEquals(1, ((QueryReply)message).getResultCount());
+        // security token is null for old protocol version
+        assertNull(((QueryReply)message).getSecurityToken());
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -314,6 +332,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     }
     
+    /**
+     *  
+     */
     public void testSORequestAndMinSpeedOOBMask() throws Exception {
         drainAll();
         
@@ -509,6 +530,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -602,6 +624,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -668,6 +691,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(1, reply.getNumResults());
+        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
 
         // WAIT for the expirer to expire the query reply
         Thread.sleep(60 * 1000); // 1 minute - expirer must run twice
