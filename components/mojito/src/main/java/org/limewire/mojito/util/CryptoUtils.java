@@ -19,10 +19,12 @@
  
 package org.limewire.mojito.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -35,6 +37,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.zip.GZIPInputStream;
 
 import org.limewire.mojito.exceptions.SignatureVerificationException;
+import org.limewire.util.Base32;
 
 
 /**
@@ -58,31 +61,48 @@ public final class CryptoUtils {
     /**
      * Loads a PublicKey from the given File 
      */
-    public static PublicKey loadMasterKey(File file) 
+    public static PublicKey loadPublicKey(File file) 
             throws IOException, SignatureException, InvalidKeyException {
         
         FileInputStream fis = null;
         GZIPInputStream gz = null;
-        DataInputStream in = null;
         try {
             fis = new FileInputStream(file);
             gz = new GZIPInputStream(fis);
-            in = new DataInputStream(gz);
-            
-            byte[] signature = new byte[in.readInt()];
-            in.readFully(signature);
-            
-            byte[] encodedKey = new byte[in.readInt()];
-            in.readFully(encodedKey);
-            
-            PublicKey pubKey = createPublicKey(encodedKey);
-            if (!verify(pubKey, signature, encodedKey)) {
-                throw new SignatureVerificationException();
-            }
-            return pubKey;
+            return loadPublicKey(gz);
         } finally {
-            if (in != null) { in.close(); }
+            if (gz != null) { gz.close(); }
         }
+    }
+    
+    public static PublicKey loadPublicKey(String base32) 
+            throws IOException, SignatureException, InvalidKeyException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(base32));
+        GZIPInputStream gz = null;
+        try {
+            gz = new GZIPInputStream(bais);
+            return loadPublicKey(gz);
+        } finally {
+            if (gz != null) { gz.close(); }
+        }
+    }
+    
+    public static PublicKey loadPublicKey(InputStream in) 
+            throws IOException, SignatureException, InvalidKeyException {
+        
+        DataInputStream dis = new DataInputStream(in);
+        
+        byte[] signature = new byte[dis.readInt()];
+        dis.readFully(signature);
+        
+        byte[] encodedKey = new byte[dis.readInt()];
+        dis.readFully(encodedKey);
+        
+        PublicKey pubKey = createPublicKey(encodedKey);
+        if (!verify(pubKey, signature, encodedKey)) {
+            throw new SignatureVerificationException();
+        }
+        return pubKey;
     }
     
     /**

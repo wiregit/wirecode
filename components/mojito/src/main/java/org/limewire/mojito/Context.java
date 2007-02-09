@@ -158,7 +158,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
             if (file.exists() && file.isFile()) {
-                masterKey = CryptoUtils.loadMasterKey(file);
+                masterKey = CryptoUtils.loadPublicKey(file);
             }
         } catch (InvalidKeyException e) {
             LOG.debug("InvalidKeyException", e);
