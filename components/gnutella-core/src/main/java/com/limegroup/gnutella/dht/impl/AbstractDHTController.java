@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +27,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
+import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RouterService;
@@ -59,6 +64,22 @@ import com.limegroup.gnutella.util.EventDispatcher;
  */
 abstract class AbstractDHTController implements DHTController {
     
+    private static final String PUBLIC_KEY 
+        = "D6FQQAAAAAAAAAAAAHYQCDX6AAAAALRQFQBBIR75ZTOX67BIDUQXP25SBSH"
+        + "UMQL6YVG56AQUDYKJOBYQENLDNC5IG5EFTOBSTGBALX6FAAAADOZQQIA3OME"
+        + "CAEWAMBZKQZEM4OAEAEYIEAI7AKAYCAH5P5JYCHLVCIUVFX2KTQXOZZHH6YI3"
+        + "OUR455CABQY6H6ALMUJGNFCV2QBCKH5VSPMNLD5L7RPVXIYPNS43KVWNPAJ3Q"
+        + "AOTI37SMZQLO24ZKCS2JH475ACHWEBCYJH3XKOX7234MG7YHNL6PRVIUYKQ6BH"
+        + "3QP3NHRI6YMBDKVATLILJCMXWOXZ24K3B24VO74RCAMMZ3UKIAHDQEFIAS5QFB"
+        + "DYVEMF4ZMUSXGBKF24EBPYFQHHVAKAYCAHX4GQILVU3HXPMXPFLLQ3LQV5ZPGK"
+        + "K7O72HLVIF6KXJQFT2B4CM5IVSV4OXLKFST7GOEDRBAMAWRERM4JD5BGCQFQTW"
+        + "7HQSMUMZCTOCPAWPKFVI7ENFDQKHLQ6FOZ2M5MRN2RX6C72EE2WF4P3MJ5ACJB"
+        + "3ZSSPDPVIKGIITKED37QVVZM7A2JIWZS6QB5VKJLEAFGDX7WPJEVAHAMEAABID"
+        + "AAFYBH7XPUVWNHIHXBRRG6ZDLCYU2NUZG22VULUBG6IUXXCQYBA5R2XANSCQ3L"
+        + "OU5HUD7UYUG2WHTRGA4RHQQ2ORWPPFGFBP246YW2P7B4OPKUR2ADVCOKNTX4TE"
+        + "3XSD7ALYDOTBJJK57VRAQGZADLNAHXY6YYFAI7D65EX4IFUH5ZITPP4MLQKSUY"
+        + "YLFJEKYDWDPADVSPP5Y4SZON2YHYQCAAA";
+    
     protected final Log LOG = LogFactory.getLog(getClass());
     
     /**
@@ -93,6 +114,18 @@ abstract class AbstractDHTController implements DHTController {
             }
         });
         dht.setHostFilter(new DHTFilterDelegate());
+        
+        try {
+            PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
+            KeyPair keyPair = new KeyPair(publicKey, null);
+            dht.setKeyPair(keyPair);
+        } catch (InvalidKeyException e) {
+            LOG.error("InvalidKeyException", e);
+        } catch (SignatureException e) {
+            LOG.error("SignatureException", e);
+        } catch (IOException e) {
+            LOG.error("IOException", e);
+        }
         
         this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
         this.dispatcher = dispatcher;
