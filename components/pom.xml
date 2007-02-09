@@ -44,6 +44,7 @@
     <module>mojito</module>
     <module>mojito-ui</module>
     <module>nio</module>
+    <module>resources</module>
     <module>security</module>
     <module>setting</module>
     <module>statistic</module>
@@ -102,6 +103,11 @@
           <downloadSources>true</downloadSources>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+	    <artifactId>cobertura-maven-plugin</artifactId>
+	    <version>2.0</version>
+      </plugin>
     </plugins>
   </build>
 
@@ -138,6 +144,10 @@
 	  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+	  <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </reporting>
