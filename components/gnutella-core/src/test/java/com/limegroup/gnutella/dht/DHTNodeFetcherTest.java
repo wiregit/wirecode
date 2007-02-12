@@ -151,7 +151,8 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
     
     public void testAddHostCatcherActiveNodes() throws Exception {
-        DHTSettings.DHT_NODE_FETCHER_TIME.setValue(100);
+        PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
+        
         dhtBootstrapper.setWaitingForNodes(true);
         DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
         
@@ -172,7 +173,8 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     }
     
     public void testRequestDHTHostsFromHostCatcher() throws Exception{
-        DHTSettings.DHT_NODE_FETCHER_TIME.setValue(100);
+        PrivilegedAccessor.setValue(DHTSettings.DHT_NODE_FETCHER_TIME, "value", 100L);
+        
         dhtBootstrapper.setWaitingForNodes(true);
         DHTNodeFetcher nodeFetcher = new DHTNodeFetcher(dhtBootstrapper);
         
