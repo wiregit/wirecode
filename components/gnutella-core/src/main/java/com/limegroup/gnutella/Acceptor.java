@@ -710,7 +710,8 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                     if(allowedWord != null && !allowedWord.equals(word))
                         throw new IOException("wrong word!");
                     
-                    buffer.limit(buffer.position()).position(i+1);
+                    //buffer.limit(buffer.position()).position(i+1);
+                    buffer.limit(buffer.position()).position(0);
                     source.interest(false);
                     RouterService.getConnectionDispatcher().dispatch(word, client, true);
                     return;
