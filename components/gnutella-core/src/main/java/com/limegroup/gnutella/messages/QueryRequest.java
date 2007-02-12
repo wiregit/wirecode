@@ -711,35 +711,33 @@ public class QueryRequest extends Message implements Serializable{
     
 	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
+     * 
+     * This should only be used for messages that originated from this client.
 	 *
 	 * @param qr the <tt>QueryRequest</tt> to copy
 	 * @return a new <tt>QueryRequest</tt> with no OOB marking
+     * 
+     * @throws IllegalArgumentException if the payload is not modifiable
+     * @throws IllegalArgumentException if the query request is not from
+     * a LimeWire
 	 */
 	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
         if (!qr.isPayloadModifiable()) {
             throw new IllegalArgumentException("payload is not modifiable " + qr);
         }
-        
-        //modify the payload to not be OOB.
-        byte[] newPayload = new byte[qr.PAYLOAD.length];
-        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        newPayload[0] |= SPECIAL_XML_MASK;
-        
-        // TODO fberger
-        GGEP ggep = new GGEP(false);
-        // disable proxying for old protocol version
-        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
-        // signal oob capability
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
-        
-        
-        try {
-            return createNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
-                                      newPayload, qr.getNetwork());
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
+        if (!GUID.isLimeGUID(qr.getGUID())) {
+            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
         }
+        
+        // only used for queries understood by us
+        // so we can use the copy constructor and set OOB to false
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                false, // set oob to false
+                qr.getFeatureSelector(), qr.doNotProxyV3(),
+                qr.getMetaMask());
 	}
 
     /**
@@ -1228,7 +1226,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN.Type> tempRequestedUrnTypes = null;
 		Set<URN> tempQueryUrns = null;
-		if(requestedUrnTypes != null) {
+		if(requestedUrnTypes != null && !requestedUrnTypes.isEmpty()) {
 			tempRequestedUrnTypes = EnumSet.copyOf(requestedUrnTypes);
 		} else {
 			tempRequestedUrnTypes = URN.Type.NO_TYPE_SET;
@@ -1621,7 +1619,7 @@ public class QueryRequest extends Message implements Serializable{
     }
     
     /**
-     * Return whether or not the payload of the query may be modified
+     * Returns whether or not the payload of the query may be modified
      * when rerouting or proxying it.
      */
     public boolean isPayloadModifiable() {

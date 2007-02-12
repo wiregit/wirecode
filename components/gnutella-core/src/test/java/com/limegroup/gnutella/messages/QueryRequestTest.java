@@ -15,10 +15,12 @@ import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -1243,6 +1245,61 @@ public final class QueryRequestTest extends LimeTestCase {
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
         assertFalse(fromNetwork.isSecurityTokenRequired());
         
+    }
+    
+    public void testUnmarkOOBQuery() throws Exception {
+        QueryRequest query = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 5555);
+        assertDesiresOutOfBand(query);
+        
+        QueryRequest copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        
+        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
+        assertEquals(query.getGUID(), copy.getGUID());
+        
+        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
+        assertEquals(query.getGUID(), copy.getGUID());
+        assertEquals(query.getMetaMask(), copy.getMetaMask());
+        
+        query = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertDesiresOutOfBand(query);
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.getGUID(), copy.getGUID());
+        
+     
+        query = QueryRequest.createQuery("query");
+        assertNotDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getPayload(), copy.getPayload());
+    }
+    
+    private void assertDesiresOutOfBand(QueryRequest query) {
+        assertTrue(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+    }
+    
+    private void assertNotDesiresOutOfBand(QueryRequest query) {
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertFalse(query.desiresOutOfBandRepliesV3());
     }
     
     static class PositionByteArrayOutputStream extends ByteArrayOutputStream {
