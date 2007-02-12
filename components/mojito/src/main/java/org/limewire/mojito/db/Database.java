@@ -65,6 +65,11 @@ public interface Database extends Serializable {
     public boolean store(DHTValueEntity entity);
     
     /**
+     * Adds the given DHTValueEntity to the Database
+     */
+    public boolean add(DHTValueEntity entity);
+    
+    /**
      * Removes the given DHTValue from the Database
      * 
      * @param DHTValueImpl to remove
@@ -105,7 +110,7 @@ public interface Database extends Serializable {
      * Returns the number of Values in the Database
      * which is greater or equal to key count.
      */
-    public int getValueCount();
+    public int getValueCount(Selector selector);
     
     /**
      * Returns the maximum number of keys

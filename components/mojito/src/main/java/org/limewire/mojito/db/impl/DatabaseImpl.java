@@ -156,12 +156,8 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#getValueCount()
      */
-    public synchronized int getValueCount() {
-        int count = 0;
-        for (DHTValueBag bag : database.values()) {
-            count += bag.size();
-        }
-        return count;
+    public synchronized int getValueCount(Selector selector) {
+        return values(selector).size();
     }
     
     /*
@@ -192,11 +188,7 @@ public class DatabaseImpl implements Database {
      * Adds the given DHTValue to the Database. Returns
      * true if the operation succeeded.
      */
-    private synchronized boolean add(DHTValueEntity entity) {
-        if (entity.getValue().isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-        
+    public synchronized boolean add(DHTValueEntity entity) {
         KUID valueId = entity.getKey();
         DHTValueBag bag = database.get(valueId);
         
@@ -398,11 +390,13 @@ public class DatabaseImpl implements Database {
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
         for (DHTValueBag bag : database.values()) {
-            buffer.append(bag.toString());
+            synchronized (bag.getValuesLock()) {
+                buffer.append(bag.toString());
+            }
         }
         buffer.append("-------------\n");
         buffer.append("TOTAL: ").append(getKeyCount())
-            .append("/").append(getValueCount()).append("\n");
+            .append("/").append(getValueCount(Selector.ALL_VALUES)).append("\n");
         return buffer.toString();
     }
 }

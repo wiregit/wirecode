@@ -13,26 +13,38 @@ import java.util.EventObject;
 public class FileManagerEvent extends EventObject {
     
     public static enum Type {
-        ADD,
-        REMOVE,
-        RENAME,
-        CHANGE,
-        FAILED,
-        ALREADY_SHARED,
+        ADD_FILE,
+        REMOVE_FILE,
+        RENAME_FILE,
+        CHANGE_FILE,
+        ADD_FAILED_FILE,
+        ALREADY_SHARED_FILE,
         ADD_FOLDER,
-        REMOVE_FOLDER;
+        REMOVE_FOLDER,
+        FILEMANAGER_LOADING,
+        FILEMANAGER_LOADED;
     }
     
-    private final Type kind;
+    private final Type type;
     private final FileDesc[] fds;
     private final File[] files;
 
     /**
      * Constructs a FileManagerEvent
      */
-    public FileManagerEvent(FileManager manager, Type kind, FileDesc... fds) {
+    public FileManagerEvent(FileManager manager, Type type) {
         super(manager);
-        this.kind = kind;
+        this.type = type;
+        this.fds = null;
+        this.files = null;
+    }
+    
+    /**
+     * Constructs a FileManagerEvent
+     */
+    public FileManagerEvent(FileManager manager, Type type, FileDesc... fds) {
+        super(manager);
+        this.type = type;
         this.fds = fds;
         this.files = null;
     }
@@ -40,15 +52,25 @@ public class FileManagerEvent extends EventObject {
     /**
      * Constructs a FileManagerEvent with a bunch of files.
      */
-    public FileManagerEvent(FileManager manager, Type kind, File... files) {
+    public FileManagerEvent(FileManager manager, Type type, File... files) {
         super(manager);
-        this.kind = kind;
+        this.type = type;
         this.files = files;
         this.fds = null;
     }
     
-    public Type getKind() {
-        return kind;
+    /**
+     * Returns the type of the Event
+     */
+    public Type getType() {
+        return type;
+    }
+    
+    /**
+     * Returns the FileManager which fired the Event
+     */
+    public FileManager getFileManager() {
+        return (FileManager)getSource();
     }
     
     /**
@@ -71,14 +93,14 @@ public class FileManagerEvent extends EventObject {
      * Returns true if this event is an ADD event
      */
     public boolean isAddEvent() {
-        return (kind.equals(Type.ADD));
+        return (type.equals(Type.ADD_FILE));
     }
     
     /**
      * Returns true if this event is a REMOVE event
      */
     public boolean isRemoveEvent() {
-        return (kind.equals(Type.REMOVE));
+        return (type.equals(Type.REMOVE_FILE));
     }
     
     /**
@@ -86,7 +108,7 @@ public class FileManagerEvent extends EventObject {
      * event
      */
     public boolean isRenameEvent() {
-        return (kind.equals(Type.RENAME));
+        return (type.equals(Type.RENAME_FILE));
     }
     
     /**
@@ -94,14 +116,14 @@ public class FileManagerEvent extends EventObject {
      * when ID3 Tags changed) event.
      */
     public boolean isChangeEvent() {
-        return (kind.equals(Type.CHANGE));
+        return (type.equals(Type.CHANGE_FILE));
     }
     
     /**
      * Returns true if this is a FAILED add event (ie, addFile failed).
      */
     public boolean isFailedEvent() {
-        return (kind.equals(Type.FAILED));
+        return (type.equals(Type.ADD_FAILED_FILE));
     }
 
     /**
@@ -109,32 +131,60 @@ public class FileManagerEvent extends EventObject {
      * (ie, an addFile event was ignored because the file was already shared)
      */
     public boolean isAlreadySharedEvent() {
-        return (kind.equals(Type.ALREADY_SHARED));
+        return (type.equals(Type.ALREADY_SHARED_FILE));
     }
     
     /**
      * Returns true if this is a ADD_FOLDER event.
      */
     public boolean isAddFolderEvent() {
-        return kind.equals(Type.ADD_FOLDER);
+        return type.equals(Type.ADD_FOLDER);
     }
     
     /**
      * Returns true if this is a REMOVE_FOLDER event
      */
     public boolean isRemoveFolderEvent() {
-        return kind.equals(Type.REMOVE_FOLDER);
+        return type.equals(Type.REMOVE_FOLDER);
     }
     
     /**
-     * Returns true of this is neither a ADD_FOLDER nor REMOVE_FOLDER event
+     * Returns true if this is a FILEMANAGER_LOADING event
+     */
+    public boolean isFileManagerLoading() {
+        return type.equals(Type.FILEMANAGER_LOADING);
+    }
+    
+    /**
+     * Returns true if this is a FILEMANAGER_LOADED event
+     */
+    public boolean isFileManagerLoaded() {
+        return type.equals(Type.FILEMANAGER_LOADED);
+    }
+    
+    /**
+     * Returns true of this is a FILE event
      */
     public boolean isFileEvent() {
-        return !isAddFolderEvent() && !isRemoveFolderEvent();
+        return !isFolderEvent() && !isFileManagerEvent();
+    }
+    
+    /**
+     * Returns true if the is a FOLDER event
+     */
+    public boolean isFolderEvent() {
+        return isAddFolderEvent() || isRemoveFolderEvent();
+    }
+    
+    /**
+     * Returns true if this is a FileManager (state change) event
+     */
+    public boolean isFileManagerEvent() {
+        return isFileManagerLoading() || isFileManagerLoaded();
     }
     
     public String toString() {
-        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(kind);
+        StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(type);
         
         if (fds != null) {
             buffer.append(", fds=").append(fds.length).append("\n");

@@ -84,6 +84,8 @@ abstract class AbstractDHTController implements DHTController {
     
     public AbstractDHTController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+        
+        this.dispatcher = dispatcher;
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
@@ -96,12 +98,14 @@ abstract class AbstractDHTController implements DHTController {
         dht.setHostFilter(new DHTFilterDelegate());
         dht.setDHTValueFactory(new LimeDHTValueFactory());
         
-        this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
-        this.dispatcher = dispatcher;
+        this.bootstrapper = new LimeDHTBootstrapper(this);
         
         DHTStatsManager.clear();
     }
 
+    /**
+     * A factory method to create MojitoDHTs
+     */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
     
     /**
@@ -233,6 +237,8 @@ abstract class AbstractDHTController implements DHTController {
         
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
+        
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**

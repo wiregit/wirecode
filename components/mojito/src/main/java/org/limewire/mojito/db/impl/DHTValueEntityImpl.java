@@ -54,7 +54,7 @@ public class DHTValueEntityImpl implements DHTValueEntity {
     /**
      * The actual value
      */
-    private final DHTValue value;
+    private DHTValue value;
     
     /**
      * Whether or not this is a local value
@@ -153,7 +153,17 @@ public class DHTValueEntityImpl implements DHTValueEntity {
      * @see org.limewire.mojito.db.DHTValueEntity#setValue(org.limewire.mojito.db.DHTValue)
      */
     public DHTValue setValue(DHTValue value) {
-        throw new UnsupportedOperationException();
+        if (value == null) {
+            throw new NullPointerException("DHTValue is null");
+        }
+        
+        DHTValue old = this.value;
+        
+        this.value = value;
+        this.publishTime = 0L;
+        this.locationCount = 0;
+        
+        return old;
     }
 
     /*

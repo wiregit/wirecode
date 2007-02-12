@@ -20,7 +20,7 @@ import com.limegroup.gnutella.dht.AltLocDHTValue;
  */
 class PassiveDHTNodeRepublishManager extends DefaultRepublishManager {
     
-    @Override
+    /*@Override
     public boolean isExpired(Context context, DHTValueEntity entity) {
         if (super.isExpired(context, entity)) {
             return true;
@@ -77,5 +77,5 @@ class PassiveDHTNodeRepublishManager extends DefaultRepublishManager {
         }
         
         return false;
-    }
+    }*/
 }

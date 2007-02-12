@@ -146,17 +146,48 @@ public class DHTValueManager implements Runnable {
         }
         
         /**
+         * Removes all expired DHTValueEntities from the Database
+         */
+        private void removeExpired(Collection<? extends DHTValueEntity> entities) {
+            RepublishManager republishManager 
+                = context.getRepublishManager();
+            
+            Database database = context.getDatabase();
+            synchronized (database) {
+                for (DHTValueEntity entity : entities) {
+                    if (republishManager.isExpired(context, entity)) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(entity + " is expired!");
+                        }
+                        
+                        database.remove(entity);
+                        databaseStats.EXPIRED_VALUES.incrementStat();
+                    }
+                }
+            }
+        }
+        
+        /**
          * Starts the republishing
          */
         public synchronized void republish() {
             Database database = context.getDatabase();
-            Collection<DHTValueEntity> c = database.values(Selector.ALL_VALUES);
-            
-            if (LOG.isInfoEnabled()) {
-                LOG.info(context.getName() + " has " + c.size() + " DHTValues to process");
+            synchronized (database) {
+                // Remove all values that have expired
+                removeExpired(database.values(Selector.ALL_VALUES));
+                
+                // And publish the local values
+                Collection<DHTValueEntity> local 
+                    = database.values(Selector.LOCAL_VALUES);
+                
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " has " 
+                            + local.size() + " DHTValues to process");
+                }
+                
+                values = local.iterator();
             }
             
-            values = c.iterator();
             next();
         }
         
@@ -173,7 +204,7 @@ public class DHTValueManager implements Runnable {
             
             while(values.hasNext()) {
                 DHTValueEntity value = values.next();
-                if (manage(value)) {
+                if (publish(value)) {
                     return true;
                 }
             }
@@ -184,7 +215,7 @@ public class DHTValueManager implements Runnable {
         /**
          * Publishes or expires the given DHTValue
          */
-        private boolean manage(DHTValueEntity entity) {
+        private boolean publish(DHTValueEntity entity) {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
@@ -201,19 +232,7 @@ public class DHTValueManager implements Runnable {
                 RepublishManager republishManager 
                     = context.getRepublishManager();
                 
-                // Check if the value is expired? If so remove it!
-                if (republishManager.isExpired(context, entity)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(entity + " is expired!");
-                    }
-                    
-                    database.remove(entity);
-                    databaseStats.EXPIRED_VALUES.incrementStat();
-                    return false;
-                
-                // Is republishing required? If NO then continue with the
-                // next value
-                } else if (!republishManager.isRepublishingRequired(context, entity)) {
+                if (!republishManager.isRepublishingRequired(context, entity)) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(entity + " does not require republishing");
                     }

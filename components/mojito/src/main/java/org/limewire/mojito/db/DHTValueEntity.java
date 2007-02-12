@@ -56,8 +56,7 @@ public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable 
     public DHTValue getValue();
     
     /**
-     * This is an unsupported operation and throws thus
-     * an UnsupportedOperationException
+     * 
      */
     public DHTValue setValue(DHTValue value);
 

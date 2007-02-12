@@ -116,7 +116,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
      */
     private AltLocDHTValueImpl(DHTValueType valueType, Version version, byte[] data) throws DHTValueException {
         if (data == null) {
-            throw new DHTValueException("Unexpected length of data: " + data.length);
+            throw new DHTValueException("Data is null");
         }
         
         this.valueType = valueType;

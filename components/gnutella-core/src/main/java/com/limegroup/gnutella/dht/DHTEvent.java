@@ -12,12 +12,20 @@ public class DHTEvent extends EventObject {
     
     private final Type type;
 
-    public DHTEvent(Object source, Type type) {
+    public DHTEvent(DHTController source, Type type) {
         super(source);
         this.type = type;
     }
 
+    public DHTController getDHTController() {
+        return (DHTController)getSource();
+    }
+    
     public Type getType() {
         return type;
+    }
+    
+    public String toString() {
+        return type.toString();
     }
 }

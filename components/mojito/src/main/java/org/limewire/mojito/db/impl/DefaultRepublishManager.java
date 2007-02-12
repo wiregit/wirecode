@@ -41,9 +41,15 @@ public class DefaultRepublishManager implements RepublishManager {
     }
     
     public boolean isExpired(Context context, DHTValueEntity entity) {
-        // Local values don't expire
+        // Local values don't expire unless they're empty values
         if (entity.isLocalValue()) {
-            return false;
+            if (!entity.hasBeenPublished()) {
+                return false;
+            }
+            
+            // Local+empty DHTValues that have been 
+            // published once expire as well
+            return entity.getValue().isEmpty();
         }
         
         return DatabaseUtils.isExpired(context.getRouteTable(), entity);
