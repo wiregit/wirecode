@@ -52,16 +52,16 @@ public class DHTSettings extends LimeProps{
      * WARNING : DO NOT MANUALLY CHANGE THIS 
      */
     public static final LongSetting MIN_DHT_AVG_UPTIME =
-        FACTORY.createRemoteLongSetting("MIN_DHT_AVG_UPTIME", 120*60*1000L,
-                "DHTSettings.MinDHTAvgUptime", 5L*60L*1000L, 48*3600*1000L);
+        FACTORY.createRemoteLongSetting("MIN_DHT_AVG_UPTIME", 120L*60L*1000L,
+                "DHTSettings.MinDHTAvgUptime", 5L*60L*1000L, 48L*3600L*1000L);
     
     /**
      * The minimum current uptime (in ms) that a node must have to join the DHT.
      * WARNING : DO NOT MANUALLY CHANGE THIS
      */
     public static final LongSetting MIN_DHT_INITIAL_UPTIME =
-        FACTORY.createRemoteLongSetting("MIN_DHT_INITIAL_UPTIME", 120*60*1000L,
-                "DHTSettings.MinDHTInitialUptime", 5L*60L*1000L, 48*3600*1000L);
+        FACTORY.createRemoteLongSetting("MIN_DHT_INITIAL_UPTIME", 120L*60L*1000L,
+                "DHTSettings.MinDHTInitialUptime", 5L*60L*1000L, 48L*3600L*1000L);
     
     /**
      * Setting for whether or not an ultrapeer can join the DHT.
@@ -112,8 +112,8 @@ public class DHTSettings extends LimeProps{
      */
     public static final LongSetting DHT_NODE_ADDER_DELAY =
         //30 minutes for now
-        FACTORY.createRemoteLongSetting("DHT_NODE_ADDER_TIME", 
-                30L * 60L * 1000L, "DHTSettings.DHTNodeAdderTime", 30L * 1000L, 24L * 60L * 60L * 1000L); 
+        FACTORY.createRemoteLongSetting("DHT_NODE_ADDER_DELAY", 
+                30L * 60L * 1000L, "DHTSettings.DHTNodeAdderDelay", 30L * 1000L, 24L * 60L * 60L * 1000L); 
     
     /**
      * Setting for the number of persisted DHT nodes if this node is a passive DHT node
