@@ -38,6 +38,12 @@ public class GGEP {
     public static final String GGEP_HEADER_UP_SUPPORT = "UP";
     /** The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
+    /** 
+     * The extension header (key) for oob query requests to require the new
+     * protocol version of oob messages that supports security tokens for
+     * authentication.
+     */
+    public static final String GGEP_HEADER_SECURE_OOB = "SO";
     /** The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */

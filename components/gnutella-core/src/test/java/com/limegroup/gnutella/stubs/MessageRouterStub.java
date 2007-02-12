@@ -44,7 +44,8 @@ public class MessageRouterStub extends MessageRouter {
                                     boolean uploaded, 
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
-                                    boolean shouldMarkForFWTransfer) {
+                                    boolean shouldMarkForFWTransfer, 
+                                    byte [] securityToken) {
         return new LinkedList();
     }
 }

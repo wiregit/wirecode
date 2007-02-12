@@ -130,7 +130,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
                              , false
                              , false
                              , Collections.EMPTY_SET
-                             );
+                             , null);
         PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", reply);
         return reply;
     }
