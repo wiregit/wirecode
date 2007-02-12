@@ -650,8 +650,18 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#select(com.limegroup.mojito.KUID)
      */
-    public synchronized Contact select(KUID nodeId) {
-        return bucketTrie.select(nodeId).select(nodeId);
+    public synchronized Contact select(final KUID nodeId) {
+        final Contact[] node = new Contact[] { null };
+        bucketTrie.select(nodeId, new Cursor<KUID, Bucket>() {
+            public SelectStatus select(Entry<? extends KUID, ? extends Bucket> entry) {
+                node[0] = entry.getValue().select(nodeId);
+                if (node[0] != null) {
+                    return SelectStatus.EXIT;
+                }
+                return SelectStatus.CONTINUE;
+            }
+        });
+        return node[0];
     }
     
     /*
