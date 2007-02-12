@@ -8,8 +8,8 @@ import java.util.Set;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.rudp.UDPConnection;
 
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 /**
  * A push endpoint for myself.  This differs from the standard
  * push endpoints because it always returns the current connections

@@ -31,6 +31,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.security.QueryKey;
 import org.limewire.service.ErrorService;
 
@@ -84,7 +85,6 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -641,9 +641,9 @@ public abstract class MessageRouter {
 
         // Send UDPConnection messages on to the connection multiplexor
         // for routing to the appropriate connection processor
-        if (msg instanceof UDPConnectionMessage) {
+        if (msg instanceof RUDPMessage) {
             RouterService.getUDPMultiplexor().routeMessage(
-                    (UDPConnectionMessage) msg, addr);
+                    (RUDPMessage) msg, addr);
             return;
         } else if(msg instanceof QueryReply) {
             // check to see if it was from the multicast map.

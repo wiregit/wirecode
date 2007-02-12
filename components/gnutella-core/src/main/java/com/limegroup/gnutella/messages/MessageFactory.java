@@ -6,6 +6,7 @@ import java.io.InterruptedIOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.rudp.messages.impl.RUDPMessageImpl;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
@@ -14,7 +15,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -380,7 +380,7 @@ public class MessageFactory {
     private static class UDPConnectionParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
-            return UDPConnectionMessage.createMessage(guid, ttl, hops, payload);
+            return RUDPMessageImpl.createMessage(guid, ttl, hops, payload);
         }
     }
 }

@@ -28,6 +28,7 @@ import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.rudp.UDPConnection;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.ConnectionAcceptor;
@@ -46,7 +47,6 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
