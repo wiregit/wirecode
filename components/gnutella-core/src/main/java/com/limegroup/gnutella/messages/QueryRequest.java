@@ -22,8 +22,6 @@ import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
-import sun.nio.cs.ext.ISCII91;
-
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;

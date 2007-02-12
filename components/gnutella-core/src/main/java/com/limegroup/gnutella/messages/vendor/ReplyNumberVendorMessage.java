@@ -75,7 +75,7 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         return new ReplyNumberVendorMessage(replyGUID, 2, numResults);
     }
     
-    public static ReplyNumberVendorMessage  createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+    public static ReplyNumberVendorMessage createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
         return new ReplyNumberVendorMessage(replyGUID, 3, numResults);
     }
 

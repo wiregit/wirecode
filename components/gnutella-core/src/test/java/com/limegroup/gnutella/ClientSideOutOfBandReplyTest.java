@@ -139,6 +139,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         }
         assertEquals(queryGuid, new GUID(ack.getGUID()));
         assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
         
         // now send back some results - they should be accepted.
         Response[] res = new Response[10];
@@ -147,7 +148,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         Message m = 
             new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, ack.getSecurityToken());
         baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();
