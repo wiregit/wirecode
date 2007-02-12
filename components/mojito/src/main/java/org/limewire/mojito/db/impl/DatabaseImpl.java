@@ -202,7 +202,7 @@ public class DatabaseImpl implements Database {
         DHTValueBag bag = database.get(valueId);
         
         if (bag == null) {
-            bag = new DHTValueBagImpl(valueId);
+            bag = createDHTValueBag(valueId);
         }
         
         if (bag.add(entity)) {
@@ -384,6 +384,13 @@ public class DatabaseImpl implements Database {
             }
         }
         return Collections.unmodifiableList(values);
+    }
+    
+    /**
+     * Factory method to create DHTValueBags
+     */
+    protected DHTValueBag createDHTValueBag(KUID valueId) {
+        return new DHTValueBagImpl(valueId);
     }
     
     public synchronized String toString() {
