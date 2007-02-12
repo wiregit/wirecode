@@ -129,8 +129,8 @@ public class CacheForwardTest extends MojitoTestCase {
     
     public void testCacheForward() throws Exception {
         
-        final long waitForNodes = 500; // ms
-        
+        final long waitForNodes = 10; // ms
+
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
@@ -199,9 +199,21 @@ public class CacheForwardTest extends MojitoTestCase {
             // a value or to remove it
             Thread.sleep(waitForNodes);
 
-            // The 'furthest' Node should no longer have the value
+            // The Node with the nearest possible ID should have the value
             assertEquals(1, nearest.getValues().size());
-            assertEquals(0, furthest.getValues().size());
+            
+            // And the Node with the furthest ID shouldn't unless the furthest
+            // Node happens to be the creator of the value in which case we're
+            // not removing the value.
+            if (creator != furthest) {
+                assertEquals(0, furthest.getValues().size());
+            } else {
+                assertEquals(1, furthest.getValues().size());
+                for (DHTValueEntity entity : furthest.getValues()) {
+                    assertTrue(entity.isLocalValue());
+                }
+            }
+            
             for (Contact remote : evt.getNodes()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 
