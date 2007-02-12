@@ -25,11 +25,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import junit.framework.TestSuite;
 
+import org.limewire.collection.PatriciaTrie;
+import org.limewire.collection.Trie;
+import org.limewire.collection.TrieUtils;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -45,7 +49,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.PrivilegedAccessor;
 
 
 public class CacheForwardTest extends MojitoTestCase {
@@ -139,7 +142,7 @@ public class CacheForwardTest extends MojitoTestCase {
         KUID valueId = KUID.createRandomID();
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
-        MojitoDHT creator = null;
+        MojitoDHT first = null;
         try {
             for (int i = 0; i < 3*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
@@ -150,16 +153,29 @@ public class CacheForwardTest extends MojitoTestCase {
                     PingResult result = dht.ping(new InetSocketAddress("localhost", PORT)).get();
                     dht.bootstrap(result.getContact());
                 } else {
-                    creator = dht;
-                    
-                    // Change the Node ID of the creator so that it can never be
-                    // member of the k-closest Nodes to the given valueId
-                    PrivilegedAccessor.invokeMethod(creator, "setLocalNodeID", valueId.invert());
+                    first = dht;
                 }
+                
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            PingResult result = creator.ping(new InetSocketAddress("localhost", PORT+1)).get();
-            creator.bootstrap(result.getContact()).get();
+            
+            PingResult result = first.ping(new InetSocketAddress("localhost", PORT+1)).get();
+            first.bootstrap(result.getContact()).get();
+            
+            // Sort all KUIDs by XOR distance and use the Node as 
+            // creator that's furthest away from the value ID so
+            // that it never cannot be member of the k-closest Nodes
+            Trie<KUID, KUID> trie = new PatriciaTrie<KUID, KUID>(KUID.KEY_ANALYZER);
+            for (KUID id : dhts.keySet()) {
+                trie.put(id, id);
+            }
+            List<KUID> idsByXorDistance = TrieUtils.select(trie, valueId, trie.size());
+            
+            // Creator happens to be the furthest of the k-closest Nodes. 
+            //MojitoDHT creator = dhts.get(idsByXorDistance.get(k-1)); 
+            
+            // Use the furthest Node as the creator.
+            MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             
             // Store the value
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "Hello World".getBytes());
