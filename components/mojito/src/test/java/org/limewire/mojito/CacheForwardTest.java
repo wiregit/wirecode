@@ -45,6 +45,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.mojito.util.UnitTestUtils;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.PrivilegedAccessor;
 
 
 public class CacheForwardTest extends MojitoTestCase {
@@ -129,10 +130,13 @@ public class CacheForwardTest extends MojitoTestCase {
     
     public void testCacheForward() throws Exception {
         
-        final long waitForNodes = 10; // ms
+        final long waitForNodes = 500; // ms
 
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        
+        // KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
+        KUID valueId = KUID.createRandomID();
         
         Map<KUID, MojitoDHT> dhts = new HashMap<KUID, MojitoDHT>();
         MojitoDHT creator = null;
@@ -147,6 +151,10 @@ public class CacheForwardTest extends MojitoTestCase {
                     dht.bootstrap(result.getContact());
                 } else {
                     creator = dht;
+                    
+                    // Change the Node ID of the creator so that it can never be
+                    // member of the k-closest Nodes to the given valueId
+                    PrivilegedAccessor.invokeMethod(creator, "setLocalNodeID", valueId.invert());
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
@@ -154,8 +162,6 @@ public class CacheForwardTest extends MojitoTestCase {
             creator.bootstrap(result.getContact()).get();
             
             // Store the value
-            //KUID valueId = KUID.create("40229239B68FFA66575E59D0AB1F685AD3191960");
-            KUID valueId = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
@@ -204,15 +210,9 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // And the Node with the furthest ID shouldn't unless the furthest
             // Node happens to be the creator of the value in which case we're
-            // not removing the value.
-            if (creator != furthest) {
-                assertEquals(0, furthest.getValues().size());
-            } else {
-                assertEquals(1, furthest.getValues().size());
-                for (DHTValueEntity entity : furthest.getValues()) {
-                    assertTrue(entity.isLocalValue());
-                }
-            }
+            // not removing the value (see init loop, we changed the creator's
+            // node ID so that it cannot be member of the k-closest nodes).
+            assertEquals(0, furthest.getValues().size());
             
             for (Contact remote : evt.getNodes()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
