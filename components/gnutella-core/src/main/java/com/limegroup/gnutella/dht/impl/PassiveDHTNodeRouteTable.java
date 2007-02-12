@@ -247,4 +247,8 @@ class PassiveDHTNodeRouteTable implements RouteTable {
     public synchronized void clear() {
         delegate.clear();
     }
+    
+    public synchronized String toString() {
+        return "Passive RouteTable: " + delegate.toString();
+    }
 }
