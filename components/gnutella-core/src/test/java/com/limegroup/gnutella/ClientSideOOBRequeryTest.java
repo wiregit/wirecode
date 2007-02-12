@@ -143,7 +143,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -260,7 +260,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(guid), 1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -399,7 +399,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(guid), 1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -552,7 +552,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back a UDP response and make sure it was saved in bypassed...
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(guid), 1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(guid), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
@@ -672,7 +672,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -802,7 +802,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // just do it for 1 UDP guy
         {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -856,8 +856,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // send back a query key
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
-                                           SERVER_PORT);
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(), SERVER_PORT);
         {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
@@ -900,8 +899,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                     Set queryURNs = qReq.getQueryUrns();
                     gotQuery = queryURNs.contains(urn);
                     if (gotQuery) {
-                        gotQuery = qk.equals(qReq.getQueryKey());
-                        if(gotQuery)
+                        gotQuery = qReq.getQueryKey().isFor(InetAddress.getLocalHost(), SERVER_PORT);
+                        if (gotQuery)
                             urnQueryGUID = qReq.getGUID();
                     }
                 }
@@ -1000,7 +999,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // send back ReplyNumberVMs that should be bypassed
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1025,7 +1024,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         // Prepopulate Query Keys
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
@@ -1068,7 +1067,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                         Set queryURNs = qReq.getQueryUrns();
                         gotQuery = queryURNs.contains(urn);
                         if (gotQuery)
-                            gotQuery = qk.equals(qReq.getQueryKey());
+                            gotQuery = qReq.getQueryKey().isFor(InetAddress.getLocalHost(), SERVER_PORT);
                     }
                 }
                 catch (InterruptedIOException iioe) {
@@ -1151,7 +1150,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         { // bypass 1 result only
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1289,7 +1288,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
-                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
+                ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(qr.getGUID()), i+1);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vm.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -1349,7 +1348,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // Prepopulate Query Keys
-        QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
+        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < (UDP_ACCESS.length/2); i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};

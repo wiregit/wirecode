@@ -1,20 +1,26 @@
 package com.limegroup.gnutella.messagehandlers;
 
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IpPort;
+import org.limewire.collection.IntSet;
+import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
@@ -28,8 +34,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private final MessageRouter router;
 	
-    private final Map<OOBSession, Integer> OOBSessions = 
-    	Collections.synchronizedMap(new HashMap<OOBSession, Integer>(1000));
+    private final Map<OOBSession, OOBSession> OOBSessions =
+        Collections.synchronizedMap(new HashMap<OOBSession, OOBSession>());
     
 	public OOBHandler(MessageRouter router) {
 		this.router = router;
@@ -46,138 +52,177 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
-		OOBSession session = new OOBSession(
-				g,
-				handler.getInetAddress(),
-				handler.getPort());
-		
+	
 		int toRequest = router.getNumOOBToRequest(msg, handler);
 		if (toRequest <= 0)
 			return;
 		
 		LimeACKVendorMessage ack =
-			new LimeACKVendorMessage(g, toRequest);
-		synchronized(OOBSessions) {
-			// remove is necessary to refresh the timestamp.
-			Integer previous = OOBSessions.remove(session);
-			if (previous == null)
-				previous = toRequest;
-			else
-				previous += toRequest;
-			OOBSessions.put(session, previous);
-		}
+			new LimeACKVendorMessage(g, toRequest, 
+                    new OOBQueryKey(new OOBTokenData(handler, msg.getGUID(), toRequest)));
+        
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
 	}
-	
-	private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
+    
+    private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
+        // if query is not of interest anymore return
+        GUID queryGUID = new GUID(reply.getGUID());
+        
+        SecurityToken token = getVerifiedSecurityToken(reply, handler);
+        if (token == null) {
+            LOG.trace("Didn't request any OOB replies for this GUID from host");
+            // TODO spammer, remember them
+            return;
+        }
+        
         ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
-        // only account for OOB stuff if this was response to a 
-        // OOB query, multicast stuff is sent over UDP too....
-        if (!reply.isReplyToMulticastQuery()) {
-            int numResps = reply.getResultCount();
-            OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-            GUID guid = new GUID(reply.getGUID());
-            OOBSession session = new OOBSession(
-                    guid,
-            		handler.getInetAddress(),
-            		handler.getPort());
+        
+        int numResps = reply.getResultCount();
+        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+        
+        int requestedResponseCount = token.getBytes()[0] & 0xFF;
+        OOBSession session = new OOBSession(token, requestedResponseCount, queryGUID);
             
-            // Allow the router to handle the query reply in the
-            // following scenarios:
-            // a) We sent a Reply# message requesting the results,
-            //    and it sent back <= the number of results we
-            //    wanted.
-            // b) We sent a directed unicast query to that host
-            //    using this specific query GUID.
-    
-            Integer numRequested = OOBSessions.get(session);
-            if (numRequested == null) {
-                LOG.trace("Didn't request any OOB replies for this GUID from host");
-                if(!router.isHostUnicastQueried(guid, session)) {
-                    LOG.trace("Didn't directly unicast this host with this GUID");
-                    return;
-                }
-            } else {
-                numRequested -= numResps;
-                if (numRequested > 0) {
-                    if(LOG.isTraceEnabled())
-                        LOG.trace("Requested more than got (" + numRequested + " left over)");
-                	OOBSessions.put(session, numRequested);
-                } else {
-                	OOBSessions.remove(session);
-                	if (numRequested < 0) { // too many, ignore.
-                        if(LOG.isTraceEnabled())
-                            LOG.trace("Received more than requested (by" + (-numRequested) + ")");
-                		if(!router.isHostUnicastQueried(guid, session)) {
-                            LOG.trace("Didn't directly unicast this host with this GUID");
-                            return;
+        // Allow the router to handle the query reply in the
+        // following scenarios:
+        // a) We sent a Reply# message requesting the results,
+        //    and it sent back <= the number of results we
+        //    wanted.
+        // b) We sent a directed unicast query to that host
+        //    using this specific query GUID.
+        
+        // synchronize over everything so sessions are not expired
+        // from another thread while we work on them, we could
+        // use a lock for more finegrained synchronization if need be
+        synchronized (OOBSessions) {
+            session = getCanonicalSession(session);
+            int remainingCount = session.getRemainingResultsCount() - numResps; 
+            if (remainingCount >= 0) {
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Requested more than got (" + remainingCount + " left over)");
+                // parsing of query reply already done here in message dispatcher thread
+                try {
+                    int added = session.countAddedResponses(reply.getResultsArray());
+                    if (added > 0) {
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Handling the reply.");
                         }
+                        router.handleQueryReply(reply, handler);
                     }
+                } 
+                catch (BadPacketException e) {
+                    // ignore packet
                 }
             }
         }
-        
-        LOG.trace("Handling the reply.");
-        router.handleQueryReply(reply, handler);
 	}
+    
+    private final OOBSession getCanonicalSession(OOBSession session) {
+        OOBSession existing = OOBSessions.get(session);
+        if (existing == null) {
+            existing = session;
+            OOBSessions.put(existing, existing);
+        }
+        return existing;
+    }
 	
-	private class OOBSession implements IpPort {
-    	private final GUID g;
-    	private final InetAddress addr;
-    	private final int port;
-    	private final int hashCode;
-    	private final long now;
-    	OOBSession(GUID g, InetAddress addr, int port) {
-    		this.g = g;
-    		this.addr = addr;
-    		this.port = port;
-    		int hash = g.hashCode();
-    		hash = 17 * hash + addr.hashCode();
-    		hash = 17 * hash + port;
-    		hashCode = hash;
-    		now = System.currentTimeMillis();
+	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
+	    byte[] securityBytes = reply.getSecurityToken();
+        if (securityBytes == null) {
+            return null;
+        }
+
+        try {
+            OOBQueryKey oobKey = new OOBQueryKey(securityBytes);
+            OOBTokenData data = new OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
+            if (oobKey.isFor(data)) {
+                return oobKey;
+            }
+        }
+        catch (InvalidSecurityTokenException e) {
+            // invalid security token echoed back
+        }
+        return null;
+	}
+
+    private class OOBSession {
+    	
+        private final SecurityToken token;
+        
+        private final int hashCode;
+        
+        private final IntSet responseHashCodes;
+        
+        private int responseCount = 0;
+        
+        private final int requestedResponseCount;
+        
+        private final GUID guid;
+        
+        private long lastResultsReceivedTimeStamp;
+    	
+        public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
+            this.token = token;
+            this.hashCode = Arrays.hashCode(token.getBytes());
+            this.requestedResponseCount = requestedResponseCount;
+            this.responseHashCodes = new IntSet(requestedResponseCount);
+            this.guid = guid;
     	}
     	
-    	public int hashCode() {
+        public int hashCode() {
     		return hashCode;
     	}
     	
+        /**
+         * Counts the responses uniquely. 
+         */
+        public int countAddedResponses(Response[] responses) {
+            int added = 0;
+            for (Response response : responses) {
+                ++responseCount;
+                Set<URN> urns = response.getUrns();
+                if (!urns.isEmpty()) {
+                    added += responseHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
+                }
+                else {
+                    added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
+                }
+            }
+            lastResultsReceivedTimeStamp = System.currentTimeMillis();
+            return added;
+        }
+        
+        public final int getRemainingResultsCount() {
+            return requestedResponseCount - responseHashCodes.size();
+        }
+        
     	public boolean equals(Object o) {
     		if (! (o instanceof OOBSession))
     			return false;
     		OOBSession other = (OOBSession) o;
-    		return g.equals(other.g) && addr.equals(other.addr) && port == other.port;
+    		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
     	
-    	public boolean isExpired(long now) {
-    		return now - this.now > router.getOOBExpireTime();
-    	}
-
-        public String getAddress() {
-            return addr.getHostAddress();
-        }
-
-        public InetAddress getInetAddress() {
-            return addr;
-        }
-
-        public int getPort() {
-            return port;
+        public boolean isExpired(long now) {
+            // if the query is alive (which is only the case if it originated from this peer)
+            // it takes precedence and the session does
+            // not expire, otherwise just rely on the timeout
+            return !router.isQueryAlive(guid) 
+                && (now - lastResultsReceivedTimeStamp) > router.getOOBExpireTime();
         }
 	}
 	
 	private void expire() {
-		long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
 		synchronized (OOBSessions) {
-			for (Iterator<Map.Entry<OOBSession,Integer>> iter = 
-				OOBSessions.entrySet().iterator();
-			iter.hasNext();) {
-				if (iter.next().getKey().isExpired(now))
-					iter.remove();
+			for (Iterator<Map.Entry<OOBSession, OOBSession>> iter = 
+			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
+			    if (iter.next().getKey().isExpired(now))
+			        iter.remove();
 			}
 		}
 	}

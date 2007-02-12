@@ -22,7 +22,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        token = QueryKey.getQueryKey(InetAddress.getLocalHost(), 5904);
+        token = new QueryKey(InetAddress.getLocalHost(), 5904);
     }
     
     public void testSecurityTokenBytesAreSet() {

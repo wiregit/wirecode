@@ -665,6 +665,23 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         assertEquals(-1, container.createTime);
     }
     
+    public void testHashCode() {
+        Response r1 = new Response(0, 0, "name");
+        Response r2 = new Response(0, 1, "name");
+        assertNotEquals(r1.hashCode(), r2.hashCode());
+        
+        Response r3 = new Response(1, 0, "name");
+        assertNotEquals(r1.hashCode(), r3.hashCode());
+        assertNotEquals(r2.hashCode(), r3.hashCode());
+        
+        assertEquals(r1.hashCode(), new Response(0, 0, "name").hashCode());
+        
+        // max int values
+        r1 = new Response(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
+        r2 = new Response(0, Integer.MAX_VALUE, "name");
+        assertNotEquals(r1.hashCode(), r2.hashCode());
+    }
+    
     private Set getAsEndpoints(AlternateLocationCollection col)
       throws Exception {
         return (Set)PrivilegedAccessor.invokeMethod(Response.class,

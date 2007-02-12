@@ -5,14 +5,14 @@ import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 import java.util.Properties;
 
-import org.limewire.io.NetworkUtils;
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.io.NetworkUtils;
+import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -23,6 +23,9 @@ import com.limegroup.gnutella.stubs.FileDescStub;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase {
+    
+    private SecurityToken token;
+    
     public VendorMessageTest(String name) {
         super(name);
     }
@@ -31,6 +34,10 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
         return buildTestSuite(VendorMessageTest.class);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        token = new QueryKey(InetAddress.getLocalHost(), 7090);
+    }
 
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
@@ -84,17 +91,35 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
                                       2, new byte[1]);
         testWrite(vm);
         // test other constructor....
-        vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()), 5);
+        vm = new LimeACKVendorMessage(new GUID(GUID.makeGuid()), 5, token);
         testRead(vm);
 
         // Reply Number
         // -----------------------------
         // test network constructor....
+        
+        // test old versions are no longer accepted 
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                    (byte) 0, 1, new byte[1]);
+            fail("should have thrown bad packed exception, protocol version 1 is no longer supported");
+        }
+        catch (BadPacketException bpe) {
+        }
+        try {
+            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
+                    (byte) 0, 2, new byte[1]);
+            fail("should have thrown bad packed exception, protocol version 2 is no longer supported");
+        }
+        catch (BadPacketException bpe) {
+        }
+        
         vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                          (byte) 0, 1, new byte[1]);
+                (byte) 0, 3, new byte[2]);
+        
         testWrite(vm);
         // test other constructor....
-        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
+        vm = ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
 
         // Push Proxy Request
@@ -172,184 +197,6 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
 
     }
 
-
-    public void testReplyNumber() throws Exception {
-        try {
-            GUID g = new GUID(GUID.makeGuid());
-            new ReplyNumberVendorMessage(g, 0);
-            assertTrue(false);
-        } catch(IllegalArgumentException expected) {}
-        try {
-            GUID g = new GUID(GUID.makeGuid());
-            new ReplyNumberVendorMessage(g, 256);
-            assertTrue(false);
-        } catch(IllegalArgumentException expected) {}
-
-        for (int i = 1; i < 256; i++) {
-            GUID guid = new GUID(GUID.makeGuid());
-            ReplyNumberVendorMessage vm = new ReplyNumberVendorMessage(guid,
-                                                                       i);
-            assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
-            assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            vm.write(baos);
-            ByteArrayInputStream bais = 
-                new ByteArrayInputStream(baos.toByteArray());
-            ReplyNumberVendorMessage vmRead = 
-                (ReplyNumberVendorMessage) MessageFactory.read(bais);
-            assertEquals(vm, vmRead);
-            assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
-            assertEquals("after Read guids aren't equal!", guid, 
-                         new GUID(vmRead.getGUID()));
-        }
-
-        // test that the VM can be backwards compatible....
-        byte[] payload = null;
-        ReplyNumberVendorMessage vm = null;
-        
-        // first test that it needs a payload of at least size 1
-        payload = new byte[0];
-        try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 0, payload);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
-
-        // first test that version 1 needs a payload of only size 1
-        payload = new byte[2];
-        try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 1, payload);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
-
-        // test that it can handle version2 2
-        payload = new byte[2];
-        try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 2, payload);
-            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
-        }
-        catch (BadPacketException expected) {
-            assertTrue(false);
-        }
-        
-        //test that it can handle versions other than 1
-        payload = new byte[3];
-        try {
-            vm = new ReplyNumberVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 3, payload);
-            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
-        }
-        catch (BadPacketException expected) {
-            assertTrue(false);
-        }
-        
-        //test un/solicited byte
-        UDPService service = RouterService.getUdpService();
-        PrivilegedAccessor.setValue(
-        		service,"_acceptedUnsolicitedIncoming",new Boolean(false));
-        
-        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
-        assertFalse(vm.canReceiveUnsolicited());
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        vm.write(baos);
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        ReplyNumberVendorMessage vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
-        assertFalse(vm2.canReceiveUnsolicited());
-        
-        PrivilegedAccessor.setValue(
-        		service,"_acceptedUnsolicitedIncoming",new Boolean(true));
-        
-        vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()),5);
-        assertTrue(vm.canReceiveUnsolicited());
-        
-        baos = new ByteArrayOutputStream();
-        vm.write(baos);
-        bais = new ByteArrayInputStream(baos.toByteArray());
-        vm2 = (ReplyNumberVendorMessage) MessageFactory.read(bais);
-        assertTrue(vm2.canReceiveUnsolicited());
-        
-        
-    }
-
-
-    public void testLimeACK() throws Exception {
-        try {
-            GUID g = new GUID(GUID.makeGuid());
-            new LimeACKVendorMessage(g, -1);
-            assertTrue(false);
-        } catch(IllegalArgumentException expected) {}
-        try {
-            GUID g = new GUID(GUID.makeGuid());
-            new LimeACKVendorMessage(g, 256);
-            assertTrue(false);
-        } catch(IllegalArgumentException expected) {}
-
-        for (int i = 0; i < 256; i++) {
-            GUID guid = new GUID(GUID.makeGuid());
-            LimeACKVendorMessage vm = new LimeACKVendorMessage(guid,
-                                                                       i);
-            assertEquals("Simple accessor is broken!", vm.getNumResults(), i);
-            assertEquals("guids aren't equal!", guid, new GUID(vm.getGUID()));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            vm.write(baos);
-            ByteArrayInputStream bais = 
-                new ByteArrayInputStream(baos.toByteArray());
-            LimeACKVendorMessage vmRead = 
-                (LimeACKVendorMessage) MessageFactory.read(bais);
-            assertEquals(vm, vmRead);
-            assertEquals("Read accessor is broken!", vmRead.getNumResults(), i);
-            assertEquals("after Read guids aren't equal!", guid, 
-                         new GUID(vmRead.getGUID()));
-        }
-
-        // test that the VM can be backwards compatible....
-        byte[] payload = null;
-        LimeACKVendorMessage vm = null;
-        
-        // first test that it needs a payload of at least size 1
-        payload = new byte[0];
-        try {
-            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 0, payload);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
-
-        // first test that it rejects all versions of 1
-        payload = new byte[1];
-        try {
-            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 1, payload);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
-
-        // first test that version 2 needs a payload of only size 1
-        payload = new byte[2];
-        try {
-            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 2, payload);
-            assertTrue(false);
-        }
-        catch (BadPacketException expected) {};
-
-        // test that it can handle versions other than 1
-        payload = new byte[7];
-        try {
-            vm = new LimeACKVendorMessage(GUID.makeGuid(), (byte) 1, 
-                                              (byte) 0, 3, payload);
-            assertEquals("Simple accessor is broken!", vm.getNumResults(), 0);
-        }
-        catch (BadPacketException expected) {
-            assertTrue(false);
-        }
-    }
-    
     public void testGiveStatsVendorMessages() throws Exception {
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
                               GiveStatsVendorMessage.PER_CONNECTION_STATS,

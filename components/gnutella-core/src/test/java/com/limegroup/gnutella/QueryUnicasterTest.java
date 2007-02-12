@@ -16,7 +16,6 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.security.QueryKey;
-import org.limewire.security.QueryKeyGenerator;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -346,7 +345,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -363,9 +361,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                         if (pr.isQueryKeyRequest()) {
                             // send a QueryKey back!!!
                             QueryKey qk = 
-                                QueryKey.getQueryKey(datagram.getAddress(),
-                                                     datagram.getPort(),
-                                                     secretKey);
+                                new QueryKey(datagram.getAddress(),
+                                        datagram.getPort());
                             
                             PingReply pRep = 
                                 PingReply.createQueryKeyReply(pr.getGUID(), 

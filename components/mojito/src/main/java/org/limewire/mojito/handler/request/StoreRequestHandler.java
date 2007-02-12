@@ -72,8 +72,9 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
-        
-        if (!securityToken.isFor(request.getContact().getContactAddress())) {
+        SecurityToken expected = context.getSecurityTokenProvider().getSecurityToken(
+                request.getContact().getContactAddress());
+        if (!securityToken.equals(expected)) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);

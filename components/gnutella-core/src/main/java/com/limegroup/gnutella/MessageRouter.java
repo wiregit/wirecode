@@ -32,6 +32,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -164,6 +165,11 @@ public abstract class MessageRouter {
     /** How long to buffer up out-of-band replies.
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    
+    /**
+     * The amount of time after which to expire an OOBSession.
+     */
+    private static final long OOB_SESSION_EXPIRE_TIME = 2 * 60 * 1000;
 
     /** Time between sending HopsFlow messages.
      */
@@ -488,7 +494,7 @@ public abstract class MessageRouter {
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
-        setUDPMessageHandler(QueryReply.class, oobHandler);
+        setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
@@ -967,7 +973,7 @@ public abstract class MessageRouter {
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
-        QueryKey key = QueryKey.getQueryKey(address, port);
+        QueryKey key = new QueryKey(address, port);
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
@@ -1111,8 +1117,10 @@ public abstract class MessageRouter {
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
-
-        byte [] securityToken = ack.getSecurityToken();
+        
+        // token is null for old oob messages, it will just be ignored then
+        SecurityToken securityToken = ack.getSecurityToken();
+       
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
             int port = addr.getPort();
@@ -1121,9 +1129,9 @@ public abstract class MessageRouter {
             //node wants
             Iterable<QueryReply> iterable;
             if (ack.getNumResults() < bundle._responses.length) {
+                // TODO move selection to responseToQueryReplies methods for randomization
                 Response[] desired = new Response[ack.getNumResults()];
-                for (int i = 0; i < desired.length; i++)
-                    desired[i] = bundle._responses[i];
+                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
                 iterable = responsesToQueryReplies(desired, bundle._query, 1, securityToken);
             } else { 
                 iterable = responsesToQueryReplies(bundle._responses, 
@@ -1149,6 +1157,7 @@ public abstract class MessageRouter {
     	// if not, remember this location for a future, 'find more sources'
     	// targeted GUESS query, as long as the other end said they can receive
     	// unsolicited.
+        // TODO fberger fix this
     	if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
     		OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
     		
@@ -1156,11 +1165,9 @@ public abstract class MessageRouter {
     		if (!reply.canReceiveUnsolicited())
     			return -1;
     		
-    		DownloadManager dManager = RouterService.getDownloadManager();
     		// only store result if it is being shown to the user or if a
     		// file with the same guid is being downloaded
-    		if (!_callback.isQueryAlive(qGUID) && 
-    				!dManager.isGuidForQueryDownloading(qGUID))
+    		if (!isQueryAlive(qGUID))
     			return -1;
     		
     		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
@@ -1181,6 +1188,15 @@ public abstract class MessageRouter {
     	
     	return reply.getNumResults();
     	
+    }
+    
+    /**
+     * Returns whether the callback still expects more results for this search
+     * or whether there is a download query active for this guid.
+     */
+    public boolean isQueryAlive(GUID guid) {
+        DownloadManager dManager = RouterService.getDownloadManager();
+        return _callback.isQueryAlive(guid) || dManager.isGuidForQueryDownloading(guid); 
     }
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -
@@ -2305,12 +2321,13 @@ public abstract class MessageRouter {
      * @param queryRequest The query request corresponding to which we are
      * generating query replies.
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
+     * @param security token might be null
      * @return Iterable of QueryReply
      */
     private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT,
-                                             byte [] securityToken) {
+                                             final int REPLY_LIMIT, SecurityToken securityToken) {
+
         //List to store Query Replies
         List<QueryReply> queryReplies = new LinkedList<QueryReply>();
         
@@ -2421,6 +2438,9 @@ public abstract class MessageRouter {
     /**
      * Abstract method for creating query hits.  Subclasses must specify
      * how this list is created.
+     * 
+     * @param securityToken might be null, otherwise must be sent in GGEP
+     * of QHD with header "SO"
      *
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
@@ -2432,7 +2452,7 @@ public abstract class MessageRouter {
                                              boolean measuredSpeed, 
                                              boolean isFromMcast,
                                              boolean shouldMarkForFWTransfer,
-                                             byte [] securityToken);
+                                             SecurityToken securityToken);
 
     /**
      * Handles a message to reset the query route table for the given
@@ -2906,8 +2926,12 @@ public abstract class MessageRouter {
         }
     }
     
+    /**
+     * Time after which an OOB session should be expired.
+     * @return
+     */
     public long getOOBExpireTime() {
-    	return CLEAR_TIME;
+    	return OOB_SESSION_EXPIRE_TIME;
     }
     
     /*
@@ -3201,5 +3225,31 @@ public abstract class MessageRouter {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, handler);
         }
+    }
+ 
+    /**
+     * This class handles UDP query replies and forwards them to the 
+     * {@link OOBHandler} if they are not replies to multicast or unicast
+     * queries.
+     */
+    public class UDPQueryReplyHandler implements MessageHandler {
+
+        private final OOBHandler oobHandler;
+        
+        public UDPQueryReplyHandler(OOBHandler oobHandler) {
+            this.oobHandler = oobHandler;
+        }
+        
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            QueryReply reply = (QueryReply)msg;
+            if (reply.isReplyToMulticastQuery()
+                    || isHostUnicastQueried(new GUID(reply.getGUID()), handler)) {
+                handleQueryReply(reply, handler);
+            }
+            else {
+                oobHandler.handleMessage(msg, addr, handler);
+            }
+        }
+        
     }
 }

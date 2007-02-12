@@ -17,6 +17,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -577,7 +578,14 @@ public class PingReply extends Message implements Serializable, IpPort {
                              payload, STANDARD_PAYLOAD_SIZE, 
                              extensions.length);
         }
-        return new PingReply(guid, ttl, (byte)0, payload, ggep, ip);
+        
+        try {
+            return new PingReply(guid, ttl, (byte)0, payload, ggep, ip);
+        } catch (BadPacketException e) {
+            // cannot happen
+            Assert.that(false);
+            return null;
+        }
     }
 
 
@@ -698,9 +706,10 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      * @param hops the hops for this message
      * @param payload the message payload
+     * @throws BadPacketException 
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip) {
+                      GGEP ggep, InetAddress ip) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
@@ -760,11 +769,15 @@ public class PingReply extends Message implements Serializable, IpPort {
 
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
-                    byte[] bytes = 
-                        ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    if(QueryKey.isValidQueryKeyBytes(bytes))
-                        key = QueryKey.getQueryKey(bytes, false);
-                } catch (BadGGEPPropertyException corrupt) {}
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                    key = new QueryKey(bytes);
+                }
+                catch (InvalidSecurityTokenException e) {
+                    throw new BadPacketException("invalid query key");
+                } 
+                catch (BadGGEPPropertyException e) {
+                    throw new BadPacketException("invalid query key");
+                }
             }
             
             if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
@@ -1288,8 +1301,15 @@ public class PingReply extends Message implements Serializable, IpPort {
                          newPayload, 0,
                          STANDARD_PAYLOAD_SIZE);
 
-        return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPayload, null, IP);
+        try {
+            return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
+                                 newPayload, null, IP);
+        } catch (BadPacketException e) {
+            // cannot happen
+            ErrorService.error(e);
+            Assert.that(false);
+            return null;
+        }
     }
     
     /**

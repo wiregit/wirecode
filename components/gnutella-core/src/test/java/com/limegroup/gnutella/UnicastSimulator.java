@@ -15,7 +15,6 @@ import java.util.Random;
 
 import org.limewire.io.IOUtils;
 import org.limewire.security.QueryKey;
-import org.limewire.security.QueryKeyGenerator;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -170,7 +169,6 @@ public class UnicastSimulator {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -186,9 +184,8 @@ public class UnicastSimulator {
                         QueryKey queryKey = 
                             ((QueryRequest)message).getQueryKey();
                         QueryKey computed = 
-                            QueryKey.getQueryKey(datagram.getAddress(),
-                                                 datagram.getPort(),
-                                                 secretKey);
+                            new QueryKey(datagram.getAddress(),
+                                    datagram.getPort());
                         if (!computed.equals(queryKey))
                             continue; // querykey is invalid!!
                         byte[] inGUID = ((QueryRequest)message).getGUID();
@@ -216,9 +213,8 @@ public class UnicastSimulator {
                         if (pr.isQueryKeyRequest()) {
                             // send a QueryKey back!!!
                             QueryKey qk = 
-                                QueryKey.getQueryKey(datagram.getAddress(),
-                                                     datagram.getPort(),
-                                                     secretKey);
+                                new QueryKey(datagram.getAddress(),
+                                        datagram.getPort());
                             PingReply pRep =
                                 PingReply.createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,

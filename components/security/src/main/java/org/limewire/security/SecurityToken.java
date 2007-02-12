@@ -2,18 +2,16 @@ package org.limewire.security;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.SocketAddress;
 
 /**
- * A SecurityToken authenticates a host based on its IP:Port.
+ * A SecurityToken authenticates a host based on its IP:Port or a other
+ * pieces of data.
+ * 
+ * TODO make api similar to MessageDigest so the secret byte can be updated
+ * by new input
  */
-public interface SecurityToken {
-    
-    /**
-     * Returns the length of the SecurityToken in byte
-     */
-    public int getTokenLength();
+public interface SecurityToken<T extends SecurityToken.TokenData> {
     
     /**
      * Returns the SecurityToken as byte array
@@ -26,14 +24,9 @@ public interface SecurityToken {
     public void write(OutputStream out) throws IOException;
     
     /** 
-     * Validates that a SecurityToken was generated for the given SocketAddress
+     * Validates that a SecurityToken was generated for the given TokenData
      */
-    public boolean isFor(SocketAddress addr);
-    
-    /** 
-     * Validates that a SecurityToken was generated for the given IP:Port
-     */
-    public boolean isFor(InetAddress addr, int port);
+    public boolean isFor(T data);
     
     /**
      * The TokenProvider is a factory interface to create SecurityTokens
@@ -44,11 +37,10 @@ public interface SecurityToken {
          * Creates and returns a SecurityToken for the given SocketAddress
          */
         public SecurityToken getSecurityToken(SocketAddress addr);
-        
-        /**
-         * Creates and returns a SecurityToken for the given IP:Port
-         */
-        public SecurityToken getSecurityToken(InetAddress addr, int port);
+    }
+    
+    public static interface TokenData {
+        public byte [] getData();
     }
     
     /**
@@ -57,11 +49,7 @@ public interface SecurityToken {
     public static class QueryKeyProvider implements TokenProvider {
 
         public SecurityToken getSecurityToken(SocketAddress addr) {
-            return QueryKey.getQueryKey(addr);
-        }
-        
-        public SecurityToken getSecurityToken(InetAddress addr, int port) {
-            return QueryKey.getQueryKey(addr, port);
+            return new QueryKey(addr);
         }
     }
 }

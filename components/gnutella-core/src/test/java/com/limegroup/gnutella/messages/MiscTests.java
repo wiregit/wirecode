@@ -52,7 +52,7 @@ public class MiscTests extends LimeTestCase {
                 rand.nextBytes(qk);
                 Arrays.sort(qk);
             }
-            QueryKey queryKey = QueryKey.getQueryKey(qk, true);
+            QueryKey queryKey = new QueryKey(qk);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             queryKey.write(baos);
             GGEP in = new GGEP(false);
@@ -62,7 +62,7 @@ public class MiscTests extends LimeTestCase {
             in.write(baos);
             GGEP out = new GGEP(baos.toByteArray(), 0, null);
             QueryKey queryKey2 = 
-            QueryKey.getQueryKey(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT), false);
+            new QueryKey(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
             assertEquals("qks not equal, i = " + i,
                        queryKey, queryKey2);
         }

@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.limewire.security.SecurityToken;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -44,8 +46,8 @@ public class MessageRouterStub extends MessageRouter {
                                     boolean uploaded, 
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
-                                    boolean shouldMarkForFWTransfer, 
-                                    byte [] securityToken) {
+                                    boolean shouldMarkForFWTransfer,
+                                    SecurityToken securityToken) {
         return new LinkedList();
     }
 }

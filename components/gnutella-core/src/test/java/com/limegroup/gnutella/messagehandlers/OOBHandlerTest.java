@@ -1,16 +1,24 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetAddress;
+import java.util.Random;
 
 import junit.framework.Test;
+
+import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.QueryKey;
+import org.limewire.security.SecurityToken;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -30,9 +38,13 @@ public class OOBHandlerTest extends LimeTestCase {
     static GUID g;
     static InetAddress address;
     static MyReplyHandler replyHandler;
+    static QueryAliveCallback callback;
     
     public void setUp() throws Exception {
-    	router = new MyMessageRouter();
+        callback = new QueryAliveCallback();
+        PrivilegedAccessor.setValue(RouterService.class, "callback", callback);
+        router = new MyMessageRouter();
+        router.initialize();
     	handler = new OOBHandler(router);
     	g = new GUID(GUID.makeGuid());
     	address = InetAddress.getByName("1.2.3.4");
@@ -47,24 +59,59 @@ public class OOBHandlerTest extends LimeTestCase {
     	// and we request all of them
     	router.numToRequest = 10;
     	handler.handleMessage(rnvm,null,replyHandler);
-    	assertACKSent(replyHandler, 10);
+    	SecurityToken token = assertACKSent(replyHandler, 10);
     	
     	// first send back only 8 results - those should be accepted
-    	QueryReply reply = getReplyWithResults(g.bytes(),8,address.getAddress());
+    	QueryReply reply = getReplyWithResults(g.bytes(),8,address.getAddress(), token);
     	handler.handleMessage(reply, null, replyHandler);
     	assertSame(reply,router.reply);
     	
     	// then send back 4 more results - those should not be accepted.
     	router.reply = null;
-    	reply = getReplyWithResults(g.bytes(), 4, address.getAddress());
+    	reply = getReplyWithResults(g.bytes(), 4, address.getAddress(), token);
     	handler.handleMessage(reply, null, replyHandler);
     	assertNull(router.reply);
+    }
+    
+    public void testMessagesWithoutEchoedTokenAreDiscarded() {
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        
+        // and we request all of them
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm,null,replyHandler);
+        assertACKSent(replyHandler, 10);
+        
+        // first send back only 10 results without token - those should be discarded
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress(), null);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotSame(reply, router.reply);
+    }
+    
+    public void testMessagesWithDifferentTokenAreDiscarded() throws InvalidSecurityTokenException {
+        //a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        
+        // and we request all of them
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm,null,replyHandler);
+        assertACKSent(replyHandler, 10);
+        
+        
+        byte[] bytes = new byte[8];
+        new Random().nextBytes(bytes);
+        SecurityToken tokenFake = new QueryKey(bytes);
+        
+        // send back messages with fake token
+        QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress(), tokenFake);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotSame(reply, router.reply);
     }
     
     public void testDropsUnAcked() throws Exception {
     	
     	// send some results w/o an RNVM
-    	QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress());
+    	QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress(), null);
     	handler.handleMessage(reply, null, replyHandler);
     	
     	// should be ignored.
@@ -76,33 +123,120 @@ public class OOBHandlerTest extends LimeTestCase {
     	handler.handleMessage(rnvm, null, replyHandler);
     	
     	// double check we sent back an ack
-    	assertACKSent(replyHandler, 10);
+    	SecurityToken token = assertACKSent(replyHandler, 10);
     	
-    	// and resend the same results
+    	// and resend the almost same results
+        reply = getReplyWithResults(g.bytes(),5, address.getAddress(), token);
     	handler.handleMessage(reply, null, replyHandler);
     	
     	// they should be forwarded to the router now
-    	assertSame(router.reply, reply);
+    	assertSame(reply, router.reply);
     }
     
-    public void testSessionsExpire() throws Exception {
+    public void testSessionsExpireBecauseOfAliveQuery() throws Exception {
     	// a host claims to have 10 results
     	ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
     	router.numToRequest = 10;
     	handler.handleMessage(rnvm, null, replyHandler);
     	
     	// double check we sent back an ack
-    	assertACKSent(replyHandler, 10);
+    	SecurityToken token = assertACKSent(replyHandler, 10);
     	
-    	// but they don't send them back in time
-    	router.timeToExpire = 50;
-    	Thread.sleep(100);
-    	handler.run();
-    	QueryReply reply = getReplyWithResults(g.bytes(), 10, address.getAddress());
-    	handler.handleMessage(reply, null, replyHandler);
-    	
-    	// should be ignored.
-    	assertNull(router.reply);
+        router.reply = null;
+        
+        // send reply, only then session objects are created
+        QueryReply reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+        
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 5);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+
+        // the next ones should be ignored since there is a full session for them
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 10);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // session is cleared by signaling that there is no query alive for it anymore
+        callback.isAlive = false;
+        handler.run();
+
+        // message is accepted again since we pretend there is an alive query for it
+        callback.isAlive = true;
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        
+    }
+    
+    public void testSessionsExpireBecauseOfTimeout() throws InterruptedException {
+        // test timeout based expiration
+        // disable query alive in callback for that
+        callback.isAlive = false;
+        router.timeToExpire = 50;
+        router.reply = null;
+        
+        // send reply number message
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        router.reply = null;
+        QueryReply reply = getReplyWithResults(g.bytes(), 8, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 4, address.getAddress(), token, 8);
+        
+        // should be discarded, too many results
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // sleep to let session expire
+        Thread.sleep(100);
+        handler.run();
+        
+        // send again, now it should be accepted
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+    }
+    
+    public void testQueryIsAliveOverridesSessionTimeout() throws InterruptedException {
+        callback.isAlive = true;
+        router.timeToExpire = 50;
+        router.reply = null;
+        
+//      send reply number message
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        router.reply = null;
+        QueryReply reply = getReplyWithResults(g.bytes(), 8, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        router.reply = null;
+        reply = getReplyWithResults(g.bytes(), 4, address.getAddress(), token, 8);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        // run timeout, but should be still discarded, since query is alive
+        Thread.sleep(100);
+        handler.run();
+        
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
     }
     
     public void testAddsRNVMs() throws Exception {
@@ -119,35 +253,109 @@ public class OOBHandlerTest extends LimeTestCase {
     	handler.handleMessage(first, null, replyHandler);
     	
     	// we sould respond we want them
-    	assertACKSent(replyHandler, 10);
+    	SecurityToken token1 = assertACKSent(replyHandler, 10);
     	
     	// then we receive the second rnvm and want only 15/20
     	replyHandler.m = null;
-    	router.numToRequest = 15;
+    	router.numToRequest = 5;
     	handler.handleMessage(second, null, replyHandler);
-    	assertACKSent(replyHandler,15);
+    	SecurityToken token2 = assertACKSent(replyHandler, 5);
     	
     	// if we get back a reply with 25 results we should accept it.
-    	QueryReply reply = getReplyWithResults(g.bytes(), 25, address.getAddress());
+    	QueryReply reply = getReplyWithResults(g.bytes(), 10 , address.getAddress(), token1);
     	handler.handleMessage(reply, null, replyHandler);
-    	assertSame(router.reply,reply);
+    	assertSame(reply, router.reply);
+        
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token2, 10);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
     }
     
-    private static void assertACKSent(MyReplyHandler rhandler, int numExpected) {
+    public void testDiscardedWithoutAliveQuery() throws InterruptedException {
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        // send reply, only then session objects are created
+        QueryReply reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+        router.reply = null;
+     
+        try {
+            callback.isAlive = false;
+            
+            handler.handleMessage(reply, null, replyHandler);
+            
+            // should be ignored.
+            assertNull(router.reply);
+        }
+        finally {
+            callback.isAlive = true;
+        }
+        
+        // send 5 other ones, marked by new offset again, now that search is alive again
+        reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token, 5);
+        handler.handleMessage(reply, null, replyHandler);
+        assertSame(reply, router.reply);
+        
+        // and now send the old ones again after expiration that does nothing
+        handler.run();
+        
+        router.reply = null;
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+    }
+    
+    public void testDuplicatePacketsIgnored() {
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+        
+        // send reply, only then session objects are created
+        QueryReply reply = getReplyWithResults(g.bytes(), 5, address.getAddress(), token);
+        handler.handleMessage(reply, null, replyHandler);
+        assertNotNull(router.reply);
+        
+        router.reply = null;
+        
+        // send same five and message should be discarded
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+    }
+    
+    private static SecurityToken assertACKSent(MyReplyHandler rhandler, int numExpected) {
     	assertNotNull(rhandler.m);
     	assertTrue (rhandler.m instanceof LimeACKVendorMessage);
     	LimeACKVendorMessage ack = (LimeACKVendorMessage)rhandler.m;
     	assertEquals(numExpected, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
+        return ack.getSecurityToken();
     }
     
-    private QueryReply getReplyWithResults(byte[] guid, int numResults,byte [] addr) {
-    	Response[] res = new Response[numResults];
-    	for (int j = 0; j < res.length; j++)
-    		res[j] = new Response(10, 10, "susheel"+j);
-    	return new QueryReply(guid, (byte) 1, 1, addr, 0, res,
-    				GUID.makeGuid(), new byte[0], false, false, true,
-    				true, false, false, null);
-    	
+    private QueryReply getReplyWithResults(byte[] guid, int numResults,byte [] addr, SecurityToken token) {
+        return getReplyWithResults(guid, numResults, addr, token, 0);
+    }
+    
+    private QueryReply getReplyWithResults(byte[] guid, int numResults,byte [] addr, SecurityToken token, int offset) {
+        Response[] res = new Response[numResults];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "susheel"+j+offset);
+
+        return new QueryReply(guid, (byte)1,
+                1, addr, 0, res, 
+                GUID.makeGuid(), new byte[0],
+                false, false,
+                true, true, false,
+                false, true, null, token);
     }
     
     private static class MyMessageRouter extends MessageRouterStub {
@@ -158,6 +366,7 @@ public class OOBHandlerTest extends LimeTestCase {
 		public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
 			return numToRequest;
 		}
+		
 		@Override
 		public long getOOBExpireTime() {
 			return timeToExpire;
@@ -179,5 +388,15 @@ public class OOBHandlerTest extends LimeTestCase {
     	public void reply (Message m) {
     		this.m = m;
     	}
+    }
+    
+    private static class QueryAliveCallback extends ActivityCallbackStub {
+        
+        private boolean isAlive = true;
+        
+        @Override
+        public boolean isQueryAlive(GUID guid) {
+            return isAlive;
+        }
     }
 }

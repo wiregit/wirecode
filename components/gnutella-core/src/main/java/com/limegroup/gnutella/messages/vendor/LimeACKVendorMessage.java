@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -32,10 +33,10 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  *  Note that this behavior of maintaining backwards compatiblity is really
  *  only necessary for UDP messages since in the UDP case there is probably no
  *  MessagesSupportedVM exchange.
- *   
- *   @version 3
  *  
- *  Adds a security token to prevent clients from spoofing their ip and just sending
+ *  @version 3
+ *  
+ *  * Adds a security token to prevent clients from spoofing their ip and just sending
  *  results back after a little while
  */
 public final class LimeACKVendorMessage extends VendorMessage {
@@ -72,6 +73,8 @@ public final class LimeACKVendorMessage extends VendorMessage {
      *  for this query.  If you want more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
+     *  @param queryKey the query key that is sent along to make sure the 
+     *  opposite side is not spoofing their ip address
      */
     public LimeACKVendorMessage(GUID replyGUID, 
                                 int numResults) {
@@ -85,29 +88,29 @@ public final class LimeACKVendorMessage extends VendorMessage {
      * @param securityToken the token to prevent spoofing.
      */
     public LimeACKVendorMessage(GUID replyGUID, 
-            int numResults, SecurityToken securityToken) {
+                                int numResults, SecurityToken securityToken) {
         super(F_LIME_VENDOR_ID, F_LIME_ACK, VERSION,
                 derivePayloadV3(numResults,securityToken.getBytes()));
         setGUID(replyGUID);
     }
-
+    
     /** @return an int (0-255) representing the amount of results that a host
      *  wants for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
         return ByteOrder.ubyte2int(getPayload()[0]);
     }
-
+    
     /**
      * @return the security token of the message if it has one or <code>null</code>
      */
-    public byte [] getSecurityToken() {
+    public SecurityToken getSecurityToken() {
         if (getVersion() > OLD_VERSION) {
             try {
                 GGEP ggep = new GGEP(getPayload(), 1);
                 if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                     // we return a oob query key, but cannot verify it when it is not from us
-                    return ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                    return new UnknownSecurityToken(ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB));
                 }
             }
             catch (BadGGEPPropertyException corrupt) {} 
@@ -153,15 +156,20 @@ public final class LimeACKVendorMessage extends VendorMessage {
 
     public boolean equals(Object other) {
         if (other instanceof LimeACKVendorMessage) {
+            LimeACKVendorMessage o = (LimeACKVendorMessage)other;
             GUID myGuid = new GUID(getGUID());
-            GUID otherGuid = new GUID(((VendorMessage) other).getGUID());
-            int otherResults = 
-                ((LimeACKVendorMessage) other).getNumResults();
+            GUID otherGuid = new GUID(o.getGUID());
+            int otherResults = o.getNumResults();
             return ((myGuid.equals(otherGuid)) && 
                     (getNumResults() == otherResults) &&
+                    areEqualTokens(getSecurityToken(), o.getSecurityToken()) &&
                     super.equals(other));
         }
         return false;
+    }
+    
+    private final boolean areEqualTokens(SecurityToken t1, SecurityToken t2) {
+        return t1 == t2 || (t1 != null && t2 != null && Arrays.equals(t1.getBytes(), t2.getBytes()));
     }
 
     /** Overridden purely for stats handling.
@@ -176,4 +184,27 @@ public final class LimeACKVendorMessage extends VendorMessage {
     public void recordDrop() {
         super.recordDrop();
     }
+
+    private class UnknownSecurityToken implements SecurityToken {
+
+        private final byte[] data;
+        
+        public UnknownSecurityToken(byte[] data) {
+            this.data = data;
+        }
+        
+        public byte[] getBytes() {
+            return data;
+        }
+
+        public boolean isFor(TokenData data) {
+            return false;
+        }
+
+        public void write(OutputStream out) throws IOException {
+            out.write(data);            
+        }
+        
+    }
+    
 }

@@ -1,6 +1,9 @@
 package org.limewire.io;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
@@ -219,5 +222,29 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertFalse(NetworkUtils.isMe("123.132.231.1", 6346));        
         assertFalse(NetworkUtils.isMe(new byte[] {(byte)123, (byte)132, (byte)231, 1}, 6346));
         
+    }
+    
+    public void testGetAddressV6Bytes() throws UnknownHostException {
+        
+        for (String name : new String[] { "127.0.0.1", "255.255.255.0", 
+                "192.168.0.1", "128.0.245.90" }) {
+            InetAddress addr = InetAddress.getByName(name);
+            byte[] bytes = NetworkUtils.getIPv6AddressBytes(addr);
+            assertEquals(16, bytes.length);
+            InetAddress res = InetAddress.getByAddress(bytes); 
+            assertTrue(res instanceof Inet4Address);
+            assertEquals(addr, res);
+        }
+        
+        for (String name : new String[] { "[::]", "[::1]", "[2001:db8::]", 
+                "[2001:0db8:0000:0000:0000:0000:1428:57ab]",
+                "[2001:0db8::1428:57ab]"}) {
+            InetAddress addr = InetAddress.getByName(name);
+            byte[] bytes = NetworkUtils.getIPv6AddressBytes(addr);
+            assertEquals(addr.getAddress(), bytes);
+            InetAddress res = InetAddress.getByAddress(bytes);
+            assertTrue(res instanceof Inet6Address);
+            assertEquals(addr, res);
+        }
     }
 }

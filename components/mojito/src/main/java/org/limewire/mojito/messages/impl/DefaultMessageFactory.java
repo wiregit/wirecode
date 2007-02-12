@@ -127,7 +127,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
     
     public SecurityToken createSecurityToken(Contact dst) {
-        return context.getSecurityTokenProvider().getSecurityToken(dst.getContactAddress());
+        return context.getSecurityTokenProvider().getSecurityToken(dst.getContactAddress()); 
     }
     
     public MessageID createMessageID(SocketAddress dst) {

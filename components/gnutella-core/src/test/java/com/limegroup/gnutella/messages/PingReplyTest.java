@@ -567,7 +567,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
         QueryKey qk = null;
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        qk = QueryKey.getQueryKey(randBytes, true);
+        qk = new QueryKey(randBytes);
         PingReply pr = 
             PingReply.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
                                           2, 2, true, qk);

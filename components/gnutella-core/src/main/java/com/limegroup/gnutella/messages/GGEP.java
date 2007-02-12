@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.TreeMap;
 
 import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.util.COBSUtil;
@@ -90,6 +92,16 @@ public class GGEP {
     public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
     /** The extension header (key) indiciating the value has a signature in it. */
     public static final String GGEP_HEADER_SIGNATURE = "SIG";
+    
+    /** 
+     * The extension header indicating that the payload of the message should
+     * not be modified. 
+     */
+    public static final String GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD = "NMP";
+    /**
+     * The extension header indicating that a GGEP should not be modified.
+     */
+    public static final String GGEP_HEADER_DO_NOT_MODIFY_GGEP = "NMG";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -362,7 +374,20 @@ public class GGEP {
             }
         }
     }
-
+    
+    /**
+     * Returns the GGEP as a byte array
+     * @return an empty array if GGEP is empty
+     */
+    public byte[] toByteArray() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            write(out);
+        } catch (IOException e) {
+            ErrorService.error(e);
+        }
+        return out.toByteArray();
+    }
 
     private final boolean shouldCOBSEncode(byte[] data) {
         // if nulls are allowed from construction time and if nulls are present
@@ -593,6 +618,13 @@ public class GGEP {
      */
     public Set<String> getHeaders() {
         return _props.keySet();
+    }
+    
+    /**
+     * Returns whether this GGEP is empty or not.
+     */
+    public boolean isEmpty() {
+        return _props.isEmpty();
     }
     
     /**

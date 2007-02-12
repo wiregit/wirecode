@@ -888,7 +888,12 @@ public class ManagedConnection extends Connection
         // 4) We must be able to OOB and have great success rate.
         if (remoteHostSupportsLeafGuidance() < 1) return query;
         if (query.desiresOutOfBandReplies()) return query;
+        
         if (query.doNotProxy()) return query;
+        
+        // can't proxy if payload should not be modified
+        if (!query.isPayloadModifiable()) return query;
+        
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;

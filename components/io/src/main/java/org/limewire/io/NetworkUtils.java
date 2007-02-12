@@ -533,4 +533,32 @@ public final class NetworkUtils {
         // TODO: Add support for vaporware like IPv9 :)
         throw new IllegalArgumentException(a + " and/or " + b + " are unknown InetAddress instances");
     }
+    
+    /**
+     * Returns the IPv6 address bytes of IPv6 and IPv4 IP addresses. 
+     * @throws IllegalArgumentException if given a different address type
+     */
+    public static byte[] getIPv6AddressBytes(InetAddress address) {
+        byte[] bytes = address.getAddress();
+        switch (bytes.length) {
+        case 16:
+            return bytes;
+        case 4:
+            byte[] result = new byte[16];
+            result[10] = (byte) 0xff;
+            result[11] = (byte) 0xff;
+            System.arraycopy(bytes, 0, result, 12, bytes.length);
+            return result;
+        default:
+            throw new IllegalArgumentException("unhandled address length");
+        }
+    }
+    
+    /**
+     * Returns true if an IPv6 representation of <code>address</code> exists.
+     */
+    public static boolean isIPv6Compatible(InetAddress address) {
+        int length = address.getAddress().length;
+        return length == 4 || length == 16;
+    }
 }

@@ -231,14 +231,14 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testBadQueryKey() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
 
-        QueryKey qkToUse = QueryKey.getQueryKey(localHost, 0);
+        QueryKey qkToUse = new QueryKey(localHost, 0);
         assertNotNull(qkToUse);
 
         {
             // we shouldn't get any response to our query...
-            QueryRequest goodQuery = QueryRequest.createQueryKeyQuery("susheel", 
+            QueryRequest badQuery = QueryRequest.createQueryKeyQuery("susheel", 
                                                                       qkToUse);
-            send(goodQuery, localHost, SERVER_PORT);
+            send(badQuery, localHost, SERVER_PORT);
             
             try {
                 // now we should NOT get an ack            

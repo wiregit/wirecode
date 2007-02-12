@@ -25,6 +25,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -224,7 +225,44 @@ public class QueryReply extends Message implements SecureMessage {
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
              false, proxies, null);
     }
-
+    
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is ON by default.  
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
+     * @param xmlBytes The (non-null) byte[] containing aggregated
+     * and indexed information regarding file metadata.  In terms of byte-size, 
+     * this should not be bigger than 65535 bytes.  Anything larger will result
+     * in an Exception being throw.  This String is assumed to consist of
+     * compressed data.
+     * @param supportsChat true iff the host currently allows chatting.
+     * @param proxies an array of PushProxy interfaces.  will be included in 
+     * the replies GGEP extension.
+     * @param the security token to echo along with the query reply
+     * @exception IllegalArgumentException Thrown if 
+     * xmlBytes.length > XML_MAX_SIZE
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID, byte[] xmlBytes,
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply, Set<? extends IpPort> proxies, SecurityToken securityToken) 
+        throws IllegalArgumentException {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             xmlBytes, true, needsPush, isBusy, 
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             false, proxies, securityToken);
+    }
 
     /** 
      * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
@@ -255,8 +293,46 @@ public class QueryReply extends Message implements SecureMessage {
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies,
-            byte [] securityToken) 
+            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies) 
+        throws IllegalArgumentException {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             xmlBytes, true, needsPush, isBusy, 
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             supportsFWTransfer, proxies, null);
+    }
+
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is ON by default.  
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
+     * @param xmlBytes The (non-null) byte[] containing aggregated
+     * and indexed information regarding file metadata.  In terms of byte-size, 
+     * this should not be bigger than 65535 bytes.  Anything larger will result
+     * in an Exception being throw.  This String is assumed to consist of
+     * compressed data.
+     * @param supportsChat true iff the host currently allows chatting.
+     * @param proxies an array of PushProxy interfaces.  will be included in 
+     * the replies GGEP extension.
+     * @param securityToken might be null
+     * @exception IllegalArgumentException Thrown if 
+     * xmlBytes.length > XML_MAX_SIZE
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID, byte[] xmlBytes,
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply, boolean supportsFWTransfer, Set<? extends IpPort> proxies, 
+            SecurityToken securityToken) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -320,7 +396,8 @@ public class QueryReply extends Message implements SecureMessage {
     }
 
     /** 
-     * Internal constructor.  Only creates QHD if includeQHD==true.  
+     * Internal constructor.  Only creates QHD if includeQHD==true or
+     * security token is not null.  
      */
     private QueryReply(byte[] guid, byte ttl, 
              int port, byte[] ip, long speed, Response[] responses,
@@ -329,7 +406,7 @@ public class QueryReply extends Message implements SecureMessage {
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
              boolean isMulticastReply, boolean supportsFWTransfer, 
-             Set<? extends IpPort> proxies, byte [] securityToken) {
+             Set<? extends IpPort> proxies, SecurityToken securityToken) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -355,7 +432,7 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setXmlBytes(xmlBytes);
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
-        _data.setSecurityToken(securityToken);
+        _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -934,8 +1011,8 @@ public class QueryReply extends Message implements SecureMessage {
             boolean supportsChatT=false;
             boolean supportsBrowseHostT=false;
             boolean replyToMulticastT=false;
-            byte [] securityToken = null;
-            Set<IpPort> proxies=null;
+            Set<IpPort> proxies = IpPort.EMPTY_SET;
+            byte[] securityToken = null;
             
             //a) extract vendor code
             try {
@@ -1046,12 +1123,8 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setSupportsChat(supportsChatT);
             _data.setSupportsBrowseHost(supportsBrowseHostT);
             _data.setReplyToMulticast(replyToMulticastT);
-            if(proxies == null)
-                _data.setProxies(IpPort.EMPTY_SET);
-            else
-                _data.setProxies(proxies);
-            if (securityToken != null)
-                _data.setSecurityToken(securityToken);
+            _data.setProxies(proxies);
+            _data.setSecurityToken(securityToken);
             _data.setHostData(new HostData(this));
 
         } catch (BadPacketException e) {
@@ -1263,11 +1336,14 @@ public class QueryReply extends Message implements SecureMessage {
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
                                 Set<? extends IpPort> proxies,
-                                byte [] securityToken) {
+                                SecurityToken securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
-            if (((proxies != null) && (proxies.size() > 0)) || securityToken != null) {
+
+            // we have specific field values so we can't use precached ggeps
+            if ((proxies != null && !proxies.isEmpty()) || securityToken != null) {
                 if (proxies == null)
                     proxies = Collections.emptySet();
+
                 final int MAX_PROXIES = 4;
                 GGEP retGGEP = new GGEP();
 
@@ -1279,27 +1355,30 @@ public class QueryReply extends Message implements SecureMessage {
                 if (supportsFWTransfer)
                     retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
                                 new byte[] {UDPConnection.VERSION});
-                if (securityToken != null)
-                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken);
+                if (securityToken != null) {
+                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
+                }
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 int numWritten = 0;
-                Iterator<? extends IpPort> iter = proxies.iterator();
-                while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
-                    IpPort ppi = iter.next();
-                    String host = 
-                        ppi.getAddress();
-                    int port = ppi.getPort();
-                    try {
-                        IPPortCombo combo = new IPPortCombo(host, port);
-                        baos.write(combo.toBytes());
-                        numWritten++;
-                    }
-                    catch (UnknownHostException bad) {
-                    }
-                    catch (IOException terrible) {
-                        ErrorService.error(terrible);
+                if (proxies != null && !proxies.isEmpty()) {
+                    Iterator<? extends IpPort> iter = proxies.iterator();
+                    while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
+                        IpPort ppi = iter.next();
+                        String host = 
+                            ppi.getAddress();
+                        int port = ppi.getPort();
+                        try {
+                            IPPortCombo combo = new IPPortCombo(host, port);
+                            baos.write(combo.toBytes());
+                            numWritten++;
+                        }
+                        catch (UnknownHostException bad) {
+                        }
+                        catch (IOException terrible) {
+                            ErrorService.error(terrible);
+                        }
                     }
                 }
 
@@ -1356,11 +1435,7 @@ public class QueryReply extends Message implements SecureMessage {
                     }
                  } catch (BadGGEPPropertyException bad) {}
             }
-            
-            if(proxies == null)
-                return Collections.emptySet();
-            else
-                return proxies;
+            return proxies != null ? proxies : IpPort.EMPTY_SET;
         }
     }
 }

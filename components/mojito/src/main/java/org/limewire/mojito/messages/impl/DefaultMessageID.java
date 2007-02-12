@@ -30,6 +30,8 @@ import java.util.Random;
 
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.security.AbstractQueryKey;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecurityToken;
 
@@ -112,7 +114,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] queryKey = QueryKey.getQueryKey(dst).getBytes();
+            byte[] queryKey = (new QueryKey(dst)).getBytes();
 
             // Obfuscate it with our random pad!
             for(int i = 0; i < RANDOM_PAD.length; i++) {
@@ -166,16 +168,14 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     
     /**
      * Extracts and returns the QueryKey from the GUID
+     * @throws InvalidSecurityTokenException 
      */
-    private SecurityToken getSecurityToken() {
+    private SecurityToken<PingTokenData> getSecurityToken() throws InvalidSecurityTokenException {
         byte[] queryKey = new byte[4];
 
-        // De-Obfuscate it with our random pad!
-        for(int i = 0; i < RANDOM_PAD.length; i++) {
-            queryKey[i] = (byte)(messageId[i] ^ RANDOM_PAD[i]);
-        }
-
-        return QueryKey.getQueryKey(queryKey, true);
+        System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
+        
+        return new PingQueryKey(queryKey);
     }
     
     /*
@@ -194,8 +194,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         if (!(src instanceof InetSocketAddress)) {
             return false;
         }
-
-        return getSecurityToken().isFor(src);
+        try {
+            return getSecurityToken().isFor(new PingTokenData(src));
+        }
+        catch (InvalidSecurityTokenException iste) {
+            return false;
+        }
     }
     
     public int compareTo(DefaultMessageID o) {
@@ -242,5 +246,33 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
     public String toString() {
         return "MessageID: " + toHexString();
+    }
+    
+    private static class PingTokenData extends QueryKey.GUESSTokenData {
+        PingTokenData(SocketAddress addr) {
+            super(addr);
+        }
+        
+        public byte [] getData() {
+            byte [] ret = super.getData();
+            for (int i = 0; i < RANDOM_PAD.length; i++)
+                ret[i] ^= RANDOM_PAD[i];
+            return ret;
+        }
+    }
+   
+    private static class PingQueryKey extends AbstractQueryKey<PingTokenData> {
+        
+        public PingQueryKey(byte[] network) throws InvalidSecurityTokenException {
+            super(network);
+        }
+
+        public PingQueryKey(PingTokenData data) {
+            super(data);
+        }
+
+        protected byte [] getFromMAC(byte [] mac, PingTokenData ignored) {
+            return mac;
+        }
     }
 }

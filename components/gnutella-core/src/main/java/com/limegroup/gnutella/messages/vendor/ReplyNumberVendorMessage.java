@@ -28,6 +28,7 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
+
     public static final int OLD_VERSION = 2;
     public static final int VERSION = 3;
     
@@ -44,18 +45,12 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
               payload);
-        if (getPayload().length < 1)
-            throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
-                                         getPayload().length);
-        if ((getVersion() == 1) && (getPayload().length != 1))
-            throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
-                                         getPayload().length);
-        if ((getVersion() == OLD_VERSION) && (getPayload().length != 2))
-            throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
-                                         getPayload().length);
+        
+        // only allow current version to come from network
+        
         // loosen the condition on the message size to allow this message version
         // to have a GGEP in the future
-        if ((getVersion() == VERSION) && getPayload().length < 2)
+        if ((getVersion() < VERSION) || getPayload().length < 2)
             throw new BadPacketException("VERSION 3 UNSUPPORTED PAYLOAD LEN: " +
                     getPayload().length);
     }

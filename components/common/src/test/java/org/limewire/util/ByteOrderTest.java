@@ -2,6 +2,7 @@ package org.limewire.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Random;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
@@ -337,6 +338,18 @@ public class ByteOrderTest extends BaseTestCase {
             ByteOrder.leb2long(new byte[] {}, 0, 9);
             fail("illegalargument expected.");
         } catch(IllegalArgumentException ignored) {}            
+    }
+    
+    public void testLong2leb() {
+        Random random = new Random();
+        // test 100 random conversions
+        for (int i = 0; i < 100; i++) {
+            long x = random.nextLong();
+            byte[] buf = new byte[8];
+            ByteOrder.long2leb(x, buf, 0);
+            // assuming leb2long is correct
+            assertEquals(x, ByteOrder.leb2long(buf, 0, 8));
+        }
     }
     
     public void testLeb2Int() {
