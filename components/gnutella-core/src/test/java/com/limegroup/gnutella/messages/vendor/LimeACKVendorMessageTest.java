@@ -27,13 +27,13 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     
     public void testSecurityTokenBytesAreSet() {
         LimeACKVendorMessage msg = new LimeACKVendorMessage(new GUID(), 10, token);
-        assertEquals(token.getBytes(), msg.getSecurityToken());
+        assertEquals(token.getBytes(), msg.getSecurityToken().getBytes());
     }
     
     public void testSecurityTokenBytesFromNetWork() throws BadPacketException {
         LimeACKVendorMessage in = new LimeACKVendorMessage(new GUID(), 10, token);
         LimeACKVendorMessage msg = new LimeACKVendorMessage(GUID.makeGuid(), (byte)1, (byte)1, 3, in.getPayload());
-        assertEquals(token.getBytes(), msg.getSecurityToken());
+        assertEquals(token.getBytes(), msg.getSecurityToken().getBytes());
         assertEquals(10, msg.getNumResults());
     }
     
