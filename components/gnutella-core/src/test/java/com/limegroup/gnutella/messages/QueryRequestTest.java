@@ -15,12 +15,10 @@ import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -1082,8 +1080,7 @@ public final class QueryRequestTest extends LimeTestCase {
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
         assertTrue(proxy.desiresOutOfBandReplies());
-        assertTrue(proxy.doNotProxyV2());
-        assertFalse(proxy.doNotProxyV3());
+        assertFalse(proxy.doNotProxy());
         
         assertEquals(query.getQuery(), proxy.getQuery());
         assertEquals(query.canDoFirewalledTransfer(), proxy.canDoFirewalledTransfer());
@@ -1100,29 +1097,25 @@ public final class QueryRequestTest extends LimeTestCase {
         byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
         
         QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
-        assertFalse(query.doNotProxyV2());
-        assertFalse(query.doNotProxyV3());
+        assertFalse(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
         QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
-        assertTrue(proxy.doNotProxyV2());
-        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
         // payload with multiple ggeps
         payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
         query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
-        assertTrue(query.doNotProxyV2());
-        assertFalse(query.doNotProxyV3());
+        assertTrue(query.doNotProxy());
         assertFalse(query.desiresOutOfBandReplies());
         
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
         proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
-        assertTrue(proxy.doNotProxyV2());
-        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         
 
@@ -1145,8 +1138,7 @@ public final class QueryRequestTest extends LimeTestCase {
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
         proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
-        assertTrue(proxy.doNotProxyV2());
-        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         // verfiy unknown gem is still there
         byte[] part = new byte[gemBytes.length];
@@ -1167,8 +1159,7 @@ public final class QueryRequestTest extends LimeTestCase {
         newPayload = QueryRequest.patchInGGEP(payload, ggep);
         
         proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
-        assertTrue(proxy.doNotProxyV2());
-        assertFalse(proxy.doNotProxyV3());
+        assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
         System.arraycopy(newPayload, startGem, part, 0, part.length);
         assertEquals(gemBytes, part);

@@ -263,7 +263,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
-        assertTrue(queryRec.doNotProxyV2());
+        assertTrue(queryRec.doNotProxy());
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
 
         // shut off query
@@ -465,7 +465,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[1],
                                                          QueryRequest.class);
         assertNotNull(queryRec);
-        assertTrue(queryRec.doNotProxyV2());
+        assertTrue(queryRec.doNotProxy());
         assertEquals(new GUID(query.getGUID()), new GUID(queryRec.getGUID()));
 
         // go through the RNVM and ACK

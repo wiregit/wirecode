@@ -119,17 +119,15 @@ public class QueryRequest extends Message implements Serializable{
     private boolean _isSecurityTokenRequired;
 
     /**
-     * Whether or not the GGEP header for Do Not Proxy was found. Defaults
-     * to true in new clients and should only be set differently from
-     * network constructor.
+     * Whether or not the GGEP header for Do Not Proxy was found and its
+     * field is empty.
      */
-    private boolean _doNotProxyV2 = true;
+    private boolean _doNotProxy = false;
+    
     /**
-     * Whether or not the GGEP header for Do Not Proxy for protocol version 3
-     * was found.
+     * Whether or not payload is modifiable, see
+     * {@link GGEP#GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD}.
      */
-    private boolean _doNotProxyV3 = false;
-
     private boolean _isPayloadModifiable = true;
     
     // HUGE v0.93 fields
@@ -695,8 +693,6 @@ public class QueryRequest extends Message implements Serializable{
         // disable old out of bounds if there
         newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
         GGEP ggep = new GGEP(false);
-        // disable proxying for old protocol version
-        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
         // signal oob capability
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
         
@@ -736,7 +732,7 @@ public class QueryRequest extends Message implements Serializable{
                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                 qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
                 false, // set oob to false
-                qr.getFeatureSelector(), qr.doNotProxyV3(),
+                qr.getFeatureSelector(), qr.doNotProxy(),
                 qr.getMetaMask());
 	}
 
@@ -1239,7 +1235,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 
         this.QUERY_KEY = queryKey;
-        this._doNotProxyV3 = doNotProxy;
+        this._doNotProxy = doNotProxy;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -1296,16 +1292,8 @@ public class QueryRequest extends Message implements Serializable{
                 ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
             // add a GGEP-block if we shouldn't proxy
-            if (_doNotProxyV2) {
-                if (_doNotProxyV3) {
-                    // for newer versions we specify which version should not
-                    // be proxied
-                    ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY, 3);
-                }
-                else {
-                    // for version two, just setting the key means to not proxy
-                    ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
-                }
+            if (_doNotProxy) {
+                ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
             }
 
             // add a meta flag
@@ -1388,9 +1376,7 @@ public class QueryRequest extends Message implements Serializable{
         
 		_featureSelector = parser.featureSelector;
         
-        _doNotProxyV2 = parser.doNotProxyV2;
-        
-        _doNotProxyV3 = parser.doNotProxyV3;
+        _doNotProxy = parser.doNotProxy;
         
         _metaMask = parser.metaMask;
         
@@ -1603,19 +1589,10 @@ public class QueryRequest extends Message implements Serializable{
     }
     
     /**
-     * Returns true if the query source does not want you to proxy for it for
-     * protocol version 2 of oob queries.
+     * Returns true if the query source does not want you to proxy for it.
      */
-    public boolean doNotProxyV2() {
-        return _doNotProxyV2;
-    }
-    
-    /**
-     * Returns true if the query source does not want you to proxy for it for
-     * the current protocol version of oob queries.
-     */
-    public boolean doNotProxyV3() {
-        return _doNotProxyV3;
+    public boolean doNotProxy() {
+        return _doNotProxy;
     }
     
     /**
@@ -1912,14 +1889,19 @@ public class QueryRequest extends Message implements Serializable{
                 // our values prevail
                 merge.merge(block.getGGEP());
                 merge.merge(ggep);
-                return insertGGEP(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge);
-            }
-            else {
-                return insertGGEP(payload, payload.length, payload.length, ggep);
+                return insertBytes(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge.toByteArray());
             }
         }
+        if (payload[payload.length - 1] != 0x1C) {
+            byte[] ggepBytes = ggep.toByteArray();
+            byte[] ggepBlock = new byte[ggepBytes.length  +  1];
+            // set HUGE delimiter
+            ggepBlock[0] = 0x1C;
+            System.arraycopy(ggepBytes, 0, ggepBlock, 1, ggepBytes.length);
+            return insertBytes(payload, payload.length - 1, payload.length - 1, ggepBlock);   
+        }
         else {
-            return insertGGEP(payload, payload.length, payload.length, ggep);
+            return insertBytes(payload, payload.length, payload.length, ggep.toByteArray());
         }
     }
     
@@ -1937,8 +1919,7 @@ public class QueryRequest extends Message implements Serializable{
         return last;
     }
     
-    private static byte[] insertGGEP(byte[] payload, int start, int end, GGEP ggep) {
-        byte[] ggepBytes = ggep.toByteArray(); 
+    private static byte[] insertBytes(byte[] payload, int start, int end, byte[] ggepBytes) {
         byte[] newPayload = new byte[payload.length + ggepBytes.length - (end - start)];
         
         System.arraycopy(payload, 0, newPayload, 0, start);
@@ -1964,7 +1945,7 @@ public class QueryRequest extends Message implements Serializable{
         
         int featureSelector;
         
-        boolean doNotProxyV2;
+        boolean doNotProxy;
         
         boolean doNotProxyV3;
         
@@ -2001,13 +1982,7 @@ public class QueryRequest extends Message implements Serializable{
                         if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                             featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
                         if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
-                            doNotProxyV2 = true;
-                            try {
-                                if (ggep.getInt(GGEP.GGEP_HEADER_NO_PROXY) == 3) {
-                                    doNotProxyV3 = true;
-                                }
-                            }
-                            catch (BadGGEPPropertyException bgpe) { }
+                            doNotProxy = true;
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
                             metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
