@@ -162,16 +162,12 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     public void stop() {
         synchronized (lock) {
             if (pingFuture != null) {
-                try {
-                    pingFuture.cancel(true);
-                } catch (CancellationException ex) {}
+                pingFuture.cancel(true);
                 pingFuture = null;
             }
             
             if (bootstrapFuture != null) {
-                try {
-                    bootstrapFuture.cancel(true);
-                } catch (CancellationException ex) {}
+                bootstrapFuture.cancel(true);
                 bootstrapFuture = null;
             }
             
