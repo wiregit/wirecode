@@ -24,12 +24,16 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
 import com.limegroup.gnutella.messagehandlers.OOBTokenData;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -52,7 +56,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     protected static int TIMEOUT = 2000;
 
-    static String _path = "com"+File.separator+"limegroup"+ File.separator+"gnutella"+File.separator;
+    static String _path = "com/limegroup/gnutella/";
 
     static File _fileWithSOFlag = CommonUtils.getResourceFile(_path + "queryWithSOFlag.bin");
     
@@ -126,8 +130,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        assertTrue(query.desiresOutOfBandRepliesV2());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
 
@@ -160,8 +164,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
-        // test that we receive old version
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        // test that we receive new version
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
         assertTrue(reply.canReceiveUnsolicited());
         
         //rince and repeat, this time pretend to be firewalled
@@ -171,8 +175,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        assertTrue(query.desiresOutOfBandRepliesV2());
-        assertFalse(query.desiresOutOfBandRepliesV3());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
         
@@ -213,8 +217,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
         assertFalse(reply.canReceiveUnsolicited());
-        // test that we receive old version
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        // test that we receive new version
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
         
         //restore our un-firewalled status and repeat
         query = 
@@ -253,8 +257,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
         assertTrue(reply.canReceiveUnsolicited());
-        // test that we receive old version
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        // test that we receive new version
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
         
         SecurityToken token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), reply.getNumResults())); 
@@ -287,9 +291,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
         assertEquals(1, ((QueryReply)message).getResultCount());
-
-        // security token is null for old protocol version
-        assertNull(((QueryReply)message).getSecurityToken());
+        assertEquals(token.getBytes(), ((QueryReply)message).getSecurityToken());
 
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
@@ -317,7 +319,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
         assertEquals(1, ((QueryReply)message).getResultCount());
         // security token is null for old protocol version
-        assertNull(((QueryReply)message).getSecurityToken());
+        assertEquals(token.getBytes(), ((QueryReply)message).getSecurityToken());
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -346,16 +348,113 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     }
     
     /**
-     *  
+     * Test server still handles OOB protocol version 2 for old clients.
+     * 
+     *  The test is a bit cumbersome in that we have to install an extra
+     *  ReplyNumberVendorMessage parser since version 3 discards the old
+     *  protocol versions. 
+     */
+    public void testServerHandlesOOBVersion2() throws Exception {
+        
+        drainAll();
+        
+        DatagramPacket pack = null;
+
+        // install extra message parse since old reply number messages are discarded
+        VendorMessageParser oldParser = VendorMessageFactory.getParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID);
+        try {
+            VendorMessageFactory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, new V2ReplyNumberVendorMessageParser());
+            
+            // raw message without "SO" key, query = "shusheel"
+            byte[] rawMessage =  new byte[] { 127, 0, 1, 1, 11, 71, -79, -94, 4, 47, 
+                    27, 72, -81, 112, 7, 0, -128, 6, 0, 15, 0, 0, 0, -60, 0, 115, 
+                    117, 115, 104, 101, 101, 108, 0, 117, 114, 110, 58, 0 };
+            
+            // encode this host's address into message payload
+            System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
+            ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+            
+            QueryRequest query = (QueryRequest)MessageFactory.read(new ByteArrayInputStream(rawMessage));
+            assertTrue(query.desiresOutOfBandReplies());
+            assertTrue(query.desiresOutOfBandRepliesV2());
+            assertFalse(query.desiresOutOfBandRepliesV3());
+            
+            query.hop();
+            
+            // we needed to hop the message because we need to make it seem that it
+            // is from sufficiently far away....
+            ULTRAPEER[1].send(query);
+            ULTRAPEER[1].flush();
+            
+            // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+            // interrupted exception if not
+            Message message = null;
+            while (!(message instanceof V2ReplyNumberVendorMessage)) {
+                UDP_ACCESS.setSoTimeout(500);
+                pack = new DatagramPacket(new byte[1000], 1000);
+                try {
+                    UDP_ACCESS.receive(pack);
+                }
+                catch (IOException bad) {
+                    fail("Did not get VM", bad);
+                }
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                // as long as we don't get a ClassCastException we are good to go
+                message = MessageFactory.read(in);
+            }
+            
+            // make sure the GUID is correct
+            assertEquals(query.getGUID(), message.getGUID());
+            V2ReplyNumberVendorMessage reply = (V2ReplyNumberVendorMessage) message;
+            // since query supports only OOB version 2, reply should be version 2
+            assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+            
+            // ok - we should ACK the ReplyNumberVM and NOT get a reply
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            
+            // send version 2 ack message
+            LimeACKVendorMessage ack = 
+                new LimeACKVendorMessage(new GUID(message.getGUID()), 
+                        1); // we get one result so ask for it
+            ack.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                    pack.getAddress(), pack.getPort());
+            UDP_ACCESS.send(pack);
+            
+            while (!(message instanceof QueryReply)) {
+                UDP_ACCESS.setSoTimeout(500);
+                pack = new DatagramPacket(new byte[1000], 1000);
+                try {
+                    UDP_ACCESS.receive(pack);
+                }
+                catch (IOException bad) {
+                    fail("Did not get VM", bad);
+                }
+                InputStream in = new ByteArrayInputStream(pack.getData());
+                // as long as we don't get a ClassCastException we are good to go
+                message = MessageFactory.read(in);
+            }
+            
+            QueryReply qReply = (QueryReply)message;
+            assertEquals(query.getGUID(), qReply.getGUID());
+            assertNull(qReply.getSecurityToken());
+        }
+        finally {
+            VendorMessageFactory.setParser(VendorMessage.F_REPLY_NUMBER, VendorMessage.F_LIME_VENDOR_ID, oldParser);
+        }
+    }
+    
+    /**
+     *  Test that a message is correctly handled that has both set, 
+     *  the OOB mask in the minspeed field and the "SO" key in the GGEP.
      */
     public void testSORequestAndMinSpeedOOBMask() throws Exception {
         drainAll();
         
         byte[] rawMessage = FileUtils.readFileFully(_fileWithSOFlag);
-        // enocode
+        // encode this host's address into message payload
         System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
         ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
-        
         
         DatagramPacket pack = null;
 
@@ -392,6 +491,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(query.getGUID(), message.getGUID());
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(1, reply.getNumResults());
+        // since query supports new OOB version, reply should prefer that version
         assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
@@ -424,7 +524,12 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(token.getBytes(), qReply.getSecurityToken());
     }
     
-    // tests 
+    /**
+     * Tests protocol version 3, this is actually done in all other
+     * tests, this test is part of the transition phase when the server
+     * also handled the version 3 , but the client couldn't produce 
+     * messages with that version. 
+     */
     public void testSORequestNoMinSpeedOOBMask() throws Exception {
         drainAll();
         
@@ -469,6 +574,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(query.getGUID(), message.getGUID());
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(1, reply.getNumResults());
+        // query is signals protocol version 3 by setting "SO" key, so server
+        // should respond with version 3
         assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
@@ -543,7 +650,8 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        // expect version 3 in replies
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -646,14 +754,17 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(2, reply.getNumResults());
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), 0));
-        LimeACKVendorMessage ack = 
-            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
+//        LimeACKVendorMessage ack = 
+//            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
+        // constructor above doesn't allow 0 responses anymore, so set 0 manually:
+        LimeACKVendorMessage ack = new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
+        ((byte[])PrivilegedAccessor.getValue(ack, "_payload"))[0] = 0;
         ack.write(baos);
         pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
                                   pack.getAddress(), pack.getPort());
@@ -715,7 +826,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
         assertEquals(1, reply.getNumResults());
-        assertEquals(2, PrivilegedAccessor.getValue(reply, "_version"));
+        assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
 
         // WAIT for the expirer to expire the query reply
         Thread.sleep(60 * 1000); // 1 minute - expirer must run twice
@@ -872,4 +983,21 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     }
 
 
+    private static class V2ReplyNumberVendorMessageParser implements VendorMessageParser {
+
+        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, byte[] restOf, int network) throws BadPacketException {
+            return new V2ReplyNumberVendorMessage(guid, ttl, hops, version, restOf);
+        }
+    }
+    
+    private static class V2ReplyNumberVendorMessage extends VendorMessage {
+        
+        public V2ReplyNumberVendorMessage(byte[] guid, byte ttl, byte hops, int version, 
+                byte[] payload) 
+                throws BadPacketException {
+            super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
+                    payload);
+        }
+    }
+    
 }
