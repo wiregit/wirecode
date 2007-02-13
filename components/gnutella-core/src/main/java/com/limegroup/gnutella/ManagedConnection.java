@@ -756,7 +756,8 @@ public class ManagedConnection extends Connection
         
         if (!query.desiresOutOfBandReplies() 
                 && isClientSupernodeConnection()
-                && getSupportedOOBProxyControlVersion() == -1) {
+                && getSupportedOOBProxyControlVersion() == -1
+                && ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.getValue()) {
             // don't proxy if we are a leaf and the ultrapeer 
             // does not know OOB v 3 and they would proxy for us
             query = QueryRequest.createDoNotProxyQuery(query);
