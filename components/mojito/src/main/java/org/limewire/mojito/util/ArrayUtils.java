@@ -19,6 +19,8 @@
  
 package org.limewire.mojito.util;
 
+import java.io.UnsupportedEncodingException;
+
 
 /**
  * Miscellaneous utilities for Arrays
@@ -179,6 +181,45 @@ public final class ArrayUtils {
             case 'f': return 15;
             case 'F': return 15;
             default: throw new NumberFormatException("Unknown digit: " + c);
+        }
+    }
+    
+    /**
+     * A helper method to convert a 4 character ASCII String
+     * into an Interger
+     */
+    public static int toInteger(String ascii) {
+        if (ascii == null) {
+            throw new NullPointerException("String is null");
+        }
+        
+        char[] chars = ascii.toCharArray();
+        if (chars.length != 4) {
+            throw new IllegalArgumentException("String must be 4 characters long");
+        }
+        
+        int id = 0;
+        for(char c : chars) {
+            id = (id << 8) | (c & 0xFF);
+        }
+        return id;
+    }
+    
+    /**
+     * A helper method to convert each of vendorId's 4 bytes
+     * into an ASCII character and to return them as String
+     */
+    public static String toString(int num) {
+        try {
+            byte[] name = new byte[]{
+                (byte)((num >> 24) & 0xFF),
+                (byte)((num >> 16) & 0xFF),
+                (byte)((num >>  8) & 0xFF),
+                (byte)((num      ) & 0xFF)
+            };
+            return new String(name, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

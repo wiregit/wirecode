@@ -20,7 +20,8 @@
 package org.limewire.mojito.routing;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+
+import org.limewire.mojito.util.ArrayUtils;
 
 /**
  * 
@@ -60,7 +61,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
     }
     
     public String toString() {
-        return toString(vendorId);
+        return ArrayUtils.toString(vendorId);
     }
     
     /** 
@@ -85,7 +86,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
      * Returns a Vendor object for the given vendor ID
      */
     public static Vendor valueOf(String vendorId) {
-        return valueOf(parse(vendorId));
+        return valueOf(ArrayUtils.toInteger(vendorId));
     }
     
     /**
@@ -102,45 +103,6 @@ public class Vendor implements Serializable, Comparable<Vendor> {
                 VENDORS[index] = vendor;
             }
             return vendor;
-        }
-    }
-    
-    /**
-     * A helper method to convert a 4 character ASCII String
-     * into an Interger
-     */
-    public static int parse(String vendorId) {
-        if (vendorId == null) {
-            throw new NullPointerException("VendorID is null");
-        }
-        
-        char[] chars = vendorId.toCharArray();
-        if (chars.length != 4) {
-            throw new IllegalArgumentException("VendorID must be 4 characters");
-        }
-        
-        int id = 0;
-        for(char c : chars) {
-            id = (id << 8) | (c & 0xFF);
-        }
-        return id;
-    }
-    
-    /**
-     * A helper method to convert each of vendorId's 4 bytes
-     * into an ASCII character and to return them as String
-     */
-    public static String toString(int vendorId) {
-        try {
-            byte[] name = new byte[]{
-                (byte)((vendorId >> 24) & 0xFF),
-                (byte)((vendorId >> 16) & 0xFF),
-                (byte)((vendorId >>  8) & 0xFF),
-                (byte)((vendorId      ) & 0xFF)
-            };
-            return new String(name, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
         }
     }
 }

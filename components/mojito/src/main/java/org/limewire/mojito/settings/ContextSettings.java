@@ -21,6 +21,7 @@ package org.limewire.mojito.settings;
 
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
@@ -96,7 +97,7 @@ public class ContextSettings extends MojitoProps {
      * This Node's Vendor code
      */
     public static final IntSetting VENDOR
-        = FACTORY.createIntSetting("VENDOR", Vendor.parse("LIME"));
+        = FACTORY.createIntSetting("VENDOR", ArrayUtils.toInteger("LIME"));
     
     /**
      * This Node's Version

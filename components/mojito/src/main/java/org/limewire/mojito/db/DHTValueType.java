@@ -27,12 +27,16 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import org.limewire.mojito.util.ArrayUtils;
+
 /**
  * DHTValueType specifies the type of a DHTValue
  */
 public final class DHTValueType implements Comparable<DHTValueType>, Serializable {
     
     private static final long serialVersionUID = -3662336008253896020L;
+    
+    private static final String UNKNOWN_NAME = "UNKNOWN";
     
     // NOTE: We cannot use enums for the DHTValueType! The simple
     // reason is that it's not possible to create new enums at
@@ -117,7 +121,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     private int type;
     
     private DHTValueType(String name) {
-        this(name, parse(name));
+        this(name, ArrayUtils.toInteger(name));
     }
     
     private DHTValueType(String name, int type) {
@@ -155,7 +159,14 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public String toString() {
-        return name + " (0x" + Long.toHexString((type & 0xFFFFFFFFL)) + ")";
+        StringBuilder buffer = new StringBuilder();
+        if (name.equals(UNKNOWN_NAME)) {
+            buffer.append(ArrayUtils.toString(type)).append("/").append(name);
+        } else {
+            buffer.append(name);
+        }
+        buffer.append(" (0x").append(Long.toHexString((type & 0xFFFFFFFFL))).append(")");
+        return buffer.toString();
     }
     
     public static DHTValueType[] values() {
@@ -165,7 +176,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType valueOf(int type) {
-        DHTValueType unknown = new DHTValueType("UNKNOWN", type);
+        DHTValueType unknown = new DHTValueType(UNKNOWN_NAME, type);
         int index = Arrays.binarySearch(TYPES, unknown);
         if (index < 0) {
             return unknown;
@@ -175,19 +186,6 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType valueOf(String type) {
-        return valueOf(parse(type));
-    }
-    
-    private static int parse(String type) {
-        char[] chars = type.toCharArray();
-        if (chars.length != 4) {
-            throw new IllegalArgumentException("Length of DHTValueType must be exactly 4 chars but is: " + chars.length);
-        }
-        
-        int id = 0;
-        for(char c : chars) {
-            id = (id << 8) | (c & 0xFF);
-        }
-        return id;
+        return valueOf(ArrayUtils.toInteger(type));
     }
 }
