@@ -753,6 +753,16 @@ public class ManagedConnection extends Connection
      */
     public void originateQuery(QueryRequest query) {
         query.originate();
+        
+        if (!query.desiresOutOfBandReplies() 
+                && isClientSupernodeConnection()
+                && getSupportedOOBProxyControlVersion() == -1) {
+            // don't proxy if we are a leaf and the ultrapeer 
+            // does not know OOB v 3 and they would proxy for us
+            query = QueryRequest.createDoNotProxyQuery(query);
+            query.originate();
+        }
+        
         send(query);
     }
  

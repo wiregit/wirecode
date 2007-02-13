@@ -705,6 +705,36 @@ public class QueryRequest extends Message implements Serializable{
         }
 	}
     
+    /**
+     * Copies a query request and marks it to not be proxied.
+     * 
+     * @throws IllegalArgumentException if the payload is not modifiable
+     * @throws IllegalArgumentException if the query request is not from
+     * a LimeWire
+     * @throws IllegalArgumentException if {@link #isOriginated()} is false 
+     */
+    public static QueryRequest createDoNotProxyQuery(QueryRequest qr) {
+        if (!qr.isPayloadModifiable()) {
+            throw new IllegalArgumentException("payload is not modifiable " + qr);
+        }
+        if (!GUID.isLimeGUID(qr.getGUID())) {
+            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
+        }
+        if (!qr.isOriginated()) {
+            throw new IllegalArgumentException("query not originated from here");
+        }
+        
+        // only used for queries understood by us
+        // so we can use the copy constructor and set OOB to false
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                qr.desiresOutOfBandReplies(),
+                qr.getFeatureSelector(), true, // do not proxy
+                qr.getMetaMask());
+    }
+    
 	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
      * 
