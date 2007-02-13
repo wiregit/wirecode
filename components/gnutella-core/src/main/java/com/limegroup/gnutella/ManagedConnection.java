@@ -896,7 +896,15 @@ public class ManagedConnection extends Connection
         if (query.doNotProxy()) return query;
         
         if (_maxDisabledOOBProtocolVersion >= ReplyNumberVendorMessage.VERSION) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("query not proxied because disabled version is " + _maxDisabledOOBProtocolVersion);
+            }
             return query;
+        }
+        else {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("query might be proxied for max disabled version " + _maxDisabledOOBProtocolVersion + " " + Arrays.toString(query.getGUID()));
+            }
         }
         
         // can't proxy if payload should not be modified
@@ -1157,6 +1165,9 @@ public class ManagedConnection extends Connection
         }
         else if (vm instanceof OOBProxyControlVendorMessage) {
             _maxDisabledOOBProtocolVersion = ((OOBProxyControlVendorMessage)vm).getMaximumDisabledVersion();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("_maxDisabledOOBProtocolVersion set to " + _maxDisabledOOBProtocolVersion);
+            }
         }
     }
 

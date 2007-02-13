@@ -9,7 +9,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * A message queue that prioritizes messages.  These are intended to be
- * heterogenous, i.e., to only contain one type of message at a time, though
+ * homogeneous, i.e., to only contain one type of message at a time, though
  * that is not strictly enforced.  Message are preferenced as follows:
  *
  * <ol>

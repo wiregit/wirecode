@@ -3,16 +3,27 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.DataUtils;
 
+/**
+ * This message allows leafs to enable or disable proxying for all or specific
+ * versions of the out-of-band protocol.
+ * 
+ * * Versions between 1 and 255 are supported.
+ * * The value 0 is reserved to enable proxying for all versions
+ * * A message without payload disables proxying for all versions
+ */
 public class OOBProxyControlVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 3;
+    public static final int VERSION = 1;
     
     public static enum Control {
         DISABLE_FOR_ALL_VERSIONS(-1),
         ENABLE_FOR_ALL_VERSIONS(0),
         DISABLE_VERSION_1(1),
         DISABLE_VERSION_2(2),
-        DISABLE_VERSION_3(3);
+        DISABLE_VERSION_3(3),
+        
+        // here for testing purposes because of signed bytes
+        DISABLE_VERSION_255(255);
         
         private int version;
         
@@ -32,7 +43,7 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
     public OOBProxyControlVendorMessage(byte[] guid, byte ttl, byte hops, 
             int version, byte[] payload) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL, version, payload);
-        if (getVersion() != VERSION || payload.length > 1) {
+        if (getVersion() != VERSION) {
             throw new BadPacketException("Unsupported version or payload length");
         }
     }
@@ -58,6 +69,11 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
         return new OOBProxyControlVendorMessage(Control.ENABLE_FOR_ALL_VERSIONS);
     }
 
+    /**
+     * Returns {@link Integer#MAX_VALUE} when proxying is disabled for all versions,
+     * otherwise the value of the highest protocol version for which proxying
+     * is disabled.
+     */
     public int getMaximumDisabledVersion() {
         byte[] payload = getPayload();
         if (payload.length == 0) {

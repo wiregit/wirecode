@@ -36,7 +36,7 @@ public class OOBProxyControlVendorMessageTest extends BaseTestCase {
     }
     
     public void testConcreteMaximumVersionNotAllowed() throws Exception {
-        for (Control control : new Control[] { Control.DISABLE_VERSION_1, Control.DISABLE_VERSION_2, Control.DISABLE_VERSION_3 }) {
+        for (Control control : new Control[] { Control.DISABLE_VERSION_1, Control.DISABLE_VERSION_2, Control.DISABLE_VERSION_3, Control.DISABLE_VERSION_255}) {
             OOBProxyControlVendorMessage msg = new OOBProxyControlVendorMessage(control);
             assertEquals(control.getVersion(), msg.getMaximumDisabledVersion());
             writeAndReadMessage(msg);
