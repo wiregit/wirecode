@@ -275,7 +275,7 @@ public class DatabaseImpl implements Database {
         DHTValueBag bag = database.get(entity.getKey());
         
         // TODO: exclude signed value also
-        if (bag == null) {
+        if (bag == null && !entity.isLocalValue()) {
             // First check if the node is flooding us with keys:
             // We can only check for flooding by the value creator, not by the sender, 
             // because that could be misused to prevent us from storing real values
