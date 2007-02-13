@@ -17,6 +17,9 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
         private int version;
         
         private Control(int version) {
+            if (version > 255) {
+                throw new IllegalArgumentException("version must be smaller than 256");
+            }
             this.version = version;
         }
         
@@ -26,8 +29,9 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
     }
     
     
-    protected OOBProxyControlVendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID, int selector, int version, byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, vendorID, selector, version, payload);
+    public OOBProxyControlVendorMessage(byte[] guid, byte ttl, byte hops, 
+            int version, byte[] payload) throws BadPacketException {
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL, version, payload);
         if (getVersion() != VERSION || payload.length > 1) {
             throw new BadPacketException("Unsupported version or payload length");
         }
@@ -36,7 +40,7 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
     public OOBProxyControlVendorMessage(Control control) {
         super(F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL, VERSION, derivePayload(control));
     }
-        
+
     private static byte[] derivePayload(Control control) {
         if (control == Control.DISABLE_FOR_ALL_VERSIONS) {
             return DataUtils.EMPTY_BYTE_ARRAY;
@@ -60,7 +64,7 @@ public class OOBProxyControlVendorMessage extends VendorMessage {
             return Integer.MAX_VALUE;
         }
         else {
-            return payload[0];            
+            return payload[0] & 0xFF;            
         }
     }
     
