@@ -28,7 +28,9 @@ import org.limewire.mojito.routing.Version;
 public interface DHTValue extends Serializable {
 
     /**
-     * An empty value
+     * An empty value is a value without an actual payload 
+     * and storing an empty value in the DHT will remove an
+     * existing value from the DHT
      */
     public static final DHTValue EMPTY_VALUE = new EmptyDHTValue();
     
@@ -58,16 +60,15 @@ public interface DHTValue extends Serializable {
     public boolean isEmpty();
 
     /**
-     * 
+     * An implementation of DHTValue that has no payload
      */
-    static class EmptyDHTValue implements DHTValue {
+    static final class EmptyDHTValue implements DHTValue {
         
         private static final long serialVersionUID = 4690500560328936523L;
 
         private static final byte[] EMPTY = new byte[0];
         
         private EmptyDHTValue() {
-            
         }
         
         public byte[] getValue() {
@@ -87,6 +88,10 @@ public interface DHTValue extends Serializable {
 
         public boolean isEmpty() {
             return true;
+        }
+        
+        public String toString() {
+            return "This is an empty DHTValue";
         }
     }
 }
