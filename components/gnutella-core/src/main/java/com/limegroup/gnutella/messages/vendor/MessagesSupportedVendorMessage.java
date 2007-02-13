@@ -137,6 +137,11 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                 						F_HEADER_UPDATE,
                 						HeaderUpdateVendorMessage.VERSION);
         hashSet.add(smp);
+        
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID, 
+                                        F_OOB_PROXYING_CONTROL,
+                                        OOBProxyControlVendorMessage.VERSION);
+        hashSet.add(smp);
     }
 
 
@@ -240,6 +245,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     
     public int supportsHeaderUpdate() {
         return supportsMessage(F_LIME_VENDOR_ID,F_HEADER_UPDATE);
+    }
+    
+    public int supportsOOBProxyingControl() {
+        return supportsMessage(F_LIME_VENDOR_ID, F_OOB_PROXYING_CONTROL);
     }
 
     // override super

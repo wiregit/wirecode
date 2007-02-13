@@ -60,9 +60,11 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
@@ -282,6 +284,8 @@ public class ManagedConnection extends Connection
     
     /** If we've received a capVM before. */
     private boolean receivedCapVM = false;
+    
+    private int _maxDisabledOOBProtocolVersion = 0;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -735,7 +739,7 @@ public class ManagedConnection extends Connection
     	int smh = hopsFlowMax;
         if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
             return;
-            
+                    
         _outputRunner.send(m);
     }
 
@@ -890,6 +894,10 @@ public class ManagedConnection extends Connection
         if (query.desiresOutOfBandReplies()) return query;
         
         if (query.doNotProxy()) return query;
+        
+        if (_maxDisabledOOBProtocolVersion >= ReplyNumberVendorMessage.VERSION) {
+            return query;
+        }
         
         // can't proxy if payload should not be modified
         if (!query.isPayloadModifiable()) return query;
@@ -1146,6 +1154,9 @@ public class ManagedConnection extends Connection
                 send(tcp);
                 _numTCPConnectBackRequests++;
             }
+        }
+        else if (vm instanceof OOBProxyControlVendorMessage) {
+            _maxDisabledOOBProtocolVersion = ((OOBProxyControlVendorMessage)vm).getMaximumDisabledVersion();
         }
     }
 

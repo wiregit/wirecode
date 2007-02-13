@@ -26,6 +26,7 @@ public abstract class VendorMessage extends Message {
     public static final int F_CAPABILITIES = 10;
     public static final int F_LIME_ACK = 11;
     public static final int F_REPLY_NUMBER = 12;
+    public static final int F_OOB_PROXYING_CONTROL = 13;
     public static final int F_PUSH_PROXY_REQ = 21;
     public static final int F_PUSH_PROXY_ACK = 22;
     public static final int F_GIVE_STATS = 14;

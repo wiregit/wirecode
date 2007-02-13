@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +61,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
         private byte mode;
         
         private static Map<DHTMode, byte[]> capabilitiesVMMap = 
-            new HashMap<DHTMode, byte[]>();
+            new EnumMap<DHTMode, byte[]>(DHTMode.class);
         
         private DHTMode(int state) {
             this.mode = (byte)(state & 0xFF);
