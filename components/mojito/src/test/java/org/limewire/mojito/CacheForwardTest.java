@@ -131,10 +131,23 @@ public class CacheForwardTest extends MojitoTestCase {
         }
     }
     
+    /*public void testCacheForwardLoop() {
+        for (int i = 0; i < 100; i++) {
+            System.out.println("#" + i);
+            try {
+                testCacheForward();
+            } catch (Throwable t) {
+                t.printStackTrace();
+                break;
+            }
+        }
+    }*/
+    
     public void testCacheForward() throws Exception {
         
         final long waitForNodes = 500; // ms
 
+        //ContextSettings.SEND_SHUTDOWN_MESSAGE.setValue(false);
         DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.setValue(true);
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
@@ -228,7 +241,20 @@ public class CacheForwardTest extends MojitoTestCase {
             // Node happens to be the creator of the value in which case we're
             // not removing the value (see init loop, we changed the creator's
             // node ID so that it cannot be member of the k-closest nodes).
-            assertEquals(0, furthest.getValues().size());
+            //assertEquals(0, furthest.getValues().size());
+            Collection before = furthest.getValues();
+            if (before.size() != 0) {
+                StringBuilder buffer = new StringBuilder();
+                buffer.append("Furthest: ").append(furthest.getLocalNode());
+                buffer.append("Creator: ").append(creator.getLocalNode());
+                
+                buffer.append("Before: ").append(before);
+                Thread.sleep(10000); // Race condition?
+                buffer.append("After: ").append(furthest.getValues());
+                
+                buffer.append("IDs: ").append(idsByXorDistance.subList(0, k+1));
+                fail(buffer.toString());
+            }
             
             for (Contact remote : evt.getNodes()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
