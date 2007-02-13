@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
@@ -157,6 +158,11 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * Returns whether this Node is waiting for Nodes or not
      */
     public boolean isWaitingForNodes();
+    
+    /**
+     * 
+     */
+    public MojitoDHT getMojitoDHT();
     
     /**
      * Returns the Vendor code of this Node

@@ -11,11 +11,13 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.MojitoGlue;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -31,12 +33,12 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The Vendor code of this DHT Node
      */
-    private Vendor vendor = ContextSettings.getVendor();
+    private final Vendor vendor = ContextSettings.getVendor();
     
     /**
      * The Version of this DHT Node
      */
-    private Version version = ContextSettings.getVersion();
+    private final Version version = ContextSettings.getVersion();
     
     /**
      * The DHTController instance
@@ -58,8 +60,15 @@ public class LimeDHTManager implements DHTManager {
     
     private boolean stopped = false;
     
+    private final MojitoGlue glue;
+    
     public LimeDHTManager(SchedulingThreadPool threadPool) {
         this.threadPool = threadPool;
+        
+        this.glue = MojitoGlue.instance(this);
+        
+        RouterService.getFileManager().addFileEventListener(glue);
+        addEventListener(glue);
     }
     
     public synchronized void start(final boolean activeMode) {

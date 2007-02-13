@@ -1805,8 +1805,8 @@ public class ManagedDownloader extends AbstractDownloader
         setState(QUEUED);
         
         // TODO Get MojitoGlue handle (for testing only)
-        //MojitoGlue glue = null;
-        //glue.getAltLocs(getSHA1Urn());
+        //MojitoGlue glue = MojitoGlue.instance();
+        //glue.findAltLocs(getSHA1Urn());
         
         return true;
     }

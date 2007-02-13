@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.dht;
 
+import java.net.InetAddress;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
@@ -23,7 +24,29 @@ public interface PushProxiesDHTValue extends DHTValue {
     public static final Version VERSION = Version.valueOf(0, 0);
     
     /**
+     * 
+     */
+    public int getPort();
+    
+    /**
+     * 
+     */
+    public int getFeatures();
+    
+    /**
+     * 
+     */
+    public int getFwtVersion();
+    
+    /**
+     * 
+     */
+    public InetAddress getInetAddress();
+    
+    /**
      * Returns a Set of Push Proxies
      */
     public Set<? extends IpPort> getPushProxies();
+    
+    public boolean isPushProxiesForSelf();
 }

@@ -28,7 +28,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     
     private static final long serialVersionUID = 8302182739922310121L;
     
-    public static final DHTValue LOCAL_HOST = new LocalDHTValue();
+    public static final DHTValue SELF = new AltLocForSelf();
     
     private final DHTValueType valueType;
     
@@ -192,7 +192,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
 
     public void write(OutputStream out) throws IOException {
-        out.write(value());
+        out.write(getValue());
     }
 
     public DHTValueType getValueType() {
@@ -207,7 +207,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         return false;
     }
     
-    public boolean isLocalAltLoc() {
+    public boolean isAltLocForSelf() {
         return false;
     }
     
@@ -224,7 +224,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
                 .append(", pushProxyPort=").append(getPushProxyPort());
         }
         
-        if (isLocalAltLoc()) {
+        if (isAltLocForSelf()) {
             buffer.append(", local=true");
         }
         
@@ -260,11 +260,9 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     /**
      * 
      */
-    private static class LocalDHTValue extends AltLocDHTValueImpl {
+    private static class AltLocForSelf extends AltLocDHTValueImpl {
         
         private static final long serialVersionUID = 8101291047246461600L;
-
-        private LocalDHTValue() {}
         
         @Override
         public int getPort() {
@@ -306,7 +304,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         }
 
         @Override
-        public boolean isLocalAltLoc() {
+        public boolean isAltLocForSelf() {
             return true;
         }
     }

@@ -72,5 +72,5 @@ public interface AltLocDHTValue extends DHTValue {
     /**
      * Returns true if this AltLoc represents the localhost
      */
-    public boolean isLocalAltLoc();
+    public boolean isAltLocForSelf();
 }

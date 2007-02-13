@@ -34,6 +34,8 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     
     private static final long serialVersionUID = -3662336008253896020L;
     
+    private static final String UNKNOWN_NAME = "UNKNOWN";
+    
     // NOTE: We cannot use enums for the DHTValueType! The simple
     // reason is that it's not possible to create new enums at
     // runtime which is a problem if somebody sends us a DHTValue
@@ -155,7 +157,14 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public String toString() {
-        return name + " (0x" + Long.toHexString((type & 0xFFFFFFFFL)) + ")";
+        StringBuilder buffer = new StringBuilder();
+        if (name.equals(UNKNOWN_NAME)) {
+            buffer.append(toString(type)).append("/").append(name);
+        } else {
+            buffer.append(name);
+        }
+        buffer.append(" (0x").append(Long.toHexString((type & 0xFFFFFFFFL))).append(")");
+        return buffer.toString();
     }
     
     public static DHTValueType[] values() {
@@ -165,7 +174,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType valueOf(int type) {
-        DHTValueType unknown = new DHTValueType("UNKNOWN", type);
+        DHTValueType unknown = new DHTValueType(UNKNOWN_NAME, type);
         int index = Arrays.binarySearch(TYPES, unknown);
         if (index < 0) {
             return unknown;
@@ -189,5 +198,16 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
             id = (id << 8) | (c & 0xFF);
         }
         return id;
+    }
+    
+    private static String toString(int type) {
+        byte[] name = new byte[] {
+            (byte)((type >> 24) & 0xFF),
+            (byte)((type >> 16) & 0xFF),
+            (byte)((type >>  8) & 0xFF),
+            (byte)((type      ) & 0xFF)
+        };
+        
+        return new String(name);
     }
 }
