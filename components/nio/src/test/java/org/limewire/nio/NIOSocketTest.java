@@ -20,6 +20,7 @@ import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.StubConnectObserver;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.BufferUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 /**

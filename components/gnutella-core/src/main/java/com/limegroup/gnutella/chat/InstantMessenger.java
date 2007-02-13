@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.AbstractChannelWriter;
 import org.limewire.nio.channel.NIOMultiplexor;
@@ -19,6 +18,7 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.statemachine.IOState;
 import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
+import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;

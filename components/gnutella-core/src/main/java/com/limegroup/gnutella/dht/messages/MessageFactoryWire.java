@@ -36,7 +36,7 @@ import org.limewire.security.SecurityToken;
  */
 public class MessageFactoryWire implements MessageFactory {
     
-    private MessageFactory delegate;
+    private final MessageFactory delegate;
 
     public MessageFactoryWire(MessageFactory delegate) {
         if (delegate == null) {

@@ -1,4 +1,4 @@
-package org.limewire.nio;
+package org.limewire.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

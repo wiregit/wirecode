@@ -1,26 +1,21 @@
 package org.limewire.rudp;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
-import org.limewire.rudp.SequenceNumberExtender;
-import org.limewire.rudp.messages.DataMessage;
-import org.limewire.rudp.messages.impl.DataMessageImpl;
+import java.nio.ByteBuffer;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.rudp.messages.DataMessage;
+import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.util.BaseTestCase;
+
 
 /**
  * Unit tests for UDPConnectionMessages
  */
-public class UDPMessageTest extends LimeTestCase {
-    
-    ByteArrayInputStream sin;
-    ByteArrayOutputStream sout;
-
-    
+public class UDPMessageTest extends BaseTestCase {
+        
 	public UDPMessageTest(String name) {
 		super(name);
 	}
@@ -137,18 +132,20 @@ public class UDPMessageTest extends LimeTestCase {
       byte[]                 data,
       int                    datalength,
       SequenceNumberExtender extender) throws Exception {
+        MessageFactory factory = new DefaultMessageFactory();
 
-        DataMessageImpl dmWrite;
-        DataMessageImpl dmRead;
-        dmWrite = new DataMessageImpl(connectionID, sequenceNumber, data, datalength);
+        DataMessage dmWrite;
+        DataMessage dmRead;
+        dmWrite = MessageHelper.createDataMessage(connectionID, sequenceNumber, data, datalength);
 
         // Write the message out
-        sout = new ByteArrayOutputStream();
+        ByteArrayOutputStream sout = new ByteArrayOutputStream();
         dmWrite.write(sout);
 
         // Read the message in
-        sin = new ByteArrayInputStream(sout.toByteArray());
-        dmRead = (DataMessageImpl) MessageFactory.read(sin);
+        ByteBuffer in = ByteBuffer.allocate(sout.size());
+        in.put(sout.toByteArray());
+        dmRead = (DataMessage)factory.createMessage(in);
 
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         dmRead.extendSequenceNumber(

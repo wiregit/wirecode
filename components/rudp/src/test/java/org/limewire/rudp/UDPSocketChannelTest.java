@@ -9,13 +9,12 @@ import java.util.Random;
 import org.limewire.rudp.DataWindow;
 import org.limewire.rudp.UDPConnectionProcessor;
 import org.limewire.rudp.UDPSocketChannel;
-import org.limewire.rudp.messages.impl.DataMessageImpl;
+import org.limewire.util.BaseTestCase;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
 
-public class UDPSocketChannelTest extends LimeTestCase {
+public class UDPSocketChannelTest extends BaseTestCase {
     public UDPSocketChannelTest(String name) {
         super(name);
     }
@@ -43,7 +42,7 @@ public class UDPSocketChannelTest extends LimeTestCase {
         // Normal read.
         byte[] data = new byte[400];
         rnd.nextBytes(data);
-        window.addData(new DataMessageImpl((byte)0, 1, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data, data.length));
         assertEquals(400, channel.read(buffer));
         assertEquals(data, buffer.array(), 0, 400);
         
@@ -64,7 +63,7 @@ public class UDPSocketChannelTest extends LimeTestCase {
         byte[] data = new byte[1500];
         rnd.nextBytes(data);
         buffer.clear();
-        window.addData(new DataMessageImpl((byte)0, 1, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data, data.length));
         assertEquals(1000, channel.read(buffer));
         assertEquals(data, 0, 1000, buffer.array());
         
@@ -91,8 +90,8 @@ public class UDPSocketChannelTest extends LimeTestCase {
         rnd.nextBytes(data);
         rnd.nextBytes(data2);
         buffer.clear();
-        window.addData(new DataMessageImpl((byte)0, 2, data2, data2.length));
-        window.addData(new DataMessageImpl((byte)0, 1, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 2, data2, data2.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data, data.length));
         assertEquals(208, channel.read(buffer));
         assertEquals(data, buffer.array(), 0, 103);
         assertEquals(data2, buffer.array(), 103, 105);
@@ -114,7 +113,7 @@ public class UDPSocketChannelTest extends LimeTestCase {
         byte[] data = new byte[101];
         rnd.nextBytes(data);
         buffer.clear();
-        window.addData(new DataMessageImpl((byte)0, 1, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data, data.length));
         stub.close();
         assertEquals(101, channel.read(buffer));
         assertEquals(data, buffer.array(), 0, 101);
@@ -143,13 +142,13 @@ public class UDPSocketChannelTest extends LimeTestCase {
         Random rnd = new Random();       
         byte[] data = new byte[300];
         rnd.nextBytes(data);
-        window.addData(new DataMessageImpl((byte)0, 1, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data, data.length));
         assertEquals(300, channel.read(buffer));
         assertEquals(data, buffer.array(), 0, 300);
         
         data = new byte[200];
         rnd.nextBytes(data);
-        window.addData(new DataMessageImpl((byte)0, 2, data, data.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 2, data, data.length));
         assertEquals(200, channel.read(buffer));
         assertEquals(data, buffer.array(), 300, 200);    
         
@@ -176,10 +175,10 @@ public class UDPSocketChannelTest extends LimeTestCase {
         rnd.nextBytes(data4);
         
         assertEquals(4, window.getWindowSpace());
-        window.addData(new DataMessageImpl((byte)0, 1, data1, data1.length));
-        window.addData(new DataMessageImpl((byte)0, 2, data2, data2.length));
-        window.addData(new DataMessageImpl((byte)0, 3, data3, data3.length));
-        window.addData(new DataMessageImpl((byte)0, 4, data4, data4.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data1, data1.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 2, data2, data2.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 3, data3, data3.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 4, data4, data4.length));
         assertEquals(0, window.getWindowSpace());
         
         assertFalse(stub.isSentKeepAlive());
@@ -206,10 +205,10 @@ public class UDPSocketChannelTest extends LimeTestCase {
         byte[] data4 = new byte[104];
         
         assertEquals(4, window.getWindowSpace());
-        window.addData(new DataMessageImpl((byte)0, 1, data1, data1.length));
-        window.addData(new DataMessageImpl((byte)0, 2, data2, data2.length));
-        window.addData(new DataMessageImpl((byte)0, 3, data3, data3.length));
-        window.addData(new DataMessageImpl((byte)0, 4, data4, data4.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 1, data1, data1.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 2, data2, data2.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 3, data3, data3.length));
+        window.addData(MessageHelper.createDataMessage((byte)0, 4, data4, data4.length));
         assertEquals(0, window.getWindowSpace());
         
         assertFalse(stub.isSentKeepAlive());
@@ -448,7 +447,7 @@ public class UDPSocketChannelTest extends LimeTestCase {
         }
         
         StubProcessor() {
-            super(null);
+            super(null, new DefaultRUDPContext());
         }
 
         void close() throws IOException {

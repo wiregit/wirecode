@@ -3,7 +3,7 @@ package org.limewire.nio.channel;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.BufferUtils;
+import org.limewire.util.BufferUtils;
 
 public abstract class AbstractChannelInterestReader implements ChannelReadObserver, InterestScatteringByteChannel {
     protected ByteBuffer buffer;

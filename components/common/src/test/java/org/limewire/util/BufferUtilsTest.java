@@ -1,12 +1,12 @@
-package org.limewire.nio;
+package org.limewire.util;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.nio.channel.ReadBufferChannel;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.BufferUtils;
 
 @SuppressWarnings( { "unchecked", "cast" } )
 public class BufferUtilsTest extends BaseTestCase {

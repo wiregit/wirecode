@@ -10,14 +10,13 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
-import org.limewire.nio.observer.TransportListener;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.rudp.messages.DataMessage;
+import org.limewire.util.BufferUtils;
 
 
 /**
@@ -35,8 +34,8 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     /** The processor this channel is writing to / reading from. */
     private final UDPConnectionProcessor processor;
     
-    /** The <tt>TransportListener</tt> to notify for pending events */
-    private final TransportListener listener;
+    /** The <tt>RUDPContext</tt> containing the TransportListener to notify for pending events */
+    private final RUDPContext context;
     
     /** The Socket object this UDPSocketChannel is used for. */
     private Socket socket;
@@ -62,10 +61,10 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     /** Whether or not we've propogated the shutdown to other writers. */
     private boolean shutdown = false;
     
-    UDPSocketChannel(SelectorProvider provider, TransportListener listener) {
+    UDPSocketChannel(SelectorProvider provider, RUDPContext context) {
         super(provider);
-        this.listener = listener;
-        this.processor = new UDPConnectionProcessor(this);
+        this.context = context;
+        this.processor = new UDPConnectionProcessor(this, context);
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
         allocateNewChunk();
@@ -79,7 +78,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     // for testing.
     UDPSocketChannel(UDPConnectionProcessor processor) {
         super(null);
-        this.listener = null;
+        this.context = new DefaultRUDPContext();
         this.processor = processor;
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
@@ -375,7 +374,6 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     }    
     
     void eventPending() {
-    	if (listener != null)
-    		listener.eventPending();
+    	context.getTransportListener().eventPending();
     }
 }

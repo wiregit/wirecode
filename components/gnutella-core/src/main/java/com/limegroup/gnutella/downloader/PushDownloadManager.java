@@ -23,13 +23,13 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.util.Base32;
+import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.ConnectionDispatcher;

@@ -9,11 +9,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
 import org.limewire.concurrent.SchedulingThreadPool;
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.DelayedBufferWriter;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.ThrottleWriter;
 import org.limewire.nio.observer.IOErrorObserver;
+import org.limewire.util.BufferUtils;
 
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;

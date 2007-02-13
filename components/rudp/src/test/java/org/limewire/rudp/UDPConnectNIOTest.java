@@ -10,13 +10,13 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.rudp.UDPConnection;
 import org.limewire.rudp.UDPConnectionProcessor;
 import org.limewire.rudp.UDPSocketChannel;
+import org.limewire.util.BufferUtils;
 
 import junit.framework.Test;
 

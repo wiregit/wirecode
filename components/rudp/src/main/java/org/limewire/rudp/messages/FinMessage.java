@@ -1,6 +1,6 @@
 package org.limewire.rudp.messages;
 
-public interface FinMessage {
+public interface FinMessage extends RUDPMessage {
 
     public static final byte REASON_NORMAL_CLOSE = 0x0;
 

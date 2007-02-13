@@ -9,19 +9,15 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
-import org.limewire.nio.observer.TransportListener;
-import org.limewire.rudp.UDPConnectionProcessor;
-import org.limewire.rudp.UDPMultiplexor;
-import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.rudp.UDPSocketChannel;
-import org.limewire.rudp.messages.RUDPMessage;
-import org.limewire.rudp.messages.impl.SynMessageImpl;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.nio.observer.TransportListener;
+import org.limewire.rudp.messages.RUDPMessage;
+import org.limewire.rudp.messages.SynMessage;
+import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.util.BaseTestCase;
 
-public class UDPMultiplexorTest extends LimeTestCase {
+public class UDPMultiplexorTest extends BaseTestCase {
 
 
     public UDPMultiplexorTest(String name) {
@@ -36,8 +32,12 @@ public class UDPMultiplexorTest extends LimeTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-    static StubListener listener = new StubListener();
-    static UDPSelectorProvider provider = new UDPSelectorProvider(listener);
+    
+    private static StubListener listener = new StubListener();
+    private static RUDPContext context = new DefaultRUDPContext(listener);
+    private static UDPSelectorProvider provider = new UDPSelectorProvider(context);
+    
+    
     public void testRegister() throws Exception {
         Selector selector = provider.openSelector();
         assertInstanceof(UDPMultiplexor.class, selector);
@@ -159,7 +159,7 @@ public class UDPMultiplexorTest extends LimeTestCase {
         assertEquals(0, selector.selectNow());
         
         key.interestOps(SelectionKey.OP_CONNECT);
-        SynMessageImpl syn = new SynMessageImpl((byte)1);
+        SynMessage syn = new DefaultMessageFactory().createSynMessage((byte)1);
         UDPMultiplexor plexor = (UDPMultiplexor) selector;
         
         StubProcessor processor = (StubProcessor)channel.getProcessor();
@@ -211,7 +211,7 @@ public class UDPMultiplexorTest extends LimeTestCase {
 
         RUDPMessage msg;
         StubProcessor(UDPSocketChannel channel) {
-            super(channel);
+            super(channel, context);
         }
         
         int readyOps() {

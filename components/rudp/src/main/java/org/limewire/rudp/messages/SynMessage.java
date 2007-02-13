@@ -1,9 +1,9 @@
 package org.limewire.rudp.messages;
 
-public interface SynMessage {
+public interface SynMessage extends RUDPMessage {
 
-    public abstract byte getSenderConnectionID();
+    public byte getSenderConnectionID();
 
-    public abstract int getProtocolVersionNumber();
+    public int getProtocolVersionNumber();
 
 }

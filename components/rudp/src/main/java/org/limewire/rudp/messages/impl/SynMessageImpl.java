@@ -1,8 +1,10 @@
 package org.limewire.rudp.messages.impl;
 
-import org.limewire.rudp.messages.SynMessage;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import org.limewire.rudp.messages.MessageFormatException;
+import org.limewire.rudp.messages.SynMessage;
 
 /** The Syn message begins a reliable udp connection by pinging the other host
  *  and by communicating the desired identifying connectionID.
@@ -10,54 +12,39 @@ import com.limegroup.gnutella.messages.BadPacketException;
 public class SynMessageImpl extends RUDPMessageImpl implements SynMessage {
 
 	private byte _senderConnectionID;
-    private int  _protocolVersionNumber;
+    private short  _protocolVersionNumber;
 
     /**
      * Construct a new SynMessage with the specified settings and data
      */
-    public SynMessageImpl(byte connectionID) {
-
-        super(
-          /* his connectionID           */ (byte)0, 
-          /* opcode                     */ OP_SYN, 
-          /* sequenceNumber             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
-          /* data length                */ 3
-          );
-		  _senderConnectionID    = connectionID;
-          _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
+    SynMessageImpl(byte connectionID) {
+        super((byte)0, OpCode.OP_SYN, 0, connectionID, PROTOCOL_VERSION_NUMBER);
+        _senderConnectionID    = connectionID;
+        _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
     }
 
     /**
      * Construct a new SynMessage with both my Connection ID and theirs
      */
-    public SynMessageImpl(byte connectionID, byte theirConnectionID) {
-
-        super(
-          /* his connectionID           */ theirConnectionID, 
-          /* opcode                     */ OP_SYN, 
-          /* sequenceNumber             */ 0, 
-          /* my data is my connectionID and the protocol version number */ 
-          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
-          /* data length                */ 3
-          );
-          _senderConnectionID    = connectionID;
-          _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
+    SynMessageImpl(byte connectionID, byte theirConnectionID) {
+        super(theirConnectionID, OpCode.OP_SYN, 0, connectionID, PROTOCOL_VERSION_NUMBER);
+        _senderConnectionID    = connectionID;
+        _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
+        _senderConnectionID    = connectionID;
+        _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
     }
 
 
     /**
      * Construct a new SynMessage from the network
      */
-    public SynMessageImpl(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
-
-      	super(guid, ttl, hops, payload);
-        _senderConnectionID    = guid[GUID_DATA_START];
-        _protocolVersionNumber = 
-          getShortInt(guid[GUID_DATA_START+1],guid[GUID_DATA_START+2]);
+    SynMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
+      throws MessageFormatException {
+        super(OpCode.OP_SYN, connectionId, sequenceNumber, data1, data2);
+        _senderConnectionID = data1.get();
+        data1.order(ByteOrder.BIG_ENDIAN);
+        _protocolVersionNumber = data1.getShort();
+        data1.rewind();
     }
 
     /* (non-Javadoc)

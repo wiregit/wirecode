@@ -1,8 +1,10 @@
 package org.limewire.rudp.messages.impl;
 
-import org.limewire.rudp.messages.KeepAliveMessage;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import org.limewire.rudp.messages.KeepAliveMessage;
+import org.limewire.rudp.messages.MessageFormatException;
 
 /** 
  *  The keepalive message is used to ensure that any firewalls continue 
@@ -15,7 +17,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
  *  has gone to zero and only KeepAliveMessages are flowing.  Once the 
  *  data window opens back up, Acks will again provide this information.
  */
-public class KeepAliveMessageImpl extends RUDPMessageImpl implements KeepAliveMessage {
+class KeepAliveMessageImpl extends RUDPMessageImpl implements KeepAliveMessage {
 
     private long _windowStart;
     private int  _windowSpace;
@@ -23,18 +25,10 @@ public class KeepAliveMessageImpl extends RUDPMessageImpl implements KeepAliveMe
     /**
      * Construct a new KeepAliveMessage with the specified settings and data
      */
-    public KeepAliveMessageImpl(byte connectionID, 
-      long windowStart, int windowSpace) {
-
-        super(
-          /* his connectionID                 */ connectionID, 
-          /* opcode                           */ OP_KEEPALIVE, 
-          /* Keepalive has no sequenceNumber  */ 0, 
-          /* window Start and Space           */ 
-          buildByteArray((int) windowStart & 0xffff, 
-			(windowSpace < 0 ? 0 : windowSpace)),
-          /* 2 short ints => 4 bytes          */ 4
-          );
+    KeepAliveMessageImpl(byte connectionID, long windowStart, int windowSpace) {
+        super(connectionID, OpCode.OP_KEEPALIVE, 0,
+                (short)(windowStart & 0xFFFF),
+                (short)(windowSpace < 0 ? 0 : windowSpace & 0xFFFF));
         _windowStart = windowStart;
         _windowSpace = windowSpace;
     }
@@ -42,15 +36,14 @@ public class KeepAliveMessageImpl extends RUDPMessageImpl implements KeepAliveMe
     /**
      * Construct a new KeepAliveMessage from the network
      */
-    public KeepAliveMessageImpl(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
-
-      	super(guid, ttl, hops, payload);
-
+    KeepAliveMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
+      throws MessageFormatException {
+        super(OpCode.OP_KEEPALIVE, connectionId, sequenceNumber, data1, data2);
+        data1.order(ByteOrder.BIG_ENDIAN);
         // Parse the added windowStart and windowSpace information
-        _windowStart = getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
-        _windowSpace = getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
+        _windowStart = data1.getShort();
+        _windowSpace = data1.getShort();
+        data1.rewind();
     }
 
     /* (non-Javadoc)

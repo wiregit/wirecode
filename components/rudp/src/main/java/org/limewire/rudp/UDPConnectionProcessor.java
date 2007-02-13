@@ -16,15 +16,10 @@ import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
-import org.limewire.rudp.messages.impl.AckMessageImpl;
-import org.limewire.rudp.messages.impl.DataMessageImpl;
-import org.limewire.rudp.messages.impl.FinMessageImpl;
-import org.limewire.rudp.messages.impl.KeepAliveMessageImpl;
-import org.limewire.rudp.messages.impl.SynMessageImpl;
-import org.limewire.rudp.messages.impl.RUDPMessageImpl;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
 /** 
@@ -260,6 +255,9 @@ public class UDPConnectionProcessor {
     
 	/** Allow a testing stub version of UDPService to be used */
 	private static UDPService _testingUDPService;
+    
+    /** The context containing various aspects required for RUDP. */
+    private final RUDPContext _context;
 
     /**
      *  For testing only, allow UDPService to be overridden
@@ -271,8 +269,9 @@ public class UDPConnectionProcessor {
     /**
      * Creates a new unconnected UDPConnectionProcessor.
      */
-    UDPConnectionProcessor(UDPSocketChannel channel) {
+    UDPConnectionProcessor(UDPSocketChannel channel, RUDPContext context) {
         // Init default state
+        _context                 = context;
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
         _connectionState         = PRECONNECT_STATE;
         _lastSendTime            = 0l;
@@ -664,10 +663,10 @@ public class UDPConnectionProcessor {
      *  these off before waiting
      */
     void sendKeepAlive() {
-        KeepAliveMessageImpl keepalive = null;
+        KeepAliveMessage keepalive = null;
         try {  
-            keepalive = 
-              new KeepAliveMessageImpl(_theirConnectionID, 
+            keepalive = _context.getMessageFactory().createKeepAliveMessage(
+                 _theirConnectionID, 
                 _receiveWindow.getWindowStart(), 
                 _receiveWindow.getWindowSpace());
             send(keepalive);
@@ -684,7 +683,7 @@ public class UDPConnectionProcessor {
     private synchronized void sendData(ByteBuffer chunk) {
         try {
             assert chunk.position() == 0;
-            DataMessageImpl dm = new DataMessageImpl(_theirConnectionID,_sequenceNumber, chunk); 
+            DataMessage dm = _context.getMessageFactory().createDataMessage(_theirConnectionID, _sequenceNumber, chunk); 
             send(dm);
 			DataRecord drec   = _sendWindow.addData(dm);  
             drec.sentTime     = _lastSendTime;
@@ -727,13 +726,9 @@ public class UDPConnectionProcessor {
      */
     private synchronized void safeSendAck(RUDPMessage msg) {
         // Ack the message
-        AckMessageImpl ack = null;
+        AckMessage ack = null;
         try {
-          ack = new AckMessageImpl(
-           _theirConnectionID, 
-           msg.getSequenceNumber(),
-           _receiveWindow.getWindowStart(),   
-           _receiveWindow.getWindowSpace());
+          ack = _context.getMessageFactory().createAckMessage(_theirConnectionID, msg.getSequenceNumber(), _receiveWindow.getWindowStart(), _receiveWindow.getWindowSpace());
           
           	if (LOG.isDebugEnabled()) {
           	    LOG.debug("total data packets "+_totalDataPackets+
@@ -754,14 +749,14 @@ public class UDPConnectionProcessor {
      */
     private synchronized void safeSendFin() {
         // Ack the message
-        FinMessageImpl fin = null;
+        FinMessage fin = null;
         try {
             // Record sequence number for ack monitoring
             // Not that it should increment anymore anyways
             _finSeqNo = _sequenceNumber;
 
             // Send the FinMessage
-            fin = new FinMessageImpl(_theirConnectionID, _sequenceNumber, _closeReasonCode);
+            fin = _context.getMessageFactory().createFinMessage(_theirConnectionID, _sequenceNumber, _closeReasonCode);
             send(fin);
         } catch(IllegalArgumentException iae) {
             // Report an error since this shouldn't ever happen
@@ -775,7 +770,7 @@ public class UDPConnectionProcessor {
     /**
      *  Send a message on to the UDPService
      */
-    private synchronized void safeSend(RUDPMessageImpl msg) {
+    private synchronized void safeSend(RUDPMessage msg) {
         try {
             send(msg); 
         } catch(IllegalArgumentException iae) {
@@ -789,7 +784,7 @@ public class UDPConnectionProcessor {
     /**
      *  Send a message on to the UDPService
      */
-	private synchronized void send(RUDPMessageImpl msg) 
+	private synchronized void send(RUDPMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
         if(msg instanceof DataMessage || msg instanceof AckMessage)
@@ -802,7 +797,8 @@ public class UDPConnectionProcessor {
             	LOG.debug("", ex);
             }
         }
-		_udpService.send(msg, _connectedTo);  
+        // TODO: Make sure this sends the right kind of msg.
+		_udpService.send((Message)msg, _connectedTo);  
 	}
 
     /**
@@ -958,11 +954,11 @@ public class UDPConnectionProcessor {
             // We cannot send the SYN until we've registered in the Multiplexor.
             if(_myConnectionID != 0) {
                 // Build SYN message with my connectionID in it
-                SynMessageImpl synMsg;
+                SynMessage synMsg;
                 if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT)
-                    synMsg = new SynMessageImpl(_myConnectionID, _theirConnectionID);
+                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID, _theirConnectionID);
                 else
-                    synMsg = new SynMessageImpl(_myConnectionID);
+                    synMsg = _context.getMessageFactory().createSynMessage(_myConnectionID);
     
                 LOG.debug("Sending SYN: " + synMsg);
                 // Send a SYN packet with our connectionID
@@ -980,7 +976,7 @@ public class UDPConnectionProcessor {
      * 
      * @param smsg
      */
-    private void handleSynMessage(SynMessageImpl smsg) {
+    private void handleSynMessage(SynMessage smsg) {
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         smsg.extendSequenceNumber(
           _extender.extendSequenceNumber(
@@ -1020,7 +1016,7 @@ public class UDPConnectionProcessor {
      * 
      * @param amsg
      */
-    private void handleAckMessage(AckMessageImpl amsg) {
+    private void handleAckMessage(AckMessage amsg) {
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         // Note that this sequence number is of local origin
         amsg.extendSequenceNumber(
@@ -1092,7 +1088,7 @@ public class UDPConnectionProcessor {
      * @param dmsg
      * @return
      */
-    private void handleDataMessage(DataMessageImpl dmsg) {
+    private void handleDataMessage(DataMessage dmsg) {
         
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         dmsg.extendSequenceNumber(
@@ -1227,7 +1223,7 @@ public class UDPConnectionProcessor {
      * 
      * @param msg
      */
-    private void handleFinMessage(FinMessageImpl msg) {
+    private void handleFinMessage(FinMessage msg) {
         // Extend the msgs sequenceNumber to 8 bytes based on past state
         msg.extendSequenceNumber(
           _extender.extendSequenceNumber(
@@ -1255,17 +1251,17 @@ public class UDPConnectionProcessor {
             LOG.debug("handleMessage :" + msg + " t:" + _lastReceivedTime);
 
         if (msg instanceof SynMessage) {
-            handleSynMessage((SynMessageImpl) msg);
+            handleSynMessage((SynMessage) msg);
         } else if (msg instanceof AckMessage) {
             _lastDataOrAckTime = _lastReceivedTime;
-            handleAckMessage((AckMessageImpl) msg);
+            handleAckMessage((AckMessage) msg);
         } else if (msg instanceof DataMessage) {
             _lastDataOrAckTime = _lastReceivedTime;
-            handleDataMessage((DataMessageImpl) msg);
+            handleDataMessage((DataMessage) msg);
         } else if (msg instanceof KeepAliveMessage) {
             handleKeepAliveMessage((KeepAliveMessage) msg);
         } else if (msg instanceof FinMessage) {
-            handleFinMessage((FinMessageImpl) msg);
+            handleFinMessage((FinMessage) msg);
         }
     }
 

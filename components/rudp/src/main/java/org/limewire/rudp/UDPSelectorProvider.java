@@ -8,15 +8,17 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 
-import org.limewire.nio.observer.TransportListener;
-
 
 public class UDPSelectorProvider extends SelectorProvider {
 
-	private final TransportListener listener;
-	
-	public UDPSelectorProvider(TransportListener listener) {
-		this.listener = listener;
+    private final RUDPContext context;
+    
+    public UDPSelectorProvider() {
+        this(new DefaultRUDPContext());
+    }
+    
+    public UDPSelectorProvider(RUDPContext context) {
+		this.context = context;
 	}
 
     public DatagramChannel openDatagramChannel() throws IOException {
@@ -28,7 +30,7 @@ public class UDPSelectorProvider extends SelectorProvider {
     }
 
     public AbstractSelector openSelector() {
-        return new UDPMultiplexor(this, listener);
+        return new UDPMultiplexor(this, context);
     }
 
     public ServerSocketChannel openServerSocketChannel() throws IOException {
@@ -36,7 +38,7 @@ public class UDPSelectorProvider extends SelectorProvider {
     }
 
     public SocketChannel openSocketChannel() {
-        return new UDPSocketChannel(this, listener);
+        return new UDPSocketChannel(this, context);
     }
 
 }

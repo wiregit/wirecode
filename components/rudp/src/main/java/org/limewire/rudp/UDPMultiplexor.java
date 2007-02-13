@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.nio.observer.TransportListener;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 
@@ -47,14 +46,15 @@ public class UDPMultiplexor extends AbstractSelector {
 		collisions after the connection is shut down. */
 	private int _lastConnectionID;
 	
-	private final TransportListener listener;
+    /** The RUDPContext that contains the TransportListener */
+	private final RUDPContext context;
 
     /**
      *  Initialize the UDPMultiplexor.
      */
-    UDPMultiplexor(SelectorProvider provider, TransportListener listener) {
+    UDPMultiplexor(SelectorProvider provider, RUDPContext context) {
         super(provider);
-        this.listener = listener;
+        this.context = context;
 		_channels       = new UDPSocketChannel[256];
 		_lastConnectionID  = 0;
     }
@@ -107,10 +107,8 @@ public class UDPMultiplexor extends AbstractSelector {
                 channel.getProcessor().handleMessage(msg);
 		}
 		
-		if (listener != null && 
-				channel != null && 
-				channel.getProcessor().readyOps() != 0)
-			listener.eventPending();
+		if (channel != null && channel.getProcessor().readyOps() != 0)
+            context.getTransportListener().eventPending();
 	}
 
     protected void implCloseSelector() throws IOException {

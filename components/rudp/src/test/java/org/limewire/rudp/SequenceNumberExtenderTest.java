@@ -1,15 +1,13 @@
 package org.limewire.rudp;
 
-import org.limewire.rudp.SequenceNumberExtender;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Tests the SequenceNumberExtender class.
  */
-public final class SequenceNumberExtenderTest extends LimeTestCase {
+public final class SequenceNumberExtenderTest extends BaseTestCase {
 
 	/*
 	 * Constructs the test.

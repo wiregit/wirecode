@@ -3,25 +3,24 @@ package org.limewire.rudp.messages.impl;
 import java.nio.ByteBuffer;
 
 import org.limewire.rudp.messages.DataMessage;
-
-import com.limegroup.gnutella.messages.BadPacketException;
+import org.limewire.rudp.messages.MessageFormatException;
 
 /** The data message is used to communicate data on the connection.
  */
-public class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
+class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
 
 	private final ByteBuffer chunk;
 
     /**
      * Construct a new DataMessage with the specified data.
      */
-    public DataMessageImpl(byte connectionID, long sequenceNumber, ByteBuffer chunk) {
-        super(connectionID, OP_DATA, sequenceNumber, chunk.array(), chunk.remaining());
+    DataMessageImpl(byte connectionID, long sequenceNumber, ByteBuffer chunk) {
+        super(connectionID, OpCode.OP_DATA, sequenceNumber, chunk.array(), chunk.remaining());
         this.chunk = chunk;
     }
     
-    public DataMessageImpl(byte connectionID, long sequenceNumber, byte[] data, int len) {
-        super(connectionID, OP_DATA, sequenceNumber, data, len);
+    DataMessageImpl(byte connectionID, long sequenceNumber, byte[] data, int len) {
+        super(connectionID, OpCode.OP_DATA, sequenceNumber, data, len);
         this.chunk = null;
     }
     
@@ -35,8 +34,9 @@ public class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
     /**
      * Construct a new DataMessage from the network.
      */
-    public DataMessageImpl(byte[] guid, byte ttl, byte hops, byte[] payload) throws BadPacketException {
-        super(guid, ttl, hops, payload);
+    DataMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
+      throws MessageFormatException {
+        super(OpCode.OP_DATA, connectionId, sequenceNumber, data1, data2);
         this.chunk = null;
     }
 
@@ -58,10 +58,10 @@ public class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
      * @see org.limewire.rudp.messages.impl.DataMessage#getDataAt(int)
      */
     public byte getDataAt(int i) {
-        if (i < MAX_GUID_DATA) 
+        if (i < MAX_DATA1_SIZE) 
             return _data1.get(i + _data1.position());
         else
-            return _data2.get(i-MAX_GUID_DATA + _data2.position());
+            return _data2.get(i-MAX_DATA1_SIZE + _data2.position());
     }
 
 	public String toString() {

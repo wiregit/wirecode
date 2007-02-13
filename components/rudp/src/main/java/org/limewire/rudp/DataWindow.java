@@ -3,7 +3,7 @@ package org.limewire.rudp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.LongHashMap;
-import org.limewire.rudp.messages.impl.DataMessageImpl;
+import org.limewire.rudp.messages.DataMessage;
 
 
 /**
@@ -58,7 +58,7 @@ public class DataWindow
     /*
      *  Add a new message to the window.  
      */
-	public DataRecord addData(DataMessageImpl msg) {
+	public DataRecord addData(DataMessage msg) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
 
@@ -498,14 +498,14 @@ public class DataWindow
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {
-	final DataMessageImpl  msg;      // the actual data message
+	final DataMessage msg;      // the actual data message
     int                         sends;    // count of the sends
 	boolean 		            read;     // whether the data was read
 	int   		                acks;     // count of the number of acks
     long                        sentTime; // when it was sent
     long                        ackTime;  // when it was acked
     
-    DataRecord(DataMessageImpl msg) {
+    DataRecord(DataMessage msg) {
     	this.msg=msg;
     }
 }

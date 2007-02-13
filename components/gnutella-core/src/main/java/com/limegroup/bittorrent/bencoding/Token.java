@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
-import org.limewire.nio.BufferUtils;
+import org.limewire.util.BufferUtils;
 
 
 /**

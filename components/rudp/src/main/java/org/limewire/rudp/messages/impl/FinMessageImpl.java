@@ -1,39 +1,32 @@
 package org.limewire.rudp.messages.impl;
 
-import org.limewire.rudp.messages.FinMessage;
+import java.nio.ByteBuffer;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import org.limewire.rudp.messages.FinMessage;
+import org.limewire.rudp.messages.MessageFormatException;
 
 /** The fin message is used to signal the end of the connection.
  */
-public class FinMessageImpl extends RUDPMessageImpl implements FinMessage {
+class FinMessageImpl extends RUDPMessageImpl implements FinMessage {
 
     private byte _reasonCode;
 
     /**
      * Construct a new FinMessage with the specified settings.
      */
-    public FinMessageImpl(byte connectionID, long sequenceNumber, byte reasonCode) {
-
-        super(
-          /* his connectionID           */ connectionID, 
-          /* opcode                     */ OP_FIN, 
-          /* sequenceNumber             */ sequenceNumber, 
-          /* Put reasonCode in the data */ buildByteArray(reasonCode),
-          /* data length of one         */ 1
-          );
-          _reasonCode = reasonCode;
+    FinMessageImpl(byte connectionID, long sequenceNumber, byte reasonCode) {
+        super(connectionID, OpCode.OP_FIN, sequenceNumber, reasonCode);
+        _reasonCode = reasonCode;
     }
 
     /**
      * Construct a new FinMessage from the network.
      */
-    public FinMessageImpl(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
-
-      	super(guid, ttl, hops, payload);
-        _reasonCode = guid[GUID_DATA_START]; 
+    FinMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
+      throws MessageFormatException {
+        super(OpCode.OP_FIN, connectionId, sequenceNumber, data1, data2);
+        _reasonCode = data1.get();
+        data1.rewind(); 
     }
 
 	public String toString() {

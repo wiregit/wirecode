@@ -1,12 +1,14 @@
 package org.limewire.rudp.messages.impl;
 
-import org.limewire.rudp.messages.AckMessage;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import org.limewire.rudp.messages.AckMessage;
+import org.limewire.rudp.messages.MessageFormatException;
 
 /** The ack message is used to acknowledge all non-ack packets in the protocol.
  */
-public class AckMessageImpl extends RUDPMessageImpl implements AckMessage {
+class AckMessageImpl extends RUDPMessageImpl implements AckMessage {
 
     private long _windowStart;
     private int  _windowSpace;
@@ -14,18 +16,10 @@ public class AckMessageImpl extends RUDPMessageImpl implements AckMessage {
     /**
      * Construct a new AckMessage with the specified settings and data
      */
-    public AckMessageImpl(byte connectionID, long sequenceNumber, 
-      long windowStart, int windowSpace) {
-
-        super(
-          /* his connectionID           */ connectionID, 
-          /* opcode                     */ OP_ACK, 
-          /* sequenceNumber             */ sequenceNumber, 
-          /* window Start and Space     */ 
-          buildByteArray((int) windowStart & 0xffff, 
-			(windowSpace < 0 ? 0 : windowSpace)),
-          /* 2 short ints => 4 bytes    */ 4
-          );
+    AckMessageImpl(byte connectionID, long sequenceNumber, long windowStart, int windowSpace) {
+        super(connectionID, OpCode.OP_ACK, sequenceNumber,
+              (short)(windowStart & 0xFFFF),
+              (short)(windowSpace < 0 ? 0 : windowSpace & 0xFFFF));
         _windowStart = windowStart;
         _windowSpace = windowSpace;
     }
@@ -33,15 +27,13 @@ public class AckMessageImpl extends RUDPMessageImpl implements AckMessage {
     /**
      * Construct a new AckMessage from the network
      */
-    public AckMessageImpl(
-      byte[] guid, byte ttl, byte hops, byte[] payload) 
-      throws BadPacketException {
-
-      	super(guid, ttl, hops, payload);
-
-        // Parse the added windowStart and windowSpace information
-        _windowStart = getShortInt(guid[GUID_DATA_START],guid[GUID_DATA_START+1]);
-        _windowSpace = getShortInt(guid[GUID_DATA_START+2],guid[GUID_DATA_START+3]);
+    AckMessageImpl(byte connectionId, long sequenceNumber, ByteBuffer data1, ByteBuffer data2)
+      throws MessageFormatException {
+        super(OpCode.OP_ACK, connectionId, sequenceNumber, data1, data2);
+        data1.order(ByteOrder.BIG_ENDIAN);
+        _windowStart = data1.getShort();
+        _windowSpace = data1.getShort();
+        data1.rewind();
     }
 
     /* (non-Javadoc)
