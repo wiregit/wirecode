@@ -42,6 +42,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.MojitoGlue;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -262,6 +263,11 @@ public class RouterService {
      */
     private static DHTManager dhtManager = 
         new LimeDHTManager(getSchedulingThreadPool());
+    
+    /**
+     * 
+     */
+    private static MojitoGlue mojitoGlue = new MojitoGlue(dhtManager);
     
     private static MessageDispatcher messageDispatcher;
     
@@ -642,6 +648,10 @@ public class RouterService {
      */
     public static DHTManager getDHTManager() {
         return dhtManager;
+    }
+    
+    public static MojitoGlue getMojitoGlue() {
+        return mojitoGlue;
     }
     
 	/**
@@ -2069,10 +2079,10 @@ public class RouterService {
     }
     
     public static void startDHT(boolean activeMode) {
-        dhtManager.start(activeMode);
+        getDHTManager().start(activeMode);
     }
     
     public static void shutdownDHT() {
-        dhtManager.stop();
+        getDHTManager().stop();
     }
 }

@@ -58,7 +58,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
-import com.limegroup.gnutella.dht.MojitoGlue;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -1804,9 +1803,8 @@ public class ManagedDownloader extends AbstractDownloader
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
         
-        // TODO Get MojitoGlue handle (for testing only)
-        //MojitoGlue glue = MojitoGlue.instance();
-        //glue.findAltLocs(getSHA1Urn());
+        // TODO This is for testing only
+        RouterService.getMojitoGlue().findAltLocs(getSHA1Urn());
         
         return true;
     }

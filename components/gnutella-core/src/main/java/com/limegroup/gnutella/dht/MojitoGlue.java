@@ -46,23 +46,13 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
  */
 public class MojitoGlue implements FileEventListener, DHTEventListener {
     
-    private static MojitoGlue GLUE = null;
-    
-    public synchronized static MojitoGlue instance() {
-        return GLUE;
-    }
-    
-    public synchronized static MojitoGlue instance(DHTManager manager) {
-        if (GLUE == null) {
-            GLUE = new MojitoGlue(manager);
-        }
-        return GLUE;
-    }
-    
     private final DHTManager manager;
     
-    private MojitoGlue(DHTManager manager) {
+    public MojitoGlue(DHTManager manager) {
         this.manager = manager;
+        
+        RouterService.getFileManager().addFileEventListener(this);
+        manager.addEventListener(this);
     }
     
     /**
@@ -453,6 +443,7 @@ public class MojitoGlue implements FileEventListener, DHTEventListener {
                             
                             try {
                                 location = AlternateLocation.createPushAltLoc(pe, urn);
+                                //findPushProxies(urn, new GUID(guid));
                             } catch (IOException e) {
                                 // Impossible. Thrown if URN or PushEndpoint is null
                                 LOG.error("IOException", e);
