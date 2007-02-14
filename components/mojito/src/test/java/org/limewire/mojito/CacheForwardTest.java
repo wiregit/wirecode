@@ -245,14 +245,14 @@ public class CacheForwardTest extends MojitoTestCase {
             Collection before = furthest.getValues();
             if (before.size() != 0) {
                 StringBuilder buffer = new StringBuilder();
-                buffer.append("Furthest: ").append(furthest.getLocalNode());
-                buffer.append("Creator: ").append(creator.getLocalNode());
+                buffer.append("Furthest: ").append(furthest.getLocalNode()).append("\n");
+                buffer.append("Creator: ").append(creator.getLocalNode()).append("\n");
                 
-                buffer.append("Before: ").append(before);
+                buffer.append("Before: ").append(before).append("\n");
                 Thread.sleep(10000); // Race condition?
-                buffer.append("After: ").append(furthest.getValues());
+                buffer.append("After: ").append(furthest.getValues()).append("\n");
                 
-                buffer.append("IDs: ").append(idsByXorDistance.subList(0, k+1));
+                buffer.append("IDs: ").append(idsByXorDistance.subList(0, k+1)).append("\n");
                 fail(buffer.toString());
             }
             

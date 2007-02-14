@@ -3,6 +3,7 @@ package com.limegroup.gnutella.dht.impl;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Test;
@@ -18,6 +19,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.CommonUtils;
 
@@ -93,7 +95,10 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testAddRemoveLeafDHTNode() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        PassiveDHTNodeController controller = new PassiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        
+        PassiveDHTNodeController controller = new PassiveDHTNodeController(
+                Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         try {
             controller.start();
@@ -121,8 +126,17 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
             assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2015)));
             assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
             Thread.sleep(500);
+            
             //see if removed from the DHT RT
-            assertEquals(20, rt.getActiveContacts().size());
+            //assertEquals(20, rt.getActiveContacts().size());
+            Collection<Contact> c = rt.getActiveContacts();
+            if (c.size() != 20) {
+                StringBuilder buffer = new StringBuilder();
+                buffer.append("Before: ").append(CollectionUtils.toString(c)).append("\n");
+                Thread.sleep(10000); // Race condition?
+                buffer.append("After: ").append(CollectionUtils.toString(rt.getActiveContacts())).append("\n");
+                fail(buffer.toString());
+            }
             
             //getActive nodes should return leaf nodes when node is bootstrapped
             List<IpPort> l = controller.getActiveDHTNodes(30);
