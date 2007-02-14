@@ -754,6 +754,14 @@ public class ManagedConnection extends Connection
     public void originateQuery(QueryRequest query) {
         query.originate();
         
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("do not proxy condition " + 
+                     !query.desiresOutOfBandReplies() + " " +
+                     isClientSupernodeConnection() + " " +
+                     (getSupportedOOBProxyControlVersion() == -1)  + " " +
+                     ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.getValue());
+        }
+        
         if (!query.desiresOutOfBandReplies() 
                 && isClientSupernodeConnection()
                 && getSupportedOOBProxyControlVersion() == -1

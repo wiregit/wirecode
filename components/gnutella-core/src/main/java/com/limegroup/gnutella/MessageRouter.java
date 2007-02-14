@@ -1832,7 +1832,7 @@ public abstract class MessageRouter {
             QueryRequest qrToSend = qr;
             if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
                 qrToSend = QueryRequest.unmarkOOBQuery(qr);
-            mc.send(qrToSend);
+            mc.originateQuery(qrToSend);
         }
     }
     

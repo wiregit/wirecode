@@ -56,16 +56,21 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      * supported messages.
      */
     private MessagesSupportedVendorMessage() {
-        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload());
+        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload(addSupportedMessages(new HashSet<SupportedMessageBlock>())));
         addSupportedMessages(_messagesSupported);
+    }
+    
+    /**
+     * Constructor for tests
+     */
+    MessagesSupportedVendorMessage(Set<SupportedMessageBlock> supportedMessageBlocks) {
+        super(F_NULL_VENDOR_ID, F_MESSAGES_SUPPORTED, VERSION, derivePayload(supportedMessageBlocks));
     }
 
     /**
      * Constructs the payload for supporting all of the messages.
      */
-    private static byte[] derivePayload() {
-        Set<SupportedMessageBlock> hashSet = new HashSet<SupportedMessageBlock>();
-        addSupportedMessages(hashSet);
+    private static byte[] derivePayload(Set<SupportedMessageBlock> hashSet) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)hashSet.size(), baos);
@@ -81,7 +86,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
 
     // ADD NEW MESSAGES HERE AS YOU BUILD THEM....
     // you should only add messages supported over TCP
-    private static void addSupportedMessages(Set<? super SupportedMessageBlock> hashSet) {
+    static Set<SupportedMessageBlock> addSupportedMessages(Set<SupportedMessageBlock> hashSet) {
         SupportedMessageBlock smp = null;
         // TCP Connect Back
         smp = new SupportedMessageBlock(F_BEAR_VENDOR_ID, F_TCP_CONNECT_BACK,
@@ -142,6 +147,8 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                                         F_OOB_PROXYING_CONTROL,
                                         OOBProxyControlVendorMessage.VERSION);
         hashSet.add(smp);
+        
+        return hashSet;
     }
 
 

@@ -95,7 +95,7 @@ public class PrivilegedAccessor {
         args[0] = arg;
         return invokeMethod(instance, methodName, args);
     }
-
+    
     /**
      * Calls a method on the given object instance with the given arguments.
      *
@@ -106,7 +106,7 @@ public class PrivilegedAccessor {
      */
     public static Object invokeMethod(Object instance, 
                                       String methodName, 
-                                      Object[] args ) 
+                                      Object... args ) 
         throws NoSuchMethodException,
                IllegalAccessException, 
                InvocationTargetException  {
