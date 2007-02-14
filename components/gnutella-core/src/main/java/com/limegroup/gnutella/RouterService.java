@@ -27,9 +27,9 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
+import org.limewire.rudp.UDPSelectorProviderFactory;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsHandler;
@@ -61,7 +61,7 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.rudp.RUDPContextWire;
+import com.limegroup.gnutella.rudp.UDPSelectorProviderFactoryWire;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -280,9 +280,10 @@ public class RouterService {
     
     static {
         // Link the multiplexor & NIODispatcher together.
-        RUDPContext context = new RUDPContextWire();
-        UDP_SELECTOR_PROVIDER = new UDPSelectorProvider(context);
-        UDP_MULTIPLEXOR = (UDPMultiplexor)UDP_SELECTOR_PROVIDER.openSelector();
+        UDPSelectorProviderFactory factory = new UDPSelectorProviderFactoryWire();
+        UDPSelectorProvider.setDefaultProviderFactory(factory);
+        UDP_SELECTOR_PROVIDER = UDPSelectorProvider.defaultProvider();
+        UDP_MULTIPLEXOR = UDP_SELECTOR_PROVIDER.openSelector();
         SelectableChannel socketChannel = UDP_SELECTOR_PROVIDER.openSocketChannel();
         try {
             socketChannel.close();

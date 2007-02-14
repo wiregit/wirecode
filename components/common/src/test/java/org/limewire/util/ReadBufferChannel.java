@@ -3,15 +3,13 @@ package org.limewire.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 
-import org.limewire.nio.channel.InterestReadableByteChannel;
 
-
-public class ReadBufferChannel implements InterestReadableByteChannel {
+public class ReadBufferChannel implements ReadableByteChannel {
     private ByteBuffer buffer;
     private boolean useEOF;
     private boolean closed = false;
-    private boolean interest = false;
     
     public ReadBufferChannel() {
         this(new byte[0]);
@@ -48,7 +46,6 @@ public class ReadBufferChannel implements InterestReadableByteChannel {
     
     public void clear() {
         this.closed = false;
-        this.interest = false;
     }
     
     public ByteBuffer getBuffer() {
@@ -90,11 +87,4 @@ public class ReadBufferChannel implements InterestReadableByteChannel {
         this.closed = closed;
     }
     
-    public void interest(boolean status) {
-        this.interest = status;
-    }
-
-    public boolean isInterested() {
-        return interest;
-    }
 }

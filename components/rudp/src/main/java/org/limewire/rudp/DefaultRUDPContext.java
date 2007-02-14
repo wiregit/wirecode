@@ -15,29 +15,60 @@ public class DefaultRUDPContext implements RUDPContext {
     /** The TransportListener that should be notified when events are pending. */
     private final TransportListener transportListener;
     
-    /** The service to send UDP messages through. */
+    /** The UDPService that messages are sent through & udp data is learned from. */
+    private final UDPService udpService;
     
-    /** The settings which control the rate of... */
+    /** The dispatcher that messages are pumped through. */
+    private final MessageDispatcher messageDispatcher;
+    
+    /** The settings that control the algorithm. */
+    private final RUDPSettings rudpSettings;
    
     public DefaultRUDPContext() {
-        this.messageFactory = new DefaultMessageFactory();
-        this.transportListener = null;
+        this(new DefaultMessageFactory(), new NoOpTransportListener(),
+             null, new DefaultMessageDispatcher(), new DefaultRUDPSettings());
     }
     
     public DefaultRUDPContext(MessageFactory factory) {
-        this(factory, null);
+        this(factory, new NoOpTransportListener(),
+             null, new DefaultMessageDispatcher(), new DefaultRUDPSettings());
     }
     
     public DefaultRUDPContext(TransportListener transportListener) {
-        this(new DefaultMessageFactory(), transportListener);
+        this(new DefaultMessageFactory(), transportListener,
+             null, new DefaultMessageDispatcher(), new DefaultRUDPSettings());
     }
     
-    public DefaultRUDPContext(MessageFactory factory, TransportListener transportListener) {
+    public DefaultRUDPContext(UDPService udpService) {
+        this(new DefaultMessageFactory(), new NoOpTransportListener(),
+             udpService, null, new DefaultRUDPSettings());
+    }
+    
+    public DefaultRUDPContext(RUDPSettings settings) {
+        this(new DefaultMessageFactory(), new NoOpTransportListener(),
+             null, new DefaultMessageDispatcher(), settings);
+    }
+    
+    public DefaultRUDPContext(MessageFactory factory,
+                              TransportListener transportListener,
+                              UDPService udpService, 
+                              RUDPSettings settings) {
+        this(factory, transportListener, udpService, null, settings);
+    }
+    
+    public DefaultRUDPContext(MessageFactory factory,
+                              TransportListener transportListener,
+                              UDPService udpService,
+                              MessageDispatcher dispatcher, 
+                              RUDPSettings settings) {
         this.messageFactory = factory;
-        if(transportListener == null)
-            this.transportListener = new NoOpTransportListener();
+        this.transportListener = transportListener;
+        if(udpService == null)
+            this.udpService = new DefaultUDPService(dispatcher);
         else
-            this.transportListener = transportListener;
+            this.udpService = udpService;
+        this.messageDispatcher = dispatcher;
+        this.rudpSettings = settings;
     }
     
     /* (non-Javadoc)
@@ -52,6 +83,18 @@ public class DefaultRUDPContext implements RUDPContext {
      */
     public TransportListener getTransportListener() {
         return transportListener;
+    }
+    
+    public UDPService getUDPService() {
+        return udpService;
+    }
+    
+    public MessageDispatcher getMessageDispatcher() {
+        return messageDispatcher;
+    }
+    
+    public RUDPSettings getRUDPSettings() {
+        return rudpSettings;
     }
     
     /** A NoOp TransportListener. */

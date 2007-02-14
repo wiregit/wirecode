@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
 
 
 public class UDPSelectorProvider extends SelectorProvider {
-
+    /** A factory so the outside world can change the default UDPSelectorProvider. */
+    private static volatile UDPSelectorProviderFactory providerFactory = null;
+    
     private final RUDPContext context;
     
     public UDPSelectorProvider() {
@@ -29,16 +29,39 @@ public class UDPSelectorProvider extends SelectorProvider {
         throw new IOException("not supported");
     }
 
-    public AbstractSelector openSelector() {
-        return new UDPMultiplexor(this, context);
+    public UDPMultiplexor openSelector() {
+        UDPMultiplexor plexor = new UDPMultiplexor(this, context);
+        return plexor;
     }
 
     public ServerSocketChannel openServerSocketChannel() throws IOException {
         throw new IOException("not supported");
     }
 
-    public SocketChannel openSocketChannel() {
+    public UDPSocketChannel openSocketChannel() {
         return new UDPSocketChannel(this, context);
+    }
+    
+    public RUDPContext getContext() {
+        return context;
+    }
+    
+    /** Retrieves the default provider. */
+    public static UDPSelectorProvider defaultProvider() {
+        if(providerFactory != null)
+            return providerFactory.createProvider();
+        else
+            return new UDPSelectorProvider();
+    }
+    
+    /** Sets the new default provider factory. */
+    public static void setDefaultProviderFactory(UDPSelectorProviderFactory factory) {
+        providerFactory = factory;
+    }
+    
+    /** Gets the last provider factory. */
+    public static UDPSelectorProviderFactory getDefaultProviderFactory() {
+        return providerFactory;
     }
 
 }

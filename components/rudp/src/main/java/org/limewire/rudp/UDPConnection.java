@@ -5,16 +5,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 
-import org.limewire.io.NetworkUtils;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
-
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
 
 /** 
  *  Create a reliable udp connection interface.
@@ -29,12 +24,20 @@ public class UDPConnection extends AbstractNBSocket {
 
     /** The default read timeout. */
     private int soTimeout = 1 * 60 * 1000; // default to 1 minute.
+    
+    /** The context surrounding this connection . */
+    private final RUDPContext context;
 
     /**
      * Creates an unconnected UDPConnection. You must call connect(...) to connect.
      */
     public UDPConnection() {
-        channel = (UDPSocketChannel)RouterService.getUDPSelectorProvider().openSocketChannel();
+        this(UDPSelectorProvider.defaultProvider());
+    }
+    
+    public UDPConnection(UDPSelectorProvider provider) {
+        this.context = provider.getContext();
+        channel = provider.openSocketChannel();
         channel.setSocket(this);
         setInitialReader();
         setInitialWriter();  
@@ -82,19 +85,7 @@ public class UDPConnection extends AbstractNBSocket {
 
     /** Returns the local address this socket uses. */
     public InetAddress getLocalAddress() {
-        InetAddress lip = null;
-        try {
-            lip = InetAddress.getByName(
-              NetworkUtils.ip2string(RouterService.getNonForcedAddress()));
-        } catch (UnknownHostException uhe) {
-            try {
-                lip = InetAddress.getLocalHost();
-            } catch (UnknownHostException uhe2) {
-                lip = null;
-            }
-        }
-
-        return lip;
+        return context.getUDPService().getStableListeningAddress();
     }
     
     public SocketAddress getRemoteSocketAddress() {
@@ -110,7 +101,7 @@ public class UDPConnection extends AbstractNBSocket {
     }
 
     public int getLocalPort() {
-        return UDPService.instance().getStableUDPPort();
+        return context.getUDPService().getStableListeningPort();
     }
     
     public SocketAddress getLocalSocketAddress() {

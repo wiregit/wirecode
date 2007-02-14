@@ -11,5 +11,11 @@ public interface RUDPContext {
 
     /** The TransportListener which should be notified when events are pending. */
     public TransportListener getTransportListener();
+    
+    /** The UDPService used to send messages & know about udp listening ports. */
+    public UDPService getUDPService();
+    
+    /** The RUDPSettings to use controlling the algorithm. */
+    public RUDPSettings getRUDPSettings();
 
 }

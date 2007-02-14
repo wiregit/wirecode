@@ -1,33 +1,29 @@
 package org.limewire.rudp;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetAddress;
-
-import org.limewire.concurrent.ManagedThread;
-import org.limewire.io.IOUtils;
-import org.limewire.rudp.UDPConnection;
-import org.limewire.rudp.UDPConnectionProcessor;
-import org.limewire.service.ErrorService;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPServiceStub;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
+import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.IOUtils;
+import org.limewire.nio.NIODispatcher;
+import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.service.ErrorService;
+import org.limewire.util.BaseTestCase;
 
 /**
  * Put full UDPConnection system through various tests.
  */
 @SuppressWarnings( { "unchecked", "cast" } )
-public final class UDPConnectionTest extends LimeTestCase {
+public final class UDPConnectionTest extends BaseTestCase {
+    
+    private static UDPSelectorProviderFactory defaultFactory = null;
+    private static UDPServiceStub stubService;
 
 	/*
 	 * Constructs the test.
@@ -48,36 +44,32 @@ public final class UDPConnectionTest extends LimeTestCase {
 	}
 
     public static void globalSetUp() throws Exception {
-        UDPConnectionProcessor.setUDPServiceForTesting(UDPServiceStub.instance());
-        new RouterService(new ActivityCallbackStub());
-        setSettings();
-    }
-    
-    private static void setSettings() throws Exception {
-        Acceptor ac = RouterService.getAcceptor();
-        ac.setAddress(InetAddress.getByName("127.0.0.1"));
-        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+        defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
+        MessageFactory factory = new DefaultMessageFactory();
+        stubService = new UDPServiceStub(factory);
+        final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
+                factory, NIODispatcher.instance().getTransportListener(),
+                stubService, new DefaultRUDPSettings()));
+        UDPSelectorProvider.setDefaultProviderFactory(new UDPSelectorProviderFactory() {
+            public UDPSelectorProvider createProvider() {
+                return provider;
+            }
+        });
     }
 
     public static void globalTearDown() throws Exception {
-        // Cleanup the UDPServiceStub usage
-        UDPConnectionProcessor.setUDPServiceForTesting(null);
+        UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
     }
 
     public void setUp() throws Exception {
-        setSettings();
-
         // Add some simulated connections to the UDPServiceStub
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 0);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 0);
+        stubService.addReceiver(6346, 6348, 10, 0);
+        stubService.addReceiver(6348, 6346, 10, 0);
     }
     
     public void tearDown() throws Exception {
         // Clear out the receiver parameters for the UDPServiceStub
-        UDPServiceStub.stubInstance().clearReceivers();
+        stubService.clearReceivers();
     }  
 
     /**
@@ -248,7 +240,7 @@ public final class UDPConnectionTest extends LimeTestCase {
 
         // Read to end and one extra on second stream
         InputStream  istream = uconn2.getInputStream();
-        uconn2.setSoTimeout(Constants.TIMEOUT); 
+        uconn2.setSoTimeout(8000); 
         String word = IOUtils.readWord(istream,8);
         uconn2.close();
 
@@ -282,9 +274,8 @@ public final class UDPConnectionTest extends LimeTestCase {
 
         // Read to end and one extra on second stream
         InputStream  istream = uconn2.getInputStream();
-        uconn2.setSoTimeout(Constants.TIMEOUT); 
-        BufferedInputStream bistream = new BufferedInputStream(istream);
-        ByteReader br = new ByteReader(bistream);
+        uconn2.setSoTimeout(8000); 
+        BufferedReader br = new BufferedReader(new InputStreamReader(istream));
 
         String line = br.readLine();
 
@@ -472,12 +463,12 @@ public final class UDPConnectionTest extends LimeTestCase {
         final int NUM_BYTES = 200000;
 
         // Clear out my standard setup
-        UDPServiceStub.stubInstance().clearReceivers();
+        stubService.clearReceivers();
 
         // Add some simulated connections to the UDPServiceStub
         // Make the connections 5% flaky
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 5);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 5);
+        stubService.addReceiver(6346, 6348, 10, 5);
+        stubService.addReceiver(6348, 6346, 10, 5);
 
         // Start the second connection in another thread
         // and run it to completion.
@@ -532,12 +523,12 @@ public final class UDPConnectionTest extends LimeTestCase {
         final int NUM_BYTES = 20000;
 
         // Clear out my standard setup
-        UDPServiceStub.stubInstance().clearReceivers();
+        stubService.clearReceivers();
 
         // Add some simulated connections to the UDPServiceStub
         // Make the connections 15% flaky
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 10, 10);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 10, 10);
+        stubService.addReceiver(6346, 6348, 10, 10);
+        stubService.addReceiver(6348, 6346, 10, 10);
 
         // Start the second connection in another thread
         // and run it to completion.
@@ -591,12 +582,12 @@ public final class UDPConnectionTest extends LimeTestCase {
         final int NUM_BYTES = 60000;
 
         // Clear out my standard setup
-        UDPServiceStub.stubInstance().clearReceivers();
+        stubService.clearReceivers();
 
         // Add some simulated connections to the UDPServiceStub
         // Make the connections 25% flaky
-        UDPServiceStub.stubInstance().addReceiver(6346, 6348, 1000, 0);
-        UDPServiceStub.stubInstance().addReceiver(6348, 6346, 1000, 0);
+        stubService.addReceiver(6346, 6348, 1000, 0);
+        stubService.addReceiver(6348, 6346, 1000, 0);
 
         // Start the second connection in another thread
         // and run it to completion.

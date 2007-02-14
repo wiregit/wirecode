@@ -18,10 +18,6 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.settings.DownloadSettings;
-
 /** 
  *  Manage a reliable udp connection for the transfer of data.
  */
@@ -107,7 +103,6 @@ public class UDPConnectionProcessor {
     private static final int  FIN_STATE               = 3;
     
     // Handle to various singleton objects in our architecture
-    private UDPService        _udpService;
     private UDPScheduler      _scheduler;
     
     /** The UDPSocketChannel backing this processor. */
@@ -215,25 +210,25 @@ public class UDPConnectionProcessor {
     ///////////////////////////////////////////
     
     /** Whether to skip any acks at all */
-    private final boolean _skipAcks = DownloadSettings.SKIP_ACKS.getValue();
+    private final boolean _skipAcks;
     
     /** How long each measuring period is */
-    private final int _period = DownloadSettings.PERIOD_LENGTH.getValue();
+    private final int _period;
     
     /** How many periods to keep track of */
-    private static final int _periodHistory = DownloadSettings.PERIOD_LENGTH.getValue();
+    private final int _periodHistory;
     
     /** 
      * By how much does the current period need to deviate from the average
      * before we start acking.
      */
-    private final float _deviation = DownloadSettings.DEVIATION.getValue();
+    private final float _deviation;
     
     /** Do not skip more than this many acks in a row */
-    private static final int _maxSkipAck = DownloadSettings.MAX_SKIP_ACKS.getValue();
+    private final int _maxSkipAck;
     
     /** how many data packets we got each second */
-    private final int [] _periods = new int[_periodHistory];
+    private final int [] _periods;
     
     /** index within that array, points to the last period */
     private int _currentPeriodId;
@@ -252,20 +247,10 @@ public class UDPConnectionProcessor {
     
     /** how many packets we got in total */
     private int _totalDataPackets;
-    
-	/** Allow a testing stub version of UDPService to be used */
-	private static UDPService _testingUDPService;
-    
+   
     /** The context containing various aspects required for RUDP. */
     private final RUDPContext _context;
-
-    /**
-     *  For testing only, allow UDPService to be overridden
-     */
-    static void setUDPServiceForTesting(UDPService udpService) {
-		_testingUDPService = udpService;
-	}
-    
+   
     /**
      * Creates a new unconnected UDPConnectionProcessor.
      */
@@ -286,12 +271,6 @@ public class UDPConnectionProcessor {
         _closeReasonCode         = FinMessage.REASON_NORMAL_CLOSE;
         _channel                 = channel;
 
-        // Allow UDPService to be overridden for testing
-        if ( _testingUDPService == null )
-            _udpService = UDPService.instance();
-        else
-            _udpService = _testingUDPService;
-
         _scheduler         = UDPScheduler.instance();
 
         // Precreate the receive window for responce reporting
@@ -301,6 +280,13 @@ public class UDPConnectionProcessor {
         // Acks seqNo need to be extended separately
         _localExtender     = new SequenceNumberExtender();
         _extender          = new SequenceNumberExtender();
+        
+        _skipAcks = _context.getRUDPSettings().isSkipAcksEnabled();
+        _maxSkipAck = _context.getRUDPSettings().getMaxSkipAcks();
+        _deviation = _context.getRUDPSettings().getMaxSkipDeviation();
+        _period = _context.getRUDPSettings().getSkipAckPeriodLength();
+        _periodHistory = _context.getRUDPSettings().getSkipAckHistorySize();
+        _periods = new int[_periodHistory];
     }
     
     /**
@@ -312,7 +298,7 @@ public class UDPConnectionProcessor {
      */
     void connect(InetSocketAddress addr) throws IOException {
         // If UDP is not running or not workable, barf
-        if (!_udpService.isListening() || !_udpService.canDoFWT()) {
+        if (!_context.getUDPService().isListening() || !_context.getUDPService().isNATTraversalCapable()) {
             throw new IOException("udp isn't working");
         }        
         
@@ -797,8 +783,7 @@ public class UDPConnectionProcessor {
             	LOG.debug("", ex);
             }
         }
-        // TODO: Make sure this sends the right kind of msg.
-		_udpService.send((Message)msg, _connectedTo);  
+		_context.getUDPService().send(msg, _connectedTo);  
 	}
 
     /**

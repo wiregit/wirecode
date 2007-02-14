@@ -3,35 +3,32 @@ package org.limewire.rudp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import junit.framework.Test;
+
+import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
-import org.limewire.rudp.UDPConnection;
-import org.limewire.rudp.UDPConnectionProcessor;
-import org.limewire.rudp.UDPSocketChannel;
+import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.StubConnectObserver;
-import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.UDPServiceStub;
 
 /**
  * Tests that NIOSocket delegates events correctly.
  */
-public final class UDPConnectNIOTest extends LimeTestCase {
+public final class UDPConnectNIOTest extends BaseTestCase {
+    
+    
+    private static UDPSelectorProviderFactory defaultFactory = null;
+    private static UDPServiceStub stubService;
+
     
     private static final int PORT_1 = 6346;
     private static final int PORT_2 = 6348;
@@ -48,38 +45,35 @@ public final class UDPConnectNIOTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    public static void globalSetUp() throws Exception {
-        UDPConnectionProcessor.setUDPServiceForTesting(UDPServiceStub.instance());
-        new RouterService(new ActivityCallbackStub());
-        Acceptor ac = RouterService.getAcceptor();
-        ac.setAddress(InetAddress.getByName("127.0.0.1"));
-        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
+     public static void globalSetUp() throws Exception {
+        defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
+        MessageFactory factory = new DefaultMessageFactory();
+        stubService = new UDPServiceStub(factory);
+        final UDPSelectorProvider provider = new UDPSelectorProvider(
+                new DefaultRUDPContext(factory, NIODispatcher.instance()
+                        .getTransportListener(), stubService,
+                        new DefaultRUDPSettings()));
+        UDPSelectorProvider
+                .setDefaultProviderFactory(new UDPSelectorProviderFactory() {
+                    public UDPSelectorProvider createProvider() {
+                        return provider;
+                    }
+                });
     }
 
     public static void globalTearDown() throws Exception {
-        // Cleanup the UDPServiceStub usage
-        UDPConnectionProcessor.setUDPServiceForTesting(null);
+        UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
     }
 
     public void setUp() throws Exception {
-        Acceptor ac = RouterService.getAcceptor();
-        ac.setAddress(InetAddress.getByName("127.0.0.1"));
-        ac.setExternalAddress(InetAddress.getByName("127.0.0.1"));
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false); 
-        ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
-        ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
-
         // Add some simulated connections to the UDPServiceStub
-        UDPServiceStub.stubInstance().addReceiver(PORT_1, PORT_2, 10, 0);
-        UDPServiceStub.stubInstance().addReceiver(PORT_2, PORT_1, 10, 0);
+        stubService.addReceiver(PORT_1, PORT_2, 10, 0);
+        stubService.addReceiver(PORT_2, PORT_1, 10, 0);
     }
     
     public void tearDown() throws Exception {
         // Clear out the receiver parameters for the UDPServiceStub
-        UDPServiceStub.stubInstance().clearReceivers();
+        stubService.clearReceivers();
     }      
     
     
