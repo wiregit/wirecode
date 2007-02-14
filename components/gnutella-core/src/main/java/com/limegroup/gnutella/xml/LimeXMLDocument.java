@@ -291,7 +291,7 @@ public class LimeXMLDocument implements Serializable {
      * Sets the identifier.
      */
     public void initIdentifier(File id) {
-    	assert fileId == null;
+    	//assert fileId == null;
         fileId = id;
     }
 
