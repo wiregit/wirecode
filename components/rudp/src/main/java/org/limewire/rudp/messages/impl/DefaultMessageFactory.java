@@ -70,7 +70,7 @@ public class DefaultMessageFactory implements MessageFactory {
             throw new MessageFormatException("inconsistent message size.  expected: " + remaining + ", was: " + in.available());
         
         // Return a reference to the remaining data.
-        ByteBuffer data2 = in.bufferFor(remaining);
+        ByteBuffer data2 = in.bufferFor(remaining); // G
         assert in.available() == 0;
 
         switch (opcode) {
