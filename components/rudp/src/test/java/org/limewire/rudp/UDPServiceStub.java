@@ -43,15 +43,19 @@ public class UDPServiceStub implements UDPService {
     
     /** The factory to create messages from. */
     private final MessageFactory factory;
+    
+    /** The active receivers of messages */
+    private final ArrayList RECEIVER_LIST = new ArrayList();
 
 	/** Constructs a new <tt>UDPServiceStub</tt>. */
 	public UDPServiceStub(MessageFactory factory) {
         SEND_QUEUE = ExecutorsHelper.newProcessingQueue("UDPServiceStub-Sender");
         this.factory = factory;
     }
-
-	/** The active receivers of messages */
-	private final ArrayList RECEIVER_LIST = new ArrayList();
+    
+    public void setUDPMultiplexor(UDPMultiplexor plexor) {
+        this.multiplexor = plexor;
+    }
 
 	/** Create receiver for each simulated incoming connection */
 	public void addReceiver(int toPort, int fromPort, int delay, int pctFlaky) {

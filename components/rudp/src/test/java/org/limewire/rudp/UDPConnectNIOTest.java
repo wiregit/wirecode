@@ -28,6 +28,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     private static UDPSelectorProviderFactory defaultFactory = null;
     private static UDPServiceStub stubService;
+    private static UDPMultiplexor udpMultiplexor;
 
     
     private static final int PORT_1 = 6346;
@@ -45,24 +46,26 @@ public final class UDPConnectNIOTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-     public static void globalSetUp() throws Exception {
+    public static void globalSetUp() throws Exception {
         defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
         MessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
-        final UDPSelectorProvider provider = new UDPSelectorProvider(
-                new DefaultRUDPContext(factory, NIODispatcher.instance()
-                        .getTransportListener(), stubService,
-                        new DefaultRUDPSettings()));
-        UDPSelectorProvider
-                .setDefaultProviderFactory(new UDPSelectorProviderFactory() {
-                    public UDPSelectorProvider createProvider() {
-                        return provider;
-                    }
-                });
+        final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
+                factory, NIODispatcher.instance().getTransportListener(),
+                stubService, new DefaultRUDPSettings()));
+        udpMultiplexor = provider.openSelector();
+        stubService.setUDPMultiplexor(udpMultiplexor);
+        UDPSelectorProvider.setDefaultProviderFactory(new UDPSelectorProviderFactory() {
+            public UDPSelectorProvider createProvider() {
+                return provider;
+            }
+        });
+        NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
     }
 
     public static void globalTearDown() throws Exception {
         UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
+        NIODispatcher.instance().removeSelector(udpMultiplexor);
     }
 
     public void setUp() throws Exception {

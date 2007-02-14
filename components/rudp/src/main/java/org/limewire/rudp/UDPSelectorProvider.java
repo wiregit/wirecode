@@ -42,6 +42,10 @@ public class UDPSelectorProvider extends SelectorProvider {
         return new UDPSocketChannel(this, context);
     }
     
+    public Class<UDPSocketChannel> getUDPSocketChannelClass() {
+        return UDPSocketChannel.class;
+    }
+    
     public RUDPContext getContext() {
         return context;
     }

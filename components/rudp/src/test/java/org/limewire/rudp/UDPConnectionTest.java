@@ -24,6 +24,7 @@ public final class UDPConnectionTest extends BaseTestCase {
     
     private static UDPSelectorProviderFactory defaultFactory = null;
     private static UDPServiceStub stubService;
+    private static UDPMultiplexor udpMultiplexor;
 
 	/*
 	 * Constructs the test.
@@ -50,15 +51,19 @@ public final class UDPConnectionTest extends BaseTestCase {
         final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),
                 stubService, new DefaultRUDPSettings()));
+        udpMultiplexor = provider.openSelector();
+        stubService.setUDPMultiplexor(udpMultiplexor);
         UDPSelectorProvider.setDefaultProviderFactory(new UDPSelectorProviderFactory() {
             public UDPSelectorProvider createProvider() {
                 return provider;
             }
         });
+        NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
     }
 
     public static void globalTearDown() throws Exception {
         UDPSelectorProvider.setDefaultProviderFactory(defaultFactory);
+        NIODispatcher.instance().removeSelector(udpMultiplexor);
     }
 
     public void setUp() throws Exception {

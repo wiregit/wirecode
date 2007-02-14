@@ -145,6 +145,7 @@ public class UDPMessageTest extends BaseTestCase {
         // Read the message in
         ByteBuffer in = ByteBuffer.allocate(sout.size());
         in.put(sout.toByteArray());
+        in.flip();
         dmRead = (DataMessage)factory.createMessage(in);
 
         // Extend the msgs sequenceNumber to 8 bytes based on past state

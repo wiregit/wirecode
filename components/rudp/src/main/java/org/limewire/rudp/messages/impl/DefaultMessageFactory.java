@@ -61,13 +61,13 @@ public class DefaultMessageFactory implements MessageFactory {
         // Assert that the int in F is the number of bytes remaining.
         int remaining = -1;
         try {
-            ByteOrder.leb2int(in);
+            remaining = ByteOrder.leb2int(in);
         } catch(IOException impossible) {
             ErrorService.error(impossible);
         }
         
         if(remaining != in.available())
-            throw new MessageFormatException("inconsistent message size");
+            throw new MessageFormatException("inconsistent message size.  expected: " + remaining + ", was: " + in.available());
         
         // Return a reference to the remaining data.
         ByteBuffer data2 = in.bufferFor(remaining);

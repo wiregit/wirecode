@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.limewire.io.CountingOutputStream;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.BufferUtils;
@@ -18,7 +19,7 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
     protected static final int MAX_DATA1_SIZE = 12; 
 
 	/** An empty byte array for internal use */
-	protected static byte[] emptyByteArray = new byte[0];
+	protected static byte[] emptyByteArray = new byte[16];
 
     /** This is an identifier for a stream from a given IP. 1 byte   */
     protected final byte _connectionID;
@@ -156,7 +157,7 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         // write out the length of the payload.
         org.limewire.util.ByteOrder.int2leb(_data2.remaining(), out);
         // write the payload.
-        if ( _data2.remaining() > 0 )
+        if ( _data2.hasRemaining() )
             out.write(_data2.array(), _data2.position(), _data2.remaining());
     }
 }

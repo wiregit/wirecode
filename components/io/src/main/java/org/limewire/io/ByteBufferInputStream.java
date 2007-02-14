@@ -162,7 +162,7 @@ public class ByteBufferInputStream extends InputStream {
         while(index < buffers.length) {
             ByteBuffer b = buffers[index];
             if(b.hasRemaining())
-                read += BufferUtils.transfer(b, dst);
+                read += BufferUtils.transfer(b, dst, false);
             if(!dst.hasRemaining())
                 break;
             // Try next ByteBuffer

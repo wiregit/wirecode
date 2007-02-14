@@ -182,7 +182,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
         private StubProcessor stubProcessor = new StubProcessor(this);
         InetSocketAddress addr;
         StubUDPSocketChannel() {
-            super((SelectorProvider)null, null);
+            super((SelectorProvider)null, context);
         }
         
         UDPConnectionProcessor getProcessor() {
