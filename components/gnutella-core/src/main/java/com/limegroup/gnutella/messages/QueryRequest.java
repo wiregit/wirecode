@@ -1661,6 +1661,22 @@ public class QueryRequest extends Message implements Serializable{
 	public boolean isLimeRequery() {
 		return GUID.isLimeRequeryGUID(getGUID());
 	}
+    
+    /**
+     * @return true if this is likely a query for LimeWire.
+     */
+    public boolean isQueryForLW() {
+        if (getQuery().length() > 0 &&
+            getQuery().toLowerCase().contains("limewire"))
+            return true;
+        
+        if (getRichQuery() != null) {
+            for (String keyword : getRichQuery().getKeyWords())
+                if (keyword.toLowerCase().contains("limewire"))
+                    return true;
+        }
+        return false;
+    }
         
     /**
      * Returns the QueryKey associated with this Request.  May very well be

@@ -1950,6 +1950,9 @@ public abstract class FileManager {
     protected synchronized void buildQRT() {
 
         _queryRouteTable = new QueryRouteTable();
+        _queryRouteTable.addIndivisible("limewire");
+        _queryRouteTable.addIndivisible("pro");
+        _queryRouteTable.addIndivisible("limewirepro");
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
             if (fds[i] instanceof IncompleteFileDesc)

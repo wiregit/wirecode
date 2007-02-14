@@ -906,6 +906,25 @@ public final class QueryRequestTest extends LimeTestCase {
         }
 
     }
+    
+    public void testLimeQuery() throws Exception {
+        QueryRequest qr = QueryRequest.createQuery("asdf");
+        assertFalse(qr.isQueryForLW());
+        qr = QueryRequest.createQuery("limewire pro");
+        assertTrue(qr.isQueryForLW());
+        qr = QueryRequest.createWhatIsNewQuery(new byte[16], (byte)1);
+        assertFalse(qr.isQueryForLW());
+        
+        String XML_LIME =
+            "<?xml version=\"1.0\"?>" +
+             "<audios xsi:noNamespaceSchemaLocation=" +
+             "\"http://www.limewire.com/schemas/audio.xsd\">" +
+             "<audio title=\"xml\" artist=\"limewire\"/></audios>";
+        qr = QueryRequest.createQuery(new byte[16], "Asdf", XML_LIME);
+        assertTrue(qr.isQueryForLW());
+        qr = QueryRequest.createQuery(new byte[16], "Asdf", XML_STRING);
+        assertFalse(qr.isQueryForLW());
+    }
 
 
     public void testMetaFlagConstructor() throws Exception {

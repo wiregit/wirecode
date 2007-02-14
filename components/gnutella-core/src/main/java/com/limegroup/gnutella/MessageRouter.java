@@ -2491,7 +2491,17 @@ public abstract class MessageRouter {
     }
 
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
-        if (!(handler instanceof Connection))
+        
+        if (request.isQueryForLW()) {
+            QueryReply qr = new QueryReply(request.getGUID(),StaticMessages.getLimeReply());
+            qr.setHops((byte)0);
+            qr.setTTL((byte)(request.getHops()+1));
+            try {
+                sendQueryReply(qr);
+            } catch (IOException ignored) {}
+        }
+        
+        if (!(handler instanceof Connection)) 
             return;
         
         Connection c = (Connection) handler;

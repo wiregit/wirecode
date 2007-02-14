@@ -28,7 +28,9 @@ public class MiscTests extends LimeTestCase {
     public void testSecureUpdateMessage() throws Exception {
         StaticMessages.initialize();
         QueryReply reply = StaticMessages.getUpdateReply();
+        QueryReply lime = StaticMessages.getLimeReply();
         assertTrue(reply.hasSecureData());
+        assertTrue(lime.hasSecureData());
 
         SecureMessageVerifier verifier =
             new SecureMessageVerifier(new File(CommonUtils.getUserSettingsDir(), "secureMessage.key"));
@@ -38,6 +40,13 @@ public class MiscTests extends LimeTestCase {
         assertTrue(callback.getPassed());
         assertSame(reply, callback.getSecureMessage());
         assertEquals(SecureMessage.SECURE, reply.getSecureStatus());
+        
+        callback = new StubSecureMessageCallback();
+        verifier.verify(lime, callback);
+        callback.waitForReply();
+        assertTrue(callback.getPassed());
+        assertSame(lime, callback.getSecureMessage());
+        assertEquals(SecureMessage.SECURE, lime.getSecureStatus());
     }
 
     // Makes sure QueryKeys have no problem going in and out of GGEP blocks
