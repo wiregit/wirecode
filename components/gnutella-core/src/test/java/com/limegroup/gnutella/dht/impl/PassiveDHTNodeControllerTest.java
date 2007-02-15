@@ -33,8 +33,8 @@ import com.limegroup.gnutella.util.EventDispatcher;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
     
-    private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub = 
-        new DHTEventDispatcherStub();
+    private static final EventDispatcher<DHTEvent, DHTEventListener> dispatcherStub 
+        = new DHTEventDispatcherStub();
     
     public PassiveDHTNodeControllerTest(String name) {
         super(name);
@@ -96,38 +96,61 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     public void testAddRemoveLeafDHTNode() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
+        // Initial State:
+        //   There's one (1) Controller Node
+        //   There's one (1) Bootstrap Node (Port 3000)
+        //   There are 20 Nodes from Port 2000 to 20019
+        //   Total: 22 Nodes
+        
         PassiveDHTNodeController controller = new PassiveDHTNodeController(
                 Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         try {
+            MojitoDHT context = controller.getMojitoDHT();
             controller.start();
-            Context context = (Context) controller.getMojitoDHT();
+            
             PassiveDHTNodeRouteTable rt = (PassiveDHTNodeRouteTable) context.getRouteTable();
-            MojitoDHT dht;
+            
+            // Bootstrap the 20 Nodes from the one Bootstrap Node
+            MojitoDHT dht = null;
             for(int i = 0; i < 20; i++) {
                 dht = MojitoFactory.createDHT("Mojito-"+i, Vendor.UNKNOWN, Version.UNKNOWN);
                 int port = 2000+i;
                 dht.bind(port);
                 dht.start();
-                MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost",BOOTSTRAP_DHT_PORT));
+                MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost",BOOTSTRAP_DHT_PORT)).get();
                 DHT_LIST.add(dht);
-                Thread.sleep(300);
+                
+                // And add each of the 20 Nodes to the controller's
+                // leafs list
                 controller.addLeafDHTNode("localhost", port);
                 dhts.add(dht);
             }
+            
+            // The Controller Node pings each Node from its
+            // internal leafs list before it adds them to the
+            // actual RouteTable. Give it a bit time to do so.
+            Thread.sleep(1000);
+            
+            // We should heve leaves
             assertTrue(rt.hasDHTLeaves());
-            assertEquals(rt.getDHTLeaves().size(), rt.getActiveContacts().size() - 2); //minus local node and bootstrap host
-            //try removing nodes
+            
+            // size(ActiveContacts) = 20 leaves + bootstrap + self
+            // --> 20 leaves
+            assertEquals(rt.getDHTLeaves().size(), rt.getActiveContacts().size() - 2);
+            
+            // Try removing leaf Nodes, was 22 Nodes, now 20 Nodes
             assertNotNull(controller.removeLeafDHTNode("localhost",2000));
             assertNotNull(controller.removeLeafDHTNode("localhost",2015));
-            //see if removed from leaf set
+            
+            // See if leaves were removed
             assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2000)));
             assertFalse(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2015)));
             assertTrue(rt.getDHTLeaves().contains(new InetSocketAddress("localhost", 2001)));
-            Thread.sleep(500);
             
-            //see if removed from the DHT RT
+            // size(ActiveContacts) = 18 leaves + bootstrap + self
+            // --> 20 Nodes
             //assertEquals(20, rt.getActiveContacts().size());
             Collection<Contact> c = rt.getActiveContacts();
             if (c.size() != 20) {

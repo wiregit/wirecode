@@ -162,7 +162,7 @@ abstract class AbstractDHTController implements DHTController {
             bootstrapper.bootstrap();
             dispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
         } catch (IOException err) {
-            LOG.error(err);
+            LOG.error("IOException", err);
             ErrorService.error(err);
         }
     }
