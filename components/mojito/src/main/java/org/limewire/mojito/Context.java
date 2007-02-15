@@ -49,11 +49,11 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.RepublishManager;
+import org.limewire.mojito.db.PublishConstraint;
 import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
-import org.limewire.mojito.db.impl.DefaultRepublishManager;
+import org.limewire.mojito.db.impl.DefaultPublishConstraint;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -144,7 +144,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /** The factory we're using to create DHTValues */
     private DHTValueFactory valueFactory;
     
-    private volatile RepublishManager republishManager;
+    private volatile PublishConstraint publishConstraint;
     
     /**
      * Constructor to create a new Context
@@ -180,7 +180,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
         valueFactory = new DefaultDHTValueFactory();
-        republishManager = new DefaultRepublishManager();
+        publishConstraint = new DefaultPublishConstraint();
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -512,7 +512,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 // which case the other guys will send us the values
                 // anyways as from there perspective we're just a new
                 // node.
-                } else if (!remove && !republishManager.isExpired(this, entity)) {
+                } else if (!remove && !publishConstraint.isExpired(this, entity)) {
                     database.store(entity);
                 }
             }
@@ -689,19 +689,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see org.limewire.mojito.MojitoDHT#setRepublishManager(org.limewire.mojito.db.RepublishManager)
      */
-    public void setRepublishManager(RepublishManager republishManager) {
-        if (republishManager == null) {
-            republishManager = new DefaultRepublishManager();
+    public void setPublishConstraint(PublishConstraint publishConstraint) {
+        if (publishConstraint == null) {
+            publishConstraint = new DefaultPublishConstraint();
         }
-        this.republishManager = republishManager;
+        this.publishConstraint = publishConstraint;
     }
     
     /*
      * (non-Javadoc)
      * @see org.limewire.mojito.MojitoDHT#getRepublishManager()
      */
-    public RepublishManager getRepublishManager() {
-        return republishManager;
+    public PublishConstraint getPublishConstraint() {
+        return publishConstraint;
     }
     
     /*

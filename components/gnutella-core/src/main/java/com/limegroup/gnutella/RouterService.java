@@ -41,8 +41,8 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.AltLocFinder;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.MojitoGlue;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -267,7 +267,8 @@ public class RouterService {
     /**
      * 
      */
-    private static MojitoGlue mojitoGlue = new MojitoGlue(dhtManager);
+    private static AltLocFinder altLocFinder 
+        = new AltLocFinder(dhtManager);
     
     private static MessageDispatcher messageDispatcher;
     
@@ -650,8 +651,11 @@ public class RouterService {
         return dhtManager;
     }
     
-    public static MojitoGlue getMojitoGlue() {
-        return mojitoGlue;
+    /**
+     * Accessor for the <tt>AltLocFinder</tt> instance.
+     */
+    public static AltLocFinder getAltLocFinder() {
+        return altLocFinder;
     }
     
 	/**

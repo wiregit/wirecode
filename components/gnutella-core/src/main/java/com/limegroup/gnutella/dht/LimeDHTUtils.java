@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.limewire.mojito.KUID;
 
-import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 
@@ -50,15 +49,5 @@ public class LimeDHTUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-    
-    /**
-     * Returns true if the FileDesc is considered rare
-     * 
-     * TODO: Define rare
-     */
-    public static boolean isRare(FileDesc fd) {
-        long time = fd.getLastAttemptedUploadTime();
-        return (System.currentTimeMillis() - time >= 0L);
     }
 }

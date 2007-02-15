@@ -20,7 +20,7 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.RepublishManager;
+import org.limewire.mojito.db.PublishConstraint;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -260,11 +260,11 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void setDHTValueFactory(DHTValueFactory valueFactory) {
         }
 
-        public RepublishManager getRepublishManager() {
+        public PublishConstraint getPublishConstraint() {
             return null;
         }
 
-        public void setRepublishManager(RepublishManager republishManager) {
+        public void setPublishConstraint(PublishConstraint republishManager) {
         }
     }
 }

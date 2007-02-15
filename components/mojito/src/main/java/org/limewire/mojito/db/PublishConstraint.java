@@ -29,12 +29,12 @@ import org.limewire.mojito.Context;
  * Note: An incorrect implementation can lead to reference
  * leaks, high network traffic and all kinds of other quirks!
  */
-public interface RepublishManager {
+public interface PublishConstraint {
     
     /**
      * Returns true if it's necessary to republish the given DHTValueEntity
      */
-    public boolean isRepublishingRequired(Context context, DHTValueEntity entity);
+    public boolean isPublishingRequired(Context context, DHTValueEntity entity);
     
     /**
      * Returns true if the given DHTValueEntity is expired

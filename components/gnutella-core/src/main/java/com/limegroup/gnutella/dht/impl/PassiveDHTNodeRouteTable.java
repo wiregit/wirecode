@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.routing.Bucket;
@@ -71,7 +71,8 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         final InetSocketAddress addr = new InetSocketAddress(host, port);
         DHTFuture<PingResult> future = dht.ping(addr);
         
-        DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
+        DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+            @Override
             public void handleFutureSuccess(PingResult result) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping succeeded to: " + result);
@@ -89,16 +90,11 @@ class PassiveDHTNodeRouteTable implements RouteTable {
                 }
             }
 
+            @Override
             public void handleFutureFailure(ExecutionException e) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping failed to: " + addr, e);
                 }
-            }
-            
-            public void handleFutureCancelled(CancellationException e) {
-            }
-
-            public void handleFutureInterrupted(InterruptedException e) {
             }
         };
         

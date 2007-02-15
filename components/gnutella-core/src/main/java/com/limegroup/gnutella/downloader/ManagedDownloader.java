@@ -1804,7 +1804,7 @@ public class ManagedDownloader extends AbstractDownloader
         setState(QUEUED);
         
         // TODO This is for testing only
-        RouterService.getMojitoGlue().findAltLocs(getSHA1Urn());
+        RouterService.getAltLocFinder().findAltLocs(getSHA1Urn());
         
         return true;
     }

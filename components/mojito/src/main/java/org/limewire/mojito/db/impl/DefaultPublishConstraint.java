@@ -21,12 +21,12 @@ package org.limewire.mojito.db.impl;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.RepublishManager;
+import org.limewire.mojito.db.PublishConstraint;
 import org.limewire.mojito.util.DatabaseUtils;
 
-public class DefaultRepublishManager implements RepublishManager {
+public class DefaultPublishConstraint implements PublishConstraint {
 
-    public boolean isRepublishingRequired(Context context, DHTValueEntity entity) {
+    public boolean isPublishingRequired(Context context, DHTValueEntity entity) {
         // Don't republish non-local values
         if (!entity.isLocalValue()) {
             return false;
