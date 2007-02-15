@@ -1169,6 +1169,22 @@ public final class QueryRequestTest extends LimeTestCase {
         GGEP parsedGGEP = parser.huge.getGGEP();
         assertEquals("BF", parsedGGEP.getString("FB"));
         assertTrue(parsedGGEP.hasKey("uk"));
+        
+        byte[] simpleSearchPayload = new byte[] {
+                (byte)0xD8, 00, 0x6C, 0x69, 0x6D, 0x65, 0x77, 0x69, 0x72, 0x65, 00
+        };
+        
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Message.N_UNKNOWN);
+        assertEquals("limewire", query.getQuery());
+        
+        newPayload = QueryRequest.patchInGGEP(query.getPayload(), ggep);
+        
+        QueryRequest patched = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Message.N_UNKNOWN);
+        assertEquals(query.getQuery(), patched.getQuery());
+        
+        patched = QueryRequest.createProxyQuery(query, GUID.makeGuid());
+        assertEquals(query.getQuery(), patched.getQuery());
+        assertTrue (patched.desiresOutOfBandRepliesV3());
     }
     
     public void testIsPayloadModifiable() throws BadPacketException {

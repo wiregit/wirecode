@@ -732,7 +732,7 @@ public class QueryRequest extends Message implements Serializable{
                 qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
                 qr.desiresOutOfBandReplies(),
                 qr.getFeatureSelector(), true, // do not proxy
-                qr.getMetaMask());
+                qr.getMetaMask(), false); // no normalization
     }
     
 	/**
@@ -1923,17 +1923,32 @@ public class QueryRequest extends Message implements Serializable{
                 return insertBytes(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge.toByteArray());
             }
         }
-        if (payload[payload.length - 1] != 0x1C) {
-            byte[] ggepBytes = ggep.toByteArray();
-            byte[] ggepBlock = new byte[ggepBytes.length  +  1];
-            // set HUGE delimiter
-            ggepBlock[0] = 0x1C;
-            System.arraycopy(ggepBytes, 0, ggepBlock, 1, ggepBytes.length);
-            return insertBytes(payload, payload.length - 1, payload.length - 1, ggepBlock);   
+        if (isFirstNullByteAfterOffset(payload, payload.length - 1, 2)) {
+            // if ggep is appended after query string keep 0 delimiter
+            return insertGGEP(payload, payload.length, payload.length, ggep.toByteArray(), true);
+        }
+        else if (payload[payload.length - 1] != 0x1C) {
+            return insertGGEP(payload, payload.length - 1, payload.length - 1, ggep.toByteArray(), true);   
         }
         else {
-            return insertBytes(payload, payload.length, payload.length, ggep.toByteArray());
+            return insertGGEP(payload, payload.length, payload.length, ggep.toByteArray(), false);
         }
+    }
+    
+    /**
+     * Returns true if byte at <code>index</code> is 0 and it's the first
+     * one in the payload signifying the end of the query string.
+     */
+    private static boolean isFirstNullByteAfterOffset(byte[] payload, int index, int offset) {
+        if (payload[index] != 0x00) {
+            return false;
+        }
+        for (int i = offset; i < index; i++) {
+            if (payload[i] == 0x00) {
+                return false;
+            }
+        }
+        return true;
     }
     
     /**
@@ -1948,6 +1963,19 @@ public class QueryRequest extends Message implements Serializable{
             }
         }
         return last;
+    }
+    
+    private static byte[] insertGGEP(byte[] payload, int start, int end, byte[] ggepBytes, boolean prependDelimiter) {
+        if (prependDelimiter) {
+            byte[] ggepBlock = new byte[ggepBytes.length  +  1];
+            // set HUGE delimiter
+            ggepBlock[0] = 0x1C;
+            System.arraycopy(ggepBytes, 0, ggepBlock, 1, ggepBytes.length);
+            return insertBytes(payload, start, end, ggepBlock);
+        }
+        else {
+            return insertBytes(payload, start, end, ggepBytes);
+        }
     }
     
     private static byte[] insertBytes(byte[] payload, int start, int end, byte[] ggepBytes) {
