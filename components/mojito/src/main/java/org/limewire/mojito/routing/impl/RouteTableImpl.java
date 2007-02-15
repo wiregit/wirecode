@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -37,6 +36,7 @@ import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.exceptions.DHTTimeoutException;
@@ -339,8 +339,8 @@ public class RouteTableImpl implements RouteTable {
      * state is that both Contacts have the same Node ID.
      */
     protected synchronized void doSpoofCheck(Bucket bucket, final Contact existing, final Contact node) {
-        DHTFutureListener<PingResult> listener = new DHTFutureListener<PingResult>() {
-            
+        DHTFutureListener<PingResult> listener = new DHTFutureAdapter<PingResult>() {
+            @Override
             public void handleFutureSuccess(PingResult result) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn(node + " is trying to spoof " + result);
@@ -351,6 +351,7 @@ public class RouteTableImpl implements RouteTable {
                 // Reason: It was maybe just a Node ID collision!
             }
             
+            @Override
             public void handleFutureFailure(ExecutionException e) {
                 DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
                 
@@ -394,12 +395,6 @@ public class RouteTableImpl implements RouteTable {
                         add(node);
                     }
                 }
-            }
-
-            public void handleFutureCancelled(CancellationException e) {
-            }
-            
-            public void handleFutureInterrupted(InterruptedException e) {
             }
         };
         
