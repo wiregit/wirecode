@@ -1191,12 +1191,10 @@ public abstract class MessageRouter {
     }
     
     /**
-     * Returns whether the callback still expects more results for this search
-     * or whether there is a download query active for this guid.
+     * @return true if there is still a route for this reply
      */
     public boolean isQueryAlive(GUID guid) {
-        DownloadManager dManager = RouterService.getDownloadManager();
-        return _callback.isQueryAlive(guid) || dManager.isGuidForQueryDownloading(guid); 
+        return _queryRouteTable.getReplyHandler(guid.bytes()) != null;
     }
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -

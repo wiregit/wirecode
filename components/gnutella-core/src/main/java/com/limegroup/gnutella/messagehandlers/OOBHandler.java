@@ -34,8 +34,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private final MessageRouter router;
 	
-    private final Map<OOBSession, OOBSession> OOBSessions =
-        Collections.synchronizedMap(new HashMap<OOBSession, OOBSession>());
+    private final Map<Integer,OOBSession> OOBSessions =
+        Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
     
 	public OOBHandler(MessageRouter router) {
 		this.router = router;
@@ -71,6 +71,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         // if query is not of interest anymore return
         GUID queryGUID = new GUID(reply.getGUID());
+        if (!router.isQueryAlive(queryGUID))
+            return;
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
@@ -85,7 +87,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
-        OOBSession session = new OOBSession(token, requestedResponseCount, queryGUID);
             
         // Allow the router to handle the query reply in the
         // following scenarios:
@@ -99,7 +100,12 @@ public class OOBHandler implements MessageHandler, Runnable {
         // from another thread while we work on them, we could
         // use a lock for more finegrained synchronization if need be
         synchronized (OOBSessions) {
-            session = getCanonicalSession(session);
+            int hashKey = Arrays.hashCode(token.getBytes());
+            OOBSession session = OOBSessions.get(hashKey);
+            if (session == null) {
+                session = new OOBSession(token, requestedResponseCount, queryGUID);
+                OOBSessions.put(hashKey,session);
+            }
             int remainingCount = session.getRemainingResultsCount() - numResps; 
             if (remainingCount >= 0) {
                 if(LOG.isTraceEnabled())
@@ -121,15 +127,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
 	}
     
-    private final OOBSession getCanonicalSession(OOBSession session) {
-        OOBSession existing = OOBSessions.get(session);
-        if (existing == null) {
-            existing = session;
-            OOBSessions.put(existing, existing);
-        }
-        return existing;
-    }
-	
 	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
 	    byte[] securityBytes = reply.getSecurityToken();
         if (securityBytes == null) {
@@ -152,30 +149,20 @@ public class OOBHandler implements MessageHandler, Runnable {
     private class OOBSession {
     	
         private final SecurityToken token;
-        
-        private final int hashCode;
-        
         private final IntSet responseHashCodes;
-        
-        private int responseCount = 0;
-        
         private final int requestedResponseCount;
-        
         private final GUID guid;
-        
-        private long lastResultsReceivedTimeStamp;
     	
         public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
             this.token = token;
-            this.hashCode = Arrays.hashCode(token.getBytes());
             this.requestedResponseCount = requestedResponseCount;
             this.responseHashCodes = new IntSet(requestedResponseCount);
             this.guid = guid;
     	}
-    	
-        public int hashCode() {
-    		return hashCode;
-    	}
+        
+        GUID getGUID() {
+            return guid;
+        }
     	
         /**
          * Counts the responses uniquely. 
@@ -183,7 +170,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         public int countAddedResponses(Response[] responses) {
             int added = 0;
             for (Response response : responses) {
-                ++responseCount;
                 Set<URN> urns = response.getUrns();
                 if (!urns.isEmpty()) {
                     added += responseHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
@@ -192,7 +178,6 @@ public class OOBHandler implements MessageHandler, Runnable {
                     added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
                 }
             }
-            lastResultsReceivedTimeStamp = System.currentTimeMillis();
             return added;
         }
         
@@ -206,22 +191,13 @@ public class OOBHandler implements MessageHandler, Runnable {
     		OOBSession other = (OOBSession) o;
     		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
-    	
-        public boolean isExpired(long now) {
-            // if the query is alive (which is only the case if it originated from this peer)
-            // it takes precedence and the session does
-            // not expire, otherwise just rely on the timeout
-            return !router.isQueryAlive(guid) 
-                && (now - lastResultsReceivedTimeStamp) > router.getOOBExpireTime();
-        }
 	}
 	
 	private void expire() {
-        long now = System.currentTimeMillis();
 		synchronized (OOBSessions) {
-			for (Iterator<Map.Entry<OOBSession, OOBSession>> iter = 
+			for (Iterator<Map.Entry<Integer, OOBSession>> iter = 
 			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
-			    if (iter.next().getKey().isExpired(now))
+			    if (!router.isQueryAlive(iter.next().getValue().getGUID()))
 			        iter.remove();
 			}
 		}

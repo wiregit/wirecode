@@ -166,7 +166,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Constant for the default query TTL.
      */
-    private static final byte DEFAULT_TTL = 6;
+    static final byte DEFAULT_TTL = 6;
 
     /**
      * Cached illegal characters in search strings.
