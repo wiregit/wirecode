@@ -726,7 +726,7 @@ public class QueryRequest extends Message implements Serializable{
         
         // only used for queries understood by us
         // so we can use the copy constructor and set OOB to false
-        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
                 qr.getQuery(), qr.getRichQueryString(), 
                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                 qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),

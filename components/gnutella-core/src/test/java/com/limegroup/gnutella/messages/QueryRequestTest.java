@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
@@ -1279,6 +1280,35 @@ public final class QueryRequestTest extends LimeTestCase {
         copy = QueryRequest.unmarkOOBQuery(query);
         assertNotDesiresOutOfBand(copy);
         assertEquals(query.getPayload(), copy.getPayload());
+    }
+    
+    public void testCreateDoNotProxyQuery() throws UnknownHostException {
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
+                URN.NO_URN_SET,
+                new QueryKey(InetAddress.getLocalHost(), 1094),
+                false, Message.N_MULTICAST, false, 0, false, 0, false);
+
+        try {
+            QueryRequest.createDoNotProxyQuery(query);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException iae) {
+        }
+        
+        query.originate();
+        
+        QueryRequest proxy = QueryRequest.createDoNotProxyQuery(query);
+        
+        assertEquals(query.getGUID(), proxy.getGUID());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getMinSpeed(), proxy.getMinSpeed());
+        assertEquals(query.getRichQueryString(), proxy.getRichQueryString());
+        assertEquals(query.getQueryUrns(), proxy.getQueryUrns());
+        assertEquals(query.getQueryKey(), proxy.getQueryKey());
+        assertEquals(query.isFirewalledSource(), proxy.isFirewalledSource());
+        assertEquals(query.getFeatureSelector(), proxy.getFeatureSelector());
+        assertEquals(query.getMetaMask(), proxy.getMetaMask());
+        assertNotEquals(query.doNotProxy(), proxy.doNotProxy());
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

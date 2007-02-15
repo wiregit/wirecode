@@ -284,7 +284,12 @@ public class ManagedConnection extends Connection
     
     /** If we've received a capVM before. */
     private boolean receivedCapVM = false;
-    
+ 
+	/**
+	 * The maximum protocol version for which OOB proxying has beend turned
+	 * off by leaf peer. Defaults to 0 to allow all OOB versions to be
+	 * proxied.
+	 */
     private int _maxDisabledOOBProtocolVersion = 0;
 
     /**

@@ -248,8 +248,9 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return "MessageID: " + toHexString();
     }
     
-    private static class PingTokenData extends QueryKey.GUESSTokenData {
-        PingTokenData(SocketAddress addr) {
+    public static class PingTokenData extends QueryKey.GUESSTokenData {
+        
+        public PingTokenData(SocketAddress addr) {
             super(addr);
         }
         

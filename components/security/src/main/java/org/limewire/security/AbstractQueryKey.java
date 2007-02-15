@@ -58,6 +58,11 @@ public abstract class AbstractQueryKey<T extends SecurityToken.TokenData> implem
     }
        
     
+    /**
+     * Should not be used if it is possible to call
+     * {@link #isFor(org.limewire.security.SecurityToken.TokenData)} which
+     * takes all possible query key smiths into account.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SecurityToken) {

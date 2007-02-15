@@ -35,6 +35,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
@@ -62,6 +63,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         StoreRequest request = (StoreRequest)message;
         networkStats.STORE_REQUESTS.incrementStat();
+        // TODO can we return a SecurityToken<PingtokenData> here?
         SecurityToken securityToken = request.getSecurityToken();
         
         if (securityToken == null) {
@@ -72,9 +74,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
-        SecurityToken expected = context.getSecurityTokenProvider().getSecurityToken(
-                request.getContact().getContactAddress());
-        if (!securityToken.equals(expected)) {
+        if (!securityToken.isFor(new DefaultMessageID.PingTokenData(request.getContact().getContactAddress()))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);
