@@ -53,6 +53,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void handleRead() throws IOException {
+        if (!readInterest) {
+            return;
+        }
+
         eventDispatch.inputReady(session);
     }
 
@@ -84,6 +88,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public boolean handleWrite() throws IOException {
+        if (!writeInterest) {
+            return false;
+        }
+        
         eventDispatch.outputReady(session);
         return writeInterest;
     }

@@ -38,6 +38,9 @@ public enum HTTPHeaderName {
     
 	/** Header for specifying the length of the content, in bytes. */
 	CONTENT_LENGTH("Content-Length"),
+
+    /** Header for specifying the media types we'll accept. */
+    ACCEPT("Accept"),
     
     /** Header for specifying the type of encoding we'll accept. */
     ACCEPT_ENCODING("Accept-Encoding"),
@@ -122,8 +125,10 @@ public enum HTTPHeaderName {
     RANGE("Range"),
     
     /** The chat status. */
-    CHAT("Chat");
+    CHAT("Chat"),
 
+    /** The transfer encoding. */
+    TRANSFER_ENCODING("Transfer-Encoding");
     
     /**
      * Constant for the HTTP header name as a string.

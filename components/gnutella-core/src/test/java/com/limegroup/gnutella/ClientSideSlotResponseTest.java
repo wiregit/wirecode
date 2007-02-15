@@ -72,7 +72,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    private static class UploadManagerStub extends UploadManager {
+    private static class UploadManagerStub extends DefaultUploadManager {
     	boolean isServiceable, mayBeServiceable;
     	UploadManagerStub() {
     		super(null);

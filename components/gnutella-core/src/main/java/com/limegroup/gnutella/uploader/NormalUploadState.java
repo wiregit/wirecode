@@ -11,8 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.BandwidthThrottle;
 
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
@@ -52,13 +52,13 @@ public final class NormalUploadState extends UploadState {
      * reset during the upload if the rate changes.
      */
     private static final BandwidthThrottle THROTTLE = 
-        new BandwidthThrottle(UploadManager.getUploadSpeed(), false);
+        new BandwidthThrottle(RouterService.getUploadManager().getUploadSpeed(), false);
         
     /**
      * UDP throttle.
      */
     private static final BandwidthThrottle UDP_THROTTLE =
-        new BandwidthThrottle(UploadManager.getUploadSpeed(), false);
+        new BandwidthThrottle(RouterService.getUploadManager().getUploadSpeed(), false);
 
 
 	/**
@@ -186,7 +186,7 @@ public final class NormalUploadState extends UploadState {
         while (true) {
             BandwidthThrottle throttle =
                 UPLOADER.isUDPTransfer() ? UDP_THROTTLE : THROTTLE;
-            throttle.setRate(UploadManager.getUploadSpeed());
+            throttle.setRate(RouterService.getUploadManager().getUploadSpeed());
 
             int c = -1;
             // request the bytes from the throttle
@@ -194,7 +194,7 @@ public final class NormalUploadState extends UploadState {
             int allowed = BLOCK_SIZE;
             if(!UPLOADER.isForcedShare())
                 allowed = throttle.request(BLOCK_SIZE);
-            int burstSent=0;
+
             try {
                 c = _fis.read(buf, 0, allowed);
             } catch(NullPointerException npe) {
@@ -215,7 +215,7 @@ public final class NormalUploadState extends UploadState {
             
             _amountWritten += c;
             UPLOADER.setAmountUploaded(_amountWritten);
-            burstSent += c;           
+           
             //finish uploading if the desired amount 
             //has been uploaded
             if(_amountWritten >= _amountRequested)

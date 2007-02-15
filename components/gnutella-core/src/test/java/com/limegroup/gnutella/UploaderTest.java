@@ -120,7 +120,7 @@ public class UploaderTest extends LimeTestCase {
         
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
-        upManager = new UploadManager(new UploadSlotManager());
+        upManager = new DefaultUploadManager(new UploadSlotManager());
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
@@ -142,7 +142,7 @@ public class UploaderTest extends LimeTestCase {
      * - Bandwidth tracker works properly.
      */
     public void testLegacy() {
-        UploadManager.tBandwidthTracker(new UploadManager(null));
+        DefaultUploadManager.tBandwidthTracker(new DefaultUploadManager(null));
     }
     
     /** 

@@ -35,6 +35,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+
 import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
@@ -42,13 +45,11 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DefaultUploadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -2664,7 +2665,7 @@ public class UploadTest extends LimeTestCase {
      * in the mentioned tests fail because our HTTPUploader is no longer in that
      * List. So, we have to cache the HTTPUploader somehow what this extension does.
      */
-    private static class TestUploadManager extends UploadManager {
+    private static class TestUploadManager extends DefaultUploadManager {
 
         private List activeUploads = new ArrayList();
         

@@ -13,12 +13,14 @@ import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOSocket;
 import org.limewire.nio.observer.ConnectObserver;
 
+import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.util.Sockets;
 
-public class HttpIOReactor implements ConnectingIOReactor {
+public class HttpIOReactor implements ConnectingIOReactor, ConnectionAcceptor {
 
     static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
     
@@ -43,6 +45,10 @@ public class HttpIOReactor implements ConnectingIOReactor {
         this.eventDispatch = eventDispatch;
     }
 
+    public HttpParams getHttpParams() {
+        return params;
+    }
+    
     public void shutdown() throws IOException {
     }
 
@@ -125,6 +131,16 @@ public class HttpIOReactor implements ConnectingIOReactor {
         socket.setWriteObserver(channel);
         
         return session;
+    }
+
+
+    public void acceptConnection(String word, Socket socket) {
+        try {
+            prepareSocket(socket);
+            connectSocket((NIOSocket) socket, null);
+        } catch (IOException e) {
+            IOUtils.close(socket);
+        }
     }
     
 }

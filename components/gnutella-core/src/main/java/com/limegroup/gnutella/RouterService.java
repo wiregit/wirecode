@@ -173,7 +173,7 @@ public class RouterService {
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
     private static UploadManager uploadManager = 
-    	new UploadManager(uploadSlotManager);
+    	new DefaultUploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.

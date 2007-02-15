@@ -110,5 +110,15 @@ public class HttpIOSession implements IOSession {
     public void setSocketTimeout(int timeout) {
         this.socketTimeout = timeout;
     }
+
+    public boolean hasBufferedInput() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public boolean hasBufferedOutput() {
+        // TODO Auto-generated method stub
+        return false;
+    }
     
 }
