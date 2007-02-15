@@ -69,10 +69,6 @@ public class OOBHandler implements MessageHandler, Runnable {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
-        // if query is not of interest anymore return
-        GUID queryGUID = new GUID(reply.getGUID());
-        if (!router.isQueryAlive(queryGUID))
-            return;
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
@@ -87,25 +83,24 @@ public class OOBHandler implements MessageHandler, Runnable {
         OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
-            
-        // Allow the router to handle the query reply in the
-        // following scenarios:
-        // a) We sent a Reply# message requesting the results,
-        //    and it sent back <= the number of results we
-        //    wanted.
-        // b) We sent a directed unicast query to that host
-        //    using this specific query GUID.
         
-        // synchronize over everything so sessions are not expired
-        // from another thread while we work on them, we could
-        // use a lock for more finegrained synchronization if need be
+        /*
+         * Router will handle the reply if it
+         * it has a route && we still expect results for this OOB session
+         */
         synchronized (OOBSessions) {
+            // if query is not of interest anymore return
+            GUID queryGUID = new GUID(reply.getGUID());
+            if (!router.isQueryAlive(queryGUID))
+                return;
+            
             int hashKey = Arrays.hashCode(token.getBytes());
             OOBSession session = OOBSessions.get(hashKey);
             if (session == null) {
                 session = new OOBSession(token, requestedResponseCount, queryGUID);
                 OOBSessions.put(hashKey,session);
             }
+            
             int remainingCount = session.getRemainingResultsCount() - numResps; 
             if (remainingCount >= 0) {
                 if(LOG.isTraceEnabled())
