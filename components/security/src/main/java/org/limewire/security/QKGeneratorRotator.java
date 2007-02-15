@@ -25,7 +25,7 @@ class QKGeneratorRotator implements QKGeneratorKeychain {
         this.factory = factory;
         this.scheduler = scheduler;
         
-        if (provider.getGrancePeriod() >= provider.getChangePeriod())
+        if (provider.getGracePeriod() >= provider.getChangePeriod())
             throw new IllegalArgumentException("settings not supported");
         
         rotator = new Runnable() {
@@ -60,7 +60,7 @@ class QKGeneratorRotator implements QKGeneratorKeychain {
             current = newKQ;
         }
         scheduler.invokeLater(rotator, provider.getChangePeriod());
-        scheduler.invokeLater(expirer, provider.getGrancePeriod());
+        scheduler.invokeLater(expirer, provider.getGracePeriod());
     }
     
     private synchronized void expireOld() {

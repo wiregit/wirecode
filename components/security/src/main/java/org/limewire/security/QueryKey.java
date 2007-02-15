@@ -75,20 +75,12 @@ public final class QueryKey extends AbstractQueryKey<TokenData> {
     }
     
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.security.SecurityToken#isFor(java.net.SocketAddress)
-     */
     public boolean isFor(SocketAddress address) {
         InetAddress ip = ((InetSocketAddress)address).getAddress();
         int port = ((InetSocketAddress)address).getPort();
         return isFor(ip, port);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.security.SecurityToken#isFor(java.net.InetAddress, int)
-     */
     public boolean isFor(InetAddress ip, int port) {
         return isFor(new GUESSTokenData(ip, port));
     }

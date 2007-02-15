@@ -1313,7 +1313,13 @@ public final class QueryRequestTest extends LimeTestCase {
         
         query.originate();
         
+        // precondition
+        assertFalse(query.doNotProxy());
+        
         QueryRequest proxy = QueryRequest.createDoNotProxyQuery(query);
+        
+        // post condition
+        assertTrue(proxy.doNotProxy());
         
         assertEquals(query.getGUID(), proxy.getGUID());
         assertEquals(query.getHops(), proxy.getHops());
@@ -1328,7 +1334,22 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getNetwork(), proxy.getNetwork());
         assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
         
-        assertNotEquals(query.doNotProxy(), proxy.doNotProxy());
+        // idempotence
+        proxy.originate();
+        query = QueryRequest.createDoNotProxyQuery(proxy);
+        
+        assertEquals(query.getGUID(), proxy.getGUID());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getMinSpeed(), proxy.getMinSpeed());
+        assertEquals(query.getRichQueryString(), proxy.getRichQueryString());
+        assertEquals(query.getQueryUrns(), proxy.getQueryUrns());
+        assertEquals(query.getQueryKey(), proxy.getQueryKey());
+        assertEquals(query.isFirewalledSource(), proxy.isFirewalledSource());
+        assertEquals(query.getFeatureSelector(), proxy.getFeatureSelector());
+        assertEquals(query.getMetaMask(), proxy.getMetaMask());
+        assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
+        assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

@@ -76,7 +76,7 @@ public class LimeCoreGlue {
                 return SecuritySettings.CHANGE_QK_EVERY.getValue();
             }
 
-            public long getGrancePeriod() {
+            public long getGracePeriod() {
                 return SecuritySettings.QK_GRACE_PERIOD.getValue();
             }
         };

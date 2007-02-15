@@ -78,25 +78,6 @@ public class PrivilegedAccessor {
     }
 
     /**
-     * Calls a method on the given object instance with the given argument.
-     *
-     * @param instance the object instance
-     * @param methodName the name of the method to invoke
-     * @param arg the argument to pass to the method
-     * @see PrivilegedAccessor#invokeMethod(Object,String,Object[])
-     */
-    public static Object invokeMethod(Object instance, 
-                                      String methodName,
-                                      Object arg) 
-        throws NoSuchMethodException,
-               IllegalAccessException, 
-               InvocationTargetException  {
-        Object[] args = new Object[1];
-        args[0] = arg;
-        return invokeMethod(instance, methodName, args);
-    }
-    
-    /**
      * Calls a method on the given object instance with the given arguments.
      *
      * @param instance the object instance

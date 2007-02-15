@@ -170,12 +170,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
      * Extracts and returns the QueryKey from the GUID
      * @throws InvalidSecurityTokenException 
      */
-    private SecurityToken<PingTokenData> getSecurityToken() throws InvalidSecurityTokenException {
+    private SecurityToken<DHTTokenData> getSecurityToken() throws InvalidSecurityTokenException {
         byte[] queryKey = new byte[4];
 
         System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
         
-        return new PingQueryKey(queryKey);
+        return new DHTQueryKey(queryKey);
     }
     
     /*
@@ -195,7 +195,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             return false;
         }
         try {
-            return getSecurityToken().isFor(new PingTokenData(src));
+            return getSecurityToken().isFor(new DHTTokenData(src));
         }
         catch (InvalidSecurityTokenException iste) {
             return false;
@@ -248,9 +248,9 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return "MessageID: " + toHexString();
     }
     
-    public static class PingTokenData extends QueryKey.GUESSTokenData {
+    public static class DHTTokenData extends QueryKey.GUESSTokenData {
         
-        public PingTokenData(SocketAddress addr) {
+        public DHTTokenData(SocketAddress addr) {
             super(addr);
         }
         
@@ -262,17 +262,17 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         }
     }
    
-    private static class PingQueryKey extends AbstractQueryKey<PingTokenData> {
+    private static class DHTQueryKey extends AbstractQueryKey<DHTTokenData> {
         
-        public PingQueryKey(byte[] network) throws InvalidSecurityTokenException {
+        public DHTQueryKey(byte[] network) throws InvalidSecurityTokenException {
             super(network);
         }
 
-        public PingQueryKey(PingTokenData data) {
+        public DHTQueryKey(DHTTokenData data) {
             super(data);
         }
 
-        protected byte [] getFromMAC(byte [] mac, PingTokenData ignored) {
+        protected byte [] getFromMAC(byte [] mac, DHTTokenData ignored) {
             return mac;
         }
     }

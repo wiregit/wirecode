@@ -77,7 +77,7 @@ public class QueryKeySmith {
     /**
      * A factory for TEA key generators.
      */
-    private static class TEAFactory implements QKGeneratorFactory {
+    static class TEAFactory implements QKGeneratorFactory {
         public QueryKeyGenerator createQueryKeyGenerator() {
             return new TEAQueryKeyGenerator();
         }

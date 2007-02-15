@@ -14,5 +14,5 @@ public interface SettingsProvider {
     /**
      * Time in milliseconds
      */
-    public long getGrancePeriod();
+    public long getGracePeriod();
 }
