@@ -1308,6 +1308,10 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.isFirewalledSource(), proxy.isFirewalledSource());
         assertEquals(query.getFeatureSelector(), proxy.getFeatureSelector());
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
+        assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
+        assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
+        
         assertNotEquals(query.doNotProxy(), proxy.doNotProxy());
     }
     
