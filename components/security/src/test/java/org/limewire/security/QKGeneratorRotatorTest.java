@@ -87,6 +87,23 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
         
         assertEquals(2, rotator.getValidQueryKeyGenerators().length);
     }
+    
+    public void testInvalidSettings() throws Exception {
+        try {
+            QKGeneratorRotator rotator = new QKGeneratorRotator(new SchedulingTestThreadPool(), 
+                    new QueryKeySmith.TEAFactory(),
+                    new SettingsProvider() {
+                public long getChangePeriod() {
+                    return 500;
+                }
+                public long getGracePeriod() {
+                    return 2500;
+                }
+            });
+            fail("constructed rotator with grace > expiry");
+        } catch (IllegalArgumentException expected ){}
+       
+    }
 
     private static class WrappingSchedulingTestThreadPool implements SchedulingThreadPool {
         
