@@ -103,13 +103,53 @@ public class QueryKeyTest extends BaseTestCase {
         assertFalse(key3.isFor(addr2, port2));
     }
     
-
-
     public void testOddsAndEnds() throws Exception {
         // test to make clover 100% for QK
         AbstractQueryKey qk = new QueryKey(InetAddress.getLocalHost(), 6346);
         assertFalse(qk.equals(new Object()));
         qk.toString();
+    }
+    
+    public void testQueryKeyExpiration() throws Exception {
+        NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
+        QueryKeySmith.setSettingsProvider(settings);
+        
+        QueryKey key = new QueryKey(InetAddress.getLocalHost(), 4545);
+        
+        // wait for secret key change
+        Thread.sleep(450);
+        
+        // key should still be valid
+        assertTrue(key.isFor(InetAddress.getLocalHost(), 4545));
+        // different port
+        assertFalse(key.isFor(InetAddress.getLocalHost(), 4544));
+        
+        // wait for grace period to be over
+        Thread.sleep(100);
+        
+        assertFalse(key.isFor(InetAddress.getLocalHost(), 4545));
+    }
+    
+    private static class NotifyingSettingsProvider implements SettingsProvider {
+
+        boolean notifyed = false;
+        
+        public synchronized long getChangePeriod() {
+            notifyed = true;
+            notify();
+            return 400;
+        }
+
+        public long getGracePeriod() {
+            return 100;
+        }
+        
+        public synchronized void waitForRotation() throws InterruptedException {
+            while (!notifyed) {
+                wait();
+            }
+        }
+        
     }
     
 }

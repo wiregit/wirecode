@@ -3,6 +3,8 @@ package org.limewire.security;
 import java.util.Arrays;
 import java.util.concurrent.Future;
 
+import junit.framework.Test;
+
 import org.limewire.concurrent.SchedulingThreadPool;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.util.BaseTestCase;
@@ -11,6 +13,10 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
 
     public QKGeneratorRotatorTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(QKGeneratorRotatorTest.class);
     }
     
     public void testKeyGeneratorsAreRotatedAndExpired() {

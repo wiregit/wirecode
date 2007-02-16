@@ -1912,7 +1912,6 @@ public class QueryRequest extends Message implements Serializable{
             // we write in the last modifiable block if available, so our
             // values are still there in the merged version that is read back 
             // from the network: this is not good
-            // TODO fberger
             GGEPBlock block = getLastModifiableBlock(huge.getGGEPBlocks());
             if (block != null) {
                 GGEP merge = new GGEP(false);
