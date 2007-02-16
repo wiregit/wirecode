@@ -1,10 +1,7 @@
 package org.limewire.nio.http;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -17,7 +14,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.MethodNotSupportedException;
-import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.DefaultHttpRequestFactory;
 import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
@@ -70,7 +67,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         server.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                response.setEntity(new HttpEntityMockup("foobar".getBytes()));
+                response.setEntity(new ByteArrayEntity("foobar".getBytes()));
             }            
         });
         server.execute(new EventListener() {
@@ -141,38 +138,6 @@ public class HttpIOReactorTest extends BaseTestCase {
             return request;
         }
         
-    }
-
-    private class HttpEntityMockup extends AbstractHttpEntity {
-        
-        private byte[] content;
-
-        public HttpEntityMockup(byte[] content) {
-            this.content = content;
-        }
-        
-        public InputStream getContent() throws IOException,
-        IllegalStateException {
-            return new ByteArrayInputStream(content);
-        }
-
-        public long getContentLength() {
-            return content.length;
-        }
-
-        public boolean isRepeatable() {
-            return true;
-        }
-
-        public boolean isStreaming() {
-            return false;
-        }
-
-        public void writeTo(OutputStream outstream)
-        throws IOException {
-            outstream.write(content);
-        }
-
     }
     
 }

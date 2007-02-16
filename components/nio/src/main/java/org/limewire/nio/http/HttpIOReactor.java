@@ -14,6 +14,7 @@ import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIOSocket;
 import org.limewire.nio.observer.ConnectObserver;
 
@@ -108,7 +109,7 @@ public class HttpIOReactor implements ConnectingIOReactor, ConnectionAcceptor {
         }
     }
     
-    protected HttpIOSession connectSocket(final NIOSocket socket, Object attachment) throws IOException {
+    protected HttpIOSession connectSocket(AbstractNBSocket socket, Object attachment) throws IOException {
         final HttpIOSession session = new HttpIOSession(socket);        
         int timeout = 0;
         try {

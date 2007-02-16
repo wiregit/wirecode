@@ -12,7 +12,7 @@ import java.util.Map;
 import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionBufferStatus;
-import org.limewire.nio.NIOSocket;
+import org.limewire.nio.AbstractNBSocket;
 
 public class HttpIOSession implements IOSession {
 
@@ -21,13 +21,13 @@ public class HttpIOSession implements IOSession {
     private SessionBufferStatus bufferStatus;
     private int socketTimeout;
 
-    private NIOSocket socket;
+    private AbstractNBSocket socket;
 
     private HttpChannel channel;
 
     private int eventMask;
     
-    public HttpIOSession(NIOSocket socket) {
+    public HttpIOSession(AbstractNBSocket socket) {
         this.attributes = Collections.synchronizedMap(new HashMap<String, Object>());
         this.socketTimeout = 0;
         this.socket = socket;
