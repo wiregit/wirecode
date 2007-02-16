@@ -29,7 +29,6 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.LimePublishConstraint;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -72,10 +71,6 @@ class PassiveDHTNodeController extends AbstractDHTController{
         
         limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
         dht.setRouteTable(limeDHTRouteTable);
-        
-        // We're an Ultrapeer and there are some special 
-        // republishing rules for our firewalled leaf Nodes.
-        dht.setPublishConstraint(new LimePublishConstraint());
         
         // Load the small list of MRS Nodes for bootstrap
         if (FILE.exists() && FILE.isFile()) {

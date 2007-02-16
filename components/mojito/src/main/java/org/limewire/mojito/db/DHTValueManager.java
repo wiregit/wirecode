@@ -20,6 +20,7 @@
 package org.limewire.mojito.db;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -31,12 +32,12 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
-import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
+import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.service.ErrorService;
 
 
@@ -149,13 +150,10 @@ public class DHTValueManager implements Runnable {
          * Removes all expired DHTValueEntities from the Database
          */
         private void removeExpired(Collection<? extends DHTValueEntity> entities) {
-            PublishConstraint publishConstraint 
-                = context.getPublishConstraint();
-            
             Database database = context.getDatabase();
             synchronized (database) {
                 for (DHTValueEntity entity : entities) {
-                    if (publishConstraint.isExpired(context, entity)) {
+                    if (DatabaseUtils.isExpired(context.getRouteTable(), entity)) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace(entity + " is expired!");
                         }
@@ -171,22 +169,26 @@ public class DHTValueManager implements Runnable {
          * Starts the republishing
          */
         public synchronized void republish() {
+            
             Database database = context.getDatabase();
             synchronized (database) {
                 // Remove all values that have expired
-                removeExpired(database.values(Selector.ALL_VALUES));
-                
-                // And publish the local values
-                Collection<DHTValueEntity> local 
-                    = database.values(Selector.LOCAL_VALUES);
-                
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(context.getName() + " has " 
-                            + local.size() + " DHTValues to process");
-                }
-                
-                values = local.iterator();
+                removeExpired(database.values());
             }
+            
+            // And publish the local values
+            DHTValueEntityPublisher valueEntityPublisher = context.getDHTValueEntityPublisher();
+            Collection<DHTValueEntity> localValues = valueEntityPublisher.values();
+            if (localValues == null) {
+                localValues = Collections.emptyList();
+            }
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info(context.getName() + " has " 
+                        + localValues.size() + " DHTValues to process");
+            }
+            
+            values = localValues.iterator();
             
             next();
         }
@@ -203,8 +205,8 @@ public class DHTValueManager implements Runnable {
             }
             
             while(values.hasNext()) {
-                DHTValueEntity value = values.next();
-                if (publish(value)) {
+                DHTValueEntity entry = values.next();
+                if (publish(entry)) {
                     return true;
                 }
             }
@@ -219,27 +221,6 @@ public class DHTValueManager implements Runnable {
             
             // Check if value is still in DB because we're
             // working with a copy of the Collection.
-            Database database = context.getDatabase();
-            synchronized(database) {
-                
-                if (!database.contains(entity)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(entity + " is no longer stored in our database");
-                    }
-                    return false;
-                }
-                
-                PublishConstraint publishConstraint 
-                    = context.getPublishConstraint();
-                
-                if (!publishConstraint.isPublishingRequired(context, entity)) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(entity + " does not require republishing");
-                    }
-                    return false;
-                } 
-            }
-            
             databaseStats.REPUBLISHED_VALUES.incrementStat();
             
             future = context.store(entity);
@@ -254,6 +235,10 @@ public class DHTValueManager implements Runnable {
                 } else {
                     LOG.info(result);
                 }
+            }
+            
+            if (!result.getNodes().isEmpty()) {
+                context.getDHTValueEntityPublisher().published(result);
             }
             
             if (!next()) {

@@ -31,7 +31,6 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -46,14 +45,13 @@ import org.limewire.mojito.concurrent.DefaultDHTExecutorService;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.PublishConstraint;
-import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.db.impl.DatabaseImpl;
+import org.limewire.mojito.db.impl.DefaultDHTValueEntityPublisher;
 import org.limewire.mojito.db.impl.DefaultDHTValueFactory;
-import org.limewire.mojito.db.impl.DefaultPublishConstraint;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherImpl;
@@ -142,9 +140,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private volatile SecurityToken.TokenProvider tokenProvider;
     
     /** The factory we're using to create DHTValues */
-    private DHTValueFactory valueFactory;
+    private volatile DHTValueFactory valueFactory;
     
-    private volatile PublishConstraint publishConstraint;
+    private volatile DHTValueEntityPublisher valueEntityPublisher;
     
     /**
      * Constructor to create a new Context
@@ -180,7 +178,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         executorService = new DefaultDHTExecutorService(getName());
         tokenProvider = new SecurityToken.QueryKeyProvider();
         valueFactory = new DefaultDHTValueFactory();
-        publishConstraint = new DefaultPublishConstraint();
+        valueEntityPublisher = new DefaultDHTValueEntityPublisher(this);
         
         setRouteTable(null);
         setDatabase(null, false);
@@ -294,7 +292,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         setLocalNodeID(newID);
-        purgeDatabase(true);
+        purgeDatabase();
     }
     
     /**
@@ -423,7 +421,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         this.routeTable = routeTable;
         
         if (database != null) {
-            purgeDatabase(true);
+            purgeDatabase();
         }
     }
 
@@ -476,7 +474,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
         
         this.database = database;
-        purgeDatabase(remove);
+        purgeDatabase();
     }
     
     /**
@@ -487,36 +485,19 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * 
      * @param remove Whether or not to remove non local DHTValues
      */
-    private void purgeDatabase(boolean remove) {
-        synchronized (database) {
-            Contact localNode = getLocalNode();
-            
-            // Get a copy of all values
-            Collection<DHTValueEntity> values 
-                = new ArrayList<DHTValueEntity>(database.values(Selector.ALL_VALUES));
-            
-            // Clear the Database
-            database.clear();
-            
-            // And re-add everything
-            for (DHTValueEntity entity : values) {
-                // If it's a local value then make sure we're the
-                // creator of the value
-                if (entity.isLocalValue()) {
-                    database.store(entity.changeCreator(localNode));
-                    
-                // We're assuming the Node IDs are totally random so
-                // chances are slim to none that we're responseible 
-                // for the values again. Even if we are there's no way
-                // to test it until we've fully re-bootstrapped in
-                // which case the other guys will send us the values
-                // anyways as from there perspective we're just a new
-                // node.
-                } else if (!remove && !publishConstraint.isExpired(this, entity)) {
-                    database.store(entity);
-                }
-            }
-        }
+    private void purgeDatabase() {
+        // We're assuming the Node IDs are totally random so
+        // chances are slim to none that we're responseible 
+        // for the values again. Even if we are there's no way
+        // to test it until we've fully re-bootstrapped in
+        // which case the other guys will send us the values
+        // anyways as from there perspective we're just a new
+        // node.
+        database.clear();
+        
+        // Notify the DHTValueEnityPublisher that our Contact
+        // information changed
+        valueEntityPublisher.handleContactChange(getDHTValueFactory(), getLocalNode());
     }
     
     /*
@@ -687,21 +668,21 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.MojitoDHT#setRepublishManager(org.limewire.mojito.db.RepublishManager)
+     * @see org.limewire.mojito.MojitoDHT#setDHTValueEntityPublisher(org.limewire.mojito.db.DHTValueEntityPublisher)
      */
-    public void setPublishConstraint(PublishConstraint publishConstraint) {
-        if (publishConstraint == null) {
-            publishConstraint = new DefaultPublishConstraint();
+    public void setDHTValueEntityPublisher(DHTValueEntityPublisher valueEntityPublisher) {
+        if (valueEntityPublisher == null) {
+            valueEntityPublisher = new DefaultDHTValueEntityPublisher(this);
         }
-        this.publishConstraint = publishConstraint;
+        this.valueEntityPublisher = valueEntityPublisher;
     }
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.MojitoDHT#getRepublishManager()
+     * @see org.limewire.mojito.MojitoDHT#getDHTValueEntityPublisher()
      */
-    public PublishConstraint getPublishConstraint() {
-        return publishConstraint;
+    public DHTValueEntityPublisher getDHTValueEntityPublisher() {
+        return valueEntityPublisher;
     }
     
     /*
@@ -1168,7 +1149,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         buffer.append("Is bootstrapped/ing: ").append(isBootstrapped()).append("/")
                                             .append(isBootstrapping()).append("\n");
         buffer.append("Database Size (Keys): ").append(getDatabase().getKeyCount()).append("\n");
-        buffer.append("Database Size (Values): ").append(getDatabase().getValueCount(Selector.ALL_VALUES)).append("\n");
+        buffer.append("Database Size (Values): ").append(getDatabase().getValueCount()).append("\n");
         buffer.append("RouteTable Size: ").append(getRouteTable().size()).append("\n");
         buffer.append("Estimated DHT Size: ").append(size()).append("\n");
         

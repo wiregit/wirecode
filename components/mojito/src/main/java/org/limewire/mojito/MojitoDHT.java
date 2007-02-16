@@ -27,9 +27,9 @@ import java.net.SocketAddress;
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.PublishConstraint;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -219,12 +219,12 @@ public interface MojitoDHT {
     /**
      * 
      */
-    public void setPublishConstraint(PublishConstraint publishConstraint);
+    public void setDHTValueEntityPublisher(DHTValueEntityPublisher x);
     
     /**
      * 
      */
-    public PublishConstraint getPublishConstraint();
+    public DHTValueEntityPublisher getDHTValueEntityPublisher();
     
     /**
      * Bootstraps the MojitoDHT from the given Contact. Use

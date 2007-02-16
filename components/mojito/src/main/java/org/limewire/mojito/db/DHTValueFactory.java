@@ -30,7 +30,7 @@ import org.limewire.mojito.routing.Version;
 public interface DHTValueFactory {
     
     /**
-     * Creates a DHTValueIdentity
+     * Creates a DHTValueEntity
      * 
      * @param creator The creator of the value
      * @param sender The sender of the value (creator and sender are

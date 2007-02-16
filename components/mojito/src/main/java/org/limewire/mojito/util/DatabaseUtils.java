@@ -85,7 +85,18 @@ public class DatabaseUtils {
     /**
      * 
      */
-    public static boolean isRepublishingRequired(long lastRepublishingTime, int locationCount) {
+    public static boolean isPublishingRequired(DHTValueEntity entity) {
+        return isPublishingRequired(entity.getPublishTime(), entity.getLocations().size());
+    }
+    
+    /**
+     * 
+     */
+    public static boolean isPublishingRequired(long lastRepublishingTime, int locationCount) {
+        if (lastRepublishingTime <= 0L || locationCount <= 0) {
+            return true;
+        }
+        
         long t = ((locationCount 
                 * DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue()) 
                     / KademliaSettings.REPLICATION_PARAMETER.getValue());

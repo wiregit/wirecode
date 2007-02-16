@@ -18,9 +18,9 @@ import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
-import org.limewire.mojito.db.PublishConstraint;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
 import org.limewire.mojito.result.BootstrapResult;
@@ -260,11 +260,11 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         public void setDHTValueFactory(DHTValueFactory valueFactory) {
         }
 
-        public PublishConstraint getPublishConstraint() {
+        public DHTValueEntityPublisher getDHTValueEntityPublisher() {
             return null;
         }
 
-        public void setPublishConstraint(PublishConstraint republishManager) {
+        public void setDHTValueEntityPublisher(DHTValueEntityPublisher x) {
         }
     }
 }

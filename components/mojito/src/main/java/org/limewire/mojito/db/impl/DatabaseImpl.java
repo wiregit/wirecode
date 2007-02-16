@@ -156,8 +156,8 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#getValueCount()
      */
-    public synchronized int getValueCount(Selector selector) {
-        return values(selector).size();
+    public synchronized int getValueCount() {
+        return values().size();
     }
     
     /*
@@ -319,7 +319,7 @@ public class DatabaseImpl implements Database {
      */
     private void banContact(Contact contact) {
         // Remove all values by this contact
-        for(DHTValueEntity entity: values(Selector.REMOTE_VALUES)) {
+        for(DHTValueEntity entity: values()) {
             if(entity.getCreator().equals(contact)) {
                 remove(entity);
             }
@@ -366,20 +366,12 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#values()
      */
-    public synchronized Collection<DHTValueEntity> values(Selector selector) {
+    public synchronized Collection<DHTValueEntity> values() {
         List<DHTValueEntity> values = new ArrayList<DHTValueEntity>(getKeyCount() * 2);
         for (DHTValueBag bag : database.values()) {
             synchronized(bag.getValuesLock()) {
                 for (DHTValueEntity entity : bag.getAllValues()) {
-                    if (selector.equals(Selector.ALL_VALUES)) {
-                        values.add(entity);
-                    } else if (entity.isLocalValue() 
-                            && selector.equals(Selector.LOCAL_VALUES)) {
-                        values.add(entity);
-                    } else if (!entity.isLocalValue() 
-                            && selector.equals(Selector.REMOTE_VALUES)) {
-                        values.add(entity);
-                    }
+                    values.add(entity);
                 }
             }
         }
@@ -395,7 +387,7 @@ public class DatabaseImpl implements Database {
         }
         buffer.append("-------------\n");
         buffer.append("TOTAL: ").append(getKeyCount())
-            .append("/").append(getValueCount(Selector.ALL_VALUES)).append("\n");
+            .append("/").append(getValueCount()).append("\n");
         return buffer.toString();
     }
 }

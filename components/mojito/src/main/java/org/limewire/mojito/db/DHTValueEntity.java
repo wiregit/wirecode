@@ -20,6 +20,7 @@
 package org.limewire.mojito.db;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import org.limewire.mojito.KUID;
@@ -73,12 +74,12 @@ public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable 
     /**
      * Returns the number of locations where this value is stored
      */
-    public int getLocationCount();
+    public Collection<? extends Contact> getLocations();
     
     /**
      * Sets the number of locations where this value is stored
      */
-    public void setLocationCount(int locationCount);
+    public void setLocations(Collection<? extends Contact> locations);
     
     /**
      * Returns true if this an entity for a local value
@@ -97,10 +98,4 @@ public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable 
      * and sender are the same).
      */
     public boolean isDirect();
-    
-    /**
-     * Creates a new DHTValueEntity with the given new creator
-     * if this is a local value
-     */
-    public DHTValueEntity changeCreator(Contact creator);
 }

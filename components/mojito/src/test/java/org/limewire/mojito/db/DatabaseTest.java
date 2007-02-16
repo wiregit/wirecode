@@ -34,7 +34,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
-import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
@@ -115,7 +114,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value1 = createLocalDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getKey())
                     .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
@@ -125,7 +124,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value2.getKey())
                     .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
@@ -135,7 +134,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), value1.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value3.getKey())
                     .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
@@ -145,7 +144,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value1.getKey(), "Tonic".getBytes());
         database.store(value4);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value4.getKey())
                     .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
@@ -154,7 +153,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value5 = createDirectDHTValue("Mojito".getBytes());
         database.store(value5);
         assertEquals(2, database.getKeyCount());
-        assertEquals(2, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value5.getKey())
                     .getValuesMap().get(value5.getSecondaryKey()).getValue().getValue()));
@@ -164,7 +163,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value5.getKey(), "Mary".getBytes());
         database.store(value6);
         assertEquals(2, database.getKeyCount());
-        assertEquals(2, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
                 database.get(value6.getKey())
                     .getValuesMap().get(value6.getSecondaryKey()).getValue().getValue()));
@@ -173,7 +172,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value7 = createDirectDHTValue("Bloody".getBytes());
         database.store(value7);
         assertEquals(3, database.getKeyCount());
-        assertEquals(3, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Bloody".getBytes(), 
                 database.get(value7.getKey())
                     .getValuesMap().get(value7.getSecondaryKey()).getValue().getValue()));
@@ -183,7 +182,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value7.getKey(), "Lime".getBytes());
         database.store(value8);
         assertEquals(3, database.getKeyCount());
-        assertEquals(3, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Lime".getBytes(), 
                 database.get(value8.getKey())
                     .getValuesMap().get(value8.getSecondaryKey()).getValue().getValue()));
@@ -197,7 +196,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value1 = createDirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getKey())
                     .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
@@ -205,14 +204,14 @@ public class DatabaseTest extends MojitoTestCase {
         // Shouldn't change
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         
         // The originator is issuing a direct store request
         DHTValueEntity value2 = createDirectDHTValue(value1.getSecondaryKey(), 
                 value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value2.getKey())
                     .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
@@ -223,7 +222,7 @@ public class DatabaseTest extends MojitoTestCase {
                     KUID.createRandomID(), value2.getKey(), "Tough".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value3.getKey())
                     .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
@@ -236,7 +235,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getKey())
                     .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
@@ -246,7 +245,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), value1.getKey(), "Mojito".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value2.getKey())
                     .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
@@ -256,7 +255,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value2.getKey(), "Tonic".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value3.getKey())
                     .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
@@ -266,7 +265,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), value3.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value4.getKey())
                     .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
@@ -279,7 +278,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getKey())
                     .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
@@ -289,7 +288,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), value1.getKey(), "Tonic".getBytes());
         database.store(value2);
         assertEquals(1, database.getKeyCount());
-        assertEquals(2, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(2, database.getValueCount());
         assertTrue(Arrays.equals("Tonic".getBytes(), 
                 database.get(value2.getKey())
                     .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
@@ -299,7 +298,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value1.getKey(), "Mary".getBytes());
         database.store(value3);
         assertEquals(1, database.getKeyCount());
-        assertEquals(3, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(3, database.getValueCount());
         assertTrue(Arrays.equals("Mary".getBytes(), 
                 database.get(value3.getKey())
                     .getValuesMap().get(value3.getSecondaryKey()).getValue().getValue()));
@@ -308,7 +307,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value4 = createDirectDHTValue("Olga".getBytes());
         database.store(value4);
         assertEquals(2, database.getKeyCount());
-        assertEquals(4, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(4, database.getValueCount());
         assertTrue(Arrays.equals("Olga".getBytes(), 
                 database.get(value4.getKey())
                     .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
@@ -321,7 +320,7 @@ public class DatabaseTest extends MojitoTestCase {
         DHTValueEntity value1 = createIndirectDHTValue("Hello World".getBytes());
         database.store(value1);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value1.getKey())
                     .getValuesMap().get(value1.getSecondaryKey()).getValue().getValue()));
@@ -331,7 +330,7 @@ public class DatabaseTest extends MojitoTestCase {
                 KUID.createRandomID(), value1.getKey(), new byte[0]);
         database.store(value2);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Hello World".getBytes(), 
                 database.get(value2.getKey())
                     .getValuesMap().get(value2.getSecondaryKey()).getValue().getValue()));
@@ -341,13 +340,13 @@ public class DatabaseTest extends MojitoTestCase {
                 value1.getKey(), new byte[0]);
         database.store(value3);
         assertEquals(0, database.getKeyCount());
-        assertEquals(0, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(0, database.getValueCount());
         
         // Add a new local value
         DHTValueEntity value4 = createLocalDHTValue("Mojito".getBytes());
         database.store(value4);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value4.getKey())
                     .getValuesMap().get(value4.getSecondaryKey()).getValue().getValue()));
@@ -357,7 +356,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value4.getKey(), new byte[0]);
         database.store(value5);
         assertEquals(1, database.getKeyCount());
-        assertEquals(1, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(1, database.getValueCount());
         assertTrue(Arrays.equals("Mojito".getBytes(), 
                 database.get(value5.getKey())
                     .getValuesMap().get(value5.getSecondaryKey()).getValue().getValue()));
@@ -367,7 +366,7 @@ public class DatabaseTest extends MojitoTestCase {
                 value4.getKey(), new byte[0]);
         database.store(value6);
         assertEquals(0, database.getKeyCount());
-        assertEquals(0, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(0, database.getValueCount());
     }
     
     /**
@@ -417,7 +416,7 @@ public class DatabaseTest extends MojitoTestCase {
         database.store(entity2);
         database.store(entity3);
         
-        assertEquals(3, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(3, database.getValueCount());
         
         DHTValueBag bag = database.get(key);
         assertNotNull(bag);
@@ -448,7 +447,7 @@ public class DatabaseTest extends MojitoTestCase {
             database.remove(e);
         }
         
-        assertEquals(0, database.getValueCount(Selector.ALL_VALUES));
+        assertEquals(0, database.getValueCount());
         assertEquals(0, bag.size());
         
         // The Bag should be gone

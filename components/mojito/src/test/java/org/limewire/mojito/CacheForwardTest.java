@@ -33,7 +33,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.db.Database.Selector;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.result.PingResult;
@@ -170,8 +169,8 @@ public class CacheForwardTest extends MojitoTestCase {
             for (Contact remote : evt.getNodes()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
-                assertEquals(1, dht.getDatabase().getValueCount(Selector.ALL_VALUES));
-                for (DHTValueEntity dhtValue : dht.getDatabase().values(Selector.ALL_VALUES)) {
+                assertEquals(1, dht.getDatabase().getValueCount());
+                for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                     assertEquals(valueId, dhtValue.getKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -201,15 +200,15 @@ public class CacheForwardTest extends MojitoTestCase {
             Thread.sleep(waitForNodes);
 
             // The 'furthest' Node should no longer have the value
-            assertEquals(1, nearest.getDatabase().values(Selector.ALL_VALUES).size());
-            assertEquals(0, furthest.getDatabase().values(Selector.ALL_VALUES).size());
+            assertEquals(1, nearest.getDatabase().values().size());
+            assertEquals(0, furthest.getDatabase().values().size());
             for (Contact remote : evt.getNodes()) {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 
                 if (dht != furthest) {
                     assertEquals(1, dht.getDatabase().getKeyCount());
-                    assertEquals(1, dht.getDatabase().getValueCount(Selector.ALL_VALUES));
-                    for (DHTValueEntity dhtValue : dht.getDatabase().values(Selector.ALL_VALUES)) {
+                    assertEquals(1, dht.getDatabase().getValueCount());
+                    for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                         assertEquals(valueId, dhtValue.getKey());
                         assertEquals(value, dhtValue.getValue());
                         assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -221,8 +220,8 @@ public class CacheForwardTest extends MojitoTestCase {
             // The 'nearest' Node received the value from the 
             // previous 'closest' Node
             assertEquals(1, nearest.getDatabase().getKeyCount());
-            assertEquals(1, nearest.getDatabase().getValueCount(Selector.ALL_VALUES));
-            for (DHTValueEntity dhtValue : nearest.getDatabase().values(Selector.ALL_VALUES)) {
+            assertEquals(1, nearest.getDatabase().getValueCount());
+            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -236,7 +235,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // and will this not store values!
             nearest.getDatabase().clear();
             assertEquals(0, nearest.getDatabase().getKeyCount());
-            assertEquals(0, nearest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, nearest.getDatabase().getValueCount());
             bootstrap(nearest, dhts.values());
             
             // Give everybody time to figure out whether to forward
@@ -244,7 +243,7 @@ public class CacheForwardTest extends MojitoTestCase {
             Thread.sleep(waitForNodes);
             
             assertEquals(0, nearest.getDatabase().getKeyCount());
-            assertEquals(0, nearest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, nearest.getDatabase().getValueCount());
             
             // Change the instanceId and we'll asked to store the
             // value again!
@@ -256,8 +255,8 @@ public class CacheForwardTest extends MojitoTestCase {
             Thread.sleep(waitForNodes);
             
             assertEquals(1, nearest.getDatabase().getKeyCount());
-            assertEquals(1, nearest.getDatabase().getValueCount(Selector.ALL_VALUES));
-            for (DHTValueEntity dhtValue : nearest.getDatabase().values(Selector.ALL_VALUES)) {
+            assertEquals(1, nearest.getDatabase().getValueCount());
+            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -283,20 +282,20 @@ public class CacheForwardTest extends MojitoTestCase {
             
             middle.getDatabase().clear();
             assertEquals(0, middle.getDatabase().getKeyCount());
-            assertEquals(0, middle.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, middle.getDatabase().getValueCount());
             bootstrap(middle, dhts.values());
             Thread.sleep(waitForNodes);
             
             assertEquals(0, middle.getDatabase().getKeyCount());
-            assertEquals(0, middle.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, middle.getDatabase().getValueCount());
             
             middle.getLocalNode().nextInstanceID();
             bootstrap(middle, dhts.values());
             Thread.sleep(waitForNodes);
             
             assertEquals(1, middle.getDatabase().getKeyCount());
-            assertEquals(1, middle.getDatabase().getValueCount(Selector.ALL_VALUES));
-            for (DHTValueEntity dhtValue : middle.getDatabase().values(Selector.ALL_VALUES)) {
+            assertEquals(1, middle.getDatabase().getValueCount());
+            for (DHTValueEntity dhtValue : middle.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -312,7 +311,7 @@ public class CacheForwardTest extends MojitoTestCase {
             Thread.sleep(waitForNodes);
             
             assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, furthest.getDatabase().getValueCount());
             
             // Same test with the current furthest Node but with
             // the exception that the current furthest Node will
@@ -331,17 +330,17 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Check the intial state
             assertEquals(1, furthest.getDatabase().getKeyCount());
-            assertEquals(1, furthest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(1, furthest.getDatabase().getValueCount());
             
             // Clear the Database but don't change the instanceId yet
             furthest.getDatabase().clear();
             assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, furthest.getDatabase().getValueCount());
             bootstrap(furthest, dhts.values());
             Thread.sleep(waitForNodes);
             
             assertEquals(0, furthest.getDatabase().getKeyCount());
-            assertEquals(0, furthest.getDatabase().getValueCount(Selector.ALL_VALUES));
+            assertEquals(0, furthest.getDatabase().getValueCount());
             
             // Change the instanceId 
             furthest.getLocalNode().nextInstanceID();
@@ -350,8 +349,8 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // And we should have the value now
             assertEquals(1, furthest.getDatabase().getKeyCount());
-            assertEquals(1, furthest.getDatabase().getValueCount(Selector.ALL_VALUES));
-            for (DHTValueEntity dhtValue : furthest.getDatabase().values(Selector.ALL_VALUES)) {
+            assertEquals(1, furthest.getDatabase().getValueCount());
+            for (DHTValueEntity dhtValue : furthest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -368,7 +367,7 @@ public class CacheForwardTest extends MojitoTestCase {
             int count = 0;
             dhts.put(nearest.getLocalNodeID(), nearest);
             for (MojitoDHT dht : dhts.values()) {
-                count += ((Context)dht).getDatabase().values(Selector.ALL_VALUES).size();
+                count += ((Context)dht).getDatabase().values().size();
             }
             
             // Make sure we're not counting the originator if it's

@@ -19,25 +19,34 @@
 
 package org.limewire.mojito.db;
 
-import org.limewire.mojito.Context;
+import java.util.Collection;
 
+import org.limewire.mojito.KUID;
+import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.routing.Contact;
 
 /**
- * An interface that's used by Mojito to determinate if
- * a value is expired or requires republishing. 
  * 
- * Note: An incorrect implementation can lead to reference
- * leaks, high network traffic and all kinds of other quirks!
  */
-public interface PublishConstraint {
+public interface DHTValueEntityPublisher {
     
     /**
-     * Returns true if it's necessary to republish the given DHTValueEntity
+     * 
      */
-    public boolean isPublishingRequired(Context context, DHTValueEntity entity);
+    public DHTValueEntity get(KUID key);
     
     /**
-     * Returns true if the given DHTValueEntity is expired
+     * 
      */
-    public boolean isExpired(Context context, DHTValueEntity entity);
+    public Collection<DHTValueEntity> values();
+    
+    /**
+     * 
+     */
+    public void published(StoreResult result);
+    
+    /**
+     * 
+     */
+    public void handleContactChange(DHTValueFactory factory, Contact node);
 }

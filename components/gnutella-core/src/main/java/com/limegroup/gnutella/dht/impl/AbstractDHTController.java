@@ -18,6 +18,7 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.db.impl.DHTValuePublisherProxy;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -26,6 +27,7 @@ import org.limewire.mojito.util.ContactUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.AltLocPublisher;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
@@ -97,6 +99,10 @@ abstract class AbstractDHTController implements DHTController {
         });
         dht.setHostFilter(new DHTFilterDelegate());
         dht.setDHTValueFactory(new LimeDHTValueFactory());
+        
+        DHTValuePublisherProxy proxy = new DHTValuePublisherProxy();
+        proxy.add(new AltLocPublisher(dht));
+        dht.setDHTValueEntityPublisher(proxy);
         
         this.bootstrapper = new LimeDHTBootstrapper(this);
         

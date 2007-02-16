@@ -29,6 +29,8 @@ import org.limewire.mojito.KUID;
 /**
  * A interface that represents a bag of DHT values that have the same ID. 
  * Used to represent multiple values coming from different originators.
+ * 
+ * TODO: Use Jakarta Collections Bag?!
  */
 public interface DHTValueBag extends Serializable {
 

@@ -36,15 +36,6 @@ import org.limewire.mojito.util.HostFilter;
 public interface Database extends Serializable {
     
     /**
-     * 
-     */
-    public static enum Selector {
-        ALL_VALUES,
-        LOCAL_VALUES,
-        REMOTE_VALUES;
-    };
-    
-    /**
      * Sets the DatabaseSecurityConstraint. Use null to reset 
      * the default constraint.
      * 
@@ -67,7 +58,7 @@ public interface Database extends Serializable {
     /**
      * Adds the given DHTValueEntity to the Database
      */
-    public boolean add(DHTValueEntity entity);
+    //public boolean add(DHTValueEntity entity);
     
     /**
      * Removes the given DHTValue from the Database
@@ -99,7 +90,7 @@ public interface Database extends Serializable {
      * Returns a Collection of DHTValueEntities based on the
      * given Selector
      */
-    public Collection<DHTValueEntity> values(Selector selector);
+    public Collection<DHTValueEntity> values();
     
     /**
      * Returns the number of Keys in the Database
@@ -110,7 +101,7 @@ public interface Database extends Serializable {
      * Returns the number of Values in the Database
      * which is greater or equal to key count.
      */
-    public int getValueCount(Selector selector);
+    public int getValueCount();
     
     /**
      * Returns the maximum number of keys

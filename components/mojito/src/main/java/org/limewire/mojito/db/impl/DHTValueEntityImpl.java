@@ -19,6 +19,10 @@
 
 package org.limewire.mojito.db.impl;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -54,7 +58,7 @@ public class DHTValueEntityImpl implements DHTValueEntity {
     /**
      * The actual value
      */
-    private DHTValue value;
+    private volatile DHTValue value;
     
     /**
      * Whether or not this is a local value
@@ -73,12 +77,12 @@ public class DHTValueEntityImpl implements DHTValueEntity {
      * If it's a local value we assume it gets published
      * as soon as the value was created.
      */
-    private transient long publishTime = 0L;
+    private volatile transient long publishTime = 0L;
     
     /**
      * The number of locations where this value was stored
      */
-    private transient int locationCount = 0;
+    private volatile transient Collection<? extends Contact> locations;
     
     /**
      * The hash code of this entity
@@ -161,7 +165,7 @@ public class DHTValueEntityImpl implements DHTValueEntity {
         
         this.value = value;
         this.publishTime = 0L;
-        this.locationCount = 0;
+        this.locations = Collections.emptySet();
         
         return old;
     }
@@ -184,26 +188,26 @@ public class DHTValueEntityImpl implements DHTValueEntity {
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntity#getLocationCount()
+     * @see org.limewire.mojito.db.DHTValueEntity#getLocations()
      */
-    public int getLocationCount() {
-        return locationCount;
+    public Collection<? extends Contact> getLocations() {
+        Collection<? extends Contact> locations = this.locations;
+        if (locations == null) {
+            locations = Collections.emptySet();
+        }
+        return locations;
     }
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntity#setLocationCount(int)
+     * @see org.limewire.mojito.db.DHTValueEntity#setLocations(java.util.Collection)
      */
-    public void setLocationCount(int locationCount) {
-        if (locationCount < 0) {
-            throw new IllegalArgumentException("locations: " + locationCount);
-        }
-        
+    public void setLocations(Collection<? extends Contact> locations) {
         if (!isLocalValue()) {
             return;
         }
         
-        this.locationCount = locationCount;
+        this.locations = locations;
         this.publishTime = System.currentTimeMillis();
     }
     
@@ -259,17 +263,11 @@ public class DHTValueEntityImpl implements DHTValueEntity {
                     && secondaryKey.equals(other.getSecondaryKey());
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntity#changeCreator(org.limewire.mojito.routing.Contact)
-     */
-    public DHTValueEntity changeCreator(Contact creator) {
-        if (!isLocalValue()) {
-            throw new UnsupportedOperationException();
-        }
+    private void readObject(java.io.ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
         
-        return new DHTValueEntityImpl(
-                creator, creator, primaryKey, secondaryKey, value, true);
+        this.locations = Collections.emptySet();
     }
     
     /*
@@ -278,15 +276,15 @@ public class DHTValueEntityImpl implements DHTValueEntity {
      */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("Creator: ").append(creator).append("\n");
-        buffer.append("Sender: ").append(sender).append("\n");
-        buffer.append("Primary Key: ").append(primaryKey).append("\n");
-        buffer.append("Secondary Key: ").append(secondaryKey).append("\n");
-        buffer.append("Local: ").append(localValue).append("\n");
-        buffer.append("Locations: ").append(locationCount).append("\n");
-        buffer.append("Creation time: ").append(creationTime).append("\n");
-        buffer.append("Publish time: ").append(publishTime).append("\n");
-        buffer.append("---\n").append(value).append("\n");
+        buffer.append("Creator: ").append(getCreator()).append("\n");
+        buffer.append("Sender: ").append(getSender()).append("\n");
+        buffer.append("Primary Key: ").append(getKey()).append("\n");
+        buffer.append("Secondary Key: ").append(getSecondaryKey()).append("\n");
+        buffer.append("Local: ").append(isLocalValue()).append("\n");
+        buffer.append("Locations: ").append(getLocations()).append("\n");
+        buffer.append("Creation time: ").append(getCreationTime()).append("\n");
+        buffer.append("Publish time: ").append(getPublishTime()).append("\n");
+        buffer.append("---\n").append(getValue()).append("\n");
         return buffer.toString();
     }
 }
