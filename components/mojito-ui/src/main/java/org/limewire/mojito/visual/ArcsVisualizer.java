@@ -7,6 +7,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -207,6 +208,8 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final Ellipse2D.Double dot = new Ellipse2D.Double();
         
+        private final Point2D.Double localhost = new Point2D.Double();
+        
         public void paint(Component c, Graphics2D g2) {
             int width = c.getWidth();
             int height = c.getHeight();
@@ -215,25 +218,26 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             g2.setStroke(new BasicStroke(2.0f));
             g2.draw(new Line2D.Float(width/2f, 0f, width/2f, height));
             
-            double x = (width - DOT_SIZE)/2f;
-            double y = position(nodeId, height)-DOT_SIZE/2f;
+            double x = width/2f;
+            double y = position(nodeId, height);
+            localhost.setLocation(x, y);
             
             synchronized (nodes) {
                 for (Iterator<ArcNode> it = nodes.iterator(); it.hasNext(); ) {
-                    if (it.next().paint(x, y, width, height, g2)) {
+                    if (it.next().paint(localhost, width, height, g2)) {
                         it.remove();
                     }
                 }
             }
             
             g2.setColor(Color.orange);
-            dot.setFrame(x, y, DOT_SIZE, DOT_SIZE);
+            dot.setFrame(x-DOT_SIZE/2d, y-DOT_SIZE/2d, DOT_SIZE, DOT_SIZE);
             g2.fill(dot);
         }
         
         public void handle(EventType type, KUID nodeId, boolean request) {
             synchronized (nodes) {
-                nodes.add(new ArcNode(type, nodeId, request));
+                nodes.add(new ArcNode(dot, type, nodeId, request));
             }
         }
         
@@ -246,6 +250,8 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     
     private static class ArcNode {
         
+        private final Ellipse2D.Double dot;
+        
         private final EventType type;
         
         private final KUID nodeId;
@@ -256,7 +262,10 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final Arc2D.Double arc = new Arc2D.Double();
         
-        public ArcNode(EventType type, KUID nodeId, boolean request) {
+        private final Ellipse2D.Double circle = new Ellipse2D.Double();
+        
+        public ArcNode(Ellipse2D.Double dot, EventType type, KUID nodeId, boolean request) {
+            this.dot = dot;
             this.type = type;
             this.nodeId = nodeId;
             this.request = request;
@@ -282,26 +291,35 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             return 180d;
         }
         
-        public boolean paint(double localX, double localY, double width, double height, Graphics2D g) {
+        private double radius() {
+            final double r = 20d;
+            long delta = System.currentTimeMillis() - timeStamp;
+            if (delta < DURATION) {
+                return r/DURATION * delta;
+            }
+            return r;
+        }
+        
+        public boolean paint(Point2D.Double localhost, double width, double height, Graphics2D g) {
             
             if (nodeId != null) {
-                paintArc(localX, localY, width, height, g);
+                paintArc(localhost, width, height, g);
             } else {
-                paintLine(localX, localY, width, height, g);
+                paintLine(localhost, width, height, g);
             }
             
             return (System.currentTimeMillis() - timeStamp) >= DURATION;
         }
         
-        private void paintArc(double localX, double localY, double width, double height, Graphics2D g) {
+        private void paintArc(Point2D.Double localhost, double width, double height, Graphics2D g) {
             
-            double nodeY = position(nodeId, height)-DOT_SIZE/2f;
-            double distance = Math.max(localY, nodeY) - Math.min(localY, nodeY);
+            double nodeY = position(nodeId, height);
+            double distance = Math.max(localhost.y, nodeY) - Math.min(localhost.y, nodeY);
             double bow = distance;
-            double nodeX = (width-bow)/2f;
+            double nodeX = (width-bow)/2d;
             
             double arcX = nodeX;
-            double arcY = (localY < nodeY) ? nodeY-distance : nodeY;
+            double arcY = (localhost.y < nodeY) ? nodeY-distance : nodeY;
             
             double start = 0f;
             double extent = 0f;
@@ -315,7 +333,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 if (!request) {
                     blue = 255;
                 }
-                if (localY < nodeY) {
+                if (localhost.y < nodeY) {
                     start = 90f;
                     extent = -extent();
                 } else {
@@ -327,7 +345,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 if (request) {
                     blue = 255;
                 }
-                if (localY < nodeY) {
+                if (localhost.y < nodeY) {
                     start = -90f;
                     extent = -extent();
                 } else {
@@ -336,19 +354,31 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                 }
             }
 
-            g.setStroke(ONE_PIXEL_STROKE);
-            g.setColor(new Color(red, green, blue, alpha()));
-            arc.setArc(arcX, arcY+DOT_SIZE/2f, bow, distance, start, extent, Arc2D.OPEN);
-            g.draw(arc);
+            Shape shape = null;
+            if (!dot.contains(width/2d, nodeY)) {
+                arc.setArc(arcX, arcY, bow, distance, start, extent, Arc2D.OPEN);
+                shape = arc;
+            } else {
+                double r = radius();
+                circle.setFrameFromCenter(localhost.x, localhost.y, 
+                        localhost.x+r, localhost.y+r);
+                shape = circle;
+            }
+            
+            if (shape != null) {
+                g.setStroke(ONE_PIXEL_STROKE);
+                g.setColor(new Color(red, green, blue, alpha()));
+                g.draw(shape);
+            }
         }
         
-        private void paintLine(double localX, double localY, double width, double height, Graphics2D g) {
+        private void paintLine(Point2D.Double localhost, double width, double height, Graphics2D g) {
             g.setStroke(ONE_PIXEL_STROKE);
             g.setColor(new Color(255, 0, 0, alpha()));
             
-            double x1 = localX;
-            double y1 = localY + DOT_SIZE/2f;
-            double x2 = x1 + (width/(2f*180f)) * extent();
+            double x1 = localhost.x;
+            double y1 = localhost.y;
+            double x2 = x1 + (width/(2d*180d)) * extent();
             double y2 = y1;
             g.draw(new Line2D.Double(x1, y1, x2, y2));
         }
@@ -391,6 +421,9 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             
             localhost.setLocation(dx, dy);
             
+            dot.setFrame(dx - DOT_SIZE/2d, dy - DOT_SIZE/2d, 
+                    DOT_SIZE, DOT_SIZE);
+            
             synchronized (nodes) {
                 for (Iterator<CurveNode> it = nodes.iterator(); it.hasNext(); ) {
                     if (it.next().paint(localhost, width, height, radius, g2)) {
@@ -400,8 +433,6 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             g2.setColor(Color.orange);
-            dot.setFrame(dx - DOT_SIZE/2d, dy - DOT_SIZE/2d, 
-                    DOT_SIZE, DOT_SIZE);
             g2.fill(dot);
         }
         
@@ -411,7 +442,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             synchronized (nodes) {
-                nodes.add(new CurveNode(type, nodeId, request));
+                nodes.add(new CurveNode(dot, type, nodeId, request));
             }
         }
         
@@ -426,6 +457,8 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private static final Random GENERATOR = new Random();
         
+        private final Ellipse2D.Double dot;
+        
         private final EventType type;
         
         private final KUID nodeId;
@@ -438,11 +471,14 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         
         private final Point2D.Double remote = new Point2D.Double();
         
-        private final Point2D.Double controlpoint = new Point2D.Double();
+        private final Point2D.Double point = new Point2D.Double();
         
         private final QuadCurve2D.Double curve = new QuadCurve2D.Double();
         
-        public CurveNode(EventType type, KUID nodeId, boolean request) {
+        private final Ellipse2D.Double circle = new Ellipse2D.Double();
+        
+        public CurveNode(Ellipse2D.Double dot, EventType type, KUID nodeId, boolean request) {
+            this.dot = dot;
             this.type = type;
             this.nodeId = nodeId;
             this.request = request;
@@ -462,6 +498,15 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             return Math.max(255 - (int)(255f/DURATION * delta), 0);
+        }
+        
+        private double radius() {
+            final double r = 20d;
+            long delta = System.currentTimeMillis() - timeStamp;
+            if (delta < DURATION) {
+                return r/DURATION * delta;
+            }
+            return r;
         }
         
         public boolean paint(Point2D.Double localhost, 
@@ -492,12 +537,25 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
             
             remote.setLocation(dx, dy);
-            controlpoint.setLocation(cx+noise, cy+noise);
-            curve.setCurve(localhost, controlpoint, remote);
             
-            g2.setStroke(ONE_PIXEL_STROKE);
-            g2.setColor(new Color(red, green, blue, alpha()));
-            g2.draw(curve);
+            
+            Shape shape = null;
+            if (!dot.contains(remote)) {
+                point.setLocation(cx+noise, cy+noise);
+                curve.setCurve(localhost, point, remote);
+                shape = curve;
+            } else {
+                double r = radius();
+                point.setLocation(localhost.x+r, localhost.y+r);
+                circle.setFrameFromCenter(localhost, point);
+                shape = circle;
+            }
+            
+            if (shape != null) {
+                g2.setStroke(ONE_PIXEL_STROKE);
+                g2.setColor(new Color(red, green, blue, alpha()));
+                g2.draw(shape);
+            }
             
             return System.currentTimeMillis() - timeStamp >= DURATION;
         }
