@@ -20,8 +20,8 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * This test makes sure that pong caching is working correctly between
@@ -77,8 +77,7 @@ public final class PongCachingTest extends LimeTestCase {
 	/**
 	 * The central Ultrapeer used in the test.
 	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
+	private static RouterService ROUTER_SERVICE = null;
 
     public PongCachingTest(String name) {
         super(name);
@@ -92,6 +91,10 @@ public final class PongCachingTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
+    public static void globalSetUp() throws Exception {
+        ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+    }
+    
 	private void buildConnections() {
 	    LEAF = new Connection("localhost", SERVER_PORT);
         ULTRAPEER_1 = new Connection("localhost", SERVER_PORT);
