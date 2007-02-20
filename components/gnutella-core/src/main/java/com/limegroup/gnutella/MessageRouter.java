@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -31,7 +32,6 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.security.QueryKey;
 import org.limewire.service.ErrorService;
 
@@ -303,6 +303,13 @@ public abstract class MessageRouter {
     /** The length of time a multicast guid should stay alive. */
     private static final long MULTICAST_GUID_EXPIRE_TIME = 60 * 1000;
     
+    /** How long to remember cached udp reply handlers. */
+    private static final int UDP_REPLY_CACHE_TIME = 60 * 1000;
+    
+    /** A mapping of UDPReplyHandlers, to prevent creation of them over-and-over. */
+    private static final FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler> _udpReplyHandlerCache =
+        new FixedsizeForgetfulHashMap<InetSocketAddress, UDPReplyHandler>(500);
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -459,6 +466,7 @@ public abstract class MessageRouter {
         // schedule a runner to send hops-flow messages
         RouterService.schedule(new HopsFlowManager(), HOPS_FLOW_INTERVAL*10, 
                                HOPS_FLOW_INTERVAL);
+        RouterService.schedule(new UDPReplyCleaner(), UDP_REPLY_CACHE_TIME, UDP_REPLY_CACHE_TIME);
         
         // runner to clean up OOB sessions
         OOBHandler oobHandler = new OOBHandler(this);
@@ -639,13 +647,7 @@ public abstract class MessageRouter {
 	    // Increment hops and decrement TTL.
 	    msg.hop();
 
-        // Send UDPConnection messages on to the connection multiplexor
-        // for routing to the appropriate connection processor
-        if (msg instanceof RUDPMessage) {
-            RouterService.getUDPMultiplexor().routeMessage(
-                    (RUDPMessage) msg, addr);
-            return;
-        } else if(msg instanceof QueryReply) {
+        if(msg instanceof QueryReply) {
             // check to see if it was from the multicast map.
             byte[] origGUID = _multicastGuidMap.getOriginalGUID(msg.getGUID());
             if(origGUID != null) {
@@ -654,7 +656,10 @@ public abstract class MessageRouter {
             }
         }
         
-        ReplyHandler replyHandler = new UDPReplyHandler(addr);
+        UDPReplyHandler replyHandler = _udpReplyHandlerCache.get(addr);
+        if(replyHandler == null)
+            replyHandler = new UDPReplyHandler(addr);
+        _udpReplyHandlerCache.put(addr, replyHandler); // renew it
         
         MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
         if (msgHandler != null) {
@@ -701,7 +706,10 @@ public abstract class MessageRouter {
             return;
         }
 
-        ReplyHandler replyHandler = new UDPReplyHandler(addr);
+        UDPReplyHandler replyHandler = _udpReplyHandlerCache.get(addr);
+        if(replyHandler == null)
+            replyHandler = new UDPReplyHandler(addr);
+        _udpReplyHandlerCache.put(addr, replyHandler); // renew it
 
         MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
         if (msgHandler != null) {
@@ -2806,27 +2814,33 @@ public abstract class MessageRouter {
         }
     }
 
+    /** Expires the UDP-Reply cache. */
+    private class UDPReplyCleaner implements Runnable {
+        public void run() {
+            RouterService.getMessageDispatcher().dispatch(new Runnable() {
+                public void run() {
+                    _udpReplyHandlerCache.clear();
+                }
+            });
+        }
+        
+    }
 
     /** Can be run to invalidate out-of-band ACKs that we are waiting for....
      */
     private class Expirer implements Runnable {
         public void run() {
-            try {
-                Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
-                synchronized (_outOfBandReplies) {
-                    long now = System.currentTimeMillis();
-                    for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
-                        if ((currQB != null) && (currQB.shouldExpire(now)))
-                            toRemove.add(currQB);
-                    }
-                    // done iterating through _outOfBandReplies, remove the 
-                    // keys now...
-                    for(GUID.TimedGUID next : toRemove)
-                        _outOfBandReplies.remove(next);
+            Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
+            synchronized (_outOfBandReplies) {
+                long now = System.currentTimeMillis();
+                for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
+                    if ((currQB != null) && (currQB.shouldExpire(now)))
+                        toRemove.add(currQB);
                 }
-            } 
-            catch(Throwable t) {
-                ErrorService.error(t);
+                // done iterating through _outOfBandReplies, remove the 
+                // keys now...
+                for(GUID.TimedGUID next : toRemove)
+                    _outOfBandReplies.remove(next);
             }
         }
     }
@@ -2837,13 +2851,8 @@ public abstract class MessageRouter {
      */
     static class ConnectBackExpirer implements Runnable {
         public void run() {
-            try {
-                _tcpConnectBacks.clear();
-                _udpConnectBacks.clear();
-            } 
-            catch(Throwable t) {
-                ErrorService.error(t);
-            }
+            _tcpConnectBacks.clear();
+            _udpConnectBacks.clear();
         }
     }
 

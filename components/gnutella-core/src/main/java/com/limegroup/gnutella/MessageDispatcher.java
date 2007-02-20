@@ -20,6 +20,11 @@ public class MessageDispatcher {
     
     private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
     
+    /** Dispatches a runnable, to allow arbitrary runnables to be processed on the message thread. */
+    public void dispatch(Runnable r) {
+        DISPATCH.execute(r);
+    }
+    
     /**
      * Dispatches a UDP message.
      */
