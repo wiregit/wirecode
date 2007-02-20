@@ -424,8 +424,8 @@ public class CacheForwardTest extends MojitoTestCase {
                 count += ((Context)dht).getDatabase().values().size();
             }
             
-            // Make sure we're not counting the originator if it's
-            // not member of the k-closest Nodes to the given value!
+            // If the creator is a member of the k-closest Nodes then
+            // make sure we're counting it as well
             for (Contact node : evt.getNodes()) {
                 if (node.getNodeID().equals(creator.getLocalNodeID())) {
                     count++;
