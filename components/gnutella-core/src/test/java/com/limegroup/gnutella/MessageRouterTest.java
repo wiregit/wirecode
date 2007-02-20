@@ -152,6 +152,7 @@ public final class MessageRouterTest extends LimeTestCase {
             Response[].class, 
             QueryRequest.class,
             Integer.TYPE,
+            byte[].class
         };
         
 		Method m = 
@@ -165,6 +166,7 @@ public final class MessageRouterTest extends LimeTestCase {
             res,
             query,
             new Integer(10),
+            new byte[0]
         };
 
         Iterable iter = (Iterable)m.invoke(ROUTER, params);
