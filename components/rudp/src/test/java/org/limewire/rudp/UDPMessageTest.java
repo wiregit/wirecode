@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import junit.framework.Test;
 
 import org.limewire.rudp.messages.DataMessage;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
 
@@ -132,7 +132,7 @@ public class UDPMessageTest extends BaseTestCase {
       byte[]                 data,
       int                    datalength,
       SequenceNumberExtender extender) throws Exception {
-        MessageFactory factory = new DefaultMessageFactory();
+        RUDPMessageFactory factory = new DefaultMessageFactory();
 
         DataMessage dmWrite;
         DataMessage dmRead;

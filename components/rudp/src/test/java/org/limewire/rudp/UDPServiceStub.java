@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.service.ErrorService;
@@ -42,13 +42,13 @@ public class UDPServiceStub implements UDPService {
     private volatile UDPMultiplexor multiplexor;
     
     /** The factory to create messages from. */
-    private final MessageFactory factory;
+    private final RUDPMessageFactory factory;
     
     /** The active receivers of messages */
     private final ArrayList RECEIVER_LIST = new ArrayList();
 
 	/** Constructs a new <tt>UDPServiceStub</tt>. */
-	public UDPServiceStub(MessageFactory factory) {
+	public UDPServiceStub(RUDPMessageFactory factory) {
         SEND_QUEUE = ExecutorsHelper.newProcessingQueue("UDPServiceStub-Sender");
         this.factory = factory;
     }

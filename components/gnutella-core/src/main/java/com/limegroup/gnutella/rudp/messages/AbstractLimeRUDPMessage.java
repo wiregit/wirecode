@@ -12,7 +12,7 @@ import com.limegroup.gnutella.util.DataUtils;
  * An abstract class that extends from Message and takes a 
  * DHTMessage as a delegate argument
  */
-abstract class AbstractMessageWire<T extends RUDPMessage> 
+public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage> 
         extends Message implements RUDPMessage {
     
     /** 
@@ -30,7 +30,7 @@ abstract class AbstractMessageWire<T extends RUDPMessage>
     /** The message this is wrapping. */
     protected final T delegate;
     
-    AbstractMessageWire(T delegate) {
+    AbstractLimeRUDPMessage(T delegate) {
         super(GUID, RUDPMessage.F_RUDP_MESSAGE, TTL, HOPS, 0, N_UDP);
         this.delegate = delegate;
     }

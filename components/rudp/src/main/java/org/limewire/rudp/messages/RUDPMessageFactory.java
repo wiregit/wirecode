@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * Creates every kind of RUDPMessage.
  */
-public interface MessageFactory {
+public interface RUDPMessageFactory {
 
     /** Deserializes a message as read from the network. */
     public RUDPMessage createMessage(ByteBuffer... data) throws MessageFormatException;

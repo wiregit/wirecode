@@ -4,10 +4,10 @@ import java.nio.ByteBuffer;
 
 import org.limewire.rudp.messages.DataMessage;
 
-class DataMessageWireImpl extends AbstractMessageWire<DataMessage> implements
+class LimeDataMessageImpl extends AbstractLimeRUDPMessage<DataMessage> implements
         DataMessage {
 
-    DataMessageWireImpl(DataMessage delegate) {
+    LimeDataMessageImpl(DataMessage delegate) {
         super(delegate);
     }
 

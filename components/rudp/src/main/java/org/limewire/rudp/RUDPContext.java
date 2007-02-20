@@ -1,13 +1,13 @@
 package org.limewire.rudp;
 
 import org.limewire.nio.observer.TransportListener;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 
 /** A context to retrieve necessary RUDP components. */
 public interface RUDPContext {
 
     /** The MessageFactory from which RUDP messages should be created. */
-    public MessageFactory getMessageFactory();
+    public RUDPMessageFactory getMessageFactory();
 
     /** The TransportListener which should be notified when events are pending. */
     public TransportListener getTransportListener();

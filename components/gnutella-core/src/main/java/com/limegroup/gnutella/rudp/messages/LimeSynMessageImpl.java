@@ -2,9 +2,9 @@ package com.limegroup.gnutella.rudp.messages;
 
 import org.limewire.rudp.messages.SynMessage;
 
-class SynMessageWireImpl extends AbstractMessageWire<SynMessage> implements SynMessage {
+class LimeSynMessageImpl extends AbstractLimeRUDPMessage<SynMessage> implements SynMessage {
 
-    SynMessageWireImpl(SynMessage delegate) {
+    LimeSynMessageImpl(SynMessage delegate) {
         super(delegate);
     }
 

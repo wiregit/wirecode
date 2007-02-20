@@ -12,7 +12,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 
-public class UDPServiceWire implements org.limewire.rudp.UDPService {
+public class LimeUDPService implements org.limewire.rudp.UDPService {
 
     public InetAddress getStableListeningAddress() {
         InetAddress lip = null;

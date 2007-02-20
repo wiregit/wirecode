@@ -8,7 +8,7 @@ import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
@@ -17,7 +17,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 
-public class DefaultMessageFactory implements MessageFactory {
+public class DefaultMessageFactory implements RUDPMessageFactory {
     
     private static final MessageFormatException NO_MATCH = 
         new MessageFormatException("No matching RUDPMessage");

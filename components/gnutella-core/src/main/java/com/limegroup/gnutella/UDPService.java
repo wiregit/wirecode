@@ -400,18 +400,8 @@ public class UDPService implements ReadWriteObserver {
      * @param msg the <tt>Message</tt> to send
      * @param host the host to send the message to
      */
-    public void send(Message msg, InetSocketAddress host) {
-        send(msg, host.getAddress(), host.getPort());
-    }    
-    
-    /**
-     * Sends the specified <tt>Message</tt> to the specified host.
-     * 
-     * @param msg the <tt>Message</tt> to send
-     * @param host the host to send the message to
-     */
     public void send(Message msg, IpPort host) {
-        send(msg, host.getInetAddress(), host.getPort());
+        send(msg, new InetSocketAddress(host.getInetAddress(), host.getPort()));
     }
 
 	/**
@@ -424,14 +414,21 @@ public class UDPService implements ReadWriteObserver {
      * @param err  an <tt>ErrorCallback<tt> if you want to be notified errors
      * @throws IllegalArgumentException if msg, ip, or err is null.
 	 */
-    public void send(Message msg, InetAddress ip, int port) 
-        throws IllegalArgumentException {
+    public void send(Message msg, InetAddress ip, int port) {
+        send(msg, new InetSocketAddress(ip, port));
+    }
+    
+    /**
+     * Sends the specified <tt>Message</tt> to the specified host.
+     * 
+     * @param msg the <tt>Message</tt> to send
+     * @param host the host to send the message to
+     */
+    public void send(Message msg, InetSocketAddress addr) {
         if (msg == null)
             throw new IllegalArgumentException("Null Message");
-        if (ip == null)
-            throw new IllegalArgumentException("Null InetAddress");
-        if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("Invalid Port: " + port);
+        if (!NetworkUtils.isValidSocketAddress(addr))
+            throw new IllegalArgumentException("Invalid addr: " + addr);
         if(_channel == null || _channel.socket().isClosed())
             return; // ignore if not open.
 
@@ -456,12 +453,12 @@ public class UDPService implements ReadWriteObserver {
         }
        
         buffer.flip();
-        send(buffer, ip, port, false);
+        send(buffer, addr, false);
     }
     
-    public void send(ByteBuffer buffer, InetAddress ip, int port, boolean custom) { 
+    public void send(ByteBuffer buffer, InetSocketAddress addr, boolean custom) { 
         synchronized(OUTGOING_MSGS) {
-            OUTGOING_MSGS.add(new SendBundle(buffer, ip, port, custom));
+            OUTGOING_MSGS.add(new SendBundle(buffer, addr, custom));
             if(_channel != null)
                 NIODispatcher.instance().interestWrite(_channel, true);
         }
@@ -514,9 +511,9 @@ public class UDPService implements ReadWriteObserver {
 	    private final SocketAddress addr;
         private final boolean custom;
 	    
-	    SendBundle(ByteBuffer b, InetAddress addr, int port, boolean custom) {
+	    SendBundle(ByteBuffer b, InetSocketAddress addr, boolean custom) {
 	        buffer = b;
-	        this.addr = new InetSocketAddress(addr, port);
+	        this.addr = addr;
             this.custom = custom;
 	    }
 	}

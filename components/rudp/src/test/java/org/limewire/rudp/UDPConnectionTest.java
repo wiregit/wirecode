@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BaseTestCase;
@@ -46,7 +46,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
     public static void globalSetUp() throws Exception {
         defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
-        MessageFactory factory = new DefaultMessageFactory();
+        RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
         final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),

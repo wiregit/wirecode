@@ -6,19 +6,19 @@ import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.impl.SynMessageImpl;
 
-public class MessageFactoryWire implements MessageFactory {
-    private final MessageFactory delegate;
+public class LimeRUDPMessageFactory implements RUDPMessageFactory {
+    private final RUDPMessageFactory delegate;
 
-    public MessageFactoryWire(MessageFactory delegate) {
+    public LimeRUDPMessageFactory(RUDPMessageFactory delegate) {
         if (delegate == null) {
             throw new NullPointerException("Delegate is null");
-        } else if (delegate instanceof MessageFactoryWire) {
+        } else if (delegate instanceof LimeRUDPMessageFactory) {
             throw new IllegalArgumentException("Recursive delegation");
         }
         
@@ -29,47 +29,47 @@ public class MessageFactoryWire implements MessageFactory {
         RUDPMessage msg = delegate.createMessage(data);
         
         if (msg instanceof AckMessage) {
-            return new AckMessageWireImpl((AckMessage)msg);
+            return new LimeAckMessageImpl((AckMessage)msg);
         } else if (msg instanceof DataMessage) {
-            return new DataMessageWireImpl((DataMessage)msg);
+            return new LimeDataMessageImpl((DataMessage)msg);
         } else if (msg instanceof FinMessage) {
-            return new FinMessageWireImpl((FinMessage)msg);
+            return new LimeFinMessageImpl((FinMessage)msg);
         } else if (msg instanceof KeepAliveMessage) {
-            return new KeepAliveMessageWireImpl((KeepAliveMessage)msg);
+            return new LimeKeepAliveMessageImpl((KeepAliveMessage)msg);
         } else if (msg instanceof SynMessageImpl) {
-            return new SynMessageWireImpl((SynMessageImpl)msg);
+            return new LimeSynMessageImpl((SynMessageImpl)msg);
         }
         
         throw new IllegalArgumentException(msg.getClass() + " is unhandled");
     }
 
     public AckMessage createAckMessage(byte connectionID, long sequenceNumber, long windowStart, int windowSpace) {
-        return new AckMessageWireImpl(
+        return new LimeAckMessageImpl(
                 delegate.createAckMessage(connectionID, sequenceNumber, windowStart, windowSpace));
     }
 
     public DataMessage createDataMessage(byte connectionID, long sequenceNumber, ByteBuffer chunk) {
-        return new DataMessageWireImpl(
+        return new LimeDataMessageImpl(
                 delegate.createDataMessage(connectionID, sequenceNumber, chunk));
     }
 
     public FinMessage createFinMessage(byte connectionID, long sequenceNumber, byte reasonCode) {
-        return new FinMessageWireImpl(
+        return new LimeFinMessageImpl(
                 delegate.createFinMessage(connectionID, sequenceNumber, reasonCode));
     }
 
     public KeepAliveMessage createKeepAliveMessage(byte connectionID, long windowStart, int windowSpace) {
-        return new KeepAliveMessageWireImpl(
+        return new LimeKeepAliveMessageImpl(
                 delegate.createKeepAliveMessage(connectionID, windowStart, windowSpace));
     }
 
     public SynMessage createSynMessage(byte connectionID) {
-        return new SynMessageWireImpl(
+        return new LimeSynMessageImpl(
                 delegate.createSynMessage(connectionID));
     }
 
     public SynMessage createSynMessage(byte connectionID, byte theirConnectionID) {
-        return new SynMessageWireImpl(
+        return new LimeSynMessageImpl(
                 delegate.createSynMessage(connectionID, theirConnectionID));
     }
 }

@@ -4,9 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.PrivilegedAccessor;
-
 import junit.framework.Test;
+
+import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
@@ -14,7 +14,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
@@ -26,8 +25,7 @@ import com.limegroup.gnutella.xml.MetaFileManager;
 @SuppressWarnings("unchecked")
 public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
 
-    private static ActivityCallback CALLBACK;        
-    private static MetaFileManager FMAN;    
+    private static ActivityCallback CALLBACK;
     private static TestMessageRouter MESSAGE_ROUTER;        
     private static RouterService ROUTER_SERVICE;
             
@@ -79,10 +77,8 @@ public final class UltrapeerQueryRouteTableTest extends LimeTestCase {
         launchBackend();
 
         CALLBACK = new TestCallback();
-        FMAN = new MetaFileManager();
         MESSAGE_ROUTER = new TestMessageRouter();
-        ROUTER_SERVICE = new RouterService(
-            CALLBACK, MESSAGE_ROUTER, FMAN);
+        ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER);
         ROUTER_SERVICE.start();
         
         RouterService.connectToHostAsynchronously("localhost", 

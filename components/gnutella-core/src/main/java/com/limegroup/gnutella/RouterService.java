@@ -27,6 +27,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.rudp.UDPSelectorProviderFactory;
@@ -61,7 +62,9 @@ import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.rudp.UDPSelectorProviderFactoryWire;
+import com.limegroup.gnutella.rudp.LimeRUDPContext;
+import com.limegroup.gnutella.rudp.LimeRUDPMessageHandler;
+import com.limegroup.gnutella.rudp.messages.AbstractLimeRUDPMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
@@ -280,7 +283,7 @@ public class RouterService {
     
     static {
         // Link the multiplexor & NIODispatcher together.
-        UDPSelectorProviderFactory factory = new UDPSelectorProviderFactoryWire();
+        UDPSelectorProviderFactory factory = new DefaultUDPSelectorProviderFactory(new LimeRUDPContext());
         UDPSelectorProvider.setDefaultProviderFactory(factory);
         UDP_SELECTOR_PROVIDER = UDPSelectorProvider.defaultProvider();
         UDP_MULTIPLEXOR = UDP_SELECTOR_PROVIDER.openSelector();
@@ -355,14 +358,6 @@ public class RouterService {
         this(callback, new StandardMessageRouter());
     }
 
-    /**
-     * Constructor for the Peer Server.
-     */ 
-    public RouterService(ActivityCallback ac, MessageRouter mr, FileManager fm){
-        this(ac,mr);
-        RouterService.fileManager = fm;
-    }
-
 	/**
 	 * Creates a new <tt>RouterService</tt> instance with special message
      * handling code.  Typically this constructor is only used for testing.
@@ -388,6 +383,9 @@ public class RouterService {
     public static void setMessageRouter(MessageRouter messageRouter) {
         RouterService.messageRouter = messageRouter;
         RouterService.messageDispatcher = new MessageDispatcher(messageRouter);
+        // Install the handler for RUDP messages.
+        messageRouter.setMessageHandler(AbstractLimeRUDPMessage.class,
+                                        new LimeRUDPMessageHandler(getUDPMultiplexor()));        
     }
     
     public static MessageDispatcher getMessageDispatcher() {

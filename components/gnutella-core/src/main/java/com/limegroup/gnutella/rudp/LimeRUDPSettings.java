@@ -4,7 +4,7 @@ import org.limewire.rudp.RUDPSettings;
 
 import com.limegroup.gnutella.settings.DownloadSettings;
 
-public class RUDPSettingsWire implements RUDPSettings {
+public class LimeRUDPSettings implements RUDPSettings {
 
     public int getMaxSkipAcks() {
         return DownloadSettings.MAX_SKIP_ACKS.getValue();

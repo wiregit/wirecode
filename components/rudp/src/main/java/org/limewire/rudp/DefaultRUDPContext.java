@@ -1,7 +1,7 @@
 package org.limewire.rudp;
 
 import org.limewire.nio.observer.TransportListener;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 
 /**
@@ -10,7 +10,7 @@ import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 public class DefaultRUDPContext implements RUDPContext {
     
     /** The MessageFactory RUDP should create messages from. */
-    private final MessageFactory messageFactory;
+    private final RUDPMessageFactory messageFactory;
     
     /** The TransportListener that should be notified when events are pending. */
     private final TransportListener transportListener;
@@ -29,7 +29,7 @@ public class DefaultRUDPContext implements RUDPContext {
              null, new DefaultMessageDispatcher(), new DefaultRUDPSettings());
     }
     
-    public DefaultRUDPContext(MessageFactory factory) {
+    public DefaultRUDPContext(RUDPMessageFactory factory) {
         this(factory, new NoOpTransportListener(),
              null, new DefaultMessageDispatcher(), new DefaultRUDPSettings());
     }
@@ -49,14 +49,14 @@ public class DefaultRUDPContext implements RUDPContext {
              null, new DefaultMessageDispatcher(), settings);
     }
     
-    public DefaultRUDPContext(MessageFactory factory,
+    public DefaultRUDPContext(RUDPMessageFactory factory,
                               TransportListener transportListener,
                               UDPService udpService, 
                               RUDPSettings settings) {
         this(factory, transportListener, udpService, null, settings);
     }
     
-    public DefaultRUDPContext(MessageFactory factory,
+    public DefaultRUDPContext(RUDPMessageFactory factory,
                               TransportListener transportListener,
                               UDPService udpService,
                               MessageDispatcher dispatcher, 
@@ -74,7 +74,7 @@ public class DefaultRUDPContext implements RUDPContext {
     /* (non-Javadoc)
      * @see org.limewire.rudp.RUDPContext#getMessageFactory()
      */
-    public MessageFactory getMessageFactory() {
+    public RUDPMessageFactory getMessageFactory() {
         return messageFactory;
     }
     

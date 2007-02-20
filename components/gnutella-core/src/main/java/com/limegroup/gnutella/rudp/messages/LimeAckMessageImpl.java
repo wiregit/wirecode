@@ -1,13 +1,11 @@
 package com.limegroup.gnutella.rudp.messages;
 
-import org.limewire.rudp.messages.KeepAliveMessage;
+import org.limewire.rudp.messages.AckMessage;
 
-class KeepAliveMessageWireImpl extends AbstractMessageWire<KeepAliveMessage> implements
-        KeepAliveMessage {
-
-    KeepAliveMessageWireImpl(KeepAliveMessage delegate) {
+class LimeAckMessageImpl extends AbstractLimeRUDPMessage<AckMessage> implements AckMessage {
+    
+    LimeAckMessageImpl(AckMessage delegate) {
         super(delegate);
-        // TODO Auto-generated constructor stub
     }
 
     public void extendWindowStart(long wStart) {

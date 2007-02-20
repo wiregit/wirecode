@@ -17,7 +17,7 @@ import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
@@ -36,7 +36,7 @@ public class DefaultUDPService implements UDPService, ReadWriteObserver {
     private static final Log LOG = LogFactory.getLog(DefaultUDPService.class);
     
     /** The MessageFactory this is using. */
-    private MessageFactory factory = new DefaultMessageFactory();
+    private RUDPMessageFactory factory = new DefaultMessageFactory();
     /** The DatagramChannel we're reading from & writing to. */
     private DatagramChannel channel;
     /** The list of messages to be sent, as SendBundles. */

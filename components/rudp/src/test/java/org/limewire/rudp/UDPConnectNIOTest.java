@@ -15,7 +15,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
-import org.limewire.rudp.messages.MessageFactory;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
@@ -48,7 +48,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     public static void globalSetUp() throws Exception {
         defaultFactory = UDPSelectorProvider.getDefaultProviderFactory();
-        MessageFactory factory = new DefaultMessageFactory();
+        RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
         final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),

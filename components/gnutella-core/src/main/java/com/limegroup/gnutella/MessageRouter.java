@@ -653,12 +653,8 @@ public abstract class MessageRouter {
                 ((QueryReply)msg).setMulticastAllowed(true);
             }
         }
-
-        // note: validity of addr/port are checked when message is constructed
-        InetAddress address = addr.getAddress();
-        int port = addr.getPort();
         
-        ReplyHandler replyHandler = new UDPReplyHandler(address, port);
+        ReplyHandler replyHandler = new UDPReplyHandler(addr);
         
         MessageHandler msgHandler = getUDPMessageHandler(msg.getClass());
         if (msgHandler != null) {
@@ -700,15 +696,12 @@ public abstract class MessageRouter {
         // Increment hops and decrement TTL.
         msg.hop();
 
-        InetAddress address = addr.getAddress();
-        int port = addr.getPort();
-
-        if (NetworkUtils.isLocalAddress(address)
+        if (NetworkUtils.isLocalAddress(addr.getAddress())
                 && !ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.getValue()) {
             return;
         }
 
-        ReplyHandler replyHandler = new UDPReplyHandler(address, port);
+        ReplyHandler replyHandler = new UDPReplyHandler(addr);
 
         MessageHandler msgHandler = getMulticastMessageHandler(msg.getClass());
         if (msgHandler != null) {
