@@ -514,6 +514,8 @@ public class ConnectionManagerTest extends LimeTestCase {
         CATCHER.endpoint = new ExtendedEndpoint("localhost", Backend.BACKEND_PORT);
         //try simple connect-disconnect
         mgr.connect();
+        while(!mgr.isConnected())
+            sleep(10);
         sleep(2000);
         //this should have lowered average time
         assertLessThan((30L*60L*1000L), mgr.getCurrentAverageUptime());
