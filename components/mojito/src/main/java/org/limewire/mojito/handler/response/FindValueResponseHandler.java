@@ -133,8 +133,8 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         FindValueResponse response = (FindValueResponse)message;
         Contact sender = response.getContact();
         
-        Collection<KUID> keys = response.getKeys();
-        Collection<? extends DHTValueEntity> values = response.getValues();
+        Collection<KUID> keys = response.getSecondaryKeys();
+        Collection<? extends DHTValueEntity> values = response.getDHTValueEntities();
         
         if (keys.isEmpty() && values.isEmpty()) {
             if (LOG.isWarnEnabled()) {

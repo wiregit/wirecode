@@ -40,21 +40,22 @@ import org.limewire.mojito.routing.Version;
 public class FindValueResponseImpl extends AbstractLookupResponse
         implements FindValueResponse {
 
-    private final Collection<KUID> keys;
+    private final Collection<KUID> secondaryKeys;
     
-    private final Collection<? extends DHTValueEntity> values;
+    private final Collection<? extends DHTValueEntity> entities;
     
     private final float requestLoad;
 
     public FindValueResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            Collection<KUID> keys,
-            Collection<? extends DHTValueEntity> values, float requestLoad) {
+            float requestLoad,
+            Collection<? extends DHTValueEntity> entities, 
+            Collection<KUID> secondaryKeys) {
         super(context, OpCode.FIND_VALUE_RESPONSE, contact, messageId);
         
-        this.keys = keys;
-        this.values = values;
         this.requestLoad = requestLoad;
+        this.entities = entities;
+        this.secondaryKeys = secondaryKeys;
     }
 
     public FindValueResponseImpl(Context context, SocketAddress src, 
@@ -62,16 +63,16 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         super(context, OpCode.FIND_VALUE_RESPONSE, src, messageId, version, in);
         
         this.requestLoad = in.readFloat();
-        this.keys = in.readKUIDs();
-        this.values = in.readDHTValueEntities(getContact());
+        this.entities = in.readDHTValueEntities(getContact());
+        this.secondaryKeys = in.readKUIDs();
     }
     
-    public Collection<KUID> getKeys() {
-        return keys;
+    public Collection<KUID> getSecondaryKeys() {
+        return secondaryKeys;
     }
     
-    public Collection<? extends DHTValueEntity> getValues() {
-        return values;
+    public Collection<? extends DHTValueEntity> getDHTValueEntities() {
+        return entities;
     }
     
     public float getRequestLoad() {
@@ -80,11 +81,11 @@ public class FindValueResponseImpl extends AbstractLookupResponse
 
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeFloat(requestLoad);
-        out.writeKUIDs(keys);
-        out.writeDHTValueEntities(values);
+        out.writeDHTValueEntities(entities);
+        out.writeKUIDs(secondaryKeys);
     }
     
     public String toString() {
-        return "FindValueResponse: " + values;
+        return "FindValueResponse: " + entities;
     }
 }

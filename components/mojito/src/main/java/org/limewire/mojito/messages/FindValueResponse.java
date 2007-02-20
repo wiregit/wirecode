@@ -33,12 +33,12 @@ public interface FindValueResponse extends LookupResponse {
     /**
      * Returns a Collection of KUIDs that a Node has to offer
      */
-    public Collection<KUID> getKeys();
+    public Collection<KUID> getSecondaryKeys();
     
     /**
      * Returns a Collection of DHTValueEntity(s)
      */
-    public Collection<? extends DHTValueEntity> getValues();
+    public Collection<? extends DHTValueEntity> getDHTValueEntities();
     
     /**
      * Returns the request load for this key

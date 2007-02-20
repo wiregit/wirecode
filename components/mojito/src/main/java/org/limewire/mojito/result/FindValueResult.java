@@ -203,8 +203,8 @@ public class FindValueResult extends LookupResult implements Iterable<Future<DHT
         
         private ContactValuesIterator(FindValueResponse response) {
             this.node = response.getContact();
-            this.keys = response.getKeys().iterator();
-            this.values = response.getValues().iterator();
+            this.keys = response.getSecondaryKeys().iterator();
+            this.values = response.getDHTValueEntities().iterator();
         }
 
         public boolean hasNext() {

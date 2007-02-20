@@ -75,7 +75,7 @@ public class GetValueResponseHandler extends AbstractResponseHandler<GetValueRes
     protected void response(ResponseMessage message, long time) throws IOException {
         if (message instanceof FindValueResponse) {
             Collection<? extends DHTValueEntity> values 
-                = ((FindValueResponse)message).getValues();
+                = ((FindValueResponse)message).getDHTValueEntities();
             
             setReturnValue(new GetValueResult(message.getContact(), values));
             

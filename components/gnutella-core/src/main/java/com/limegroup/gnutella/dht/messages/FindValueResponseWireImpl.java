@@ -14,12 +14,12 @@ public class FindValueResponseWireImpl extends AbstractMessageWire<FindValueResp
         super(delegate);
     }
 
-    public Collection<KUID> getKeys() {
-        return delegate.getKeys();
+    public Collection<KUID> getSecondaryKeys() {
+        return delegate.getSecondaryKeys();
     }
 
-    public Collection<? extends DHTValueEntity> getValues() {
-        return delegate.getValues();
+    public Collection<? extends DHTValueEntity> getDHTValueEntities() {
+        return delegate.getDHTValueEntities();
     }
 
     public float getRequestLoad() {
