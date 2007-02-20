@@ -22,13 +22,13 @@ package org.limewire.mojito.handler;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueBag;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.DHTMessage;
@@ -54,6 +54,17 @@ import org.limewire.service.ErrorService;
 public class DefaultMessageHandler {
     
     private static final Log LOG = LogFactory.getLog(DefaultMessageHandler.class);
+    
+    private static enum Operation {
+        // Do nothing
+        NOTHING,
+        
+        // Forward value
+        FORWARD,
+        
+        // Delete value
+        DELETE;
+    }
     
     private DatabaseStatisticContainer databaseStats;
     
@@ -196,135 +207,29 @@ public class DefaultMessageHandler {
      */
     private void forwardOrRemoveValues(Contact node, Contact existing, DHTMessage message) {
         
-        RouteTable routeTable = context.getRouteTable();
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
         Database database = context.getDatabase();
         synchronized(database) {
             for(KUID valueId : database.keySet()) {
                 
-                // To avoid redundant STORE forward, a node only transfers a value 
-                // if it is the closest to the key or if its ID is closer than any 
-                // other ID (except the new closest one of course)
-                // TODO: maybe relax this a little bit: what if we're not the closest 
-                // and the closest is stale?
+                Operation op = getOperation(node, existing, valueId);
                 
-                List<Contact> nodes = routeTable.select(valueId, k, false);
-                Contact closest = nodes.get(0);
-                Contact furthest = nodes.get(nodes.size()-1);
-                
-                //System.out.println(CollectionUtils.toString(nodes));
-                //System.out.println("RT nearest: " + closest);
-                //System.out.println("RT furthest: " + furthest);
-                //System.out.println(context.getLocalNode());
-                //System.out.println(node);
-                //System.out.println(CollectionUtils.toString(nodes));
-                //System.out.println();
-                
-                // We store forward if:
-                // #1 We're the nearest Node of the k-closest Nodes to
-                //    the given valueId
-                //
-                // #2 We're the second nearest of the k-closest Nodes to
-                //    the given valueId AND the other Node is the nearest.
-                //    In other words it changed its instance ID 'cause it
-                //    was offline for a short period of time or whatsoever.
-                //    (see also pre-condition(s) from where we're calling
-                //    this method)
-                //
-                // The first condition applies if the Node is new
-                // and we're the closest Node. The second condition
-                // applies if the Node has changed it's instanceId.
-                // That means we're the second closest and since
-                // the other Node has changed its instanceId we must
-                // re-send the values
-                if (context.isLocalNode(closest)
-                        || (node.equals(closest)
-                                && nodes.size() > 1
-                                && context.isLocalNode(nodes.get(1)))) {
+                if (op.equals(Operation.FORWARD)) {
+                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    valuesToForward.addAll(bag.values());
+                    databaseStats.STORE_FORWARD_COUNT.incrementStat();
                     
-                    KUID nodeId = node.getNodeID();
-                    KUID furthestId = furthest.getNodeID();
-                    
-                    // #3 The other Node must be equal to the furthest Node
-                    //    or better
-                    if (nodeId.equals(furthestId) 
-                            || nodeId.isNearerTo(valueId, furthestId)) {
-                        
-                        //System.out.println("CONDITION B (FORWARD)");
-                        //System.out.println("Local (from): " + context.getLocalNode());
-                        //System.out.println("Remote (to): " + node);
-                        //System.out.println(CollectionUtils.toString(nodes));
-                        //System.out.println();
-                        
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
-                        }
-                        
-                        databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                        DHTValueBag bag = database.get(valueId);
-                        if(bag != null) {
-                            valuesToForward.addAll(bag.getAllValues());
+                } else if (op.equals(Operation.DELETE)
+                        && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
+                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    for (DHTValueEntity entity : bag.values()) {
+                        if (!entity.isLocalValue()) {
+                            //System.out.println("REMOVING: " + entity + "\n");
+                            database.remove(entity.getKey(), entity.getSecondaryKey());
                         }
                     }
-                
-                // We remove a value if:
-                // #1 The value is stored at k Nodes 
-                //    (i.e. the total number of Nodes in the DHT
-                //     is equal or greater than k. If the DHT has
-                //     less than k Nodes then there's no reason to
-                //     remove a value)
-                //
-                // #2 This Node is the furthest of the k-closest Nodes
-                //
-                // #3 The new Node isn't in our RouteTable yet. That means
-                //    adding it will push this Node out of the club of the
-                //    k-closest Nodes and makes it the (k+1)-closest Node.
-                //    
-                // #4 The new Node is nearer to the given valueId then
-                //    the furthest away Node (we).
-                } else if (nodes.size() >= k 
-                        && context.isLocalNode(furthest)
-                        && (existing==null)
-                        /*&& !containsNodeID(nodes, node.getNodeID())*/) {
-                    
-                    KUID nodeId = node.getNodeID();
-                    KUID furthestId = furthest.getNodeID();
-                        
-                    if (nodeId.isNearerTo(valueId, furthestId)) {
-                        //System.out.println("CONDITION C");
-                        //System.out.println(valueId);
-                        //System.out.println(context.getLocalNode());
-                        //System.out.println(node);
-                        //System.out.println(CollectionUtils.toString(nodes));
-                        //System.out.println();
-                        
-                        if (DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
-                            int deletedCount = 0;
-                            DHTValueBag bag = database.get(valueId);
-                            if (bag != null) {
-                                // bag->database does not happen
-                                // because the database monitor is already held.
-                                List<DHTValueEntity> entities = null;
-                                synchronized(bag.getValuesLock()) {
-                                    entities = new ArrayList<DHTValueEntity>(bag.getAllValues());
-                                }
-                                
-                                for (DHTValueEntity value : entities) {
-                                    if (!value.isLocalValue()) {
-                                        //System.out.println("REMOVING: " + value + "\n");
-                                        
-                                        database.remove(value);
-                                        deletedCount++;
-                                    }
-                                }
-                                
-                                databaseStats.STORE_FORWARD_REMOVALS.addData(deletedCount);
-                            }
-                        }
-                    }
+                    databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
                 }
             }
         }
@@ -357,5 +262,110 @@ public class DefaultMessageHandler {
             }
         }
         return false;
+    }
+    
+    /**
+     * 
+     */
+    private Operation getOperation(Contact node, Contact existing, KUID valueId) {
+        // To avoid redundant STORE forward, a node only transfers a value 
+        // if it is the closest to the key or if its ID is closer than any 
+        // other ID (except the new closest one of course)
+        // TODO: maybe relax this a little bit: what if we're not the closest 
+        // and the closest is stale?
+        
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        RouteTable routeTable = context.getRouteTable();
+        List<Contact> nodes = routeTable.select(valueId, k, false);
+        Contact closest = nodes.get(0);
+        Contact furthest = nodes.get(nodes.size()-1);
+        
+        //System.out.println(CollectionUtils.toString(nodes));
+        //System.out.println("RT nearest: " + closest);
+        //System.out.println("RT furthest: " + furthest);
+        //System.out.println(context.getLocalNode());
+        //System.out.println(node);
+        //System.out.println(CollectionUtils.toString(nodes));
+        //System.out.println();
+        
+        // We store forward if:
+        // #1 We're the nearest Node of the k-closest Nodes to
+        //    the given valueId
+        //
+        // #2 We're the second nearest of the k-closest Nodes to
+        //    the given valueId AND the other Node is the nearest.
+        //    In other words it changed its instance ID 'cause it
+        //    was offline for a short period of time or whatsoever.
+        //    (see also pre-condition(s) from where we're calling
+        //    this method)
+        //
+        // The first condition applies if the Node is new
+        // and we're the closest Node. The second condition
+        // applies if the Node has changed it's instanceId.
+        // That means we're the second closest and since
+        // the other Node has changed its instanceId we must
+        // re-send the values
+        if (context.isLocalNode(closest)
+                || (node.equals(closest)
+                        && nodes.size() > 1
+                        && context.isLocalNode(nodes.get(1)))) {
+            
+            KUID nodeId = node.getNodeID();
+            KUID furthestId = furthest.getNodeID();
+            
+            // #3 The other Node must be equal to the furthest Node
+            //    or better
+            if (nodeId.equals(furthestId) 
+                    || nodeId.isNearerTo(valueId, furthestId)) {
+                
+                //System.out.println("CONDITION B (FORWARD)");
+                //System.out.println("Local (from): " + context.getLocalNode());
+                //System.out.println("Remote (to): " + node);
+                //System.out.println(CollectionUtils.toString(nodes));
+                //System.out.println();
+                
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Node " + node + " is now close enough to a value and we are responsible for xfer");   
+                }
+                
+                return Operation.FORWARD;
+            }
+        
+        // We remove a value if:
+        // #1 The value is stored at k Nodes 
+        //    (i.e. the total number of Nodes in the DHT
+        //     is equal or greater than k. If the DHT has
+        //     less than k Nodes then there's no reason to
+        //     remove a value)
+        //
+        // #2 This Node is the furthest of the k-closest Nodes
+        //
+        // #3 The new Node isn't in our RouteTable yet. That means
+        //    adding it will push this Node out of the club of the
+        //    k-closest Nodes and makes it the (k+1)-closest Node.
+        //    
+        // #4 The new Node is nearer to the given valueId then
+        //    the furthest away Node (we).
+        } else if (nodes.size() >= k 
+                && context.isLocalNode(furthest)
+                && (existing==null)
+                /*&& !containsNodeID(nodes, node.getNodeID())*/) {
+            
+            KUID nodeId = node.getNodeID();
+            KUID furthestId = furthest.getNodeID();
+                
+            if (nodeId.isNearerTo(valueId, furthestId)) {
+                //System.out.println("CONDITION C");
+                //System.out.println(valueId);
+                //System.out.println(context.getLocalNode());
+                //System.out.println(node);
+                //System.out.println(CollectionUtils.toString(nodes));
+                //System.out.println();
+                
+                return Operation.DELETE;
+            }
+        }
+        
+        return Operation.NOTHING;
     }
 }

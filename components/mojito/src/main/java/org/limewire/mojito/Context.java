@@ -48,6 +48,7 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueManager;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.exceptions.NotBootstrappedException;
@@ -992,7 +993,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             throw new IllegalStateException(getName() + " is not running");
         }
         
-        DHTValueEntity entity = new DHTValueEntity(
+        DHTValueEntity entity = new DHTValueEntityImpl(
                 getLocalNode(), getLocalNode(), key, value, true);
         database.store(entity);
         

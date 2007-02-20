@@ -21,6 +21,7 @@ package org.limewire.mojito.db;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.limewire.mojito.KUID;
@@ -61,29 +62,33 @@ public interface Database extends Serializable {
      * @param DHTValueImpl to remove
      * @return Whether or not the given DHTValue was removed
      */
-    public boolean remove(DHTValueEntity entity);
-    
-    /**
-     * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
-     * 
-     * @param valueId The KUID of the value to lookup in the database
-     */
-    public DHTValueBag get(KUID valueId);
+    public DHTValueEntity remove(KUID primaryKey, KUID secondaryKey);
     
     /**
      * Returns whether or not the given DHTValue is stored in our
      * Database
      */
-    public boolean contains(DHTValueEntity entiry);
+    public boolean contains(KUID primaryKey, KUID secondaryKey);
     
     /**
-     * Returns all Keys. The returned Set is unmodifyable!
+     * Returns a DHTValueBag for the given ValueID, or null if no bag exists.
+     * 
+     * @param primaryKey The KUID of the value to lookup in the database
+     */
+    public Map<KUID, DHTValueEntity> get(KUID primaryKey);
+    
+    /**
+     * 
+     */
+    public float getRequestLoad(KUID primaryKey, boolean incrementLoad);
+    
+    /**
+     * Returns all Keys
      */
     public Set<KUID> keySet();
     
     /**
-     * Returns all DHTValues. The returned Collection
-     * is unmodifyable!
+     * Returns a Collection of DHTValueEntities 
      */
     public Collection<DHTValueEntity> values();
     

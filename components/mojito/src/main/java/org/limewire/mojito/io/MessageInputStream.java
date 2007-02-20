@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito.db.impl.DHTValueEntityImpl;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
@@ -109,7 +110,7 @@ public class MessageInputStream extends DataInputStream {
         Contact creator = readContact();
         KUID valueId = readKUID();
         DHTValueImpl value = readDHTValue();
-        return new DHTValueEntity(creator, sender, valueId, value, false);
+        return new DHTValueEntityImpl(creator, sender, valueId, value, false);
     }
     
     /**

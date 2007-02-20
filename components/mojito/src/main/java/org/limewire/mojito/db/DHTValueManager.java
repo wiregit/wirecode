@@ -191,7 +191,7 @@ public class DHTValueManager implements Runnable {
             Database database = context.getDatabase();
             synchronized(database) {
                 
-                if (!database.contains(entity)) {
+                if (!database.contains(entity.getKey(), entity.getSecondaryKey())) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(entity + " is no longer stored in our database");
                     }
@@ -211,7 +211,7 @@ public class DHTValueManager implements Runnable {
                             LOG.trace(entity + " is expired!");
                         }
                         
-                        database.remove(entity);
+                        database.remove(entity.getKey(), entity.getSecondaryKey());
                         databaseStats.EXPIRED_VALUES.incrementStat();
                         return false;
                     }

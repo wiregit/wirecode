@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueBag;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseSecurityConstraint;
@@ -71,7 +70,7 @@ public class DatabaseImpl implements Database {
     private static final long serialVersionUID = -4857315774747734947L;
     
     /** LOCKING: this */
-    private final Map<KUID, DHTValueBag> database = new HashMap<KUID, DHTValueBag>();
+    private final Map<KUID, DHTValueEntityBag> database = new HashMap<KUID, DHTValueEntityBag>();
     
     /**
      * The maximum database size. Can be negative to 
@@ -158,11 +157,7 @@ public class DatabaseImpl implements Database {
      * @see com.limegroup.mojito.db.Database#getValueCount()
      */
     public synchronized int getValueCount() {
-        int count = 0;
-        for (DHTValueBag bag : database.values()) {
-            count += bag.size();
-        }
-        return count;
+        return values().size();
     }
     
     /*
@@ -183,7 +178,7 @@ public class DatabaseImpl implements Database {
         }
         
         if (entity.getValue().isEmpty()) {
-            return remove(entity);
+            return remove(entity.getKey(), entity.getSecondaryKey()) != null;
         } else {
             return add(entity);
         }
@@ -193,16 +188,12 @@ public class DatabaseImpl implements Database {
      * Adds the given DHTValue to the Database. Returns
      * true if the operation succeeded.
      */
-    private synchronized boolean add(DHTValueEntity entity) {
-        if (entity.getValue().isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-        
+    public synchronized boolean add(DHTValueEntity entity) {
         KUID valueId = entity.getKey();
-        DHTValueBag bag = database.get(valueId);
+        DHTValueEntityBag bag = database.get(valueId);
         
         if (bag == null) {
-            bag = createDHTValueBag(valueId);
+            bag = new DHTValueEntityBag(this, valueId);
         }
         
         if (bag.add(entity)) {
@@ -218,12 +209,12 @@ public class DatabaseImpl implements Database {
      * (non-Javadoc)
      * @see com.limegroup.mojito.db.Database#remove(com.limegroup.mojito.db.DHTValue)
      */
-    public synchronized boolean remove(DHTValueEntity entity) {
+    public synchronized DHTValueEntity remove(KUID primaryKey, KUID secondaryKey) {
         
-        KUID primaryKey = entity.getKey();
-        DHTValueBag bag = database.get(primaryKey);
-        if (bag != null && bag.remove(entity)) {
-
+        DHTValueEntity entity = null;
+        DHTValueEntityBag bag = database.get(primaryKey);
+        if (bag != null && (entity = bag.remove(secondaryKey)) != null) {
+            
             if (bag.isEmpty()) {
                 database.remove(primaryKey);
             }
@@ -259,10 +250,24 @@ public class DatabaseImpl implements Database {
                     }
                 }
             }
-            
-            return true;
         }
-        return false;
+        
+        return entity;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.Database#getRequestLoad(org.limewire.mojito.KUID, boolean)
+     */
+    public synchronized float getRequestLoad(KUID valueId, boolean incrementLoad) {
+        DHTValueEntityBag bag = database.get(valueId);
+        if (bag != null) {
+            if (incrementLoad) {
+                bag.incrementRequestLoad();
+            }
+            return bag.getRequestLoad();
+        }
+        return 0f;
     }
     
     /**
@@ -271,8 +276,7 @@ public class DatabaseImpl implements Database {
      * if possible
      */
     private boolean allowStore(DHTValueEntity entity) {
-        
-        DHTValueBag bag = database.get(entity.getKey());
+        DHTValueEntityBag bag = database.get(entity.getKey());
         
         // TODO: exclude signed value also
         if (bag == null && !entity.isLocalValue()) {
@@ -316,8 +320,8 @@ public class DatabaseImpl implements Database {
         
         // Check with the security constraint now
         DatabaseSecurityConstraint dbsc = securityConstraint;
-        if (dbsc != null) {
-            return dbsc.allowStore(this, bag, entity);
+        if (dbsc != null && bag != null) {
+            return dbsc.allowStore(this, bag.getValues(false), entity);
         }
         
         return true;
@@ -331,7 +335,7 @@ public class DatabaseImpl implements Database {
         // Remove all values by this contact
         for(DHTValueEntity entity: values()) {
             if(entity.getCreator().equals(contact)) {
-                remove(entity);
+                remove(entity.getKey(), entity.getSecondaryKey());
             }
         }
         
@@ -342,26 +346,32 @@ public class DatabaseImpl implements Database {
         }
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#get(com.limegroup.mojito.KUID)
+    /**
+     * For internal use only
      */
-    public synchronized DHTValueBag get(KUID valueId) {
+    public synchronized DHTValueEntityBag getBag(KUID valueId) {
         return database.get(valueId);
     }
     
     /*
      * (non-Javadoc)
-     * @see com.limegroup.mojito.db.Database#contains(com.limegroup.mojito.db.DHTValue)
+     * @see org.limewire.mojito.db.Database#get(org.limewire.mojito.KUID)
      */
-    public synchronized boolean contains(DHTValueEntity entity) {
-        DHTValueBag bag = get(entity.getKey()); 
-        
+    public synchronized Map<KUID, DHTValueEntity> get(KUID valueId) {
+        DHTValueEntityBag bag = database.get(valueId);
         if (bag != null) {
-            return bag.containsKey(entity.getSecondaryKey());
-        } 
-        
-        return false;
+            return bag.getValues(true);
+        }
+        return Collections.emptyMap();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.Database#contains(org.limewire.mojito.KUID, org.limewire.mojito.KUID)
+     */
+    public synchronized boolean contains(KUID primaryKey, KUID secondaryKey) {
+        DHTValueEntityBag bag = database.get(primaryKey); 
+        return (bag != null && bag.contains(secondaryKey));
     }
 
     /*
@@ -369,7 +379,7 @@ public class DatabaseImpl implements Database {
      * @see com.limegroup.mojito.db.Database#keySet()
      */
     public synchronized Set<KUID> keySet() {
-        return Collections.unmodifiableSet(new HashSet<KUID>(database.keySet()));
+        return new HashSet<KUID>(database.keySet());
     }
 
     /*
@@ -377,27 +387,19 @@ public class DatabaseImpl implements Database {
      * @see com.limegroup.mojito.db.Database#values()
      */
     public synchronized Collection<DHTValueEntity> values() {
-        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
-        for (DHTValueBag bag : database.values()) {
-            synchronized(bag.getValuesLock()) {
-                values.addAll(bag.getAllValues());
-            }
+        List<DHTValueEntity> values = new ArrayList<DHTValueEntity>(getKeyCount() * 2);
+        for (DHTValueEntityBag bag : database.values()) {
+            values.addAll(bag.getValues(false).values());
         }
-        return Collections.unmodifiableList(values);
-    }
-    
-    /**
-     * Factory method to create DHTValueBags
-     */
-    protected DHTValueBag createDHTValueBag(KUID valueId) {
-        return new DHTValueBagImpl(valueId);
+        return values;
     }
     
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
-        for (DHTValueBag bag : database.values()) {
+        for (DHTValueEntityBag bag : database.values()) {
             buffer.append(bag.toString());
         }
+        
         buffer.append("-------------\n");
         buffer.append("TOTAL: ").append(getKeyCount())
             .append("/").append(getValueCount()).append("\n");

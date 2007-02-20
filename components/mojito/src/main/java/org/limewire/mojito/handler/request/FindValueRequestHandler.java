@@ -20,9 +20,7 @@
 package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -30,12 +28,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.db.DHTValueBag;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.RequestMessage;
+import org.limewire.mojito.util.CollectionUtils;
 
 
 /**
@@ -63,68 +61,65 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         
         KUID lookup = request.getLookupID();
         
+        Map<KUID, DHTValueEntity> bag = null;
+        float requestLoad = 0f;
+        
         Database database = context.getDatabase();
-        DHTValueBag bag = database.get(lookup);
-
-        boolean empty = false;
-        
-        // The keys and values we'll return
-        Collection<KUID> availableKeys = Collections.emptySet();
-        Collection<DHTValueEntity> valuesToResturn = Collections.emptyList();
-        
-        if (bag != null) {
-            synchronized(bag.getValuesLock()) {
-                Map<KUID, DHTValueEntity> map = bag.getValuesMap();
-                
-                if (map.isEmpty()) {
-                    empty = true;
-                    
-                } else {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Hit! " + lookup + "\n" + bag);
-                    }
-    
-                    // The keys the remote Node is requesting
-                    Collection<KUID> secondaryKeys = request.getSecondaryKeys();
-    
-                    // Nothing specific requested?
-                    if (secondaryKeys.isEmpty()) {
-                        // If there's only one value for this key then send 
-                        // just the value
-                        if (map.size() == 1) {
-                            valuesToResturn = new ArrayList<DHTValueEntity>(map.values());
-    
-                            // Otherwise send the keys and the remote Node must
-                            // figure out what it's looking for
-                        } else {
-                            availableKeys = new HashSet<KUID>(map.keySet());
-                        }
-                    } else {
-                        // Send all requested values back.
-                        // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                        valuesToResturn = new ArrayList<DHTValueEntity>(secondaryKeys.size());
-                        for (KUID secondaryKey : secondaryKeys) {
-                            DHTValueEntity value = map.get(secondaryKey);
-                            if (value != null) {
-                                valuesToResturn.add(value);
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            empty = true;
+        synchronized (database) {
+            bag = database.get(lookup);
+            requestLoad = database.getRequestLoad(lookup, true);
         }
 
-        if (empty) {
+        // The keys and values we'll return
+        Collection<KUID> availableKeys = new HashSet<KUID>();
+        Collection<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
+        
+        // The keys the remote Node is requesting
+        Collection<KUID> secondaryKeys = request.getSecondaryKeys();
+        
+        if (bag != null && !bag.isEmpty()) {
+            if (secondaryKeys.isEmpty()) {
+                if (valuesToReturn.isEmpty()
+                        && bag.size() == 1) {
+                    valuesToReturn.addAll(bag.values());
+                } else {
+                    availableKeys.addAll(bag.keySet());
+                }
+            } else {
+                // Send all requested values back.
+                // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
+                for (KUID secondaryKey : secondaryKeys) {
+                    DHTValueEntity value = bag.get(secondaryKey);
+                    if (value != null) {
+                        valuesToReturn.add(value);
+                    }
+                }
+            }   
+        }
+        
+        if (valuesToReturn.isEmpty() 
+                && availableKeys.isEmpty()) {
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("No values for " + lookup + ", returning Contacts instead to " + request.getContact());
+            }
+            
             // OK, send Contacts instead!
             findNodeDelegate.handleRequest(message);
+            
         } else {
+            
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Return " + CollectionUtils.toString(valuesToReturn) + " and " 
+                        + CollectionUtils.toString(availableKeys) + " for " 
+                        + lookup + " to " + request.getContact());
+            }
+            
             context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
 
             FindValueResponse response = context.getMessageHelper()
-            .createFindValueResponse(request, availableKeys, valuesToResturn, 
-                    bag.incrementRequestLoad());
+                .createFindValueResponse(request, availableKeys, 
+                        valuesToReturn, requestLoad);
             context.getMessageDispatcher().send(request.getContact(), response);
         }
     }

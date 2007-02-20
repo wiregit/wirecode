@@ -19,7 +19,9 @@
 
 package org.limewire.mojito.db.impl;
 
-import org.limewire.mojito.db.DHTValueBag;
+import java.util.Map;
+
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.DatabaseSecurityConstraint;
@@ -31,7 +33,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
     
     private static final long serialVersionUID = 4513377023367562179L;
 
-    public boolean allowStore(Database database, DHTValueBag bag, DHTValueEntity entity) {
+    public boolean allowStore(Database database, Map<KUID, DHTValueEntity> bag, DHTValueEntity entity) {
         
         // Allow as many local values as you want!
         if (entity.isLocalValue()) {
@@ -61,7 +63,7 @@ public class DefaultDatabaseSecurityConstraint implements DatabaseSecurityConstr
      * Returns true if it's OK to replace the existing value with
      * the new value
      */
-    private boolean allowReplace(Database database, DHTValueBag bag, 
+    private boolean allowReplace(Database database, Map<KUID, DHTValueEntity> bag, 
             DHTValueEntity existing, DHTValueEntity entity) {
         
         // Non-local values cannot replace local values

@@ -167,7 +167,7 @@ public class StoreResponseHandler extends AbstractResponseHandler<StoreResult> {
         
         for (DHTValueEntity value : values) {
             if (!failed.contains(value)) {
-                value.setLocationCount(nodes.size());
+                value.setLocations(nodes);
             }
         }
         
