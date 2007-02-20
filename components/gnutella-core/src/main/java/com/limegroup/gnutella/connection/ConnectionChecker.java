@@ -127,6 +127,12 @@ public final class ConnectionChecker implements Runnable {
 
     private static ConnectionChecker current;
     
+    private static volatile int numWorkarounds;
+    
+    public static int getNumWorkarounds() {
+        return numWorkarounds;
+    }
+    
     /**
      * Creates a new <tt>ConnectionChecker</tt> instance that checks for a live
      * internet connection.  If the checker determines that there is no active 
@@ -263,6 +269,7 @@ public final class ConnectionChecker implements Runnable {
      */
     private void killAndSleep() {
         RouterService.disconnect();
+        numWorkarounds++;
         try {
             Thread.sleep(5*1000);
         } catch (InterruptedException ignored){}
