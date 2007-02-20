@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -8,6 +9,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
@@ -24,13 +26,16 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
-import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.nio.http.HttpCoreUtils;
 import org.limewire.nio.http.HttpIOReactor;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.uploader.BrowseRepsonseEntity;
 import com.limegroup.gnutella.uploader.HTTPSession;
+import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -75,7 +80,7 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
 
         // intercepts http requests and responses
         BasicHttpProcessor processor = new BasicHttpProcessor();
-        processor.addInterceptor(new ResponseDate());
+        //processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new ResponseConnControl());
@@ -102,32 +107,31 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
         registerHandler("/", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
+                UploadStat.BROWSE_HOST.incrementStat();
                 if (!HttpCoreUtils.hasHeader(request, "Accept",
                         Constants.QUERYREPLY_MIME_TYPE)) {
                     response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
                 } else {
                     response.setEntity(new BrowseRepsonseEntity());
-                    response.setStatusCode(HttpStatus.SC_OK);
                 }
             }
         });
 
-        // what is this?
-        registerHandler("/browser-control", new HttpRequestHandler() {
+        // update
+        registerHandler("/update.xml", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                response.setReasonPhrase("Feature Not Active");
-                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+                UploadStat.UPDATE_FILE.incrementStat();
+                File file = new File(CommonUtils.getUserSettingsDir(),
+                        "update.xml");
+                // TODO is the returned mime-type correct?
+                response.setEntity(new FileEntity(file,
+                        Constants.QUERYREPLY_MIME_TYPE));
             }
         });
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = new HttpRequestHandler() {
-            public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws HttpException, IOException {
-                response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
-            }
-        };
+        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler();
         registerHandler("/gnutella/push-proxy", pushProxyHandler);
         registerHandler("/gnet/push-proxy", pushProxyHandler);
 
@@ -136,6 +140,26 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
+            }
+        });
+
+        // unsupported requests
+        HttpRequestHandler notFoundHandler = new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                response.setReasonPhrase("Feature Not Active");
+                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+            }
+        };
+        registerHandler("/browser-control", notFoundHandler);
+        registerHandler("/gnutella/file-view*", notFoundHandler);
+        registerHandler("/gnutella/res/*", notFoundHandler);
+
+        // return malformed request for everything else
+        registerHandler("*", new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             }
         });
     }
@@ -255,4 +279,5 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
         }
 
     }
+
 }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.uploader;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +8,9 @@ import java.io.OutputStream;
 
 import org.apache.http.entity.AbstractHttpEntity;
 
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
