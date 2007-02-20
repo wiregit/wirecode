@@ -73,7 +73,8 @@ class PassiveDHTNodeController extends AbstractDHTController{
         dht.setRouteTable(limeDHTRouteTable);
         
         // Load the small list of MRS Nodes for bootstrap
-        if (FILE.exists() && FILE.isFile()) {
+        if (DHTSettings.PERSIST_DHT.getValue()
+                && FILE.exists() && FILE.isFile()) {
             ObjectInputStream ois = null;
             try {
                 ois = new ObjectInputStream(

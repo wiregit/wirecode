@@ -55,8 +55,8 @@ class ActiveDHTNodeController extends AbstractDHTController {
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createDHT("ActiveMojitoDHT", vendor, version);
         
-        if (DHTSettings.PERSIST_DHT.getValue() && 
-                FILE.exists() && FILE.isFile()) {
+        if (DHTSettings.PERSIST_DHT.getValue() 
+                && FILE.exists() && FILE.isFile()) {
             ObjectInputStream in = null;
             try {
                 in = new ObjectInputStream(
