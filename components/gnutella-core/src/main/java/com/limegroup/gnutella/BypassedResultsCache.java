@@ -9,21 +9,21 @@ import java.util.Set;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 
 /**
- * Keeps track of possible GUESS endpoints that provide results for
+ * Keeps track of possible ips that provide results for
  * query GUIDs and have not been queried yet. 
  */
-public class GUESSSourcesCache {
+public class BypassedResultsCache {
     
     /**
      * The maximum number of bypassed results to remember per query.
      */
-    private final int MAX_BYPASSED_RESULTS = 150;
+    static int MAX_BYPASSED_RESULTS = 150;
     
     private final ActivityCallback _callback;
     
     private final DownloadManager _downloadManager;
 
-    public GUESSSourcesCache(ActivityCallback callback, DownloadManager downloadManager) {
+    public BypassedResultsCache(ActivityCallback callback, DownloadManager downloadManager) {
         _callback = callback;
         _downloadManager = downloadManager;
     }
@@ -34,13 +34,16 @@ public class GUESSSourcesCache {
      */
     private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = Collections.synchronizedMap(new HashMap<GUID, Set<GUESSEndpoint>>());
 
-    
+    // made package private until this is refactored to events and
+    // the cache can subscribe to a query killed event
     void queryKilled(GUID guid) {
         if (!_downloadManager.isGuidForQueryDownloading(guid)) {
             _bypassedResults.remove(guid);
         }
     }
     
+    // made package private until this is refactored to events and
+    // the cache can subscribe to a download finished event
     void downloadFinished(GUID guid) {
         if (!isGUIDOfInterest(guid)) {
             _bypassedResults.remove(guid);
@@ -48,12 +51,12 @@ public class GUESSSourcesCache {
     }
     
     /**
-     * Returns a set of possible GUESS endpoints for the guid or 
+     * Returns a set of possible query endpoints for the guid or 
      * an empty set if there aren't any.
      *
      * @return the set is owned by the caller and can be modified
      */
-    public Set<GUESSEndpoint> getGUESSLocs(GUID guid) {
+    public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
         Set<GUESSEndpoint> clone = new HashSet<GUESSEndpoint>();
         synchronized (_bypassedResults) {
             Set<GUESSEndpoint> eps = _bypassedResults.get(guid);
@@ -75,7 +78,7 @@ public class GUESSSourcesCache {
      * Adds the endpoint to its internal cache and returns true if it
      * does so.
      */
-    public boolean addGUESSSource(GUID guid, GUESSEndpoint endpoint) {
+    public boolean addBypassedSource(GUID guid, GUESSEndpoint endpoint) {
         if (!isGUIDOfInterest(guid)) {
             return false;
         }
@@ -87,11 +90,13 @@ public class GUESSSourcesCache {
                 eps = new HashSet<GUESSEndpoint>();
                 _bypassedResults.put(guid, eps);
             }
-            if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS) {
-                eps.add(endpoint);
+            if (eps.size() < MAX_BYPASSED_RESULTS) {
+                return eps.add(endpoint);
+            }
+            else {
+                return false;
             }
         }
-        return true;
     }
     
 }

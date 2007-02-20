@@ -182,7 +182,7 @@ public abstract class MessageRouter {
         new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
     
-    private GUESSSourcesCache _guessSourcesCache = new GUESSSourcesCache(RouterService.getCallback(), RouterService.getDownloadManager());
+    private BypassedResultsCache _bypassedResultsCache;
     
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -445,6 +445,9 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
+        
+		_bypassedResultsCache = new BypassedResultsCache(_callback, RouterService.getDownloadManager());
+        
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
@@ -520,7 +523,7 @@ public abstract class MessageRouter {
     public void queryKilled(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        _guessSourcesCache.queryKilled(guid);
+        _bypassedResultsCache.queryKilled(guid);
     }
 
     /** Call this to inform us that a download is finished or whatever.  Useful
@@ -532,15 +535,15 @@ public abstract class MessageRouter {
     public void downloadFinished(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        _guessSourcesCache.downloadFinished(guid);
+        _bypassedResultsCache.downloadFinished(guid);
     }
     
     /** @returns a Set with GUESSEndpoints that had matches for the
      *  original query guid.  may be empty.
      *  @param guid the guid of the query you want endpoints for.
      */
-    public Set<GUESSEndpoint> getGUESSLocs(GUID guid) {
-        return _guessSourcesCache.getGUESSLocs(guid);
+    public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
+        return _bypassedResultsCache.getQueryLocs(guid);
     }
     
     public String getPingRouteTableDump() {
@@ -1123,7 +1126,7 @@ public abstract class MessageRouter {
         // TODO: tally some stat stuff here
     }
     
-    public boolean addPossibleGUESSSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+    public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
         
         //if the reply cannot receive unsolicited udp, there is no point storing it
         if (!reply.canReceiveUnsolicited()) {
@@ -1131,7 +1134,7 @@ public abstract class MessageRouter {
         }
 
         GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
-        return _guessSourcesCache.addGUESSSource(new GUID(reply.getGUID()), ep);
+        return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
     }
 
     public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
