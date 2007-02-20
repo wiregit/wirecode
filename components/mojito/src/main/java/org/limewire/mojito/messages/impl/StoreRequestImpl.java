@@ -58,7 +58,7 @@ public class StoreRequestImpl extends AbstractRequestMessage
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
         this.securityToken = in.readQueryKey();
-        this.values = in.readDHTValueEntities(getContact());
+        this.values = in.readDHTValueEntities(getContact(), context.getDHTValueFactory());
     }
     
     public SecurityToken getSecurityToken() {

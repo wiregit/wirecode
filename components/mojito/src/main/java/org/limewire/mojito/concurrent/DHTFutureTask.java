@@ -19,8 +19,8 @@
 
 package org.limewire.mojito.concurrent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -32,8 +32,8 @@ import java.util.concurrent.FutureTask;
  */
 public class DHTFutureTask<V> extends FutureTask<V> implements DHTFuture<V> {
 
-    private List<DHTFutureListener<V>> listeners 
-        = new ArrayList<DHTFutureListener<V>>();
+    private final Set<DHTFutureListener<V>> listeners 
+        = new LinkedHashSet<DHTFutureListener<V>>();
     
     protected DHTFutureTask(Callable<V> callable) {
         super(callable);

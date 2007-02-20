@@ -161,8 +161,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, Contact dst, 
-            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
-        return new FindValueResponseImpl(context, contact, messageId, requestLoad, values, keys);
+            MessageID messageId, float requestLoad, Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
+        return new FindValueResponseImpl(context, contact, messageId, requestLoad, entities, secondaryKeys);
     }
 
     public PingRequest createPingRequest(Contact contact, SocketAddress dst) {

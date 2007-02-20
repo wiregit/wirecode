@@ -110,7 +110,7 @@ public interface MessageFactory {
      * @param dst The destination information to where the request will be send
      */
     public FindValueResponse createFindValueResponse(Contact src, Contact dst, 
-            MessageID messageId, Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad);
+            MessageID messageId, float requestLoad, Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys);
 
     /**
      * Creates and returns a StoreRequest Message

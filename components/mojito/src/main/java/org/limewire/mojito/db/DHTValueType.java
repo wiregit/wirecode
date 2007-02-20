@@ -161,7 +161,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         if (name.equals(UNKNOWN_NAME)) {
-            buffer.append(ArrayUtils.toString(type)).append("/").append(name);
+            buffer.append(toString(type)).append("/").append(name);
         } else {
             buffer.append(name);
         }
@@ -187,5 +187,16 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     
     public static DHTValueType valueOf(String type) {
         return valueOf(ArrayUtils.toInteger(type));
+    }
+    
+    private static String toString(int type) {
+        byte[] name = new byte[] {
+            (byte)((type >> 24) & 0xFF),
+            (byte)((type >> 16) & 0xFF),
+            (byte)((type >>  8) & 0xFF),
+            (byte)((type      ) & 0xFF)
+        };
+        
+        return new String(name);
     }
 }

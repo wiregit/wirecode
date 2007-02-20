@@ -205,7 +205,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 Context dht = (Context)dhts.get(remote.getNodeID());
                 assertEquals(1, dht.getDatabase().getKeyCount());
                 assertEquals(1, dht.getDatabase().getValueCount());
-                for (DHTValueEntity dhtValue : dht.getValues()) {
+                for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                     assertEquals(valueId, dhtValue.getKey());
                     assertEquals(value, dhtValue.getValue());
                     assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -235,14 +235,14 @@ public class CacheForwardTest extends MojitoTestCase {
             Thread.sleep(waitForNodes);
 
             // The Node with the nearest possible ID should have the value
-            assertEquals(1, nearest.getValues().size());
+            assertEquals(1, nearest.getDatabase().getValueCount());
             
             // And the Node with the furthest ID shouldn't unless the furthest
             // Node happens to be the creator of the value in which case we're
             // not removing the value (see init loop, we changed the creator's
             // node ID so that it cannot be member of the k-closest nodes).
             //assertEquals(0, furthest.getValues().size());
-            Collection before = furthest.getValues();
+            Collection before = furthest.getDatabase().values();
             if (before.size() != 0) {
                 StringBuilder buffer = new StringBuilder();
                 buffer.append("Furthest: ").append(furthest.getLocalNode()).append("\n");
@@ -250,7 +250,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 
                 buffer.append("Before: ").append(before).append("\n");
                 Thread.sleep(10000); // Race condition?
-                buffer.append("After: ").append(furthest.getValues()).append("\n");
+                buffer.append("After: ").append(furthest.getDatabase().values()).append("\n");
                 
                 buffer.append("IDs: ").append(idsByXorDistance.subList(0, k+1)).append("\n");
                 fail(buffer.toString());
@@ -262,7 +262,7 @@ public class CacheForwardTest extends MojitoTestCase {
                 if (dht != furthest) {
                     assertEquals(1, dht.getDatabase().getKeyCount());
                     assertEquals(1, dht.getDatabase().getValueCount());
-                    for (DHTValueEntity dhtValue : dht.getValues()) {
+                    for (DHTValueEntity dhtValue : dht.getDatabase().values()) {
                         assertEquals(valueId, dhtValue.getKey());
                         assertEquals(value, dhtValue.getValue());
                         assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -275,7 +275,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // previous 'closest' Node
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : nearest.getValues()) {
+            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -310,7 +310,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             assertEquals(1, nearest.getDatabase().getKeyCount());
             assertEquals(1, nearest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : nearest.getValues()) {
+            for (DHTValueEntity dhtValue : nearest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -349,7 +349,7 @@ public class CacheForwardTest extends MojitoTestCase {
             
             assertEquals(1, middle.getDatabase().getKeyCount());
             assertEquals(1, middle.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : middle.getValues()) {
+            for (DHTValueEntity dhtValue : middle.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -404,7 +404,7 @@ public class CacheForwardTest extends MojitoTestCase {
             // And we should have the value now
             assertEquals(1, furthest.getDatabase().getKeyCount());
             assertEquals(1, furthest.getDatabase().getValueCount());
-            for (DHTValueEntity dhtValue : furthest.getValues()) {
+            for (DHTValueEntity dhtValue : furthest.getDatabase().values()) {
                 assertEquals(valueId, dhtValue.getKey());
                 assertEquals(value, dhtValue.getValue());
                 assertEquals(creator.getLocalNodeID(), dhtValue.getSecondaryKey());
@@ -421,21 +421,16 @@ public class CacheForwardTest extends MojitoTestCase {
             int count = 0;
             dhts.put(nearest.getLocalNodeID(), nearest);
             for (MojitoDHT dht : dhts.values()) {
-                count += ((Context)dht).getValues().size();
+                count += ((Context)dht).getDatabase().values().size();
             }
             
             // Make sure we're not counting the originator if it's
             // not member of the k-closest Nodes to the given value!
-            boolean contains = false;
             for (Contact node : evt.getNodes()) {
                 if (node.getNodeID().equals(creator.getLocalNodeID())) {
-                    contains = true;
+                    count++;
                     break;
                 }
-            }
-            
-            if (!contains) {
-                count--;
             }
             
             assertEquals(k, count);

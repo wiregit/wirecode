@@ -31,12 +31,12 @@ public class LimeDHTManager implements DHTManager {
     /**
      * The Vendor code of this DHT Node
      */
-    private Vendor vendor = ContextSettings.getVendor();
+    private final Vendor vendor = ContextSettings.getVendor();
     
     /**
      * The Version of this DHT Node
      */
-    private Version version = ContextSettings.getVersion();
+    private final Version version = ContextSettings.getVersion();
     
     /**
      * The DHTController instance
@@ -46,8 +46,8 @@ public class LimeDHTManager implements DHTManager {
     /**
      * List of event listeners for ConnectionLifeCycleEvents.
      */
-    private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners = 
-        new CopyOnWriteArrayList<DHTEventListener>();
+    private final CopyOnWriteArrayList<DHTEventListener> dhtEventListeners 
+        = new CopyOnWriteArrayList<DHTEventListener>();
     
     /** 
      * The executor to use to execute blocking DHT methods, such

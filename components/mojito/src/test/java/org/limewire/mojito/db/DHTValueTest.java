@@ -35,6 +35,7 @@ import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.mojito.util.MojitoUtils;
 
 public class DHTValueTest extends MojitoTestCase {
@@ -95,7 +96,7 @@ public class DHTValueTest extends MojitoTestCase {
             // Pre-Condition
             assertEquals(0, value.getLocations().size());
             assertEquals(0L, value.getPublishTime());
-            assertTrue(value.isRepublishingRequired());
+            assertTrue(DatabaseUtils.isPublishingRequired(value));
             
             // Store...
             StoreResult result = ((Context)first).store(value).get();
@@ -107,7 +108,7 @@ public class DHTValueTest extends MojitoTestCase {
             assertSame(value, result.getSucceeded().iterator().next());
             assertEquals(k, value.getLocations().size());
             assertGreaterThanOrEquals(time, value.getPublishTime());
-            assertFalse(value.isRepublishingRequired());
+            assertFalse(DatabaseUtils.isPublishingRequired(value));
             
         } finally {
             for (MojitoDHT dht : dhts.values()) {

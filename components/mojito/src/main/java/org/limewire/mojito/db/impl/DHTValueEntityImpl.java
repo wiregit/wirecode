@@ -26,7 +26,6 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.routing.Contact;
-import org.limewire.mojito.util.DatabaseUtils;
 
 /**
  * The default implementation of DHTValueEntity
@@ -261,21 +260,6 @@ public class DHTValueEntityImpl implements DHTValueEntity {
         DHTValueEntity other = (DHTValueEntity)o;
         return primaryKey.equals(other.getKey())
                     && secondaryKey.equals(other.getSecondaryKey());
-    }
-    
-    /**
-     * Returns true if this value needs to be republished
-     */
-    public boolean isRepublishingRequired() {
-        if (!isLocalValue()) {
-            return false;
-        }
-        
-        if (publishTime == 0L) {
-            return true;
-        }
-        
-        return DatabaseUtils.isRepublishingRequired(publishTime, getLocations().size());
     }
     
     /**

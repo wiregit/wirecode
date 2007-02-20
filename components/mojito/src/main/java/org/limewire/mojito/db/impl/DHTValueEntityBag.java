@@ -68,7 +68,10 @@ public class DHTValueEntityBag implements Serializable {
         return primaryKey;
     }
     
-    public float getRequestLoad() {
+    public float getRequestLoad(boolean incrementLoad) {
+        if (incrementLoad) {
+            incrementRequestLoad();
+        }
         return requestLoad;
     }
     
@@ -166,7 +169,7 @@ public class DHTValueEntityBag implements Serializable {
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Bag: ").append(getPrimaryKey()).append("\n");
-        buffer.append("Load: ").append(getRequestLoad()).append("\n");
+        buffer.append("Load: ").append(getRequestLoad(false)).append("\n");
         buffer.append("Values:").append("\n");
         
         for(DHTValueEntity entity : values.values()) {    

@@ -43,11 +43,6 @@ public class DHTValueImpl implements DHTValue {
     private static final byte[] EMPTY = new byte[0];
     
     /**
-     * An empty value
-     */
-    public static final DHTValue EMPTY_VALUE = new DHTValueImpl(DHTValueType.BINARY, Version.UNKNOWN, EMPTY);
-    
-    /**
      * The type of the value
      */
     private final DHTValueType valueType;
@@ -98,7 +93,7 @@ public class DHTValueImpl implements DHTValue {
     /* (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValue#writeValue(java.io.OutputStream)
      */
-    public void writeValue(OutputStream out) throws IOException {
+    public void write(OutputStream out) throws IOException {
         out.write(value, 0, value.length);
     }
     
@@ -106,29 +101,16 @@ public class DHTValueImpl implements DHTValue {
      * @see org.limewire.mojito.db.DHTValue#getValue()
      */
     public byte[] getValue() {
-        return getValue(new byte[value.length], 0, value.length);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValue(byte[], int, int)
-     */
-    public byte[] getValue(byte[] dst, int offset, int length) {
-        System.arraycopy(value, 0, dst, 0, value.length);
-        return dst;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#size()
-     */
-    public int size() {
-        return value.length;
+        byte[] copy = new byte[value.length];
+        System.arraycopy(value, 0, copy, 0, value.length);
+        return copy;
     }
     
     /* (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValue#isEmpty()
      */
     public boolean isEmpty() {
-        return size() == 0;
+        return value.length == 0;
     }
     
     public int hashCode() {

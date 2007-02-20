@@ -42,6 +42,7 @@ import com.limegroup.gnutella.browser.HTTPAcceptor;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.dht.AltLocFinder;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.impl.LimeDHTManager;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -267,6 +268,12 @@ public class RouterService {
      */
     private static DHTManager dhtManager = 
         new LimeDHTManager(ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+    
+    /**
+     * 
+     */
+    private static AltLocFinder altLocFinder 
+        = new AltLocFinder(dhtManager);
     
     private static MessageDispatcher messageDispatcher;
     
@@ -647,6 +654,13 @@ public class RouterService {
      */
     public static DHTManager getDHTManager() {
         return dhtManager;
+    }
+    
+    /**
+     * Accessor for the <tt>AltLocFinder</tt> instance.
+     */
+    public static AltLocFinder getAltLocFinder() {
+        return altLocFinder;
     }
     
 	/**
@@ -1793,7 +1807,8 @@ public class RouterService {
     public static boolean isDHTNode() {
         if(dhtManager != null) {
             return dhtManager.isRunning();
-        } else return false;
+        } 
+        return false;
     }
     
     /**
@@ -1813,7 +1828,9 @@ public class RouterService {
         if(dhtManager != null) {
             return (dhtManager.isRunning()
                     && dhtManager.isBootstrapped());
-        } else return false;
+        }
+        
+        return false;
     }
     
 	/**
@@ -2071,10 +2088,10 @@ public class RouterService {
     }
     
     public static void startDHT(boolean activeMode) {
-        dhtManager.start(activeMode);
+        getDHTManager().start(activeMode);
     }
     
     public static void shutdownDHT() {
-        dhtManager.stop();
+        getDHTManager().stop();
     }
 }

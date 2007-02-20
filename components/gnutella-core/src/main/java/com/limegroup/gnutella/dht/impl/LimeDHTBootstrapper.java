@@ -26,14 +26,10 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTNodeFetcher;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.util.EventDispatcher;
 
 class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     
@@ -43,7 +39,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
      * Limit size to 50 for now.
      */
-    private Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
+    private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
     
     /**
      * A flag that indicates whether or not we've tried to
@@ -71,7 +67,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     /**
      * The DHT controller
      */
-    private DHTController controller;
+    private final DHTController controller;
 
     /**
      * The DHTNodeFetcher instance
@@ -81,17 +77,10 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     /**
      * The lock Object
      */
-    private Object lock = new Object();
+    private final Object lock = new Object();
     
-    /**
-     * The DHT event dispatcher
-     */
-    private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
-    
-    public LimeDHTBootstrapper(DHTController controller, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+    public LimeDHTBootstrapper(DHTController controller) {
         this.controller = controller;
-        this.dispatcher = dispatcher;
     }
     
     /**
@@ -260,7 +249,6 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      */
     private void finish() {
         controller.sendUpdatedCapabilities();
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.CONNECTED));
     }
     
     /**

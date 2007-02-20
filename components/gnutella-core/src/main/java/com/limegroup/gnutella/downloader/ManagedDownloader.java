@@ -1802,7 +1802,10 @@ public class ManagedDownloader extends AbstractDownloader
             
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
-
+        
+        // TODO This is for testing only
+        RouterService.getAltLocFinder().findAltLocs(getSHA1Urn());
+        
         return true;
     }
     

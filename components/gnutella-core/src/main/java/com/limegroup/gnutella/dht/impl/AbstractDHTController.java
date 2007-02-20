@@ -22,6 +22,7 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.db.impl.DHTValuePublisherProxy;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -31,13 +32,15 @@ import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.AltLocPublisher;
 import com.limegroup.gnutella.dht.DHTBootstrapper;
 import com.limegroup.gnutella.dht.DHTController;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTFilterDelegate;
+import com.limegroup.gnutella.dht.LimeDHTValueFactory;
 import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
-import com.limegroup.gnutella.dht.DHTEvent.EventType;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -104,6 +107,8 @@ abstract class AbstractDHTController implements DHTController {
     
     public AbstractDHTController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+        
+        this.dispatcher = dispatcher;
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
@@ -114,6 +119,7 @@ abstract class AbstractDHTController implements DHTController {
             }
         });
         dht.setHostFilter(new DHTFilterDelegate());
+        dht.setDHTValueFactory(new LimeDHTValueFactory());
         
         try {
             PublicKey publicKey = CryptoUtils.loadPublicKey(PUBLIC_KEY);
@@ -126,13 +132,19 @@ abstract class AbstractDHTController implements DHTController {
         } catch (IOException e) {
             LOG.error("IOException", e);
         }
+
+        DHTValuePublisherProxy proxy = new DHTValuePublisherProxy();
+        proxy.add(new AltLocPublisher(dht));
+        dht.setDHTValueEntityPublisher(proxy);
         
-        this.bootstrapper = new LimeDHTBootstrapper(this, dispatcher);
-        this.dispatcher = dispatcher;
+        this.bootstrapper = new LimeDHTBootstrapper(this);
         
         DHTStatsManager.clear();
     }
 
+    /**
+     * A factory method to create MojitoDHTs
+     */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
     
     /**
@@ -160,7 +172,7 @@ abstract class AbstractDHTController implements DHTController {
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             bootstrapper.bootstrap();
-            dispatcher.dispatchEvent(new DHTEvent(this, EventType.STARTING));
+            dispatcher.dispatchEvent(new DHTEvent(this, Type.STARTING));
         } catch (IOException err) {
             LOG.error("IOException", err);
             ErrorService.error(err);
@@ -180,7 +192,7 @@ abstract class AbstractDHTController implements DHTController {
         dhtNodeAdder.stop();
         dht.close();
         
-        dispatcher.dispatchEvent(new DHTEvent(this, EventType.STOPPED));
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
     }
     
     /**
@@ -264,6 +276,8 @@ abstract class AbstractDHTController implements DHTController {
         
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
+        
+        dispatcher.dispatchEvent(new DHTEvent(this, Type.CONNECTED));
     }
     
     /**

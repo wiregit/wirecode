@@ -163,9 +163,9 @@ public class MetaFileManager extends FileManager {
                         ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
                         ctCache.commitTime(fd.getSHA1Urn());
                     }
-                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.CHANGE, removed, fd);
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.CHANGE_FILE, removed, fd);
                 } else {
-                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.REMOVE, removed);
+                    newEvt = new FileManagerEvent(MetaFileManager.this, Type.REMOVE_FILE, removed);
                 }
                 dispatchFileEvent(newEvt);
             }

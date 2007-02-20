@@ -446,6 +446,7 @@ public class DatabaseTest extends MojitoTestCase {
         
         // The Bag should be gone
         assertNull(database.getBag(key));
+        assertTrue(database.get(key).isEmpty());
     }
     
     public void testFloodDatabase() {

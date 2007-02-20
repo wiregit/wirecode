@@ -17,7 +17,6 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.dht.DHTControllerStub;
-import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -43,10 +42,9 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
-        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht), 
-                new DHTEventDispatcherStub());
+        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht));
         dhtContext = (Context)dht;
-        dhtContext.bind(new InetSocketAddress("localhost", 2000));
+        dhtContext.bind(new InetSocketAddress(2000));
         dhtContext.start();
     }
 

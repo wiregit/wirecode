@@ -24,13 +24,12 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.security.KeyPair;
-import java.util.Collection;
-import java.util.Set;
 
 import org.limewire.mojito.concurrent.DHTExecutorService;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
@@ -219,6 +218,26 @@ public interface MojitoDHT {
     public Database getDatabase();
     
     /**
+     * 
+     */
+    public void setDHTValueFactory(DHTValueFactory valueFactory);
+    
+    /**
+     * 
+     */
+    public DHTValueFactory getDHTValueFactory();
+    
+    /**
+     * 
+     */
+    public void setDHTValueEntityPublisher(DHTValueEntityPublisher x);
+    
+    /**
+     * 
+     */
+    public DHTValueEntityPublisher getDHTValueEntityPublisher();
+    
+    /**
      * Bootstraps the MojitoDHT from the given Contact. Use
      * the ping() methods to find a Contact!
      */
@@ -240,16 +259,6 @@ public interface MojitoDHT {
      * Tries to ping the given address
      */
     public DHTFuture<PingResult> ping(SocketAddress dst);
-    
-    /**
-     * Returns a Set of all keys in the Database
-     */
-    public Set<KUID> keySet();
-    
-    /**
-     * Returns a Collection of all values in the Database
-     */
-    public Collection<DHTValueEntity> getValues();
     
     /**
      * Tries to find the value for the given key

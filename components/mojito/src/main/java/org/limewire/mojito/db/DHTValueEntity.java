@@ -98,15 +98,4 @@ public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable 
      * and sender are the same).
      */
     public boolean isDirect();
-    
-    /**
-     * 
-     */
-    public boolean isRepublishingRequired();
-    
-    /**
-     * Creates a new DHTValueEntity with the given new creator
-     * if this is a local value
-     */
-    public DHTValueEntity changeCreator(Contact creator);
 }

@@ -57,6 +57,11 @@ public interface Database extends Serializable {
     public boolean store(DHTValueEntity entity);
     
     /**
+     * Adds the given DHTValueEntity to the Database
+     */
+    //public boolean add(DHTValueEntity entity);
+    
+    /**
      * Removes the given DHTValue from the Database
      * 
      * @param DHTValueImpl to remove

@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
@@ -64,18 +65,30 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Map<KUID, DHTValueEntity> bag = null;
         float requestLoad = 0f;
         
+        DHTValueEntityPublisher publisher = context.getDHTValueEntityPublisher();
+        DHTValueEntity localValueEntity = publisher.get(lookup);
+        
         Database database = context.getDatabase();
         synchronized (database) {
             bag = database.get(lookup);
             requestLoad = database.getRequestLoad(lookup, true);
         }
-
+        
         // The keys and values we'll return
         Collection<KUID> availableKeys = new HashSet<KUID>();
         Collection<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
         
         // The keys the remote Node is requesting
         Collection<KUID> secondaryKeys = request.getSecondaryKeys();
+        
+        if (localValueEntity != null) {
+            if (secondaryKeys.isEmpty() 
+                    || secondaryKeys.contains(context.getLocalNodeID())) {
+                valuesToReturn.add(localValueEntity);
+            } else {
+                availableKeys.add(context.getLocalNodeID());
+            }
+        }
         
         if (bag != null && !bag.isEmpty()) {
             if (secondaryKeys.isEmpty()) {
@@ -118,8 +131,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();
 
             FindValueResponse response = context.getMessageHelper()
-                .createFindValueResponse(request, availableKeys, 
-                        valuesToReturn, requestLoad);
+                .createFindValueResponse(request, requestLoad, 
+                        valuesToReturn, availableKeys);
             context.getMessageDispatcher().send(request.getContact(), response);
         }
     }

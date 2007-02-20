@@ -21,6 +21,7 @@ package org.limewire.mojito.handler;
 
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -209,6 +210,16 @@ public class DefaultMessageHandler {
         
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
+        Collection<DHTValueEntity> entities = context
+                .getDHTValueEntityPublisher().getValuesToForward();
+        for (DHTValueEntity entity : entities) {
+            Operation op = getOperation(node, existing, entity.getKey());
+            if (op.equals(Operation.FORWARD)) {
+                databaseStats.STORE_FORWARD_COUNT.incrementStat();
+                valuesToForward.add(entity);
+            }
+        }
+        
         Database database = context.getDatabase();
         synchronized(database) {
             for(KUID valueId : database.keySet()) {
@@ -224,10 +235,9 @@ public class DefaultMessageHandler {
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
                     Map<KUID, DHTValueEntity> bag = database.get(valueId);
                     for (DHTValueEntity entity : bag.values()) {
-                        if (!entity.isLocalValue()) {
-                            //System.out.println("REMOVING: " + entity + "\n");
-                            database.remove(entity.getKey(), entity.getSecondaryKey());
-                        }
+                        assert (!entity.isLocalValue());
+                        //System.out.println("REMOVING: " + entity + "\n");
+                        database.remove(entity.getKey(), entity.getSecondaryKey());
                     }
                     databaseStats.STORE_FORWARD_REMOVALS.incrementStat();
                 }

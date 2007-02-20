@@ -99,10 +99,10 @@ public class MessageHelper {
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, 
-            Collection<KUID> keys, Collection<? extends DHTValueEntity> values, float requestLoad) {
+            float requestLoad, Collection<? extends DHTValueEntity> values, Collection<KUID> keys) {
         
         return factory.createFindValueResponse(getLocalNode(), request.getContact(), 
-                request.getMessageID(), keys, values, requestLoad);
+                request.getMessageID(), requestLoad, values, keys);
     }
 
     public StoreRequest createStoreRequest(SocketAddress dst, SecurityToken securityToken, 
