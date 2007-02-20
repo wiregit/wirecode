@@ -90,7 +90,7 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
     
     public void testInvalidSettings() throws Exception {
         try {
-            QKGeneratorRotator rotator = new QKGeneratorRotator(new SchedulingTestThreadPool(), 
+            new QKGeneratorRotator(new SchedulingTestThreadPool(), 
                     new QueryKeySmith.TEAFactory(),
                     new SettingsProvider() {
                 public long getChangePeriod() {

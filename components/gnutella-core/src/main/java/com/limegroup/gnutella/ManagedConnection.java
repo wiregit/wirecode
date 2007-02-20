@@ -931,9 +931,6 @@ public class ManagedConnection extends Connection
             }
         }
         
-        // can't proxy if payload should not be modified
-        if (!query.isPayloadModifiable()) return query;
-        
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;

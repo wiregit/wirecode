@@ -1187,28 +1187,6 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue (patched.desiresOutOfBandRepliesV3());
     }
     
-    public void testIsPayloadModifiable() throws BadPacketException {
-        QueryRequest query = QueryRequest.createQuery("query");
-        assertTrue(query.isPayloadModifiable());
-        
-        query = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), query.getPayload(), 0);
-        assertTrue(query.isPayloadModifiable());
-        
-        // patch in non-modifiability
-        GGEP ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD);
-        query = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), QueryRequest.patchInGGEP(query.getPayload(), ggep), 0);
-        assertFalse(query.isPayloadModifiable());
-        
-        try {
-            QueryRequest.createProxyQuery(query, GUID.makeGuid());
-            fail("should not be able to create proxy queries from unmodifiable payload");
-        }
-        catch (IllegalArgumentException iae) {
-        }
-    }
-    
-
     /**
      * Tests if the security token key is set for oob query requests and that
      * it's not set otherwise.

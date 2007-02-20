@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -80,7 +79,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
@@ -129,11 +127,6 @@ public abstract class MessageRouter {
      * The maximum size for <tt>RouteTable</tt>s.
      */
     private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
-
-    /**
-     * The maximum number of bypassed results to remember per query.
-     */
-    private final int MAX_BYPASSED_RESULTS = 150;
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -188,12 +181,9 @@ public abstract class MessageRouter {
     private final Map<GUID.TimedGUID, QueryResponseBundle> _outOfBandReplies =
         new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
-    /**
-     * Keeps track of potential sources of content.  Comprised of Sets of GUESS
-     * Endpoints.  Kept tidy when searches/downloads are killed.
-     */
-    private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = new HashMap<GUID, Set<GUESSEndpoint>>();
-
+    
+    private GUESSSourcesCache _guessSourcesCache = new GUESSSourcesCache(RouterService.getCallback(), RouterService.getDownloadManager());
+    
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
      * UDP.  The size is limited and once the size is reached, no more connect
@@ -530,10 +520,7 @@ public abstract class MessageRouter {
     public void queryKilled(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_bypassedResults) {
-        if (!RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-            _bypassedResults.remove(guid);
-        }
+        _guessSourcesCache.queryKilled(guid);
     }
 
     /** Call this to inform us that a download is finished or whatever.  Useful
@@ -545,25 +532,15 @@ public abstract class MessageRouter {
     public void downloadFinished(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_bypassedResults) {
-            if (!_callback.isQueryAlive(guid) && 
-              !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-                _bypassedResults.remove(guid);
-        }
+        _guessSourcesCache.downloadFinished(guid);
     }
     
     /** @returns a Set with GUESSEndpoints that had matches for the
      *  original query guid.  may be empty.
      *  @param guid the guid of the query you want endpoints for.
      */
-    public Set<GUESSEndpoint> getGuessLocs(GUID guid) {
-        Set<GUESSEndpoint> clone = new HashSet<GUESSEndpoint>();
-        synchronized (_bypassedResults) {
-            Set<GUESSEndpoint> eps = _bypassedResults.get(guid);
-            if (eps != null)
-                clone.addAll(eps);
-        }
-        return clone;
+    public Set<GUESSEndpoint> getGUESSLocs(GUID guid) {
+        return _guessSourcesCache.getGUESSLocs(guid);
     }
     
     public String getPingRouteTableDump() {
@@ -1145,49 +1122,32 @@ public abstract class MessageRouter {
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
     }
+    
+    public boolean addPossibleGUESSSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+        
+        //if the reply cannot receive unsolicited udp, there is no point storing it
+        if (!reply.canReceiveUnsolicited()) {
+            return false;
+        }
+
+        GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
+        return _guessSourcesCache.addGUESSSource(new GUID(reply.getGUID()), ep);
+    }
 
     public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
     	GUID qGUID = new GUID(reply.getGUID());
-    	int numResults = 
+    	
+        int numResults = 
     		RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-    	if (numResults < 0) // this may be a proxy query
+    	
+        if (numResults < 0) // this may be a proxy query
     		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
-    	
-    	// see if we need more results for this query....
-    	// if not, remember this location for a future, 'find more sources'
-    	// targeted GUESS query, as long as the other end said they can receive
-    	// unsolicited.
-        // TODO fberger fix this
-    	if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-    		OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
-    		
-    		//if the reply cannot receive unsolicited udp, there is no point storing it.
-    		if (!reply.canReceiveUnsolicited())
-    			return -1;
-    		
-    		// only store result if it is being shown to the user or if a
-    		// file with the same guid is being downloaded
-    		if (!isQueryAlive(qGUID))
-    			return -1;
-    		
-    		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
-    		synchronized (_bypassedResults) {
-    			// this is a quick critical section for _bypassedResults
-    			// AND the set within it
-    			Set<GUESSEndpoint> eps = _bypassedResults.get(qGUID);
-    			if (eps == null) {
-    				eps = new HashSet<GUESSEndpoint>();
-    				_bypassedResults.put(qGUID, eps);
-    			}
-    			if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
-    				eps.add(ep);
-    		}
-    		
-    		return -1;
-    	}
-    	
+
+        if (numResults < 0 || numResults > QueryHandler.ULTRAPEER_RESULTS) {
+            return -1;
+        }
+        
     	return reply.getNumResults();
-    	
     }
     
     /**

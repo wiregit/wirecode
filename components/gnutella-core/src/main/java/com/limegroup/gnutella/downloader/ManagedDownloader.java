@@ -940,7 +940,7 @@ public class ManagedDownloader extends AbstractDownloader
             return false;
             
         MessageRouter mr = RouterService.getMessageRouter();
-        Set<GUESSEndpoint> guessLocs = mr.getGuessLocs(this.originalQueryGUID);
+        Set<GUESSEndpoint> guessLocs = mr.getGUESSLocs(this.originalQueryGUID);
         if(guessLocs == null || guessLocs.isEmpty())
             return false;
 

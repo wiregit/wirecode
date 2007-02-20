@@ -124,12 +124,6 @@ public class QueryRequest extends Message implements Serializable{
      */
     private boolean _doNotProxy = false;
     
-    /**
-     * Whether or not payload is modifiable, see
-     * {@link GGEP#GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD}.
-     */
-    private boolean _isPayloadModifiable = true;
-    
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
@@ -681,10 +675,6 @@ public class QueryRequest extends Message implements Serializable{
 	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
         if (guid.length != 16)
             throw new IllegalArgumentException("bad guid size: " + guid.length);
-        
-        if (!qr.isPayloadModifiable()) {
-            throw new IllegalArgumentException("payload is not modifiable " + qr);
-        }
 
         // i can't just call a new constructor, since there might be stuff in
         // the payload we don't understand and would get lost
@@ -714,9 +704,6 @@ public class QueryRequest extends Message implements Serializable{
      * @throws IllegalArgumentException if {@link #isOriginated()} is false 
      */
     public static QueryRequest createDoNotProxyQuery(QueryRequest qr) {
-        if (!qr.isPayloadModifiable()) {
-            throw new IllegalArgumentException("payload is not modifiable " + qr);
-        }
         if (!GUID.isLimeGUID(qr.getGUID())) {
             throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
         }
@@ -748,9 +735,6 @@ public class QueryRequest extends Message implements Serializable{
      * a LimeWire
 	 */
 	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
-        if (!qr.isPayloadModifiable()) {
-            throw new IllegalArgumentException("payload is not modifiable " + qr);
-        }
         if (!GUID.isLimeGUID(qr.getGUID())) {
             throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
         }
@@ -1413,8 +1397,6 @@ public class QueryRequest extends Message implements Serializable{
         
         _isSecurityTokenRequired = parser.hasSecurityTokenRequest;
         
-        _isPayloadModifiable = parser.isPayloadModifiable;
-        
 		if(parser.queryUrns == null) {
 			QUERY_URNS =Collections.emptySet(); 
 		}
@@ -1624,14 +1606,6 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean doNotProxy() {
         return _doNotProxy;
-    }
-    
-    /**
-     * Returns whether or not the payload of the query may be modified
-     * when rerouting or proxying it.
-     */
-    public boolean isPayloadModifiable() {
-        return _isPayloadModifiable;
     }
     
     /**
@@ -1912,7 +1886,7 @@ public class QueryRequest extends Message implements Serializable{
             // we write in the last modifiable block if available, so our
             // values are still there in the merged version that is read back 
             // from the network: this is not good
-            GGEPBlock block = getLastModifiableBlock(huge.getGGEPBlocks());
+            GGEPBlock block = getLastBlock(huge.getGGEPBlocks());
             if (block != null) {
                 GGEP merge = new GGEP(false);
                 // first merge in original block and then ours, to make sure
@@ -1954,12 +1928,10 @@ public class QueryRequest extends Message implements Serializable{
      * Return the last modifiable GGEPBlock in the list or null if there
      * is none or if the list is empty.
      */
-    private static GGEPBlock getLastModifiableBlock(List<GGEPBlock> blocks) {
+    private static GGEPBlock getLastBlock(List<GGEPBlock> blocks) {
         GGEPBlock last = null;
         for (GGEPBlock block : blocks) {
-            if (!block.getGGEP().hasKey(GGEP.GGEP_HEADER_DO_NOT_MODIFY_GGEP)) {
-                last = block;
-            }
+            last = block;
         }
         return last;
     }
@@ -2015,8 +1987,6 @@ public class QueryRequest extends Message implements Serializable{
         
         int hugeEnd;
         
-        boolean isPayloadModifiable = true;
-        
         public QueryRequestPayloadParser(byte[] payload) throws BadPacketException {
             try {
                 PositionByteArrayInputStream bais = new PositionByteArrayInputStream(payload);
@@ -2050,9 +2020,6 @@ public class QueryRequest extends Message implements Serializable{
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
                             hasSecurityTokenRequest = true;
-                        }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_DO_NOT_MODIFY_PAYLOAD)) {
-                            isPayloadModifiable = false;
                         }
                     } catch (BadGGEPPropertyException ignored) {}
                 }

@@ -52,11 +52,16 @@ public class OOBHandler implements MessageHandler, Runnable {
 	
 	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
-	
-		int toRequest = router.getNumOOBToRequest(msg, handler);
-		if (toRequest <= 0)
-			return;
-		
+
+        int toRequest;
+        
+        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg, handler)) < 0) {
+            // remember as possible GUESS source though
+            router.addPossibleGUESSSource(msg, handler);
+            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
+            return;
+        }
+				
 		LimeACKVendorMessage ack =
 			new LimeACKVendorMessage(g, toRequest, 
                     new OOBQueryKey(new OOBTokenData(handler, msg.getGUID(), toRequest)));
