@@ -60,7 +60,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testNodesPersistence() throws Exception{
-        int numPersistedNodes = DHTSettings.NUM_PERSISTED_NODES.getValue();
+        int numPersistedNodes = DHTSettings.MAX_PERSISTED_NODES.getValue();
         DHTSettings.PERSIST_DHT.setValue(true);
         //first delete any previous file
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "mojito.dat");

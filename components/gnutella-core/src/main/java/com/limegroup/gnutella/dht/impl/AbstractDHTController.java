@@ -135,6 +135,7 @@ abstract class AbstractDHTController implements DHTController {
 
         DHTValuePublisherProxy proxy = new DHTValuePublisherProxy();
         proxy.add(new AltLocPublisher(dht));
+        //proxy.add(new PushProxiesPublisher(dht));
         dht.setDHTValueEntityPublisher(proxy);
         
         this.bootstrapper = new LimeDHTBootstrapper(this);

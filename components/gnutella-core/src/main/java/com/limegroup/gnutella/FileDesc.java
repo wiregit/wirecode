@@ -90,7 +90,10 @@ public class FileDesc implements FileDetails {
 	 */
 	private int _attemptedUploads;
 	
-    private long lastAttemptedUploadTime = 0L;
+    /**
+     * The time when the last attempt was made to upload this file
+     */
+    private long lastAttemptedUploadTime = System.currentTimeMillis();
     
 	/** 
 	 * The number of times this file has had completed uploads

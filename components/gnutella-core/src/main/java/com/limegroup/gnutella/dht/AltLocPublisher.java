@@ -19,9 +19,15 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
- * 
+ * The AltLocPublisher publishes the localhost as an alternate 
+ * locations for rare files. Rare files are files that haven't 
+ * been uploaded for a certain amount of time. There are various
+ * other ways to determinate the rareness of a file like using
+ * the number of query hits instead of upload attempts or even
+ * keeping track of the file activities over multiple sessions.
  */
 public class AltLocPublisher implements DHTValueEntityPublisher {
     
@@ -34,8 +40,12 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         this.dht = dht;
     }
     
-    public DHTValueEntity get(KUID secondaryKey) {
-        return values.get(secondaryKey);
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
+     */
+    public DHTValueEntity get(KUID primaryKey) {
+        return values.get(primaryKey);
     }
 
     /*
@@ -100,7 +110,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
                 
                 // Publish only rare FileDescs and removed entities
                 // respectively
-                if (fd == null || isRare(fd)) {
+                if (fd == null || isRareFile(fd)) {
                     publish.add(entity);
                 }
             }
@@ -126,7 +136,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
                 FileDesc fd = fileManager.getFileDescForUrn(urn);
                 
                 // And forward only if it still exists and is rare
-                if (fd != null && isRare(fd)) {
+                if (fd != null && isRareFile(fd)) {
                     forward.add(entity);
                 }
             }
@@ -161,11 +171,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
     
     /**
      * Returns true if the FileDesc is considered rare
-     * 
-     * TODO: Define rare
      */
-    private static boolean isRare(FileDesc fd) {
+    private static boolean isRareFile(FileDesc fd) {
         long time = fd.getLastAttemptedUploadTime();
-        return (System.currentTimeMillis() - time >= 0L);
+        long delta = System.currentTimeMillis() - time;
+        return (delta >= DHTSettings.RARE_FILE_TIME.getValue());
     }
 }

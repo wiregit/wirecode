@@ -42,7 +42,7 @@ public interface DHTValueEntityPublisher {
      * 
      * TODO: Add a second argument to specify the DHTValueType
      */
-    public DHTValueEntity get(KUID secondaryKey);
+    public DHTValueEntity get(KUID primaryKey);
     
     /**
      * Returns all DHTValueEntities

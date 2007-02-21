@@ -155,7 +155,7 @@ class PassiveDHTNodeController extends AbstractDHTController{
                                     new FileOutputStream(FILE))));
                 
                 // Sort by MRS and save only some Nodes
-                contacts = ContactUtils.sort(contacts, DHTSettings.NUM_PERSISTED_NODES.getValue());
+                contacts = ContactUtils.sort(contacts, DHTSettings.MAX_PERSISTED_NODES.getValue());
                 
                 KUID localNodeID = getMojitoDHT().getLocalNodeID();
                 for(Contact node : contacts) {

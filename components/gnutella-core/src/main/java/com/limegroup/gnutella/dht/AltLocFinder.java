@@ -152,8 +152,6 @@ public class AltLocFinder {
                             }
                         }
                         
-                        System.out.println(entity + " -> " + location);
-                        
                         if (location != null) {
                             altLocManager.add(location, this);
                         }
@@ -166,17 +164,17 @@ public class AltLocFinder {
 
         @Override
         public void handleFutureCancelled(CancellationException e) {
-            e.printStackTrace();
+            LOG.error("CancellationException", e);
         }
 
         @Override
         public void handleFutureFailure(ExecutionException e) {
-            e.printStackTrace();
+            LOG.error("ExecutionException", e);
         }
 
         @Override
         public void handleFutureInterrupted(InterruptedException e) {
-            e.printStackTrace();
+            LOG.error("InterruptedException", e);
         }
 
         public int hashCode() {
@@ -248,6 +246,21 @@ public class AltLocFinder {
                 } catch (InterruptedException e) {
                 } 
             }
+        }
+        
+        @Override
+        public void handleFutureCancelled(CancellationException e) {
+            LOG.error("CancellationException", e);
+        }
+
+        @Override
+        public void handleFutureFailure(ExecutionException e) {
+            LOG.error("ExecutionException", e);
+        }
+
+        @Override
+        public void handleFutureInterrupted(InterruptedException e) {
+            LOG.error("InterruptedException", e);
         }
         
         public int hashCode() {

@@ -69,11 +69,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
-    public DHTValueEntity get(KUID secondaryKey) {
+    public DHTValueEntity get(KUID primaryKey) {
         DHTValueEntity entity = null;
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
-                entity = publisher.get(secondaryKey);
+                entity = publisher.get(primaryKey);
                 if (entity != null) {
                     return entity;
                 }
