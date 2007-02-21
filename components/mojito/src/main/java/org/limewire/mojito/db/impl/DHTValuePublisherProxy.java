@@ -24,10 +24,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Contact;
 
 /**
@@ -35,7 +39,7 @@ import org.limewire.mojito.routing.Contact;
  * instances. In other words you may use it to combine multiple data
  * sources.
  */
-public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
+public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutureListener<StoreResult> {
 
     private final Set<DHTValueEntityPublisher> proxy
         = Collections.synchronizedSet(new LinkedHashSet<DHTValueEntityPublisher>());
@@ -82,6 +86,20 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
      */
+    public Collection<DHTValueEntity> getValues() {
+        Collection<DHTValueEntity> values = new ArrayList<DHTValueEntity>();
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                values.addAll(publisher.getValues());
+            }
+        }
+        return values;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
+     */
     public Collection<DHTValueEntity> getValuesToPublish() {
         Collection<DHTValueEntity> publish = new ArrayList<DHTValueEntity>();
         synchronized (proxy) {
@@ -94,28 +112,16 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
+     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
      */
-    public Collection<DHTValueEntity> getValues() {
+    public Collection<DHTValueEntity> getValuesToForward() {
         Collection<DHTValueEntity> forward = new ArrayList<DHTValueEntity>();
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
-                forward.addAll(publisher.getValues());
+                forward.addAll(publisher.getValuesToForward());
             }
         }
         return forward;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#published(org.limewire.mojito.db.DHTValueEntity, org.limewire.mojito.result.StoreResult)
-     */
-    public void published(DHTValueEntity entity) {
-        synchronized (proxy) {
-            for (DHTValueEntityPublisher publisher : proxy) {
-                publisher.published(entity);
-            }
-        }
     }
     
     /*
@@ -126,6 +132,62 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
                 publisher.changeContact(node);
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureSuccess(java.lang.Object)
+     */
+    public void handleFutureSuccess(StoreResult result) {
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                if (publisher instanceof DHTFutureListener) {
+                    ((DHTFutureListener<StoreResult>)publisher).handleFutureSuccess(result);
+                }
+            }
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureCancelled(java.util.concurrent.CancellationException)
+     */
+    public void handleFutureCancelled(CancellationException e) {
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                if (publisher instanceof DHTFutureListener) {
+                    ((DHTFutureListener<StoreResult>)publisher).handleFutureCancelled(e);
+                }
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureFailure(java.util.concurrent.ExecutionException)
+     */
+    public void handleFutureFailure(ExecutionException e) {
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                if (publisher instanceof DHTFutureListener) {
+                    ((DHTFutureListener<StoreResult>)publisher).handleFutureFailure(e);
+                }
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureInterrupted(java.lang.InterruptedException)
+     */
+    public void handleFutureInterrupted(InterruptedException e) {
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                if (publisher instanceof DHTFutureListener) {
+                    ((DHTFutureListener<StoreResult>)publisher).handleFutureInterrupted(e);
+                }
             }
         }
     }

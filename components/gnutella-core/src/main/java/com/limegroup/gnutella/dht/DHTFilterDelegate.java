@@ -22,5 +22,4 @@ public class DHTFilterDelegate implements HostFilter {
         RouterService.getIpFilter().ban(addr);
         RouterService.reloadIPFilter();
     }
-
 }

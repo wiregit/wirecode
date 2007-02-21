@@ -111,6 +111,16 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
     
     /*
      * (non-Javadoc)
+     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
+     */
+    public Collection<DHTValueEntity> getValues() {
+        synchronized (values) {
+            return new ArrayList<DHTValueEntity>(values.values());
+        }
+    }
+    
+    /*
+     * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
      */
     public Collection<DHTValueEntity> getValuesToPublish() {
@@ -129,18 +139,8 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
      */
-    public Collection<DHTValueEntity> getValues() {
-        synchronized (values) {
-            return new ArrayList<DHTValueEntity>(values.values());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#published(org.limewire.mojito.db.DHTValueEntity, org.limewire.mojito.result.StoreResult)
-     */
-    public void published(DHTValueEntity entity) {
-        
+    public Collection<DHTValueEntity> getValuesToForward() {
+        return getValues();
     }
     
     /*

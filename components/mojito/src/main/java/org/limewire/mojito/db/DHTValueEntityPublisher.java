@@ -28,6 +28,11 @@ import org.limewire.mojito.routing.Contact;
  * The DHTValueEntityPublisher provides an interface to attach 
  * an external data source to Mojito. A correct implementation
  * is crucial for the DHT.
+ * 
+ * Implementation detail: You may implement the DHTFutureListener
+ * interface for StoreResults as well. The DHTValueManager checks 
+ * if the publisher implements the DHTFutureListener and registers
+ * it with the DHTValueManager's internal DHTFuture if it does.
  */
 public interface DHTValueEntityPublisher {
     
@@ -50,10 +55,9 @@ public interface DHTValueEntityPublisher {
     public Collection<DHTValueEntity> getValuesToPublish();
     
     /**
-     * A callback method that's called every time a DHTValueEntity
-     * was published
+     * Returns all DHTValueEntities that can be forwared
      */
-    public void published(DHTValueEntity entity);
+    public Collection<DHTValueEntity> getValuesToForward();
     
     /**
      * A callback method that notifies the Publisher that the

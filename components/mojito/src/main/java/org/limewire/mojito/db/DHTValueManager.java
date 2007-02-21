@@ -126,6 +126,8 @@ public class DHTValueManager implements Runnable {
         
         private Iterator<DHTValueEntity> values = null;
         
+        private DHTFutureListener<StoreResult> listener = null;
+        
         private DHTFuture<StoreResult> future = null;
         
         /**
@@ -184,6 +186,14 @@ public class DHTValueManager implements Runnable {
                 valuesToPublish = Collections.emptyList();
             }
             
+            // The DHTValueEntityPublisher may implement the DHTFutureListener
+            // interface in which case we're adding it to the DHTFuture as well.
+            if (valueEntityPublisher instanceof DHTFutureListener) {
+                listener = (DHTFutureListener<StoreResult>)valueEntityPublisher;
+            } else {
+                listener = null;
+            }
+            
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " 
                         + valuesToPublish.size() + " DHTValues to process");
@@ -226,23 +236,21 @@ public class DHTValueManager implements Runnable {
             
             future = context.store(entity);
             future.addDHTFutureListener(this);
+            
+            if (listener != null) {
+                future.addDHTFutureListener(listener);
+            }
+            
             return true;
         }
         
         public void handleFutureSuccess(StoreResult result) {
-            Collection<? extends Contact> nodes = result.getNodes();
             
-            if (!nodes.isEmpty()) {
-                if (LOG.isInfoEnabled()) {
+            if (LOG.isInfoEnabled()) {
+                Collection<? extends Contact> nodes = result.getNodes();
+                if (!nodes.isEmpty()) {
                     LOG.info(result);
-                }
-                
-                Collection<DHTValueEntity> entities = result.getSucceeded();
-                assert (entities.size() == 1);
-                DHTValueEntity entity = entities.iterator().next();
-                context.getDHTValueEntityPublisher().published(entity);
-            } else {
-                if (LOG.isInfoEnabled()) {
+                } else {
                     LOG.info("Failed to store " + result.getValues());
                 }
             }

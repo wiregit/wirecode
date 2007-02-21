@@ -7,14 +7,14 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 
 /**
- * 
+ * An interface for Gnutella Alternative Locations
  */
 public interface AltLocDHTValue extends DHTValue {
     
     /**
      * DHTValueType for AltLocs
      */
-    public static final DHTValueType ALT_LOC = DHTValueType.valueOf("ALOC");
+    public static final DHTValueType ALT_LOC = DHTValueType.valueOf("Gnutella Alternative Location", "ALOC");
     
     /**
      * Version of AltLocDHTValue

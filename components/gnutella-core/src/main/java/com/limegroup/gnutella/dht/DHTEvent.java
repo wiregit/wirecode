@@ -2,6 +2,9 @@ package com.limegroup.gnutella.dht;
 
 import java.util.EventObject;
 
+/**
+ * DHTEvents are fired for DHT state changes
+ */
 public class DHTEvent extends EventObject {
     
     public static enum Type {
