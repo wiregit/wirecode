@@ -69,7 +69,7 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
         if(remaining != in.available())
             throw new MessageFormatException("inconsistent message size.  expected: " + remaining + ", was: " + in.available());
         
-        // Return a reference to the remaining data.
+        // Return a reference to the remaining data if possible.
         ByteBuffer data2 = in.bufferFor(remaining); // G
         assert in.available() == 0;
 

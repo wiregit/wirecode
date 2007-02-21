@@ -92,6 +92,10 @@ public class ByteBufferInputStream extends InputStream {
         
         return -1;
     }
+    
+    public int read(byte[] b) {
+        return read(b, 0, b.length);
+    }
 
     public int read(byte[] b, int off, int len) {
         if (b == null) {
@@ -183,16 +187,26 @@ public class ByteBufferInputStream extends InputStream {
      */
     public ByteBuffer bufferFor(int length) {
         ByteBuffer ret = null;
+        
+        // make sure we advance to the first buffer with data left.
+        // this lets the reference work correctly.
+        while(index < buffers.length) {
+            if(buffers[index].hasRemaining())
+                break;
+            index++;
+        }
+        
         if(index < buffers.length) {
+            length = Math.min(length, available());
             ByteBuffer b = buffers[index];
-            if(b.remaining() >= length) {
+            if(b.remaining() >= length ) {
                 int oldLimit = b.limit();
                 b.limit(b.position() + length);
                 ret = b.slice();
                 b.limit(oldLimit);
                 b.position(b.position() + length);
             } else {
-                ret = ByteBuffer.allocate(Math.min(length, available()));
+                ret = ByteBuffer.allocate(length);
                 read(ret);
                 ret.flip();
             }
