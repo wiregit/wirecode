@@ -211,7 +211,7 @@ public class DefaultMessageHandler {
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
         Collection<DHTValueEntity> entities = context
-                .getDHTValueEntityPublisher().getValuesToForward();
+                .getDHTValueEntityPublisher().getValues();
         for (DHTValueEntity entity : entities) {
             Operation op = getOperation(node, existing, entity.getKey());
             if (op.equals(Operation.FORWARD)) {

@@ -34,8 +34,8 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         this.dht = dht;
     }
     
-    public DHTValueEntity get(KUID key) {
-        return values.get(key);
+    public DHTValueEntity get(KUID secondaryKey) {
+        return values.get(secondaryKey);
     }
 
     public Collection<DHTValueEntity> getValuesToPublish() {
@@ -93,7 +93,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         return entities;
     }
     
-    public Collection<DHTValueEntity> getValuesToForward() {
+    public Collection<DHTValueEntity> getValues() {
         return Collections.emptySet();
     }
 

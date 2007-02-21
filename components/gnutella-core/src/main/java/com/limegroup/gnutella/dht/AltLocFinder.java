@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -161,6 +162,21 @@ public class AltLocFinder {
                 } catch (InterruptedException e) {
                 } 
             }
+        }
+
+        @Override
+        public void handleFutureCancelled(CancellationException e) {
+            e.printStackTrace();
+        }
+
+        @Override
+        public void handleFutureFailure(ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        @Override
+        public void handleFutureInterrupted(InterruptedException e) {
+            e.printStackTrace();
         }
 
         public int hashCode() {

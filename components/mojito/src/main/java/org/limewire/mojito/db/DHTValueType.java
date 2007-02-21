@@ -49,18 +49,29 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     /**
      * An arbitrary type of value
      */
-    public static final DHTValueType BINARY = new DHTValueType("BINARY", 0x00000000);
-    //public static final ValueType LIME = new ValueType("LIME", parse("LIME"));
+    public static final DHTValueType BINARY = new DHTValueType("Binary", 0x00000000);
+    
+    /**
+     * LIME and all deviations of LIME like LiMe or lime are reserved
+     * for Lime Wire LLC
+     */
+    public static final DHTValueType LIME = new DHTValueType("LimeWire", "LIME");
     
     /**
      * Type for UTF-8 encoded Strings
      */
-    public static final DHTValueType TEXT = new DHTValueType("TEXT");
+    public static final DHTValueType TEXT = new DHTValueType("UTF-8 Encoded String", "TEXT");
     
     /**
      * A value that is used for testing purposes
      */
-    public static final DHTValueType TEST = new DHTValueType("TEST");
+    public static final DHTValueType TEST = new DHTValueType("Test Value", "TEST");
+    
+    /**
+     * The ANY type is reserved for requesting purposes. You may not
+     * use it as an actual value type
+     */
+    public static final DHTValueType ANY = new DHTValueType("Any Type", "****");
     
     // --- END VALUETYPE DECLARATION BLOCK ---
     
@@ -115,13 +126,17 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     /** The Name of the value type */
-    private String name;
+    private final String name;
     
     /** The type code of the value */
-    private int type;
+    private final int type;
     
-    private DHTValueType(String name) {
+    /*private DHTValueType(String name) {
         this(name, ArrayUtils.toInteger(name));
+    }*/
+    
+    private DHTValueType(String name, String type) {
+        this(name, ArrayUtils.toInteger(type));
     }
     
     private DHTValueType(String name, int type) {
@@ -138,7 +153,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public boolean isUnknownType() {
-        return Arrays.binarySearch(TYPES, this) >= 0;
+        return Arrays.binarySearch(TYPES, this) < 0;
     }
 
     public int compareTo(DHTValueType o) {
@@ -161,7 +176,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         if (name.equals(UNKNOWN_NAME)) {
-            buffer.append(toString(type)).append("/").append(name);
+            buffer.append(ArrayUtils.toString(type)).append("/").append(name);
         } else {
             buffer.append(name);
         }
@@ -176,27 +191,24 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType valueOf(int type) {
-        DHTValueType unknown = new DHTValueType(UNKNOWN_NAME, type);
+        return valueOf(UNKNOWN_NAME, type);
+    }
+    
+    public static DHTValueType valueOf(String type) {
+        return valueOf(UNKNOWN_NAME, type);
+    }
+    
+    public static DHTValueType valueOf(String name, String type) {
+        return valueOf(name, ArrayUtils.toInteger(type));
+    }
+    
+    public static DHTValueType valueOf(String name, int type) {
+        DHTValueType unknown = new DHTValueType(name, type);
         int index = Arrays.binarySearch(TYPES, unknown);
         if (index < 0) {
             return unknown;
         } else {
             return TYPES[index];
         }
-    }
-    
-    public static DHTValueType valueOf(String type) {
-        return valueOf(ArrayUtils.toInteger(type));
-    }
-    
-    private static String toString(int type) {
-        byte[] name = new byte[] {
-            (byte)((type >> 24) & 0xFF),
-            (byte)((type >> 16) & 0xFF),
-            (byte)((type >>  8) & 0xFF),
-            (byte)((type      ) & 0xFF)
-        };
-        
-        return new String(name);
     }
 }

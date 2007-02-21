@@ -25,32 +25,40 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * 
+ * The DHTValueEntityPublisher provides an interface to attach 
+ * an external data source to Mojito. A correct implementation
+ * is crucial for the DHT.
  */
 public interface DHTValueEntityPublisher {
     
     /**
+     * Returns a DHTValueEntity for the given KUID or null if
+     * no such DHTValueEntity exists
      * 
+     * TODO: Add a second argument to specify the DHTValueType
      */
-    public DHTValueEntity get(KUID key);
+    public DHTValueEntity get(KUID secondaryKey);
     
     /**
-     * 
+     * Returns all DHTValueEntities
+     */
+    public Collection<DHTValueEntity> getValues();
+    
+    /**
+     * Returns all DHTValueEntities that need to be published now
      */
     public Collection<DHTValueEntity> getValuesToPublish();
     
     /**
-     * 
-     */
-    public Collection<DHTValueEntity> getValuesToForward();
-    
-    /**
-     * 
+     * A callback method that's called every time a DHTValueEntity
+     * was published
      */
     public void published(DHTValueEntity entity);
     
     /**
-     * 
+     * A callback method that notifies the Publisher that the
+     * Node ID of the local Node changed. Use it to rebuild
+     * your underlying data structure if necessary!
      */
     public void changeContact(Contact node);
 }

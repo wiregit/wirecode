@@ -36,7 +36,8 @@ import org.limewire.mojito.routing.impl.LocalContact;
 import org.limewire.mojito.util.DatabaseUtils;
 
 /**
- * 
+ * The default implementation of DHTValueEntityPublisher. 
+ * It's backed by a Map and works much like a Database.
  */
 public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
 
@@ -50,7 +51,7 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
     }
     
     /**
-     * 
+     * Adds the given KUID, DHTValue pair
      */
     public DHTValue put(KUID key, DHTValue value) {
         DHTValueEntity entity = context.createDHTValueEntity(key, value);
@@ -62,7 +63,7 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
     }
     
     /**
-     * 
+     * Removes the given KUID
      */
     public DHTValue remove(KUID key) {
         DHTValueEntity entity = values.remove(key);
@@ -73,18 +74,39 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
     }
     
     /**
-     * 
+     * Returns true if the given KUID exists
      */
     public boolean contains(KUID key) {
         return values.containsKey(key);
+    }
+    
+    /**
+     * Returns true if the Map is empty
+     */
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+    
+    /**
+     * Returns the number of elements
+     */
+    public int size() {
+        return values.size();
+    }
+    
+    /**
+     * Clears the mapping
+     */
+    public void clear() {
+        values.clear();
     }
     
     /*
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
-    public DHTValueEntity get(KUID key) {
-        return values.get(key);
+    public DHTValueEntity get(KUID secondaryKey) {
+        return values.get(secondaryKey);
     }
     
     /*
@@ -107,7 +129,7 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
      */
-    public Collection<DHTValueEntity> getValuesToForward() {
+    public Collection<DHTValueEntity> getValues() {
         synchronized (values) {
             return new ArrayList<DHTValueEntity>(values.values());
         }

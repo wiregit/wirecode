@@ -19,6 +19,7 @@
 
 package org.limewire.mojito.db.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -30,13 +31,18 @@ import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * 
+ * The DHTValuePublisherProxy proxies multiple DHTValueEntityPublisher
+ * instances. In other words you may use it to combine multiple data
+ * sources.
  */
 public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
 
     private final Set<DHTValueEntityPublisher> proxy
         = Collections.synchronizedSet(new LinkedHashSet<DHTValueEntityPublisher>());
     
+    /**
+     * Adds the given DHTValueEntityPublisher to the proxy
+     */
     public void add(DHTValueEntityPublisher publisher) {
         if (publisher == null) {
             throw new NullPointerException("DHTValueEntityPublisher is null");
@@ -44,6 +50,9 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
         proxy.add(publisher);
     }
     
+    /**
+     * Removes the given DHTValueEntityPublisher from the proxy
+     */
     public void remove(DHTValueEntityPublisher publisher) {
         if (publisher == null) {
             throw new NullPointerException("DHTValueEntityPublisher is null");
@@ -56,11 +65,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
-    public DHTValueEntity get(KUID key) {
+    public DHTValueEntity get(KUID secondaryKey) {
         DHTValueEntity entity = null;
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
-                entity = publisher.get(key);
+                entity = publisher.get(secondaryKey);
                 if (entity != null) {
                     return entity;
                 }
@@ -74,7 +83,7 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
      */
     public Collection<DHTValueEntity> getValuesToPublish() {
-        Set<DHTValueEntity> publish = new LinkedHashSet<DHTValueEntity>();
+        Collection<DHTValueEntity> publish = new ArrayList<DHTValueEntity>();
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
                 publish.addAll(publisher.getValuesToPublish());
@@ -87,11 +96,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#values()
      */
-    public Collection<DHTValueEntity> getValuesToForward() {
-        Set<DHTValueEntity> forward = new LinkedHashSet<DHTValueEntity>();
+    public Collection<DHTValueEntity> getValues() {
+        Collection<DHTValueEntity> forward = new ArrayList<DHTValueEntity>();
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
-                forward.addAll(publisher.getValuesToForward());
+                forward.addAll(publisher.getValues());
             }
         }
         return forward;

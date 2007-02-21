@@ -27,7 +27,12 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * A DHTValueEntity
+ * A DHTValueEntity is primarly a Key->Value tuple with some
+ * other information like who created or who sent us the value.
+ * 
+ * TODO: With the new DHTValueEntityPublisher interface we don't
+ * need necessarily an unified entity interface for local and
+ * remote values. 
  */
 public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable {
     
@@ -57,7 +62,7 @@ public interface DHTValueEntity extends Map.Entry<KUID, DHTValue>, Serializable 
     public DHTValue getValue();
     
     /**
-     * 
+     * Replaces the current value with the given new value
      */
     public DHTValue setValue(DHTValue value);
 
