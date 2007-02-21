@@ -12,6 +12,7 @@ import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
+import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageParser;
 
 /** The parts necessary for linking together LimeWire & RUDP. */
 public class LimeRUDPContext implements RUDPContext {

@@ -6,11 +6,10 @@ import org.limewire.rudp.messages.AckMessage;
 import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.FinMessage;
 import org.limewire.rudp.messages.KeepAliveMessage;
-import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.MessageFormatException;
 import org.limewire.rudp.messages.RUDPMessage;
+import org.limewire.rudp.messages.RUDPMessageFactory;
 import org.limewire.rudp.messages.SynMessage;
-import org.limewire.rudp.messages.impl.SynMessageImpl;
 
 public class LimeRUDPMessageFactory implements RUDPMessageFactory {
     private final RUDPMessageFactory delegate;
@@ -24,6 +23,11 @@ public class LimeRUDPMessageFactory implements RUDPMessageFactory {
         
         this.delegate = delegate;
     }
+    
+    /** Returns the delegate factory. */
+    RUDPMessageFactory getDelegate() {
+        return delegate;
+    }
 
     public RUDPMessage createMessage(ByteBuffer... data) throws MessageFormatException {
         RUDPMessage msg = delegate.createMessage(data);
@@ -36,8 +40,8 @@ public class LimeRUDPMessageFactory implements RUDPMessageFactory {
             return new LimeFinMessageImpl((FinMessage)msg);
         } else if (msg instanceof KeepAliveMessage) {
             return new LimeKeepAliveMessageImpl((KeepAliveMessage)msg);
-        } else if (msg instanceof SynMessageImpl) {
-            return new LimeSynMessageImpl((SynMessageImpl)msg);
+        } else if (msg instanceof SynMessage) {
+            return new LimeSynMessageImpl((SynMessage)msg);
         }
         
         throw new IllegalArgumentException(msg.getClass() + " is unhandled");

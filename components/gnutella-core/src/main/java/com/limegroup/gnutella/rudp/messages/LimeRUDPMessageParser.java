@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.rudp;
+package com.limegroup.gnutella.rudp.messages;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -23,9 +23,7 @@ public class LimeRUDPMessageParser implements MessageParser {
             byte softMax, int network) throws BadPacketException, IOException {
         
         try {
-            return (Message)factory.createMessage(null, 
-                    ByteBuffer.wrap(header), 
-                    ByteBuffer.wrap(payload));
+            return (Message)factory.createMessage(ByteBuffer.wrap(header), ByteBuffer.wrap(payload));
         } catch(MessageFormatException mfe) {
             throw new BadPacketException(mfe);
         }
