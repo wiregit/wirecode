@@ -191,4 +191,14 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
             }
         }
     }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        synchronized (proxy) {
+            for (DHTValueEntityPublisher publisher : proxy) {
+                buffer.append(publisher.toString()).append("\n");
+            }
+        }
+        return buffer.toString();
+    }
 }

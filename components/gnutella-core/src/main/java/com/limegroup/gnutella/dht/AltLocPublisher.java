@@ -14,6 +14,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.CollectionUtils;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -167,6 +168,14 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
                 values.put(primaryKey, entity);
             }
         }
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        synchronized (values) {
+            buffer.append(CollectionUtils.toString(getValues()));
+        }
+        return buffer.toString();
     }
     
     /**

@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 
 import org.limewire.io.SecureInputStream;
 import org.limewire.io.SecureOutputStream;
+import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.impl.DHTValueImpl;
@@ -64,6 +65,7 @@ public class CommandHandler {
             "remove (key|kuid) (\\w|\\d)+",
             "get (key|kuid) (\\w|\\d)+",
             "database",
+            "publisher",
             "routetable",
             "store .+",
             "load .+",
@@ -130,14 +132,21 @@ public class CommandHandler {
     
     public static void database(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
-        Database database = ((Context)dht).getDatabase();
+        Database database = dht.getDatabase();
         buffer.append(database.toString());
+        out.println(buffer);
+    }
+    
+    public static void publisher(MojitoDHT dht, String[] args, PrintWriter out) {
+        StringBuilder buffer = new StringBuilder("\n");
+        DHTValueEntityPublisher pusbliher = dht.getDHTValueEntityPublisher();
+        buffer.append(pusbliher.toString());
         out.println(buffer);
     }
     
     public static void routetable(MojitoDHT dht, String[] args, PrintWriter out) {
         StringBuilder buffer = new StringBuilder("\n");
-        RouteTable routingTable = ((Context)dht).getRouteTable();
+        RouteTable routingTable = dht.getRouteTable();
         buffer.append(routingTable.toString());
         out.println(buffer);
     }
