@@ -37,7 +37,7 @@ public class DHTSettings extends LimeProps{
      * Setting for wether or not the DHT should be active at all.
      */
     public static final BooleanSetting DISABLE_DHT_USER 
-        = FACTORY.createBooleanSetting("DISABLE_DHT_USER", false);
+        = FACTORY.createBooleanSetting("DISABLE_DHT_USER", false); 
 
     /**
      * Setting for wether or not the DHT should be active at all.
@@ -63,7 +63,7 @@ public class DHTSettings extends LimeProps{
                 "DHTSettings.MinDHTInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
-     * Setting for whether or not an ultrapeer can join the DHT.
+     * Setting for whether or not an ultrapeer can join the DHT in active mode.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting EXCLUDE_ULTRAPEERS 

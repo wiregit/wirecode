@@ -20,14 +20,10 @@
 package org.limewire.mojito.db;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Map;
 
 import org.limewire.mojito.util.ArrayUtils;
+import org.limewire.mojito.util.FixedSizeHashMap;
 
 /**
  * DHTValueType specifies the type of a DHTValue
@@ -38,106 +34,41 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     
     private static final String UNKNOWN_NAME = "UNKNOWN";
     
-    // NOTE: We cannot use enums for the DHTValueType! The simple
-    // reason is that it's not possible to create new enums at
-    // runtime which is a problem if somebody sends us a DHTValue
-    // we don't understand. It'd be impossible to wrap the type
-    // code into an enum Object.
-    
-    // --- BEGIN VALUETYPE DECLARATION BLOCK ---
+    private static final Map<Integer, DHTValueType> TYPES 
+        = new FixedSizeHashMap<Integer, DHTValueType>(16, 0.75f, true, 254);
     
     /**
      * An arbitrary type of value
      */
-    public static final DHTValueType BINARY = new DHTValueType("Binary", 0x00000000);
+    public static final DHTValueType BINARY = DHTValueType.valueOf("Binary", 0x00000000);
     
     /**
      * LIME and all deviations of LIME like LiMe or lime are reserved
      * for Lime Wire LLC
      */
-    public static final DHTValueType LIME = new DHTValueType("LimeWire", "LIME");
+    public static final DHTValueType LIME = DHTValueType.valueOf("LimeWire", "LIME");
     
     /**
      * Type for UTF-8 encoded Strings
      */
-    public static final DHTValueType TEXT = new DHTValueType("UTF-8 Encoded String", "TEXT");
+    public static final DHTValueType TEXT = DHTValueType.valueOf("UTF-8 Encoded String", "TEXT");
     
     /**
      * A value that is used for testing purposes
      */
-    public static final DHTValueType TEST = new DHTValueType("Test Value", "TEST");
+    public static final DHTValueType TEST = DHTValueType.valueOf("Test Value", "TEST");
     
     /**
      * The ANY type is reserved for requesting purposes. You may not
      * use it as an actual value type
      */
-    public static final DHTValueType ANY = new DHTValueType("Any Type", "****");
-    
-    // --- END VALUETYPE DECLARATION BLOCK ---
-    
-    /**
-     * An arry of ValueTypes. It's initialized in the static
-     * initializer.
-     */
-    private static final DHTValueType[] TYPES;
-    
-    static {
-        List<DHTValueType> types = new ArrayList<DHTValueType>();
-        Field[] fields = DHTValueType.class.getDeclaredFields();
-        for (Field field : fields) {
-            int modifiers = field.getModifiers();
-            Class<?> type = field.getType();
-            
-            // Make sure it's a static field and of type ValueType
-            if ((modifiers & Modifier.STATIC) != 0 
-                    && type.isAssignableFrom(DHTValueType.class)) {
-                
-                try {
-                    DHTValueType valueType = (DHTValueType)field.get(null);
-                    if (valueType == null) {
-                        throw new NullPointerException(
-                                "The static ValueType field " + field.getName() 
-                                + " is either really null or is declared after the"
-                                + " static-initializer block");
-                    }
-                    
-                    types.add(valueType);
-                } catch (IllegalAccessException err) {
-                    // This should never happen!
-                    throw new RuntimeException(err);
-                }
-            }
-        }
-        
-        TYPES = types.toArray(new DHTValueType[0]);
-        
-        // Sort the types by their type code so that we
-        // can perform binary searches on the array
-        Arrays.sort(TYPES, new Comparator<DHTValueType>() {
-            public int compare(DHTValueType o1, DHTValueType o2) {
-                int diff = o1.compareTo(o2);
-                if (diff == 0) {
-                    throw new IllegalArgumentException("The type code of " 
-                            + o1 + " and " + o2 + " collide!");
-                }
-                return diff;
-            }
-        });
-    }
+    public static final DHTValueType ANY = DHTValueType.valueOf("Any Type", "****");
     
     /** The Name of the value type */
     private final String name;
     
     /** The type code of the value */
     private final int type;
-    
-    /*private DHTValueType(String name) {
-        this(name, ArrayUtils.toInteger(name));
-    }*/
-    
-    private DHTValueType(String name, String type) {
-        this(name, ArrayUtils.toInteger(type));
-    }
     
     private DHTValueType(String name, int type) {
         this.name = name;
@@ -152,10 +83,6 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return type;
     }
     
-    public boolean isUnknownType() {
-        return Arrays.binarySearch(TYPES, this) < 0;
-    }
-
     public int compareTo(DHTValueType o) {
         return type - o.type;
     }
@@ -165,12 +92,13 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public boolean equals(Object o) {
-        if (!(o instanceof DHTValueType)) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof DHTValueType)) {
             return false;
         }
         
-        DHTValueType other = (DHTValueType)o;
-        return compareTo(other)==0 && name.equals(other.name);
+        return compareTo((DHTValueType)o)==0;
     }
     
     public String toString() {
@@ -185,9 +113,9 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType[] values() {
-        DHTValueType[] copy = new DHTValueType[TYPES.length];
-        System.arraycopy(TYPES, 0, copy, 0, copy.length);
-        return copy;
+        synchronized (TYPES) {
+            return TYPES.values().toArray(new DHTValueType[0]);
+        }
     }
     
     public static DHTValueType valueOf(int type) {
@@ -203,12 +131,25 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     }
     
     public static DHTValueType valueOf(String name, int type) {
-        DHTValueType unknown = new DHTValueType(name, type);
-        int index = Arrays.binarySearch(TYPES, unknown);
-        if (index < 0) {
-            return unknown;
-        } else {
-            return TYPES[index];
+        Integer key = Integer.valueOf(type);
+        synchronized (TYPES) {
+            DHTValueType valueType = TYPES.get(key);
+            if (valueType == null
+                    || (valueType.name.equals(UNKNOWN_NAME) 
+                            && !name.equals(UNKNOWN_NAME))) {
+                valueType = new DHTValueType(name, type);
+                TYPES.put(key, valueType);
+            }
+            return valueType;
         }
+    }
+    
+    /**
+     * Check the cache and replace this instance with the cached instance
+     * if one exists. The main goal is to pre-initialize the VENDORS
+     * array.
+     */
+    private Object readResolve() {
+        return valueOf(name, type);
     }
 }
