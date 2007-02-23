@@ -4,6 +4,12 @@
  * http://creativecommons.org/licenses/publicdomain
  */
 
+/*
+ * This is the Java 6 ThreadPoolExecutor! For more information see:
+ * 
+ * <http://www.nabble.com/ThreadPoolExecutor-with-corePoolSize-%3D-0-t2862650.html>
+ */
+
 package org.limewire.concurrent;
 
 import java.util.concurrent.*;
