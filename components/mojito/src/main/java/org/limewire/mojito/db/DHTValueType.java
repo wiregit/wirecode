@@ -134,9 +134,8 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         Integer key = Integer.valueOf(type);
         synchronized (TYPES) {
             DHTValueType valueType = TYPES.get(key);
-            if (valueType == null
-                    || (valueType.name.equals(UNKNOWN_NAME) 
-                            && !name.equals(UNKNOWN_NAME))) {
+            if (valueType == null 
+                    || isBetterName(valueType, name)) {
                 valueType = new DHTValueType(name, type);
                 TYPES.put(key, valueType);
             }
@@ -146,10 +145,27 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
     
     /**
      * Check the cache and replace this instance with the cached instance
-     * if one exists. The main goal is to pre-initialize the VENDORS
-     * array.
+     * if one exists. The main goal is to pre-initialize the DHTValueType
+     * Map
      */
     private Object readResolve() {
-        return valueOf(name, type);
+        Integer key = Integer.valueOf(type);
+        DHTValueType valueType = null;
+        synchronized (TYPES) {
+            valueType = TYPES.get(key);
+            if (valueType == null || isBetterName(valueType, name)) {
+                valueType = this;
+                TYPES.put(key, valueType);
+            }
+        }
+        return valueType;
+    }
+    
+    /**
+     * Returns true if the given name is a better than DHTValueType's
+     * current name
+     */
+    private static boolean isBetterName(DHTValueType valueType, String name) {
+        return valueType.name.equals(UNKNOWN_NAME) && !name.equals(UNKNOWN_NAME);
     }
 }
