@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.gui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.limewire.util.FileUtils;
+
 import junit.framework.Test;
+
 import com.limegroup.gnutella.util.GUIBaseTestCase;
 
 public class GUIUtilsTest extends GUIBaseTestCase {
@@ -27,4 +31,10 @@ public class GUIUtilsTest extends GUIBaseTestCase {
 		assertEquals("1,5 KB", GUIUtils.toUnitbytes(1536));
 	}
 
+    public void testLaunchFileWithoutExtension() {
+        File file = new File("extensionless");
+        assertNull(FileUtils.getFileExtension(file));
+        GUIUtils.launchOrEnqueueFile(file, false);
+    }
+    
 }
