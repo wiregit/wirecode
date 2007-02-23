@@ -33,6 +33,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.impl.LocalContact;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
 /**
@@ -167,6 +168,12 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
                 DHTValue value = entity.getValue();
                 values.put(key, context.createDHTValueEntity(key, value));
             }
+        }
+    }
+    
+    public String toString() {
+        synchronized (values) {
+            return CollectionUtils.toString(values.values());
         }
     }
 }
