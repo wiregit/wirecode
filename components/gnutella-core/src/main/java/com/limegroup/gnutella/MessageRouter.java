@@ -1172,7 +1172,7 @@ public abstract class MessageRouter {
     				eps = new HashSet<GUESSEndpoint>();
     				_bypassedResults.put(qGUID, eps);
     			}
-    			if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
+    			if (eps.size() <= MAX_BYPASSED_RESULTS)
     				eps.add(ep);
     		}
     		
