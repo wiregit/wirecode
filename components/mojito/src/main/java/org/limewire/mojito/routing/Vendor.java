@@ -24,7 +24,9 @@ import java.io.Serializable;
 import org.limewire.mojito.util.ArrayUtils;
 
 /**
- * 
+ * Vendor is a four byte value in big-endian byte order where
+ * each byte is chosen from the human readable ASCII character 
+ * space.
  */
 public class Vendor implements Serializable, Comparable<Vendor> {
     

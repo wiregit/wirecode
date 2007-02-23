@@ -36,11 +36,13 @@ import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito.settings.BucketRefresherSettings;
 
 
 /**
- * 
+ * The BucketRefresher refreshes in periodical intervals 
+ * every Bucket that hasn't been touched for a certain amout
+ * of time and refreshes it.
  */
 public class BucketRefresher implements Runnable {
     
@@ -62,10 +64,10 @@ public class BucketRefresher implements Runnable {
     public void start() {
         synchronized (refreshTask) {
             if (future == null) {
-                long delay = RouteTableSettings.RANDOM_REFRESHER_DELAY.getValue();
+                long delay = BucketRefresherSettings.RANDOM_REFRESHER_DELAY.getValue();
                 long initialDelay = delay;
                 
-                if (RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
+                if (BucketRefresherSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.getValue()) {
                     initialDelay = delay + (long)(delay * Math.random());
                 }
                 

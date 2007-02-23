@@ -25,7 +25,6 @@ import java.net.SocketAddress;
 import org.limewire.mojito.KUID;
 
 
-
 /**
  * A Contact is a Node in the DHT. The Contact interface
  * encapsulates all required informations to contact the

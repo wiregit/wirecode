@@ -225,21 +225,21 @@ public interface RouteTable extends Serializable {
             CLEAR;
         }
         
-        private RouteTable routeTable;
+        private final RouteTable routeTable;
         
-        private Bucket bucket;
+        private final Bucket bucket;
         
-        private Bucket left;
+        private final Bucket left;
         
-        private Bucket right;
+        private final Bucket right;
         
-        private Contact existing;
+        private final Contact existing;
         
-        private Contact node;
+        private final Contact node;
         
-        private EventType type;
+        private final EventType type;
         
-        private long timeStamp = System.currentTimeMillis();
+        private final long timeStamp = System.currentTimeMillis();
         
         public RouteTableEvent(RouteTable routeTable, 
                 Bucket bucket, Bucket left, Bucket right,

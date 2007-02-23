@@ -25,7 +25,7 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 
 /**
- * Settings for the Database, DHTValue and for the DHTValueRepublisher 
+ * Settings for the Database, DHTValue and for the DHTValueManager
  */
 public final class DatabaseSettings extends MojitoProps {
     
@@ -55,12 +55,11 @@ public final class DatabaseSettings extends MojitoProps {
      * 
      * x = number of key stored per DHT node per IP
      * 
-     * x = (v*k)/n  ==> x = (v*100000)/20 = (1/5000)*v
+     * x = (v*k)/n  ==> x = (v*20)/100000 = (1/5000)*v
      * 
      * --> with x = 5, v = 25'000
      * 
      * Considering even NAT'd addresses, this should be enough
-     * 
      */
     public static final IntSetting MAX_KEY_PER_IP
         = FACTORY.createRemoteIntSetting("MAX_KEY_PER_IP", 5, 
@@ -113,8 +112,9 @@ public final class DatabaseSettings extends MojitoProps {
     /**
      * The delay (in sec) after which we null back the value request load
      */
+    // 1 minute
     public static final IntSetting VALUE_REQUEST_LOAD_NULLING_DELAY
-        = FACTORY.createIntSetting("value_request_load_nulling_delay", 60); //1 minute
+        = FACTORY.createIntSetting("value_request_load_nulling_delay", 60); 
     
     /**
      * Whether or not to delete a DHTValue from the Database if we're

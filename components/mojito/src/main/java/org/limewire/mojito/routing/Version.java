@@ -22,7 +22,9 @@ package org.limewire.mojito.routing;
 import java.io.Serializable;
 
 /**
- * 
+ * Version is a two byte value in big-endian byte order where
+ * the first byte is the major version number and the second
+ * byte the minor version number.
  */
 public class Version implements Serializable, Comparable<Version> {
 
