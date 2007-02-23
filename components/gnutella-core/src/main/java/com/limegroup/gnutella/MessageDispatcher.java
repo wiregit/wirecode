@@ -12,13 +12,13 @@ import com.limegroup.gnutella.messages.Message;
  */
 public class MessageDispatcher {
     
+    private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
+
     private final MessageRouter messageRouter;
     
     public MessageDispatcher(MessageRouter messageRouter) {
         this.messageRouter = messageRouter;
     }
-    
-    private final ExecutorService DISPATCH = ExecutorsHelper.newProcessingQueue("MessageDispatch");
     
     /**
      * Dispatches a UDP message.
