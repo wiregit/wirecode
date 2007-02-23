@@ -13,10 +13,12 @@ import java.util.Set;
  * 
  * @author Gregorio Roper
  * 
- * Note: do not use this class for time-sensitive operations.
- * if you do, wait at least 10-20ms before each operation. --zab
+ * Note: expiration times longer than Long.MAX_VALUE / 10^6 will be truncated.  
  */
 public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
+    
+    private static final long MAX_EXPIRE_TIME = Long.MAX_VALUE / 1000000;
+    
     /*
      * Default size for the FixedSizExpiringSet
      */
@@ -25,7 +27,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     /*
      * Default time after which the entires expire 10 minutes
      */
-    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000;
+    private static final long DEFAULT_EXPIRE_TIME = 10 * 60 * 1000 * 1000 * 1000;
 
     private final int _maxSize;
     private final long _expireTime;
@@ -55,7 +57,8 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
      */
     public FixedSizeExpiringSet(int size, long expireTime) {
         _maxSize = size;
-        _expireTime = expireTime;
+        expireTime = Math.min(MAX_EXPIRE_TIME, expireTime);
+        _expireTime = expireTime * 1000 * 1000;
         _map = new HashMap<T,Long>();
 
     }
@@ -88,7 +91,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
         Long time = _map.get(arg0);
         if (time == null)
             return false;
-        else if (time.longValue() < System.currentTimeMillis()) {
+        else if (time.longValue() < System.nanoTime()) {
             _map.remove(arg0);
             return false;
         } else
@@ -138,7 +141,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
         if (_map.containsKey(arg0)) //contract requires it!
         	return false; 
         
-        _map.put(arg0, System.currentTimeMillis() + _expireTime);
+        _map.put(arg0, System.nanoTime() + _expireTime);
         return true;
     }
 
@@ -224,7 +227,7 @@ public class FixedSizeExpiringSet<T> implements Set<T>, Collection<T> {
     private void expire(boolean forceRemove) {
         if (_map.size() == 0)
             return;
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
         long min = Long.MAX_VALUE;
         T oldest = null;
         Collection<T> expired = new HashSet<T>();

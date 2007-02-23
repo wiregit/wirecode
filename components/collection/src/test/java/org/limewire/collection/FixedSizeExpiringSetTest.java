@@ -65,7 +65,7 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         
         //test a fast-expiring set
         fastSet.add(empty1);
-        Thread.sleep(60);
+        Thread.sleep(51); // thanks to nanoTime we're accurate.
         assertFalse(fastSet.contains(empty1));
 
         // initialize a couple of objects
@@ -110,12 +110,13 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         // test expiring!
         while (set.size() > 0) {
             for (int i = 4; i < 10; i++) {
+                long now = System.currentTimeMillis();
                 if (set.contains(obj[i])) {
-                    assertGreaterThanOrEquals(System.currentTimeMillis(), 
+                    assertGreaterThanOrEquals(now, 
                         timeExpiring[i]);
                 } else {
                     assertGreaterThan(timeExpiring[i],
-                        System.currentTimeMillis());
+                        now+1); // round off to the next millisecond.
                 }
             }
             Thread.sleep(100L);
