@@ -1553,15 +1553,24 @@ public class DefaultUploadManager implements FileLocker, ConnectionAcceptor, Ban
     
     public float getMeasuredBandwidth() {
     	float bw = 0;
-    	try {
+
+        try {
     		bw += slotManager.getMeasuredBandwidth();
-    	} catch (InsufficientDataException notEnough){}
-    	for (HTTPUploader forced : forceAllowedUploads)
-    		bw += forced.getMeasuredBandwidth();
+    	} catch (InsufficientDataException notEnough) {
+        }
+        
+    	for (HTTPUploader forced : forceAllowedUploads) {
+    		try {
+                bw += forced.getMeasuredBandwidth();
+            } catch (InsufficientDataException e) {
+            }
+        }
+        
     	synchronized(this) {
     		averageBandwidth = ( ( averageBandwidth * numMeasures) + bw) /
     		++numMeasures;
     	}
+        
     	lastMeasuredBandwidth = bw;
     	return bw;
     }

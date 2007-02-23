@@ -1,6 +1,8 @@
 package com.limegroup.bittorrent;
 
 
+import java.net.InetAddress;
+
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RouterService;
@@ -169,5 +171,10 @@ public class BTUploader implements Uploader, TorrentEventListener {
 
     public UploadType getUploadType() {
         return UploadType.SHARED_FILE;
+    }
+
+    public InetAddress getConnectedHost() {
+        // TODO implement me
+        return null;
     }
 }

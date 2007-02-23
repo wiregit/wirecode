@@ -1277,14 +1277,8 @@ public final class HTTPUploader implements Uploader {
         session.measureBandwidth(written);
     }
 
-    public float getMeasuredBandwidth() {
-        float retVal = 0;
-        try {
-            retVal = session.getMeasuredBandwidth();
-        } catch (InsufficientDataException ide) {
-            retVal = 0;
-        }
-        return retVal;
+    public float getMeasuredBandwidth() throws InsufficientDataException {
+        return session.getMeasuredBandwidth();
     }
     
     public float getAverageBandwidth() {

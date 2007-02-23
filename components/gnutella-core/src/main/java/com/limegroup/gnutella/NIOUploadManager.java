@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 
 import org.apache.http.HttpException;
@@ -13,8 +12,7 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
-import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
-import org.apache.http.nio.protocol.EventListener;
+import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -29,30 +27,35 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.nio.http.HttpCoreUtils;
 import org.limewire.nio.http.HttpIOReactor;
+import org.limewire.nio.http.HttpServiceHandler;
+import org.limewire.nio.http.ServerConnectionEventListener;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRepsonseEntity;
 import com.limegroup.gnutella.uploader.HTTPSession;
+import com.limegroup.gnutella.uploader.NIOUploader;
 import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
+import com.limegroup.gnutella.uploader.UploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
+public class NIOUploadManager extends AbstractUploadManager implements
+        UploadManager, ConnectionAcceptor {
 
+    private final static String SESSION_KEY = "org.limewire.session";
+    
     private HttpIOReactor reactor;
 
     private HttpParams params;
 
     private HttpRequestHandlerRegistry registry;
 
-    private ReactorEventListener listener;
-
-    private UploadSlotManager uploadSlotManager;
+    private ConnectionEventListener listener;
 
     public NIOUploadManager(UploadSlotManager uploadSlotManager) {
-        this.uploadSlotManager = uploadSlotManager;
+        super(uploadSlotManager);
 
         initializeReactor();
         inititalizeHandlers();
@@ -76,19 +79,19 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
                 .getHttpServer());
 
         this.registry = new HttpRequestHandlerRegistry();
-        this.listener = new ReactorEventListener();
+        this.listener = new ConnectionEventListener();
 
         // intercepts http requests and responses
         BasicHttpProcessor processor = new BasicHttpProcessor();
-        //processor.addInterceptor(new ResponseDate());
+        // processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new ResponseConnControl());
 
-        BufferingHttpServiceHandler serviceHandler = new BufferingHttpServiceHandler(
+        HttpServiceHandler serviceHandler = new HttpServiceHandler(
                 processor, new DefaultHttpResponseFactory(),
                 new DefaultConnectionReuseStrategy(), params);
-        serviceHandler.setEventListener(listener);
+        serviceHandler.setConnectionListener(listener);
         serviceHandler.setHandlerResolver(this.registry);
 
         this.reactor = new HttpIOReactor(params);
@@ -122,6 +125,9 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 UploadStat.UPDATE_FILE.incrementStat();
+                UploadSession session = getSession(context);
+                NIOUploader uploader = new NIOUploader("update.xml", session, -1); 
+                
                 File file = new File(CommonUtils.getUserSettingsDir(),
                         "update.xml");
                 // TODO is the returned mime-type correct?
@@ -178,80 +184,29 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
     public void acceptConnection(String word, Socket socket) {
         reactor.acceptConnection(word, socket);
     }
-
-    public float getLastMeasuredBandwidth() {
-        // TODO Auto-generated method stub
-        return 0;
+    
+    public NIOUploader getUploader(HttpContext context, String filename, int index) {
+        UploadSession session = getSession(context);
+        NIOUploader uploader = (NIOUploader) session.getUploader();
+        if (uploader != null) {
+            
+        } else {
+            uploader = new NIOUploader(filename, session, index);
+        }
+        return uploader;
     }
 
-    public int getNumQueuedUploads() {
-        // TODO Auto-generated method stub
-        return 0;
+    public HTTPSession createSession(HttpContext context, HttpRequest reqeust) {
+        assert context.getAttribute(SESSION_KEY) == null;
+        HTTPSession session = new HTTPSession(null, this);
+        context.setAttribute(SESSION_KEY, session);
+        return session;
     }
 
-    public int getPositionInQueue(HTTPSession session) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public float getUploadSpeed() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public boolean hadSuccesfulUpload() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean hasActiveInternetTransfers() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean isConnectedTo(InetAddress addr) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean isServiceable() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean killUploadsForFileDesc(FileDesc fd) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean mayBeServiceable() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public int measuredUploadSpeed() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int uploadsInProgress() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public float getAverageBandwidth() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public float getMeasuredBandwidth() throws InsufficientDataException {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public void measureBandwidth() {
-        // TODO Auto-generated method stub
-
+    public UploadSession getSession(HttpContext context) {
+        UploadSession session = (UploadSession) context.getAttribute(SESSION_KEY);
+        assert session != null;
+        return session;
     }
 
     public void registerHandler(final String pattern,
@@ -259,22 +214,27 @@ public class NIOUploadManager implements UploadManager, ConnectionAcceptor {
         this.registry.register(pattern, handler);
     }
 
-    private class ReactorEventListener implements EventListener {
+    private class ConnectionEventListener implements ServerConnectionEventListener {
 
-        public void connectionClosed(InetAddress address) {
+        public void connectionClosed(NHttpServerConnection conn) {
+            UploadSession session = getSession(conn.getContext());
+            // TODO close session
         }
 
-        public void connectionOpen(InetAddress address) {
+        public void connectionOpen(NHttpServerConnection conn) {
+            createSession(conn.getContext(), conn.getHttpRequest());
         }
 
-        public void connectionTimeout(InetAddress address) {
+        public void connectionTimeout(NHttpServerConnection conn) {
+            throw new RuntimeException();
         }
 
-        public void fatalIOException(IOException e) {
-            throw new RuntimeException(e);
+        public void fatalIOException(NHttpServerConnection conn, IOException e) {
+            throw new RuntimeException(e);            
         }
 
-        public void fatalProtocolException(HttpException e) {
+        public void fatalProtocolException(NHttpServerConnection conn,
+                HttpException e) {
             throw new RuntimeException(e);
         }
 

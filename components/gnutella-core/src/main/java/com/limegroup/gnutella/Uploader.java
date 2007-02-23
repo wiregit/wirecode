@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.net.InetAddress;
+
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**
@@ -138,6 +140,8 @@ public interface Uploader extends BandwidthTracker {
      * (shared file, browse host, malformed request, etc..)
      */
     public UploadType getUploadType();
+
+    public InetAddress getConnectedHost();
 
 }
 
