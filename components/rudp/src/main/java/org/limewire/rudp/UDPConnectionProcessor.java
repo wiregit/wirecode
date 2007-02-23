@@ -251,10 +251,8 @@ public class UDPConnectionProcessor {
     /** The context containing various aspects required for RUDP. */
     private final RUDPContext _context;
    
-    /**
-     * Creates a new unconnected UDPConnectionProcessor.
-     */
-    UDPConnectionProcessor(UDPSocketChannel channel, RUDPContext context) {
+    /** Creates a new unconnected UDPConnectionProcessor. */
+    protected UDPConnectionProcessor(UDPSocketChannel channel, RUDPContext context) {
         // Init default state
         _context                 = context;
         _theirConnectionID       = UDPMultiplexor.UNASSIGNED_SLOT; 
@@ -296,7 +294,7 @@ public class UDPConnectionProcessor {
      * @param port
      * @throws IOException
      */
-    void connect(InetSocketAddress addr) throws IOException {
+    protected void connect(InetSocketAddress addr) throws IOException {
         // If UDP is not running or not workable, barf
         if (!_context.getUDPService().isListening() || !_context.getUDPService().isNATTraversalCapable()) {
             throw new IOException("udp isn't working");
@@ -329,22 +327,22 @@ public class UDPConnectionProcessor {
     }
     
     /** Sets the connection id this is using. */
-    void setConnectionId(byte id) {
+    protected void setConnectionId(byte id) {
         this._myConnectionID = id;
     }
     
     /** Retrieves the InetSocketAddress this is connecting to. */
-    InetSocketAddress getSocketAddress() {
+    protected InetSocketAddress getSocketAddress() {
         return _connectedTo;
     }
     
     /** Retrieves the DataWindow used for reading data. */
-    DataWindow getReadWindow() {
+    protected DataWindow getReadWindow() {
         return _receiveWindow;
     }
 
     /** Returns the ready ops of this processor. */
-    synchronized int readyOps() {
+    protected synchronized int readyOps() {
         if(isClosed())
             return 0xFF;
         else
@@ -376,7 +374,7 @@ public class UDPConnectionProcessor {
      * @param complete
      * @throws IOException
      */
-    synchronized void close() throws IOException {
+    protected synchronized void close() throws IOException {
         // If closed then done
         if ( _connectionState == FIN_STATE )
             throw new IOException("already closed");
@@ -439,7 +437,7 @@ public class UDPConnectionProcessor {
     /**
      *  Prepare for handling an open connection.
      */
-    synchronized boolean prepareOpenConnection() throws IOException {
+    protected synchronized boolean prepareOpenConnection() throws IOException {
         if(isClosed())
             throw new ClosedChannelException();
         if(isConnected())
@@ -533,7 +531,7 @@ public class UDPConnectionProcessor {
     /**
      *  Hand off the wakeup of data writing to the scheduler
      */
-    void wakeupWriteEvent(boolean force) {
+    protected void wakeupWriteEvent(boolean force) {
         if (force || _waitingForDataAvailable ) {
             LOG.debug("wakupWriteEvent");
             if (_safeWriteWakeup.getEventTime() == Long.MAX_VALUE) {
@@ -605,7 +603,7 @@ public class UDPConnectionProcessor {
     /**
      *  Test whether the connection is in connecting mode
      */
-    synchronized boolean isConnected() {
+    protected synchronized boolean isConnected() {
         return (_connectionState == CONNECT_STATE && 
                 _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
     }
@@ -613,14 +611,14 @@ public class UDPConnectionProcessor {
     /**
      *  Test whether the connection is closed
      */
-    synchronized boolean isClosed() {
+    protected synchronized boolean isClosed() {
         return (_connectionState == FIN_STATE);
     }
 
     /**
      *  Test whether the connection is not fully setup
      */
-	synchronized boolean isConnecting() {
+    protected synchronized boolean isConnecting() {
         // It is important to check for either CONNECTING_STATE
         // or UNASSIGNED_SLOT because the state is advanced when
         // an ACK to our syn is received, and the connectionId is
@@ -640,7 +638,7 @@ public class UDPConnectionProcessor {
 	 *  remain equal to the space available in the sender and receiver 
 	 *  data window.
      */
-	int getChunkLimit() {
+    protected int getChunkLimit() {
 		return Math.min(_chunkLimit, _receiverWindowSpace);
 	}
 
@@ -648,7 +646,7 @@ public class UDPConnectionProcessor {
      *  Convenience method for sending keepalive message since we might fire 
      *  these off before waiting
      */
-    void sendKeepAlive() {
+    protected void sendKeepAlive() {
         KeepAliveMessage keepalive = null;
         try {  
             keepalive = _context.getMessageFactory().createKeepAliveMessage(
@@ -920,7 +918,7 @@ public class UDPConnectionProcessor {
      *  Send SYN messages to desired host and wait for Acks and their 
      *  SYN message.  Schedules an event to periodically resend a Syn.
      */
-	synchronized private void tryToConnect() {
+    private synchronized void tryToConnect() {
         if (!isConnecting()) {
             LOG.debug("Already connected");
             if(_connectEvent != null)
@@ -1229,7 +1227,7 @@ public class UDPConnectionProcessor {
     /**
      *  Take action on a received message.
      */
-     synchronized void handleMessage(RUDPMessage msg) {
+    protected synchronized void handleMessage(RUDPMessage msg) {
         // Record when the last message was received
         _lastReceivedTime = System.currentTimeMillis();
         if (LOG.isDebugEnabled())
