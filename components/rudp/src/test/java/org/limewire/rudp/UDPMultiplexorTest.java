@@ -214,15 +214,15 @@ public class UDPMultiplexorTest extends BaseTestCase {
             super(channel, context);
         }
         
-        int readyOps() {
+        protected int readyOps() {
             return readyOps;
         }
         
-        void setReadyOps(int readyOps) {
+        protected void setReadyOps(int readyOps) {
             this.readyOps = readyOps;
         }
 
-		void handleMessage(RUDPMessage msg) {
+        protected void handleMessage(RUDPMessage msg) {
 			this.msg = msg;
 		}
         

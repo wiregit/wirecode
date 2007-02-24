@@ -450,50 +450,50 @@ public class UDPSocketChannelTest extends BaseTestCase {
             super(null, new DefaultRUDPContext());
         }
 
-        void close() throws IOException {
+        protected void close() throws IOException {
             closed = true;
         }
 
-        void connect(InetSocketAddress addr) throws IOException {
+        protected void connect(InetSocketAddress addr) throws IOException {
             connected = true;
             this.addr = addr;
         }
 
-        DataWindow getReadWindow() {
+        protected DataWindow getReadWindow() {
             return readWindow;
         }
 
-        InetSocketAddress getSocketAddress() {
+        protected InetSocketAddress getSocketAddress() {
             return addr;
         }
 
-        boolean isClosed() {
+        protected boolean isClosed() {
             return closed;
         }
 
-        boolean isConnected() {
+        protected boolean isConnected() {
             return connected;
         }
 
-        boolean isConnecting() {
+        protected boolean isConnecting() {
             return connecting;
         }
 
-        boolean prepareOpenConnection() throws IOException {
+        protected boolean prepareOpenConnection() throws IOException {
             preparedOpenConnection = true;
             return prepareOpenConnectionRetValue;
         }
 
-        void sendKeepAlive() {
+        protected void sendKeepAlive() {
             sentKeepAlive = true;
         }
 
-        void wakeupWriteEvent(boolean force) {
+        protected void wakeupWriteEvent(boolean force) {
             wokeupWriteEvent = true;
             wokeupWriteEventWasForced = force;
         }
 
-        int getChunkLimit() {
+        protected int getChunkLimit() {
             return chunkLimit;
         }
 
