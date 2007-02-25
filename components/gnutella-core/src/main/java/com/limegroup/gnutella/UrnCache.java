@@ -59,11 +59,9 @@ public final class UrnCache {
     private static UrnCache instance = null;
 
     /**
-     * UrnCache container.  LOCKING: obtain this.  Although URN_MAP is static,
-     * UrnCache is a singleton, so obtaining UrnCache's monitor is sufficient--
-     * and slightly more convenient.
+     * UrnCache container.  LOCKING: obtain this.
      */
-    private final Map<UrnSetKey, Set<URN>> URN_MAP;
+    private final Map<UrnSetKey, /*Unmodifyable*/Set<URN>> URN_MAP;
     
     /**
      * The ProcessingQueue that Files are hashed in.
@@ -107,25 +105,28 @@ public final class UrnCache {
      * will be notified immediately.  Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public synchronized void calculateAndCacheUrns(File file, UrnCallback callback) {			
-    	Set<URN> urns = getUrns(file);
-        // TODO: If we ever create more URN types (other than SHA1)
-        // we cannot just check for size == 0, we must check for
-        // size == NUM_URNS_WE_WANT, and calculateUrns should only
-        // calculate the URN for the specific hash we still need.
-        if(!urns.isEmpty()) {
-            callback.urnsCalculated(file, urns);
-        } else {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Adding: " + file + " to be hashed.");
-            List<UrnCallback> list = pendingHashing.get(file);
-            if(list == null) {
-                list = new ArrayList<UrnCallback>(1);
-                pendingHashing.put(file, list);
+    public void calculateAndCacheUrns(File file, UrnCallback callback) {
+        Set<URN> urns;
+        synchronized (this) {
+            urns = getUrns(file);
+            // TODO: If we ever create more URN types (other than SHA1)
+            // we cannot just check for size == 0, we must check for
+            // size == NUM_URNS_WE_WANT, and calculateUrns should only
+            // calculate the URN for the specific hash we still need.
+            if (urns.isEmpty()) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Adding: " + file + " to be hashed.");
+                List<UrnCallback> list = pendingHashing.get(file);
+                if(list == null) {
+                    list = new ArrayList<UrnCallback>(1);
+                    pendingHashing.put(file, list);
+                }
+                list.add(callback);
+                QUEUE.execute(new Processor(file));
             }
-            list.add(callback);
-            QUEUE.execute(new Processor(file));
         }
+        if (!urns.isEmpty())
+            callback.urnsCalculated(file, urns);
     }
     
     /**
