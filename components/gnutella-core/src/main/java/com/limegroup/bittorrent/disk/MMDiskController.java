@@ -9,8 +9,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,24 +33,19 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 	private Map<RandomAccessFile, MappedByteBuffer> bufMap;
 
 	@Override
-	public List<F> open(List<F> files, boolean complete, boolean isVerifying) throws IOException {
+	public synchronized List<F> open(List<F> files, boolean complete, boolean isVerifying) throws IOException {
 		List<F> ret =  super.open(files, complete, isVerifying);
 		
-		Map<RandomAccessFile, MappedByteBuffer> bMap = 
-			new HashMap<RandomAccessFile, MappedByteBuffer>(files.size());
+		bufMap = new HashMap<RandomAccessFile, MappedByteBuffer>(files.size());
 		
 		for (int i = 0; i < _fos.length; i++) {
 			
 			if (_files.get(i).length() >= Integer.MAX_VALUE)
 				continue; // not even in 64 bit jvms
 			
-			RandomAccessFile raf;
-			synchronized(this) {
-				raf = _fos[i];
-			}
 			try {
-				bMap.put(raf,
-						raf.getChannel().map(
+				bufMap.put(_fos[i],
+						_fos[i].getChannel().map(
 								complete ? MapMode.READ_ONLY : MapMode.READ_WRITE, 
 										0, 
 										_files.get(i).length()));
@@ -63,10 +56,6 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 				if (LOG.isDebugEnabled())
 					LOG.debug("didn't map "+_files.get(i), mapFailed);
 			} 
-		}
-		
-		synchronized(this) {
-			bufMap = bMap;
 		}
 		
 		return ret;
@@ -98,47 +87,35 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		return bufMap.get(f);
 	}
 	
-	public void close() {
+	public synchronized void close() {
 		LOG.debug("closing...");
-		Collection<MappedByteBuffer> bufs = new ArrayList<MappedByteBuffer>();
-		synchronized(this) {
-			bufs.addAll(bufMap.values());
-			bufMap.clear();
-		}
 		boolean allCleaned = false;
 		try {
 			boolean cleaned = true;
-			for (MappedByteBuffer mbb : bufs) {
+			for (MappedByteBuffer mbb : bufMap.values()) {
 				safeForce(mbb);
 				cleaned = cleaned && clean(mbb);
 			}
 			allCleaned = cleaned;
 		} finally {
-			bufs.clear();
+			bufMap.clear();
 			if (!allCleaned)
 				System.gc(); 
 		}
 		super.close();
 	}
 	
-	public void flush() throws IOException {
-		Collection<MappedByteBuffer> bufs = new ArrayList<MappedByteBuffer>();
-		synchronized(this) {
-			if (bufMap == null)
-				return;
-			bufs.addAll(bufMap.values());
-		}
-		for (MappedByteBuffer buf : bufs)
+	public synchronized void flush() throws IOException {
+	    if (bufMap == null)
+	        return;
+	    for (MappedByteBuffer buf : bufMap.values())
 			buf.force(); // do not use safeForce, its ok if an iox throws.
 		super.flush();
 	}
 
 	@Override
-	public RandomAccessFile setReadOnly(RandomAccessFile raf, String path) throws IOException {
-		MappedByteBuffer buf;
-		synchronized(this) {
-			buf = bufMap.remove(raf);
-		}
+	public synchronized RandomAccessFile setReadOnly(RandomAccessFile raf, String path) throws IOException {
+		MappedByteBuffer buf = bufMap.remove(raf);
 		try {
 			safeForce(buf);
 		} finally {
@@ -149,9 +126,7 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		}
 		raf = super.setReadOnly(raf, path);
 		buf = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.length());
-		synchronized(this) {
-			bufMap.put(raf, buf);
-		}
+		bufMap.put(raf, buf);
 		return raf;
 	}
 	
