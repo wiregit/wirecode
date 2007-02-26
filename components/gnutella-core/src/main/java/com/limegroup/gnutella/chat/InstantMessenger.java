@@ -154,6 +154,12 @@ public class InstantMessenger implements Chatter {
      * user from calling it when a connection is not yet established.
      */
     public boolean send(String message) {
+        synchronized (this) {
+            if (stopped || sender == null) {
+                return false;
+            }
+        }
+        
         try {
             sender.sendMessage(message + "\n");
         } catch (IOException e) {
@@ -207,19 +213,21 @@ public class InstantMessenger implements Chatter {
      * Invoked when the handshake completes.
      */
     private void handshakeCompleted() {
-        callback.acceptChat(this);
-
         try {
             socket.setSoTimeout(0);
         } catch (SocketException e) {
             LOG.warn("Could not set socket timeout", e);
         }
 
-        receiver = new MessageReceiver();
-        sender = new MessageSender();
+        synchronized (this) {
+            receiver = new MessageReceiver();
+            sender = new MessageSender();
+        }
 
         ((NIOMultiplexor) socket).setReadObserver(receiver);
         ((NIOMultiplexor) socket).setWriteObserver(sender);
+
+        callback.acceptChat(this);
     }
 
     private void handleException(IOException e) {
