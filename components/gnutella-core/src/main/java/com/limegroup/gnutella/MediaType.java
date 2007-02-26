@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +20,10 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * MediaType's are immutable.
  *
  * // See http://www.mrc-cbu.cam.ac.uk/Help/mimedefault.html
+ * 
+ * Implementation note: Since MediaType implements serialization and there
+ * are inner anonymous classes be careful where to add new inner classes
+ * and fields.
  */
 public class MediaType implements Serializable {
     private static final long serialVersionUID = 3999062781289258389L;
@@ -45,13 +50,14 @@ public class MediaType implements Serializable {
      */
     private static final MediaType TYPE_ANY = 
         new MediaType(SCHEMA_ANY_TYPE, ANY_TYPE, null) {
-            // required SVUID because we're constructing an anonymous class.
-            private static final long serialVersionUID = 3728385699213635375L;
-            
-            public boolean matches(String ext) {
-                return true;
-            }
-        };
+        // required SVUID because we're constructing an anonymous class.
+        // the id is taken from old limewire builds, versions 4.4 to 4.12
+        private static final long serialVersionUID = 8621997774686329539L; //3728385699213635375L;
+        
+        public boolean matches(String ext) {
+            return true;
+        }
+    };
                                        
     /**
      * Type for 'documents'
@@ -316,6 +322,34 @@ public class MediaType implements Serializable {
         return false;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MediaType) {
+            MediaType type = (MediaType)obj;
+            return schema.equals(type.schema) 
+            && areEqual(descriptionKey, type.descriptionKey)
+            && exts.equals(type.exts)
+            && isDefault == type.isDefault;
+        }
+        return false;
+    }
+    
+    private final static boolean areEqual(Object o1, Object o2) {
+        return o1 == o2 || (o1 != null && o2 != null && o1.equals(o2));
+    }
+    
+    /*
+     * We canoncialize the default mediatypes, but since MediaType has
+     * a public constructor only 'equals' comparisons should be used.
+     */
+    Object readResolve() throws ObjectStreamException {
+        for (MediaType type : ALL_MEDIA_TYPES) {
+            if (equals(type)) {
+                return type;
+            }
+        }
+        return this;
+    }
  
     /**
      * Retrieves the any media type.
