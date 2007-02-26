@@ -38,6 +38,7 @@ import org.limewire.util.CommonUtils;
 import com.limegroup.gnutella.bootstrap.BootstrapServer;
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
@@ -565,25 +566,30 @@ public class HostCatcher {
             endpoint.setUDPHostCache(true);
         }
         
+        if(!isValidHost(endpoint)) {
+            return false;
+        }
+        
         int dhtVersion = pr.getDHTVersion();
         if(dhtVersion > -1) {
             DHTMode mode = pr.getDHTMode();
             endpoint.setDHTVersion(dhtVersion);
             endpoint.setDHTMode(mode);
-            //if active DHT endpoint, immediately send to dht manager
-            if(mode.equals(DHTMode.ACTIVE)) {
-                SocketAddress address = new InetSocketAddress(
-                        endpoint.getAddress(), endpoint.getPort());
-                RouterService.getDHTManager().addActiveDHTNode(address);
-            } else if(mode.equals(DHTMode.PASSIVE)) {
-                SocketAddress address = new InetSocketAddress(
-                        endpoint.getAddress(), endpoint.getPort());
-                RouterService.getDHTManager().addPassiveDHTNode(address);
+            
+            DHTManager dhtManager = RouterService.getDHTManager();
+            if (dhtManager.isRunning()) {
+                // If active DHT endpoint, immediately send to dht manager
+                if(mode.equals(DHTMode.ACTIVE)) {
+                    SocketAddress address = new InetSocketAddress(
+                            endpoint.getAddress(), endpoint.getPort());
+                    dhtManager.addActiveDHTNode(address);
+                } else if(mode.equals(DHTMode.PASSIVE)) {
+                    SocketAddress address = new InetSocketAddress(
+                            endpoint.getAddress(), endpoint.getPort());
+                    dhtManager.addPassiveDHTNode(address);
+                }
             }
         }
-        
-        if(!isValidHost(endpoint))
-            return false;
         
         if(pr.supportsUnicast()) {
             QueryUnicaster.instance().
