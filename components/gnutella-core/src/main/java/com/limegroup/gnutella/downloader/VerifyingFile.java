@@ -20,6 +20,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.collection.PowerOf2ByteArrayCache;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.DiskException;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
