@@ -392,7 +392,7 @@ BTLinkListener {
 				state.set(TorrentState.QUEUED);
 				return true;
 			default:
-				throw new IllegalStateException("torrent not resumable "+state);
+				throw new IllegalStateException("torrent not resumable "+state.get());
 			}
 		}
 	}
