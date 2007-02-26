@@ -63,4 +63,11 @@ public class BittorrentSettings extends LimeProps {
 	 */
 	public static BooleanSetting TORRENT_AUTO_START =
 		FACTORY.createBooleanSetting("TORRENT_AUTO_START", true);
+    
+    /**
+     * Whether to report Disk problems to the bug server
+     */
+    public static BooleanSetting REPORT_DISK_PROBLEMS =
+        FACTORY.createRemoteBooleanSetting("REPORT_BT_DISK_PROBLEMS", 
+                false, "BTSettings.reportDisk");
 }

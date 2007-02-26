@@ -26,6 +26,7 @@ import org.limewire.collection.ApproximateMatcher;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.collection.Interval;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
@@ -687,10 +688,23 @@ public class ManagedDownloader extends AbstractDownloader
             initializeVerifyingFile();
         }catch(IOException bad) {
             setState(DISK_PROBLEM);
+            reportDiskProblem(bad);
             return;
         }
         
         setState(QUEUED);
+    }
+    
+    private void reportDiskProblem(IOException cause) {
+        if (DownloadSettings.REPORT_DISK_PROBLEMS.getValue()) {
+            if (!(cause instanceof DiskException))
+                cause = new DiskException(cause);
+            ErrorService.error(cause);
+        }
+    }
+    private void reportDiskProblem(String cause) {
+        if (DownloadSettings.REPORT_DISK_PROBLEMS.getValue())
+            ErrorService.error(new DiskException(cause));
     }
     
     /** 
@@ -1655,15 +1669,6 @@ public class ManagedDownloader extends AbstractDownloader
     }
     
     /**
-     * Callback from workers to inform the managing thread that
-     * a disk problem has occured.
-     */
-    synchronized void diskProblemOccured() {
-        setState(DISK_PROBLEM);
-        stop();
-    }
-
-    /**
      * Notifies all existing HTTPDownloaders about this RFD.
      * If good is true, it notifies them of a succesful alternate location,
      * otherwise it notifies them of a failed alternate location.
@@ -2004,6 +2009,7 @@ public class ManagedDownloader extends AbstractDownloader
             initializeVerifyingFile();
             openVerifyingFile();
         } catch (IOException iox) {
+            reportDiskProblem(iox);
             return DISK_PROBLEM;
         }
 
@@ -2146,8 +2152,11 @@ public class ManagedDownloader extends AbstractDownloader
         
         //4. Move to library.
         // Make sure we can write into the complete file's directory.
-        if (!FileUtils.setWriteable(getSaveFile().getParentFile()))
+        if (!FileUtils.setWriteable(getSaveFile().getParentFile())) {
+            reportDiskProblem("could not set file writeable " + 
+                    getSaveFile().getParentFile());
             return DISK_PROBLEM;
+        }
         File saveFile = getSaveFile();
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
@@ -2165,8 +2174,11 @@ public class ManagedDownloader extends AbstractDownloader
         incompleteFileManager.removeEntry(incompleteFile);
         
         // If that didn't work, we're out of luck.
-        if (!success)
+        if (!success) {
+            reportDiskProblem("forceRename failed "+incompleteFile+
+                    " -> "+ saveFile);
             return DISK_PROBLEM;
+        }
             
         //Add file to library.
         // first check if it conflicts with the saved dir....
@@ -2395,6 +2407,7 @@ public class ManagedDownloader extends AbstractDownloader
                     throw new InterruptedException();
                 }
                 stop();
+                reportDiskProblem(dio);
                 return DISK_PROBLEM;
             }
             

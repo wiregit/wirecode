@@ -100,4 +100,10 @@ public class DownloadSettings extends LimeProps {
         FACTORY.createRemoteStringArraySetting("PREVIEWABLE_EXTENSIONS", 
                 defaultPreviewableExtensions,
                 "PREVIEWABLE_EXTENSIONS");
+    
+    /** Whether to report disk problems to the bug server */
+    public static final BooleanSetting REPORT_DISK_PROBLEMS =
+        FACTORY.createRemoteBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", false, 
+                "DownloadSettings.reportDisk");
+        
 }

@@ -1,5 +1,7 @@
 package com.limegroup.bittorrent.disk;
 
+import org.limewire.io.DiskException;
+
 /**
  * Listener for callbacks from a <tt>TorrentDiskManager</tt>
  */
@@ -8,7 +10,7 @@ public interface DiskManagerListener {
 	/**
 	 * Notification that a disk error has happened.
 	 */
-	public void diskExceptionHappened();
+	public void diskExceptionHappened(DiskException e);
 
 	/**
 	 * Notification that verification previously existing data

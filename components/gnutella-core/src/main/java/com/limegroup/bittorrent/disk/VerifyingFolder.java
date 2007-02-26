@@ -27,6 +27,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.collection.NECallable;
 import org.limewire.collection.NotView;
 import org.limewire.collection.RRProcessingQueue;
+import org.limewire.io.DiskException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.SystemUtils;
 
@@ -225,7 +226,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			} catch (IOException iox) {
 				if (isOpen()) {
 					storedException = iox;
-					notifyDiskProblem();
+					notifyDiskProblem(iox);
 				}
 			} finally {
 				synchronized(VerifyingFolder.this) {
@@ -507,7 +508,7 @@ class VerifyingFolder implements TorrentDiskManager {
 			} catch (IOException bad) {
 				if (isOpen()) {
 					storedException = bad;
-					notifyDiskProblem();
+					notifyDiskProblem(new DiskException(bad));
 				}
 			} finally {
 				if (success)
@@ -518,10 +519,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 	}
 	
-	private void notifyDiskProblem() {
+	private void notifyDiskProblem(IOException e) {
 		DiskManagerListener t = listener;
 		if (t != null)
-			t.diskExceptionHappened();
+			t.diskExceptionHappened(new DiskException(e));
 	}
 	
 	/**
@@ -798,7 +799,7 @@ class VerifyingFolder implements TorrentDiskManager {
 				storedException = new InterruptedIOException();
 			} finally {
 				if (storedException != null && isOpen())
-					notifyDiskProblem();
+					notifyDiskProblem(storedException);
 			}
 		}
 	}

@@ -12,7 +12,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SchedulingThreadPool;
+import org.limewire.io.DiskException;
 import org.limewire.io.NetworkUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.bittorrent.choking.Choker;
@@ -22,6 +24,7 @@ import com.limegroup.bittorrent.disk.TorrentDiskManager;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.messages.BTHave;
+import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.bittorrent.tracking.TrackerManager;
 import com.limegroup.bittorrent.tracking.TrackerManagerFactory;
 import com.limegroup.gnutella.RouterService;
@@ -281,13 +284,15 @@ BTLinkListener {
 	/* (non-Javadoc)
 	 * @see com.limegroup.bittorrent.DiskManagerListener#diskExceptionHappened()
 	 */
-	public void diskExceptionHappened() {
+	public void diskExceptionHappened(DiskException e) {
 		synchronized(state.getLock()) {
 			if (state.get() == TorrentState.DISK_PROBLEM)
 				return;
 			state.set(TorrentState.DISK_PROBLEM);
 		}
 		stopImpl();
+		if (BittorrentSettings.REPORT_DISK_PROBLEMS.getValue())
+		    ErrorService.error(e);
 	}
 	
 	/**
@@ -647,7 +652,7 @@ BTLinkListener {
 		try {
 			saveFiles();
 		} catch (IOException failed) {
-			diskExceptionHappened();
+			diskExceptionHappened(new DiskException(failed));
 			return;
 		}
 		

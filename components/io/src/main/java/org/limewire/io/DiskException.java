@@ -1,5 +1,5 @@
 
-package com.limegroup.gnutella.downloader;
+package org.limewire.io;
 
 import java.io.IOException;
 
