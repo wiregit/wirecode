@@ -47,7 +47,7 @@ public class BTDownloader extends AbstractDownloader
 	/**
 	 * The <tt>ManagedTorrent</tt> instance this is representing
 	 */
-	private Torrent _torrent;
+	private volatile Torrent _torrent;
 
 	/**
 	 * The <tt>BTMetaInfo</tt> for this torrent.
@@ -79,14 +79,19 @@ public class BTDownloader extends AbstractDownloader
 	
 	private NumericBuffer<Float> averagedBandwidth = 
 		new NumericBuffer<Float>(10);
+    
+    /** Whether finish() has been invoked on this */
+    private volatile boolean finished;
 	
 	public BTDownloader(BTMetaInfo info) {
 		context = new BTContext(info);
 		_info = info;
 		urn = info.getURN();
 		fileSystem = info.getFileSystem();
-		propertiesMap.put(METAINFO, info);
-		propertiesMap.put(DEFAULT_FILENAME, info.getName());
+		synchronized(this) {
+		    propertiesMap.put(METAINFO, info);
+		    propertiesMap.put(DEFAULT_FILENAME, info.getName());
+		}
 	}
 	
 	/**
@@ -401,6 +406,8 @@ public class BTDownloader extends AbstractDownloader
 	throws IOException {
 		Map<String, Serializable> m = new HashMap<String, Serializable>();
 		synchronized(this) {
+            if (finished) // do not write finished downloads
+                return;
 			m.putAll(propertiesMap);
 		}
 		Assert.that(m.containsKey(METAINFO));
@@ -480,13 +487,12 @@ public class BTDownloader extends AbstractDownloader
 		return fileSystem.conflictsIncomplete(incomplete); 
 	}
 
-	public void finish() {
+	public synchronized void finish() {
+        finished = true;
 		RouterService.getTorrentManager().removeEventListener(this);
 		_torrent = new FinishedTorrentDownload(_torrent);
 		_info = null;
-		synchronized(this) {
-			propertiesMap.remove(METAINFO);
-		}
+		propertiesMap.remove(METAINFO);
 	}
 	
 	public String toString() {
