@@ -184,9 +184,11 @@ BTLinkListener {
 	public void start() {
 		if (LOG.isDebugEnabled())
 			LOG.debug("requesting torrent start", new Exception());
-		
-		if (state.get() != TorrentState.QUEUED)
-			throw new IllegalStateException();
+
+		synchronized(state.getLock()) {
+		    if (state.get() != TorrentState.QUEUED)
+		        throw new IllegalStateException("torrent should be queued but is "+state.get());
+		}
 		dispatchEvent(TorrentEvent.Type.STARTING);
 		
 		diskInvoker.execute(new Runnable() {
@@ -371,7 +373,7 @@ BTLinkListener {
 		boolean wasActive = false;
 		synchronized(state.getLock()) {
 			if (!isActive() && state.get() != TorrentState.QUEUED)
-				throw new IllegalStateException("torrent not pausable");
+				throw new IllegalStateException("torrent not pausable "+state.get());
 			
 			wasActive = isActive();
 			state.set(TorrentState.PAUSED);
