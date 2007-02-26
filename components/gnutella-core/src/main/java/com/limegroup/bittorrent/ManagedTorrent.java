@@ -196,6 +196,8 @@ BTLinkListener {
 				
 				initializeTorrent();
 				initializeFolder();
+                if (state.get() == TorrentState.DISK_PROBLEM)
+                    return;
 				
 				dispatchEvent(TorrentEvent.Type.STARTED); 
 				
