@@ -31,6 +31,9 @@ public final class LimeWireUtils {
      * needs, and getVersion method retuns this value if it's not null
      */
     private static String testVersion = null;
+    
+    /** True if this is a beta. */
+    private static final boolean betaVersion = true;
 
     /**
      * The cached value of the major revision number.
@@ -107,6 +110,11 @@ public final class LimeWireUtils {
             _isPro = true;
 		}
 	}
+    
+    /** Returns true if we're a beta. */
+    public static boolean isBetaRelease() {
+        return betaVersion;
+    }
 	
 	/** Gets the major version of GUESS supported.
      */

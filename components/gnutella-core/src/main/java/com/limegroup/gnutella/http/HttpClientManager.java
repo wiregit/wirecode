@@ -15,6 +15,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.auth.HttpAuthenticator;
+import org.apache.commons.httpclient.protocol.DefaultProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.logging.Log;
@@ -63,18 +64,15 @@ public class HttpClientManager {
     
     static {
         MANAGER = new MultiThreadedHttpConnectionManager();
-        ((MultiThreadedHttpConnectionManager)MANAGER).
-            setIdleConnectionTime(IDLE_TIME);
+        ((MultiThreadedHttpConnectionManager)MANAGER).setIdleConnectionTime(IDLE_TIME);
         Protocol limeProtocol = new Protocol("http",new LimeSocketFactory(),80);
         Protocol.registerProtocol("http",limeProtocol);
     }
             
-    /**
-     * Returns a new HttpClient with the appropriate manager.
-     */
+    /** Returns a new HttpClient with the appropriate manager. */
     public static HttpClient getNewClient() {
         return getNewClient(CONNECTION_TIMEOUT, TIMEOUT);
-    }
+    }    
     
     /**
      * Returns a new HttpClient with the appropriate manager and parameters.
@@ -92,14 +90,29 @@ public class HttpClientManager {
     }
     
     /**
+     * Execute a method without using NIO. 
+     */
+    public static void executeMethodNoNIO(HttpClient client, HttpMethod method)
+      throws IOException, HttpException {
+        HostConfiguration hc = method.getHostConfiguration();
+        Protocol p = hc == null ? null : hc.getProtocol();
+        String scheme = p == null ? "" : p.getScheme();
+        if(!"http".equals(scheme.toLowerCase()))
+            throw new IOException("only support no NIO with http");
+        Protocol http = new Protocol("http", new DefaultProtocolSocketFactory(), 80);
+        hc.setHost(hc.getHost(), hc.getPort(), http);
+        client.executeMethod(method);
+    }
+    
+    /**
      * Executes the given HttpMethod in the HttpClient, following redirects.
      * This method is needed because HttpClient does not support redirects
      * across protocols, hosts, and/or ports.
      */
     public static void executeMethodRedirecting(HttpClient client,
-                                                HttpMethod methid)
+                                                HttpMethod method)
       throws IOException, HttpException {
-        executeMethodRedirecting(client, methid, MAXIMUM_REDIRECTS);
+        executeMethodRedirecting(client, method, MAXIMUM_REDIRECTS);
     }
     
     /**
@@ -109,32 +122,50 @@ public class HttpClientManager {
      * across protocols, hosts, and/or ports.
      */
     public static void executeMethodRedirecting(HttpClient client,
-                                                HttpMethod methid,
+                                                HttpMethod method,
                                                 int redirects)
+      throws IOException, HttpException {
+        executeMethodRedirecting(client, method, redirects, true);
+    }
+    
+    public static void executeMethodRedirectingNoNIO(HttpClient client,
+                                                     HttpMethod method,
+                                                     int redirects)
+      throws IOException, HttpException {
+        executeMethodRedirecting(client, method, redirects, false);
+    }
+    
+    private static void executeMethodRedirecting(final HttpClient client,
+                                                 final HttpMethod method,
+                                                 final int redirects,
+                                                 final boolean allowNIO)
       throws IOException, HttpException {
         for(int i = 0; i < redirects; i++) {
             if(LOG.isInfoEnabled())
                 LOG.info("Attempting connection (" + i + ") to " + 
-                         methid.getURI().getEscapedURI());
+                        method.getURI().getEscapedURI());
             try {
-                client.executeMethod(methid);
+                if(allowNIO)
+                    client.executeMethod(method);
+                else
+                    executeMethodNoNIO(client, method);
             } catch(IllegalArgumentException iae) {
                 // HttpClient 2.1rc2 has errors w/ parsing cookies.
                 // See: https://www.limewire.org/jira/browse/CORE-33
                 throw (IOException)new IOException().initCause(iae);
             }
-            switch(methid.getStatusCode()) {
+            switch(method.getStatusCode()) {
             case HttpStatus.SC_MOVED_TEMPORARILY:
             case HttpStatus.SC_MOVED_PERMANENTLY:
             case HttpStatus.SC_SEE_OTHER:
             case HttpStatus.SC_TEMPORARY_REDIRECT:
-                if(!methid.getFollowRedirects()) {
+                if(!method.getFollowRedirects()) {
                     if(LOG.isInfoEnabled())
                         LOG.warn("Redirect requested but not supported");
                     throw new HttpException("Redirect requested");
                 }
                 
-                Header locationHeader = methid.getResponseHeader("location");
+                Header locationHeader = method.getResponseHeader("location");
                 if(locationHeader == null) {
                     if(LOG.isInfoEnabled())
                         LOG.warn("Redirect requested, no location header");
@@ -148,29 +179,30 @@ public class HttpClientManager {
                 URI newLocation = new URI(location.toCharArray());
                 
                 // Retrieve the RequestHeaders
-                Header[] requestHeaders = methid.getRequestHeaders();
+                Header[] requestHeaders = method.getRequestHeaders();
                 
                 // Recycle this method so we can use it again.
-                methid.recycle();
+                method.recycle();
                 
-                HostConfiguration hc = methid.getHostConfiguration();
-                hc.setHost(
+                HostConfiguration methodConfig = method.getHostConfiguration();
+                    
+                methodConfig.setHost(
                     newLocation.getHost(),
                     newLocation.getPort(),
                     newLocation.getScheme()
                 );
                 
-                methid.setFollowRedirects(true);
+                method.setFollowRedirects(true);
                 
                 for(int j = 0; j < requestHeaders.length; j++) {
                     if(!requestHeaders[j].getName().equals("Host"))
-                        methid.addRequestHeader(requestHeaders[j]);
+                        method.addRequestHeader(requestHeaders[j]);
                 }
                 
                 // Set up the new values for the method.
-                methid.setPath(newLocation.getEscapedPath());
-                methid.setQueryString(newLocation.getEscapedQuery());
-                methid.removeRequestHeader(HttpAuthenticator.WWW_AUTH_RESP);
+                method.setPath(newLocation.getEscapedPath());
+                method.setQueryString(newLocation.getEscapedQuery());
+                method.removeRequestHeader(HttpAuthenticator.WWW_AUTH_RESP);
 
                 // Loop around and try the method again.
                 break;
@@ -184,7 +216,7 @@ public class HttpClientManager {
     private static class LimeSocketFactory implements ProtocolSocketFactory {
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
-        throws IOException, UnknownHostException {
+          throws IOException, UnknownHostException {
             return Sockets.connect(host,port,0);
         }
 

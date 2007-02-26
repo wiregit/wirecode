@@ -63,4 +63,8 @@ public class BugSettings extends LimeProps {
      */
     public static final StringSetting LAST_ACCEPTABLE_VERSION =
         FACTORY.createRemoteStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
+    
+    /** Setting for whether or not deadlock bugs should be sent. */
+    public static final BooleanSetting SEND_DEADLOCK_BUGS =
+        FACTORY.createBooleanSetting("SEND_DEADLOCK_BUGS", true);
 }

@@ -6,6 +6,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.limewire.nio.NIODispatcher;
 
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -85,8 +86,8 @@ public class HttpClientManagerTest extends LimeTestCase {
     }
     
     public void testExecuteMethodRedirecting() throws Exception {
-        HttpMethod get = new GetMethod(url1);
         HttpClient client = HttpClientManager.getNewClient();
+        HttpMethod get = new GetMethod(url1);
         
         s1.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url2);
         s2.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url3);
@@ -111,6 +112,77 @@ public class HttpClientManagerTest extends LimeTestCase {
         }
         
         HttpClientManager.executeMethodRedirecting(client, get, 9);
+        assertNotNull(s3.getRequest());
+        assertNotNull(s4.getRequest());
+        assertNotNull(s5.getRequest());
+        assertNotNull(s6.getRequest());
+        assertNotNull(s7.getRequest());
+        assertNotNull(s8.getRequest());
+        assertNotNull(s9.getRequest());
+        assertNotNull(s10.getRequest());
+        assertNotNull(s11.getRequest());
+    }
+    
+    public void testExecuteMethodRedirectingNoNIO() throws Exception {
+        HttpClient client = HttpClientManager.getNewClient();
+        HttpMethod get = new GetMethod(url1);
+        
+        s1.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url2);
+        s2.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url3);
+        
+        s3.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url4);
+        s4.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url5);
+        s5.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url6);
+        s6.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url7);
+        s7.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url8);
+        s8.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url9);
+        s9.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url10);
+        s10.setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+url11);
+
+        final Object nioLock = new Object();
+        try {
+            try {
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        synchronized(nioLock) {
+                            try {
+                                nioLock.wait();
+                            } catch(InterruptedException ignored) {}
+                        }
+                    }
+                });
+                Thread.sleep(100);
+                HttpClientManager.executeMethodRedirectingNoNIO(client, get, 2);
+                fail("Should have thrown redirect failure");
+            } finally {
+                synchronized(nioLock) {
+                    nioLock.notify();
+                }
+            }
+        } catch(HttpException he) {
+            assertNotNull(s1.getRequest());
+            assertNotNull(s2.getRequest());
+            assertNull(s3.getRequest()); // should have stopped after 1 & 2 tried.
+            // expected.
+        }
+        
+        try {
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    synchronized(nioLock) {
+                        try {
+                            nioLock.wait();
+                        } catch(InterruptedException ignored) {}
+                    }
+                }
+            });
+            Thread.sleep(100);
+            HttpClientManager.executeMethodRedirectingNoNIO(client, get, 9);
+        } finally {
+            synchronized (nioLock) {
+                nioLock.notify();
+            }
+        }
         assertNotNull(s3.getRequest());
         assertNotNull(s4.getRequest());
         assertNotNull(s5.getRequest());
