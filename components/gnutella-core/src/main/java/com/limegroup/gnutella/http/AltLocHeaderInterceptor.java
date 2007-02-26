@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.nio.http.HeaderInterceptor;
+import org.limewire.http.HeaderInterceptor;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.RouterService;

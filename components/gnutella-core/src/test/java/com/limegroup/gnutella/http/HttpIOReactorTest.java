@@ -1,9 +1,10 @@
-package org.limewire.nio.http;
+package com.limegroup.gnutella.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 
 import junit.framework.Test;
 
@@ -20,18 +21,23 @@ import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.HttpTestClient;
+import org.limewire.http.HttpTestServer;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class HttpIOReactorTest extends BaseTestCase {
 
     private static final int ACCEPTOR_PORT = 9999;
+
     private static Acceptor acceptor;
+
     private HttpRequestFactory requestFactory = new DefaultHttpRequestFactory();
-    
+
     public HttpIOReactorTest(String name) {
         super(name);
     }
@@ -46,68 +52,83 @@ public class HttpIOReactorTest extends BaseTestCase {
 
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
-        
+
         acceptor = new Acceptor();
         acceptor.start();
         acceptor.setListeningPort(ACCEPTOR_PORT);
-        
-        // Give thread time to find and open it's sockets.   This race condition
+
+        // Give thread time to find and open it's sockets. This race condition
         // is tolerated in order to speed up LimeWire startup
         try {
             Thread.sleep(2000);
-        } catch (InterruptedException ex) {}                
+        } catch (InterruptedException ex) {
+        }
     }
 
     public static void globealTearDown() throws Exception {
         acceptor.setListeningPort(0);
     }
-   
+
     public void testGetFromAcceptor() throws Exception {
         final HttpTestServer server = new HttpTestServer();
         server.registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setEntity(new ByteArrayEntity("foobar".getBytes()));
-            }            
+            }
         });
         server.execute(new EventListener() {
             public void connectionClosed(InetAddress address) {
             }
+
             public void connectionOpen(InetAddress address) {
             }
+
             public void connectionTimeout(InetAddress address) {
             }
+
             public void fatalIOException(IOException e) {
                 throw new RuntimeException(e);
             }
+
             public void fatalProtocolException(HttpException e) {
                 throw new RuntimeException(e);
             }
         });
-        
+        RouterService.getConnectionDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        server.acceptConnection(word, socket);
+                    }
+                }, new String[] { "GET", "HEAD", "POST" }, false, false);
+
         final HttpTestClient client = new HttpTestClient();
         MyHttpRequestExecutionHandler executionHandler = new MyHttpRequestExecutionHandler();
         client.execute(executionHandler);
-        
+
         client.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), null);
-        
+
         synchronized (HttpIOReactorTest.this) {
             HttpIOReactorTest.this.wait(1000);
         }
         assertNotNull(executionHandler.response);
-        assertEquals(HttpVersion.HTTP_1_1, executionHandler.response.getStatusLine().getHttpVersion());
-        assertEquals(HttpStatus.SC_OK, executionHandler.response.getStatusLine().getStatusCode());
+        assertEquals(HttpVersion.HTTP_1_1, executionHandler.response
+                .getStatusLine().getHttpVersion());
+        assertEquals(HttpStatus.SC_OK, executionHandler.response
+                .getStatusLine().getStatusCode());
         assertEquals("foobar", executionHandler.responseContent);
     }
-    
-    private class MyHttpRequestExecutionHandler implements HttpRequestExecutionHandler {
+
+    private class MyHttpRequestExecutionHandler implements
+            HttpRequestExecutionHandler {
 
         HttpRequest request;
+
         HttpResponse response;
+
         String responseContent;
-        
-        public void handleResponse(HttpResponse response,
-                HttpContext context) {
+
+        public void handleResponse(HttpResponse response, HttpContext context) {
             this.response = response;
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -129,7 +150,7 @@ public class HttpIOReactorTest extends BaseTestCase {
                 // request has been sent already;
                 return null;
             }
-            
+
             try {
                 this.request = requestFactory.newHttpRequest("GET", "/");
             } catch (MethodNotSupportedException e) {
@@ -137,7 +158,7 @@ public class HttpIOReactorTest extends BaseTestCase {
             }
             return request;
         }
-        
+
     }
-    
+
 }

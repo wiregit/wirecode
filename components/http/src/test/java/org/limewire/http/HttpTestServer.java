@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
  * $Revision: 1.1.2.1 $
- * $Date: 2007-02-12 21:40:57 $
+ * $Date: 2007-02-26 21:55:48 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -29,9 +29,10 @@
  *
  */
 
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.io.IOException;
+import java.net.Socket;
 
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
@@ -50,8 +51,7 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-
-import com.limegroup.gnutella.RouterService;
+import org.limewire.http.HttpIOReactor;
 
 public class HttpTestServer {
 
@@ -77,7 +77,7 @@ public class HttpTestServer {
         this.registry.register(pattern, handler);
     }
 
-    protected void execute(EventListener listener) throws IOException {
+    public void execute(EventListener listener) throws IOException {
         BasicHttpProcessor processor = new BasicHttpProcessor();
         processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
@@ -96,9 +96,10 @@ public class HttpTestServer {
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
                 serviceHandler, reactor.getHttpParams());
         reactor.execute(ioEventDispatch);
-
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(reactor,
-                new String[] { "GET", "HEAD", "POST" }, false, false);
     }
 
+    public void acceptConnection(String word, Socket socket) {
+        reactor.acceptConnection(word, socket);
+    }
+    
 }

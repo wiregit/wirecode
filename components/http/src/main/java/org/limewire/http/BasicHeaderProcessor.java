@@ -1,4 +1,4 @@
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.io.IOException;
 import java.util.ArrayList;

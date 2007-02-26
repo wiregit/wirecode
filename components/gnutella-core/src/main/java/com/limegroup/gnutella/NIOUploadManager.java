@@ -25,10 +25,10 @@ import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
-import org.limewire.nio.http.HttpCoreUtils;
-import org.limewire.nio.http.HttpIOReactor;
-import org.limewire.nio.http.HttpServiceHandler;
-import org.limewire.nio.http.ServerConnectionEventListener;
+import org.limewire.http.HttpCoreUtils;
+import org.limewire.http.HttpIOReactor;
+import org.limewire.http.HttpServiceHandler;
+import org.limewire.http.ServerConnectionEventListener;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
@@ -45,7 +45,7 @@ public class NIOUploadManager extends AbstractUploadManager implements
         UploadManager, ConnectionAcceptor {
 
     private final static String SESSION_KEY = "org.limewire.session";
-    
+
     private HttpIOReactor reactor;
 
     private HttpParams params;
@@ -60,8 +60,12 @@ public class NIOUploadManager extends AbstractUploadManager implements
         initializeReactor();
         inititalizeHandlers();
 
-        RouterService.getConnectionDispatcher().addConnectionAcceptor(reactor,
-                new String[] { "GET", "HEAD", }, false, false);
+        RouterService.getConnectionDispatcher().addConnectionAcceptor(
+                new ConnectionAcceptor() {
+                    public void acceptConnection(String word, Socket socket) {
+                        reactor.acceptConnection(word, socket);
+                    }
+                }, new String[] { "GET", "HEAD", }, false, false);
     }
 
     private void initializeReactor() {
@@ -88,8 +92,8 @@ public class NIOUploadManager extends AbstractUploadManager implements
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new ResponseConnControl());
 
-        HttpServiceHandler serviceHandler = new HttpServiceHandler(
-                processor, new DefaultHttpResponseFactory(),
+        HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
+                new DefaultHttpResponseFactory(),
                 new DefaultConnectionReuseStrategy(), params);
         serviceHandler.setConnectionListener(listener);
         serviceHandler.setHandlerResolver(this.registry);
@@ -126,8 +130,9 @@ public class NIOUploadManager extends AbstractUploadManager implements
                     HttpContext context) throws HttpException, IOException {
                 UploadStat.UPDATE_FILE.incrementStat();
                 UploadSession session = getSession(context);
-                NIOUploader uploader = new NIOUploader("update.xml", session, -1); 
-                
+                NIOUploader uploader = new NIOUploader("update.xml", session,
+                        -1);
+
                 File file = new File(CommonUtils.getUserSettingsDir(),
                         "update.xml");
                 // TODO is the returned mime-type correct?
@@ -184,12 +189,13 @@ public class NIOUploadManager extends AbstractUploadManager implements
     public void acceptConnection(String word, Socket socket) {
         reactor.acceptConnection(word, socket);
     }
-    
-    public NIOUploader getUploader(HttpContext context, String filename, int index) {
+
+    public NIOUploader getUploader(HttpContext context, String filename,
+            int index) {
         UploadSession session = getSession(context);
         NIOUploader uploader = (NIOUploader) session.getUploader();
         if (uploader != null) {
-            
+
         } else {
             uploader = new NIOUploader(filename, session, index);
         }
@@ -204,7 +210,8 @@ public class NIOUploadManager extends AbstractUploadManager implements
     }
 
     public UploadSession getSession(HttpContext context) {
-        UploadSession session = (UploadSession) context.getAttribute(SESSION_KEY);
+        UploadSession session = (UploadSession) context
+                .getAttribute(SESSION_KEY);
         assert session != null;
         return session;
     }
@@ -214,7 +221,8 @@ public class NIOUploadManager extends AbstractUploadManager implements
         this.registry.register(pattern, handler);
     }
 
-    private class ConnectionEventListener implements ServerConnectionEventListener {
+    private class ConnectionEventListener implements
+            ServerConnectionEventListener {
 
         public void connectionClosed(NHttpServerConnection conn) {
             UploadSession session = getSession(conn.getContext());
@@ -230,7 +238,7 @@ public class NIOUploadManager extends AbstractUploadManager implements
         }
 
         public void fatalIOException(NHttpServerConnection conn, IOException e) {
-            throw new RuntimeException(e);            
+            throw new RuntimeException(e);
         }
 
         public void fatalProtocolException(NHttpServerConnection conn,

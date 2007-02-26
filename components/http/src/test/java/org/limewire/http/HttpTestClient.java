@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpClient.java $
  * $Revision: 1.1.2.1 $
- * $Date: 2007-02-12 21:40:57 $
+ * $Date: 2007-02-26 21:55:48 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -29,7 +29,7 @@
  *
  */
 
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -46,6 +46,8 @@ import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
+import org.limewire.http.HttpIOReactor;
+import org.limewire.http.HttpSessionRequest;
 
 public class HttpTestClient {
 
@@ -63,7 +65,7 @@ public class HttpTestClient {
             .setParameter(HttpProtocolParams.USER_AGENT, "TEST-CLIENT/1.1");
     }
     
-    protected void execute(final HttpRequestExecutionHandler execHandler) throws IOException {
+    public void execute(final HttpRequestExecutionHandler execHandler) throws IOException {
         BasicHttpProcessor httpproc = new BasicHttpProcessor();
         httpproc.addInterceptor(new RequestContent());
         httpproc.addInterceptor(new RequestTargetHost());

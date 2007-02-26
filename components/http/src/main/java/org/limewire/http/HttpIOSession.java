@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.net.SocketAddress;
 import java.nio.channels.ByteChannel;

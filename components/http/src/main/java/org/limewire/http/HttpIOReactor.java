@@ -1,4 +1,4 @@
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,10 +18,9 @@ import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIOSocket;
 import org.limewire.nio.observer.ConnectObserver;
 
-import com.limegroup.gnutella.ConnectionAcceptor;
 import com.limegroup.gnutella.util.Sockets;
 
-public class HttpIOReactor implements ConnectingIOReactor, ConnectionAcceptor {
+public class HttpIOReactor implements ConnectingIOReactor {
 
     static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
     

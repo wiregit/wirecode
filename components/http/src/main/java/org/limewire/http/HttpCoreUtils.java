@@ -1,4 +1,4 @@
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;

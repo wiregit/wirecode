@@ -1,4 +1,4 @@
-package org.limewire.nio.http;
+package org.limewire.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 
-public class NIOEntity implements HttpEntity {
+public class HttpNIOEntity implements HttpEntity {
 
     public void consumeContent() throws IOException {
         // TODO Auto-generated method stub
