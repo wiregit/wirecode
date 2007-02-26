@@ -266,8 +266,10 @@ BTLinkListener {
 	 */
 	public void stop() {
 				
-		if (!isActive())
-			throw new IllegalStateException("torrent cannot be stopped");
+		if (!isActive()) {
+			throw new IllegalStateException("torrent cannot be stopped in state "+
+                    state.get());
+        }
 		
 		state.set(TorrentState.STOPPED);
 		

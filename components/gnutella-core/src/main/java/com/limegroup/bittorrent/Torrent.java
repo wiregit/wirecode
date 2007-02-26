@@ -7,19 +7,25 @@ interface Torrent {
 	 * to Downloader states.
 	 */
 	public enum TorrentState {
-	WAITING_FOR_TRACKER,
-	VERIFYING,
-	CONNECTING,
-	DOWNLOADING,
-	SAVING,
-	SEEDING,
-	QUEUED,
-	PAUSED,
-	STOPPED,
-	DISK_PROBLEM,
-	TRACKER_FAILURE,
-	SCRAPING, //scraping == requesting from tracker
-	INVALID
+        /*
+         * d - Downloading a - Active p - Pausable
+         * r - Resumable, i - Inactive, c - Completed
+         * s - ShouldBeRemoved, iu - Inactive upload
+         * ss - StopState
+         */
+    WAITING_FOR_TRACKER, // a, d, p
+    VERIFYING, // a, p
+    CONNECTING, // a, d, p
+    DOWNLOADING, // a, d, p
+    SAVING, // a
+    SEEDING, // a, c, s
+    QUEUED, // p, i
+    PAUSED, // r, i, iu, ss
+    STOPPED, // c, iu, ss
+    DISK_PROBLEM, // c, s, ss
+    TRACKER_FAILURE, // r, c, ss
+    SCRAPING, //scraping == requesting from tracker // a, d, p
+    INVALID // ss
 	};
 	
 	/**
