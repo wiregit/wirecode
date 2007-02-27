@@ -198,9 +198,7 @@ public final class Launcher {
 	}
 
     /**
-     * Windows: Launches the Explorer and highlights the file.
-     * Mac OS X: Launches the Finder and opens the file if it is
-     *  a directory or its parent if it is a file
+     * Launches the Explorer/Finder and highlights the file.
      * 
      * @param file the file to show in explorer
      * @return null, if not supported by platform; the launched process otherwise
@@ -216,12 +214,10 @@ public final class Launcher {
             
             // launches explorer and highlights the file
             return LimeProcess.exec(new String[] { "explorer", "/select,", explorePath });
+            
         } else if (OSUtils.isMacOSX()) {
-            if (file.isFile()) {
-                return launchFile(file.getParentFile());
-            } else {
-                return launchFile(file);
-            }
+            // launches the Finder and highlights the file
+            return LimeProcess.exec(selectFileCommand(file));
         }
         return null;
     }
@@ -255,7 +251,31 @@ public final class Launcher {
 	private static LimeProcess launchFileMacOSX(final String file) throws IOException {
 	    return LimeProcess.exec(new String[]{"open", file});
 	}
-
+    
+    /**
+     * Launches the Finder and selects the given File
+     */
+    private static String[] selectFileCommand(File file) {
+        String path = null;
+        try {
+            path = file.getCanonicalPath();
+        } catch (IOException err) {
+            path = file.getAbsolutePath();
+        }
+        
+        String[] command = new String[] { 
+                "osascript", 
+                "-e", "set unixPath to \"" + path + "\"",
+                "-e", "set hfsPath to POSIX file unixPath",
+                "-e", "tell application \"Finder\"", 
+                "-e",    "activate", 
+                "-e",    "select hfsPath",
+                "-e", "end tell" 
+        };
+        
+        return command;
+    }
+    
 	/** 
 	 * Loads specialized classes for the Mac needed to launch files.
 	 *
@@ -306,5 +326,10 @@ public final class Launcher {
 	    }
 
 	    return LimeProcess.exec(strs);
+    }
+    
+    public static void main(String[] args) throws Exception {
+        File file = new File("/Users/roger/Shared/EPSON1.TXT");
+        launchExplorer(file);
     }
 }
