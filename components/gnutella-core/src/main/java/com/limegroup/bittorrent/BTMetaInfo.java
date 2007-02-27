@@ -263,6 +263,8 @@ public class BTMetaInfo implements Serializable {
 	}
     
     private static void validateURI(URI check) throws ValueException {
+        if (check == null)
+            throw new ValueException("null URI");
         if (!"http".equalsIgnoreCase(check.getScheme()))
             throw new ValueException("unsupported tracker protocol: "+check.getScheme());
         boolean hostOk = false;
