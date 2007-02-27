@@ -149,14 +149,17 @@ public class OOBHandler implements MessageHandler, Runnable {
     private class OOBSession {
     	
         private final SecurityToken token;
-        private final IntSet responseHashCodes;
+        private final IntSet urnHashCodes;
+        
+        private IntSet responseHashCodes;
+        
         private final int requestedResponseCount;
         private final GUID guid;
     	
         public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
             this.token = token;
             this.requestedResponseCount = requestedResponseCount;
-            this.responseHashCodes = new IntSet(requestedResponseCount);
+            this.urnHashCodes = new IntSet(requestedResponseCount);
             this.guid = guid;
     	}
         
@@ -172,9 +175,13 @@ public class OOBHandler implements MessageHandler, Runnable {
             for (Response response : responses) {
                 Set<URN> urns = response.getUrns();
                 if (!urns.isEmpty()) {
-                    added += responseHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
+                    added += urnHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
                 }
                 else {
+                    // create lazily since responses should have urns
+                    if (responseHashCodes == null) {
+                        responseHashCodes = new IntSet();
+                    }
                     added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
                 }
             }
@@ -182,7 +189,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
         
         public final int getRemainingResultsCount() {
-            return requestedResponseCount - responseHashCodes.size();
+            return requestedResponseCount - urnHashCodes.size() - (responseHashCodes != null ? responseHashCodes.size() : 0); 
         }
         
     	public boolean equals(Object o) {
