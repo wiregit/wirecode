@@ -1,8 +1,9 @@
 package org.limewire.io;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+
+import org.limewire.util.BufferUtils;
 
 /**
  * Like ByteArrayInputStream but for ByteBuffer(s) and this Class is not
@@ -41,7 +42,7 @@ public class ByteBufferInputStream extends InputStream {
         return buffers;
     }
     
-    public int available() throws IOException {
+    public int available() {
         int available = 0;
         for(int i = buffers.length-1; i >= index; --i) {
             available += buffers[i].remaining();
@@ -49,7 +50,7 @@ public class ByteBufferInputStream extends InputStream {
         return available;
     }
     
-    public void close() throws IOException {
+    public void close() {
         index = 0;
         mark = -1;
         buffers = EMPTY;
@@ -64,7 +65,7 @@ public class ByteBufferInputStream extends InputStream {
         }
     }
 
-    public void reset() throws IOException {
+    public void reset() {
         if (mark != -1) {
             index = mark;
             for(int i = buffers.length-1; i >= index ; --i) {
@@ -78,7 +79,7 @@ public class ByteBufferInputStream extends InputStream {
         return true;
     }
 
-    public int read() throws IOException {
+    public int read() {
         while(index < buffers.length) {
             ByteBuffer b = buffers[index];
             if (b.hasRemaining()) {
@@ -91,8 +92,12 @@ public class ByteBufferInputStream extends InputStream {
         
         return -1;
     }
+    
+    public int read(byte[] b) {
+        return read(b, 0, b.length);
+    }
 
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte[] b, int off, int len) {
         if (b == null) {
             throw new NullPointerException();
         } else if ((off < 0) || (off > b.length) || (len < 0)
@@ -133,7 +138,7 @@ public class ByteBufferInputStream extends InputStream {
         return (r > 0 ? r : -1);
     }
     
-    public long skip(long n) throws IOException {
+    public long skip(long n) {
         long s = 0L;
         while(index < buffers.length) {
             ByteBuffer b = buffers[index];
@@ -153,5 +158,61 @@ public class ByteBufferInputStream extends InputStream {
         }
         
         return s;
+    }
+    
+    /** Reads as much as possible into the destination buffer. */
+    public long read(ByteBuffer dst) {
+        long read = 0L;
+        while(index < buffers.length) {
+            ByteBuffer b = buffers[index];
+            if(b.hasRemaining())
+                read += BufferUtils.transfer(b, dst, false);
+            if(!dst.hasRemaining())
+                break;
+            // Try next ByteBuffer
+            ++index;
+        }
+        return read;
+    }
+    
+    /**
+     * Returns a reference to the existing buffers if possible.
+     * If not possible, returns a copy of the data in a new buffer.
+     * 
+     * This advances the read mark, as if the requested data has
+     * been read.
+     * 
+     * If there wasn't enough data to place into the buffer, the
+     * buffer is created with as much data as possible.
+     */
+    public ByteBuffer bufferFor(int length) {
+        ByteBuffer ret = null;
+        
+        // make sure we advance to the first buffer with data left.
+        // this lets the reference work correctly.
+        while(index < buffers.length) {
+            if(buffers[index].hasRemaining())
+                break;
+            index++;
+        }
+        
+        if(index < buffers.length) {
+            length = Math.min(length, available());
+            ByteBuffer b = buffers[index];
+            if(b.remaining() >= length ) {
+                int oldLimit = b.limit();
+                b.limit(b.position() + length);
+                ret = b.slice();
+                b.limit(oldLimit);
+                b.position(b.position() + length);
+            } else {
+                ret = ByteBuffer.allocate(length);
+                read(ret);
+                ret.flip();
+            }
+        } else {
+            ret = BufferUtils.getEmptyBuffer();
+        }
+        return ret;
     }
 }

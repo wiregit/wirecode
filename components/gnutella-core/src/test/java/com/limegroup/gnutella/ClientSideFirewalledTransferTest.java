@@ -21,6 +21,8 @@ import java.util.StringTokenizer;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -37,8 +39,6 @@ import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.udpconnect.SynMessage;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

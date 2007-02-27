@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
+import org.limewire.util.BufferUtils;
 
 /**
  * State machine for reading & writing.

@@ -20,6 +20,11 @@ public class MessageDispatcher {
         this.messageRouter = messageRouter;
     }
     
+    /** Dispatches a runnable, to allow arbitrary runnables to be processed on the message thread. */
+    public void dispatch(Runnable r) {
+        DISPATCH.execute(r);
+    }
+    
     /**
      * Dispatches a UDP message.
      */

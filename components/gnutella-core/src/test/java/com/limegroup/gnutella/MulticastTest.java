@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.Test;
+
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
@@ -25,7 +25,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 @SuppressWarnings("unchecked")
 public class MulticastTest extends LimeTestCase {
@@ -34,7 +33,7 @@ public class MulticastTest extends LimeTestCase {
     
     private static final int DELAY = 1000;
         
-    private static MetaFileManager FMAN;
+    private static FileManager FMAN;
     
     private static MulticastHandler M_HANDLER;
     
@@ -88,9 +87,8 @@ public class MulticastTest extends LimeTestCase {
 
     public static void globalSetUp() throws Exception {
         CALLBACK = new ActivityCallbackStub();
-        FMAN = new MetaFileManager();
-        ROUTER_SERVICE = new RouterService(
-            CALLBACK, new StandardMessageRouter(), FMAN);
+        ROUTER_SERVICE = new RouterService(CALLBACK, new StandardMessageRouter());
+        FMAN = RouterService.getFileManager();
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
     

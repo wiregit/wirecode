@@ -24,6 +24,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
+import org.limewire.rudp.UDPConnection;
 import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -38,7 +39,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**

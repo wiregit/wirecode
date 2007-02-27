@@ -14,7 +14,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -44,7 +43,6 @@ public class MessageFactory {
         setParser(Message.F_ROUTE_TABLE_UPDATE, new RouteTableUpdateParser());
         setParser(Message.F_VENDOR_MESSAGE, new VendorMessageParser());
         setParser(Message.F_VENDOR_MESSAGE_STABLE, new VendorMessageStableParser());
-        setParser(Message.F_UDP_CONNECTION, new UDPConnectionParser());
     }
     
     /**
@@ -374,13 +372,6 @@ public class MessageFactory {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
             return VendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
-        }
-    }
-    
-    private static class UDPConnectionParser extends GnutellaMessageParser {
-        protected Message parse(byte[] guid, byte ttl, byte hops, 
-                byte[] payload, int network) throws BadPacketException {
-            return UDPConnectionMessage.createMessage(guid, ttl, hops, payload);
         }
     }
 }

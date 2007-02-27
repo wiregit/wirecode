@@ -18,13 +18,13 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.nio.BufferUtils;
 import org.limewire.nio.SocketFactory;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
 import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsHandler;
+import org.limewire.util.BufferUtils;
 
 
 import com.limegroup.gnutella.settings.ConnectionSettings;

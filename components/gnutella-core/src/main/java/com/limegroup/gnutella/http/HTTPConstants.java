@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.http;
 
-import com.limegroup.gnutella.udpconnect.UDPConnection;
+import org.limewire.rudp.UDPConnection;
 
 /**
  * This class defines a set of constants for use in HTTP messages.

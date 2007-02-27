@@ -29,6 +29,7 @@ import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPortSet;
+import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -64,7 +65,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.Sockets;
 

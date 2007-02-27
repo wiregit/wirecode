@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import org.limewire.io.NetworkUtils;
 
@@ -23,15 +24,8 @@ import com.limegroup.gnutella.util.DataUtils;
  */
 public final class UDPReplyHandler implements ReplyHandler {
 
-	/**
-	 * Constant for the <tt>InetAddress</tt> of the host to reply to.
-	 */
-	private final InetAddress IP;
-
-	/**
-	 * Constant for the port of the host to reply to.
-	 */
-	private final int PORT;
+	/** The InetSocketAddress this is for. */
+    private final InetSocketAddress addr;
 
 	/**
 	 * Constant for the <tt>UDPService</tt>.
@@ -49,21 +43,17 @@ public final class UDPReplyHandler implements ReplyHandler {
     private static volatile SpamFilter _personalFilter =
         SpamFilter.newPersonalFilter();
 	
-	/**
-	 * Constructor that sets the ip and port to reply to.
-	 *
-	 * @param ip the <tt>InetAddress</tt> to reply to
-	 * @param port the port to reply to
-	 */
-	public UDPReplyHandler(InetAddress ip, int port) {
-	    if(!NetworkUtils.isValidPort(port))
-	        throw new IllegalArgumentException("invalid port: " + port);
-	    if(!NetworkUtils.isValidAddress(ip))
-	        throw new IllegalArgumentException("invalid ip: " + ip);
+	/** Creates a new UDPReplyHandler for the given address. */
+	public UDPReplyHandler(InetSocketAddress addr) {
+	    if(!NetworkUtils.isValidSocketAddress(addr))
+	        throw new IllegalArgumentException("invalid addr: " + addr);
 	       
-		IP   = ip;
-		PORT = port;
+		this.addr = addr;
 	}
+    
+    public UDPReplyHandler(InetAddress addr, int port) {
+        this(new InetSocketAddress(addr, port));
+    }
     
     /**
      * Sets the new personal spam filter to be used for all UDPReplyHandlers.
@@ -83,7 +73,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-        UDP_SERVICE.send(pong, IP, PORT);
+        UDP_SERVICE.send(pong, addr);
 		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
@@ -97,7 +87,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-        UDP_SERVICE.send(hit, IP, PORT);
+        UDP_SERVICE.send(hit, addr);
 		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
@@ -111,7 +101,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-        UDP_SERVICE.send(request, IP, PORT);
+        UDP_SERVICE.send(request, addr);
 		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
@@ -232,7 +222,7 @@ public final class UDPReplyHandler implements ReplyHandler {
      * datagram.
      */
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException {
-        UDPService.instance().send(m, IP, PORT);
+        UDPService.instance().send(m, addr);
     }
     
     /**
@@ -242,19 +232,17 @@ public final class UDPReplyHandler implements ReplyHandler {
         //This should never happen. But if it does, ignore it and move on
         return;
     }
-    
-
 
     // inherit doc comment
     public InetAddress getInetAddress() {
-        return IP;
+        return addr.getAddress();
     }
     
     /**
      * Retrieves the host address.
      */
     public String getAddress() {
-        return IP.getHostAddress();
+        return addr.getAddress().getHostAddress();
     }
 
     /**
@@ -280,22 +268,22 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * this <tt>UDPReplyHandler</tt>
 	 */
 	public String toString() {
-		return IP.toString() + ":" + PORT;
+		return addr.toString();
 	}
 	
 	/**
 	 * sends the response through udp back to the requesting party
 	 */
 	public void handleUDPCrawlerPong(UDPCrawlerPong m) {
-		UDPService.instance().send(m, IP, PORT);
+		UDPService.instance().send(m, addr);
 	}
 	
 	public void reply(Message m) {
-		UDPService.instance().send(m, IP,PORT);
+		UDPService.instance().send(m, addr);
 	}
 	
 	public int getPort() {
-		return PORT;
+		return addr.getPort();
 	}
 	
 	public byte[] getClientGUID() {

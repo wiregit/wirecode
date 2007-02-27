@@ -22,6 +22,8 @@
 	<classpathentry path="components/setting/src/test/java" output="components/setting/build/tests" kind="src"/>
 	<classpathentry path="components/nio/src/main/java" output="components/nio/build/classes" kind="src"/>
 	<classpathentry path="components/nio/src/test/java" output="components/nio/build/tests" kind="src"/>
+	<classpathentry path="components/rudp/src/main/java" output="components/rudp/build/classes" kind="src"/>
+	<classpathentry path="components/rudp/src/test/java" output="components/rudp/build/tests" kind="src"/>	
 	<classpathentry path="components/statistic/src/main/java" output="components/statistic/build/classes" kind="src"/>
 	<classpathentry path="components/mojito/src/main/java" output="components/mojito/build/classes" kind="src"/>
 	<classpathentry path="components/mojito/src/test/java" output="components/mojito/build/tests" kind="src"/>

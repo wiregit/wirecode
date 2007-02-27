@@ -24,5 +24,4 @@ public class DualMessageHandler implements MessageHandler {
     public String toString() {
         return "DualHandler for {" + a + "} and {" + b + "}";
     }
-
 }

@@ -18,6 +18,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.rudp.UDPConnection;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
 

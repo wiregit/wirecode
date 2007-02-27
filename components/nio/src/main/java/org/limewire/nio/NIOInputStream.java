@@ -11,6 +11,7 @@ import org.limewire.nio.channel.InterestScatteringByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.timeout.ReadTimeout;
 import org.limewire.nio.timeout.SoTimeout;
+import org.limewire.util.BufferUtils;
 
 
 /**
