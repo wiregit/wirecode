@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
@@ -235,8 +236,7 @@ public class BTMetaInfo implements Serializable {
 	private BTMetaInfo(BTData data) throws IOException {
 		try {
 			URI trackerURI = new URI(data.getAnnounce());
-			if (!"http".equalsIgnoreCase(trackerURI.getScheme()))
-				throw new ValueException("unsupported tracker protocol: "+trackerURI.getScheme());
+			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
 		} catch (URIException mue) {
 			throw new ValueException("bad tracker: " + data.getAnnounce());
@@ -261,6 +261,19 @@ public class BTMetaInfo implements Serializable {
 
 		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
 	}
+    
+    private static void validateURI(URI check) throws ValueException {
+        if (!"http".equalsIgnoreCase(check.getScheme()))
+            throw new ValueException("unsupported tracker protocol: "+check.getScheme());
+        boolean hostOk = false;
+        try {
+            hostOk = check.getHost() != null; // validity will be checked upon request
+        } catch (URIException bad) {}
+        if (!hostOk)
+            throw new ValueException("invalid host");
+        if (!NetworkUtils.isValidPort(check.getPort()))
+            throw new ValueException("invalid port");
+    }
     
     // keys used between read/write object.
     private static enum SerialKeys {
@@ -311,6 +324,11 @@ public class BTMetaInfo implements Serializable {
 				 _infoHash == null || _trackers == null ||
                  diskManagerData == null || ratio == null)
 			throw new IOException("cannot read BTMetaInfo");
+        
+        if (_trackers.length == 0)
+            throw new IOException("no trackers");
+        for (URI uri : _trackers)
+            validateURI(uri);
         
 		historicRatio = ratio.floatValue();
 		_pieceLength = pieceLength.intValue();
