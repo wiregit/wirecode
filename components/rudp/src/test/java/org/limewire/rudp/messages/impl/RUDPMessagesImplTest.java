@@ -30,7 +30,7 @@ public class RUDPMessagesImplTest extends BaseTestCase {
         // data for dataData
         byte[] bufferData = Base32.decode("VNMMPZX6DDIHKZ6UHU34ZYHHVK7TO2FQVRL755B2WS6SSOSQFSALBLJKHCNSJ2WCEKNPGDEGWIBVNQFKZWYKMBW753ERHQXZPJW6N7LAOJA2EIJQZ3CY3OX6XKZ62CXFAYK5G6Y4222UK43TREZYOGNR7RCDHNPH443Q");
         // 5, 2, bufferData
-        byte[] dataData = Base32.decode("AU6AAATIMTSUTKDECK2ETNFLOZAQCAC2AAAABLLFW2JG2YRVSOOE3A32WQL5BYNYM6KNOR2V7OTEHVXXYVBYTCERJFPFWVKDQYHAY4AMVZTJZLGMQWD3XCECPAZK6TXB43NKWPHAPXP4TFLQ43RVQXYXSBRF4KBOGLQVIA7XYLP5HRXXJVE2C");
+        byte[] dataData = Base32.decode("AU6AAAVLLDD6N7QY2B2WPVB5G5AQCAC2AAAABTHA46VL6N3IWCWFP7XUHK2L2KJ2KAWIBMFNFI4JWJHKYIRJV4YMQ2ZAGVWAVLG3BJQG37XMSE6C7F5G3ZX5MBZEDIRBGDHMLDN2725LH3IK4UDBLU33DTLLKRLTOOETHBYZWH6EIM5V47TTO");
         // 254, 21, 5
         byte[] finData = Base32.decode("7ZAQAFIFAAAAAAAAAAAAAAAAABAQCAAAAAAAA");
         // 203, 5810, 52
@@ -41,22 +41,27 @@ public class RUDPMessagesImplTest extends BaseTestCase {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         
         checkMessage(factory.createAckMessage((byte)3, 5, 8, 3),
-                     factory.createMessage(ByteBuffer.wrap(ackData)));
+                     factory.createMessage(ByteBuffer.wrap(ackData)),
+                     ackData);
         
         checkMessage(factory.createDataMessage((byte)5, 2, ByteBuffer.wrap(bufferData)),
-                     factory.createMessage(ByteBuffer.wrap(dataData)));
+                     factory.createMessage(ByteBuffer.wrap(dataData)),
+                     dataData);
         
         checkMessage(factory.createFinMessage((byte)254, 21, (byte)5),
-                     factory.createMessage(ByteBuffer.wrap(finData)));
+                     factory.createMessage(ByteBuffer.wrap(finData)),
+                     finData);
         
         checkMessage(factory.createKeepAliveMessage((byte)203, 5810, 52),
-                     factory.createMessage(ByteBuffer.wrap(keepAliveData)));
+                     factory.createMessage(ByteBuffer.wrap(keepAliveData)),
+                     keepAliveData);
         
         checkMessage(factory.createSynMessage((byte)123, (byte)153),
-                     factory.createMessage(ByteBuffer.wrap(synData)));
+                     factory.createMessage(ByteBuffer.wrap(synData)),
+                     synData);
     }
     
-    private void checkMessage(RUDPMessage a, RUDPMessage b) throws Exception {
+    private void checkMessage(RUDPMessage a, RUDPMessage b, byte[] data) throws Exception {
         assertEquals(b.getClass(), a.getClass());
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         a.write(out);
@@ -65,6 +70,8 @@ public class RUDPMessagesImplTest extends BaseTestCase {
         b.write(out);
         byte[] bb = out.toByteArray();
         assertEquals(bb.length, ba.length);
+        assertEquals(data, bb);
+        assertEquals(data, ba);
         assertEquals(bb, ba);
     }
 }
