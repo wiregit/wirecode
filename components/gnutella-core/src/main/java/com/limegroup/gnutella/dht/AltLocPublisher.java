@@ -18,6 +18,7 @@ import org.limewire.mojito.util.CollectionUtils;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -60,8 +61,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         // Turn the FileDesc-Array to a Map<KUID, FileDesc>
         Map<KUID, FileDesc> current = new HashMap<KUID, FileDesc>();
         for (FileDesc fd : fds) {
-            KUID key = LimeDHTUtils.toKUID(fd.getSHA1Urn());
-            current.put(key, fd);
+            if (!(fd instanceof IncompleteFileDesc)) {
+                KUID key = LimeDHTUtils.toKUID(fd.getSHA1Urn());
+                current.put(key, fd);
+            }
         }
         
         synchronized (values) {
