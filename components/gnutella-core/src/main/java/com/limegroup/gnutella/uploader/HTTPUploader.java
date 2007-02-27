@@ -854,6 +854,9 @@ public final class HTTPUploader implements Uploader {
 		int port; 
 		try {
 			port = java.lang.Integer.parseInt(sport);
+            if (!NetworkUtils.isValidPort(port)) {
+                return true;
+            }
 		} catch (NumberFormatException e) {
 			throw new ProblemReadingHeaderException();
         }
