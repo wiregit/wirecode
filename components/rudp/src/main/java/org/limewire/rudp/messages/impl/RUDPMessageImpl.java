@@ -145,7 +145,7 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         out.write((byte)((_sequenceNumber & 0xFF00) >> 8));
         out.write((byte)(_sequenceNumber & 0x00FF));
         if(_data1.hasRemaining())
-            out.write(_data1.array(), _data1.position(), _data1.remaining());
+            out.write(_data1.array(), _data1.arrayOffset() + _data1.position(), _data1.remaining());
         //make sure we fill up the remaining header data.
         if(_data1.remaining() < MAX_DATA1_SIZE)
             out.write(emptyByteArray, 0, MAX_DATA1_SIZE - _data1.remaining());
@@ -157,6 +157,6 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         org.limewire.util.ByteOrder.int2leb(_data2.remaining(), out);
         // write the payload.
         if ( _data2.hasRemaining() )
-            out.write(_data2.array(), _data2.position(), _data2.remaining());
+            out.write(_data2.array(), _data2.arrayOffset() + _data2.position(), _data2.remaining());
     }
 }
