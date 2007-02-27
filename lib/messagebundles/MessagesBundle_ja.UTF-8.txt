@@ -2404,6 +2404,8 @@ ERROR_INTERNAL_ALWAYS_SEND=常に即時送信
 ERROR_INTERNAL_ALWAYS_REVIEW=常に見直しを要求
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=常に全エラーを破棄
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire のバグサーバーに接続不可。LimeWireのバグ修正のためにエラーをコピーし、bugs@limewire.comまで電子メールを送信すること。
 

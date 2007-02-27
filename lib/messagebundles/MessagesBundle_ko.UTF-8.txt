@@ -2403,6 +2403,8 @@ ERROR_INTERNAL_ALWAYS_SEND=항상 즉시 송신
 ERROR_INTERNAL_ALWAYS_REVIEW=항상 재검토를 요구
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=항상 모든 에러를 삭제
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire가 버그 서버에 접속 불가합니다. LimeWire의 버그 수정을 위해서 www.limewire.com으로 방문하셔서 'Support'를 클릭하여 정보를 보내주십시오. 감사합니다.
 

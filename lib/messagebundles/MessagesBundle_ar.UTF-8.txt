@@ -2401,6 +2401,8 @@ ERROR_INTERNAL_ALWAYS_SEND=دائما أرسل في الحال
 ERROR_INTERNAL_ALWAYS_REVIEW=السؤال دائما عن التقرير
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=تجاهل الأخطاء دائما
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بملقم الخطأ وذلك بهدف إرسال تقرير الخطأ المبين بأسفل.لتساعد في إصلاح الأخطاء، قم بنسخ النص التالي وأرسله إلى bugs@limiWire.com. شكرا
 

@@ -2401,6 +2401,8 @@ ERROR_INTERNAL_ALWAYS_SEND=Her zaman hemen G�nder
 ERROR_INTERNAL_ALWAYS_REVIEW=Her zaman G�zder Ge�irmeyi Sor
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=Her Zaman T�m Hatalar� Atla
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=A�a��daki hata raporunu g�ndermek i�in LimeWire hata sunucusuna ba�lanamad�. Daha fazla yard�m ve hata ay�klama hakk�nda yard�mc� olmak i�in, l�tfen www.limewire.com � yiyaret edin ve 'Destek' i t�klay�n. Te�ekk�r ederiz.
 

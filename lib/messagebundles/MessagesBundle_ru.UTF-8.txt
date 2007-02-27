@@ -2401,6 +2401,8 @@ ERROR_INTERNAL_ALWAYS_SEND=Всегда отправлять немедленн�
 ERROR_INTERNAL_ALWAYS_REVIEW=Всегда предлагать просмотреть
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=Всегда игнорировать ошибки
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire не может подключиться к серверу для отправки отчёта об ошибке. Вы можете проинформировать разработчиков об ошибке, скопировав нижеследующий текст и отправив его на email bugs@limewire.com. Благодарим вас.
 

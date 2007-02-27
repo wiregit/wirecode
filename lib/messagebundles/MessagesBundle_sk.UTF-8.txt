@@ -2403,6 +2403,8 @@ ERROR_INTERNAL_ALWAYS_SEND=Vždy posielať okamžite
 ERROR_INTERNAL_ALWAYS_REVIEW=Vža sa spýtať na náhľad
 #### ERROR_INTERNAL_ALWAYS_DISCARD=Always Discard All Errors
 ERROR_INTERNAL_ALWAYS_DISCARD=Vždy odmietnuť všetky chyby
+#### ERROR_INTERNAL_DEADLOCK_OPTION=Send Errors Automatically if LimeWire is Frozen
+#? ERROR_INTERNAL_DEADLOCK_OPTION=
 #### ERROR_INTERNAL_SERVLET_FAILED=LimeWire was unable to connect to the bug server in order to send the below bug report. For further help and to aid with debugging, please visit www.limewire.com and click 'Support'. Thank you.
 ERROR_INTERNAL_SERVLET_FAILED=LimeWire sa nemohol spojiť so serverom na nahlásenie chyby a odoslať nižšiu správu o chybe.Ak chcete pomôcť s dokonalením LimeWire, navštívte proím www.limewire.com a kliknite na 'Support'. Ďakujeme.
 
