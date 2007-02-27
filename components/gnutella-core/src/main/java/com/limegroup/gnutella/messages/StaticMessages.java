@@ -19,7 +19,7 @@ public final class StaticMessages {
     
     private static final Log LOG = LogFactory.getLog(StaticMessages.class);
 
-    private static QueryReply updateReply, limeReply;
+    private static volatile QueryReply updateReply, limeReply;
     
     public static void initialize() {
         updateReply = readUpdateReply();

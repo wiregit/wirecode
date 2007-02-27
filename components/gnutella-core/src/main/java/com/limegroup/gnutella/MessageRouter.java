@@ -2492,7 +2492,7 @@ public abstract class MessageRouter {
 
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
         
-        if (request.isQueryForLW()) {
+        if (request.isQueryForLW() && StaticMessages.getLimeReply() != null) {
             QueryReply qr = new QueryReply(request.getGUID(),StaticMessages.getLimeReply());
             qr.setHops((byte)0);
             qr.setTTL((byte)(request.getHops()+1));

@@ -472,6 +472,10 @@ public class RouterService {
     		acceptor.start();
     		LOG.trace("STOP Acceptor");
     		
+            LOG.trace("START loading StaticMessages");
+            StaticMessages.initialize();
+            LOG.trace("END loading StaticMessages");
+            
     		LOG.trace("START ConnectionManager");
     		callback.componentLoading("CONNECTION_MANAGER");
     		manager.initialize();
@@ -558,10 +562,6 @@ public class RouterService {
 			RatingTable.instance();
 			LOG.trace("START loading spam data");
             
-            LOG.trace("START loading StaticMessages");
-            StaticMessages.initialize();
-            LOG.trace("END loading StaticMessages");
-
             LOG.trace("START ChatManager");
             ChatManager.instance().initialize();
             LOG.trace("END ChatManager");
