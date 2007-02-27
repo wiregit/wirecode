@@ -327,9 +327,4 @@ public final class Launcher {
 
 	    return LimeProcess.exec(strs);
     }
-    
-    public static void main(String[] args) throws Exception {
-        File file = new File("/Users/roger/Shared/EPSON1.TXT");
-        launchExplorer(file);
-    }
 }
