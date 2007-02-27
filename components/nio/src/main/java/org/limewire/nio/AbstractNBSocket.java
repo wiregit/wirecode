@@ -9,6 +9,9 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,10 +47,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     private final Object LOCK = new Object();
 
     /** The reader. */
-    protected ReadObserver reader;
+    protected volatile ReadObserver reader;
 
     /** The writer. */
-    protected WriteObserver writer;
+    protected volatile WriteObserver writer;
 
     /** The connecter. */
     protected volatile ConnectObserver connecter;
@@ -320,43 +323,39 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public final InputStream getInputStream() throws IOException {
+        // Unlocked check real quickly.
         if(isClosed() || isShutdown())
             throw new IOException("Socket closed.");
         
-        if(reader instanceof NIOInputStream) {
+        ReadObserver localReader;
+        synchronized(LOCK) {
+            if(isShutdown())
+                throw new IOException("Socket closed.");
+            localReader = reader;
+        }
+        
+        if(localReader instanceof NIOInputStream) {
             // Ensure the stream is initialized before we interest it.
-            InputStream stream = ((NIOInputStream)reader).getInputStream();
+            InputStream stream = ((NIOInputStream)localReader).getInputStream();
             NIODispatcher.instance().interestRead(getChannel(), true);
             return stream;
         } else {
-            Future future = new Future() {
-                private Object result;
-                public void run() {
-                    try {
-                        NIOInputStream stream = new NIOInputStream(AbstractNBSocket.this, AbstractNBSocket.this, null).init();
-                        setReadObserver(stream);
-                        result = stream.getInputStream();
-                    } catch(IOException iox) { // impossible, but not a big deal.
-                        LOG.error("IOXed after creation", iox);
-                    }
-                }
-                
-                public Object getResult() {
-                    return result;
+            Callable<InputStream> callable = new Callable<InputStream>() {
+                public InputStream call() throws IOException {
+                    NIOInputStream stream = new NIOInputStream(AbstractNBSocket.this, AbstractNBSocket.this, null).init();
+                    setReadObserver(stream);
+                    return stream.getInputStream();
                 }
             };
             
+            Future<InputStream> future = NIODispatcher.instance().submit(callable);
             try {
-                NIODispatcher.instance().invokeAndWait(future);
-            } catch(InterruptedException ie) {
-                throw (IOException)new IOException().initCause(ie);
+                return future.get();
+            } catch(ExecutionException ee) {
+                throw (IOException)new IOException().initCause(ee.getCause());
+            } catch (InterruptedException ie) {
+                throw (IOException)new IOException().initCause(ie.getCause());
             }
-            
-            InputStream result = (InputStream)future.getResult();
-            if(result == null)
-                throw new IOException("error constructing InputStream");
-            else
-                return result;
         }
     }
     
@@ -366,19 +365,24 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
     public final OutputStream getOutputStream() throws IOException {
+        // Unlocked check real quickly.
         if(isClosed() || isShutdown())
             throw new IOException("Socket closed.");
-            
-        if(writer instanceof NIOOutputStream)
-            return ((NIOOutputStream)writer).getOutputStream();
-        else {
-            // Must check again, since it could have been closed & changed
-            // to a NoOpWriter after above check.
-            if(isClosed() || isShutdown())
+        
+        // Retrieve the writer within the lock, guaranteeing
+        // that it is not going to change to a NoOp if it was
+        // shutdown after we got it.
+        WriteObserver localWriter;
+        synchronized(LOCK) {
+            if(isShutdown())
                 throw new IOException("Socket closed.");
-            else
-                throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
+            localWriter = writer;
         }
+        
+        if(localWriter instanceof NIOOutputStream)
+            return ((NIOOutputStream)localWriter).getOutputStream();
+        else
+            throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
     }
     
     /** Gets the read timeout for this socket. */

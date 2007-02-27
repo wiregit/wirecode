@@ -1,10 +1,11 @@
 package org.limewire.nio;
 
 import java.util.concurrent.Delayed;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Future<T> {
+class DelayedRunnable<T> implements Runnable, Delayed, Future<T> {
 	
 	
 	private static final AtomicLong sequencer = new AtomicLong(0);
@@ -16,6 +17,7 @@ class DelayedRunnable<T> implements Runnable, Delayed, java.util.concurrent.Futu
 	private final long sequenceNumber;
 	private volatile boolean executed;
 	private boolean executing;
+    
 	DelayedRunnable(Runnable delegate, long time) {
 		this.delegate = delegate;
 		sequenceNumber = sequencer.getAndIncrement();

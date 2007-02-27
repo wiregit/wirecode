@@ -390,7 +390,7 @@ public class NIODispatcherTest extends BaseTestCase {
     		Thread.sleep(10);
     	
     	final CountDownLatch executed = new CountDownLatch(1);
-    	java.util.concurrent.Future f = NIODispatcher.instance().invokeLater(new Runnable() {
+    	java.util.concurrent.Future f = NIODispatcher.instance().submit(new Runnable() {
     		public void run() {
     			// should be executed on the dispatch thread
     			assertSame(t.get(), Thread.currentThread());

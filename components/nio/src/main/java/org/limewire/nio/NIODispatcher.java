@@ -18,9 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -363,22 +365,47 @@ public class NIODispatcher implements Runnable {
         wakeup();
     }
    
-
-   public java.util.concurrent.Future invokeLater(Runnable later, long delay) {
-	   DelayedRunnable ret = new DelayedRunnable(later, delay);
+   /**
+    * Invokes a Runnable that will run as soon as possible.
+    * The returned Future can be used to cancel the Runnable from running.
+    * Attempting to call 'get' on the Future will return null.
+    */
+   public Future<?> submit(Runnable runner) {
+       FutureTask<?> ft = new FutureTask<Object>(runner, null);
+       invokeLater(ft);
+       return ft;
+   }
+   
+   /**
+    * Invokes a Callable that will run as soon as possible.
+    * The returned Future can be used to cancel the Runnable from running,
+    * and retrieve the result, after it finishes.
+    */
+   public <T> Future<T> submit(Callable<T> caller) {
+       FutureTask<T> ft = new FutureTask<T>(caller);
+       invokeLater(ft);
+       return ft;
+   }
+   
+   /**
+    * Invokes a Runnable at some point in the future, and returns
+    * a Future that can be used to cancel the Runnable from running.
+    */
+   public Future<?> submit(Runnable runner, long delay) {
+	   DelayedRunnable ret = new DelayedRunnable(runner, delay);
 	   DELAYED.add(ret);
 	   wakeup();
 	   return ret;
    }
    
    /** Invokes the method in the NIODispatcher thread & returns after it ran. */
-   public void invokeAndWait(final Runnable future) throws InterruptedException {
+   public void invokeAndWait(final Runnable runner) throws InterruptedException {
        if(Thread.currentThread() == dispatchThread) {
-           future.run();
+           runner.run();
        } else {
            Runnable waiter = new Runnable() {
                public void run() {
-                   future.run();
+                   runner.run();
                    synchronized(this) {
                        notify();
                    }
@@ -984,7 +1011,7 @@ public class NIODispatcher implements Runnable {
     private static class MyThreadPool implements SchedulingThreadPool {
 
 		public Future invokeLater(Runnable r, long delay) {
-			return instance().invokeLater(r, delay);
+			return instance().submit(r, delay);
 		}
 
 		public void invokeLater(Runnable runner) {
