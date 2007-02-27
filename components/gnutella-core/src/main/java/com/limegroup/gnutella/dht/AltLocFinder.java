@@ -29,7 +29,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 /**
- * 
+ * The AltLocFinder queries the DHT for Alternate Locations
  */
 public class AltLocFinder {
 
@@ -44,45 +44,49 @@ public class AltLocFinder {
     /**
      * Finds AlternateLocations for the given URN
      */
-    public void findAltLocs(URN urn) {
+    public boolean findAltLocs(URN urn) {
         if (urn == null) {
-            return;
+            return false;
         }
         
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {
-                return;
+                return false;
             }
             
             KUID key = LimeDHTUtils.toKUID(urn);
             DHTFuture<FindValueResult> future = dht.get(key);
             future.addDHTFutureListener(new AltLocsHandler(urn, key));
+            return true;
         }
     }
     
     /**
      * Finds push AlternateLocations for the given GUID and URN
      */
-    public void findPushAltLocs(GUID guid, URN urn) {
+    public boolean findPushAltLocs(GUID guid, URN urn) {
         if (guid == null || urn == null) {
-            return;
+            return false;
         }
         
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {
-                return;
+                return false;
             }
             
             KUID key = LimeDHTUtils.toKUID(guid);
             DHTFuture<FindValueResult> future = dht.get(key);
             future.addDHTFutureListener(new PushAltLocsHandler(guid, urn, key));
+            return true;
         }
     }
     
     /**
-     * 
+     * The AltLocsHandler listens for the FindValueResult, constructs 
+     * AlternateLocations from the results and passes them to AltLocManager 
+     * which in turn notifies every Downloader about the new locations.
      */
     private class AltLocsHandler extends DHTFutureAdapter<FindValueResult> {
         
@@ -157,7 +161,9 @@ public class AltLocFinder {
                         }
                     }
                 } catch (ExecutionException e) {
+                    LOG.error("ExecutionException", e);
                 } catch (InterruptedException e) {
+                    LOG.error("InterruptedException", e);
                 } 
             }
         }
@@ -193,7 +199,9 @@ public class AltLocFinder {
     }
     
     /**
-     * 
+     * The PushAltLocsHandler listens for FindValueResults, constructs PushEndpoints
+     * from the results and passes them to AltLocManager which in turn notifies all
+     * Downloads about the new alternate locations.
      */
     private class PushAltLocsHandler extends DHTFutureAdapter<FindValueResult> {
         
@@ -243,7 +251,9 @@ public class AltLocFinder {
                         }
                     }
                 } catch (ExecutionException e) {
+                    LOG.error("ExecutionException", e);
                 } catch (InterruptedException e) {
+                    LOG.error("InterruptedException", e);
                 } 
             }
         }

@@ -130,4 +130,18 @@ public class DHTSettings extends LimeProps{
     public static final LongSetting RARE_FILE_TIME
         = FACTORY.createRemoteLongSetting("RARE_FILE_TIME", 
                 0L, "rare_file_time", 0L, 24L*60L*60L*1000L);
+    
+    /**
+     * The maximum number of DHT requery attempts
+     */
+    public static final IntSetting MAX_DHT_REQUERY_ATTEMPTS
+        = FACTORY.createRemoteIntSetting("MAX_DHT_REQUERY_ATTEMPTS", 
+                1, "max_dht_requery_attempts", 1, Integer.MAX_VALUE);
+    
+    /**
+     * The minimum time between two DHT requeries
+     */
+    public static final LongSetting TIME_BETWEEN_DHT_REQUERIES
+        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_REQUERIES", 
+                5L*60L*1000L, "time_between_dht_requeries", 30L*1000L, 24L*60L*60L*1000L);
 }

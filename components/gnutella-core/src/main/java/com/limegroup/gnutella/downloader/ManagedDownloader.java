@@ -62,6 +62,7 @@ import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -253,8 +254,10 @@ public class ManagedDownloader extends AbstractDownloader
      * The time to wait between requeries, in milliseconds.  This time can
      * safely be quite small because it is overridden by the global limit in
      * DownloadManager.  Package-access and non-final for testing.
-     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_REQUERIES */
-    static int TIME_BETWEEN_REQUERIES = 5*60*1000;  //5 minutes
+     * 
+     * @see com.limegroup.gnutella.DownloadManager#TIME_BETWEEN_GNUTELLA_REQUERIES 
+     */
+    static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
     
     /**
      * How long we'll wait after sending a GUESS query before we try something
@@ -272,7 +275,7 @@ public class ManagedDownloader extends AbstractDownloader
      * The number of times to requery the network. All requeries are
      * user-driven.
      */
-    private static final int REQUERY_ATTEMPTS = 1;
+    private static final int GNUTELLA_REQUERY_ATTEMPTS = 1;
     
 
     /** The size of the approx matcher 2d buffer... */
@@ -445,11 +448,26 @@ public class ManagedDownloader extends AbstractDownloader
     protected boolean deserializedFromDisk;
     
     /**
-     * The number of queries already done for this downloader.
+     * The number of Gnutella queries already done for this downloader.
      * Influenced by the type of downloader & whether or not it was started
      * from disk or from scratch.
      */
-    private int numQueries;
+    private int numGnutellaQueries;
+    
+    /**
+     * The number of DHT queries already done for this downloader.
+     */
+    private int numDHTQueries;
+    
+    /**
+     * Flag for whether or not this is the first query attempt
+     */
+    private boolean firstQueryAttempt = true;
+    
+    /**
+     * Flag for whether or not we've already tried to query Gnutella
+     */
+    private boolean alreadyTriedGnutella = false;
     
     /**
      * Whether or not we've sent a GUESS query.
@@ -690,6 +708,10 @@ public class ManagedDownloader extends AbstractDownloader
             return;
         }
         
+        // Initial re-query state
+        firstQueryAttempt = true;
+        alreadyTriedGnutella = false;
+        
         setState(QUEUED);
     }
     
@@ -750,7 +772,7 @@ public class ManagedDownloader extends AbstractDownloader
      * areas, depending on what is required or what has already occurred.
      */
     private void completeDownload(int status) {
-        
+    
         boolean complete;
         boolean clearingNeeded = false;
         int waitTime = 0;
@@ -811,70 +833,123 @@ public class ManagedDownloader extends AbstractDownloader
             }
         }
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("MD completing <" + getSaveFile().getName() + 
-                      "> completed download, state: " +
-                      getState() + ", numQueries: " + numQueries +
-                      ", lastQuerySent: " + lastQuerySent);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("MD completing <" + getSaveFile().getName() 
+                    + "> completed download, state: " + getState() 
+                    + ", numGnutellaQueries: " + numGnutellaQueries 
+                    + ", numDHTQueries: " + numDHTQueries
+                    + ", lastQuerySent: " + lastQuerySent);
+        }
         
         VerifyingFile.clearCaches();
 
         // if this is all completed, nothing else to do.
-        if(complete)
+        if(complete) {
             ; // all done.
             
         // if this is paused, nothing else to do also.
-        else if(getState() == PAUSED)
+        } else if(getState() == PAUSED) {
             ; // all done for now.
-
+            
         // Try iterative GUESSing...
         // If that sent some queries, don't do anything else.
-        else if(tryGUESSing())
+        } else if(tryGUESSing()) {
             ; // all done for now.
-
-       // If busy, try waiting for that busy host.
-        else if (getState() == BUSY)
+            
+            // If busy, try waiting for that busy host.
+        } else if (getState() == BUSY) {
             setState(BUSY, waitTime);
-        
+            
         // If we sent a query recently, then we don't want to send another,
         // nor do we want to give up.  Just continue waiting for results
         // from that query.
-        else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES)
+        } else if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
             setState(WAITING_FOR_RESULTS,
                      TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
-            
+        
         // If we're at our requery limit, give up.
-        else if( numQueries >= REQUERY_ATTEMPTS )
+        } else if(shouldGiveUp()) {
             setState(GAVE_UP);
             
         // If we want to send the requery immediately, do so.
-        else if(shouldSendRequeryImmediately(numQueries))
+        } else if(shouldSendRequeryImmediately(numGnutellaQueries)) {
             sendRequery();
             
         // Otherwise, wait for the user to initiate the query.            
-        else
+        } else {
             setState(WAITING_FOR_USER);
+        }
         
-        if(LOG.isTraceEnabled())
-            LOG.trace("MD completed <" + getSaveFile().getName() +
-                      "> completed download, state: " + 
-                      getState() + ", numQueries: " + numQueries);
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("MD completed <" + getSaveFile().getName() 
+                    + "> completed download, state: " + getState() 
+                    + ", numGnutellaQueries: " + numGnutellaQueries
+                    + ", numDHTQueries: " + numDHTQueries);
+        }
+    }
+    
+    /**
+     * Returns whether or not we should give up 
+     */
+    private boolean shouldGiveUp() {
+        return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS
+                && (numDHTQueries >= DHTSettings.MAX_DHT_REQUERY_ATTEMPTS.getValue()
+                        || !RouterService.isMemberOfDHT());
+    }
+    
+    /**
+     * Determines if we should send a requery immediately, or wait for user
+     * input.
+     *
+     * 'lastQuerySent' being equal to -1 indicates that the user has already
+     * clicked resume, so we do want to send immediately.
+     */
+    protected boolean shouldSendRequeryImmediately(int numRequeries) {
+        return (lastQuerySent == -1 || !firstQueryAttempt);
     }
     
     /**
      * Attempts to send a requery.
+     * 
+     * Try in this order:
+     * 
+     *     1) DHT
+     *     2) Gnutella
+     *  -->3) DHT
+     *  |__|
      */
     private void sendRequery() {
+        if (RouterService.isMemberOfDHT() 
+                && (firstQueryAttempt || alreadyTriedGnutella)) {
+            sendDHTQuery();
+        } else {
+            sendGnutellaQuery();
+        }
+    }
+    
+    private void sendDHTQuery() {
+        if (manager.sendDHTQuery(this)) {
+            firstQueryAttempt = false;
+            lastQuerySent = System.currentTimeMillis();
+            numDHTQueries++;
+            setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+        } else {
+            lastQuerySent = -1;
+        }
+    }
+    
+    private void sendGnutellaQuery() {
         // If we don't have stable connections, wait until we do.
         if(!hasStableConnections()) {
             lastQuerySent = -1; // mark as wanting to requery.
             setState(WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
         } else {
             try {
-                QueryRequest qr = newRequery(numQueries);
+                QueryRequest qr = newRequery(numGnutellaQueries);
                 if(manager.sendQuery(this, qr)) {
+                    alreadyTriedGnutella = true;
                     lastQuerySent = System.currentTimeMillis();
-                    numQueries++;
+                    numGnutellaQueries++;
                     setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
                 } else {
                     lastQuerySent = -1; // mark as wanting to requery.
@@ -1244,22 +1319,7 @@ public class ManagedDownloader extends AbstractDownloader
             return QueryRequest.createQuery(queryString);
             
     }
-
-
-    /**
-     * Determines if we should send a requery immediately, or wait for user
-     * input.
-     *
-     * 'lastQuerySent' being equal to -1 indicates that the user has already
-     * clicked resume, so we do want to send immediately.
-     */
-    protected boolean shouldSendRequeryImmediately(int numRequeries) {
-        if(lastQuerySent == -1)
-            return true;
-        else
-            return false;
-    }
-
+    
     /** Subclasses should override this method when necessary.
      *  If you return false, then AltLocs are not initialized from the
      *  incomplete file upon invocation of tryAllDownloads.
@@ -1787,8 +1847,11 @@ public class ManagedDownloader extends AbstractDownloader
 
         // if we were waiting for the user to start us,
         // then try to send the requery.
-        if(getState() == WAITING_FOR_USER)
+        if(getState() == WAITING_FOR_USER) {
             lastQuerySent = -1; // inform requerying that we wanna go.
+            firstQueryAttempt = true;
+            alreadyTriedGnutella = false;
+        }
         
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
@@ -1802,9 +1865,6 @@ public class ManagedDownloader extends AbstractDownloader
             
         // queue ourselves so we'll try and become active immediately
         setState(QUEUED);
-        
-        // TODO This is for testing only
-        RouterService.getAltLocFinder().findAltLocs(getSHA1Urn());
         
         return true;
     }

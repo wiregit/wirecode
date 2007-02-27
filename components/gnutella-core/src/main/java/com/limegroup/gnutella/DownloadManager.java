@@ -32,20 +32,22 @@ import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.AltLocFinder;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
-import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.RequeryDownloader;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
@@ -114,14 +116,22 @@ public class DownloadManager implements BandwidthTracker {
      */
     private int innetworkCount = 0;
 
-    /** The global minimum time between any two requeries, in milliseconds.
-     *  @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES*/
-    public static long TIME_BETWEEN_REQUERIES = 45 * 60 * 1000; 
-
-    /** The last time that a requery was sent.
+    /** 
+     * The global minimum time between any two Gnutella requeries, in milliseconds.
+     * @see com.limegroup.gnutella.downloader.ManagedDownloader#TIME_BETWEEN_REQUERIES
      */
-    private long lastRequeryTime = 0;
+    public static final long TIME_BETWEEN_GNUTELLA_REQUERIES = 45 * 60 * 1000; 
+    
+    /** 
+     * The last time that a Gnutella requery was sent.
+     */
+    private long lastGnutellaRequeryTime = 0L;
 
+    /**
+     * The last time that a DHT requery was sent.
+     */
+    private long lastDHTRequeryTime = 0L;
+    
     /** This will hold the MDs that have sent requeries.
      *  When this size gets too big - meaning bigger than active.size(), then
      *  that means that all MDs have been serviced at least once, so you can
@@ -1099,8 +1109,8 @@ public class DownloadManager implements BandwidthTracker {
         //Disallow if global time limits exceeded.  These limits don't apply to
         //queries that are requeries.
         boolean isRequery=GUID.isLimeRequeryGUID(query.getGUID());
-        long elapsed=System.currentTimeMillis()-lastRequeryTime;
-        if (isRequery && elapsed<=TIME_BETWEEN_REQUERIES) {
+        long elapsed=System.currentTimeMillis()-lastGnutellaRequeryTime;
+        if (isRequery && elapsed <= TIME_BETWEEN_GNUTELLA_REQUERIES) {
             return false;
         }
 
@@ -1121,11 +1131,30 @@ public class DownloadManager implements BandwidthTracker {
         if(LOG.isTraceEnabled())
             LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
-        lastRequeryTime = System.currentTimeMillis();
+        lastGnutellaRequeryTime = System.currentTimeMillis();
         router.sendDynamicQuery(query);
         return true;
     }
 
+    /**
+     * Attempts to send a DHT requery to provide the given downloader with 
+     * more sources to download.
+     */
+    public synchronized boolean sendDHTQuery(ManagedDownloader requerier) {
+        long elapsed = System.currentTimeMillis() - lastDHTRequeryTime;
+        if (elapsed < DHTSettings.TIME_BETWEEN_DHT_REQUERIES.getValue()) {
+            return false;
+        }
+        
+        URN sha1 = requerier.getSHA1Urn();
+        AltLocFinder finder = RouterService.getAltLocFinder();
+        if (finder.findAltLocs(sha1)) {
+            lastDHTRequeryTime = System.currentTimeMillis();
+            return true;
+        }
+        return false;
+    }
+    
     /** Calls measureBandwidth on each uploader. */
     public void measureBandwidth() {
         List activeCopy;
