@@ -9,7 +9,6 @@ import com.limegroup.gnutella.RouterService;
 
 /**
  * A Host Filter that delegates to RouterService's filter
- *
  */
 public class DHTFilterDelegate implements HostFilter {
 

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTExecutorService;
@@ -267,6 +268,10 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         }
 
         public void setKeyPair(KeyPair keyPair) {
+        }
+
+        public DHTFuture<FindValueResult> get(EntityKey entityKey) {
+            return null;
         }
     }
 }

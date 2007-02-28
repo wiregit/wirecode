@@ -106,7 +106,7 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
         
-        setReturnValue(new FindValueResult(context, getLookupID(), path, values, time, currentHop));
+        setReturnValue(new FindValueResult(getLookupID(), path, values, time, currentHop));
     }
     
     /**

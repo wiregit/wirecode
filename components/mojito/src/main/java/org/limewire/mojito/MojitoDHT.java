@@ -266,6 +266,11 @@ public interface MojitoDHT {
     public DHTFuture<FindValueResult> get(KUID key);
     
     /**
+     * Tries to get the value of the given EntityKey
+     */
+    public DHTFuture<FindValueResult> get(EntityKey entityKey);
+    
+    /**
      * Stores the given key, value pair
      */
     public DHTFuture<StoreResult> put(KUID key, DHTValue value);

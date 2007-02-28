@@ -67,7 +67,6 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.FindValueResult;
-import org.limewire.mojito.result.GetValueResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.BucketRefresher;
@@ -977,21 +976,12 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return findValueManager.lookup(key);
     }
     
-    /** 
-     * Retrieve all DHTValues from the remote Node that are 
-     * stored under the given valueId and nodeIds
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#get(org.limewire.mojito.db.EntityKey)
      */
-    public DHTFuture<GetValueResult> get(Contact node, KUID valueId, KUID nodeId) {
-        return get(node, valueId, Collections.singleton(nodeId));
-    }
-    
-    /** 
-     * Retrieve all DHTValues from the remote Node that are 
-     * stored under the given valueId and nodeIds
-     */
-    public DHTFuture<GetValueResult> get(Contact node, 
-            KUID valueId, Collection<KUID> nodeIds) {
-        return getValueManager.get(node, valueId, nodeIds);
+    public DHTFuture<FindValueResult> get(EntityKey entityKey) {
+        return getValueManager.get(entityKey);
     }
     
     /** 
