@@ -412,11 +412,11 @@ public class UploadSlotManager implements BandwidthTracker {
         StringBuilder ret = new StringBuilder("UploadSlotManager:");
         ret.append("active:");
         appendPriorities(active, ret);
-        ret.append(" queued:");
+        ret.append("queued:");
         appendPriorities(queued, ret);
-        ret.append(" resumable:");
+        ret.append("resumable:");
         appendPriorities(queuedResumable, ret);
-        ret.append(" bw now:").append(getTotalBandwidth());
+        ret.append("bw now:").append(getTotalBandwidth());
         ret.append(" session avg:").append(sessionAverage);
         return ret.toString();
     }
@@ -424,7 +424,7 @@ public class UploadSlotManager implements BandwidthTracker {
     private void appendPriorities(List<? extends UploadSlotRequest> l, StringBuilder dest) {
         int [] priorities = countPriorities(l);
         for (int i = 0; i < priorities.length; i++)
-            dest.append(i).append(":").append(priorities[i]);
+            dest.append(i).append(":").append(priorities[i]).append(" ");
     }
     
     private int[] countPriorities(List<? extends UploadSlotRequest> l) {
