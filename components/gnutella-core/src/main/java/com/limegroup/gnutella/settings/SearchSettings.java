@@ -252,6 +252,10 @@ public final class SearchSettings extends LimeProps {
 		FACTORY.createBooleanSetting("OOB_ENABLED", true);
 
 
+    public static final BooleanSetting DISABLE_OOB_V2
+        = FACTORY.createRemoteBooleanSetting("DISABLE_OOB_V2",
+                false, "SearchSettings.DisableOOBV2");
+
     /**
      * The TTL for probe queries.
      */
@@ -345,4 +349,6 @@ public final class SearchSettings extends LimeProps {
     public static final IntSetting QUERY_KEY_DELAY = 
         FACTORY.createRemoteIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
+    
+    
 }

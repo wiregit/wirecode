@@ -1213,7 +1213,11 @@ public class QueryRequest extends Message implements Serializable{
             
             if (!canReceiveOutOfBandReplies) 
                 minSpeed |= SPECIAL_XML_MASK;
-            // don't mark old oob flag anymore
+            else {
+                if (!SearchSettings.DISABLE_OOB_V2.getValue()) {
+                    minSpeed |= SPECIAL_OUTOFBAND_MASK;
+                }
+            }
         }
 
         MIN_SPEED = minSpeed;

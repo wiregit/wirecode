@@ -10,7 +10,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessageStubHelper;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -29,7 +29,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
 
     @SuppressWarnings("unused")
     private static void doSettings() {
-        ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
     }
     
     public static Integer numUPs() {
@@ -59,7 +59,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
-        ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
         
         // send query through router service
         PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
@@ -84,7 +84,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         assertTrue(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
-        ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
         
         // send query through router service
         PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
@@ -106,7 +106,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         assertFalse(query.desiresOutOfBandReplies());
         assertFalse(query.doNotProxy());
         
-        ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
         
         // send query through router service
         PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",

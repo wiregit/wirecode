@@ -75,6 +75,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
@@ -764,15 +765,15 @@ public class ManagedConnection extends Connection
                      !query.desiresOutOfBandReplies() + " " +
                      isClientSupernodeConnection() + " " +
                      (getSupportedOOBProxyControlVersion() == -1)  + " " +
-                     ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.getValue());
+                     SearchSettings.DISABLE_OOB_V2.getValueAsString());
         }
         
         if (!query.desiresOutOfBandReplies() 
                 && isClientSupernodeConnection()
                 && getSupportedOOBProxyControlVersion() == -1
-                && ConnectionSettings.SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2.getValue()) {
+                && SearchSettings.DISABLE_OOB_V2.getValue()) {
             // don't proxy if we are a leaf and the ultrapeer 
-            // does not know OOB v 3 and they would proxy for us
+            // does not know OOB v3 and they would proxy for us
             query = QueryRequest.createDoNotProxyQuery(query);
             query.originate();
         }

@@ -174,7 +174,7 @@ class Container {
         } catch(ClassCastException cce) {
             LOG.warn("Not a map!", cce);
         } catch(IOException iox) {
-            LOG.warn("Can't write to disk!", iox);
+            LOG.warn("Can't read from disk!", iox);
         } catch(Throwable x) {
             LOG.warn("Error reading!", x);
         } finally {

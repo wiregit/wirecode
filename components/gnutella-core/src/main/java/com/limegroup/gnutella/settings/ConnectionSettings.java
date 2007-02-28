@@ -391,11 +391,6 @@ public final class ConnectionSettings extends LimeProps {
     public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD 
         = FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
     
-    
-    public static final BooleanSetting SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2
-        = FACTORY.createRemoteBooleanSetting("SEND_DO_NOT_PROXY_OOB_TO_ULTRAPEER_V2",
-                false, "ConnectionSettings.SendNoProxyToUPV2");
-    
     /**
      * Helper method left from Settings Manager
      *
