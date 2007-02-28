@@ -1332,12 +1332,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     private void assertDesiresOutOfBand(QueryRequest query) {
         assertTrue(query.desiresOutOfBandReplies());
-        if (SearchSettings.DISABLE_OOB_V2.getValue()) {
-            assertFalse(query.desiresOutOfBandRepliesV2());
-        }
-        else {
-            assertTrue(query.desiresOutOfBandRepliesV2());
-        }
+        assertFalse(query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
     }
     
