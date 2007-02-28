@@ -36,7 +36,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -131,12 +130,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        if (SearchSettings.DISABLE_OOB_V2.getValue()) {
-            assertFalse(query.desiresOutOfBandRepliesV2());
-        }
-        else {
-            assertTrue(query.desiresOutOfBandRepliesV2());
-        }
+        assertFalse(query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
@@ -181,12 +175,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        if (SearchSettings.DISABLE_OOB_V2.getValue()) {
-            assertFalse(query.desiresOutOfBandRepliesV2());
-        }
-        else {
-            assertTrue(query.desiresOutOfBandRepliesV2());
-        }
+        assertFalse(query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
