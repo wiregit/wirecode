@@ -2772,9 +2772,9 @@ NO_INTERNET_RETRYING=您的電腦沒有網路連線，或者防火牆不允許 L
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
 ################################################################################
-#### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#### GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella. Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_FETCHED_TOO_MANY=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆或過濾軟體封鎖了對 Gnutella (連接埠6346) 的連接。請檢視您的防火牆選項，允許 LimeWire 連接 Gnutella 網路，或者聯絡系統管理員或 ISP，確定 Gnutella 連線未被過濾。
-#### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+#### GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella. Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
 GWEBCACHE_NO_CACHES_LEFT=LimeWire 無法連線到 Gnutella 網路主機。這最有可能是因為防火牆或過濾軟體封鎖了對 Gnutella (連接埠6346) 的連接。請檢視您的防火牆選項，允許 LimeWire 連線 Gnutella 網路，或者聯絡系統管理員或 ISP，確定 Gnutella 連線未被過濾。
 
 ################################################################################
