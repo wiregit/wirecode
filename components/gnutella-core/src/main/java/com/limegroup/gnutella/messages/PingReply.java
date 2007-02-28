@@ -583,7 +583,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             return new PingReply(guid, ttl, (byte)0, payload, ggep, ip);
         } catch (BadPacketException e) {
             // cannot happen
-            Assert.that(false);
+            assert false;
             return null;
         }
     }
@@ -1307,7 +1307,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         } catch (BadPacketException e) {
             // cannot happen
             ErrorService.error(e);
-            Assert.that(false);
+            assert false;
             return null;
         }
     }

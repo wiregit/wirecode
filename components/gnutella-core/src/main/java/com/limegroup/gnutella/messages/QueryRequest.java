@@ -1925,15 +1925,11 @@ public class QueryRequest extends Message implements Serializable{
     }
     
     /**
-     * Return the last modifiable GGEPBlock in the list or null if there
+     * Return the last GGEPBlock in the list or null if there
      * is none or if the list is empty.
      */
     private static GGEPBlock getLastBlock(List<GGEPBlock> blocks) {
-        GGEPBlock last = null;
-        for (GGEPBlock block : blocks) {
-            last = block;
-        }
-        return last;
+        return blocks.isEmpty() ? null : blocks.get(blocks.size() - 1);
     }
     
     private static byte[] insertGGEP(byte[] payload, int start, int end, byte[] ggepBytes, boolean prependDelimiter) {
