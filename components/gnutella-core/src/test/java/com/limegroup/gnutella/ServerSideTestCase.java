@@ -117,7 +117,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                           "getActivityCallback",
-                                                          (Object)null);
+                                                          null);
         assertEquals("unexpected port", PORT, 
 					 ConnectionSettings.PORT.getValue());
 
@@ -131,14 +131,14 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 					 ConnectionSettings.PORT.getValue());
         // set up ultrapeer stuff
         Integer numUPs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
-                                                                 "numUPs", (Object)null);
+                                                                 "numUPs", null);
         if ((numUPs.intValue() < 0) || (numUPs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numUPs!!!");
         ULTRAPEER = new Connection[numUPs.intValue()];
 
         Integer numLs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
                                                                  "numLeaves", 
-                                                                 (Object)null);
+                                                                 null);
         if ((numLs.intValue() < 0) || (numLs.intValue() > 30))
             throw new IllegalArgumentException("Bad value for numLs!!!");
         LEAF = new Connection[numLs.intValue()];
