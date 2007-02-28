@@ -104,7 +104,7 @@ public abstract class ClientSideTestCase
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
                                                          "getActivityCallback",
-                                                         null);
+                                                         (Object[])null);
         rs=new RouterService(callback);
         RouterService.preGuiInit();
         assertEquals("unexpected port",
@@ -177,7 +177,7 @@ public abstract class ClientSideTestCase
          Boolean shouldReply = Boolean.TRUE;
          try {
              shouldReply = (Boolean)PrivilegedAccessor.invokeMethod(callingClass,
-                                     "shouldRespondToPing", null);
+                                     "shouldRespondToPing", (Object[])null);
          } catch(NoSuchMethodException ignored) {}
          
          if(shouldReply.booleanValue())

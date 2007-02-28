@@ -181,7 +181,12 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV2());
+        if (SearchSettings.DISABLE_OOB_V2.getValue()) {
+            assertFalse(query.desiresOutOfBandRepliesV2());
+        }
+        else {
+            assertTrue(query.desiresOutOfBandRepliesV2());
+        }
         assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();

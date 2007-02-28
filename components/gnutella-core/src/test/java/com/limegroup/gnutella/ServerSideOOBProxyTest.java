@@ -697,7 +697,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();
                 synchronized(guidMapImpl) {
-                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", (Object)null);
+                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", (Object[])null);
                     assertTrue(currMap.isEmpty());
                 }
             }
