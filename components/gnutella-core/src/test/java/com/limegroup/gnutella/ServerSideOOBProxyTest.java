@@ -389,7 +389,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             sendF(LEAF[0], resp);
         }
         
-        // turn proxying off for version 3 => proxying should not work since we are ath version 3
+        // turn proxying off for version 3 => proxying should not work since we are at version 3
         {
             drainAll();
             
@@ -729,7 +729,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             for(Iterator i = expireList.iterator(); i.hasNext(); ) {
                 Object guidMapImpl = i.next();
                 synchronized(guidMapImpl) {
-                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", (Object)null);
+                    Map currMap = (Map)PrivilegedAccessor.invokeMethod(guidMapImpl, "getMap", (Object[])null);
                     assertTrue(currMap.isEmpty());
                 }
             }
