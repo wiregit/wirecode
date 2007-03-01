@@ -13,9 +13,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
+import org.limewire.util.FileUtils;
 
 /**
  * An alternative to IOStateMachine that will block until the machine
@@ -78,8 +78,8 @@ public class BlockingStateMachine implements Closeable, Shutdownable {
     
     /** Aborts this statemachine. */
     public void close() {
-        IOUtils.close(readChannel);
-        IOUtils.close(writeChannel);
+        FileUtils.close(readChannel);
+        FileUtils.close(writeChannel);
     }
     
     /** Releases any data the statemachine retained. */
