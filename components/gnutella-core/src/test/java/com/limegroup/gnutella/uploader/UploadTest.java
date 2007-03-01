@@ -49,7 +49,7 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.DefaultUploadManager;
+import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
@@ -2665,7 +2665,7 @@ public class UploadTest extends LimeTestCase {
      * in the mentioned tests fail because our HTTPUploader is no longer in that
      * List. So, we have to cache the HTTPUploader somehow what this extension does.
      */
-    private static class TestUploadManager extends DefaultUploadManager {
+    private static class TestUploadManager extends HTTPUploadManager {
 
         private List activeUploads = new ArrayList();
         

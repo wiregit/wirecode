@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,9 +13,22 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
+import org.apache.http.HttpInetConnection;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpServerConnection;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.nio.NHttpServerConnection;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpExecutionContext;
+import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.Interval;
+import org.limewire.http.HttpResponseListener;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
@@ -22,20 +36,22 @@ import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.uploader.BrowseRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPSession;
+import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.LimitReachedUploadState;
+import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
 import com.limegroup.gnutella.uploader.UploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.uploader.UploadType;
 
-/**
- * 
- */
-public abstract class AbstractUploadManager implements FileLocker,
-        ConnectionAcceptor, BandwidthTracker, UploadManager {
+public class HTTPUploadManager implements FileLocker, BandwidthTracker,
+        UploadManager, HttpResponseListener, HTTPUploadSessionManager {
 
-    private static final Log LOG = LogFactory
-            .getLog(AbstractUploadManager.class);
+    private final static String SESSION_KEY = "org.limewire.session";
+
+    private static final Log LOG = LogFactory.getLog(HTTPUploadManager.class);
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -54,7 +70,7 @@ public abstract class AbstractUploadManager implements FileLocker,
      * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
      * instances (all of the uploads in progress).
      */
-    private List<Uploader> _activeUploadList = new LinkedList<Uploader>();
+    private List<HTTPUploader> _activeUploadList = new LinkedList<HTTPUploader>();
 
     /** A manager for the available upload slots */
     private final UploadSlotManager slotManager;
@@ -69,7 +85,7 @@ public abstract class AbstractUploadManager implements FileLocker,
      * Number of active uploads that are not accounted in the slot manager but
      * whose bandwidth is counted. (i.e. Multicast)
      */
-    private Set<Uploader> forceAllowedUploads = new CopyOnWriteArraySet<Uploader>();
+    private Set<HTTPUploader> forceAllowedUploads = new CopyOnWriteArraySet<HTTPUploader>();
 
     /**
      * LOCKING: obtain this' monitor before modifying any of the data structures
@@ -125,9 +141,79 @@ public abstract class AbstractUploadManager implements FileLocker,
     private final Map<String, RequestCache> REQUESTS = new FixedsizeForgetfulHashMap<String, RequestCache>(
             250);
 
-    public AbstractUploadManager(UploadSlotManager slotManager) {
+    private HTTPAcceptor acceptor;
+
+    public HTTPUploadManager(UploadSlotManager slotManager) {
         this.slotManager = slotManager;
+        this.acceptor = new HTTPAcceptor();
+
         FileUtils.addFileLocker(this);
+        acceptor.addResponseListener(this);
+
+        inititalizeHandlers();
+    }
+
+    private void inititalizeHandlers() {
+        // browse
+        acceptor.registerHandler("/", new BrowseRequestHandler(this));
+
+        // update
+        acceptor.registerHandler("/update.xml", new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                UploadStat.UPDATE_FILE.incrementStat();
+                UploadSession session = getSession(context);
+                HTTPUploader uploader = getOrCreateUploader(context,
+                        UploadType.UPDATE_FILE, "update.xml");
+                addToGUI(uploader);
+
+                File file = new File(CommonUtils.getUserSettingsDir(),
+                        "update.xml");
+                // TODO is the returned mime-type correct?
+                response.setEntity(new FileEntity(file,
+                        Constants.QUERYREPLY_MIME_TYPE));
+            }
+        });
+
+        // push-proxy requests
+        HttpRequestHandler pushProxyHandler = new PushProxyRequestHandler();
+        acceptor.registerHandler("/gnutella/push-proxy", pushProxyHandler);
+        acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
+
+        // uploads
+        acceptor.registerHandler("/get*", new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
+            }
+        });
+
+        // unsupported requests
+        HttpRequestHandler notFoundHandler = new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                response.setReasonPhrase("Feature Not Active");
+                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+            }
+        };
+        acceptor.registerHandler("/browser-control", notFoundHandler);
+        acceptor.registerHandler("/gnutella/file-view*", notFoundHandler);
+        acceptor.registerHandler("/gnutella/res/*", notFoundHandler);
+
+        // return malformed request for everything else
+        acceptor.registerHandler("*", new HttpRequestHandler() {
+            public void handle(HttpRequest request, HttpResponse response,
+                    HttpContext context) throws HttpException, IOException {
+                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+            }
+        });
+    }
+
+    /**
+     * Push uploads from firewalled clients.
+     */
+    public void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan) {
+        // TODO redirect to acceptor
     }
 
     /**
@@ -141,9 +227,9 @@ public abstract class AbstractUploadManager implements FileLocker,
      * Don't let FILE_VIEW requests bypass the queue, we want to make sure those
      * guys don't hammer.
      */
-    private boolean shouldBypassQueue(HTTPUploader uploader) {
-        return uploader.getState() != Uploader.CONNECTING
-                || uploader.getMethod() == HTTPRequestMethod.HEAD
+    private boolean shouldBypassQueue(HttpRequest request, HTTPUploader uploader) {
+        return uploader.getState() != HTTPUploader.CONNECTING
+                || "HEAD".equals(request.getRequestLine().getMethod())
                 || uploader.isForcedShare();
     }
 
@@ -154,13 +240,13 @@ public abstract class AbstractUploadManager implements FileLocker,
      * open 4) Increments the completed uploads in the FileDesc 5) Removes the
      * uploader from the GUI. (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
-    private void cleanupFinishedUploader(Uploader uploader, long startTime) {
+    public void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
         if (LOG.isTraceEnabled())
             LOG.trace(uploader + " cleaning up finished.");
 
         int state = uploader.getState();
         int lastState = uploader.getLastTransferState();
-//        assertAsFinished(state);
+        // assertAsFinished(state);
 
         long finishTime = System.currentTimeMillis();
         synchronized (this) {
@@ -173,16 +259,16 @@ public abstract class AbstractUploadManager implements FileLocker,
             forceAllowedUploads.remove(uploader);
         }
 
-//        uploader.closeFileStreams();
+        // uploader.closeFileStreams();
 
         switch (state) {
-        case Uploader.COMPLETE:
+        case HTTPUploader.COMPLETE:
             UploadStat.COMPLETED.incrementStat();
-            if (lastState == Uploader.UPLOADING
-                    || lastState == Uploader.THEX_REQUEST)
+            if (lastState == HTTPUploader.UPLOADING
+                    || lastState == HTTPUploader.THEX_REQUEST)
                 UploadStat.COMPLETED_FILE.incrementStat();
             break;
-        case Uploader.INTERRUPTED:
+        case HTTPUploader.INTERRUPTED:
             UploadStat.INTERRUPTED.incrementStat();
             break;
         }
@@ -191,8 +277,8 @@ public abstract class AbstractUploadManager implements FileLocker,
                 && !uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
             if (fd != null
-                    && state == Uploader.COMPLETE
-                    && (lastState == Uploader.UPLOADING || lastState == Uploader.THEX_REQUEST)) {
+                    && state == HTTPUploader.COMPLETE
+                    && (lastState == HTTPUploader.UPLOADING || lastState == HTTPUploader.THEX_REQUEST)) {
                 fd.incrementCompletedUploads();
                 RouterService.getCallback()
                         .handleSharedFileUpdate(fd.getFile());
@@ -242,70 +328,70 @@ public abstract class AbstractUploadManager implements FileLocker,
     // }
     // }
 
-    /**
-     * Sets the uploader's state based off values read in the headers.
-     */
-    private void setUploaderStateOffHeaders(HTTPUploader uploader) {
-        FileDesc fd = uploader.getFileDesc();
-
-        // If it's still trying to connect, do more checks ...
-        if (uploader.getState() == Uploader.CONNECTING) {
-            // If it's the wrong URN, File Not Found it.
-            URN urn = uploader.getRequestedURN();
-            if (fd != null && urn != null && !fd.containsUrn(urn)) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug(uploader + " wrong content urn");
-                uploader.setState(Uploader.FILE_NOT_FOUND);
-                return;
-            }
-
-            // handling THEX Requests
-            if (uploader.isTHEXRequest()) {
-                if (uploader.getFileDesc().getHashTree() != null)
-                    uploader.setState(Uploader.THEX_REQUEST);
-                else
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
-                return;
-            }
-
-            // Special handling for incomplete files...
-            if (fd instanceof IncompleteFileDesc) {
-                // Check to see if we're allowing PFSP.
-                if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
-                    return;
-                }
-
-                // cannot service THEXRequests for partial files
-                if (uploader.isTHEXRequest()) {
-                    uploader.setState(Uploader.FILE_NOT_FOUND);
-                    return;
-                }
-
-                // If we are allowing, see if we have the range.
-                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-                int upStart = uploader.getUploadBegin();
-                // uploader.getUploadEnd() is exclusive!
-                int upEnd = uploader.getUploadEnd() - 1;
-                // If the request contained a 'Range:' header, then we can
-                // shrink the request to what we have available.
-                if (uploader.containedRangeRequest()) {
-                    Interval request = ifd.getAvailableSubRange(upStart, upEnd);
-                    if (request == null) {
-                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
-                        return;
-                    }
-                    uploader
-                            .setUploadBeginAndEnd(request.low, request.high + 1);
-                } else {
-                    if (!ifd.isRangeSatisfiable(upStart, upEnd)) {
-                        uploader.setState(Uploader.UNAVAILABLE_RANGE);
-                        return;
-                    }
-                }
-            }
-        }
-    }
+//    /**
+//     * Sets the uploader's state based off values read in the headers.
+//     */
+//    private void setUploaderStateOffHeaders(HTTPUploader uploader) {
+//        FileDesc fd = uploader.getFileDesc();
+//
+//        // If it's still trying to connect, do more checks ...
+//        if (uploader.getState() == HTTPUploader.CONNECTING) {
+//            // If it's the wrong URN, File Not Found it.
+//            URN urn = uploader.getRequestedURN();
+//            if (fd != null && urn != null && !fd.containsUrn(urn)) {
+//                if (LOG.isDebugEnabled())
+//                    LOG.debug(uploader + " wrong content urn");
+//                uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+//                return;
+//            }
+//
+//            // handling THEX Requests
+//            if (uploader.isTHEXRequest()) {
+//                if (uploader.getFileDesc().getHashTree() != null)
+//                    uploader.setState(HTTPUploader.THEX_REQUEST);
+//                else
+//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+//                return;
+//            }
+//
+//            // Special handling for incomplete files...
+//            if (fd instanceof IncompleteFileDesc) {
+//                // Check to see if we're allowing PFSP.
+//                if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+//                    return;
+//                }
+//
+//                // cannot service THEXRequests for partial files
+//                if (uploader.isTHEXRequest()) {
+//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+//                    return;
+//                }
+//
+//                // If we are allowing, see if we have the range.
+//                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+//                int upStart = uploader.getUploadBegin();
+//                // uploader.getUploadEnd() is exclusive!
+//                int upEnd = uploader.getUploadEnd() - 1;
+//                // If the request contained a 'Range:' header, then we can
+//                // shrink the request to what we have available.
+//                if (uploader.containedRangeRequest()) {
+//                    Interval request = ifd.getAvailableSubRange(upStart, upEnd);
+//                    if (request == null) {
+//                        uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
+//                        return;
+//                    }
+//                    uploader
+//                            .setUploadBeginAndEnd(request.low, request.high + 1);
+//                } else {
+//                    if (!ifd.isRangeSatisfiable(upStart, upEnd)) {
+//                        uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
+//                        return;
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Adds an accepted HTTPUploader to the internal list of active downloads.
@@ -320,7 +406,7 @@ public abstract class AbstractUploadManager implements FileLocker,
      * Adds this upload to the GUI and increments the attempted uploads. Does
      * nothing if 'shouldShowInGUI' is false.
      */
-    private void addToGUI(HTTPUploader uploader) {
+    public void addToGUI(HTTPUploader uploader) {
 
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
@@ -341,35 +427,35 @@ public abstract class AbstractUploadManager implements FileLocker,
         }
     }
 
-    protected void updateStatistics(Uploader uploader) throws IOException {
+    protected void updateStatistics(HTTPUploader uploader) throws IOException {
         switch (uploader.getState()) {
-        case Uploader.UNAVAILABLE_RANGE:
+        case HTTPUploader.UNAVAILABLE_RANGE:
             UploadStat.UNAVAILABLE_RANGE.incrementStat();
             break;
-        case Uploader.FILE_NOT_FOUND:
+        case HTTPUploader.FILE_NOT_FOUND:
             UploadStat.FILE_NOT_FOUND.incrementStat();
             break;
-        case Uploader.FREELOADER:
+        case HTTPUploader.FREELOADER:
             UploadStat.FREELOADER.incrementStat();
             break;
-        case Uploader.LIMIT_REACHED:
+        case HTTPUploader.LIMIT_REACHED:
             UploadStat.LIMIT_REACHED.incrementStat();
             break;
-        case Uploader.QUEUED:
+        case HTTPUploader.QUEUED:
             UploadStat.QUEUED.incrementStat();
             break;
-        case Uploader.BANNED_GREEDY:
+        case HTTPUploader.BANNED_GREEDY:
             UploadStat.BANNED.incrementStat();
             break;
-        case Uploader.CONNECTING:
+        case HTTPUploader.CONNECTING:
             // uploader.setState(Uploader.UPLOADING);
             UploadStat.UPLOADING.incrementStat();
             break;
-        case Uploader.THEX_REQUEST:
+        case HTTPUploader.THEX_REQUEST:
             UploadStat.THEX.incrementStat();
             break;
-        case Uploader.COMPLETE:
-        case Uploader.INTERRUPTED:
+        case HTTPUploader.COMPLETE:
+        case HTTPUploader.INTERRUPTED:
             Assert.that(false, "invalid state in doSingleUpload");
             break;
         }
@@ -419,7 +505,7 @@ public abstract class AbstractUploadManager implements FileLocker,
         if (slotManager.getNumUsersForHost(addr.getHostAddress()) > 0)
             return true;
 
-        for (Uploader uploader : _activeUploadList) {
+        for (HTTPUploader uploader : _activeUploadList) {
             InetAddress host = uploader.getConnectedHost();
             if (host != null && host.equals(addr))
                 return true;
@@ -442,7 +528,7 @@ public abstract class AbstractUploadManager implements FileLocker,
         boolean ret = false;
         // This causes the uploader to generate an exception,
         // and ultimately remove itself from the list.
-        for (Uploader uploader : _activeUploadList) {
+        for (HTTPUploader uploader : _activeUploadList) {
             FileDesc upFD = uploader.getFileDesc();
             if (upFD != null && upFD.equals(fd)) {
                 ret = true;
@@ -535,7 +621,7 @@ public abstract class AbstractUploadManager implements FileLocker,
      * This method also removes the <tt>Uploader</tt> from the <tt>List</tt>
      * of active uploads.
      */
-    private synchronized void removeFromList(Uploader uploader) {
+    private synchronized void removeFromList(HTTPUploader uploader) {
         // if the uploader is not in the active list, we should not
         // try remove the urn from the map of unique uploaded files for that
         // host.
@@ -678,7 +764,7 @@ public abstract class AbstractUploadManager implements FileLocker,
 
     public void measureBandwidth() {
         slotManager.measureBandwidth();
-        for (Uploader forced : forceAllowedUploads) {
+        for (HTTPUploader forced : forceAllowedUploads) {
             forced.measureBandwidth();
         }
     }
@@ -689,14 +775,14 @@ public abstract class AbstractUploadManager implements FileLocker,
             bw += slotManager.getMeasuredBandwidth();
         } catch (InsufficientDataException notEnough) {
         }
-        
-        for (Uploader forced : forceAllowedUploads) {
+
+        for (HTTPUploader forced : forceAllowedUploads) {
             try {
                 bw += forced.getMeasuredBandwidth();
             } catch (InsufficientDataException e) {
             }
         }
-        
+
         synchronized (this) {
             averageBandwidth = ((averageBandwidth * numMeasures) + bw)
                     / ++numMeasures;
@@ -816,4 +902,63 @@ public abstract class AbstractUploadManager implements FileLocker,
             ACTIVE_UPLOADS.remove(sha1);
         }
     }
+
+    public void acceptConnection(String word, Socket s) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public UploadSlotManager getSlotManager() {
+        return slotManager;
+    }
+
+    public UploadSession getOrCreateSession(HttpContext context) {
+        HttpInetConnection conn = (HttpInetConnection) context
+                .getAttribute(HttpExecutionContext.HTTP_CONNECTION);
+        assert context.getAttribute(SESSION_KEY) == null;
+        UploadSession session = new UploadSession(getSlotManager(),
+                conn.getRemoteAddress());
+        context.setAttribute(SESSION_KEY, session);
+        return session;
+    }
+
+    public UploadSession getSession(HttpContext context) {
+        UploadSession session = (UploadSession) context
+                .getAttribute(SESSION_KEY);
+        return session;
+    }
+
+    public HTTPUploader getOrCreateUploader(HttpContext context,
+            UploadType type, String filename) {
+        return getOrCreateUploader(context, type, filename, -1);
+    }
+
+    public HTTPUploader getOrCreateUploader(HttpContext context,
+            UploadType type, String filename, int index) {
+        UploadSession session = getOrCreateSession(context);
+        HTTPUploader uploader = session.getUploader();
+        if (uploader == null || !uploader.getFileName().equals(filename)) {
+            uploader = new HTTPUploader(filename, session, index);
+        }
+        uploader.setUploadType(type);
+        session.setUploader(uploader);
+        addToGUI(uploader);
+        return uploader;
+    }
+
+    public HTTPUploader getUploader(HttpContext context) {
+        UploadSession session = getSession(context);
+        HTTPUploader uploader = session.getUploader();
+        assert uploader != null;
+        return uploader;
+    }
+
+    public void responseSent(NHttpServerConnection conn, HttpResponse response) {
+        HTTPUploader uploader = getUploader(conn.getContext());
+        if (response.getEntity() == null) {
+            // not sending a body
+            uploader.setState(Uploader.COMPLETE);
+        }
+    }
+
 }

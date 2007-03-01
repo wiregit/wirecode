@@ -3,7 +3,6 @@ package com.limegroup.gnutella.uploader;
 import java.net.InetAddress;
 
 import com.limegroup.gnutella.BandwidthTrackerImpl;
-import com.limegroup.gnutella.Uploader;
 
 public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUser {
 
@@ -15,7 +14,7 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
 
     public static final int MAX_POLL_TIME = 120000; // 120 sec
 
-    private Uploader uploader;
+    private HTTPUploader uploader;
 
     private final InetAddress host;
 
@@ -29,11 +28,11 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         this.host = host;
     }
 
-    public void setUploader(Uploader uploader) {
+    public void setUploader(HTTPUploader uploader) {
         this.uploader = uploader;
     }
 
-    public Uploader getUploader() {
+    public HTTPUploader getUploader() {
         return uploader;
     }
 

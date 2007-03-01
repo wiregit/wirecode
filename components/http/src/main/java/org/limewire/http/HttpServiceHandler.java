@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.1 $
- * $Date: 2007-02-26 21:55:48 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2007-03-01 03:14:09 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +32,10 @@
 package org.limewire.http;
 
 import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseFactory;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
+import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
 import org.apache.http.params.HttpParams;
@@ -76,6 +79,21 @@ public class HttpServiceHandler extends BufferingHttpServiceHandler {
         if (connectionListener != null) {
             connectionListener.connectionClosed(conn);
         }
+    }
+
+    @Override
+    public void outputReady(NHttpServerConnection conn, ContentEncoder encoder) {
+        super.outputReady(conn, encoder);
+        
+        if (encoder.isCompleted()) {
+            connectionListener.responseContentSent(conn, conn.getHttpResponse());
+        }
+    }
+    
+    public void responseSent(DefaultNHttpServerConnection conn, HttpResponse response) {
+        if (connectionListener != null) {
+            connectionListener.responseSent(conn, response);
+        }        
     }
 
 }

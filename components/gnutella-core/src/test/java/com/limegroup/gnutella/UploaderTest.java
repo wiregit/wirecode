@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import junit.framework.Test;
+
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.auth.StubContentAuthority;
 import com.limegroup.gnutella.downloader.ConnectionStatus;
@@ -44,7 +44,7 @@ public class UploaderTest extends LimeTestCase {
 
     private static FileManager fm;
     private static RouterService rs;
-    private UploadManager upManager;
+    private HTTPUploadManager upManager;
     private RemoteFileDesc rfd1;
     private RemoteFileDesc rfd2;
     private RemoteFileDesc rfd3;
@@ -120,7 +120,7 @@ public class UploaderTest extends LimeTestCase {
         
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
-        upManager = new DefaultUploadManager(new UploadSlotManager());
+        upManager = new HTTPUploadManager(new UploadSlotManager());
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);
@@ -142,7 +142,7 @@ public class UploaderTest extends LimeTestCase {
      * - Bandwidth tracker works properly.
      */
     public void testLegacy() {
-        DefaultUploadManager.tBandwidthTracker(new DefaultUploadManager(null));
+        HTTPUploadManager.tBandwidthTracker(new HTTPUploadManager(null));
     }
     
     /** 
@@ -436,7 +436,7 @@ public class UploaderTest extends LimeTestCase {
             fail("unable to create piped socket factory", e);
         }
         final Socket sa = psf.getSocketA();
-        final UploadManager upman = upManager;
+        final HTTPUploadManager upman = upManager;
         Thread t = new Thread() {
             public void run() {
                 try {
@@ -519,7 +519,7 @@ public class UploaderTest extends LimeTestCase {
         UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
-        Class cache = PrivilegedAccessor.getClass(UploadManager.class,
+        Class cache = PrivilegedAccessor.getClass(HTTPUploadManager.class,
                                                   "RequestCache");
         PrivilegedAccessor.setValue(cache, "WAIT_TIME",
                                     new Long(20*1000));
@@ -1058,7 +1058,7 @@ public class UploaderTest extends LimeTestCase {
      *  because upman was busy
      * @exception IOException some other exception
      */     
-    private static HTTPDownloader addUploader(final UploadManager upman, 
+    private static HTTPDownloader addUploader(final HTTPUploadManager upman, 
                                               RemoteFileDesc rfd,
                                               String ip,
                                               boolean block) throws Exception{

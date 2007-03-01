@@ -141,7 +141,5 @@ public interface Uploader extends BandwidthTracker {
      */
     public UploadType getUploadType();
 
-    public InetAddress getConnectedHost();
-
 }
 

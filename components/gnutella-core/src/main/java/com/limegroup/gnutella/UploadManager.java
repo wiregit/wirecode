@@ -1,19 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
-import java.net.Socket;
 
-import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.uploader.HTTPSession;
+import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 public interface UploadManager extends BandwidthTracker {
     
-    /**
-     * Constant for HttpRequestLine parameter
-     */
-    final String SERVICE_ID = "service_id";
-
-    void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan);
+//    void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan);
 
     float getLastMeasuredBandwidth();
 
@@ -38,5 +32,7 @@ public interface UploadManager extends BandwidthTracker {
     boolean mayBeServiceable();
 
     int measuredUploadSpeed();
+    
+    UploadSlotManager getSlotManager();
 
 }

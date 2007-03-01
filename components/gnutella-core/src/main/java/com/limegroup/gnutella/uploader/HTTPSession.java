@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import com.limegroup.gnutella.BandwidthTrackerImpl;
-import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.Uploader;
 
 /**
@@ -16,7 +16,7 @@ public class HTTPSession extends BandwidthTrackerImpl implements UploadSlotUser 
 	/** The socket used for this session */
 	private final Socket socket;
 	
-	private final UploadManager manager;
+	private final HTTPUploadManager manager;
 	
 	/** The current HTTPUploader servicing an upload */
 	private HTTPUploader uploader;
@@ -30,7 +30,7 @@ public class HTTPSession extends BandwidthTrackerImpl implements UploadSlotUser 
 	private volatile long lastPollTime;
 	
 	
-	public HTTPSession(Socket socket, UploadManager manager) {
+	public HTTPSession(Socket socket, HTTPUploadManager manager) {
 		this.socket = socket;
 		this.manager = manager;
 	}

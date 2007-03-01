@@ -1,13 +1,13 @@
 
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.DefaultUploadManager;
+import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
  * stub for easier testing.  Feel free to override more methods/getters
  */
-public class UploadManagerStub extends DefaultUploadManager {
+public class UploadManagerStub extends HTTPUploadManager {
 	
 	public UploadManagerStub() {
 		super(new UploadSlotManager());

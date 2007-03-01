@@ -172,8 +172,8 @@ public class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static UploadManager uploadManager = 
-    	new NIOUploadManager(uploadSlotManager);
+    private static HTTPUploadManager uploadManager = 
+    	new HTTPUploadManager(uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -717,7 +717,7 @@ public class RouterService {
      *
      * @return the <tt>UploadManager</tt> in use
      */
-	public static UploadManager getUploadManager() {
+	public static HTTPUploadManager getUploadManager() {
 		return uploadManager;
 	}
 
