@@ -367,7 +367,9 @@ public class HostCatcher {
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            rank(new HashSet<Endpoint>(ENDPOINT_SET));
+            List<Endpoint> l = new ArrayList<Endpoint>(ENDPOINT_SET);
+            Collections.shuffle(l);
+            rank(l); 
         }
     }
     
