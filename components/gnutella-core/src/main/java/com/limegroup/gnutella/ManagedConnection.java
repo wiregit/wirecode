@@ -1184,6 +1184,16 @@ public class ManagedConnection extends Connection
                 send(tcp);
                 _numTCPConnectBackRequests++;
             }
+
+            // disable oobv2 explicitly.
+            if (isClientSupernodeConnection()&&
+                    SearchSettings.DISABLE_OOB_V2.getValue() &&
+                    getSupportedOOBProxyControlVersion() != -1) {
+                Message stopv2 = 
+                    new OOBProxyControlVendorMessage(
+                            OOBProxyControlVendorMessage.Control.DISABLE_VERSION_2);
+                send(stopv2);
+            }
         }
         else if (vm instanceof OOBProxyControlVendorMessage) {
             _maxDisabledOOBProtocolVersion = ((OOBProxyControlVendorMessage)vm).getMaximumDisabledVersion();
