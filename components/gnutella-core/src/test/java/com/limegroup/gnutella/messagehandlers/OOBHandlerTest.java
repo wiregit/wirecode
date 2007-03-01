@@ -155,17 +155,34 @@ public class OOBHandlerTest extends LimeTestCase {
         }
     }
 
+    
+    public void testDropsUnAckedForDisabledOOBV2() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        testHandlesUnAcked(true);
+    }
+    
+    public void testAcceptsUnAckedForEnabledOOBV2() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        testHandlesUnAcked(false);
+    }
 
-    public void testDropsUnAcked() throws Exception {
+    public void testHandlesUnAcked(boolean disableOOBV2) throws Exception {
 
         // send some results w/o an RNVM
         QueryReply reply = getReplyWithResults(g.bytes(), 10, address
                 .getAddress(), null);
+        
+        router.reply = null;
         handler.handleMessage(reply, null, replyHandler);
 
-        // should be ignored.
-        assertNull(router.reply);
-
+        if (disableOOBV2) {
+            // should be ignored.
+            assertNull(router.reply);
+        }
+        else {
+            assertSame(reply, router.reply);
+        }
+            
         // send an RNVM now
         ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
         router.numToRequest = 10;
