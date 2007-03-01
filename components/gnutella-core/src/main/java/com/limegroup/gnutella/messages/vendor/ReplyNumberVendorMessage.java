@@ -8,6 +8,7 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".
@@ -46,12 +47,18 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
               payload);
         
+        if (version < OLD_VERSION)
+            throw new BadPacketException("ancient version");
+        
         // only allow current version to come from network
+        // unless OOBv2 is allowed
+        if (version < VERSION && SearchSettings.DISABLE_OOB_V2.getValue())
+            throw new BadPacketException("OOB v2 not allowed");
         
         // loosen the condition on the message size to allow this message version
         // to have a GGEP in the future
-        if ((getVersion() < VERSION) || getPayload().length < 2)
-            throw new BadPacketException("VERSION 3 UNSUPPORTED PAYLOAD LEN: " +
+        if (getPayload().length < 2)
+            throw new BadPacketException("VERSION " + version+" UNSUPPORTED PAYLOAD LEN: " +
                     getPayload().length);
     }
 
@@ -136,6 +143,10 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
      */
     public void recordDrop() {
         super.recordDrop();
+    }
+    
+    public boolean isOOBv3() {
+        return getVersion() == VERSION;
     }
 
 }

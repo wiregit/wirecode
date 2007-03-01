@@ -680,8 +680,9 @@ public class QueryRequest extends Message implements Serializable{
         // the payload we don't understand and would get lost
         byte[] newPayload = new byte[qr.PAYLOAD.length];
         System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        // disable old out of bounds if there
-        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        // disable old out of band if requested
+        if (SearchSettings.DISABLE_OOB_V2.getValue())
+            newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
         GGEP ggep = new GGEP(false);
         // signal oob capability
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
@@ -1213,6 +1214,8 @@ public class QueryRequest extends Message implements Serializable{
             
             if (!canReceiveOutOfBandReplies) 
                 minSpeed |= SPECIAL_XML_MASK;
+            else if (!SearchSettings.DISABLE_OOB_V2.getValue())
+                minSpeed |= SPECIAL_OUTOFBAND_MASK;
         }
 
         MIN_SPEED = minSpeed;

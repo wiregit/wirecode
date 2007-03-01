@@ -26,6 +26,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 
@@ -74,9 +75,12 @@ public class OOBHandler implements MessageHandler, Runnable {
             return;
         }
 				
-		LimeACKVendorMessage ack =
-			new LimeACKVendorMessage(g, toRequest, 
+		LimeACKVendorMessage ack;
+        if (msg.isOOBv3()) {
+			ack = new LimeACKVendorMessage(g, toRequest, 
                     new OOBQueryKey(new OOBTokenData(handler, msg.getGUID(), toRequest)));
+        } else
+            ack = new LimeACKVendorMessage(g, toRequest);
         
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
@@ -100,8 +104,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
-            LOG.trace("Didn't request any OOB replies for this GUID from host");
-            // TODO spammer, remember them
+            if (!SearchSettings.DISABLE_OOB_V2.getValue()) 
+                router.handleQueryReply(reply, handler);
             return;
         }
         
