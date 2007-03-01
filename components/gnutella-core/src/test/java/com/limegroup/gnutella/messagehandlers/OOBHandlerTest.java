@@ -378,7 +378,7 @@ public class OOBHandlerTest extends LimeTestCase {
         SecurityToken token = assertACKSent(replyHandler, 10);
 
         // send reply, only then session objects are created
-        QueryReply reply = getReplyWithResults(g.bytes(), 5, address
+        QueryReply reply = getReplyWithResults(guid.bytes(), 10, address
                 .getAddress(), token);
         
         // timeout query
