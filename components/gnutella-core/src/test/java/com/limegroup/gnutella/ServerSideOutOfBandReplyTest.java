@@ -36,6 +36,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -65,7 +66,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket UDP_ACCESS;
+    private volatile static DatagramSocket UDP_ACCESS;
+    
+    private static volatile boolean v2disabled;
 
     public ServerSideOutOfBandReplyTest(String name) {
         super(name);
@@ -122,7 +125,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         PrivilegedAccessor.setValue( RouterService.getUdpService(), "_acceptedUnsolicitedIncoming", new Boolean(true));
         
         DatagramPacket pack = null;
-        UDP_ACCESS = new DatagramSocket(10000);
+        if (UDP_ACCESS == null)
+            UDP_ACCESS = new DatagramSocket(10000);
+            
         drainAll();
 
         QueryRequest query = 
@@ -130,7 +135,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertNotEquals(v2disabled,query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
@@ -175,7 +180,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         assertTrue(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertNotEquals(v2disabled,query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
         
         query.hop();
@@ -347,6 +352,13 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     }
     
+    public void testBasicOutOfBandRequestV3Only() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        v2disabled = true;
+        testBasicOutOfBandRequest();
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        v2disabled = false;
+    }
     /**
      * Test server still handles OOB protocol version 2 for old clients.
      * 

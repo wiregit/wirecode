@@ -58,7 +58,10 @@ public final class QueryRequestTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         SearchSettings.DISABLE_OOB_V2.revertToDefault();
+        OOBv2Disabled = false;
     }
+    
+    private static volatile boolean OOBv2Disabled;
     
 	/**
 	 * Tests the constructor that most of the other constructors are built
@@ -1094,6 +1097,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getTTL(), proxy.getTTL());
         
         SearchSettings.DISABLE_OOB_V2.setValue(true);
+        OOBv2Disabled = true;
         proxy = QueryRequest.createProxyQuery(query,
                 query.getGUID());
         assertDesiresOutOfBand(proxy);
@@ -1288,6 +1292,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     public void testNotUnmarkOOBQuery() throws Exception {
         SearchSettings.DISABLE_OOB_V2.setValue(true);
+        OOBv2Disabled = true;
         testUnmarkOOBQuery();
     }
     
@@ -1347,7 +1352,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     private void assertDesiresOutOfBand(QueryRequest query) {
         assertTrue(query.desiresOutOfBandReplies());
-        assertNotEquals(SearchSettings.DISABLE_OOB_V2.getValue(),query.desiresOutOfBandRepliesV2());
+        assertNotEquals(OOBv2Disabled,query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
     }
     
