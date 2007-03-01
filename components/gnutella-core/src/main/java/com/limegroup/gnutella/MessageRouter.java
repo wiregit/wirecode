@@ -40,6 +40,7 @@ import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -1148,11 +1149,14 @@ public abstract class MessageRouter {
      * if it is likely to not be firewalled.
      */
     public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
-        if(reply.isLikelyNotFirewalled()) {
-            GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
-            return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
+        try {
+            if (reply.getHostData().isFirewalled())
+                return false;
+        } catch (BadPacketException bpe){
+            return false;
         }
-        return false;
+        GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
+        return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
     }
 
     /**

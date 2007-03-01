@@ -1168,43 +1168,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(_token.getBytes(), query.getSecurityToken());
     }
     
-    public void testIsLikelyNotFirewalled() throws Exception {
-        
-        LocalSocketAddressProvider oldProvider = LocalSocketAddressService.getSharedProvider();
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
-
-            public byte[] getLocalAddress() {
-                return null;
-            }
-
-            public int getLocalPort() {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-
-            public boolean isLocalAddressPrivate() {
-                return true;
-            }
-            
-        });
-        
-        try {
-            assertFalse(createReply(new byte[] { 127, 0, 0, 1 }, null).isLikelyNotFirewalled());
-            
-            Set<IpPort> proxies = new HashSet<IpPort>();
-            proxies.add(new IpPortImpl("limewire.com:5454"));
-            assertFalse(createReply(new byte[] { 127, 0, 0, 1 }, proxies).isLikelyNotFirewalled());
-            
-            byte[] addr = InetAddress.getByName("limewire.com").getAddress();
-            assertFalse(createReply(addr, proxies).isLikelyNotFirewalled());
-            assertTrue(createReply(addr, null).isLikelyNotFirewalled());
-            assertTrue(createReply(addr, IpPort.EMPTY_SET).isLikelyNotFirewalled());
-        }
-        finally {
-            LocalSocketAddressService.setSocketAddressProvider(oldProvider);
-        }
-    }
-    
     private static QueryReply createReply(byte[] address, Set<IpPort> proxies) {
         Response[] res = new Response[] { new Response(2, 5, "response") }; 
         

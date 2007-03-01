@@ -1438,13 +1438,4 @@ public class QueryReply extends Message implements SecureMessage {
             return proxies != null ? proxies : IpPort.EMPTY_SET;
         }
     }
-    
-    /**
-     * Returns true if sender is most likely not firewalled, i.e. their
-     * address is not private and it does not have push proxies.
-     */
-    public boolean isLikelyNotFirewalled() {
-        return !NetworkUtils.isPrivateAddress(getIPBytes())
-            && getPushProxies().isEmpty();
-    }
 }
