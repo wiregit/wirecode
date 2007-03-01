@@ -21,6 +21,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
@@ -82,7 +83,17 @@ public class OOBHandlerTest extends LimeTestCase {
         assertNull(router.reply);
     }
 
-    public void testMessagesWithoutEchoedTokenAreDiscarded() {
+    public void testMessagesWithoutEchoedTokenAreDiscardedForDisabledOOBV2() {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        testMessagesWithoutEchoedTokenAreHandled(true);
+    }
+    
+    public void testMessagesWithoutEchoedTokenAreNotDiscardedForEnabledOOBV2() {
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        testMessagesWithoutEchoedTokenAreHandled(false);
+    }
+    
+    public void testMessagesWithoutEchoedTokenAreHandled(boolean disableOOBV2) {
         // a host claims to have 10 results
         ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
 
@@ -95,11 +106,27 @@ public class OOBHandlerTest extends LimeTestCase {
         // discarded
         QueryReply reply = getReplyWithResults(g.bytes(), 10, address
                 .getAddress(), null);
+        router.reply = null;
         handler.handleMessage(reply, null, replyHandler);
-        assertNotSame(reply, router.reply);
+        if (disableOOBV2) {
+            assertNotSame(reply, router.reply);
+        }
+        else {
+            assertSame(reply, router.reply);
+        }
     }
 
-    public void testMessagesWithDifferentTokenAreDiscarded()
+    public void testMessagesWithDifferentTokenAreDiscardedForDisabledOOBV2() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        testMessagesWithDifferentTokenAreHandled(true);
+    }
+    
+    public void testMessagesWithDifferentTokenAreAcceptedForEnabeldOOBV2() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        testMessagesWithDifferentTokenAreHandled(false);
+    }
+    
+    public void testMessagesWithDifferentTokenAreHandled(boolean disableOOBV2)
             throws InvalidSecurityTokenException {
         // a host claims to have 10 results
         ReplyNumberVendorMessage rnvm = new ReplyNumberVendorMessage(g, 10);
@@ -116,9 +143,18 @@ public class OOBHandlerTest extends LimeTestCase {
         // send back messages with fake token
         QueryReply reply = getReplyWithResults(g.bytes(), 10, address
                 .getAddress(), tokenFake);
+        
+        router.reply = null;
         handler.handleMessage(reply, null, replyHandler);
-        assertNotSame(reply, router.reply);
+        
+        if (disableOOBV2) {
+            assertNotSame(reply, router.reply);
+        }
+        else {
+            assertSame(reply, router.reply);
+        }
     }
+
 
     public void testDropsUnAcked() throws Exception {
 
