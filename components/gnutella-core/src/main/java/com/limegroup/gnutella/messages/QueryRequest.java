@@ -683,6 +683,8 @@ public class QueryRequest extends Message implements Serializable{
         // disable old out of band if requested
         if (SearchSettings.DISABLE_OOB_V2.getValue())
             newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        else
+            newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
         GGEP ggep = new GGEP(false);
         // signal oob capability
         ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);

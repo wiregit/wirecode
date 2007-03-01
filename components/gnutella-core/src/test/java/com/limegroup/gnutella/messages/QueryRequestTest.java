@@ -55,6 +55,11 @@ public final class QueryRequestTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
+    
+    public void setUp() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.revertToDefault();
+    }
+    
 	/**
 	 * Tests the constructor that most of the other constructors are built
 	 * off of.
@@ -1080,13 +1085,18 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(query.desiresOutOfBandReplies());
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
-        assertTrue(proxy.desiresOutOfBandReplies());
+        assertDesiresOutOfBand(proxy);
         assertFalse(proxy.doNotProxy());
         
         assertEquals(query.getQuery(), proxy.getQuery());
         assertEquals(query.canDoFirewalledTransfer(), proxy.canDoFirewalledTransfer());
         assertEquals(query.getHops(), proxy.getHops());
         assertEquals(query.getTTL(), proxy.getTTL());
+        
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        proxy = QueryRequest.createProxyQuery(query,
+                query.getGUID());
+        assertDesiresOutOfBand(proxy);
     }
     
     public void testPatchInGGEP() throws Exception {
@@ -1276,6 +1286,11 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getPayload(), copy.getPayload());
     }
     
+    public void testNotUnmarkOOBQuery() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        testUnmarkOOBQuery();
+    }
+    
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
                 URN.NO_URN_SET,
@@ -1332,7 +1347,7 @@ public final class QueryRequestTest extends LimeTestCase {
     
     private void assertDesiresOutOfBand(QueryRequest query) {
         assertTrue(query.desiresOutOfBandReplies());
-        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertNotEquals(SearchSettings.DISABLE_OOB_V2.getValue(),query.desiresOutOfBandRepliesV2());
         assertTrue(query.desiresOutOfBandRepliesV3());
     }
     
