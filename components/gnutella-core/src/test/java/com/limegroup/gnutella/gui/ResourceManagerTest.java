@@ -2,20 +2,12 @@ package com.limegroup.gnutella.gui;
 
 import java.util.Locale;
 
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.util.GUIBaseTestCase;
 
-public class ResourceManagerTest extends LimeTestCase {
+public class ResourceManagerTest extends GUIBaseTestCase {
 
 	public ResourceManagerTest(String name) {
 		super(name);
-	}
-	
-	static void setLocaleSettings(Locale locale) {
-		ApplicationSettings.LANGUAGE.setValue(locale.getLanguage());
-        ApplicationSettings.COUNTRY.setValue(locale.getCountry());
-        ApplicationSettings.LOCALE_VARIANT.setValue(locale.getVariant());
-        ResourceManager.resetLocaleOptions();
 	}
 	
 	public void testResetLocaleOptions() {
