@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -338,7 +339,9 @@ public class HostCatcher {
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            rank(new HashSet(ENDPOINT_SET));
+            List l = new ArrayList(ENDPOINT_SET);
+            Collections.shuffle(l);
+            rank(l);
         }
     }
     
