@@ -362,6 +362,36 @@ public class OOBHandlerTest extends LimeTestCase {
         point = points.iterator().next();
         assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
         assertEquals(replyHandler.getPort(), point.getPort());
+        
+        // 3. case the first query reply comes in but the query is not alive
+        guid = new GUID();
+        rnvm = new ReplyNumberVendorMessage(guid, 10);
+        router.numToRequest = 10;
+        router.isAlive = true;
+        router.reply = null;
+        
+        handler.handleMessage(rnvm, null, replyHandler);
+        // source is not remembered yet
+        assertTrue(router.getQueryLocs(guid).isEmpty());
+        
+        // double check we sent back an ack
+        SecurityToken token = assertACKSent(replyHandler, 10);
+
+        // send reply, only then session objects are created
+        QueryReply reply = getReplyWithResults(g.bytes(), 5, address
+                .getAddress(), token);
+        
+        // timeout query
+        router.isAlive = false;
+        
+        // send same five and message should be discarded
+        handler.handleMessage(reply, null, replyHandler);
+        assertNull(router.reply);
+        
+        assertFalse(router.getQueryLocs(guid).isEmpty());
+        point = router.getQueryLocs(guid).iterator().next();
+        assertEquals(replyHandler.getInetAddress(), point.getInetAddress());
+        assertEquals(replyHandler.getPort(), point.getPort());
     }
 
     private static SecurityToken assertACKSent(MyReplyHandler rhandler,
@@ -400,8 +430,7 @@ public class OOBHandlerTest extends LimeTestCase {
         volatile boolean isAlive = true;
 
         @Override
-        public int getNumOOBToRequest(ReplyNumberVendorMessage reply,
-                ReplyHandler handler) {
+        public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
             return numToRequest;
         }
 

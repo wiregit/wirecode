@@ -1126,6 +1126,12 @@ public abstract class MessageRouter {
         // TODO: tally some stat stuff here
     }
     
+    /**
+     * Adds the address of <code>handler</code> to the {@link BypassedResultsCache}
+     * if it can receive unsolicited udp.
+     * 
+     * @return true if successfully added to the bypassed results cache
+     */
     public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
         
         //if the reply cannot receive unsolicited udp, there is no point storing it
@@ -1136,8 +1142,25 @@ public abstract class MessageRouter {
         GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
         return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
     }
+    
+    /**
+     * Adds the address of <code>handler</code> to the {@link BypassedResultsCache}
+     * if it is likely to not be firewalled.
+     */
+    public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
+        if(reply.isLikelyNotFirewalled()) {
+            GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
+            return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
+        }
+        return false;
+    }
 
-    public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+    /**
+     * Returns the number of results to request from source of <code>reply</code>.
+     * 
+     * @return -1 if no results are desired
+     */
+    public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
     	GUID qGUID = new GUID(reply.getGUID());
     	
         int numResults = 

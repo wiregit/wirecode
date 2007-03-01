@@ -15,6 +15,7 @@ import org.limewire.collection.IntSet;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
+import com.limegroup.gnutella.BypassedResultsCache;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
@@ -28,6 +29,11 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 
+/**
+ * Handles {@link ReplyNumberVendorMessage} and {@link QueryReply} for 
+ * out-of-band search results and manages a cache of session objects 
+ * to keep track of the results that have alreay been received.
+ */
 public class OOBHandler implements MessageHandler, Runnable {
     
     private static final Log LOG = LogFactory.getLog(OOBHandler.class);
@@ -50,12 +56,18 @@ public class OOBHandler implements MessageHandler, Runnable {
 			throw new IllegalArgumentException("can't handle this type of message");
 	}
 	
+    /**
+     * Handles the reply number message, verifying the query for it is still alive
+     * and more results are wanted and sending a {@link LimeACKVendorMessage} in
+     * that case. Otherwise the source of the <code>msg</code> is added to the 
+     * {@link BypassedResultsCache}.
+     */
 	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
 
         int toRequest;
         
-        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg, handler)) < 0) {
+        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) < 0) {
             // remember as possible GUESS source though
             router.addBypassedSource(msg, handler);
             OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
@@ -70,6 +82,17 @@ public class OOBHandler implements MessageHandler, Runnable {
 		handler.reply(ack);
 	}
     
+    /**
+     * Handles an out-of-band query reply verifying if its security token is valid
+     * and creating a session object that keeps track of the number of results
+     * received for that security token.
+     * 
+     * Invalid messages with invalid security token or without token or duplicate
+     * messages are ignored.
+     * 
+     * If the query is not alive messages are discarded and added to the
+     *  {@link BypassedResultsCache}.
+     */
     private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
@@ -89,6 +112,8 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
         
+        
+        boolean shouldAddBypassedSource = false;
         /*
          * Router will handle the reply if it
          * it has a route && we still expect results for this OOB session
@@ -96,37 +121,51 @@ public class OOBHandler implements MessageHandler, Runnable {
         synchronized (OOBSessions) {
             // if query is not of interest anymore return
             GUID queryGUID = new GUID(reply.getGUID());
-            if (!router.isQueryAlive(queryGUID))
-                return;
-            
-            int hashKey = Arrays.hashCode(token.getBytes());
-            OOBSession session = OOBSessions.get(hashKey);
-            if (session == null) {
-                session = new OOBSession(token, requestedResponseCount, queryGUID);
-                OOBSessions.put(hashKey,session);
+            if (!router.isQueryAlive(queryGUID)) {
+                shouldAddBypassedSource = true;
             }
-            
-            int remainingCount = session.getRemainingResultsCount() - numResps; 
-            if (remainingCount >= 0) {
-                if(LOG.isTraceEnabled())
-                    LOG.trace("Requested more than got (" + remainingCount + " left over)");
-                // parsing of query reply already done here in message dispatcher thread
-                try {
-                    int added = session.countAddedResponses(reply.getResultsArray());
-                    if (added > 0) {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Handling the reply.");
+            else {
+                int hashKey = Arrays.hashCode(token.getBytes());
+                OOBSession session = OOBSessions.get(hashKey);
+                if (session == null) {
+                    session = new OOBSession(token, requestedResponseCount, queryGUID);
+                    OOBSessions.put(hashKey, session);
+                }
+                
+                int remainingCount = session.getRemainingResultsCount() - numResps; 
+                if (remainingCount >= 0) {
+                    if(LOG.isTraceEnabled())
+                        LOG.trace("Requested >= than got (" + remainingCount + " left over)");
+                    // parsing of query reply already done here in message dispatcher thread
+                    try {
+                        int added = session.countAddedResponses(reply.getResultsArray());
+                        if (added > 0) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Handling the reply.");
+                            }
+                            router.handleQueryReply(reply, handler);
                         }
-                        router.handleQueryReply(reply, handler);
+                    } 
+                    catch (BadPacketException e) {
+                        // ignore packet
                     }
-                } 
-                catch (BadPacketException e) {
-                    // ignore packet
                 }
             }
         }
-	}
+        
+        if (shouldAddBypassedSource) {
+            router.addBypassedSource(reply, handler);
+        }
+    }
     
+    /**
+     * Reconstructs the security token from the query reply and verifies it
+     * against the handler, the number of results requested and the GUID of
+     * the reply.
+     *
+     * @return null if there is no security token in the reply or the security
+     * token did not validate
+     */
 	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
 	    byte[] securityBytes = reply.getSecurityToken();
         if (securityBytes == null) {
@@ -146,6 +185,10 @@ public class OOBHandler implements MessageHandler, Runnable {
         return null;
 	}
 
+    /**
+     * Keeps track of how many results have been received for a security
+     * token. 
+     */
     private class OOBSession {
     	
         private final SecurityToken token;
@@ -188,6 +231,9 @@ public class OOBHandler implements MessageHandler, Runnable {
             return added;
         }
         
+        /**
+         * Returns the number of results that are still expected to come in.
+         */
         public final int getRemainingResultsCount() {
             return requestedResponseCount - urnHashCodes.size() - (responseHashCodes != null ? responseHashCodes.size() : 0); 
         }

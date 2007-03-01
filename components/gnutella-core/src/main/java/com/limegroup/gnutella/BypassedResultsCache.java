@@ -22,11 +22,6 @@ public class BypassedResultsCache {
     private final ActivityCallback _callback;
     
     private final DownloadManager _downloadManager;
-
-    public BypassedResultsCache(ActivityCallback callback, DownloadManager downloadManager) {
-        _callback = callback;
-        _downloadManager = downloadManager;
-    }
     
     /**
      * Keeps track of potential sources of content.  Comprised of Sets of GUESS
@@ -34,6 +29,12 @@ public class BypassedResultsCache {
      */
     private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = Collections.synchronizedMap(new HashMap<GUID, Set<GUESSEndpoint>>());
 
+
+    public BypassedResultsCache(ActivityCallback callback, DownloadManager downloadManager) {
+        _callback = callback;
+        _downloadManager = downloadManager;
+    }
+    
     // made package private until this is refactored to events and
     // the cache can subscribe to a query killed event
     void queryKilled(GUID guid) {
