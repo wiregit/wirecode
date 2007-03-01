@@ -3,29 +3,39 @@ package org.limewire.nio.statemachine;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.util.BufferUtils;
 
-
+/**
+ * A state used for skipping over data.
+ * 
+ * If this is constructed with an AtomicLong, it is possible to change
+ * the skipping value prior to the state's first processing.  You MUST NOT
+ * change the value after the state has begun processing.
+ */
 public class ReadSkipState extends ReadState {
     
-    private long leftToRead;
+    private final AtomicLong leftToRead;
     
     public ReadSkipState(long length) {
+        this(new AtomicLong(length));
+    }
+    
+    public ReadSkipState(AtomicLong length) {
         this.leftToRead = length;
     }
     
     protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
-        
-        leftToRead = BufferUtils.delete(buffer, leftToRead);     
+        leftToRead.set(BufferUtils.delete(buffer, leftToRead.get()));     
         int read = 0;
-        while(leftToRead > 0 && (read = rc.read(buffer)) > 0)
-            leftToRead = BufferUtils.delete(buffer, leftToRead);
+        while(leftToRead.get() > 0 && (read = rc.read(buffer)) > 0)
+            leftToRead.set(BufferUtils.delete(buffer, leftToRead.get()));
         
-        if(leftToRead > 0 && read == -1)
+        if(leftToRead.get() > 0 && read == -1)
             throw new IOException("EOF");
         else
-            return leftToRead > 0; // requires more processing if still stuff to read.
+            return leftToRead.get() > 0; // requires more processing if still stuff to read.
     }
 
     public long getAmountProcessed() {

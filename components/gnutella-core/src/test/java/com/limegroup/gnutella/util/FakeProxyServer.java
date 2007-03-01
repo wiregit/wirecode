@@ -219,9 +219,9 @@ public class FakeProxyServer extends AssertComparisons {
         assertEquals("LW sent wrong port", "" + ProxyTest.DEST_PORT, tok.nextToken());
         assertEquals("LW didn't send http string", "HTTP/1.0", tok.nextToken());
         if(_makeError)
-            os.write("503 Busy\r\n\r\n".getBytes());
+            os.write("503 Busy\r\nHeader: Value\r\n\r\n".getBytes());
         else
-            os.write("200 OK\r\n\r\n".getBytes());
+            os.write("200 OK\r\nHeader: Value\r\n\r\n".getBytes());
         
     }
 

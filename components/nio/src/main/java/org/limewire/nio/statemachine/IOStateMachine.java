@@ -20,7 +20,6 @@ import org.limewire.util.BufferUtils;
 public class IOStateMachine implements ChannelReadObserver, ChannelWriter, InterestReadableByteChannel {
     
     private static final Log LOG = LogFactory.getLog(IOStateMachine.class);
-    
    
     /** Observer to notify when this finishes or fails. */
     private IOStateObserver observer;
