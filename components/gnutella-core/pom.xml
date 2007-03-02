@@ -37,6 +37,11 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-rudp</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-security</artifactId>
       <version>${limewire.version}</version>
     </dependency>

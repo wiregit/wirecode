@@ -45,6 +45,7 @@
     <module>mojito-ui</module>
     <module>nio</module>
     <module>resources</module>
+    <module>rudp</module>
     <module>security</module>
     <module>setting</module>
     <module>statistic</module>
