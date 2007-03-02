@@ -260,7 +260,7 @@ public class DHTValueManager implements Runnable {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
 
             if (!(e.getCause() instanceof DHTException)) {
@@ -272,12 +272,12 @@ public class DHTValueManager implements Runnable {
             }
         }
 
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.debug("CancellationException", e);
             stop();
         }
         
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.debug("InterruptedException", e);
             stop();
         }   

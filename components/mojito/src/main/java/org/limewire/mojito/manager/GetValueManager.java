@@ -57,7 +57,7 @@ public class GetValueManager extends AbstractManager<FindValueResult> {
     private class GetValueFuture extends DHTFutureTask<FindValueResult> {
 
         public GetValueFuture(GetValueResponseHandler callable) {
-            super(callable);
+            super(context, callable);
         }
     }
 }

@@ -91,7 +91,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
             }
 
             @Override
-            public void handleFutureFailure(ExecutionException e) {
+            public void handleExecutionException(ExecutionException e) {
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Ping failed to: " + addr, e);
                 }

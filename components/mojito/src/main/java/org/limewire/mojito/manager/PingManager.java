@@ -24,13 +24,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.PingResponseHandler;
 import org.limewire.mojito.handler.response.PingResponseHandler.PingIterator;
 import org.limewire.mojito.result.PingResult;
@@ -67,7 +67,7 @@ public class PingManager extends AbstractManager<PingResult> {
         return ping(null, host, pinger);
     }
 
-    public DHTFuture<PingResult> pingAddresses(Set<SocketAddress> hosts) {
+    public DHTFuture<PingResult> pingAddresses(Set<? extends SocketAddress> hosts) {
         PingIterator pinger = new PingIteratorFactory.SocketAddressPinger(hosts);
         return ping(null, null, pinger);
     }
@@ -156,28 +156,28 @@ public class PingManager extends AbstractManager<PingResult> {
 
         private final SocketAddress key;
         
-        public PingFuture(SocketAddress key, Callable<PingResult> handler) {
-            super(handler);
+        public PingFuture(SocketAddress key, DHTTask<PingResult> handler) {
+            super(context, handler);
             this.key = key;
         }
         
         @Override
-        protected void deregister() {
+        protected void done() {
             if (key != null) {
                 futureMap.remove(key);
             }
         }
-        
+
         @Override
-        protected void fireFutureSuccess(PingResult value) {
+        protected void fireFutureResult(PingResult value) {
             networkStats.PINGS_OK.incrementStat();
-            super.fireFutureSuccess(value);
+            super.fireFutureResult(value);
         }
         
         @Override
-        protected void fireFutureFailure(ExecutionException e) {
+        protected void fireExecutionException(ExecutionException e) {
             networkStats.PINGS_FAILED.incrementStat();
-            super.fireFutureFailure(e);
+            super.fireExecutionException(e);
         }
     }
 }

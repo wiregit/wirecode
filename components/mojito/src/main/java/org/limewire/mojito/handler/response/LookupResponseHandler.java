@@ -280,7 +280,6 @@ public abstract class LookupResponseHandler<V extends LookupResult> extends Abst
     
     @Override
     protected synchronized void start() throws DHTException {
-        super.start();
         
         // Get the closest Contacts from our RouteTable 
         // and add them to the yet-to-be queried list.

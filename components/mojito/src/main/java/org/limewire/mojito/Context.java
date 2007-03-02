@@ -920,7 +920,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Tries to ping a Set of hosts
      */
-    public DHTFuture<PingResult> ping(Set<SocketAddress> hosts) {
+    public DHTFuture<PingResult> ping(Set<? extends SocketAddress> hosts) {
         return pingManager.pingAddresses(hosts);
     }
     

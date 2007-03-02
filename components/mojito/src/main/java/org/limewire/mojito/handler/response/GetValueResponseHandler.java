@@ -55,7 +55,6 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
     
     @Override
     protected void start() throws DHTException {
-        super.start();
         
         Contact node = entityKey.getContact();
         KUID primaryKey = entityKey.getPrimaryKey();

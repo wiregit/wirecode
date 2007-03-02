@@ -345,7 +345,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             synchronized (lock) {
                 pingFuture = null;
                 
@@ -380,14 +380,14 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Cancelled", e);
                 stop();
             }
         }
 
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Interrupted", e);
                 stop();
@@ -423,7 +423,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             synchronized (lock) {
                 LOG.error("ExecutionException", e);
                 
@@ -435,14 +435,14 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Cancelled", e);
                 stop();
             }
         }
 
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Interrupted", e);
                 stop();

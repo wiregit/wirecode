@@ -19,10 +19,9 @@
 
 package org.limewire.mojito.manager;
 
-import java.util.concurrent.Callable;
-
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.handler.response.FindValueResponseHandler;
 import org.limewire.mojito.result.FindValueResult;
 
@@ -40,7 +39,7 @@ public class FindValueManager extends AbstractLookupManager<FindValueResult> {
      * Creates and returns a FindValueResponseHandler
      */
     @Override
-    protected Callable<FindValueResult> createLookupHandler(
+    protected DHTTask<FindValueResult> createLookupHandler(
             KUID lookupId, int count) {
         return new FindValueResponseHandler(context, lookupId);
     }

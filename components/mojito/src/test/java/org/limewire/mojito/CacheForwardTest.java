@@ -27,13 +27,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import junit.framework.TestSuite;
 
 import org.limewire.collection.PatriciaTrie;
 import org.limewire.collection.Trie;
 import org.limewire.collection.TrieUtils;
+import org.limewire.mojito.concurrent.CallableDHTTask;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -107,14 +108,15 @@ public class CacheForwardTest extends MojitoTestCase {
             
             // Get the SecurityToken...
             Class clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenHandler");
-            Constructor<Callable<Result>> con 
+            Constructor<DHTTask<Result>> con 
                 = clazz.getDeclaredConstructor(Context.class, Contact.class);
             con.setAccessible(true);
             
-            Callable<Result> handler = con.newInstance(context2, context1.getLocalNode());
+            DHTTask<Result> task = con.newInstance(context2, context1.getLocalNode());
+            CallableDHTTask<Result> callable = new CallableDHTTask<Result>(task);
             
             try {
-                Result result = handler.call();
+                Result result = callable.call();
                 clazz = Class.forName("org.limewire.mojito.manager.StoreManager$GetSecurityTokenResult");
                 Method m = clazz.getDeclaredMethod("getSecurityToken", new Class[0]);
                 m.setAccessible(true);

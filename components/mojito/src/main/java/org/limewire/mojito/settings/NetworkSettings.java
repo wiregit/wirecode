@@ -94,4 +94,18 @@ public final class NetworkSettings extends MojitoProps {
      */
     public static final BooleanSetting ALLOCATE_NEW_BUFFER
         = FACTORY.createBooleanSetting("ALLOCATE_NEW_BUFFER", false);
+    
+    /**
+     * 
+     */
+    public static final LongSetting BOOTSTRAP_TIMEOUT
+        = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
+                4L*60L*60L*1000L, "bootstrap_timeout", 60L*60L*1000L, 10L*60L*60L*1000L);
+    
+    /**
+     * 
+     */
+    public static final LongSetting STORE_TIMEOUT
+        = FACTORY.createRemoteLongSetting("STORE_TIMEOUT", 
+                4L*60L*60L*1000L, "store_timeout", 60L*60L*1000L, 10L*60L*60L*1000L);
 }

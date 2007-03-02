@@ -154,11 +154,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
      * (non-Javadoc)
      * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureCancelled(java.util.concurrent.CancellationException)
      */
-    public void handleFutureCancelled(CancellationException e) {
+    public void handleCancellationException(CancellationException e) {
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
                 if (publisher instanceof DHTFutureListener) {
-                    ((DHTFutureListener<StoreResult>)publisher).handleFutureCancelled(e);
+                    ((DHTFutureListener<StoreResult>)publisher).handleCancellationException(e);
                 }
             }
         }
@@ -168,11 +168,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
      * (non-Javadoc)
      * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureFailure(java.util.concurrent.ExecutionException)
      */
-    public void handleFutureFailure(ExecutionException e) {
+    public void handleExecutionException(ExecutionException e) {
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
                 if (publisher instanceof DHTFutureListener) {
-                    ((DHTFutureListener<StoreResult>)publisher).handleFutureFailure(e);
+                    ((DHTFutureListener<StoreResult>)publisher).handleExecutionException(e);
                 }
             }
         }
@@ -182,11 +182,11 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
      * (non-Javadoc)
      * @see org.limewire.mojito.concurrent.DHTFutureListener#handleFutureInterrupted(java.lang.InterruptedException)
      */
-    public void handleFutureInterrupted(InterruptedException e) {
+    public void handleInterruptedException(InterruptedException e) {
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
                 if (publisher instanceof DHTFutureListener) {
-                    ((DHTFutureListener<StoreResult>)publisher).handleFutureInterrupted(e);
+                    ((DHTFutureListener<StoreResult>)publisher).handleInterruptedException(e);
                 }
             }
         }

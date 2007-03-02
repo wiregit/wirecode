@@ -352,7 +352,7 @@ public class RouteTableImpl implements RouteTable {
             }
             
             @Override
-            public void handleFutureFailure(ExecutionException e) {
+            public void handleExecutionException(ExecutionException e) {
                 DHTTimeoutException timeout = ExceptionUtils.getCause(e, DHTTimeoutException.class);
                 
                 // We can only make decisions for timeouts! 

@@ -21,92 +21,208 @@ package org.limewire.mojito.concurrent;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.limewire.mojito.Context;
+import org.limewire.mojito.exceptions.LockTimeoutException;
+import org.limewire.mojito.util.OnewayExchanger;
 
 /**
- * An abstract implementation of DHTFuture
+ * 
  */
-public class DHTFutureTask<V> extends FutureTask<V> implements DHTFuture<V> {
+public class DHTFutureTask<T> implements Runnable, DHTTask.Callback<T>, DHTFuture<T>, Cancellable {
+    
+    private final OnewayExchanger<T, ExecutionException> exchanger
+        = new OnewayExchanger<T, ExecutionException>(true);
+    
+    private final Set<DHTFutureListener<T>> listeners 
+        = new LinkedHashSet<DHTFutureListener<T>>();
+    
+    private final Context context;
+    
+    private final DHTTask<T> task;
+    
+    private boolean running = false;
+    
+    private ScheduledFuture<?> watchdog = null;
+    
+    public DHTFutureTask(Context context, DHTTask<T> task) {
+        this.task = task;
+        this.context = context;
+    }
+    
+    public void run() {
+        try {
+            synchronized (exchanger) {
+                if (!exchanger.isDone()) {
+                    task.start(this);
+                    running = true;
+                    
+                    if (!exchanger.isDone()) {
+                        initWatchdog();
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            setException(t);
+        }
+    }
 
-    private final Set<DHTFutureListener<V>> listeners 
-        = new LinkedHashSet<DHTFutureListener<V>>();
+    private void initWatchdog() {
+        Runnable r = new Runnable() {
+            public void run() {
+                synchronized (exchanger) {
+                    if (!exchanger.isDone()) {
+                        setException(new LockTimeoutException(task.toString()));
+                    }
+                }
+            }
+        };
     
-    protected DHTFutureTask(Callable<V> callable) {
-        super(callable);
+        watchdog = context.getDHTExecutorService().schedule(
+                r, task.getLockTimeout(), TimeUnit.MILLISECONDS);
     }
     
-    /**
-     * This method is called after a DHTFuture has finished its task.
-     * You may override it to deregister a DHTFuture from a pool of
-     * Futures for example
-     */
-    protected void deregister() {
-        // DO NOTHING
+    protected void done() {
+        
     }
     
-    /*
-     * (non-Javadoc)
-     * @see com.limegroup.mojito.concurrent.DHTFuture#addDHTFutureListener(com.limegroup.mojito.concurrent.DHTFutureListener)
-     */
-    public void addDHTFutureListener(DHTFutureListener<V> listener) {
+    private void internalDone() {
+        done();
+        
+        Runnable r = new Runnable() {
+            public void run() {
+                try {
+                    T value = get();
+                    fireFutureResult(value);
+                } catch (ExecutionException e) {
+                    fireExecutionException(e);
+                } catch (CancellationException e) {
+                    fireCancellationException(e);
+                } catch (InterruptedException e) {
+                    fireInterruptedException(e);
+                }
+            }
+        };
+        
+        context.getDHTExecutorService().execute(r);
+    }
+    
+    public void setReturnValue(T value) {
+        boolean done = false;
+        synchronized (exchanger) {
+            if (!exchanger.isDone()) {
+                exchanger.setValue(value);
+                if (watchdog != null) {
+                    watchdog.cancel(true);
+                    watchdog = null;
+                }
+                done = true;
+            }
+        }
+        
+        if (done) {
+            internalDone();
+        }
+    }
+    
+    public void setException(Throwable t) {
+        boolean done = false;
+        synchronized (exchanger) {
+            if (!exchanger.isDone()) {
+                exchanger.setException(new ExecutionException(t));
+                if (watchdog != null) {
+                    watchdog.cancel(true);
+                    watchdog = null;
+                }
+                done = true;
+            }
+        }
+        
+        if (done) {
+            internalDone();
+        }
+    }
+    
+    public void addDHTFutureListener(final DHTFutureListener<T> listener) {
         if (listener == null) {
             throw new NullPointerException("DHTFutureListener is null");
         }
         
-        // TODO: Not sure if it's a good or bad idea to
-        // call the listener on the caller Thread if the
-        // DHTFuture is done
         boolean done = false;
         synchronized (listeners) {
-            done = isDone();
+            done = exchanger.isDone();
             if (!done) {
                 listeners.add(listener);
             }
         }
         
         if (done) {
-            try {
-                V value = get();
-                listener.handleFutureSuccess(value);
-            } catch (ExecutionException e) {
-                listener.handleFutureFailure(e);
-            } catch (CancellationException e) {
-                listener.handleFutureCancelled(e);
-            } catch (InterruptedException e) {
-                listener.handleFutureInterrupted(e);
-            }
+            Runnable r = new Runnable() {
+                public void run() {
+                    try {
+                        T value = get();
+                        listener.handleFutureSuccess(value);
+                    } catch (ExecutionException e) {
+                        listener.handleExecutionException(e);
+                    } catch (CancellationException e) {
+                        listener.handleCancellationException(e);
+                    } catch (InterruptedException e) {
+                        listener.handleInterruptedException(e);
+                    }
+                }
+            };
+            
+            context.getDHTExecutorService().execute(r);
         }
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see java.util.concurrent.FutureTask#done()
-     */
-    @Override
-    protected void done() {
-        assert (isDone());
-        
-        super.done();
-        deregister();
-        
-        try {
-            V value = get();
-            fireFutureSuccess(value);
-        } catch (ExecutionException e) {
-            fireFutureFailure(e);
-        } catch (CancellationException e) {
-            fireFutureCancelled(e);
-        } catch (InterruptedException e) {
-            fireFutureInterrupted(e);
+
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        boolean done = false;
+        synchronized (exchanger) {
+            if (!exchanger.isDone()) {
+                if (!running || mayInterruptIfRunning) {
+                    exchanger.cancel();
+                    task.cancel();
+                    if (watchdog != null) {
+                        watchdog.cancel(true);
+                        watchdog = null;
+                    }
+                    done = true;
+                }
+            }
         }
+        
+        if (done) {
+            internalDone();
+        }
+        
+        return done;
+    }
+
+    public boolean isCancelled() {
+        return exchanger.isCancelled();
+    }
+
+    public boolean isDone() {
+        return exchanger.isDone();
+    }
+    
+    public T get() throws InterruptedException, ExecutionException {
+        return exchanger.get();
+    }
+
+    public T get(long timeout, TimeUnit unit) 
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return exchanger.get(timeout, unit);
     }
     
     @SuppressWarnings("unchecked")
-    private DHTFutureListener<V>[] listeners() {
+    private DHTFutureListener<T>[] listeners() {
         synchronized (listeners) {
             return listeners.toArray(new DHTFutureListener[0]);
         }
@@ -115,8 +231,8 @@ public class DHTFutureTask<V> extends FutureTask<V> implements DHTFuture<V> {
     /**
      * Fires a success event
      */
-    protected void fireFutureSuccess(V value) {
-        for (DHTFutureListener<V> l : listeners()) {
+    protected void fireFutureResult(T value) {
+        for (DHTFutureListener<T> l : listeners()) {
             l.handleFutureSuccess(value);
         }
     }
@@ -124,27 +240,27 @@ public class DHTFutureTask<V> extends FutureTask<V> implements DHTFuture<V> {
     /**
      * Fires an ExecutionException event
      */
-    protected void fireFutureFailure(ExecutionException e) {
-        for (DHTFutureListener<V> l : listeners()) {
-            l.handleFutureFailure(e);
+    protected void fireExecutionException(ExecutionException e) {
+        for (DHTFutureListener<T> l : listeners()) {
+            l.handleExecutionException(e);
         }
     }
     
     /**
      * Fires an CancellationException event
      */
-    protected void fireFutureCancelled(CancellationException e) {
-        for (DHTFutureListener<V> l : listeners()) {
-            l.handleFutureCancelled(e);
+    protected void fireCancellationException(CancellationException e) {
+        for (DHTFutureListener<T> l : listeners()) {
+            l.handleCancellationException(e);
         }
     }
     
     /**
      * Fires an InterruptedException event
      */
-    protected void fireFutureInterrupted(InterruptedException e) {
-        for (DHTFutureListener<V> l : listeners()) {
-            l.handleFutureInterrupted(e);
+    protected void fireInterruptedException(InterruptedException e) {
+        for (DHTFutureListener<T> l : listeners()) {
+            l.handleInterruptedException(e);
         }
     }
 }

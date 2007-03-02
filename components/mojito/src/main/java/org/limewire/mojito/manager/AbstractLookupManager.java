@@ -22,12 +22,12 @@ package org.limewire.mojito.manager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTFutureTask;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureTask;
+import org.limewire.mojito.concurrent.DHTTask;
 import org.limewire.mojito.result.Result;
 
 
@@ -65,7 +65,7 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
         synchronized(futureMap) {
             future = futureMap.get(lookupId);
             if (future == null) {
-                Callable<V> handler = createLookupHandler(lookupId, count);
+                DHTTask<V> handler = createLookupHandler(lookupId, count);
                 
                 future = new LookupFuture(lookupId, handler);
                 futureMap.put(lookupId, future);
@@ -82,7 +82,7 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
      * @param lookupId The KUID we're looking for
      * @param count The result set size (i.e. k)
      */
-    protected abstract Callable<V> createLookupHandler(KUID lookupId, int count);
+    protected abstract DHTTask<V> createLookupHandler(KUID lookupId, int count);
     
     /**
      * A lookup specific implementation of DHTFuture
@@ -91,16 +91,16 @@ abstract class AbstractLookupManager<V extends Result> extends AbstractManager<V
 
         private final KUID lookupId;
         
-        private final Callable<V> handler;
+        private final DHTTask<V> handler;
         
-        public LookupFuture(KUID lookupId, Callable<V> handler) {
-            super(handler);
+        public LookupFuture(KUID lookupId, DHTTask<V> handler) {
+            super(context, handler);
             this.lookupId = lookupId;
             this.handler = handler;
         }
 
         @Override
-        protected void deregister() {
+        protected void done() {
             futureMap.remove(lookupId);
         }
 

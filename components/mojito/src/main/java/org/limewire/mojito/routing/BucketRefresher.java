@@ -220,7 +220,7 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
             
             if (!next()) {
@@ -228,12 +228,12 @@ public class BucketRefresher implements Runnable {
             }
         }
         
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.debug("CancellationException", e);
             stop();
         }
         
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.debug("CancellationException", e);
             stop();
         }

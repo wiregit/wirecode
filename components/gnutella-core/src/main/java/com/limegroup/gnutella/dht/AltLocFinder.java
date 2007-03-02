@@ -187,17 +187,17 @@ public class AltLocFinder {
         }
         
         @Override
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.error("CancellationException", e);
         }
 
         @Override
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
         }
 
         @Override
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.error("InterruptedException", e);
         }
 
@@ -294,17 +294,17 @@ public class AltLocFinder {
         }
         
         @Override
-        public void handleFutureCancelled(CancellationException e) {
+        public void handleCancellationException(CancellationException e) {
             LOG.error("CancellationException", e);
         }
 
         @Override
-        public void handleFutureFailure(ExecutionException e) {
+        public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
         }
 
         @Override
-        public void handleFutureInterrupted(InterruptedException e) {
+        public void handleInterruptedException(InterruptedException e) {
             LOG.error("InterruptedException", e);
         }
         

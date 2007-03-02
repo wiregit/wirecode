@@ -25,7 +25,7 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testGetTimeout() throws Exception {
-        OnewayExchanger e = new OnewayExchanger();
+        OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
         try {
             e.get(1, TimeUnit.MILLISECONDS);
             fail("Should have thrown a TimeoutException");
@@ -34,15 +34,15 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testTryGet() throws Exception {
-        OnewayExchanger e = new OnewayExchanger();
+        OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
         assertNull(e.tryGet());
         e.setValue("Hello World!");
         assertEquals("Hello World!", e.tryGet());
     }
     
     public void testGetValue() throws Exception {
-        final OnewayExchanger e = new OnewayExchanger();
-        final Object value = "Hello World";
+        final OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
+        final String value = "Hello World";
         
         Runnable getter = new Runnable() {
             public void run() {
@@ -61,7 +61,7 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testSetException() throws Exception {
-        final OnewayExchanger e = new OnewayExchanger();
+        final OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
         
         Runnable getter = new Runnable() {
             public void run() {
@@ -82,8 +82,8 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testIsDone() throws Exception {
-        final OnewayExchanger e = new OnewayExchanger();
-        final Object value = "Hello World";
+        final OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
+        final String value = "Hello World";
         
         Runnable getter = new Runnable() {
             public void run() {
@@ -102,7 +102,7 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testThrowsException() throws Exception {
-        final OnewayExchanger e = new OnewayExchanger();
+        final OnewayExchanger<String, Exception> e = new OnewayExchanger<String, Exception>();
         
         Runnable getter = new Runnable() {
             public void run() {
@@ -124,7 +124,7 @@ public class OnewayExchangerTest extends BaseTestCase {
     }
     
     public void testOneShot() throws Exception {
-        OnewayExchanger e1 = new OnewayExchanger(true);
+        OnewayExchanger<String, Exception> e1 = new OnewayExchanger<String, Exception>(true);
         e1.setValue("Hello World!");
         try {
             e1.setValue("Should fail!");
@@ -140,7 +140,7 @@ public class OnewayExchangerTest extends BaseTestCase {
         }
         
         // Same test but with Exceptions
-        OnewayExchanger e2 = new OnewayExchanger(true);
+        OnewayExchanger<String, Exception> e2 = new OnewayExchanger<String, Exception>(true);
         e2.setException(new IllegalArgumentException("Hello World!"));
         try {
             e2.setException(new IllegalArgumentException("Should fail!"));
@@ -158,13 +158,13 @@ public class OnewayExchangerTest extends BaseTestCase {
     
     public void testCancel() throws Exception {
         // Cannot cancel if value or Exception are set
-        OnewayExchanger e1 = new OnewayExchanger();
+        OnewayExchanger<String, Exception> e1 = new OnewayExchanger<String, Exception>();
         e1.setValue("Hello World!");
         boolean cancelled = e1.cancel();
         assertFalse(cancelled);
         assertEquals("Hello World!", e1.tryGet());
         
-        OnewayExchanger e2 = new OnewayExchanger();
+        OnewayExchanger<String, Exception> e2 = new OnewayExchanger<String, Exception>();
         e2.setException(new IllegalArgumentException("Hello World!"));
         cancelled = e2.cancel();
         assertFalse(cancelled);
@@ -175,7 +175,7 @@ public class OnewayExchangerTest extends BaseTestCase {
             assertEquals("Hello World!", expected.getMessage());
         }
         
-        OnewayExchanger e3 = new OnewayExchanger();
+        OnewayExchanger<String, Exception> e3 = new OnewayExchanger<String, Exception>();
         cancelled = e3.cancel();
         assertTrue(cancelled);
         assertTrue(e3.throwsException());

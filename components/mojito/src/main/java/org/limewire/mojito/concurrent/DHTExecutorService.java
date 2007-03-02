@@ -78,6 +78,11 @@ public interface DHTExecutorService {
     public <V> ScheduledFuture<V> schedule(Callable<V> task, long delay, TimeUnit unit);
     
     /**
+     * 
+     */
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit);
+    
+    /**
      * Submits a value-returning task for execution and returns a Future
      * representing the pending results of the task. The task is executed on
      * Mojito DHTs internal Executor (an unbound ThreadPoolExecutor).

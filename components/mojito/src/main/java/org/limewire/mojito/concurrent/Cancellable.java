@@ -17,30 +17,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package org.limewire.mojito.manager;
+package org.limewire.mojito.concurrent;
 
-import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
-import org.limewire.mojito.concurrent.DHTTask;
-import org.limewire.mojito.handler.response.FindNodeResponseHandler;
-import org.limewire.mojito.result.FindNodeResult;
-
-
-/**
- * FindNodeManager manages lookups for Nodes
- */
-public class FindNodeManager extends AbstractLookupManager<FindNodeResult> {
-
-    public FindNodeManager(Context context) {
-        super(context);
-    }
-
-    /**
-     * Creates and returns a FindNodeResponseHandler
-     */
-    @Override
-    protected DHTTask<FindNodeResult> createLookupHandler(
-            KUID lookupId, int count) {
-        return new FindNodeResponseHandler(context, lookupId, count);
-    }
+public interface Cancellable {
+    
+    public boolean isCancelled();
+    
+    public boolean cancel(boolean mayInterruptIfRunning);
 }
