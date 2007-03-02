@@ -1722,10 +1722,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             _fetchers.addAll(fetchers);
             dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
                     EventType.CONNECTING, null));
-        } else if (need == 0) {
-            dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
-                    EventType.CONNECTED, null));
-        }
+        } 
 
         // Stop ConnectionFetchers as necessary, but it's possible there
         // aren't enough fetchers to stop.  In this case, close some of the
@@ -2069,6 +2066,11 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                         EventType.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
+                if (_initializedConnections.size() >= getPreferredConnectionCount())
+                    dispatchEvent(new ConnectionLifecycleEvent(ConnectionManager.this,
+                            EventType.CONNECTED,
+                            mc));
+                    
             }
             return connectionOpen;
         }
