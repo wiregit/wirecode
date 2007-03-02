@@ -17,7 +17,6 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpServerConnection;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.nio.NHttpServerConnection;
@@ -26,13 +25,13 @@ import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.collection.Interval;
 import org.limewire.http.HttpResponseListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
@@ -53,18 +52,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private static final Log LOG = LogFactory.getLog(HTTPUploadManager.class);
 
-    /** An enumeration of return values for queue checking. */
-    private final int BYPASS_QUEUE = -1;
-
-    private final int REJECTED = 0;
-
-    private final int QUEUED = 1;
-
-    private final int ACCEPTED = 2;
-
-    private final int BANNED = 3;
-
-    // private final int NOT_VALIDATED = 4;
+    private enum QueueStatus { BYPASS, REJECTED, QUEUED, ACCEPTED, BANNED };
 
     /**
      * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
@@ -109,7 +97,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     private static final int MIN_SAMPLE_BYTES = 200000; // 200KB
 
     /** The average speed in kiloBITs/second of the last few uploads. */
-    private Buffer /* of Integer */speeds = new Buffer(MAX_SPEED_SAMPLE_SIZE);
+    private Buffer<Integer> speeds = new Buffer<Integer>(MAX_SPEED_SAMPLE_SIZE);
 
     /**
      * The highestSpeed of the last few downloads, or -1 if not enough downloads
@@ -541,7 +529,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Checks whether the given upload may proceed based on number of slots,
      * position in upload queue, etc. Updates the upload queue as necessary.
-     * Always accepts Browse Host requests, though. Notifies callback of this.
      * 
      * @return ACCEPTED if the download may proceed, QUEUED if this is in the
      *         upload queue, REJECTED if this is flat-out disallowed (and hence
@@ -550,13 +537,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      *         us. If REJECTED, <tt>uploader</tt>'s state will be set to
      *         LIMIT_REACHED. If BANNED, the <tt>Uploader</tt>'s state will
      *         be set to BANNED_GREEDY.
-     * @exception IOException the request came sooner than allowed by upload
-     *            queueing rules. (Throwing IOException forces the connection to
-     *            be closed by the calling code.)
      */
-    private synchronized int checkAndQueue(UploadSession session)
-            throws IOException {
-        RequestCache rqc = (RequestCache) REQUESTS.get(session.getHost());
+    private synchronized QueueStatus checkAndQueue(UploadSession session) {
+        RequestCache rqc = REQUESTS.get(session.getHost());
         if (rqc == null)
             rqc = new RequestCache();
         // make sure we don't forget this RequestCache too soon!
@@ -565,7 +548,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (rqc.isHammering()) {
             if (LOG.isWarnEnabled())
                 LOG.warn(session.getUploader() + " banned.");
-            return BANNED;
+            return QueueStatus.BANNED;
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
@@ -575,7 +558,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         URN sha1 = fd.getSHA1Urn();
 
         if (rqc.isDupe(sha1))
-            return REJECTED;
+            return QueueStatus.REJECTED;
 
         // check the host limit unless this is a poll
         if (slotManager.positionInQueue(session) == -1
@@ -583,7 +566,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             if (LOG.isDebugEnabled())
                 LOG.debug("host limit reached for " + session.getHost());
             UploadStat.LIMIT_REACHED_GREEDY.incrementStat();
-            return REJECTED;
+            return QueueStatus.REJECTED;
         }
 
         int queued = slotManager.pollForSlot(session, session.getUploader()
@@ -593,17 +576,18 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             LOG.debug("queued at " + queued);
 
         if (queued == -1) // not accepted nor queued.
-            return REJECTED;
+            return QueueStatus.REJECTED;
 
         if (queued > 0 && session.poll()) {
             slotManager.cancelRequest(session);
-            throw new IOException("came back too soon");
+            // TODO we used to just drop the connection
+            return QueueStatus.BANNED;
         }
-        if (queued > 0)
-            return QUEUED;
-        else {
+        if (queued > 0) {
+            return QueueStatus.QUEUED;
+        } else {
             rqc.startedUpload(sha1);
-            return ACCEPTED;
+            return QueueStatus.ACCEPTED;
         }
     }
 
@@ -627,12 +611,12 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // host.
 
         if (_activeUploadList.remove(uploader)) {
-            if (((HTTPUploader) uploader).isForcedShare())
+            if (uploader.isForcedShare())
                 _forcedUploads--;
 
             // at this point it is safe to allow other uploads from the same
             // host
-            RequestCache rcq = (RequestCache) REQUESTS.get(uploader.getHost());
+            RequestCache rcq = REQUESTS.get(uploader.getHost());
 
             // check for nulls so that unit tests pass
             if (rcq != null && uploader != null
@@ -720,15 +704,16 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // Calculate the bandwidth in kiloBITS/s. We just assume that 1 kilobyte
         // is 1000 (not 1024) bytes for simplicity.
         int bandwidth = 8 * (int) ((float) bytes / (float) milliseconds);
-        speeds.add(new Integer(bandwidth));
+        synchronized (speeds) {
+            speeds.add(bandwidth);
 
-        // Update maximum speed if possible. This should be atomic. TODO: can
-        // the compiler replace the temporary variable max with highestSpeed?
-        if (speeds.size() >= MIN_SPEED_SAMPLE_SIZE) {
-            int max = 0;
-            for (int i = 0; i < speeds.size(); i++)
-                max = Math.max(max, ((Integer) speeds.get(i)).intValue());
-            this.highestSpeed = max;
+            // Update maximum speed if possible
+            if (speeds.size() >= MIN_SPEED_SAMPLE_SIZE) {
+                int max = 0;
+                for (int i = 0; i < speeds.size(); i++)
+                    max = Math.max(max, speeds.get(i));
+                this.highestSpeed = max;
+            }
         }
     }
 
@@ -958,6 +943,49 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (response.getEntity() == null) {
             // not sending a body
             uploader.setState(Uploader.COMPLETE);
+        }
+    }
+
+    public void enqueue(HttpContext context, HttpRequest request, HttpResponse response) {
+        UploadSession session = getSession(context);
+        
+        QueueStatus queued;
+        if (shouldBypassQueue(request, session.getUploader())) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("bypassing queue");
+            queued = QueueStatus.BYPASS;
+        } else if (HttpContextParams.isLocal(context)) {
+            queued = QueueStatus.ACCEPTED;
+            forceAllowedUploads.add(session.getUploader()); 
+        } else {
+            queued = checkAndQueue(session);
+        }
+        
+        switch(queued) {
+        case REJECTED:
+            session.getUploader().setState(Uploader.LIMIT_REACHED);
+            response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            // FIXME add alt locations etc.
+            break;
+        case BANNED:
+            session.getUploader().setState(Uploader.BANNED_GREEDY);
+            response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+            response.setReasonPhrase("Banned");
+            break;
+        case QUEUED:
+            session.getUploader().setState(Uploader.QUEUED);
+            response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+            // FIXME add X-Queue header, alt locations etc.
+            break;
+        case ACCEPTED:
+            addAcceptedUploader(session.getUploader());
+            response.setStatusCode(HttpStatus.SC_OK);
+            break;
+        case BYPASS:
+            // TODO reset session poll state?
+            response.setStatusCode(HttpStatus.SC_OK);
+            // ignore.
+            break;
         }
     }
 

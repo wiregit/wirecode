@@ -12,12 +12,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
-import org.limewire.http.HttpNIOEntity;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
@@ -35,15 +36,17 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         UploadStat.BROWSE_HOST.incrementStat();
         HTTPUploader uploader = sessionManager.getOrCreateUploader(context,
                 UploadType.BROWSE_HOST, "Browse-File");
+        uploader.setState(Uploader.BROWSE_HOST);
         if (!HttpCoreUtils.hasHeader(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {
             response.setStatusCode(HttpStatus.SC_NOT_ACCEPTABLE);
         } else {
             response.setEntity(new BrowseResponseEntity(uploader));
+            sessionManager.enqueue(context, request, response);
         }
     }
 
-    public class BrowseResponseEntity extends HttpNIOEntity {
+    public class BrowseResponseEntity extends AbstractHttpNIOEntity {
 
         private final ByteArrayOutputStream BAOS = new ByteArrayOutputStream();
 
@@ -52,6 +55,13 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
 
+            // XXX LW can't acctually handle chunked responses
+            setChunked(true);
+            
+            initialize();
+        }
+        
+        private void initialize() {
             // create a new indexing query
             QueryRequest indexingQuery = QueryRequest.createBrowseHostQuery();
 
@@ -95,6 +105,12 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
         public void writeTo(OutputStream outstream) throws IOException {
             outstream.write(BAOS.toByteArray());
+        }
+
+        @Override
+        public boolean handleWrite() throws IOException {
+            // TODO Auto-generated method stub
+            return false;
         }
 
     }

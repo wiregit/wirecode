@@ -9,7 +9,9 @@ public class HttpContextParams {
     public final static String FILE_DETAILS = "org.limewire.filedetails";
     
     public final static String ALT_LOC_TRACKER = "org.limewire.altloctracker";
-    
+
+    public final static String LOCAL = "org.limewire.local";
+
     public static FileDetails getFileDetails(final HttpContext context) {
         return (FileDetails) context.getAttribute(FILE_DETAILS);
     }
@@ -25,5 +27,14 @@ public class HttpContextParams {
     public static void setAltLocTracker(final HttpContext context, final AltLocTracker tracker) {
         context.setAttribute(ALT_LOC_TRACKER, tracker);
     }
-    
+
+    public static boolean isLocal(final HttpContext context) {
+        Object o = context.getAttribute(LOCAL);
+        return (o != null) ? (Boolean) o : false;
+    }
+
+    public static void setLocal(final HttpContext context, final boolean local) {
+        context.setAttribute(LOCAL, local);
+    }
+
 }
