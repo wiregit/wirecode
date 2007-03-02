@@ -35,9 +35,9 @@
 	  <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.limewire</groupId>
+      <groupId>org.cyberneko</groupId>
       <artifactId>manekineko</artifactId>
-      <version>1.0-lw</version>
+      <version>0.2.2</version>
 	  <scope>test</scope>
     </dependency>	
     <dependency>
