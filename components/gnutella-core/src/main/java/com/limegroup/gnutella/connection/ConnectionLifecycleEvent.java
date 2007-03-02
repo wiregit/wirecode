@@ -46,35 +46,35 @@ public class ConnectionLifecycleEvent extends EventObject {
     }
 
     public boolean isConnectingEvent() {
-        return (type == EventType.CONNECTING); 
+        return (type.equals(EventType.CONNECTING)); 
     }
     
     public boolean isConnectedEvent() {
-        return (type == EventType.CONNECTED);
+        return (type.equals(EventType.CONNECTED));
     }
     
     public boolean isDisconnectedEvent() {
-        return (type == EventType.DISCONNECTED);
+        return (type.equals(EventType.DISCONNECTED));
     }
     
     public boolean isNoInternetEvent() {
-        return (type == EventType.NO_INTERNET);
+        return (type.equals(EventType.NO_INTERNET));
     }
     
     public boolean isConnectionInitializingEvent() {
-        return (type == EventType.CONNECTION_INITIALIZING);
+        return (type.equals(EventType.CONNECTION_INITIALIZING));
     }
     
     public boolean isConnectionClosedEvent() {
-        return (type == EventType.CONNECTION_CLOSED);
+        return (type.equals(EventType.CONNECTION_CLOSED));
     }
     
     public boolean isConnectionInitializedEvent() {
-        return (type == EventType.CONNECTION_INITIALIZED);
+        return (type.equals(EventType.CONNECTION_INITIALIZED));
     }
     
     public boolean isConnectionCapabilitiesEvent() {
-        return (type == EventType.CONNECTION_CAPABILITIES);
+        return (type.equals(EventType.CONNECTION_CAPABILITIES));
     }
     
     public String toString() {
