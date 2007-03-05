@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,8 +26,6 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -39,7 +37,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * and local database. 
  * 
  */
-class ActiveDHTNodeController extends AbstractDHTController {
+public class ActiveDHTNodeController extends AbstractDHTController {
     
     /**
      * The file to persist this Mojito DHT

@@ -79,7 +79,6 @@ public interface DHTController {
      * NOTE: This is for internal use only and should be used only
      * within the dht.impl package. The DHT should not be handled directly
      * by external classes.
-     * 
      */
     public MojitoDHT getMojitoDHT();
 }

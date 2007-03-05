@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Future;
@@ -16,15 +16,13 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.dht.DHTControllerStub;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class LimeDHTBootstrapperTest extends DHTTestCase {
     
     private static Context dhtContext;
     
-    private LimeDHTBootstrapper bootstrapper;
+    private DHTBootstrapperImpl bootstrapper;
     
     public LimeDHTBootstrapperTest(String name) {
         super(name);
@@ -42,7 +40,7 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
     protected void setUp() throws Exception {
         setSettings();
         MojitoDHT dht = MojitoFactory.createDHT();
-        bootstrapper = new LimeDHTBootstrapper(new DHTControllerStub(dht));
+        bootstrapper = new DHTBootstrapperImpl(new DHTControllerStub(dht));
         dhtContext = (Context)dht;
         dhtContext.bind(new InetSocketAddress(2000));
         dhtContext.start();

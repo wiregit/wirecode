@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -23,24 +23,21 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.impl.DHTValuePublisherProxy;
+import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
+import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.AltLocPublisher;
-import com.limegroup.gnutella.dht.DHTBootstrapper;
-import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTFilterDelegate;
-import com.limegroup.gnutella.dht.LimeDHTValueFactory;
-import com.limegroup.gnutella.dht.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
+import com.limegroup.gnutella.dht.db.AltLocPublisher;
+import com.limegroup.gnutella.dht.db.LimeDHTValueFactory;
+import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -65,7 +62,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * 
  * The current implementation is specific to the Mojito DHT. 
  */
-abstract class AbstractDHTController implements DHTController {
+public abstract class AbstractDHTController implements DHTController {
     
     private static final String PUBLIC_KEY 
         = "D6FQQAAAAAAAAAAAAHYQCDX6AAAAALRQFQBBIR75ZTOX67BIDUQXP25SBSH"
@@ -118,7 +115,7 @@ abstract class AbstractDHTController implements DHTController {
                 return new ManagedThread(runnable);
             }
         });
-        dht.setHostFilter(new DHTFilterDelegate());
+        dht.setHostFilter(new FilterDelegate());
         dht.setDHTValueFactory(new LimeDHTValueFactory());
         
         try {
@@ -138,7 +135,7 @@ abstract class AbstractDHTController implements DHTController {
         //proxy.add(new PushProxiesPublisher(dht));
         dht.setDHTValueEntityPublisher(proxy);
         
-        this.bootstrapper = new LimeDHTBootstrapper(this);
+        this.bootstrapper = new DHTBootstrapperImpl(this);
         
         DHTStatsManager.clear();
     }
@@ -282,13 +279,6 @@ abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * Returns the RandomNodeAdder instance. For testing only!
-     */
-    RandomNodeAdder getRandomNodeAdder() {
-        return dhtNodeAdder;
-    }
-    
-    /**
      * A helper class to easily go back and forth 
      * from the DHT's RemoteContact to Gnutella's IpPort
      */
@@ -391,6 +381,22 @@ abstract class AbstractDHTController implements DHTController {
             }
             dhtNodes.clear();
             isRunning = false;
+        }
+    }
+    
+    /**
+     * A Host Filter that delegates to RouterService's filter
+     */
+    private static class FilterDelegate implements HostFilter {
+        
+        public boolean allow(DHTMessage message) {
+            SocketAddress addr = message.getContact().getContactAddress();
+            return RouterService.getIpFilter().allow(addr);
+        }
+
+        public void ban(SocketAddress addr) {
+            RouterService.getIpFilter().ban(addr);
+            RouterService.reloadIPFilter();
         }
     }
 }

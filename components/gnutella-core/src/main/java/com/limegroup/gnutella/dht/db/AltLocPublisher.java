@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +21,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -62,7 +63,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         Map<KUID, FileDesc> current = new HashMap<KUID, FileDesc>();
         for (FileDesc fd : fds) {
             if (!(fd instanceof IncompleteFileDesc)) {
-                KUID key = LimeDHTUtils.toKUID(fd.getSHA1Urn());
+                KUID key = KUIDUtils.toKUID(fd.getSHA1Urn());
                 current.put(key, fd);
             }
         }
@@ -98,7 +99,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
             Collection<DHTValueEntity> entities = getValues();
             for (DHTValueEntity entity : entities) {
                 KUID primaryKey = entity.getKey();
-                URN urn = LimeDHTUtils.toURN(primaryKey);
+                URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
                 FileDesc fd = fileManager.getFileDescForUrn(urn);
@@ -134,7 +135,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
             Collection<DHTValueEntity> entities = getValues();
             for (DHTValueEntity entity : entities) {
                 KUID primaryKey = entity.getKey();
-                URN urn = LimeDHTUtils.toURN(primaryKey);
+                URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
                 FileDesc fd = fileManager.getFileDescForUrn(urn);

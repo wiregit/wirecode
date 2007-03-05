@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -8,13 +8,13 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTController;
 
 /**
  * A class that uses the Null Object pattern to avoid
  * repetitive null checks in DHTManagers
  */
-class NullDHTController implements DHTController {
+@Deprecated
+public class NullDHTController implements DHTController {
 
 	public void addActiveDHTNode(SocketAddress hostAddress) {}
 

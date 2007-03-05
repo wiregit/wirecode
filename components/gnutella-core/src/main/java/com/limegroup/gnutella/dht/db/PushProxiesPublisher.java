@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.db;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +13,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
  * This class has currently no practical use-case.
@@ -34,7 +35,7 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
         
         if (localhost == null) {
             GUID guid = new GUID(RouterService.getMyGUID());
-            KUID primaryKey = LimeDHTUtils.toKUID(guid);
+            KUID primaryKey = KUIDUtils.toKUID(guid);
             
             DHTValueFactory valueFactory = dht.getDHTValueFactory();
             localhost = valueFactory.createDHTValueEntity(

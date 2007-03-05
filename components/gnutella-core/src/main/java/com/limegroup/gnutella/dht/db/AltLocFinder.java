@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.db;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -27,6 +27,8 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
  * The AltLocFinder queries the DHT for Alternate Locations
@@ -55,7 +57,7 @@ public class AltLocFinder {
                 return false;
             }
             
-            KUID key = LimeDHTUtils.toKUID(urn);
+            KUID key = KUIDUtils.toKUID(urn);
             DHTFuture<FindValueResult> future = dht.get(key);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key));
             return true;
@@ -76,7 +78,7 @@ public class AltLocFinder {
                 return false;
             }
             
-            KUID key = LimeDHTUtils.toKUID(guid);
+            KUID key = KUIDUtils.toKUID(guid);
             DHTFuture<FindValueResult> future = dht.get(key);
             future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key));
             return true;

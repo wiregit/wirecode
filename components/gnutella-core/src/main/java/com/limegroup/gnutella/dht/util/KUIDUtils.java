@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.util;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -10,11 +10,11 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 
 /**
- * 
+ * Utilities to convert between GUID, URN and KUID
  */
-public class LimeDHTUtils {
+public class KUIDUtils {
 
-    private LimeDHTUtils() {}
+    private KUIDUtils() {}
     
     /**
      * Converts the given SHA-1 URN into a KUID

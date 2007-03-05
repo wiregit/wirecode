@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
 import java.util.List;
@@ -25,8 +25,8 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
-public class LimeDHTManager implements DHTManager {
-	
+public class DHTManagerImpl implements DHTManager {
+    
     /**
      * The Vendor code of this DHT Node
      */
@@ -53,7 +53,7 @@ public class LimeDHTManager implements DHTManager {
      * as stopping or starting a Mojito instance (which perform 
      * network and disk I/O). 
      * */
-    private Executor executor;
+    private final Executor executor;
     
     private boolean stopped = false;
     
@@ -64,7 +64,7 @@ public class LimeDHTManager implements DHTManager {
      * 
      * @param service
      */
-    public LimeDHTManager(Executor service) {
+    public DHTManagerImpl(Executor service) {
         this.executor = service;
     }
     
@@ -73,7 +73,7 @@ public class LimeDHTManager implements DHTManager {
         stopped = false;
         Runnable task = new Runnable() {
             public void run() {
-                synchronized(LimeDHTManager.this) {
+                synchronized(DHTManagerImpl.this) {
                     //could have been stopped before this gets executed
                     if(stopped) {
                         return;
@@ -88,9 +88,9 @@ public class LimeDHTManager implements DHTManager {
                     controller.stop();
 
                     if (activeMode) {
-                        controller = new ActiveDHTNodeController(vendor, version, LimeDHTManager.this);
+                        controller = new ActiveDHTNodeController(vendor, version, DHTManagerImpl.this);
                     } else {
-                        controller = new PassiveDHTNodeController(vendor, version, LimeDHTManager.this);
+                        controller = new PassiveDHTNodeController(vendor, version, DHTManagerImpl.this);
                     }
 
                     controller.start();
@@ -103,7 +103,7 @@ public class LimeDHTManager implements DHTManager {
     public void addActiveDHTNode(final SocketAddress hostAddress) {
         executor.execute(new Runnable() {
             public void run() {
-                synchronized(LimeDHTManager.this) {
+                synchronized(DHTManagerImpl.this) {
                     controller.addActiveDHTNode(hostAddress);
                 }
             }
@@ -113,7 +113,7 @@ public class LimeDHTManager implements DHTManager {
     public void addPassiveDHTNode(final SocketAddress hostAddress) {
         executor.execute(new Runnable() {
             public void run() {
-                synchronized(LimeDHTManager.this) {
+                synchronized(DHTManagerImpl.this) {
                     controller.addPassiveDHTNode(hostAddress);
                 }
             }
@@ -125,7 +125,7 @@ public class LimeDHTManager implements DHTManager {
         //disk and network ops.
         executor.execute(new Runnable() {
             public void run() {
-                synchronized(LimeDHTManager.this) {
+                synchronized(DHTManagerImpl.this) {
                     if(!controller.isRunning()) {
                         return;
                     }
@@ -206,7 +206,7 @@ public class LimeDHTManager implements DHTManager {
         if(evt.isDisconnectedEvent() || evt.isNoInternetEvent()) {
             r = new Runnable() {
                 public void run() {
-                    synchronized(LimeDHTManager.this) {
+                    synchronized(DHTManagerImpl.this) {
                         if(controller.isRunning() 
                                 && !DHTSettings.FORCE_DHT_CONNECT.getValue()) {
                             controller.stop();
@@ -218,7 +218,7 @@ public class LimeDHTManager implements DHTManager {
         } else {
             r = new Runnable() {
                 public void run() {
-                    synchronized(LimeDHTManager.this) {
+                    synchronized(DHTManagerImpl.this) {
                         controller.handleConnectionLifecycleEvent(evt);
                     }
                 }

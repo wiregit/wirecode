@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,8 +28,6 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -48,7 +46,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * session, and accuracy of the contacts in the RT is not guaranteed when a node 
  * is passive (as it does not get contacted by the DHT).   
  */
-class PassiveDHTNodeController extends AbstractDHTController{
+public class PassiveDHTNodeController extends AbstractDHTController {
     
     /**
      * The file to persist the list of host

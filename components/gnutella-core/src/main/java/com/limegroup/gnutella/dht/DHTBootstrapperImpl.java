@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -24,16 +24,13 @@ import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.util.ExceptionUtils;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.dht.DHTBootstrapper;
-import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTNodeFetcher;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 
-class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
+class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
-    private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
+    private static final Log LOG = LogFactory.getLog(DHTBootstrapperImpl.class);
     
     /**
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
@@ -79,7 +76,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      */
     private final Object lock = new Object();
     
-    public LimeDHTBootstrapper(DHTController controller) {
+    public DHTBootstrapperImpl(DHTController controller) {
         this.controller = controller;
     }
     
@@ -373,7 +370,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
             // will restart the bootstrapping. Otherwise see
             // if there are entries in the hosts Set
             if (nodeFetcher == null) {
-                nodeFetcher = new DHTNodeFetcher(LimeDHTBootstrapper.this);
+                nodeFetcher = new DHTNodeFetcher(DHTBootstrapperImpl.this);
                 nodeFetcher.start();
             } else {
                 bootstrap();

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,14 +13,14 @@ import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
  * The LimeDHTMessageParser class delegates parse
  * requests to Mojito's MessageFactory
  */
-class LimeDHTMessageParser implements MessageParser {
+class MessageParserDelegate implements MessageParser {
     
     /**
      * A handle to Mojito's MessageFactory
      */
-    private MessageFactory factory;
+    private final MessageFactory factory;
     
-    LimeDHTMessageParser(MessageFactory factory) {
+    public MessageParserDelegate(MessageFactory factory) {
         this.factory = factory;
     }
     

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -77,7 +77,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
                 new MessageFactoryWire(context.getMessageFactory()));
         
         // Register the Message type
-        LimeDHTMessageParser parser = new LimeDHTMessageParser(
+        MessageParserDelegate parser = new MessageParserDelegate(
                 context.getMessageFactory());
         
         MessageFactory.setParser((byte)DHTMessage.F_DHT_MESSAGE, parser);

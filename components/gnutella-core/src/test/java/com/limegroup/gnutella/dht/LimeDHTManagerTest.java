@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,6 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class LimeDHTManagerTest extends DHTTestCase {
@@ -47,7 +46,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
     public void testLimeDHTManager() throws Exception{
         DHTSettings.PERSIST_DHT.setValue(true);
         TestExecutor executor = new TestExecutor();
-        LimeDHTManager manager = new LimeDHTManager(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor);
         
         try {
             assertFalse(manager.isRunning());
@@ -104,7 +103,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
     
     public void testStopStartLimeDHTManager() throws Exception{
         TestExecutor executor = new TestExecutor();
-        LimeDHTManager manager = new LimeDHTManager(executor);
+        DHTManagerImpl manager = new DHTManagerImpl(executor);
         try {
             manager.start(true);
             manager.stop();

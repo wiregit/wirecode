@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -35,9 +35,7 @@ import org.limewire.mojito.statistics.DHTStats;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.dht.DHTManagerStub;
-import com.limegroup.gnutella.dht.DHTTestCase;
-import com.limegroup.gnutella.dht.impl.AbstractDHTController.RandomNodeAdder;
+import com.limegroup.gnutella.dht.AbstractDHTController.RandomNodeAdder;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class AbstractDHTControllerTest extends DHTTestCase {
@@ -81,8 +79,9 @@ public class AbstractDHTControllerTest extends DHTTestCase {
                 controller.addActiveDHTNode(new InetSocketAddress("localhost", 2000+i));
             }
             Thread.sleep(500);
+            
             //should have started the Random node adder
-            RandomNodeAdder nodeAdder = controller.getRandomNodeAdder();
+            RandomNodeAdder nodeAdder = (RandomNodeAdder)PrivilegedAccessor.getValue(controller, "dhtNodeAdder");
             assertNotNull(nodeAdder);
             assertTrue("Node adder should be running", nodeAdder.isRunning());
             //should have pinged all hosts

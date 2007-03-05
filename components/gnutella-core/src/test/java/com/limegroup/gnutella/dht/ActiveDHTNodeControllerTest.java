@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht.impl;
+package com.limegroup.gnutella.dht;
 
 import java.io.File;
 import java.net.InetSocketAddress;
@@ -19,10 +19,9 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.ActiveDHTNodeController;
 import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventDispatcherStub;
 import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 

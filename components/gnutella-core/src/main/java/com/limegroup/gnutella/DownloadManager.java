@@ -32,7 +32,7 @@ import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.AltLocFinder;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;

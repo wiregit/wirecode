@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.dht;
+package com.limegroup.gnutella.dht.db;
 
 import java.net.InetAddress;
 import java.util.Set;
