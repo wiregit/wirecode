@@ -130,10 +130,10 @@ public final class CapabilitiesVM extends VendorMessage {
         
         if(RouterService.isMemberOfDHT()) {
             if(RouterService.isActiveDHTNode()) {
-                smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.ACTIVE),
+                smp = new SupportedMessageBlock(DHTMode.ACTIVE.getCapabilityName(),
                         RouterService.getDHTManager().getVersion().getVersion());
             } else {
-                smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.PASSIVE),
+                smp = new SupportedMessageBlock(DHTMode.PASSIVE.getCapabilityName(),
                         RouterService.getDHTManager().getVersion().getVersion());
             }
             hashSet.add(smp);
@@ -200,14 +200,14 @@ public final class CapabilitiesVM extends VendorMessage {
      * Returns the current DHT version if this node is an active DHT node
      */
     public int isActiveDHTNode() {
-        return supportsCapability(DHTMode.getCapabilitiesVMBytes(DHTMode.ACTIVE));
+        return supportsCapability(DHTMode.ACTIVE.getCapabilityName());
     }
     
     /**
      * Returns the current DHT version if this node is an active DHT node
      */
     public int isPassiveDHTNode() {
-        return supportsCapability(DHTMode.getCapabilitiesVMBytes(DHTMode.PASSIVE));
+        return supportsCapability(DHTMode.PASSIVE.getCapabilityName());
     }
 
     // override super

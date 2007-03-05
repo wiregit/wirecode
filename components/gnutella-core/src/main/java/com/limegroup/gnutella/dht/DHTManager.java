@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.SocketAddress;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
@@ -37,15 +35,14 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * 
          * @see NodeAssigner.java
          */
-        INACTIVE(0x00),
+        INACTIVE(0x00, new byte[]{ 'I', 'D', 'H', 'T' }),
         
         /**
          * A DHT Node is ACTIVE mode if it's a full participant
          * of the DHT, e.g. a non-firewalled Gnutella leave node
          * with a sufficiently stable connection.
-         * 
          */
-        ACTIVE(0x01),
+        ACTIVE(0x01, new byte[]{ 'A', 'D', 'H', 'T' }),
         
         /**
          * A DHT Node is in PASSIVE mode if it's connected to
@@ -53,26 +50,35 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * Thus, a passive node never receives requests from the DHT 
          * and does necessarily have an accurate knowledge of the DHT
          * structure. However, it can perform queries and requests stores.
-         * 
          */
-        PASSIVE(0x02);
+        PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' });
         
         public static final byte DHT_MODE_MASK = 0x0F;
         
-        private byte mode;
+        private final int mode;
         
-        private static Map<DHTMode, byte[]> capabilitiesVMMap = 
-            new HashMap<DHTMode, byte[]>();
+        private final byte[] capabilityName;
         
-        private DHTMode(int state) {
-            this.mode = (byte)(state & 0xFF);
+        private DHTMode(int mode, byte[] capabilityName) {
+            assert (capabilityName.length == 4);
+            this.mode = mode;
+            this.capabilityName = capabilityName;
         }
         
         /**
          * Returns the mode as byte
          */
         public byte toByte() {
-            return mode;
+            return (byte)(mode & 0xFF);
+        }
+        
+        /**
+         * Returns the VM capability name
+         */
+        public byte[] getCapabilityName() {
+            byte[] copy = new byte[capabilityName.length];
+            System.arraycopy(capabilityName, 0, copy, 0, copy.length);
+            return copy;
         }
         
         private static final DHTMode[] MODES;
@@ -85,25 +91,19 @@ public interface DHTManager extends ConnectionLifecycleListener,
                 assert (MODES[index] == null);
                 MODES[index] = m;
             }
-            capabilitiesVMMap.put(ACTIVE, new byte[]{ 'A', 'D', 'H', 'T' });
-            capabilitiesVMMap.put(PASSIVE, new byte[]{ 'P', 'D', 'H', 'T' });
         }
         
         /**
          * Returns a DHTMode enum for the given mode and null
          * if no such DHTMode exists.
          */
-        public static DHTMode valueOf(byte mode) {
+        public static DHTMode valueOf(int mode) {
             int index = (mode & 0xFF) % MODES.length;
             DHTMode s = MODES[index];
             if (s.mode == mode) {
                 return s;
             }
             return null;
-        }
-        
-        public static byte[] getCapabilitiesVMBytes(DHTMode mode) {
-            return capabilitiesVMMap.get(mode);
         }
     }
     

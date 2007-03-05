@@ -24,7 +24,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * 
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
- * 
  */
 public class LimeDHTManager implements DHTManager {
 	
