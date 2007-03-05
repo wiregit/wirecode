@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.StringTokenizer;
 
 import org.limewire.concurrent.ThreadExecutor;
@@ -98,17 +99,26 @@ public class FakeProxyServer extends AssertComparisons {
                    assertTrue("test not set up correctly, incorrect proxy version",
                            _isHTTPRequest);
                 int a = 0;
-                if(_isHTTPRequest) {
-                    consumeHttpHeaders(is);
-                    writeHTTPBack(os);
-                    try {
-                        Thread.sleep(1000); 
-                    } catch (InterruptedException x) { }
+                try {
+                    if(_isHTTPRequest) {
+                        consumeHttpHeaders(is);
+                        writeHTTPBack(os);
+                        try {
+                            Thread.sleep(1000); 
+                        } catch (InterruptedException x) { }
+                    }
+                    else {
+                        //os.write('x');
+                        while(a != -1) 
+                            a = is.read();
+                    }
                 }
-                else {
-                    //os.write('x');
-                    while(a != -1) 
-                        a = is.read();
+                catch (SocketException se) {
+                    // in error case socket might have been closed from the other side
+                    // swallow exception then
+                    if (!_makeError) {
+                        throw se;
+                    }
                 }
                 if(!incomingProxy.isClosed())
                     incomingProxy.close();
