@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -143,7 +144,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
             FILE.delete();
         }
         
-        List<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
+        Collection<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
             ObjectOutputStream oos = null;
             try {

@@ -671,7 +671,7 @@ public class RouteTableImpl implements RouteTable {
      * Returns 'count' number of Contacts that are nearest (xor distance)
      * to the given KUID.
      */
-    public synchronized List<Contact> select(KUID nodeId, int count) {
+    public synchronized Collection<Contact> select(KUID nodeId, int count) {
         return select(nodeId, count, false);
     }
     
@@ -679,7 +679,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#select(com.limegroup.mojito.KUID, int, boolean)
      */
-    public synchronized List<Contact> select(final KUID nodeId, final int count, 
+    public synchronized Collection<Contact> select(final KUID nodeId, final int count, 
             final boolean activeContacts) {
         
         final int maxNodeFailures = RouteTableSettings.MAX_ACCEPT_NODE_FAILURES.getValue();
@@ -743,9 +743,9 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#getContacts()
      */
-    public synchronized List<Contact> getContacts() {
-        List<Contact> live = getActiveContacts();
-        List<Contact> cached = getCachedContacts();
+    public synchronized Collection<Contact> getContacts() {
+        Collection<Contact> live = getActiveContacts();
+        Collection<Contact> cached = getCachedContacts();
         
         List<Contact> nodes = new ArrayList<Contact>(live.size() + cached.size());
         nodes.addAll(live);
@@ -757,7 +757,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#getActiveContacts()
      */
-    public synchronized List<Contact> getActiveContacts() {
+    public synchronized Collection<Contact> getActiveContacts() {
         List<Contact> nodes = new ArrayList<Contact>();
         for (Bucket bucket : bucketTrie.values()) {
             nodes.addAll(bucket.getActiveContacts());
@@ -769,7 +769,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#getCachedContacts()
      */
-    public synchronized List<Contact> getCachedContacts() {
+    public synchronized Collection<Contact> getCachedContacts() {
         List<Contact> nodes = new ArrayList<Contact>();
         for (Bucket bucket : bucketTrie.values()) {
             nodes.addAll(bucket.getCachedContacts());
@@ -787,7 +787,7 @@ public class RouteTableImpl implements RouteTable {
      * (non-Javadoc)
      * @see com.limegroup.mojito.routing.RouteTable#getRefreshIDs(boolean)
      */
-    public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
+    public synchronized Collection<KUID> getRefreshIDs(boolean bootstrapping) {
         List<KUID> randomIds = new ArrayList<KUID>();
         for (Bucket bucket : bucketTrie.values()) {
             
@@ -962,11 +962,11 @@ public class RouteTableImpl implements RouteTable {
     private void rebuild(boolean isTrueRebuild, long lastContactTime) {
         
         // Get the active Contacts
-        List<Contact> activeNodes = getActiveContacts();
+        Collection<Contact> activeNodes = getActiveContacts();
         activeNodes = ContactUtils.sortAliveToFailed(activeNodes);
         
         // Get the cached Contacts
-        List<Contact> cachedNodes = null;
+        Collection<Contact> cachedNodes = null;
         if (isTrueRebuild) {
             cachedNodes = getCachedContacts();
             cachedNodes = ContactUtils.sort(cachedNodes);

@@ -89,7 +89,7 @@ public class DHTSizeEstimator {
 
             // TODO only live nodes?
             KUID localNodeId = routeTable.getLocalNode().getNodeID();
-            List<Contact> nodes = routeTable.select(localNodeId, k, false);
+            Collection<Contact> nodes = routeTable.select(localNodeId, k, false);
             
             updateSize(nodes);
             localEstimateTime = System.currentTimeMillis();

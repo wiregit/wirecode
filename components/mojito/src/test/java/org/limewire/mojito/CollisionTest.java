@@ -22,8 +22,8 @@ package org.limewire.mojito;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestSuite;
@@ -90,7 +90,7 @@ public class CollisionTest extends MojitoTestCase {
             assertNotEquals(original.getContactAddress(), spoofer.getContactAddress());
             
             Context context = (Context)bootstrap;
-            List<Contact> nodes = context.getRouteTable().getContacts();
+            Collection<Contact> nodes = context.getRouteTable().getContacts();
             
             // Precondition: LocalContact.equals(LiveContact) == false
             // Copy the fields we're interested in into a Map and perform
@@ -143,7 +143,7 @@ public class CollisionTest extends MojitoTestCase {
             MojitoUtils.bootstrap(bootstrap, original.getContactAddress()).get();
             original.stop();
             
-            List<Contact> nodes = ((Context)bootstrap).getRouteTable().getContacts();
+            Collection<Contact> nodes = bootstrap.getRouteTable().getContacts();
             
             // Precondition: LocalContact.equals(LiveContact) == false
             // Copy the fields we're interested in into a Map and perform

@@ -42,6 +42,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -182,7 +183,7 @@ public class DefaultMessageHandler {
                     //we select the 2*k closest nodes in order to also check those values
                     //where the local node is part of the k closest to the value but not part
                     //of the k closest to the new joining node.
-                    List<Contact> nodes = routeTable.select(nodeId, 2*k, false);
+                    Collection<Contact> nodes = routeTable.select(nodeId, 2*k, false);
                     
                     // Are we one of the K nearest Nodes to the contact?
                     if (containsNodeID(nodes, context.getLocalNodeID())) {
@@ -265,9 +266,9 @@ public class DefaultMessageHandler {
     /**
      * Returns whether or not the local Node is in the given List
      */
-    private boolean containsNodeID(List<Contact> nodes, KUID id) {
-        for (int i = nodes.size()-1; i >= 0; i--) {
-            if (id.equals(nodes.get(i).getNodeID())) {
+    private boolean containsNodeID(Collection<Contact> nodes, KUID id) {
+        for (Contact node : nodes) {
+            if (id.equals(node.getNodeID())) {
                 return true;
             }
         }
@@ -286,7 +287,7 @@ public class DefaultMessageHandler {
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         RouteTable routeTable = context.getRouteTable();
-        List<Contact> nodes = routeTable.select(valueId, k, false);
+        List<Contact> nodes = CollectionUtils.toList(routeTable.select(valueId, k, false));
         Contact closest = nodes.get(0);
         Contact furthest = nodes.get(nodes.size()-1);
         

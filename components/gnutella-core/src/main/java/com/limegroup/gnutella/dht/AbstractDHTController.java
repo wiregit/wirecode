@@ -9,6 +9,7 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TimerTask;
@@ -232,7 +233,7 @@ public abstract class AbstractDHTController implements DHTController {
      */
     protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
         Context dhtContext = (Context)dht; 
-        List<Contact> nodes = ContactUtils.sort(
+        Collection<Contact> nodes = ContactUtils.sort(
                 dhtContext.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
         
         KUID localNode = dhtContext.getLocalNodeID();

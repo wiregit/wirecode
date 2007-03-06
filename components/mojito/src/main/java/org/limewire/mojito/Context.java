@@ -34,7 +34,6 @@ import java.security.SignatureException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -848,7 +847,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
                 LOG.debug("Sending shutdown message to " + count + " Nodes");
             }
             
-            List<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
+            Collection<Contact> nodes = getRouteTable().select(localNode.getNodeID(), count, true);
             
             synchronized (messageDispatcher.getOutputQueueLock()) {
                 for (Contact node : nodes) {
@@ -902,8 +901,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     private Set<Contact> getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
-        List<Contact> contactList = getRouteTable().getActiveContacts();
-        Collections.sort(contactList, ContactUtils.CONTACT_MRS_COMPARATOR);
+        Collection<Contact> contactList = getRouteTable().getActiveContacts();
+        contactList = ContactUtils.sort(contactList);
         nodes.addAll(contactList);
         nodes.remove(getLocalNode());
         return nodes;

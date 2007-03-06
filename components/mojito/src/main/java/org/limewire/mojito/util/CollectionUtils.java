@@ -20,9 +20,11 @@
 package org.limewire.mojito.util;
 
 import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -45,6 +47,18 @@ public final class CollectionUtils {
         }
         
         return new LinkedHashSet<T>(c);
+    }
+    
+    /**
+     * Converts the given Collection to a List (if it isn't
+     * already a List)
+     */
+    public static <T> List<T> toList(Collection<T> c) {
+        if (c instanceof Set) {
+            return (List<T>)c;
+        }
+        
+        return new ArrayList<T>(c);
     }
     
     /**

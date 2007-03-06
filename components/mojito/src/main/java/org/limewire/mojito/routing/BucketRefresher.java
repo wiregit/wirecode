@@ -19,8 +19,8 @@
 
 package org.limewire.mojito.routing;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -178,7 +178,7 @@ public class BucketRefresher implements Runnable {
          * Starts the refresh
          */
         public synchronized boolean refresh() {
-            List<KUID> list = context.getRouteTable().getRefreshIDs(false);
+            Collection<KUID> list = context.getRouteTable().getRefreshIDs(false);
             
             if (LOG.isInfoEnabled()) {
                 LOG.info(context.getName() + " has " + list.size() + " Buckets to refresh");

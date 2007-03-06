@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.Test;
@@ -19,9 +20,6 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.dht.ActiveDHTNodeController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -85,7 +83,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
             //should have the same nodeID as before
             assertEquals(nodeID, context.getLocalNodeID());
             //should have persisted the routetable
-            List<Contact> contacts = rt.getContacts();
+            Collection<Contact> contacts = rt.getContacts();
             assertEquals(12, contacts.size()); //11 + localnode
             assertTrue(contacts.contains(node));
         } finally {

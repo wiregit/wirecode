@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -176,7 +175,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.get(nodeId);
     }
 
-    public synchronized List<Contact> getActiveContacts() {
+    public synchronized Collection<Contact> getActiveContacts() {
         return delegate.getActiveContacts();
     }
 
@@ -188,11 +187,11 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.getBuckets();
     }
 
-    public synchronized List<Contact> getCachedContacts() {
+    public synchronized Collection<Contact> getCachedContacts() {
         return delegate.getCachedContacts();
     }
 
-    public synchronized List<Contact> getContacts() {
+    public synchronized Collection<Contact> getContacts() {
         return delegate.getContacts();
     }
 
@@ -200,7 +199,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.getLocalNode();
     }
 
-    public synchronized List<KUID> getRefreshIDs(boolean bootstrapping) {
+    public synchronized Collection<KUID> getRefreshIDs(boolean bootstrapping) {
         return delegate.getRefreshIDs(bootstrapping);
     }
 
@@ -228,7 +227,7 @@ class PassiveDHTNodeRouteTable implements RouteTable {
         return delegate.select(nodeId);
     }
     
-    public synchronized List<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
+    public synchronized Collection<Contact> select(KUID nodeId, int count, boolean aliveContacts) {
         return delegate.select(nodeId, count, aliveContacts);
     }
     

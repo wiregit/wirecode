@@ -67,7 +67,7 @@ public interface RouteTable extends Serializable {
      * @param aliveContacts whether or not only alive Contacts should be in the result set
      * @return list of Contacts sorted by closeness
      */
-    public List<Contact> select(KUID nodeId, int count, boolean aliveContacts);
+    public Collection<Contact> select(KUID nodeId, int count, boolean aliveContacts);
     
     /**
      * Notifies the RoutingTable that the Contact with the provided
@@ -78,17 +78,17 @@ public interface RouteTable extends Serializable {
     /**
      * Returns all Contacts as List
      */
-    public List<Contact> getContacts();
+    public Collection<Contact> getContacts();
     
     /**
      * Returns Contacts that are actively used for routing
      */
-    public List<Contact> getActiveContacts();
+    public Collection<Contact> getActiveContacts();
     
     /**
      * Returns cached Contacts that are in the replacement cache
      */
-    public List<Contact> getCachedContacts();
+    public Collection<Contact> getCachedContacts();
     
     /**
      * Returns a Bucket that is nearest (xor distance) 
@@ -107,7 +107,7 @@ public interface RouteTable extends Serializable {
      * 
      * @param bootstrapping Whether or not this refresh is done during bootstrap
      */
-    public List<KUID> getRefreshIDs(boolean bootstrapping);
+    public Collection<KUID> getRefreshIDs(boolean bootstrapping);
     
     /**
      * Clears all elements from the RoutingTable
