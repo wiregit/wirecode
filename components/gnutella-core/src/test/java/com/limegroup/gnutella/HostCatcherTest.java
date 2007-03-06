@@ -14,6 +14,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
@@ -369,20 +370,20 @@ public class HostCatcherTest extends BaseTestCase {
         //PingReply's.
         setUp();
         // Adding a private should add 1 more to numPrivateHosts
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)3, 6346, 
             new byte[] {(byte)192,(byte)168,(byte)0,(byte)1}, false));
         assertEquals("private PingReply added as ultrapeer",
 					 0 ,hc.getNumUltrapeerHosts());
 
         setUp();
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, false));
         assertEquals("normal PingReply added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
 
 
         setUp();
-        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)3, 6346, 
             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1}, true));
         assertEquals("ultrapeer PingReply not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
@@ -393,20 +394,20 @@ public class HostCatcherTest extends BaseTestCase {
         //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         //1. Create HC, add entries, write to disk.
         hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));
         
         // duplicate
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, 6342,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 1000, false));  
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         // duplicate (well, with lower uptime)
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, 6343,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)143}, 30, false));
         
         // private address (ignored)
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, 6343,
             new byte[] {(byte)192, (byte)168, (byte)0, (byte)1}, 3000, false));
             
         // udp host caches ..
@@ -442,15 +443,15 @@ public class HostCatcherTest extends BaseTestCase {
         //(various uptimes).
         final int N=HostCatcher.PERMANENT_SIZE;
         for (int i=0; i<=N; i++) {            
-            hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, i+1,
+            hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, i+1,
                 new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                     i+10, false));
         }
         //Now add bad pong--which isn't really added
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+2,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(), (byte)7, N+2,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 0, false));
         //Now re-add port 1 (which was kicked out earlier).
-        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 1,
+        hc.add(PingReply.createExternal(PingRequest.UDP_GUID.bytes(),(byte)7, 1,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, N+101,false));
 
         File tmp=File.createTempFile("hc_test", ".net" );
@@ -553,7 +554,7 @@ public class HostCatcherTest extends BaseTestCase {
         // Test with UDPHC pongs.
         GGEP ggep = new GGEP(true);
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        PingReply pr = PingReply.create(PingRequest.UDP_GUID.bytes(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     (long)0, (long)0, false, ggep);
         hc.add(pr);
@@ -571,7 +572,7 @@ public class HostCatcherTest extends BaseTestCase {
         // Test with a name in the cache.
         ggep = new GGEP(true);
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
-        pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+        pr = PingReply.create(PingRequest.UDP_GUID.bytes(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
                     (long)0, (long)0, false, ggep);
         hc.add(pr);
@@ -596,7 +597,7 @@ public class HostCatcherTest extends BaseTestCase {
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         PingReply pr = PingReply.create(
-            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+                PingRequest.UDP_GUID.bytes(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
         hc.add(pr);
@@ -617,7 +618,7 @@ public class HostCatcherTest extends BaseTestCase {
         ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = PingReply.create(
-            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+                PingRequest.UDP_GUID.bytes(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
         hc.add(pr);
@@ -637,7 +638,7 @@ public class HostCatcherTest extends BaseTestCase {
             "www.test.org:1";
         ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
         PingReply pr = PingReply.create(
-            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+                PingRequest.UDP_GUID.bytes(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
         
         hc.add(pr);

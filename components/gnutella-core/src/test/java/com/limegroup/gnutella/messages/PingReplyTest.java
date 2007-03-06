@@ -131,7 +131,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // make sure we reject invalid payload sizes
         try {
             PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            payload);
+                                            payload, Message.N_UNKNOWN);
             fail("should have not accepted payload size");
         } catch(BadPacketException e) {
             // expected because the payload size is invalid
@@ -142,7 +142,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         addIP(payload);
         try {
             PingReply.createFromNetwork(null, (byte)4, (byte)3,
-                                            payload);
+                                            payload,Message.N_UNKNOWN);
             fail("should have not accepted null guid");
         } catch(NullPointerException e) {
             // expected because the payload size is invalid
@@ -151,7 +151,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // make sure we reject null payloads
         try {
             PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            null);
+                                            null,Message.N_UNKNOWN);
             fail("should have not accepted null payload");
         } catch(NullPointerException e) {
             // expected because the payload size is invalid
@@ -179,7 +179,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
                          extensions.length);
         try {
             PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                            payload);
+                                            payload,Message.N_UNKNOWN);
             fail("should have not accepted bad GGEP in payload");
         } catch(BadPacketException e) {
             // expected because the payload size is invalid
@@ -192,7 +192,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // this one should go through
         PingReply.createFromNetwork(guid, (byte)4, (byte)3,
-                                        payload);
+                                        payload, Message.N_UNKNOWN);
     }
 
 
@@ -298,7 +298,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload[14] = (byte) 65;
         payload[15] = (byte) 66;
         PingReply pr=null;
-        pr = PingReply.createFromNetwork(new byte[16], (byte)2, (byte)4, payload);
+        pr = PingReply.createFromNetwork(new byte[16], (byte)2, (byte)4, payload, Message.N_UNKNOWN);
         assertTrue(! pr.hasGGEPExtension());
 
         assertEquals("pong should not have a daily uptime", -1,

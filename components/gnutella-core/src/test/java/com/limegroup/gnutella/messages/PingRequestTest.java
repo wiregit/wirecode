@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -234,6 +235,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public void testUDPPingRequest() {
+        
         PingRequest pr = PingRequest.createUDPPing();
         assertTrue(pr.supportsCachedPongs());
         
@@ -247,6 +249,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertFalse(pr.requestsIP());
         byte[] data = pr.getSupportsCachedPongData();
         assertEquals(0x1, data[0] & 0x1);
+        assertEquals(PingRequest.UDP_GUID.bytes(),pr.getGUID());
         
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
@@ -259,6 +262,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         pr = PingRequest.createUDPPing();
         assertTrue(pr.requestsIP());
+        assertEquals(UDPService.instance().getSolicitedGUID().bytes(),pr.getGUID());
     }
     
     public void testSupportsCachedPongData() throws Exception {
