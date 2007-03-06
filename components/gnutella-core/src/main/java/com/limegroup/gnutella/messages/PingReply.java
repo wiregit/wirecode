@@ -486,7 +486,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
         // i can't just call a new constructor, i have to recreate stuff
         try {
-            return createFromNetwork(guid, getTTL(), getHops(), PAYLOAD); 
+            return createFromNetwork(guid, getTTL(), getHops(), PAYLOAD, getNetwork()); 
         }
         catch (BadPacketException ioe) {
             throw new IllegalArgumentException("Input pong was bad!");
@@ -550,7 +550,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                              payload, STANDARD_PAYLOAD_SIZE, 
                              extensions.length);
         }
-        return new PingReply(guid, ttl, (byte)0, payload, ggep, ip);
+        return new PingReply(guid, ttl, (byte)0, payload, ggep, ip, Message.N_UNKNOWN);
     }
 
 
@@ -565,7 +565,7 @@ public class PingReply extends Message implements Serializable, IpPort {
      *  any reason
      */
     public static PingReply 
-        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
+        createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
         throws BadPacketException {
         if(guid == null) {
             throw new NullPointerException("null guid");
@@ -663,7 +663,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 throw new BadPacketException("bad IP:"+ipString+" "+e.getMessage());
             }
         }
-        return new PingReply(guid, ttl, hops, payload, ggep, ip);
+        return new PingReply(guid, ttl, hops, payload, ggep, ip, network);
     }
      
     /**
@@ -675,8 +675,8 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param payload the message payload
      */
     private PingReply(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip) {
-        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length);
+                      GGEP ggep, InetAddress ip, int network) {
+        super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
         PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
         FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,6));
@@ -1179,7 +1179,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                          STANDARD_PAYLOAD_SIZE);
 
         return new PingReply(this.getGUID(), this.getTTL(), this.getHops(),
-                             newPayload, null, IP);
+                             newPayload, null, IP, this.getNetwork());
     }
     
     /**

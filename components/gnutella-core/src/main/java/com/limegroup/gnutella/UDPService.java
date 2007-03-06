@@ -15,6 +15,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,6 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.guess.QueryKeyGenerator;
 import com.limegroup.gnutella.io.NIODispatcher;
 import com.limegroup.gnutella.io.ReadWriteObserver;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -55,6 +58,8 @@ public class UDPService implements ReadWriteObserver {
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private final static UDPService INSTANCE = new UDPService();
+	
+	private static final QueryKeyGenerator PING_GENERATOR = QueryKey.createKeyGenerator();
 	
 	/**
 	 * The DatagramChannel we're reading from & writing to.
@@ -327,6 +332,8 @@ public class UDPService implements ReadWriteObserver {
 	 * Processes a single message.
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
+    	if (message instanceof PingReply) 
+    		mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
         updateState(message, addr);
         MessageDispatcher.instance().dispatchUDP(message, addr);
     }
@@ -455,7 +462,15 @@ public class UDPService implements ReadWriteObserver {
         }
        
         buffer.flip();
+        if (msg instanceof PingRequest)
+        	mutateGUID(buffer.array(), ip, port);
         send(buffer, ip, port, false);
+    }
+    
+    private void mutateGUID(byte[] guid, InetAddress ip, int port) {
+    	byte [] qk = QueryKey.getQueryKey(ip, port, PING_GENERATOR).getBytes();
+    	for (int i = 0; i < qk.length; i++)
+    		guid[i] =(byte)(guid[i] ^ qk[i]);
     }
     
     public void send(ByteBuffer buffer, InetAddress ip, int port, boolean custom) { 

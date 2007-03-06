@@ -301,7 +301,7 @@ public class MessageFactory {
     private static class PingReplyParser implements MessageParser {
         public Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
-            return PingReply.createFromNetwork(guid, ttl, hops, payload);
+            return PingReply.createFromNetwork(guid, ttl, hops, payload, network);
         }
     }
     

@@ -30,6 +30,10 @@ public class PingRequest extends Message {
     public static final byte SCP_LEAF = 0x0;
     public static final byte SCP_ULTRAPEER = 0x1;
    
+    /**
+     * GUID to send out for UDP pings.
+     */
+    public static final GUID UDP_GUID = new GUID();
 
     /**
      * With the Big Ping and Big Pong extensions pings may have a payload
@@ -110,7 +114,7 @@ public class PingRequest extends Message {
      */
     public static PingRequest createUDPPing() {
         List l = new LinkedList();
-        return new PingRequest(populateUDPGGEPList(l).bytes(), (byte)1, l);
+        return new PingRequest(populateUDPGGEPList(UDP_GUID, l).bytes(), (byte)1, l);
     }
     
     /**
@@ -119,7 +123,7 @@ public class PingRequest extends Message {
      */    
     public static PingRequest createUHCPing() {
         List ggeps = new LinkedList();
-        GUID guid = populateUDPGGEPList(ggeps);
+        GUID guid = populateUDPGGEPList(UDP_GUID,ggeps);
         ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
         return new PingRequest(guid.bytes(),(byte)1,ggeps);
     }
@@ -128,10 +132,10 @@ public class PingRequest extends Message {
      * @param l list to put the standard extentions we add to UDP pings
      * @return the guid to use for the ping
      */
-    private static GUID populateUDPGGEPList(List l) {
+    private static GUID populateUDPGGEPList(GUID g, List l) {
         GUID guid;
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
-            guid = new GUID();
+            guid = g;
         } else {
             l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
             guid = UDPService.instance().getSolicitedGUID();

@@ -487,6 +487,14 @@ public class HostCatcher {
      * @return true iff pr was actually added 
      */
     public boolean add(PingReply pr) {
+    	// if over UDP, verify GUIDs
+    	if (pr.isUDP()) {
+    		GUID g = new GUID(pr.getGUID());
+    		if (!g.equals(PingRequest.UDP_GUID) && 
+                    !g.equals(UDPService.instance().getSolicitedGUID())) 
+    			return false;
+    	}
+    	
         //Convert to endpoint
         ExtendedEndpoint endpoint;
         
