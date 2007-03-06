@@ -6,7 +6,7 @@ import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.ByteOrder;
 
 
-/* package */ class TEAQueryKeyGenerator implements QueryKeyGenerator {
+/* package */ class TEASecurityTokenGenerator implements SecurityTokenGenerator {
 
     // This uses TEA (Tiny Encryption Algorithm) from
     // D. Wheeler and R. Needham of Cambridge University.
@@ -15,8 +15,8 @@ import org.limewire.util.ByteOrder;
     // in software, and has an extremely small footprint in
     // the CPU's data and instruction caches.
     
-    // Length of each query key that we generate, in bytes.
-    protected final int QK_LENGTH = 4;
+    // Length of each security token that we generate, in bytes.
+    protected final int ST_LENGTH = 4;
     
     // Pre- and post- encryption cyclic shift values
     // to get random padding equivalent to the previous
@@ -36,7 +36,7 @@ import org.limewire.util.ByteOrder;
     protected final long POST_WHITEN_KEY;
     
     
-    /* package */ TEAQueryKeyGenerator() {
+    /* package */ TEASecurityTokenGenerator() {
        SecureRandom rand = SecurityUtils.createSecureRandomNoBlock();
        PRE_WHITEN_KEY = rand.nextLong();
        POST_WHITEN_KEY = rand.nextLong();
@@ -52,7 +52,7 @@ import org.limewire.util.ByteOrder;
     }
     
     // Constructor is package scoped for unit tests
-    /* package */ TEAQueryKeyGenerator(int k0, int k1, int k2, int k3,
+    /* package */ TEASecurityTokenGenerator(int k0, int k1, int k2, int k3,
             int preRotate, int postRotate) {
         
         // Set cyclic shifts to allow getting at differet
@@ -71,17 +71,17 @@ import org.limewire.util.ByteOrder;
      * Returns the raw bytes for a QueryKey, which will not contain
      * 0x1C and 0x00, to accomidate clients that poorly parse GGEP.
      */
-    public byte[] getKeyBytes(TokenData tokenData) {
+    public byte[] getTokenBytes(TokenData tokenData) {
         byte [] data = tokenData.getData();
         long key64 = encryptCBCCMAC(data);
         
         // 32-bit QK gives attackers the least amount of information
         // about our secret key while still not making it worth their
         // while to try and make a botnet out of the Gnutella network
-        byte[] qkBytes = new byte[QK_LENGTH];
+        byte[] qkBytes = new byte[ST_LENGTH];
         
         // Copy bytes that arent 0x00 or 0x1C into output
-        int outIndex = QK_LENGTH - 1;
+        int outIndex = ST_LENGTH - 1;
         for (int left=(int)(key64 >> 32), right=(int)key64; outIndex>=0; left >>>= 8) {
             if (left == 0) {
                 // get more data

@@ -22,7 +22,7 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
     public void testKeyGeneratorsAreRotatedAndExpired() {
         
         SchedulingTestThreadPool pool = new SchedulingTestThreadPool();
-        QKGeneratorRotator rotator = new QKGeneratorRotator(pool, new QueryKeySmith.TEAFactory(),
+        SecurityTokenGeneratorRotator rotator = new SecurityTokenGeneratorRotator(pool, new SecurityTokenSmith.TEAFactory(),
                 new SettingsProvider() {
                     public long getChangePeriod() {
                         return 1;
@@ -32,38 +32,38 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
                     }
         });
         
-        QueryKeyGenerator generator = rotator.getSecretKey();
-        assertEquals(1, rotator.getValidQueryKeyGenerators().length);
-        assertContains(Arrays.asList(rotator.getValidQueryKeyGenerators()), generator);
+        SecurityTokenGenerator generator = rotator.getCurrentTokenGenerator();
+        assertEquals(1, rotator.getValidSecurityTokenGenerators().length);
+        assertContains(Arrays.asList(rotator.getValidSecurityTokenGenerators()), generator);
         
         // run rotate
         Runnable r = pool.r;
         pool.r = null;
         r.run();
         
-        assertEquals(2, rotator.getValidQueryKeyGenerators().length);
-        QueryKeyGenerator generatorNew = rotator.getSecretKey();
+        assertEquals(2, rotator.getValidSecurityTokenGenerators().length);
+        SecurityTokenGenerator generatorNew = rotator.getCurrentTokenGenerator();
         assertNotSame(generator, generatorNew);
-        assertContains(Arrays.asList(rotator.getValidQueryKeyGenerators()), generator);
-        assertContains(Arrays.asList(rotator.getValidQueryKeyGenerators()), generatorNew);
+        assertContains(Arrays.asList(rotator.getValidSecurityTokenGenerators()), generator);
+        assertContains(Arrays.asList(rotator.getValidSecurityTokenGenerators()), generatorNew);
         
         // expire old key
         r = pool.r2;
         pool.r2 = null;
         r.run();
         
-        assertEquals(1, rotator.getValidQueryKeyGenerators().length);
-        QueryKeyGenerator generator3 = rotator.getSecretKey();
+        assertEquals(1, rotator.getValidSecurityTokenGenerators().length);
+        SecurityTokenGenerator generator3 = rotator.getCurrentTokenGenerator();
         assertSame(generatorNew, generator3);
-        assertContains(Arrays.asList(rotator.getValidQueryKeyGenerators()), generator3);
-        assertNotContains(Arrays.asList(rotator.getValidQueryKeyGenerators()), generator);
+        assertContains(Arrays.asList(rotator.getValidSecurityTokenGenerators()), generator3);
+        assertNotContains(Arrays.asList(rotator.getValidSecurityTokenGenerators()), generator);
     }
     
     public void testGracePeriodIsHonored() throws Exception {
         
         WrappingSchedulingTestThreadPool pool = new WrappingSchedulingTestThreadPool();
         
-        QKGeneratorRotator rotator = new QKGeneratorRotator(pool, new QueryKeySmith.TEAFactory(),
+        SecurityTokenGeneratorRotator rotator = new SecurityTokenGeneratorRotator(pool, new SecurityTokenSmith.TEAFactory(),
                 new SettingsProvider() {
                     public long getChangePeriod() {
                         return 500;
@@ -73,25 +73,25 @@ public class QKGeneratorRotatorTest extends BaseTestCase {
                     }
         });
         
-        assertEquals(1, rotator.getValidQueryKeyGenerators().length);
+        assertEquals(1, rotator.getValidSecurityTokenGenerators().length);
         
         pool.r.waitForRunnable();
         
-        assertEquals(2, rotator.getValidQueryKeyGenerators().length);
+        assertEquals(2, rotator.getValidSecurityTokenGenerators().length);
         
         pool.r2.waitForRunnable();
         
-        assertEquals(1, rotator.getValidQueryKeyGenerators().length);
+        assertEquals(1, rotator.getValidSecurityTokenGenerators().length);
         
         pool.r.waitForRunnable();
         
-        assertEquals(2, rotator.getValidQueryKeyGenerators().length);
+        assertEquals(2, rotator.getValidSecurityTokenGenerators().length);
     }
     
     public void testInvalidSettings() throws Exception {
         try {
-            new QKGeneratorRotator(new SchedulingTestThreadPool(), 
-                    new QueryKeySmith.TEAFactory(),
+            new SecurityTokenGeneratorRotator(new SchedulingTestThreadPool(), 
+                    new SecurityTokenSmith.TEAFactory(),
                     new SettingsProvider() {
                 public long getChangePeriod() {
                     return 500;

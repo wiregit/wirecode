@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
-import org.limewire.security.QueryKeySmith;
+import org.limewire.security.SecurityTokenSmith;
 import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
@@ -81,7 +81,7 @@ public class LimeCoreGlue {
             }
         };
         
-        QueryKeySmith.setSettingsProvider(settingsProvider);
+        SecurityTokenSmith.setSettingsProvider(settingsProvider);
     }
 
 }

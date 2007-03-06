@@ -22,7 +22,7 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
-import com.limegroup.gnutella.messagehandlers.OOBQueryKey;
+import com.limegroup.gnutella.messagehandlers.OOBSecurityToken;
 import com.limegroup.gnutella.messagehandlers.OOBTokenData;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -265,7 +265,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // test that we receive new version
         assertEquals(3, PrivilegedAccessor.getValue(reply, "_version"));
         
-        SecurityToken token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
+        SecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), reply.getNumResults())); 
         
         // ok - we should ACK the ReplyNumberVM
@@ -300,7 +300,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken<OOBTokenData> receivedToken = new OOBQueryKey(receivedTokenBytes);
+        SecurityToken<OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
 
@@ -668,7 +668,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
-        OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
+        OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), 1));
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 1, token);
@@ -696,7 +696,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(1, ((QueryReply)message).getResultCount());
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken<OOBTokenData> receivedToken = new OOBQueryKey(receivedTokenBytes);
+        SecurityToken<OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
         assertEquals(1, receivedToken.getBytes()[0] & 0XFF);
@@ -770,7 +770,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
+        OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), 0));
 //        LimeACKVendorMessage ack = 
 //            new LimeACKVendorMessage(new GUID(message.getGUID()), 0, token);
@@ -845,7 +845,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OOBQueryKey token = new OOBQueryKey(new OOBTokenData(pack.getAddress(), 
+        OOBSecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
                 pack.getPort(), reply.getGUID(), reply.getNumResults()));
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 

@@ -57,8 +57,8 @@ public class QueryKeyTest extends BaseTestCase {
         InetAddress ip = null;
         ip = InetAddress.getByName("www.limewire.com");
         int port = 6346;
-        AbstractQueryKey qk1 = new QueryKey(ip, port);
-        AbstractQueryKey qk2 = new QueryKey(ip, port);
+        AbstractSecurityToken qk1 = new QueryKey(ip, port);
+        AbstractSecurityToken qk2 = new QueryKey(ip, port);
         assertEquals(qk1,qk2);
         ip = InetAddress.getByName("10.254.0.42");
         qk1 = new QueryKey(ip, port);
@@ -105,14 +105,14 @@ public class QueryKeyTest extends BaseTestCase {
     
     public void testOddsAndEnds() throws Exception {
         // test to make clover 100% for QK
-        AbstractQueryKey qk = new QueryKey(InetAddress.getLocalHost(), 6346);
+        AbstractSecurityToken qk = new QueryKey(InetAddress.getLocalHost(), 6346);
         assertFalse(qk.equals(new Object()));
         qk.toString();
     }
     
     public void testQueryKeyExpiration() throws Exception {
         NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
-        QueryKeySmith.setSettingsProvider(settings);
+        SecurityTokenSmith.setSettingsProvider(settings);
         
         QueryKey key = new QueryKey(InetAddress.getLocalHost(), 4545);
         

@@ -4,18 +4,14 @@ import org.limewire.security.SecurityToken.TokenData;
 
 /**
  * An interface that represents the embodiment of an algorithm and
- * secret key(s) used to generate QueryKeys.
- * 
- * A particular instance of a QueryKeyGenerator must obey the relation
- * checkKeyBytes(getKeyBytes(x, y), x, y) == true for all legal 
- * InetAddresses x and IP port numbers y.
+ * secret key(s) used to generate SecurityTokens.
  * 
  * Also, attackers have knowledge of the algorithms implemented here
- * and have the ability to query a host for getKeyBytes(x,y) for many
- * different (x,y) values.  It must be computationally infeasable for
- * an attacker within the lifetime of a given QueryKeyGenerator instance
- * to guess a byte array that satisfies checkKeyBytes(keyBytes, a,b) for
- * any (a,b) that the attacker does not control.  Otherwise, the Gnutella
+ * and have the ability to query a host for getTokenBytes(TokenData data) for many
+ * different values.  It must be computationally infeasable for
+ * an attacker within the lifetime of a given SecurityTokenGenerator instance
+ * to guess a byte array that satisfies {@link SecurityToken#isFor(TokenData)} for
+ * any TokenData value that the attacker does not control.  Otherwise, the Gnutella
  * network can be turned into a gigantic DDoS botnet.
  * 
  * Secure implementations likely use a cryptographically secure encryption
@@ -24,11 +20,10 @@ import org.limewire.security.SecurityToken.TokenData;
  * RSA problem, etc.)  Strait-forward use of a linear encryption algorithm such
  * as RC4/ARC4/MARC4 is completely insecure.
  */
-
-public interface QueryKeyGenerator {
+public interface SecurityTokenGenerator {
     /**
      * Uses secret keys to generate a byte array from an InetAddres and
      * a port number.
      */
-    public byte[] getKeyBytes(TokenData data);
+    public byte[] getTokenBytes(TokenData data);
 }

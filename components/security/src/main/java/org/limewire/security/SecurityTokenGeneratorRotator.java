@@ -5,11 +5,11 @@ import org.limewire.concurrent.SchedulingThreadPool;
 /**
  * Class that hides the rotation of private keys.
  */
-class QKGeneratorRotator implements QKGeneratorKeychain {
+class SecurityTokenGeneratorRotator implements SecurityTokenGeneratorChain {
     private final SettingsProvider provider;
-    private final QKGeneratorFactory factory;
+    private final SecurityTokenGeneratorFactory factory;
     private final SchedulingThreadPool scheduler;
-    private QueryKeyGenerator current, old;
+    private SecurityTokenGenerator current, old;
     private final Runnable rotator, expirer;
 
     /**
@@ -18,8 +18,8 @@ class QKGeneratorRotator implements QKGeneratorKeychain {
      * @param provider a <tt>SettingsProvider</tt>.  The change period must be bigger
      * than the grace period. 
      */
-    QKGeneratorRotator(SchedulingThreadPool scheduler, 
-            QKGeneratorFactory factory, 
+    SecurityTokenGeneratorRotator(SchedulingThreadPool scheduler, 
+            SecurityTokenGeneratorFactory factory, 
             SettingsProvider provider) {
         this.provider = provider;
         this.factory = factory;
@@ -42,19 +42,19 @@ class QKGeneratorRotator implements QKGeneratorKeychain {
         rotate();
     }
     
-    public synchronized QueryKeyGenerator[] getValidQueryKeyGenerators() {
+    public synchronized SecurityTokenGenerator[] getValidSecurityTokenGenerators() {
         if (old == null)
-            return new QueryKeyGenerator[]{current};
+            return new SecurityTokenGenerator[]{current};
         else
-            return new QueryKeyGenerator[]{current, old};
+            return new SecurityTokenGenerator[]{current, old};
     }
     
-    public synchronized QueryKeyGenerator getSecretKey() {
+    public synchronized SecurityTokenGenerator getCurrentTokenGenerator() {
         return current;
     }
     
     private void rotate() {
-        QueryKeyGenerator newKQ = factory.createQueryKeyGenerator();
+        SecurityTokenGenerator newKQ = factory.createSecurityTokenGenerator();
         synchronized(this) {
             old = current;
             current = newKQ;

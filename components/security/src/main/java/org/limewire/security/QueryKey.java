@@ -26,7 +26,7 @@ import org.limewire.util.ByteOrder;
  * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
  * to use your new QueryKeyGenerator implementation. 
  */
-public final class QueryKey extends AbstractQueryKey<TokenData> {
+public final class QueryKey extends AbstractSecurityToken<TokenData> {
 
     /** As detailed by the GUESS spec.
      */
@@ -145,8 +145,8 @@ public final class QueryKey extends AbstractQueryKey<TokenData> {
     /** Returns a new QueryKeyGenerator with random secret key(s),
      *  using the default QueryKeyGenerator implementation.
      */
-    public static QueryKeyGenerator createKeyGenerator() {
-        return new TEAQueryKeyGenerator();
+    public static SecurityTokenGenerator createTokenGenerator() {
+        return new TEASecurityTokenGenerator();
     }
     
     /**

@@ -1,19 +1,19 @@
 package com.limegroup.gnutella.messagehandlers;
 
-import org.limewire.security.AbstractQueryKey;
+import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 
 /**
- * A query key to be used in the OOB v3 protocol.
+ * A security token to be used in the OOB v3 protocol.
  */
-public class OOBQueryKey extends AbstractQueryKey<OOBTokenData> {
+public class OOBSecurityToken extends AbstractSecurityToken<OOBTokenData> {
     
     /** 
-     * Creates a query key with the provided data.
+     * Creates a security token with the provided data.
      * The query key consists of the # of results followed 
      * by the MAC checksum of the data object.
      */
-    public OOBQueryKey(OOBTokenData data) {
+    public OOBSecurityToken(OOBTokenData data) {
         super(data);
     }
 
@@ -22,11 +22,11 @@ public class OOBQueryKey extends AbstractQueryKey<OOBTokenData> {
      * byte is the # of results, the rest are the checksum to verify against.
      * @throws InvalidSecurityTokenException 
      */
-    public OOBQueryKey(byte [] network) throws InvalidSecurityTokenException {
+    public OOBSecurityToken(byte[] network) throws InvalidSecurityTokenException {
         super(network);
     }
     
-    protected byte [] getFromMAC(byte []b, OOBTokenData data) {
+    protected byte [] getFromMAC(byte[] b, OOBTokenData data) {
         byte [] ret = new byte[b.length+1];
         ret[0] = (byte)data.getNumRequests();
         System.arraycopy(b, 0, ret, 1, b.length);

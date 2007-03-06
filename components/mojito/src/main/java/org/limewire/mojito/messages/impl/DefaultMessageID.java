@@ -30,7 +30,7 @@ import java.util.Random;
 
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
-import org.limewire.security.AbstractQueryKey;
+import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.QueryKey;
 import org.limewire.security.SecurityToken;
@@ -175,7 +175,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
         System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
         
-        return new DHTQueryKey(queryKey);
+        return new MessageSecurityToken(queryKey);
     }
     
     /*
@@ -262,13 +262,13 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         }
     }
    
-    private static class DHTQueryKey extends AbstractQueryKey<DHTTokenData> {
+    private static class MessageSecurityToken extends AbstractSecurityToken<DHTTokenData> {
         
-        public DHTQueryKey(byte[] network) throws InvalidSecurityTokenException {
+        public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
             super(network);
         }
 
-        public DHTQueryKey(DHTTokenData data) {
+        public MessageSecurityToken(DHTTokenData data) {
             super(data);
         }
 

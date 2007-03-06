@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.TEAQueryKeyGenerator;
+import org.limewire.security.TEASecurityTokenGenerator;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
@@ -15,14 +15,14 @@ import org.limewire.util.PrivilegedAccessor;
 import junit.framework.Test;
 
 
-public class TEAQueryKeyGeneratorTest extends BaseTestCase {
+public class TEASecurityTokenGeneratorTest extends BaseTestCase {
 
-    public TEAQueryKeyGeneratorTest(String name) {
+    public TEASecurityTokenGeneratorTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(TEAQueryKeyGeneratorTest.class);
+        return buildTestSuite(TEASecurityTokenGeneratorTest.class);
     }
     
     // Generates 420 QueryKeys using random secret keys 
@@ -37,9 +37,9 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         }
         
         for(int i=20; i > 0; --i) {
-            TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
+            TEASecurityTokenGenerator key = new TEASecurityTokenGenerator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
+                byte[] keyBytes = key.getTokenBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
                 for(int k=keyBytes.length-1; k >= 0; --k) {
                     int keyByte = keyBytes[k];
                     if (keyByte == 0x00 || keyByte == 0x1C) {
@@ -67,10 +67,10 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         }
         
         for(int i=20; i > 0; --i) {
-            TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
+            TEASecurityTokenGenerator key = new TEASecurityTokenGenerator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
-                if (! Arrays.equals(keyBytes, key.getKeyBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i)))) {
+                byte[] keyBytes = key.getTokenBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i));
+                if (! Arrays.equals(keyBytes, key.getTokenBytes(new QueryKey.GUESSTokenData(addresses[j], 1024 + i)))) {
                     byte[] printBuf = new byte[keyBytes.length+1];
                     System.arraycopy(keyBytes, 0, printBuf, 1, keyBytes.length);
                     printBuf[0] = (byte) 1;
@@ -107,7 +107,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
      *
      */
     public void testEncryptCBCMACIdentity() {
-        TEAQueryKeyGenerator generator = new TEAQueryKeyGenerator();
+        TEASecurityTokenGenerator generator = new TEASecurityTokenGenerator();
         Random random = new Random();
         
         for (int i = 0; i < 100; i++) {
@@ -150,7 +150,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
     public void testEncryptCBCMACIterations() {
         // a single iteration on input of length <= 8 should return 
         // the same as encrypt
-        TEAQueryKeyGenerator generator = new TEAQueryKeyGenerator();
+        TEASecurityTokenGenerator generator = new TEASecurityTokenGenerator();
         Random random = new Random();
         
         for (int i = 1; i <= 8; i++) {
@@ -178,7 +178,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         }
     }
     
-    private class TEAVectorTester extends TEAQueryKeyGenerator {
+    private class TEAVectorTester extends TEASecurityTokenGenerator {
         /** Set up a tester with given TEA encryption keys */
         public TEAVectorTester(int k0, int k1, int k2, int k3, 
                 int preRotate, int postRotate) {
@@ -204,7 +204,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
                 right >>>= 8;
             }
             
-            byte[] resultBytes = getKeyBytes(new QueryKey.GUESSTokenData(InetAddress.getByAddress(ipBytes), left));
+            byte[] resultBytes = getTokenBytes(new QueryKey.GUESSTokenData(InetAddress.getByAddress(ipBytes), left));
             
             int byteCount = resultBytes.length;
             int result = 0;
