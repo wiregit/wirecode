@@ -54,7 +54,7 @@ public final class CollectionUtils {
      * already a List)
      */
     public static <T> List<T> toList(Collection<T> c) {
-        if (c instanceof Set) {
+        if (c instanceof List) {
             return (List<T>)c;
         }
         
