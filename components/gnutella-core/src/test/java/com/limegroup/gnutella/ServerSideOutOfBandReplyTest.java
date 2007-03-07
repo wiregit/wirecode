@@ -928,7 +928,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             ULTRAPEER[0].flush();
         }
 
-        // count NO ReplyNumberVMs
+        // should not get any more ReplyNumberVMs
         try {
             while (true) {
                 UDP_ACCESS.setSoTimeout(500);
