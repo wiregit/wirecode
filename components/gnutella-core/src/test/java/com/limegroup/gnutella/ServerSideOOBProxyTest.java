@@ -31,6 +31,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -227,6 +228,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         QueryRequest.createOutOfBandQuery("leehsus",
                                           LEAF[0].getInetAddress().getAddress(),
                                           LEAF[0].getPort());
+        assertTrue(query.desiresOutOfBandRepliesV3());
         sendF(LEAF[0], query);
         
         Thread.sleep(1000);
@@ -300,6 +302,52 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         //------------------------------
     }
 
+    /** tests that v2 queries are upgraded to v3. */
+    public void testProtocolUpgrade() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        drainAll();
+        QueryRequest nonOOB = QueryRequest.createQuery("badger");
+        assertFalse(nonOOB.desiresOutOfBandReplies());
+        nonOOB.getPayload()[0] |= 0x0004; // pretend it wants oob v2
+        sendF(LEAF[0], nonOOB);
+        
+        QueryRequest OOBv2 = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                                                         QueryRequest.class);
+        // upgraded to v3 and proxied
+        assertTrue(OOBv2.desiresOutOfBandRepliesV2());
+        assertTrue(OOBv2.desiresOutOfBandRepliesV3());
+        
+        byte[] proxiedGuid = OOBv2.getGUID().clone();
+        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
+                RouterService.getPort());
+        // guid should be address encoded with proxying ultrapeer
+        assertEquals(proxiedGuid, OOBv2.getGUID());
+    }
+    
+    /** tests that v2 queries are upgraded to v3 and v2 is disabled */
+    public void testProtocolUpgradeDisableV2() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        drainAll();
+        QueryRequest nonOOB = QueryRequest.createQuery("badger");
+        assertFalse(nonOOB.desiresOutOfBandReplies());
+        nonOOB.getPayload()[0] |= 0x0004; // pretend it wants oob v2
+        sendF(LEAF[0], nonOOB);
+        
+        QueryRequest OOBv2 = 
+            (QueryRequest) getFirstInstanceOfMessageType(ULTRAPEER[0],
+                                                         QueryRequest.class);
+        // upgraded to v3 and proxied, v2 disabled
+        assertFalse(OOBv2.desiresOutOfBandRepliesV2());
+        assertTrue(OOBv2.desiresOutOfBandRepliesV3());
+        
+        byte[] proxiedGuid = OOBv2.getGUID().clone();
+        GUID.addressEncodeGuid(proxiedGuid, RouterService.getAddress(),
+                RouterService.getPort());
+        // guid should be address encoded with proxying ultrapeer
+        assertEquals(proxiedGuid, OOBv2.getGUID());
+    }
+    
     public void testOOBProxyControlMessage() throws Exception {
         
         // default case proxying works
