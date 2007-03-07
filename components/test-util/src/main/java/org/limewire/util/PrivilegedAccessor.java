@@ -91,15 +91,7 @@ public class PrivilegedAccessor {
         throws NoSuchMethodException,
                IllegalAccessException, 
                InvocationTargetException  {
-        Class[] classTypes = null;
-        if( args != null) {
-            classTypes = new Class[args.length];
-            for( int i = 0; i < args.length; i++ ) {
-                if( args[i] != null )
-                    classTypes[i] = args[i].getClass();
-            }
-        }
-        return invokeMethod(instance, methodName, args, classTypes);
+        return invokeMethod(instance, methodName, args, getArgumentTypes(args));
     }
     
     /**
@@ -166,15 +158,7 @@ public class PrivilegedAccessor {
         throws NoSuchMethodException,
                IllegalAccessException, 
                InvocationTargetException  {
-        Class[] classTypes = null;
-        if( args != null) {
-            classTypes = new Class[args.length];
-            for( int i = 0; i < args.length; i++ ) {
-                if( args[i] != null )
-                    classTypes[i] = args[i].getClass();
-            }
-        }
-        return invokeAllStaticMethods(clazz, methodName, args, classTypes);
+        return invokeAllStaticMethods(clazz, methodName, args, getArgumentTypes(args));
     }
 
     /**
@@ -276,6 +260,13 @@ public class PrivilegedAccessor {
                IllegalAccessException,
                InvocationTargetException,
                InstantiationException {
+        return invokeConstructor(clazz, args, getArgumentTypes(args));
+    }
+    
+    /**
+     * Returns the array of classes for the array of arguments. 
+     */
+    private static Class[] getArgumentTypes(Object[] args) {
         Class[] classTypes = null;
         if( args != null) {
             classTypes = new Class[args.length];
@@ -284,7 +275,7 @@ public class PrivilegedAccessor {
                     classTypes[i] = args[i].getClass();
             }
         }
-        return invokeConstructor(clazz, args, classTypes);
+        return classTypes;
     }
     
     /**

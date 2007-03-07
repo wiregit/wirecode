@@ -94,8 +94,8 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         // new ultrapeer should not get do_not_proxy
         assertQuery(testUP[0], query, false, true);
         
-        // old ultrapper should not get do_not_proxy either
-        assertQuery(testUP[1], query, false, true);
+        // old ultrapper should get do_not_proxy since it doesn't see that new version desires OOB
+        assertQuery(testUP[1], query, true, true);
     }
     
     public void testDoesNotSendNoProxyIfSettingIsDisabled() throws Exception {
