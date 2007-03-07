@@ -22,6 +22,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -157,26 +158,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(UDP_ACCESS.length, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), UDP_ACCESS.length);
         }
 
         {
             // now we should make sure MessageRouter clears the map
             RouterService.stopQuery(new GUID(qr.getGUID()));
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         ((MyCallback)getCallback()).clearGUID();
     }
@@ -248,13 +236,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         
         // send back a UDP response and make sure it was saved in bypassed...
@@ -275,14 +257,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(guid, 1);
         }
         
         // now do the download, wait for it to finish, and then bypassed results
@@ -307,17 +282,15 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
 
     }
 
+    private void assertByPassedResultsCacheHasSize(byte[] guid, int size) {
+        Set<GUESSEndpoint> endpoints = RouterService.getMessageRouter().getQueryLocs(new GUID(guid));
+        assertEquals(size, endpoints.size());
+    }
 
     public void testQueryAliveNoPurge() throws Exception {
 
@@ -387,13 +360,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         
         // send back a UDP response and make sure it was saved in bypassed...
@@ -414,14 +381,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(guid, 1);
         }
         
         // now do the download, wait for it to finish, and then bypassed results
@@ -445,27 +405,14 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(guid, 1);
         }
         
         RouterService.stopQuery(new GUID(guid));
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(),0);
         }
 
     }
@@ -540,13 +487,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         {
             // now we should make sure MessageRouter has not bypassed anything
             // yet
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         
         // send back a UDP response and make sure it was saved in bypassed...
@@ -567,14 +508,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(guid, 1);
         }
         
         // now do the download, wait for it to finish, and then bypassed results
@@ -594,14 +528,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // download still in progress, don't purge
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(guid, 1);
         }
 
         UploadSettings.UPLOAD_SPEED.setValue(100);
@@ -615,14 +542,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             new File(_sharedDir, "metadata.mp3").exists());
 
         {
-            // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            // now we should make sure MessageRouter clears the cache
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
 
     }
@@ -686,14 +607,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(UDP_ACCESS.length, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), UDP_ACCESS.length);
         }
         
         Downloader downloader = 
@@ -743,13 +657,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
 
         uploader.stopThread();
@@ -816,14 +724,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 1);
         }
         
         long currTime = System.currentTimeMillis();
@@ -941,13 +842,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         uploader.stopThread();
     }
@@ -1013,14 +908,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(UDP_ACCESS.length, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), UDP_ACCESS.length);
         }
         
         // Prepopulate Query Keys
@@ -1089,13 +977,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
 
         uploader.stopThread();
@@ -1164,14 +1046,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 1);
         }
         
         Downloader downloader = 
@@ -1204,14 +1079,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // we should still have bypassed results since downloader2 alive
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(1, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 1);
         }
 
         downloader2.stop();
@@ -1219,13 +1087,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
         uploader.stopThread();
         uploader2.stopThread();
@@ -1302,14 +1164,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
-            Map _bypassedResults = 
-                (Map)PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(1, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNotNull(endpoints);
-            assertEquals(UDP_ACCESS.length, endpoints.size());
+            assertByPassedResultsCacheHasSize(qr.getGUID(), UDP_ACCESS.length);
         }
         
         Downloader downloader = 
@@ -1421,13 +1276,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         {
             // now we should make sure MessageRouter clears the map
-            Map _bypassedResults = 
-                (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                                  "_bypassedResults");
-            assertNotNull(_bypassedResults);
-            assertEquals(0, _bypassedResults.size());
-            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
-            assertNull(endpoints);
+            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
         }
     }
 
