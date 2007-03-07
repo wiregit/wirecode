@@ -40,7 +40,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         return new ActivityCallbackStub();
     }
     
-    public void testDoesNotSendNoProxyToUltraPeerV3() throws Exception {
+    public void testQueryV2Disabled() throws Exception {
         
         drainAll();
         
@@ -75,7 +75,7 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
     }
     
     
-    public void testDoesNotSendNoProxyIfOOBDesired()  throws Exception {
+    public void testOOBQueryV2Disabled()  throws Exception {
         
         drainAll();
         
@@ -94,11 +94,34 @@ public class ClientSideOOBProxyControlTest extends ClientSideTestCase {
         // new ultrapeer should not get do_not_proxy
         assertQuery(testUP[0], query, false, true);
         
-        // old ultrapper should get do_not_proxy since it doesn't see that new version desires OOB
+        // old ultrapper get do_not_proxy 
         assertQuery(testUP[1], query, true, true);
     }
     
-    public void testDoesNotSendNoProxyIfSettingIsDisabled() throws Exception {
+    public void testOOBQueryV2Enabled()  throws Exception {
+        
+        drainAll();
+        
+        QueryRequest query = QueryRequest.createOutOfBandQuery("txt", InetAddress.getLocalHost().getAddress(), 1340);
+        
+        assertTrue(query.desiresOutOfBandReplies());
+        assertFalse(query.doNotProxy());
+        
+        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        
+        // send query through router service
+        PrivilegedAccessor.invokeMethod(RouterService.class, "recordAndSendQuery",
+                query, MediaType.getDocumentMediaType());
+        Thread.sleep(250);
+        
+        // new ultrapeer should not get do_not_proxy
+        assertQuery(testUP[0], query, false, true);
+        
+        // old ultrapper should not get do_not_proxy either
+        assertQuery(testUP[1], query, false, true);
+    }
+    
+    public void testQueryV2Enabled() throws Exception {
         
         drainAll();
         
