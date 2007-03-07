@@ -762,14 +762,12 @@ public class ManagedConnection extends Connection
         
         if (LOG.isTraceEnabled()) {
             LOG.trace("do not proxy condition " + 
-                     !query.desiresOutOfBandReplies() + " " +
                      isClientSupernodeConnection() + " " +
                      (getSupportedOOBProxyControlVersion() == -1)  + " " +
                      SearchSettings.DISABLE_OOB_V2.getValueAsString());
         }
         
-        if (!query.desiresOutOfBandReplies() 
-                && isClientSupernodeConnection()
+        if (isClientSupernodeConnection()
                 && getSupportedOOBProxyControlVersion() == -1
                 && SearchSettings.DISABLE_OOB_V2.getValue()) {
             // don't proxy if we are a leaf and the ultrapeer 
@@ -916,7 +914,7 @@ public class ManagedConnection extends Connection
         // 3.5) The query originator should not disallow proxying.
         // 4) We must be able to OOB and have great success rate.
         if (remoteHostSupportsLeafGuidance() < 1) return query;
-        if (query.desiresOutOfBandReplies()) return query;
+        if (query.desiresOutOfBandRepliesV3()) return query;
         
         if (query.doNotProxy()) return query;
         
