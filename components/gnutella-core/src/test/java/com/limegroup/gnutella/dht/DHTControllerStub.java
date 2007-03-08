@@ -63,14 +63,6 @@ public class DHTControllerStub implements DHTController {
     public void addContact(Contact node) {
     }
 
-    public boolean isPassiveLeafNode() {
-        return false;
-    }
-
-    public boolean isPassiveNode() {
-        return false;
-    }
-
     public DHTMode getDHTMode() {
         return null;
     }
