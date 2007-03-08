@@ -32,4 +32,13 @@ class PassiveLeafController extends AbstractDHTController {
         
         return dht;
     }
+
+    @Override
+    public void start() {
+        super.start();
+        
+        if (isRunning()) {
+            sendUpdatedCapabilities();
+        }
+    }
 }
