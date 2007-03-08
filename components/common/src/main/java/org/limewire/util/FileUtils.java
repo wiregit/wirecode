@@ -517,7 +517,15 @@ public class FileUtils {
     	return command;
     }
     
-    public static boolean deleteRecursive(File file) {
+    
+    /**
+     * Deletes all files in 'directory'.
+     * Returns true if this succesfully deleted every file recursively, including itself.
+     * 
+     * @param directory
+     * @return
+     */
+    public static boolean deleteRecursive(File directory) {
 		// make sure we only delete canonical children of the parent file we
 		// wish to delete. I have a hunch this might be an issue on OSX and
 		// Linux under certain circumstances.
@@ -525,27 +533,28 @@ public class FileUtils {
 		// symlinks), I would much appreciate it.
 		String canonicalParent;
 		try {
-			canonicalParent = file.getCanonicalPath();
+			canonicalParent = getCanonicalPath(directory);
 		} catch (IOException ioe) {
 			return false;
 		}
 
-		if (!file.isDirectory())
-			return file.delete();
+		if (!directory.isDirectory())
+			return directory.delete();
 
-		File[] files = file.listFiles();
+		File[] files = directory.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			try {
-				if (!files[i].getCanonicalPath().startsWith(canonicalParent))
+				if (!getCanonicalPath(files[i]).startsWith(canonicalParent))
 					continue;
 			} catch (IOException ioe) {
 				return false;
 			}
+            
 			if (!deleteRecursive(files[i]))
 				return false;
 		}
 
-		return file.delete();
+		return directory.delete();
 	}
     
     /**

@@ -92,6 +92,9 @@ public final class LimeWireUtils {
      */
     private static boolean _isPro = false;
 
+    /** Whether or not a temporary directory is in use. */
+    private static boolean temporaryDirectoryInUse;
+
 	/**
 	 * Make sure the constructor can never be called.
 	 */
@@ -262,6 +265,55 @@ public final class LimeWireUtils {
 	public static String getHttpServer() {
 		return HTTP_SERVER;
 	}
+
+    /** Returns a temporary directory that can be used for settings. */
+    public static File getTemporarySettingsDirectory() throws IOException {
+        File tempDir = File.createTempFile("limewire", "-temp").getAbsoluteFile();
+        File tempDirParent = tempDir.getParentFile();
+        tempDir.delete();
+        if(!tempDir.exists()) {
+            if(tempDir.mkdir()) {
+                if(tempDir.exists() && tempDir.isDirectory()) {
+                    return tempDir;
+                }
+            }
+        }
+        
+        // If we couldn't convert a temporary file into a temporary directory...
+        for(int i = 0; i < 1000; i++) {
+            tempDir = new File(tempDirParent, "limewire-tempdir-" + i);
+            if(!tempDir.exists()) {
+                if(tempDir.mkdir()) {
+                    if(tempDir.exists() && tempDir.isDirectory()) {
+                        return tempDir;
+                    }
+                }
+            }
+        }
+        
+        throw new IOException("couldn't find a temporary directory to use");
+    }
+    
+    /** Clears all potential temporary LW directories. */
+    public static void clearTemporarySettingsDirectories() {
+        File tempDir;
+        try {
+            tempDir = File.createTempFile("limewire", "-temp").getAbsoluteFile();
+        } catch(IOException failure) {
+            return; // can't do much from here.
+        }
+        
+        File tempDirParent = tempDir.getParentFile();
+        tempDir.delete();
+        
+        for(int i = 0; i < 1000; i++) {
+            File dir = new File(tempDirParent, "limewire-tempdir-" + i);
+            // If we can't delete it immediately, try deleting all contents first.
+            if(!dir.delete())
+                FileUtils.deleteRecursive(dir);
+        }
+        
+    }
       
     /**
      * Returns the location where the user settings directory should be placed.
@@ -339,6 +391,16 @@ public final class LimeWireUtils {
                "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
                "&guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString());
         return url;
+    }
+
+    /** Returns whether or not a temporary directory is in use. */
+    public static boolean isTemporaryDirectoryInUse() {
+        return temporaryDirectoryInUse;
+    }
+
+    /** Sets whether or not a temporary directory is in use. */
+    public static void setTemporaryDirectoryInUse(boolean inUse) {
+        temporaryDirectoryInUse = inUse;
     }
 }
 

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,11 +33,48 @@ public class LimeCoreGlue {
         if(!preinstalled.compareAndSet(false, true))
             return;
         
+        // This looks a lot more complicated than it really is.
+        // The excess try/catch blocks are just to make debugging easier,
+        // to keep track of what messages each successive IOException is.
+        // The flow is basically:
+        //  - Try to set the settings dir to the requested location.
+        //  - If that doesn't work, try getting a temporary directory to use.
+        //  - If we can't find a temporary directory, deleting old stale ones & try again.
+        //  - If it still doesn't work, bail.
+        //  - If it did work, mark it for deletion & set it as the settings directory.
+        //  - If it can't be set, bail.
+        //  - Otherwise, success.
         try {
             CommonUtils.setUserSettingsDir(LimeWireUtils.getRequestedUserSettingsLocation());
         } catch(IOException iox) {
-            // If the settings directory cannot be created, bail.
-            throw new RuntimeException(iox);
+            try {
+                File temporaryDir;
+                try {
+                    temporaryDir = LimeWireUtils.getTemporarySettingsDirectory();
+                } catch(IOException tempFull) {
+                    tempFull.printStackTrace();
+                    tempFull.initCause(iox);
+                    LimeWireUtils.clearTemporarySettingsDirectories();
+                    try {
+                        temporaryDir = LimeWireUtils.getTemporarySettingsDirectory();
+                    } catch(IOException stillBad) {
+                        stillBad.initCause(tempFull);
+                        throw stillBad;
+                    }
+                }
+                temporaryDir.deleteOnExit();
+                try {
+                    CommonUtils.setUserSettingsDir(temporaryDir);
+                } catch(IOException cannotSet) {
+                    cannotSet.initCause(iox);
+                    throw cannotSet;
+                }
+                
+                LimeWireUtils.setTemporaryDirectoryInUse(true);
+            } catch(IOException reallyBad) {
+                // If the settings directory cannot be created, bail.
+                throw new RuntimeException(reallyBad);
+            }
         }
     }
 
