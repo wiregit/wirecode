@@ -13,6 +13,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class LimeDHTManagerTest extends DHTTestCase {
@@ -54,26 +55,26 @@ public class LimeDHTManagerTest extends DHTTestCase {
             assertFalse(manager.isWaitingForNodes());
             assertEquals(0, manager.getActiveDHTNodes(10).size());
             
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
             assertEquals(1, executor.getRunners().size());
             Thread.sleep(200);
             assertTrue(manager.isRunning());
-            assertTrue(manager.isActiveNode());
+            assertEquals(DHTMode.ACTIVE, manager.getMode());
             KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
             
             // Rry starting again
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
             Thread.sleep(200);
             assertEquals(activeLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
             
             // Try switching mode
-            manager.start(false);
+            manager.start(DHTMode.PASSIVE);
             Thread.sleep(200);
-            assertFalse(manager.isActiveNode());
+            assertEquals(DHTMode.PASSIVE, manager.getMode());
             assertTrue(manager.isRunning());
             KUID passiveLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
             assertNotEquals(activeLocalNodeID, passiveLocalNodeID);
-            manager.start(false);
+            manager.start(DHTMode.PASSIVE);
             Thread.sleep(200);
             assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
             manager.addressChanged();
@@ -81,15 +82,15 @@ public class LimeDHTManagerTest extends DHTTestCase {
             assertEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
             
             // Try switching multiple times (does some Disk I/O)
-            manager.start(true);
-            manager.start(false);
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
+            manager.start(DHTMode.PASSIVE);
+            manager.start(DHTMode.ACTIVE);
             
             // Give it enough time --> previous starts were offloaded to threadpool
             Thread.sleep(10000);
             
             // We should be in active mode
-            assertTrue(manager.isActiveNode());
+            assertEquals(DHTMode.ACTIVE, manager.getMode());
             
             // The Node ID should be something else than passiveLocalNodeID
             assertNotEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
@@ -105,21 +106,21 @@ public class LimeDHTManagerTest extends DHTTestCase {
         TestExecutor executor = new TestExecutor();
         DHTManagerImpl manager = new DHTManagerImpl(executor);
         try {
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
             manager.stop();
             Thread.sleep(200);
             assertFalse(manager.isRunning());
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
             Thread.sleep(200);
             assertTrue(manager.isRunning());
-            assertTrue(manager.isActiveNode());
-            manager.start(false);
+            assertEquals(DHTMode.ACTIVE, manager.getMode());
+            manager.start(DHTMode.PASSIVE);
             Thread.sleep(200);
-            assertFalse(manager.isActiveNode());
+            assertEquals(DHTMode.PASSIVE, manager.getMode());
             assertTrue(manager.isRunning());
-            manager.start(true);
-            manager.start(false);
-            manager.start(true);
+            manager.start(DHTMode.ACTIVE);
+            manager.start(DHTMode.PASSIVE);
+            manager.start(DHTMode.ACTIVE);
             manager.stop();
             assertFalse(manager.isRunning());
             Thread.sleep(500);

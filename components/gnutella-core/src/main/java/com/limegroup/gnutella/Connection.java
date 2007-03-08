@@ -1106,11 +1106,11 @@ public class Connection implements IpPort {
     /**
      * Returns the DHT version if the remote host is an active DHT node
      * or -1 if it is not.
-     * 
      */
     public int remostHostIsActiveDHTNode() {
-        if(_capabilities != null) 
+        if(_capabilities != null) {
             return _capabilities.isActiveDHTNode();
+        }
         return -1;
     }
     
@@ -1120,8 +1120,20 @@ public class Connection implements IpPort {
      * 
      */
     public int remostHostIsPassiveDHTNode() {
-        if(_capabilities != null) 
+        if(_capabilities != null) {
             return _capabilities.isPassiveDHTNode();
+        }
+        return -1;
+    }
+    
+    /**
+     * Returns the DHT version of the remote host is a passive leaf DHT node
+     * or -1 if it is not.
+     */
+    public int remoteHostIsPassiveLeafNode() {
+        if (_capabilities != null) {
+            return _capabilities.isPassiveLeafNode();
+        }
         return -1;
     }
 

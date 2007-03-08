@@ -6,20 +6,26 @@ import java.util.List;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Contact;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
  * A class that uses the Null Object pattern to avoid
  * repetitive null checks in DHTManagers
  */
-@Deprecated
-public class NullDHTController implements DHTController {
+class NullDHTController implements DHTController {
 
-	public void addActiveDHTNode(SocketAddress hostAddress) {}
+	public void addActiveDHTNode(SocketAddress hostAddress) {
+    }
 
-	public void addPassiveDHTNode(SocketAddress hostAddress) {}
+	public void addPassiveDHTNode(SocketAddress hostAddress) {
+    }
 
+    public void addContact(Contact node) {
+    }
+    
 	public List<IpPort> getActiveDHTNodes(int maxNodes) {
 		return Collections.emptyList();
 	}
@@ -30,11 +36,11 @@ public class NullDHTController implements DHTController {
 
 	public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
 
-	public boolean isActiveNode() {
-		return false;
-	}
-
-	public boolean isRunning() {
+    public DHTMode getDHTMode() {
+        return DHTMode.INACTIVE;
+    }
+    
+    public boolean isRunning() {
 		return false;
 	}
 

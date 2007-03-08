@@ -43,8 +43,9 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -1812,11 +1813,13 @@ public class RouterService {
     }
     
     /**
-     * Tells whether this node is *actively* connected to the DHT,
-     * i.e. is part of the global DHT routing table 
+     * Returns the current mode of the DHT
      */
-    public static boolean isActiveDHTNode() {
-        return dhtManager.isActiveNode();
+    public static DHTMode getDHTMode() {
+        if (dhtManager != null) {
+            return dhtManager.getMode();
+        }
+        return DHTMode.INACTIVE;
     }
     
     /**
@@ -2087,8 +2090,8 @@ public class RouterService {
         return NIODispatcher.instance().getNumPendingTimeouts();
     }
     
-    public static void startDHT(boolean activeMode) {
-        getDHTManager().start(activeMode);
+    public static void startDHT(DHTMode mode) {
+        getDHTManager().start(mode);
     }
     
     public static void shutdownDHT() {

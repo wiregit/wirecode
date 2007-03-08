@@ -9,6 +9,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 
 public class DHTManagerStub implements DHTManager {
     
@@ -18,11 +19,17 @@ public class DHTManagerStub implements DHTManager {
 
     public void addressChanged() {}
 
-    public List<IpPort> getActiveDHTNodes(int maxNodes) {return null;}
+    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+        return null;
+    }
 
-    public MojitoDHT getMojitoDHT() {return null;}
+    public MojitoDHT getMojitoDHT() {
+        return null;
+    }
 
-    public boolean isActiveNode() {return true;}
+    public DHTMode getMode() {
+        return DHTMode.ACTIVE;
+    }
 
     public boolean isRunning() {return true;}
 
@@ -34,7 +41,7 @@ public class DHTManagerStub implements DHTManager {
 
     public void removeEventListener(DHTEventListener listener) {}
 
-    public void start(boolean activeMode) {}
+    public void start(DHTMode mode) {}
 
     public void stop() {}
 
@@ -50,5 +57,8 @@ public class DHTManagerStub implements DHTManager {
     
     public Version getVersion() {
         return Version.UNKNOWN;
+    }
+
+    public void handleDHTContactsMessage(DHTContactsMessage msg) {
     }
 }

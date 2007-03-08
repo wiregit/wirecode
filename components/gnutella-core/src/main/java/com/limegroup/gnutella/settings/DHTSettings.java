@@ -144,4 +144,10 @@ public class DHTSettings extends LimeProps{
     public static final LongSetting TIME_BETWEEN_DHT_REQUERIES
         = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_REQUERIES", 
                 5L*60L*1000L, "time_between_dht_requeries", 30L*1000L, 24L*60L*60L*1000L);
+    
+    /**
+     * 
+     */
+    public static final BooleanSetting ENABLE_PASSIVE_LEAF_MODE
+        = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_LEAF_MODE", false, "enable_passive_leaf_mode");
 }

@@ -7,15 +7,13 @@ import java.util.concurrent.Executor;
 
 import org.limewire.io.IpPort;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.dht.DHTController;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
-import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -68,7 +66,7 @@ public class DHTManagerImpl implements DHTManager {
         this.executor = service;
     }
     
-    public synchronized void start(final boolean activeMode) {
+    public synchronized void start(final DHTMode mode) {
         
         stopped = false;
         Runnable task = new Runnable() {
@@ -81,16 +79,20 @@ public class DHTManagerImpl implements DHTManager {
                     
                     //controller already running in the correct mode?
                     if(controller.isRunning() 
-                            && (controller.isActiveNode() == activeMode)) {
+                            && (controller.getDHTMode() == mode)) {
                         return;
                     }
                     
                     controller.stop();
 
-                    if (activeMode) {
+                    if (mode == DHTMode.ACTIVE) {
                         controller = new ActiveDHTNodeController(vendor, version, DHTManagerImpl.this);
-                    } else {
+                    } else if (mode == DHTMode.PASSIVE) {
                         controller = new PassiveDHTNodeController(vendor, version, DHTManagerImpl.this);
+                    } else if (mode == DHTMode.PASSIVE_LEAF) {
+                        controller = new PassiveLeafController(vendor, version, DHTManagerImpl.this);
+                    } else {
+                        controller = new NullDHTController();
                     }
 
                     controller.start();
@@ -140,8 +142,8 @@ public class DHTManagerImpl implements DHTManager {
         return controller.getActiveDHTNodes(maxNodes);
     }
     
-    public synchronized boolean isActiveNode() {
-        return (controller.isActiveNode() && controller.isRunning());
+    public synchronized DHTMode getMode() {
+        return controller.getDHTMode();
     }
     
     /**
@@ -233,5 +235,17 @@ public class DHTManagerImpl implements DHTManager {
     
     public Version getVersion() {
         return version;
+    }
+    
+    public void handleDHTContactsMessage(final DHTContactsMessage msg) {
+        executor.execute(new Runnable() {
+            public void run() {
+                synchronized(DHTManagerImpl.this) {
+                    for (Contact node : msg.getContacts()) {
+                        controller.addContact(node);
+                    }
+                }
+            }
+        });
     }
 }

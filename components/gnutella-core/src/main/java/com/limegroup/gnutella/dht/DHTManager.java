@@ -10,6 +10,7 @@ import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
@@ -51,7 +52,21 @@ public interface DHTManager extends ConnectionLifecycleListener,
          * and does necessarily have an accurate knowledge of the DHT
          * structure. However, it can perform queries and requests stores.
          */
-        PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' });
+        PASSIVE(0x02, new byte[]{ 'P', 'D', 'H', 'T' }),
+        
+        /**
+         * The PASSIVE_LEAF mode is very similar to PASSIVE mode with
+         * two major differences:
+         * 
+         * 1) A passive leaf has a fixed size LRU Map as its RouteTable.
+         *    That means it has almost no knowledge of the global DHT
+         *    RouteTable and depends entirely on an another peer (Ultrapeer)
+         *    that feeds it continiously with fresh contacts.
+         *    
+         * 2) A passive leaf node does not perform any Kademlia maintenance
+         *    operations!
+         */
+        PASSIVE_LEAF(0x03, new byte[]{ 'L', 'D', 'H', 'T' });
         
         public static final byte DHT_MODE_MASK = 0x0F;
         
@@ -70,6 +85,18 @@ public interface DHTManager extends ConnectionLifecycleListener,
          */
         public byte toByte() {
             return (byte)(mode & 0xFF);
+        }
+        
+        public boolean isActive() {
+            return (this == ACTIVE);
+        }
+        
+        public boolean isPassiveUltrapeer() {
+            return (this == PASSIVE);
+        }
+        
+        public boolean isPassiveLeaf() {
+            return (this == PASSIVE_LEAF);
         }
         
         /**
@@ -110,7 +137,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     /**
      * Starts the DHT Node either in active or passive mode.
      */
-    public void start(boolean activeMode);
+    public void start(DHTMode mode);
 
     /**
      * Stops the DHT Node
@@ -140,9 +167,9 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public List<IpPort> getActiveDHTNodes(int maxNodes);
 
     /**
-     * Returns whether this Node is an active Node or not
+     * 
      */
-    public boolean isActiveNode();
+    public DHTMode getMode();
     
     /**
      * Returns whether this Node is running
@@ -173,4 +200,9 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * Returns the Vendor code of this Node
      */
     public Version getVersion();
+    
+    /**
+     * 
+     */
+    public void handleDHTContactsMessage(DHTContactsMessage msg);
 }

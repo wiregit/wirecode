@@ -70,6 +70,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         NetworkSettings.TIMEOUT.setValue(500);
+        NetworkSettings.BOOTSTRAP_TIMEOUT.setValue(500);
+        NetworkSettings.STORE_TIMEOUT.setValue(500);
     }
     
     public static void globalTearDown() throws Exception {

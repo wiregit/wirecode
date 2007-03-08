@@ -48,6 +48,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.GiveStatsVendorMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
@@ -485,6 +486,7 @@ public abstract class MessageRouter {
         setMessageHandler(UpdateRequest.class, new UpdateRequestHandler());
         setMessageHandler(UpdateResponse.class, new UpdateResponseHandler());
         setMessageHandler(HeadPong.class, new HeadPongHandler());
+        setMessageHandler(DHTContactsMessage.class, new DHTContactsMessageHandler());
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
@@ -1399,8 +1401,8 @@ public abstract class MessageRouter {
             source.send(ack);
             
             // 2)
-            _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(),
-                                       source);
+            _pushRouteTable.routeReply(ppReq.getClientGUID().bytes(), source);
+            source.setPushProxyFor(true);
         }
     }
 
@@ -2815,6 +2817,9 @@ public abstract class MessageRouter {
         } 
     } 
     
+    private void handleDHTContactsMessage(DHTContactsMessage msg, ReplyHandler handler) {
+        RouterService.getDHTManager().handleDHTContactsMessage(msg);
+    }
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;
@@ -3070,6 +3075,12 @@ public abstract class MessageRouter {
     private class HeadPongHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleHeadPong((HeadPong)msg, handler); 
+        }
+    }
+    
+    private class DHTContactsMessageHandler implements MessageHandler {
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            handleDHTContactsMessage((DHTContactsMessage)msg, handler); 
         }
     }
     

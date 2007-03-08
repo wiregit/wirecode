@@ -24,11 +24,18 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -57,19 +64,19 @@ public class PassiveDHTNodeController extends AbstractDHTController {
     /**
      * A RouteTable for passive Nodes
      */
-    private PassiveDHTNodeRouteTable limeDHTRouteTable;
+    private PassiveDHTNodeRouteTable routeTable;
     
     public PassiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher);
+        super(vendor, version, dispatcher, DHTMode.PASSIVE);
     }
     
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
-        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveMojitoDHT", vendor, version);
+        MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveUltrapeerDHT", vendor, version);
         
-        limeDHTRouteTable = new PassiveDHTNodeRouteTable(dht);
-        dht.setRouteTable(limeDHTRouteTable);
+        routeTable = new PassiveDHTNodeRouteTable(dht);
+        dht.setRouteTable(routeTable);
         
         // Load the small list of MRS Nodes for bootstrap
         if (DHTSettings.PERSIST_DHT.getValue()
@@ -83,7 +90,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                 
                 Contact node = null;
                 while((node = (Contact)ois.readObject()) != null){
-                    limeDHTRouteTable.add(node);
+                    routeTable.add(node);
                 }
             } catch (Throwable ignored) {
             } finally {
@@ -93,8 +100,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
         
         return dht;
     }
-
-
+    
     /**
      * This method first adds the given host to the list of bootstrap nodes and 
      * then adds it to this passive node's routing table.
@@ -115,7 +121,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Adding host: "+addr+" to leaf dht nodes");
         }
-        limeDHTRouteTable.addLeafDHTNode(host, port);
+        routeTable.addLeafDHTNode(host, port);
     }
     
     protected SocketAddress removeLeafDHTNode(String host, int port) {
@@ -123,7 +129,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
             return null;
         }
         
-        SocketAddress removed = limeDHTRouteTable.removeLeafDHTNode(host, port);
+        SocketAddress removed = routeTable.removeLeafDHTNode(host, port);
 
         if(LOG.isDebugEnabled() && removed != null) {
             LOG.debug("Removed host: "+removed+" from leaf dht nodes");
@@ -144,7 +150,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
             FILE.delete();
         }
         
-        Collection<Contact> contacts = limeDHTRouteTable.getActiveContacts(); 
+        Collection<Contact> contacts = routeTable.getActiveContacts(); 
         if (contacts.size() >= 2) {
             ObjectOutputStream oos = null;
             try {
@@ -172,10 +178,6 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                 IOUtils.close(oos);
             }
         }
-    }
-    
-    public boolean isActiveNode() {
-        return false;
     }
 
     /**

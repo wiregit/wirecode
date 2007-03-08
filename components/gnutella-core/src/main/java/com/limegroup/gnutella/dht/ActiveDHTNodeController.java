@@ -26,6 +26,7 @@ import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -46,7 +47,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
     
     public ActiveDHTNodeController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
-        super(vendor, version, dispatcher);
+        super(vendor, version, dispatcher, DHTMode.ACTIVE);
     }
     
     @Override
@@ -127,10 +128,6 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                 IOUtils.close(out);
             }
         }
-    }
-    
-    public boolean isActiveNode() {
-        return true;
     }
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {

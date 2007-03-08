@@ -58,6 +58,7 @@ public class VendorMessageFactory {
         setParser(VendorMessage.F_CONTENT_REQ, VendorMessage.F_LIME_VENDOR_ID, new ContentRequestParser());
         setParser(VendorMessage.F_CONTENT_RESP, VendorMessage.F_LIME_VENDOR_ID, new ContentResponseParser());
         setParser(VendorMessage.F_HEADER_UPDATE, VendorMessage.F_LIME_VENDOR_ID, new HeaderUpdateVendorMessageParser());
+        setParser(VendorMessage.F_DHT_CONTACTS, VendorMessage.F_LIME_VENDOR_ID, new DHTContactsMessageParser());
     }
     
     /**
@@ -354,6 +355,13 @@ public class VendorMessageFactory {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, int network) throws BadPacketException {
             return new HeaderUpdateVendorMessage(guid, ttl, hops, version, restOf);
+        }
+    }
+    
+    private static class DHTContactsMessageParser implements VendorMessageParser {
+        public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
+                byte[] restOf, int network) throws BadPacketException {
+            return new DHTContactsMessage(guid, ttl, hops, version, restOf);
         }
     }
     

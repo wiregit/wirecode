@@ -60,20 +60,25 @@ public class LimeDHTBootstrapperTest extends DHTTestCase {
         DHTFuture future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "pingFuture");
         Thread.sleep(300);
         assertTrue((Boolean)PrivilegedAccessor.getValue(bootstrapper, "fromRouteTable"));
-        //now emulate reception of a DHT node from the Gnutella network
+        
+        // Now emulate reception of a DHT node from the Gnutella network
         bootstrapper.addBootstrapHost(BOOTSTRAP_DHT.getContactAddress());
         assertTrue("ping future should be cancelled", future.isCancelled());
+        
         Thread.sleep(200);
         future = (DHTFuture)PrivilegedAccessor.getValue(bootstrapper, "bootstrapFuture");
-        assertFalse("Should not be waiting",bootstrapper.isWaitingForNodes());
+        assertFalse("Should not be waiting", bootstrapper.isWaitingForNodes());
+        
         //should be bootstrapping
         assertTrue(dhtContext.isBootstrapping() || dhtContext.isBootstrapped());
+        
         //now try adding more hosts -- should keep them but not bootstrap
         for(int i = 0; i < 30; i++) {
             bootstrapper.addBootstrapHost(new InetSocketAddress("1.2.3.4.5", i));
         }
         assertFalse(bootstrapper.isWaitingForNodes());
         assertFalse(future.isCancelled());
+        
         //finish bootstrap
         future.get();
         assertTrue(dhtContext.isBootstrapped());

@@ -57,12 +57,14 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         dhtFile.delete();
         //start the node controller
         ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        
         try {
             Context context = (Context) controller.getMojitoDHT();
             KUID nodeID = context.getLocalNodeID();
             RouteTable rt = context.getRouteTable();
             //fill the routing table a bit
             fillRoutingTable(rt, 10);
+            
             //add one more
             KUID kuid = KUID.createRandomID();
             RemoteContact node = new RemoteContact(
@@ -75,8 +77,10 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
                     Contact.DEFAULT_FLAG,
                     State.UNKNOWN);
             rt.add(node);
+            
             controller.start();
             controller.stop();
+            
             controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();

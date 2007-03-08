@@ -57,9 +57,9 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     /** The maximum number of errors that may occur */
     private int maxErrors;
     
-    private boolean cancelled = false;
+    private volatile boolean cancelled = false;
     
-    private boolean done = false;
+    private volatile boolean done = false;
     
     /** A handle to Context */
     protected final Context context;
@@ -302,7 +302,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * (non-Javadoc)
      * @see com.limegroup.mojito.handler.ResponseHandler#isCancelled()
      */
-    public synchronized boolean isCancelled() {
+    public boolean isCancelled() {
         return cancelled;            
     }
     
@@ -311,7 +311,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
      * means if it has returnded a result or threw an
      * Exception
      */
-    public synchronized boolean isDone() {
+    public boolean isDone() {
         return done;
     }
     

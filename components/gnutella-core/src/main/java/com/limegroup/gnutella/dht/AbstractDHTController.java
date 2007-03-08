@@ -10,6 +10,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TimerTask;
@@ -20,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
-import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.impl.DHTValuePublisherProxy;
@@ -28,18 +28,25 @@ import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
+import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.statistics.DHTStatsManager;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.CryptoUtils;
 import org.limewire.mojito.util.HostFilter;
 import org.limewire.service.ErrorService;
 
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ManagedConnection;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
 import com.limegroup.gnutella.dht.db.LimeDHTValueFactory;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
@@ -103,10 +110,15 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
     
+    private final DHTMode mode;
+    
     public AbstractDHTController(Vendor vendor, Version version, 
-            EventDispatcher<DHTEvent, DHTEventListener> dispatcher) {
+            EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
+            DHTMode mode) {
         
         this.dispatcher = dispatcher;
+        this.mode = mode;
+        
         this.dht = createMojitoDHT(vendor, version);
         
         assert (dht != null);
@@ -138,6 +150,23 @@ public abstract class AbstractDHTController implements DHTController {
         
         this.bootstrapper = new DHTBootstrapperImpl(this);
         
+        // If we're an Ultrapeer we want to notify our firewalled
+        // leafs about every new Contact
+        if (RouterService.isActiveSuperNode()) {
+            dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
+                public void handleRouteTableEvent(RouteTableEvent event) {
+                    switch(event.getEventType()) {
+                        case ADD_ACTIVE_CONTACT:
+                        case ADD_CACHED_CONTACT:
+                        case UPDATE_CONTACT:
+                            Contact node = event.getContact();
+                            forwardContact(node);
+                            break;
+                    }
+                }
+            });
+        }
+        
         DHTStatsManager.clear();
     }
 
@@ -145,6 +174,33 @@ public abstract class AbstractDHTController implements DHTController {
      * A factory method to create MojitoDHTs
      */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
+    
+    private void forwardContact(Contact node) {
+        if (!DHTSettings.ENABLE_PASSIVE_LEAF_MODE.getValue()) {
+            return;
+        }
+        
+        DHTContactsMessage msg = new DHTContactsMessage(node);
+        ConnectionManager cm = RouterService.getConnectionManager();
+        List<ManagedConnection> list = cm.getInitializedClientConnections();
+        for (ManagedConnection mc : list) {
+            if (mc.isPushProxyFor()
+                    && mc.remoteHostIsPassiveLeafNode() > -1) {
+                mc.send(msg);
+            }
+        }
+    }
+    
+    public DHTMode getDHTMode() {
+        return mode;
+    }
+
+    public List<IpPort> getActiveDHTNodes(int maxNodes) {
+        return Collections.emptyList();
+    }
+
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+    }
     
     /**
      * Start the Mojito DHT and connects it to the network in either passive mode
@@ -216,11 +272,15 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     public void addPassiveDHTNode(SocketAddress hostAddress) {
-        if (dht.isBootstrapped()) {
-            return;
+        if (!dht.isBootstrapped()) {
+            bootstrapper.addPassiveNode(hostAddress);
         }
-        
-        bootstrapper.addPassiveNode(hostAddress);
+    }
+    
+    public void addContact(Contact node) {
+        if (getDHTMode().isPassiveLeaf()) {
+            getMojitoDHT().getRouteTable().add(node);
+        }
     }
     
     /**
@@ -231,12 +291,11 @@ public abstract class AbstractDHTController implements DHTController {
      * @param excludeLocal true to exclude the local node
      * @return A list of DHT <tt>IpPorts</tt>
      */
-    protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal){
-        Context dhtContext = (Context)dht; 
+    protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal) {
         Collection<Contact> nodes = ContactUtils.sort(
-                dhtContext.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
+                dht.getRouteTable().getActiveContacts(), numNodes + 1); //it will add the local node!
         
-        KUID localNode = dhtContext.getLocalNodeID();
+        KUID localNode = dht.getLocalNodeID();
         List<IpPort> ipps = new ArrayList<IpPort>();
         for(Contact cn : nodes) {
             if(excludeLocal && cn.getNodeID().equals(localNode)) {

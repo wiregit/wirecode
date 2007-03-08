@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -151,13 +152,12 @@ public class NodeAssignerTest extends LimeTestCase {
         connect();
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
         assertTrue("should be passively connected to the DHT", RouterService.isDHTNode() 
-                && !RouterService.isActiveDHTNode());
+                && (RouterService.getDHTMode() != DHTMode.ACTIVE));
         
         //make sure you can't be an active DHT node at the same time
         setDHTCapabilities();
         sleep(200);
-        assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
-        
+        assertFalse(RouterService.getDHTMode().isActive());
     }
     
     public void testLeafToUltrapeerPromotion() throws Exception{
@@ -172,7 +172,7 @@ public class NodeAssignerTest extends LimeTestCase {
                 new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(1000);
         assertTrue("should be an ultrapeer", RouterService.getConnectionManager().isActiveSupernode());
-        assertFalse("should not be a DHT node", RouterService.isActiveDHTNode());
+        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
     }
     
     public void testDHTtoUltrapeerSwitch() throws Exception{
@@ -184,7 +184,7 @@ public class NodeAssignerTest extends LimeTestCase {
         connect();
         sleep();
         assertFalse("should not be an ultrapeer", RouterService.isSupernode());
-        assertTrue("should be DHT node", RouterService.isActiveDHTNode());
+        assertEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
         ULTRAPEER.setAcceptsUltrapeers(true);
         setUltrapeerCapabilities();
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",new Boolean(true));
@@ -192,7 +192,8 @@ public class NodeAssignerTest extends LimeTestCase {
         PrivilegedAccessor.setValue(ASSIGNER, "_lastUltrapeerAttempt", 
                 new Long(System.currentTimeMillis() - 24*3600*1000));
         sleep(2000);
-        assertFalse("should not be an active DHT node", RouterService.isActiveDHTNode());
+        
+        assertNotEquals(DHTMode.ACTIVE, RouterService.getDHTMode());
         assertTrue("should be an ultrapeer", RouterService.isSupernode());
     }
     

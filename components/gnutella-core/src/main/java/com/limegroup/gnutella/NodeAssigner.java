@@ -9,6 +9,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.OSUtils;
 
+import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -144,7 +145,7 @@ public class NodeAssigner {
                     //check if became ultrapeer capable
                     assignUltrapeerNode();
                     //check if became DHT capable
-                    assignActiveDHTNode();
+                    assignDHTMode();
                     
                 } catch(Throwable t) {
                     ErrorService.error(t);
@@ -238,22 +239,7 @@ public class NodeAssigner {
             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
-
-        if(RouterService.isSupernode()) {
-            //if we're already an ultrapeer, connect to the DHT in passive mode
-            //or if we were connected as active node before, switch to passive mode
-            if(RouterService.isActiveSuperNode()
-                    && !DHTSettings.DISABLE_DHT_NETWORK.getValue()
-                    && !DHTSettings.DISABLE_DHT_USER.getValue()
-                    && (!RouterService.isDHTNode() || RouterService.isActiveDHTNode())) {
-
-                NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
-                RouterService.startDHT(false);
-                
-            }
-            return;
-        }
-
+        
         boolean isUltrapeerCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime OR current uptime high enough?
@@ -313,7 +299,8 @@ public class NodeAssigner {
         }
         //here: we are not an ultrapeer and will not try to connect as one
         //maybe a demotion from ultrapeer to leaf --> disconnect the DHT if it is the case
-        if(RouterService.isDHTNode() && !RouterService.isActiveDHTNode()) {
+        if (RouterService.isDHTNode() 
+                && (RouterService.getDHTMode() != DHTMode.ACTIVE)) {
             NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
             RouterService.shutdownDHT();
         }
@@ -341,7 +328,9 @@ public class NodeAssigner {
      * @return true if we switched, false otherwise
      */
     private static boolean switchFromActiveDHTNode() {
-        if(RouterService.isActiveDHTNode() && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
+        if((RouterService.getDHTMode() == DHTMode.ACTIVE) 
+                && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
+            
             if(Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue()){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("Randomly switching from DHT node to ultrapeer!");
@@ -368,70 +357,133 @@ public class NodeAssigner {
     }
     
     /**
-     * Sets EVER_DHT_CAPABLE to true if this node has the necessary
-     * requirements for joining the DHT. DOES modify the property if the capabilities
-     * are not met and disconnects the node from the DHT.  
-     * If the user has disabled DHT support, sets EVER_DHT_CAPABLE to false.
+     * 
      */
-    private static void assignActiveDHTNode() {
+    private static void assignDHTMode() {
         
-        //make sure that the node has had the time to try to connect as an ultrapeer
-        Assert.that(((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L) > 
-                     UltrapeerSettings.MIN_CONNECT_TIME.getValue()), "Wrong minimum initial uptime");
-        
+        // Check if the DHT was disabled by somebody. If so shut it
+        // down and return
         if (DHTSettings.DISABLE_DHT_USER.getValue() 
                 || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
             DHTSettings.ACTIVE_DHT_CAPABLE.setValue(false);
-            RouterService.shutdownDHT();
+            if (RouterService.getDHTMode() != DHTMode.INACTIVE) {
+                RouterService.shutdownDHT();
+            }
             return;
         }
         
-        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
-                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        // Remember the old mode as we're only going to switch
+        // if the new mode is different from the old mode!
+        final DHTMode old = RouterService.getDHTMode();
         
-        boolean isActiveDHTCapable = 
-            (_isHardcoreCapable &&
-            //AND is my average uptime AND current uptime high enough?
-            (averageTime >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue() 
-                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L))
-                    //AND I have accepted incoming messages over UDP
-                    && RouterService.isGUESSCapable());
-                     
-        //don't give active capability to active ultrapeers
-        if(DHTSettings.EXCLUDE_ULTRAPEERS.getValue() 
-                && RouterService.isActiveSuperNode()){
-            isActiveDHTCapable = false;
-        }
+        // Initial mode is to turn off the DHT
+        DHTMode mode = DHTMode.INACTIVE;
         
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Node is "+(isActiveDHTCapable?"":"NOT")+" DHT capable\n average time: "+averageTime
-                    +"\n currentUptime: "+_currentUptime);
-        }
-
-        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(isActiveDHTCapable);
-        
-        //Node is not allready part of the DHT 
-        //AND is DHT capable AND is accepted (probabilistic factor) 
-        if ((isActiveDHTCapable && acceptDHTNode() 
-                && !RouterService.isActiveDHTNode()) 
-                || DHTSettings.FORCE_DHT_CONNECT.getValue()) {
-            
-            Runnable dhtInitializer = new Runnable() {
-                public void run() {
-                    NodeAssignerStat.ACTIVE_DHT_ASSIGNMENTS.incrementStat();
-                    RouterService.startDHT(true);
-                }
-            };
-            
-            ThreadExecutor.startThread(dhtInitializer, "DHT-InitializeThread");
-            return;
+        // If we're an Ultrapeer, connect to the DHT in passive mode or if 
+        // we were connected as active node before, switch to passive mode
+        boolean isUltrapeer = RouterService.isActiveSuperNode();
+        if (isUltrapeer) {
+            mode = DHTMode.PASSIVE;
         } 
+        
+        // If we're not an ultrapeer or if ultrapeers are allowed to become
+        // active DHT nodes then figure out if the local node matches the
+        // requirements to become an active DHT node
+        if (!isUltrapeer || !DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
+            
+            // Make sure that the node has had the time to try to connect as an ultrapeer
+            assert ((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L) 
+                    > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
+                    
+            long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+                    ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+            
+            // This is the minimum requirement to connect to the DHT in passive mode
+            boolean passiveCapable = _isHardcoreCapable
+                && (averageTime >= DHTSettings.MIN_DHT_AVG_UPTIME.getValue()
+                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L));
+        
+            // In order to be able to connect to the DHT in active mode you
+            // must not be firewalled and able to receive unsolicited UDP
+            boolean activeCapable = passiveCapable && RouterService.isGUESSCapable();
+            
+            if (LOG.isDebugEnabled()) {
+                if (passiveCapable && !activeCapable) {
+                    LOG.debug("Node is passive DHT capable\n average time: " 
+                            + averageTime + "\n currentUptime: " + _currentUptime);
+                } else if (activeCapable) {
+                    LOG.debug("Node is active DHT capable\n average time: " 
+                            + averageTime + "\n currentUptime: " + _currentUptime);
+                } else {
+                    LOG.debug("Node is NOT DHT capable\n average time: " 
+                            + averageTime + "\n currentUptime: " + _currentUptime);
+                }
+            }
 
-        // for now, disconnect node as soon as not anymore DHT capable
-        if(!isActiveDHTCapable && RouterService.isActiveDHTNode()) { 
-            NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
-            RouterService.shutdownDHT();
+            DHTSettings.ACTIVE_DHT_CAPABLE.setValue(activeCapable);
+            
+            if (passiveCapable) {
+                // Switch to active mode if possible!
+                if (activeCapable) {
+                    mode = DHTMode.ACTIVE;
+                    
+                // Only leafs can become passive leaf nodes!
+                } else if (!isUltrapeer 
+                        && DHTSettings.ENABLE_PASSIVE_LEAF_MODE.getValue()) {
+                    mode = DHTMode.PASSIVE_LEAF;
+                }
+            }
         }
+        
+        if (DHTSettings.FORCE_DHT_CONNECT.getValue()) {
+            mode = DHTMode.ACTIVE;
+        }
+        
+        // Ultrapeers may always start in passive mode
+        // Everybody else is accepted with a certain likelihood
+        if ((isUltrapeer || acceptDHTNode()) && (mode != old)) {
+            switchDHTMode(old, mode);
+        }
+    }
+    
+    private static void switchDHTMode(final DHTMode from, final DHTMode to) {
+        switch(from) {
+            case ACTIVE:
+                NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
+                break;
+            case PASSIVE:
+                NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
+                break;
+            case PASSIVE_LEAF:
+                NodeAssignerStat.PASSIVE_LEAF_DHT_DISCONNECTIONS.incrementStat();
+                break;
+            // INACTIVE
+        }
+        
+        switch(to) {
+            case ACTIVE:
+                NodeAssignerStat.ACTIVE_DHT_ASSIGNMENTS.incrementStat();
+                break;
+            case PASSIVE:
+                NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
+                break;
+            case PASSIVE_LEAF:
+                NodeAssignerStat.PASSIVE_LEAF_DHT_ASSIGNMENTS.incrementStat();
+                break;
+            // INACTIVE
+        }
+        
+        Runnable init = new Runnable() {
+            public void run() {
+                if (to != DHTMode.INACTIVE) {
+                    RouterService.startDHT(to);
+                } else {
+                    RouterService.shutdownDHT();
+                }
+            }
+        };
+        
+        ThreadExecutor.startThread(init, "DHT-InitializeThread");
     }
     
     private static boolean acceptDHTNode() {

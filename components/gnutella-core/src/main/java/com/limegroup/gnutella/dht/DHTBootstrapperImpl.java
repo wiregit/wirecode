@@ -195,7 +195,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             }
             
             pingFuture = getMojitoDHT().findActiveContact();
-            pingFuture.addDHTFutureListener(new PongListener());
+            pingFuture.addDHTFutureListener(new PongListener(pingFuture));
             
             triedRouteTable = true;
             fromRouteTable = true;
@@ -236,7 +236,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
             it.remove();
             
             pingFuture = getMojitoDHT().ping(addr);
-            pingFuture.addDHTFutureListener(new PongListener());
+            pingFuture.addDHTFutureListener(new PongListener(pingFuture));
         }
     }
     
@@ -328,8 +328,19 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * 2) check the hosts Set for other Nodes and ping 'em
      */
     private class PongListener implements DHTFutureListener<PingResult> {
+        
+        private final DHTFuture<PingResult> myFuture;
+        
+        public PongListener(DHTFuture<PingResult> myFuture) {
+            this.myFuture = myFuture;
+        }
+        
         public void handleFutureSuccess(PingResult result) {
             synchronized (lock) {
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 pingFuture = null;
 
                 // Stop the DHTNodeFetcher, we don't need it anymore
@@ -344,6 +355,10 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         
         public void handleExecutionException(ExecutionException e) {
             synchronized (lock) {
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 pingFuture = null;
                 
                 if (ExceptionUtils.isCausedBy(e, DHTException.class)) {
@@ -380,6 +395,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         public void handleCancellationException(CancellationException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Cancelled", e);
+                
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 stop();
             }
         }
@@ -387,6 +407,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
         public void handleInterruptedException(InterruptedException e) {
             synchronized (lock) {
                 LOG.debug("Bootstrap Ping Interrupted", e);
+                
+                if (pingFuture != myFuture) {
+                    return;
+                }
+                
                 stop();
             }
         }

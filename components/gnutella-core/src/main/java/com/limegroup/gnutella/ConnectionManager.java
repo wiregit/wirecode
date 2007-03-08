@@ -1150,7 +1150,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             for(ManagedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;
-                if (currMC.isPushProxy())
+                if (currMC.isMyPushProxy())
                     proxies.add(currMC);
             }
             return proxies;

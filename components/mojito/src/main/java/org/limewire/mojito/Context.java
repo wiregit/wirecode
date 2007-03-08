@@ -111,6 +111,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     private MessageDispatcher messageDispatcher;
     private MessageHelper messageHelper;
     private DHTValueManager valueManager;
+    
+    private boolean bucketRefresherDisabled;
     private BucketRefresher bucketRefresher;
     
     private PingManager pingManager;
@@ -690,6 +692,23 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         return valueEntityPublisher;
     }
     
+    /**
+     * Sets whether or not the BucketRefresher should be disabled
+     */
+    public synchronized void setBucketRefresherDisabled(boolean bucketRefresherDisabled) {
+        if (isRunning()) {
+            throw new IllegalStateException("Cannot disable BucketRefresher while " + getName() + " is running");
+        }
+        this.bucketRefresherDisabled = bucketRefresherDisabled;
+    }
+    
+    /**
+     * Returns whether or not the BucketRefresher is disabled
+     */
+    public boolean isBucketRefresherDisabled() {
+        return bucketRefresherDisabled;
+    }
+    
     /*
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isRunning()
@@ -719,6 +738,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     public synchronized boolean isBootstrapped() {
         return isRunning() && bootstrapManager.isBootstrapped();
+    }
+    
+    /**
+     * 
+     */
+    public synchronized void setBootstrapped(boolean bootstrapped) {
+        bootstrapManager.setBootstrapped(bootstrapped);
     }
     
     /*
@@ -806,7 +832,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         
         estimator = new DHTSizeEstimator();
         messageDispatcher.start();
-        bucketRefresher.start();
+        
+        if (!isBucketRefresherDisabled()) {
+            bucketRefresher.start();
+        }
+        
         valueManager.start();
     }
     
@@ -901,9 +931,9 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     private Set<Contact> getActiveContacts() {
         Set<Contact> nodes = new LinkedHashSet<Contact>();
-        Collection<Contact> contactList = getRouteTable().getActiveContacts();
-        contactList = ContactUtils.sort(contactList);
-        nodes.addAll(contactList);
+        Collection<Contact> active = getRouteTable().getActiveContacts();
+        active = ContactUtils.sort(active);
+        nodes.addAll(active);
         nodes.remove(getLocalNode());
         return nodes;
     }

@@ -129,16 +129,12 @@ public final class CapabilitiesVM extends VendorMessage {
         hashSet.add(smp);
         
         if(RouterService.isMemberOfDHT()) {
-            if(RouterService.isActiveDHTNode()) {
-                smp = new SupportedMessageBlock(DHTMode.ACTIVE.getCapabilityName(),
-                        RouterService.getDHTManager().getVersion().getVersion());
-            } else {
-                smp = new SupportedMessageBlock(DHTMode.PASSIVE.getCapabilityName(),
-                        RouterService.getDHTManager().getVersion().getVersion());
-            }
+            DHTMode mode = RouterService.getDHTMode();
+            assert (mode != null);
+            smp = new SupportedMessageBlock(mode.getCapabilityName(),
+                    RouterService.getDHTManager().getVersion().getVersion());
             hashSet.add(smp);
         }
-        
     }
 
 
@@ -210,6 +206,13 @@ public final class CapabilitiesVM extends VendorMessage {
         return supportsCapability(DHTMode.PASSIVE.getCapabilityName());
     }
 
+    /**
+     * 
+     */
+    public int isPassiveLeafNode() {
+        return supportsCapability(DHTMode.PASSIVE_LEAF.getCapabilityName());
+    }
+    
     // override super
     public boolean equals(Object other) {
         if(other == this)

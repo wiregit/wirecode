@@ -33,9 +33,10 @@ public class UDPCrawlerPong extends VendorMessage {
 	public static final String AGENT_SEP = ";";
     
 	//The masks for the DHT status information
-    public static final byte DHT_PASSIVE_MASK = 0x1;
-    public static final byte DHT_ACTIVE_MASK = 0x2;
-    public static final byte DHT_WAITING_MASK = 0x4;
+    public static final byte DHT_PASSIVE_MASK       = 0x01;
+    public static final byte DHT_ACTIVE_MASK        = 0x02;
+    public static final byte DHT_WAITING_MASK       = 0x04;
+    public static final byte DHT_PASSIVE_LEAF_MASK  = 0x08;
     
 	//this message is sent only as a reply to a request message, so when 
 	//constructing it we need the object representing the request message
@@ -157,11 +158,18 @@ public class UDPCrawlerPong extends VendorMessage {
         if(request.hasDHTStatus()) {
             byte dhtStatus = 0x0;
             if(RouterService.isDHTNode()) {
-                if(RouterService.isActiveDHTNode()) {
-                    dhtStatus |= DHT_ACTIVE_MASK;
-                } else {
-                    dhtStatus |= DHT_PASSIVE_MASK;
+                switch (RouterService.getDHTMode()) {
+                    case ACTIVE:
+                        dhtStatus |= DHT_ACTIVE_MASK;
+                        break;
+                    case PASSIVE:
+                        dhtStatus |= DHT_PASSIVE_MASK;
+                        break;
+                    case PASSIVE_LEAF:
+                        dhtStatus |= DHT_PASSIVE_LEAF_MASK;
+                        break;        
                 }
+                
                 if(!RouterService.isMemberOfDHT()) {
                     dhtStatus |= DHT_WAITING_MASK;
                 }
