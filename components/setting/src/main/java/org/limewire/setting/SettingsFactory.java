@@ -677,6 +677,22 @@ public final class SettingsFactory implements Iterable<Setting> {
         return result;
     }
     
+    public synchronized ProbabilisticBooleanSetting createProbabilisticBooleanSetting(
+            String key, float defaultValue) {
+        ProbabilisticBooleanSetting result =
+            new ProbabilisticBooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
+    public synchronized ProbabilisticBooleanSetting createRemoteProbabilisticBooleanSetting(
+            String key, float defaultValue, String remoteKey, float min, float max) {
+        ProbabilisticBooleanSetting result =
+            new ProbabilisticBooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue, min, max);
+        handleSettingInternal(result, remoteKey);
+        return result;
+    }
+    
     /**
      * Creates a new <tt>PasswordSetting</tt> instance with the specified
      * key and default value.
