@@ -157,7 +157,7 @@ public abstract class RouteTableMessage extends Message {
     	// Save the given information in the Message core of this RouteTableMessage object 
         super(
         	guid,
-        	Message.F_ROUTE_TABLE_UPDATE, // 0x30, the byte that identifes a qrp message
+        	Message.F_ROUTE_TABLE_UPDATE, // 0x30, the byte that identifes a QRP message
         	ttl,
         	hops,
         	length);

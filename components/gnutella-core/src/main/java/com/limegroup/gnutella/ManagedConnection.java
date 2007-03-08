@@ -661,8 +661,8 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
 
         	// Make a new QueryRouteTable object
             _lastQRPTableReceived = new QueryRouteTable(
-                m.getTableSize(), // The size of the query route table
-                m.getInfinity()); // The infinity the QRP table uses
+                m.getTableSize(), // The size of the query route table, like 65536
+                m.getInfinity()); // The infinity the QRP table uses, like 7
 
         // The remote computer is replacing a previous query route table with a new one
         } else {
@@ -673,6 +673,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
     }
 
     /**
+     * Bring our record of this remote computer's QRP table up to date by reading the given QRP patch message it sent us.
      * The remote computer sent us a QRP patch, patch _lastQRPTableReceived with it.
      * 
      * Called when the remote computer sends us a PatchTableMessage.
@@ -807,7 +808,7 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
          * sure that the remote host can answer the query....
          */
 
-        // This is a feature query (ask)
+        // This is a What's New search, just looking for files users recently started sharing
         if (query.isFeatureQuery()) {
 
             // We are an ultrapeer and the remote computer is a leaf
@@ -2137,8 +2138,8 @@ public class ManagedConnection extends Connection implements ReplyHandler, Messa
      */
 
     /**
-     * Returns the time we should next forward our query route table to this remote computer.
-     * incrementNextQRPForwardTime() set it to 1 minute from now if the remote computer is an ultrapeer, 5 minutes if it is a leaf.
+     * Returns the time we should next send our QRP table to this remote computer.
+     * incrementNextQRPForwardTime() set it to 1 minute from now if this remote computer is an ultrapeer, 5 minutes if it is a leaf.
      * 
      * This time is only valid if isClientSupernodeConnection() is true. (do)
      */

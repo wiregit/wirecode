@@ -1,3 +1,6 @@
+
+// Edited for the Learning branch
+
 package com.limegroup.gnutella;
 
 import java.io.File;
@@ -272,17 +275,30 @@ public abstract class FileManager {
     private static final FileEventListener EMPTY_CALLBACK = new FileEventListener() {
         public void handleFileEvent(FileManagerEvent evt) {}
     };
-         
+
+    //done
+
     /**
-     * The QueryRouteTable kept by this.  The QueryRouteTable will be 
+     * Our QRP table that describes what words will match file names we're sharing.
+     * To get it, call getQRT().
+     * 
+     * The QueryRouteTable kept by this.  The QueryRouteTable will be
      * lazily rebuilt when necessary.
      */
     protected static QueryRouteTable _queryRouteTable;
-    
+
     /**
-     * Boolean for checking if the QRT needs to be rebuilt.
+     * Determine if we need to rebuild our QRP table to reflect the files we're currently sharing.
+     * 
+     * False if our QRP table reflects the files we're currently sharing.
+     * True if our QRP table is no longer up to date.
+     * 
+     * After getQRT() calls buildQRT(), it sets _needRebuild to false, our new QRP table is up to date.
+     * Other methods that change the files we're sharing set _needRebuild back to true.
      */
     protected static volatile boolean _needRebuild = true;
+
+    //do
 
     /**
      * Characters used to tokenize queries and file names.
@@ -1069,6 +1085,8 @@ public abstract class FileManager {
                     // the file is still shareable.
                     if(!urns.isEmpty() && isFileShareable(file)) {
                         fd = addFile(file, urns);
+
+                        // Record that our QRP table is no longer up to date
                         _needRebuild = true;
                     }
                 }
@@ -1185,7 +1203,7 @@ public abstract class FileManager {
 
         // Ensure file can be found by URN lookups
         this.updateUrnIndex(fileDesc);
-        _needRebuild = true;            
+        _needRebuild = true; // Record that our QRP table is no longer up to date
         return fileDesc;
     }
 
@@ -1249,7 +1267,7 @@ public abstract class FileManager {
         
         _files.set(i, null);
         _fileToFileDescMap.remove(f);
-        _needRebuild = true;
+        _needRebuild = true; // Record that our QRP table is no longer up to date
 
         // If it's an incomplete file, the only reference we 
         // have is the URN, so remove that and be done.
@@ -1818,40 +1836,62 @@ public abstract class FileManager {
         
         return false;
     }
-    
+
+    //done
+
     /**
+     * Get a copy of our QRP table that describes the files we're sharing.
+     * Our QRP table describes what words will match the files we're sharing.
+     * 
      * Returns the QRTable.
      * If the shared files have changed, then it will rebuild the QRT.
      * A copy is returned so that FileManager does not expose
      * its internal data structure.
+     * 
+     * @return A copy of our _queryRouteTable object
      */
     public synchronized QueryRouteTable getQRT() {
+
+    	// If other methods changed the files we're sharing, making our QRP table no longer up to date
         if(_needRebuild) {
-            buildQRT();
-            _needRebuild = false;
+
+        	// Rebuild it
+        	buildQRT();           // Remake _queryRouteTable
+            _needRebuild = false; // Record that our QRP table is up to date
         }
-        
-        QueryRouteTable qrt = new QueryRouteTable(_queryRouteTable.getSize());
-        qrt.addAll(_queryRouteTable);
-        return qrt;
+
+        // Copy _queryRouteTable to a new QueryRouteTable object, and return the copy
+        QueryRouteTable qrt = new QueryRouteTable(_queryRouteTable.getSize()); // Make qrt the same size
+        qrt.addAll(_queryRouteTable); // Bring in all the same values
+        return qrt; // Return a reference to the copy object, not _queryRouteTable
     }
 
     /**
+     * Build our QRP table with bits open for the file names we're sharing.
+     * Save the QueryRouteTable object in the member variable named _queryRouteTable.
+     * 
      * build the qrt.  Subclasses can add other Strings to the
-     * QRT by calling buildQRT and then adding directly to the 
+     * QRT by calling buildQRT and then adding directly to the
      * _queryRouteTable variable. (see xml/MetaFileManager.java)
      */
     protected synchronized void buildQRT() {
 
-        _queryRouteTable = new QueryRouteTable();
+    	// Make a new QRP table with our default size of 65536 and infinity of 7
+        _queryRouteTable = new QueryRouteTable(); // It starts out filled with 0s, blocking all searches
+
+        // Loop through each file we're sharing, represented by a FileDesc object
         FileDesc[] fds = getAllSharedFileDescriptors();
         for (int i = 0; i < fds.length; i++) {
-        	
-            if (fds[i] instanceof IncompleteFileDesc) continue;
-            
+
+        	// We haven't finished downloading this file yet
+            if (fds[i] instanceof IncompleteFileDesc) continue; // Don't list its keywords in our QRP table
+
+            // Get the complete path to the shared file, and add all those words to our QRP table
             _queryRouteTable.add(fds[i].getPath());
         }
     }
+
+    //do
 
     ////////////////////////////////// Queries ///////////////////////////////
 

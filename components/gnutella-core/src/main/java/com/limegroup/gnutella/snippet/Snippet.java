@@ -4,15 +4,50 @@
 package com.limegroup.gnutella.snippet;
 
 
-import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.routing.HashFunction;
 
 
 import com.limegroup.gnutella.ByteOrder;
 
 public class Snippet {
 
-    public static void snippet() {
+	/**
+	 * Hashes a keyword into the index of its bit in a QRP table.
+	 * 
+	 * @param keyword The search keyword to hash.
+	 * @param bits    The number of bits the value should be within.
+	 *                16 indicates 2^16, 65536, the hash value will be between 0 and 65535.
+	 * @return        The hash value.
+	 */
+    public static int hashKeyword(String keyword, byte bits) {
 
+    	int hash = 0;
+        int hashPosition = 0;
+
+        for (int keywordIndex = 0; keywordIndex < keyword.length(); keywordIndex++) {
+
+        	hash ^= (Character.toLowerCase(keyword.charAt(keywordIndex)) & 0xFF) << hashPosition;
+        	hashPosition = (hashPosition + 8) & 24;
+        }
+
+        return (int)(hash * 0x4F1BBCDC) >>> (32 - bits);
+    }
+
+
+
+    public static void snippet() {
+    	
+    	
+    	
+    	String result1[] = HashFunction.keywords("reds and greens");
+    	String result2[] = HashFunction.getPrefixes(result1);
+    	
+
+    	
+    	
+    	
+    	
+    	/*
         BitSet b = new BitSet();
         
         int cardinality, unused, inuse;
@@ -34,6 +69,7 @@ public class Snippet {
         cardinality = b.cardinality();
         unused = b.unusedUnits();
         inuse = b.getUnitsInUse();
+        */
         
         
         

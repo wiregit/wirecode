@@ -68,16 +68,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 /**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
  * One of the three classes that make up the core of the backend.  This
  * class' job is to direct the routing of messages and to count those message
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
- * 
- * 
  */
 public abstract class MessageRouter {
-
-    //done
 
     /** A debugging log we can write lines of text to as the program runs. */
     private static final Log LOG = LogFactory.getLog(MessageRouter.class);
@@ -89,16 +91,17 @@ public abstract class MessageRouter {
      */
     protected static ConnectionManager _manager;
 
-    //do
-
     /**
-     * 15
+     * 15, if we get a query message from an old Gnutella program, only forward it to 15 ultrapeers, not all of them.
+     * 
+     * handleQueryRequest() calls forwardLimitedQueryToUltrapeers() when it gets a query message from a Gnutella program that doesn't support advanced features.
+     * forwardLimitedQueryToUltrapeers() only forwards the query to 15 ultrapeers, and tries to find 15 old ones.
+     * This is different than forwardQueryToUltrapeers(), which forwards a query from a modern Gnutella program to all our ultrapeers.
+     * 
      * Constant for the number of old connections to use when forwarding
      * traffic from old connections.
      */
     private static final int OLD_CONNECTIONS_TO_USE = 15;
-
-    //done
 
     /**
      * Our client ID GUID that uniquely identifies us on the Gnutella network.
@@ -200,7 +203,11 @@ public abstract class MessageRouter {
      */
     private RouteTable _headPongRouteTable = new RouteTable(10, MAX_ROUTE_TABLE_SIZE); // 10 seconds, 50 thousand entries
 
-    /** How long to buffer up out-of-band replies.
+    /**
+     * 30000, 30 seconds in milliseconds.
+     * Every 30 seconds, 
+     *  
+     *  How long to buffer up out-of-band replies.
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
 
@@ -272,8 +279,6 @@ public abstract class MessageRouter {
     /**
      * Not used.
      * 
-     * TODO:kfaaborg This is not used.
-     * 
      * keeps track of which hosts have sent us head pongs.  We may choose
      * to use these messages for udp tunnel keep-alive, so we don't want to
      * set the minimum interval too high.  Right now it is half of what we
@@ -316,14 +321,15 @@ public abstract class MessageRouter {
 	 */
 	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
 
-	//do
-
     /**
-     * Variable for the most recent <tt>QueryRouteTable</tt> created
-     * for this node.  If this node is an Ultrapeer, the routing
-     * table will include the tables from its leaves.
+     * Our QRP table.
+     * 
+     * The most recent QRP table we made to describe the files we're sharing.
+     * If we're an ultrapeer, the QRP table will include our files and those of all our leaves.
      */
     private QueryRouteTable _lastQueryRouteTable;
+
+    //do
 
     /**
      * 10
@@ -559,14 +565,14 @@ public abstract class MessageRouter {
 			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 
-        // 0x30 QRP, 0x00 Reset Table, a remote computer will start over describing its QRP table to us
+        // 0x30 QRP, 0x00 Reset Table, a remote computer is defining the size and values of its QRP table
         } else if (msg instanceof ResetTableMessage) {
 
             // Update statistics and hand off the message
 			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg, receivingConnection);
 
-        // 0x30 QRP, 0x01 Patch Table, a remote computer is sending us the next part of its QRP table
+        // 0x30 QRP, 0x01 Patch Table, a remote computer is sending us its QRP table
 		} else if (msg instanceof PatchTableMessage) {
 
             // Update statistics and hand off the message
@@ -707,7 +713,7 @@ public abstract class MessageRouter {
         // We received a query by UDP
         if (msg instanceof QueryRequest) {
 
-            //TODO: compare QueryKey with old generation params.  if it matches
+            //TODO1: compare QueryKey with old generation params.  if it matches
             //send a new one generated with current params
             if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
                 sendAcknowledgement(addr, msg.getGUID());
@@ -771,12 +777,12 @@ public abstract class MessageRouter {
             
         } else if (msg instanceof UDPCrawlerPing) {
             
-        	//TODO: add the statistics recording code
+        	//TODO1: add the statistics recording code
         	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
             
         } else if (msg instanceof HeadPing) {
             
-        	//TODO: add the statistics recording code
+        	//TODO1: add the statistics recording code
         	handleHeadPing((HeadPing)msg, handler);
             
         } else if (msg instanceof UpdateRequest) {
@@ -1066,7 +1072,7 @@ public abstract class MessageRouter {
         } else {
 
             /*
-             * TODO:kfaaborg How can control reach here?
+             * TODO1:kfaaborg How can control reach here?
              */
 
             // Record the duplicate query in statistics
@@ -1315,7 +1321,7 @@ public abstract class MessageRouter {
          */
 
         // Does nothing
-        updateMessage(request, handler); // TODO:kfaaborg Remove this line
+        updateMessage(request, handler); // TODO1:kfaaborg Remove this line
 
         // The query is from one of our leaves
 		if (handler.isSupernodeClientConnection() && // We're an ultrapeer, and the computer that sent us this query is one of our leaves, and
@@ -1473,13 +1479,13 @@ public abstract class MessageRouter {
         }
         
         // else some sort of routing error or attack?
-        // TODO: tally some stat stuff here
+        // TODO1: tally some stat stuff here
     }
 
     //done
 
     /**
-     * A remote computer is telling us how many results we want, reply to request them all.
+     * A remote computer is telling us how many results it has, reply to request them all.
      * 
      * A remote computer sent us a LIME 12 2 Reply Number vendor message in a UDP packet.
      * Our query packet reached it, and it has hits for us.
@@ -2144,34 +2150,29 @@ public abstract class MessageRouter {
         }
 	}
 
-    //do
-
 	/**
-	 * Factored-out method that sends a query to a connection that supports
-	 * query routing.  The query is only forwarded if there's a hit in the
-	 * query routing entries.
-	 *
-	 * @param query the <tt>QueryRequest</tt> to potentially forward
-	 * @param mc the <tt>ManagedConnection</tt> to forward the query to
-	 * @param handler the <tt>ReplyHandler</tt> that will be entered into
-	 *  the routing tables to handle any replies
-	 * @return <tt>true</tt> if the query was sent, otherwise <tt>false</tt>
+	 * See if a query makes it through an ultrapeer's QRP table, and send it if it does.
+	 * Only forwardQueryToUltrapeer() calls this method.
+	 * 
+	 * @param query   The query packet to send
+	 * @param mc      The ultrapeer to send it to
+	 * @param handler Not used
+	 * @return        True if we sent it, false if we didn't
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc, ReplyHandler handler) {
-        
+
+		// If the search makes it through the ultrapeer's QRP table
 		if (mc.shouldForwardQuery(query)) {
-            
-			//A new client with routing entry, or one that hasn't started
-			//sending the patch.
+
+			// Send it the query packet and report we sent it
 			mc.send(query);
 			return true;
 		}
-        
+
+		// The search was stopped by the ultrapeer's QRP table, we didn't send it
 		return false;
 	}
 
-    //done
-    
     /**
      * Not used.
      * 
@@ -2201,129 +2202,160 @@ public abstract class MessageRouter {
 		MulticastService.instance().send(query);
 	}
 
-    //do
-
     /**
-     * //do
+     * Forward a query message we received to all our ultrapeers.
+     * handleQueryRequest() uses this method when we get a query from a modern ultrapeer.
+     * It sends the query to each of our fellow ultrapeers, using QRP to block pointless searches on the last hop.
      * 
      * Broadcasts the query request to all initialized connections that
      * are not the receivingConnection, setting up the routing
      * to the designated QueryReplyHandler.  This is called from the default
      * handleQueryRequest and the default broadcastQueryRequest(QueryRequest)
-     *
+     * 
      * If different (smarter) broadcasting functionality is desired, override
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
+     * 
+     * @param query   The query message to send.
+     * @param handler The computer that we got the query message from.
+     *                Used to make sure that we don't send the query back to the computer that gave it to us.
      */
     private void forwardQueryToUltrapeers(QueryRequest query, ReplyHandler handler) {
-        
-		// Note the use of initializedConnections only.
-		// Note that we have zero allocations here.
-		
-		//Broadcast the query to other connected nodes (ultrapeers or older
-		//nodes), but DON'T forward any queries not originating from me 
-		//along leaf to ultrapeer connections.
-	 
+
+    	/*
+		 * Note the use of initializedConnections only.
+		 * Note that we have zero allocations here.
+		 * 
+		 * Broadcast the query to other connected nodes (ultrapeers or older
+		 * nodes), but DON'T forward any queries not originating from me
+		 * along leaf to ultrapeer connections.
+    	 */
+
+    	// Loop for each ultrapeer we're connected to
 		List list = _manager.getInitializedConnections();
         int limit = list.size();
+		for (int i = 0; i < limit; i++) {
+			ManagedConnection mc = (ManagedConnection)list.get(i);
 
-		for (int i=0; i<limit; i++) {
-            
-			ManagedConnection mc = (ManagedConnection)list.get(i);      
-            forwardQueryToUltrapeer(query, handler, mc);  
+			// Send the query to the remote computer, making sure it's not being sent back and using QRP on the last hop
+            forwardQueryToUltrapeer(query, handler, mc);
         }
     }
 
     /**
-     * //do
+     * Forward a query message we received from an old Gnutella program to up to 15 of our ultrapeers.
+     * handleQueryRequest() uses this method instead of the one above when we get a query from an older ultrapeer.
+     * It sends the query to up to 15 of our fellow ultrapeers, and tries to find 15 old ones.
      * 
      * Performs a limited broadcast of the specified query.  This is
-     * useful, for example, when receiving queries from old-style 
+     * useful, for example, when receiving queries from old-style
      * connections that we don't want to forward to all connected
      * Ultrapeers because we don't want to overly magnify the query.
-     *
-     * @param query the <tt>QueryRequest</tt> instance to forward
-     * @param handler the <tt>ReplyHandler</tt> from which we received
-     *  the query
+     * 
+     * @param query   The query message to send.
+     * @param handler The computer that we got the query message from.
+     *                Used to make sure that we don't send the query back to the computer that gave it to us.
      */
     private void forwardLimitedQueryToUltrapeers(QueryRequest query, ReplyHandler handler) {
-        
-		//Broadcast the query to other connected nodes (ultrapeers or older
-		//nodes), but DON'T forward any queries not originating from me 
-		//along leaf to ultrapeer connections.
-	 
+
+    	/*
+		 * Broadcast the query to other connected nodes (ultrapeers or older
+		 * nodes), but DON'T forward any queries not originating from me
+		 * along leaf to ultrapeer connections.
+    	 */
+
+    	// Loop for each ultrapeer we're connected to
 		List list = _manager.getInitializedConnections();
         int limit = list.size();
-
-        int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
-        
+        int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE; // 15, we'll stop after send the query to 15 ultrapeers
 		for (int i = 0; i < limit; i++) {
-            
-            // if we've already queried enough old connections for
-            // an old-style query, break out
+
+			// If we've already sent this query to 15 of our ultrapeers, leave the loop and the method
             if (connectionsNeededForOld == 0) break;
 
+            // Get the next ultrapeer in the list
 			ManagedConnection mc = (ManagedConnection)list.get(i);
-            
-            // if the query is comiing from an old connection, try to
-            // send it's traffic to old connections.  Only send it to
-            // new connections if we only have a minimum number left
-            if (mc.isGoodUltrapeer() && (limit-i) > connectionsNeededForOld) {
-                
+
+			/*
+             * if the query is comiing from an old connection, try to
+             * send it's traffic to old connections.  Only send it to
+             * new connections if we only have a minimum number left
+			 */
+
+			// If this destination ultrapeer is modern, and we have more ultrapeers to try, don't send it to this one
+			if (mc.isGoodUltrapeer() &&    // The ultrapeer we're going to send it to supports advanced Gnutella features, and
+            	(limit - i) >              // The number of ultrapeers we have left in our list is greater than
+            	connectionsNeededForOld) { // The number of ultrapeers we still have to send the query to in our first 15
+
+            	// Skip this ultrapeer, going to the next one
                 continue;
             }
-            
+
+            // Send the query to the remote computer, making sure it's not being sent back and using QRP on the last hop
             forwardQueryToUltrapeer(query, handler, mc);
-            
-            // decrement the connections to use
+
+            // Count we have one less ultrapeer to send it to in our initial count of 15 of them
             connectionsNeededForOld--;
-		}    
+		}
     }
 
     /**
+     * Send a query message to an ultrapeer, checking the ultrapeer's QRP table if this is the query message's last hop.
+     * We are also an ultrapeer, this method is for broadcasting query messages forward between ultrapeers on the Gnutella network.
+     * 
+     * Checks the following things before sending the message:
+     * Makes sure the destination ultrapeer isn't where we got the message from.
+     * Makes sure we aren't a leaf.
+     * If the query is a What's New search, makes sure the destination ultrapeer understands them.
+     * If the query has just 1 hop left, makes sure the search isn't stopped by the ultrapeer's QRP table.
+     * 
+     * Only the 2 methods above call this one.
+     * 
      * Forwards the specified query to the specified Ultrapeer.  This
      * encapsulates all necessary logic for forwarding queries to
      * Ultrapeers, for example handling last hop Ultrapeers specially
      * when the receiving Ultrapeer supports Ultrapeer query routing,
-     * meaning that we check it's routing tables for a match before sending 
+     * meaning that we check it's routing tables for a match before sending
      * the query.
-     *
-     * @param query the <tt>QueryRequest</tt> to forward
-     * @param handler the <tt>ReplyHandler</tt> that sent the query
-     * @param ultrapeer the Ultrapeer to send the query to
+     * 
+     * @param query     The query message to send.
+     * @param handler   The computer that we got the query message from.
+     *                  Used to make sure that we don't send the query back to the computer that gave it to us.
+     * @param ultrapeer The remote ultrapeer to send the query message to.
      */
     private void forwardQueryToUltrapeer(QueryRequest query, ReplyHandler handler, ManagedConnection ultrapeer) {
-        
-        // don't send a query back to the guy who sent it
-        if (ultrapeer == handler) return;
 
-        // make double-sure we don't send a query received
-        // by a leaf to other Ultrapeers
+    	// Don't forward the query message to the remote computer that sent it to us
+        if (ultrapeer == handler) return; // The references point to the same object, return without doing anything
+
+        // If we are a leaf beneath the given ultrapeer, we shouldn't be forwarding query messages at all
         if (ultrapeer.isClientSupernodeConnection()) return;
 
-        // make sure that the ultrapeer understands feature queries.
-        if (query.isFeatureQuery() && !ultrapeer.getRemoteHostSupportsFeatureQueries()) return;
+        // If this is a What's New search, make sure the ultrapeer understands them
+        if (query.isFeatureQuery() &&                         // The query message is a What's New search, and
+        	!ultrapeer.getRemoteHostSupportsFeatureQueries()) // The ultrapeer didn't say "WHAT" in the Capabilities vendor message
+        	return;                                           // It can't understand What's New searches, don't send it this one
 
-        // is this the last hop for the query??
-		boolean lastHop = query.getTTL() == 1; 
-           
-        // if it's the last hop to an Ultrapeer that sends
-        // query route tables, route it.
+        // Determine if the query can just travel one more hop
+		boolean lastHop = query.getTTL() == 1; // If so, the ultrapeer we send it to won't send it any farther
+
+		// If this is the last hop, we can use the ultrapeer's QRP table to see if the ultrapeer and it's leaves might have a hit for it
         if (lastHop && ultrapeer.isUltrapeerQueryRoutingConnection()) {
-            
-            boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler);
-            
-            if (sent) RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-            else      RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
-            
+
+        	// See if the query makes it through the ultrapeer's QRP table, and send it if it does
+            boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler); // Doesn't use handler
+
+            // Record what happened in statistics
+            if (sent) RoutedQueryStat.ULTRAPEER_SEND.incrementStat(); // The search made it through the QRP table so we sent it
+            else      RoutedQueryStat.ULTRAPEER_DROP.incrementStat(); // The search was blocked by the QRP table so we didn't send it
+
+        // If the query has more hops, the QRP table can't help us
         } else {
-            
-            // otherwise, just send it out
+
+        	// Just send it to the ultrapeer
             ultrapeer.send(query);
         }
     }
-
-    //done
 
     /**
      * Send the given query packet up to our ultrapeers, who will search with it for us.
@@ -2728,8 +2760,8 @@ public abstract class MessageRouter {
     }
 
     /**
-     *  If we get and SimppRequest, get the payload we need from the
-     *  SimppManager and send the simpp bytes the the requestor in a SimppVM. 
+     * If we get and SimppRequest, get the payload we need from the
+     * SimppManager and send the simpp bytes the the requestor in a SimppVM. 
      */
     private void handleSimppRequest(final SimppRequestVM simppReq, final ReplyHandler handler ) {
         
@@ -2763,7 +2795,7 @@ public abstract class MessageRouter {
     }
 
     /**
-     *  Handles an update request by sending a response.
+     * Handles an update request by sending a response.
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
 
@@ -2940,7 +2972,7 @@ public abstract class MessageRouter {
         if (replyHandler != null) replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else                      throw new IOException("no route for push");
     }
-    
+
     /**
      * Sends a push request to the multicast network.  No lookups are
      * performed in the push route table, because the message will always
@@ -3021,7 +3053,7 @@ public abstract class MessageRouter {
             for (int i = 0; i < 10; i++, j++) { // Loop 10 times, moving i and j forward
 
                 /*
-                 * TODO:kfaaborg Above, it should be i < HIGH_HOPS_RESPONSE_LIMIT, not the magic number 10, which is the current value
+                 * TODO1:kfaaborg Above, it should be i < HIGH_HOPS_RESPONSE_LIMIT, not the magic number 10, which is the current value
                  */
 
                 // Pick a Response object from the given array
@@ -3108,69 +3140,71 @@ public abstract class MessageRouter {
     // Implemented in StandardMessageRouter.createQueryReply()
     protected abstract List createQueryReply(byte[] guid, byte ttl, long speed, Response[] res, byte[] clientGUID, boolean busy, boolean uploaded, boolean measuredSpeed, boolean isFromMcast, boolean shouldMarkForFWTransfer);
 
-    //do
-
     /**
-     * Handles a message to reset the query route table for the given
-     * connection.
-     * 
-     * 
+     * We've received a QRP reset table message.
+     * A fellow ultrapeer or one of our leaves is telling us how big its QRP table is and what infinity it uses.
+     * Save that information in the ManagedConnection object that represents the leaf, and remake our composite QRP table.
      * Only MessageRouter.handleMessage() calls this method.
-     *
      * 
      * @param rtm A QRP reset table message
      * @param mc  The remote computer that sent it to us
      */
     private void handleResetTableMessage(ResetTableMessage rtm, ManagedConnection mc) {
 
-    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake.
+    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake
         if (!isQRPConnection(mc)) return;
 
-        // reset the query route table for this connection
+        // Save the table size and chosen infinity value in the ManagedConnection object that represents the remote computer
         synchronized (mc.getQRPLock()) {
-            
             mc.resetQueryRouteTable(rtm);
         }
 
-        // if this is coming from a leaf, make sure we update
-        // our tables so that the dynamic querier has correct
-        // data
+        /*
+         * if this is coming from a leaf, make sure we update
+         * our tables so that the dynamic querier has correct
+         * data
+         */
+
+        // The remote computer that sent us the reset message is one of our leaves
         if (mc.isLeafConnection()) {
-            
+
+        	// Remake our QRP table, which shows what we and our leaves are sharing
             _lastQueryRouteTable = createRouteTable();
         }
     }
 
     /**
-     * Handles a message to patch the query route table for the given
-     * connection.
-     *
-     * 
+     * We've received a QRP patch table message.
+     * A fellow ultrapeer or one of our leaves is giving us patches we can use to update our record of its QRP table.
+     * Use them to bring our record of the remote computer's QRP table up to date, and remake our composite QRP table.
+     * Only MessageRouter.handleMessage() calls this method.
      * 
      * @param ptm A QRP patch table message
      * @param mc  The remote computer that sent it to us
      */
     private void handlePatchTableMessage(PatchTableMessage ptm, ManagedConnection mc) {
 
-    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake.
+    	// Only do something if it's from one of our leaves, or a fellow ultrapeer that told us "X-Ultrapeer-Query-Routing: 0.1" in the handshake
         if (!isQRPConnection(mc)) return;
 
-        // patch the query route table for this connection
+        // Bring our record of the remote computer's QRP table up to date
         synchronized (mc.getQRPLock()) {
-            
             mc.patchQueryRouteTable(ptm);
         }
 
-        // if this is coming from a leaf, make sure we update
-        // our tables so that the dynamic querier has correct
-        // data
+        /*
+         * if this is coming from a leaf, make sure we update
+         * our tables so that the dynamic querier has correct
+         * data
+         */
+
+        // The remote computer that sent us the patch message is one of our leaves
         if (mc.isLeafConnection()) {
-            
+
+        	// Remake our QRP table, which shows what we and our leaves are sharing
             _lastQueryRouteTable = createRouteTable();
         }
     }
-
-    //done
 
     /**
      * Does nothing.
@@ -3180,10 +3214,6 @@ public abstract class MessageRouter {
      * @param handler The remote computer that sent it to us
      */
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
-        
-        /*
-         * TODO:kfaaborg Remove this method.
-         */
 
         // Only do something if we got the query packet through TCP, from a remote computer we have represented as a ManagedConnection object
         if (!(handler instanceof Connection)) return;
@@ -3214,11 +3244,9 @@ public abstract class MessageRouter {
         // If the remote computer said "X-Ultrapeer-Query-Routing: 0.1", yes, it should be sending us QRP messages
         if (c.isUltrapeerQueryRoutingConnection()) return true;
 
-        // Otherwise, the remote computer should not be sending us QRP messages.
+        // Otherwise, the remote computer has made no promise to send us QRP messages.
         return false;
     }
-
-    //do
 
     /**
 	 * A thread that loops forever, calling forwardQueryRouteTables() every 10 seconds.
@@ -3251,10 +3279,7 @@ public abstract class MessageRouter {
                 	// Wait here for 10 seconds
                 	Thread.sleep(10 * 1000);
 
-                	
-                	
-                	
-                	// (do)
+                	// Send our QRP table to all our ultrapeers that we haven't updated in the last minute
                 	forwardQueryRouteTables();
                 }
 
@@ -3264,11 +3289,11 @@ public abstract class MessageRouter {
     }
 
     /**
-     * 
+     * Send a group of QRP messages to all our ultrapeers to bring their records of our QRP table up to date.
+     * Prepares a custom group of QRP messages for each ultrapeer that we haven't updated in the last minute, and sends them to it.
      * 
      * Only QRPPropagator.managedRun() above calls this method.
      * The "QRPPropagator" thread calls here every 10 seconds as the program runs.
-     * 
      * 
      * Sends updated query routing tables to all connections which haven't
      * been updated in a while.  You can call this method as often as you want;
@@ -3279,10 +3304,16 @@ public abstract class MessageRouter {
 		// Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
 
-		// For all connections to new hosts c needing an update...
+		// Get the list of all the ultrapeers we're connected to
 		List list = _manager.getInitializedConnections();
+
+		// Our current QRP table
 		QueryRouteTable table = null;
-		List /* of RouteTableMessage */ patches = null;
+
+		// The QRP messages we'll have to send a remote computer to bring their record of our QRP table up to date
+		List patches = null; // A List of RouteTableMessage objects
+
+		// A remote computer's out of date version of our QRP table
 		QueryRouteTable lastSent = null;
 
 		// Loop for each ultrapeer we're connected to
@@ -3297,122 +3328,156 @@ public abstract class MessageRouter {
 			} else if (!(                          // Otherwise, make sure that we're a leaf and c, our ultrapeer above us, supports QRP
 				c.isClientSupernodeConnection() && // We're a leaf and c is our ultrapeer above us, and
 				c.isQueryRoutingEnabled())) {      // It said it can accept our QRP table
-				continue;                          // Go to the start of the loop to get the next ultrapeer
+				continue;                          // Either of those weren't true, go to the start of the loop to get the next ultrapeer
 			}
 
-			// If it hasn't been 5 minutes since we sent this ultrapeer our QRP table, skip it and go to the next one
-			if (time < c.getNextQRPForwardTime()) continue;
+			// Only send an ultrapeer our QRP table once every minute
+			if (time < c.getNextQRPForwardTime()) continue; // We haven't waited long a minute yet, skip this ultrapeer and go to the next one
+			c.incrementNextQRPForwardTime(time);            // It's been more than a minute, set the next time to 1 minute from now
 
-			c.incrementNextQRPForwardTime(time);
-
-			// Create a new query route table if we need to
+			// Make our current QRP table
 			if (table == null) {
-                
-				table = createRouteTable();     //  Ignores busy leaves
-                _lastQueryRouteTable = table;
-			} 
+				table = createRouteTable();
+                _lastQueryRouteTable = table; // Keep a record of our last QRP table we've sent
+			}
 
-			//..and send each piece.
-			
-			// Because we tend to send the same list of patches to lots of
-			// Connections, we can reuse the list of RouteTableMessages
-			// between those connections if their last sent
-			// table is exactly the same.
-			// This allows us to only reduce the amount of times we have
-			// to call encode.
-			
-			//  (This if works for 'null' sent tables too)
-			if (lastSent == c.getQueryRouteTableSent()) {
-                
-			    // if we have not constructed the patches yet, then do so.
+			/*
+			 * Because we tend to send the same list of patches to lots of
+			 * Connections, we can reuse the list of RouteTableMessages
+			 * between those connections if their last sent
+			 * table is exactly the same.
+			 * This allows us to only reduce the amount of times we have
+			 * to call encode.
+			 */
+
+			/*
+			 * Make patches, the group of messages we'll send this remote computer to bring its record of our QRP table up to date.
+			 * The line of code that does it is:
+			 * 
+			 * patches = table.encode(lastSent, true);
+			 * 
+			 * lastSent is the version of our QRP table this remote computer has.
+			 * table is our current QRP table.
+			 * true allows compression within the patch messages.
+			 */
+
+			// If the last QRP table we sent this computer is represented by the same object as lastSent, only make patches if we don't have them already
+			if (lastSent == c.getQueryRouteTableSent()) { // This compares references, not the contents of the objects, and works when both references are null
+
+				// If we don't have them yet, make all the QRP messages we need to patch lastSent into table
 			    if (patches == null) patches = table.encode(lastSent, true);
 
-            // If they aren't the same, we have to encode a new set of
-            // patches for this connection.
+			// They aren't the same, we need to make a custom group of patch messages for this remote computer
             } else {
-                
-			    lastSent = c.getQueryRouteTableSent();
-			    patches = table.encode(lastSent, true);
+
+            	// Get our record of the remote computer's record of our QRP table
+			    lastSent = c.getQueryRouteTableSent(); // This is the QRP table the remote computer has, the last one we've sent it
+
+			    // Make all the QRP messages we need to patch lastSent, the last QRP table we sent this remote computer, into table, our current QRP table
+			    patches = table.encode(lastSent, true); // True to allow compression
             }
-            
-            // If sending QRP tables is turned off, don't send them.  
+
+			// If settings have turned off QRP entirely, leave the method without sending anything to anyone
             if (!ConnectionSettings.SEND_QRP.getValue()) return;
 
+            // Send the group of QRP messages to the remote computer
 		    for (Iterator iter = patches.iterator(); iter.hasNext(); ) {
-                
 		        c.send((RouteTableMessage)iter.next());
     	    }
-    	    
-            c.setQueryRouteTableSent(table);
+
+		    // Save the table we updated the remote computer to in its ManagedConnection object
+            c.setQueryRouteTableSent(table); // This way, we'll know what we need to change to patch it up to date next time
 		}
     }
 
-    
-    
-    
-    
     /**
+     * Our QRP table that we've been sending our ultrapeers.
+     * If we're an ultrapeer, our QRP table will include our files and all the files all our leaves are sharing, too.
+     * 
+     * Every 10 seconds, forwardQueryRouteTables() makes _lastQueryRouteTable with createRouteTable().
+     * createRouteTable() gives _lastQueryRouteTable the files we and all of our leaves are sharing.
+     * Then, forwardQueryRouteTables() loops through all our ultrapeers.
+     * Those that we haven't updated in 1 minute are sent a custom group of QRP patch messages.
+     * The patch message group brings the out-of-date record of our QRP table the remote ultrapeer has up to date.
+     * 
      * Accessor for the most recently calculated <tt>QueryRouteTable</tt>
      * for this node.  If this node is an Ultrapeer, the table will include
      * all data for leaf nodes in addition to data for this node's files.
-     *
+     * 
      * @return the <tt>QueryRouteTable</tt> for this node
      */
     public QueryRouteTable getQueryRouteTable() {
-        
+
+    	// Return our QRP table we've been using to update ultrapeers
         return _lastQueryRouteTable;
     }
 
     /**
+     * Make our QRP table, which shows what we and our leaves are sharing.
+     * 
+     * Gets a copy of our QRP table from the FileManager, showing what we're sharing.
+     * If we're an ultrapeer, mixes in the QRP tables from our leaves.
+     * 
      * Creates a query route table appropriate for forwarding to connection c.
      * This will not include information from c.
-     *     @requires queryUpdateLock held
+     * requires queryUpdateLock held
+     * 
+     * @return Our QRP table
      */
     private static QueryRouteTable createRouteTable() {
-        
+
+    	// Get a copy of our QRP table that describes the files we're sharing
         QueryRouteTable ret = _fileManager.getQRT();
-        
-        // Add leaves' files if we're an Ultrapeer.
+
+        // If we're an ultrapeer
         if (RouterService.isSupernode()) {
-            
+
+        	// Mix in the QRP tables of our leaves
             addQueryRoutingEntriesForLeaves(ret);
         }
-        
+
+        // Return our QRP table, which shows what we and our leaves are sharing
         return ret;
     }
 
 	/**
+	 * Merge the QRP tables from all our leaves into our own.
+	 * Only createRouteTable() above calls this method.
+	 * 
 	 * Adds all query routing tables of leaves to the query routing table for
 	 * this node for propagation to other Ultrapeers at 1 hop.
 	 * 
 	 * Added "busy leaf" support to prevent a busy leaf from having its QRT
-	 * 	table added to the Ultrapeer's last-hop QRT table.  This should reduce
-	 *  BW costs for UPs with busy leaves.  
-	 *
-	 * @param qrt the <tt>QueryRouteTable</tt> to add to
+	 * table added to the Ultrapeer's last-hop QRT table.  This should reduce
+	 * BW costs for UPs with busy leaves.
+	 * 
+	 * @param qrt Our QRP table, to add to.
+	 *            This method doesn't return anything because it edits qrt in place.
 	 */
 	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
-        
+
+		// Loop for each of our leaves
 		List leaves = _manager.getInitializedClientConnections();
-		
 		for (int i = 0; i < leaves.size(); i++) {
-            
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
-            
         	synchronized (mc.getQRPLock()) {
-                
-        	    // Don't include busy leaves
+
+        		// Only do something if this leaf has free file upload slots
         	    if (!mc.isBusyLeaf()) {
-                    
+
+        	    	// Get the leaf's QRP table
                 	QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
 					if (qrtr != null) {
-                        
+
+						// Add all the 1s in the leaf's QRP table to our own
 						qrt.addAll(qrtr);
 					}
         	    }
 			}
 		}
 	}
+
+	//do
 
     /**
      * Adds the specified MessageListener for messages with this GUID.
@@ -3518,7 +3583,7 @@ public abstract class MessageRouter {
         if (pingee == null) return; 
         
         //don't bother routing if this is intended for me. 
-        // TODO:  Clean up ReplyHandler interface so we aren't
+        // TODO1:  Clean up ReplyHandler interface so we aren't
         //        afraid to use it like it's intended.
         //        That way, we can do pingee.handleHeadPing(ping)
         //        and not need this anti-OO instanceof check.
@@ -3555,7 +3620,7 @@ public abstract class MessageRouter {
         
         ReplyHandler forwardTo =  _headPongRouteTable.getReplyHandler(pong.getGUID()); 
 
-        // TODO: Clean up ReplyHandler interface so we're not afraid
+        // TODO1: Clean up ReplyHandler interface so we're not afraid
         //       to use it correctly.
         //       Ideally, we'd do forwardTo.handleHeadPong(pong)
         //       instead of this instanceof check

@@ -12,7 +12,9 @@ import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
- * A ResetTableMessage objects represents a QRP reset table message that we've received or are going to send.
+ * A ResetTableMessage object represents a QRP reset table message that we've received or are going to send.
+ * A Gnutella program sends a QRP reset table message one time, after the connection is made and before groups of patch messages.
+ * The reset message states the table size and the infinity value.
  * 
  * A QRP reset table message is 29 bytes:
  * 
@@ -27,23 +29,40 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  * d is the hops, 0.
  * e is the length of the payload that follows, 6.
  * 
- * f is the first byte of the payload, 0x00 identifes this as a ResetTableMessage.
- * t is the table size, 65536, an int written in little endian order.
- * i is the infinity, 7.
+ * f is the first byte of the payload, 0x00 identifes this as a reset message.
+ * t is the table size, like 65536, an int written in little endian order.
+ * i is the infinity, like 7.
  * 
  * LimeWire uses a table size of 65536 bytes, which is 64 KB.
  * The infinity TTL is 7 for historical reasons.
- * The payload size is 6.
+ * The payload size is always 6.
  * QRP messages aren't relayed on the network, and start out with a TTL of 1 and a hops of 0.
- * 
- * (do) What does a ResetTableMessage mean? When does a program send one? What do we do when we get one?
  */
 public class ResetTableMessage extends RouteTableMessage {
 
-	/** The size in bytes of the QRP table, 65536 bytes, 64 KB. */
+	/**
+	 * The number of values the QRP table can hold.
+	 * LimeWire and current Gnutella programs make QRP tables that hold 65536 bits of information.
+	 * 
+	 * This means that a BitSet used to describe the QRP table will have 65536 bits.
+	 * Uncompressed table data uses a full byte to describe each table entry.
+	 * This means the whole table will take up 65536 bytes, which is 64 KB.
+	 */
     private int tableSize;
 
-    /** The infinity TTL, 7 for historical reasons. */
+    /**
+     * The infinity TTL.
+     * LimeWire sends QRP tables with the infinity set to 7.
+     * Most modern Gnutella programs use 7, while others use 2.
+     * 
+     * A QRP table's infinity defines what values in the table will mean.
+     * The value that lets a search through will be 1 - infinity.
+     * The value that blocks a search will be infinity - 1.
+     * For instance, if the infinity is 7, -6 will let a search through and 6 will block it.
+     * For an infinity of 2, -1 will let a search through and 1 will block it.
+     * 
+     * The value 0 always means no change.
+     */
     private byte infinity;
 
     /*
@@ -127,12 +146,7 @@ public class ResetTableMessage extends RouteTableMessage {
     protected ResetTableMessage(byte[] guid, byte ttl, byte hops, byte[] payload) throws BadPacketException {
 
     	// Save the GUID, TTL, hops and length in the Message and RouteTableMessage cores of this new ResetTableMessage
-        super(
-        	guid,
-        	ttl,
-        	hops,
-        	payload.length,
-        	RouteTableMessage.RESET_VARIANT); // 0x00 identifies this as a ResetTableMessage
+        super(guid, ttl, hops, payload.length, RouteTableMessage.RESET_VARIANT); // 0x00 identifies this as a ResetTableMessage
 
         /*
          * TODO: maybe we shouldn't enforce this
@@ -157,7 +171,7 @@ public class ResetTableMessage extends RouteTableMessage {
      * 
      * This is the smallest value in the route table for infinity, i.e., one more than the max TTL.
      * 
-     * @return The infinity TTL, 7 for historical reasons
+     * @return The infinity TTL the QRP table will use, probably 7
      */
     public byte getInfinity() {
 
@@ -166,11 +180,17 @@ public class ResetTableMessage extends RouteTableMessage {
     }
 
     /**
-     * Get the size, in bytes, of the QRP table this ResetTableMessage is resetting.
-     * If we made this ResetTableMessage, it will be 65536 bytes, 64 KB.
-     * Modern Gnutella programs that LimeWire connects to have 64 KB QRP tables.
+     * The number of bits of information the QRP table will have.
      * 
-     * @return The size, in bytes, of the QRP table, like 65536 bytes, which is 64 KB
+     * Before sending a QRP table, a Gnutella program sends a reset table message.
+     * This reset message tells the size of the QRP table that will follow.
+     * 
+     * If we made this ResetTableMessage, the size will be 65536.
+     * 
+     * Internally, LimeWire keeps QRP tables as BitSet objects, meaning this size is 65536 bits.
+     * These bits are not sent over the wire, rather, they are sent in the data of patch table messages.
+     * 
+     * @return The number of bits of information the QRP table will have, like 65536
      */
     public int getTableSize() {
 

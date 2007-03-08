@@ -36,6 +36,19 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
 /**
  * The StandardMessageRouter class contains the code that gets ping and query packets, and makes and sends pong and query hits in response.
  * 
+ * Pings and Pongs:
+ * respondToPingRequest()     Responds to a ping a remote computer sent us with a pong about us, and 6 more pongs we've cached.
+ * respondToUDPPingRequest()  When a remote computer sends a ping in a UDP packet, respond with a single pong about us.
+ * 
+ * The Crawler:
+ * handleCrawlerPing()        Responds to a crawler ping with a pong about each one of our leaves.
+ * 
+ * Search:
+ * respondToQueryRequest()    See which of our shared files match a given query packet, and generate and send query hit packets in response.
+ * sendResponses()            Convert a query packet we received and our Response objects that match, generate and send query hit packets in response.
+ * isConnectedTo()            Determine if the computer that sent us a query packet made it, or just forwarded it.
+ * createQueryReply()         Given a list of Response objects, compose query hit packets with 32 KB or less XML in each.
+ * 
  * StandardMessageRouter extends MessageRouter to provide code for the methods that MessageRouter marks abstract.
  * StandardMessageRouter is the only class in LimeWire which extends MessageRouter.
  * LimeWire never makes a MessageRouter object, and just makes one StandardMessageRouter.

@@ -1,5 +1,5 @@
 
-// Edited for the Learning branch
+// Commented for the Learning branch
 
 package com.limegroup.gnutella.routing;
 
@@ -22,15 +22,103 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
+ * A QueryRouteTable object represents a QRP table.
+ * A QRP table shields a Gnutella program from searches that couldn't possibly produce a hit.
+ * A leaf sends its QRP table up to its ultrapeers.
+ * An ultrapeer combines its QRP table with those of its leaves, and sends the composite table to its fellow ultrapeers.
  * 
+ * -- Table Size --
  * 
+ * A QRP table has 65536 bits.
+ * A bit set to 0 blocks a search, while a bit set to 1 lets a search pass through.
+ * In a QueryRouteTable object, this is the BitSet object named bitTable.
  * 
+ * DEFAULT_TABLE_SIZE is 65536, the number of values our QRP tables hold.
+ * It's possible that a remote computer will send us a QRP table that has a different size.
+ * The size of the QRP table that this QueryRouteTable object represents is kept in the private int bitTableLength.
+ * Read it by calling getSize().
+ * 
+ * -- The Infinity, and Patch Table Data Values --
+ * 
+ * A QRP table has a value called the infinity.
+ * A Gnutella program tells another what infinity value it's using in the QRP reset table message it sends first.
+ * The infinity defines what values the patch table data will use.
+ * The value that lets a search through is 1 - infinity.
+ * The value that blocks a search is infinity - 1.
+ * For historical reasons, LimeWire makes QRP tables with the infinity set to 7.
+ * On the current Gnutella network, some QRP tables arrive with an infinity of 2.
+ * 
+ * Meaning                                     Block the search,    Let the search through,
+ *                                             a hit is impossible  there might be a hit
+ * Value in the BitSet                         0                    1
+ * Value to use when making patch table data   infinity - 1         1 - infinity
+ *   If the infinity is 7                      6                    -6
+ *   If the infinity is 2                      1                    -1
+ * Value to use when reading patch table data  any positive number  any negative number
+ * 
+ * In patch table data, 0 means no change.
+ * handlePatch() interprets any positive number, like 6 or 1, as a command to block, and changes the bit in the BitSet to 0.
+ * handlePatch() interprets any negative number, like -6 or -1, as a command to let through, and changes the bit in the BitSet to 1.
+ * KEYWORD_NO_CHANGE is 0, meaning that if we find a 0 in patch table data, we won't change our table.
+ * keywordPresent and keywordAbsent hold the values like -6 and 6 to look for in patch table data.
+ * 
+ * -- Sending a QRP Table --
+ * 
+ * To make all the QRP messages we need to completely describe this QRP table, call encode().
+ * The encode() method will prepare a group of messages, like this:
+ * 
+ * Communication 1:  reset message         The initial communication begins with the reset message.
+ *                   patch message 1 of 3  After that comes a group of patch messages.
+ *                   patch message 2 of 3
+ *                   patch message 3 of 3
+ * 
+ * Communication 2:  patch message 1 of 2  Later communications consist of only a group of patch messages.
+ *                   patch message 2 of 2
+ * 
+ * The reset message describes a QRP table that blocks everything, and chooses the infinity.
+ * 
+ * A QRP table could be sent as just 65536 bits, but it's much more complicated than that.
+ * Each table value is just a bit, but is turned into a whole byte of data to begin.
+ * QRP table data is 0 block or 1 let through, while patch message data is 0 no change, 6 block, -6 let through.
+ * In patch message data, there is no code that flips the bit, it is not like 0 no change, 1 change to opposite.
+ * 
+ * 65536 bytes of patch message data is 64 KB, so Gnutella programs do several things to transform the data.
+ * The values 0, 6, and -6 all fit into 4 bits, so halve() puts two values in each byte.
+ * Then, encode() deflate compresses the data.
+ * After that, it splits it up into 4 KB chunks, and puts each chunk in a patch table message.
+ * 
+ * -- Receiving a QRP Table --
+ * 
+ * This QueryRouteTable object may represent the QRP table of a remote computer we're connected to.
+ * If so, when that computer sends us a patch message, we get it with a call to the handlePatch() method.
+ * A Gnutella program could wait for a whole group of patch messages to arrive before patching the table.
+ * LimeWire is more advanced, however, and patches the table as each message arrives.
+ * 
+ * sequenceNumber and sequenceSize keep our place through this process.
+ * Between groups, both are set to -1.
+ * sequenceNumber keeps the sequence number of the patch message we received most recently.
+ * If sequenceNumber is 2, that means that we received patch message 2, and are waiting for patch message 3.
+ * 
+ * Patch table data gets compressed, then sliced into 4 KB chunks, then sent in a group of patch messages.
+ * A QueryRouteTable object has a java.util.zip.Inflater object named uncompressor.
+ * When handlePatch() gets the first message in a new group, it makes the Inflater.
+ * It has to use the same Inflater for all the messages in the group, as the Inflater object keeps the context of the compression.
+ * After removing the compression from the data in the last message, it frees the Inflater.
+ * 
+ * -- Making and Using this QRP Table --
+ * 
+ * To add a keyword of a file we're sharing to this QRP table to let a search for it pass through, call add().
+ * To see if a search is blocked by this QRP table or not, call contains().
+ * 
+ * --
  * 
  * A list of query keywords that a connection can respond to, as well as the
  * minimum TTL for a response.  More formally, a QueryRouteTable is a (possibly
  * infinite!) list of keyword TTL pairs, [ &#60;keyword_1, ttl_1&#62;, ...,
- * &#60;keywordN, ttl_N&#62; ]  <p>
- *
+ * &#60;keywordN, ttl_N&#62; ]
+ * 
+ * Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
+ * 
  * 10/08/2002 - A day after Susheel's birthday, he decided to change this class
  * for the heck of it.  Kidding.  Functionality has been changed so that keyword
  * depth is 'constant' - meaning that if a keyword is added, then any contains
@@ -39,7 +127,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * their leaves ONLY, so the depth is always 1.  If you looking for a keyword
  * and it is in the table, a leaf MAY have it, so return true.  This only
  * needed a one line change.
- *
+ * 
  * 12/05/2003 - Two months after Susheel's birthday, this class was changed to
  * once again accept variable infinity values.  Over time, optimizations had
  * removed the ability for a QueryRouteTable to have an infinity that wasn't
@@ -50,14 +138,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * keywordAbsent values going to 1 and -1, cutting the size of our patch
  * messages further in half (a quarter of the original size).  This would
  * probably require upgrading the X-Query-Routing to another version.
- *
+ * 
  * This class is NOT synchronized.
- * 
- * Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
- * 
- * 
- * 
- * 
  */
 public class QueryRouteTable {
 
@@ -79,7 +161,11 @@ public class QueryRouteTable {
      */
     public static final byte KEYWORD_NO_CHANGE = (byte)0;
 
-    /** 65536, our QRP table will be 65536 bytes big, which is 64 KB of data. */
+    /**
+     * 65536, our QRP table will be have 65536 values.
+     * In uncompressed patch table data, each value takes up a whole byte.
+     * 65536 values will take up 65536 bytes, which is 64 KB of data.
+     */
     public static final int DEFAULT_TABLE_SIZE = 1 << 16; // 1 shifted up 16 bits is 65536
 
     /**
@@ -176,6 +262,7 @@ public class QueryRouteTable {
      * The sequence number of the QRP patch message the remote computer sent us most recently.
      * -1 if we're waiting for the message that will begin a group of patch messages.
      * 1 after the first message, 2 after the second, and so on.
+     * When we get a message, its sequence number should be sequenceNumber + 1.
      */
     private int sequenceNumber;
 
@@ -186,16 +273,16 @@ public class QueryRouteTable {
      */
     private int sequenceSize;
 
-    //do
-
     /**
-     * 
      * The index of the next table entry to patch.
      * 
+     * Information about how to patch this entire table arrives in a group of patch messages.
+     * Before the first message in a group arrives, code in this class sets nextPatch to 0.
+     * When the first patch message arrives, handlePatch() increments nextPatch as it processes the first patch.
+     * When the second patch message arrives, handlePatch() starts at nextPatch, and keeps moving it forward.
+     * handlePatch() makes sure that nextPatch doesn't reach beyond the end of the BitSet.
      */
     private int nextPatch;
-
-    //done
 
     /**
      * The Inflater object we use to decompress the data in a group of patch messages.
@@ -293,8 +380,8 @@ public class QueryRouteTable {
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
 
-        // (do)
-        this.nextPatch = 0;
+        // Start the nextPatch index at the start of the table
+        this.nextPatch = 0; // As we get patch messages in a group, we'll move nextPatch down the entire table
 
         // Set numbers based on the infinity TTL, which is probably 7
         this.keywordPresent = (byte)(1 - infinity); // -6, the number that indicates a keyword is present
@@ -303,19 +390,18 @@ public class QueryRouteTable {
     }
 
     /**
-     * Get the size of this QRP table.
-     * Returns 65536.
+     * Get the size of this QRP table, like 65536.
      * This is the number of bits in the table.
      * It's also the number of bytes the table takes up in QRP messages before they are compressed.
      * 
-     * @return 65536
+     * @return The number of values in this QRP table
      */
     public int getSize() {
 
     	// Return bitTableLength, the size of this QRP table in bytes
         return bitTableLength;
-    }    
-    
+    }
+
     /**
      * Returns the percentage of slots used in this QueryRouteTable's BitTable.
      * The return value is from 0 to 100.
@@ -631,7 +717,7 @@ public class QueryRouteTable {
     public void addIndivisible(String iString) {
 
     	// Compute the QRP hash of the given String
-        final int hash = HashFunction.hash(iString, Utilities.log2(bitTableLength)); // bitTableLength is 65536, making bits 16, as 2^16 = 65536
+        final int hash = HashFunction.hash(iString, Utilities.log2(bitTableLength)); // bitTableLength is 65536, making this 16, as 2^16 = 65536
 
         // Use the hash value as a distance into the table, go there, if the bit there isn't already opened
         if (!bitTable.get(hash)) {
@@ -648,6 +734,9 @@ public class QueryRouteTable {
      * Add the striped pattern of a given QRP table to this one.
      * If either table has a 1 in a spot, we will have a 1 there also.
      * This makes our table more clear, and lets more searches through.
+     * 
+     * FileManager.getQRT() uses addAll() to make a copy of a QRP table.
+     * MessageRouter.addQueryRoutingEntriesForLeaves() uses addAll() to create a composite QRP table.
      * 
      * For all <keyword_i> in qrt, adds <keyword_i> to this.
      * (This is useful for unioning lots of route tables for propoagation.)
@@ -718,34 +807,53 @@ public class QueryRouteTable {
         return resizedQRT.bitTable;
     }
 
-    //do
-    
-    /** True if o is a QueryRouteTable with the same entries of this. */
+    /**
+     * Determine if a given QueryRouteTable object holds exactly the same information as this one.
+     * Compares the BitSet objects, returning true if they are the same length and have exactly the same bits set.
+     * 
+     * @return True if they are the same, false if different
+     */
     public boolean equals(Object o) {
 
+    	// If the given object is a reference to us, it's the same, return true
         if (this == o) return true;
-            
+
+        // Make sure the given object is a QueryRouteTable, not some other type of object
         if (!(o instanceof QueryRouteTable)) return false;
+        QueryRouteTable other = (QueryRouteTable)o; // It is, cast it that way
 
-        //TODO: two qrt's can be equal even if they have different TTL ranges.
-        QueryRouteTable other = (QueryRouteTable)o;
+        /*
+         * TODO: two qrt's can be equal even if they have different TTL ranges.
+         */
+
+        // Compare the lengths, and then the contents of the BitSet objects
         if (this.bitTableLength != other.bitTableLength) return false;
-
         if (!this.bitTable.equals(other.bitTable)) return false;
-
         return true;
     }
 
+    /**
+     * Hash the data in this QueryRouteTable into a number.
+     * 
+     * @return An int based on the data in the bit table right now
+     */
     public int hashCode() {
-        return bitTable.hashCode() * 17;
+
+    	// Hash the BitSet, and multiply by a prime number
+    	return bitTable.hashCode() * 17;
     }
 
-
+    /**
+     * Express this QueryRouteTable object as text.
+     * Composes text like "QueryRouteTable : {0, 1, 5, 22}".
+     * 
+     * @return A String
+     */
     public String toString() {
-        return "QueryRouteTable : " + bitTable.toString();
-    }
 
-    //done
+    	// Compose and return the text
+    	return "QueryRouteTable : " + bitTable.toString();
+    }
 
     /*
      * ////////////////////// Core Encoding and Decoding //////////////////////
@@ -784,8 +892,6 @@ public class QueryRouteTable {
      * allocations here if memory is at a premium.
      */
 
-    //do
-
     /**
      * Given a QRP patch message, bring this QRP table up to date.
      * 
@@ -794,7 +900,7 @@ public class QueryRouteTable {
      * This QueryRouteTable object repsresents our record of the remote computer's QRP table.
      * This handlePatch() method uses the received patch message to bring our record of the QRP table up to date.
      * 
-     * @param m A QRP patch message from a remote computer
+     * @param m A QRP patch message from the remote computer
      */
     private void handlePatch(PatchTableMessage m) throws BadPacketException {
 
@@ -817,10 +923,10 @@ public class QueryRouteTable {
     	if (sequenceNumber == -1 ?                       // If we're waiting for the first patch message in a group,
     		m.getSequenceNumber() != 1 :                 // Make sure the message we got is numbered 1, otherwise
             sequenceNumber + 1 != m.getSequenceNumber()) // We're waiting for the next message, make sure this is it
-            throw new BadPacketException("Inconsistent seq number: " + m.getSequenceNumber() + " vs. "+sequenceNumber);
+            throw new BadPacketException("Inconsistent seq number: " + m.getSequenceNumber() + " vs. " + sequenceNumber);
 
     	// Get the data the patch message holds
-        byte[] data = m.getData();
+        byte[] data = m.getData(); // This is the payload data of the patch table message
 
         /*
          * 1. Start pipelined uncompression.
@@ -861,62 +967,84 @@ public class QueryRouteTable {
 
         // If the message says it was able to put 2 bytes of QRP table data in each byte, remove this kind of compression next
         if (m.getEntryBits() == 4) data = unhalve(data);
-        else if (m.getEntryBits() != 8) throw new BadPacketException("Unknown value for entry bits"); // If not, it better have used 8
+        else if (m.getEntryBits() != 8) throw new BadPacketException("Unknown value for entry bits"); // If not, make sure it used 8
 
         /*
          * 3. Add data[0...] to table[nextPatch...]
          */
 
+        // Move i across all the bytes in data
         for (int i = 0; i < data.length; i++) {
 
+        	// Make sure we haven't moved beyond the end of our table
             if (nextPatch >= bitTableLength) throw new BadPacketException("Tried to patch " + nextPatch + " on a bitTable of size " + bitTableLength);
 
-            // All negative values indicate presence
+            /*
+             * All negative values indicate presence
+             * All positive values indicate absence
+             */
+
+            // The patch data has a negative value, set the bit in our table to 1
             if (data[i] < 0) {
-            
+
+            	// Set the bit to 1
             	bitTable.set(nextPatch);
-                resizedQRT = null;
-            }
-            
-            // All positive values indicate absence
-            else if (data[i] > 0) {
-                
+                resizedQRT = null; // Throw away our cached table of a different size, our table has changed so we'll have to remake it
+
+            // The patch data has a positive value, set the bit in our table to 0
+            } else if (data[i] > 0) {
+
+            	// Set the bit to 0
             	bitTable.clear(nextPatch);
-                resizedQRT = null;
+                resizedQRT = null; // Throw away our cached table of a different size, our table has changed so we'll have to remake it
             }
-            
+
+            /*
+             * From this, it looks like patch messages don't contain changes in values.
+             * Rather, they contain values.
+             * 
+             * For instance, it's not like it's 0 to leave the same and 1 to flip to the opposite.
+             * Rather, it's like it's -whatever to set to 1, and +whatever to set to 0.
+             * 0 produces no change, but no value will flip the bit.
+             */
+
+            // Increment nextPatch, which scans down the whole table across the patch messages in a group
             nextPatch++;
         }
-        
-        bitTable.compact();
+
+        // Tell our BitSet we're done editing it
+        bitTable.compact(); // If it has 0s at the end, it will switch to a smaller array
 
         /*
          * 4. Update sequence numbers.
          */
 
+        // Save the number of patch messages in this group
         this.sequenceSize = m.getSequenceSize();
 
+        // This isn't the last patch message in its group
         if (m.getSequenceNumber() != m.getSequenceSize()) {
 
+        	// Save it's number, the next message we get should have sequenceNumber + 1
         	this.sequenceNumber = m.getSequenceNumber();
 
+        // This is the last patch message in the group, it's finishing the group
         } else {
 
-        	//Sequence complete
+        	// Reset member variables to indicate we're between groups of patch messages
             this.sequenceNumber = -1;
             this.sequenceSize = -1;
-            this.nextPatch = 0; //TODO: is this right?
+            this.nextPatch = 0;
 
-            // if this last message was compressed, release the uncompressor.
+            // We made an Inflater object to decompress the data in this group of patch messages
             if (this.uncompressor != null) {
 
+            	// Free it
                 this.uncompressor.end();
                 this.uncompressor = null;
             }
         }
     }
-
-    //done
 
     /** Not used. */
     public List encode(QueryRouteTable prev) { // List of RouteTableMessage objects
@@ -1309,30 +1437,29 @@ public class QueryRouteTable {
         return ret;
     }
 
-    //do
-
     /**
      * Restore the original array that halve() made half as big.
      * 
      * Returns an array of R of length array.length*2, where R[i] is the the
      * sign-extended high nibble of floor(i/2) if i even, or the sign-extended
      * low nibble of floor(i/2) if i odd.
-     * 
-     */        
+     */
     static byte[] unhalve(byte[] array) {
-    	
+
+    	// Make the array we'll return, which is twice as long as the given array
         byte[] ret = new byte[array.length * 2];
-        
+
+        // Move i across each byte in the given array
         for (int i = 0; i < array.length; i++) {
-        	
-            ret[2 * i]=(byte)(array[i] >> 4); //sign extension
-            ret[2 * i + 1] = extendNibble((byte)(array[i] & 0xF));
+
+        	// Fill the return array with the high and then low 4 bits from the byte in the given array
+            ret[2 * i] = (byte)(array[i] >> 4);
+            ret[2 * i + 1] = extendNibble((byte)(array[i] & 0xF)); // Read the low 4 bits as a value -7 to 7
         }
-        
+
+        // Return the array we made
         return ret;
     }
-
-    //done
 
     /**
      * If the given nibble has a 1 at 0x08, set all 4 high bits to 1.
