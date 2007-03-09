@@ -23,7 +23,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messagehandlers.OOBSecurityToken;
-import com.limegroup.gnutella.messagehandlers.OOBTokenData;
+import static com.limegroup.gnutella.messagehandlers.OOBSecurityToken.OOBTokenData;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -696,7 +696,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(1, ((QueryReply)message).getResultCount());
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken<OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
+        SecurityToken<OOBSecurityToken.OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
         assertEquals(1, receivedToken.getBytes()[0] & 0XFF);

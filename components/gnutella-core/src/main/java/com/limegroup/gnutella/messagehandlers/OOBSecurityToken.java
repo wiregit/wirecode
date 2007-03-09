@@ -43,7 +43,7 @@ public class OOBSecurityToken extends AbstractSecurityToken<OOBSecurityToken.OOB
         return ret;
     }
     
-    static class OOBTokenData implements SecurityToken.TokenData {
+    public static class OOBTokenData implements SecurityToken.TokenData {
         
         private final int numRequests;
         private final byte [] data;

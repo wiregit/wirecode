@@ -12,7 +12,7 @@ public class MACCalculatorRepositoryManager {
 
     private volatile static MACCalculatorRepositoryManager defaultRepositoryManager = new MACCalculatorRepositoryManager();
 
-    public static MACCalculatorRepositoryManager getDefaultTokenSmith() {
+    public static MACCalculatorRepositoryManager getDefaultRepositoryManager() {
         return defaultRepositoryManager;
     }
     
