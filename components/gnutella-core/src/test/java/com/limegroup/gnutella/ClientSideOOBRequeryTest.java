@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -757,7 +757,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // send back a query key
-        QueryKey qk = new QueryKey(InetAddress.getLocalHost(), SERVER_PORT);
+        AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(), SERVER_PORT);
         {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
             PingReply pr = 
@@ -912,7 +912,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
         
         // Prepopulate Query Keys
-        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
+        AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
@@ -1203,7 +1203,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         // Prepopulate Query Keys
-        QueryKey qk = new QueryKey(InetAddress.getLocalHost(),
+        AddressSecurityToken qk = new AddressSecurityToken(InetAddress.getLocalHost(),
                                            SERVER_PORT);
         for (int i = 0; i < (UDP_ACCESS.length/2); i++) {
             byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};

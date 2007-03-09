@@ -13,7 +13,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.security.InvalidSecurityTokenException;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.OSUtils;
 
@@ -80,7 +80,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                QueryKey qk = new QueryKey(bytes);
+                AddressSecurityToken qk = new AddressSecurityToken(bytes);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(false); // do COBS
@@ -495,7 +495,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 * @throws InvalidSecurityTokenException 
 	 */
 	public void testStringQueryKeyConstructor() throws InvalidSecurityTokenException {
-		QueryKey key = new QueryKey(GUID.makeGuid());
+		AddressSecurityToken key = new AddressSecurityToken(GUID.makeGuid());
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 
@@ -550,7 +550,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	private void runStandardChecks(QueryRequest qr, 
 								   boolean multicast, Set urnTypes,
-								   Set urns, QueryKey key) {
+								   Set urns, AddressSecurityToken key) {
 		if(!multicast) {
 			assertTrue("should not be multicast", !qr.isMulticast());
 			assertTrue("should be firewalled", qr.isFirewalledSource());
@@ -1239,7 +1239,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertTrue(fromNetwork.isSecurityTokenRequired());
         
         // oob not set
-        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (QueryKey)null, true, Message.N_TCP, false, 0);
+        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (AddressSecurityToken)null, true, Message.N_TCP, false, 0);
         assertFalse(request.isSecurityTokenRequired());
         
         fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
@@ -1299,7 +1299,7 @@ public final class QueryRequestTest extends LimeTestCase {
     public void testCreateDoNotProxyQuery() throws UnknownHostException {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
                 URN.NO_URN_SET,
-                new QueryKey(InetAddress.getLocalHost(), 1094),
+                new AddressSecurityToken(InetAddress.getLocalHost(), 1094),
                 false, Message.N_MULTICAST, false, 0, false, 0, false);
 
         try {

@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.InetAddress;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.BaseTestCase;
 
@@ -22,7 +22,7 @@ public class LimeACKVendorMessageTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        token = new QueryKey(InetAddress.getLocalHost(), 5904);
+        token = new AddressSecurityToken(InetAddress.getLocalHost(), 5904);
     }
     
     public void testSecurityTokenBytesAreSet() {

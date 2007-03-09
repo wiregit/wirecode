@@ -78,7 +78,7 @@ public class OOBHandler implements MessageHandler, Runnable {
 		LimeACKVendorMessage ack;
         if (msg.isOOBv3()) {
 			ack = new LimeACKVendorMessage(g, toRequest, 
-                    new OOBSecurityToken(new OOBTokenData(handler, msg.getGUID(), toRequest)));
+                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest)));
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
         
@@ -178,7 +178,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 
         try {
             OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes);
-            OOBTokenData data = new OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
+            OOBSecurityToken.OOBTokenData data = 
+                new OOBSecurityToken.OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
             if (oobKey.isFor(data)) {
                 return oobKey;
             }

@@ -15,7 +15,7 @@ import java.util.TreeSet;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
@@ -564,10 +564,10 @@ public class PingReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testQueryKeyPong() throws Exception {
         byte[] randBytes = new byte[8];
         (new Random()).nextBytes(randBytes);
-        QueryKey qk = null;
+        AddressSecurityToken qk = null;
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        qk = new QueryKey(randBytes);
+        qk = new AddressSecurityToken(randBytes);
         PingReply pr = 
             PingReply.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
                                           2, 2, true, qk);

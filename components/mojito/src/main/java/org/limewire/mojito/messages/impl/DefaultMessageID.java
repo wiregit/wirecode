@@ -32,7 +32,7 @@ import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -51,7 +51,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
     /**
      * A random pad we're using to obfuscate the actual
-     * QueryKey. Nodes must do a lookup to get the QK!
+     * AddressSecurityToken. Nodes must do a lookup to get the QK!
      */
     private static final byte[] RANDOM_PAD = new byte[4];
 
@@ -114,7 +114,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] queryKey = (new QueryKey(dst)).getBytes();
+            byte[] queryKey = (new AddressSecurityToken(dst)).getBytes();
 
             // Obfuscate it with our random pad!
             for(int i = 0; i < RANDOM_PAD.length; i++) {
@@ -167,7 +167,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     }
     
     /**
-     * Extracts and returns the QueryKey from the GUID
+     * Extracts and returns the AddressSecurityToken from the GUID
      * @throws InvalidSecurityTokenException 
      */
     private SecurityToken<DHTTokenData> getSecurityToken() throws InvalidSecurityTokenException {
@@ -248,7 +248,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return "MessageID: " + toHexString();
     }
     
-    public static class DHTTokenData extends QueryKey.GUESSTokenData {
+    public static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
         
         public DHTTokenData(SocketAddress addr) {
             super(addr);

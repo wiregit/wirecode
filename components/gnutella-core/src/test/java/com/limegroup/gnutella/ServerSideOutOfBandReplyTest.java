@@ -15,7 +15,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
@@ -508,7 +508,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SecurityToken token = new QueryKey(InetAddress.getLocalHost(), 10000);
+        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
                                      reply.getNumResults(), token);
@@ -592,7 +592,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         // ok - we should ACK the ReplyNumberVM and NOT get a reply
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SecurityToken token = new QueryKey(InetAddress.getLocalHost(), 10000);
+        SecurityToken token = new AddressSecurityToken(InetAddress.getLocalHost(), 10000);
         LimeACKVendorMessage ack = 
             new LimeACKVendorMessage(new GUID(message.getGUID()), 
                                      reply.getNumResults(), token);

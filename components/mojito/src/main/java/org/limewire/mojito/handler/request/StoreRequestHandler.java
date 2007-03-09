@@ -37,7 +37,7 @@ import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 
@@ -74,7 +74,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
-        if (!securityToken.isFor(new QueryKey.GUESSTokenData(request.getContact().getContactAddress()))) {
+        if (!securityToken.isFor(new AddressSecurityToken.AddressTokenData(request.getContact().getContactAddress()))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
                         + " send us an invalid SecurityToken " + securityToken);

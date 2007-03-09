@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.PingReply;
@@ -226,15 +226,15 @@ public final class QueryUnicaster {
                 GUESSEndpoint toQuery = getUnicastHost();
                 // no query key to use in my query!
                 if (!_queryKeys.containsKey(toQuery)) {
-                    // send a QueryKey Request
+                    // send a AddressSecurityToken Request
                     PingRequest pr = PingRequest.createQueryKeyRequest();
                     udpService.send(pr,toQuery.getInetAddress(), toQuery.getPort());
                     SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
-                    // QueryKey Reply!!
+                    // AddressSecurityToken Reply!!
                     continue; // try another up above....
                 }
-                QueryKey queryKey = _queryKeys.get(toQuery)._queryKey;
+                AddressSecurityToken addressSecurityToken = _queryKeys.get(toQuery)._queryKey;
 
                 purgeGuidsInternal(); // in case any were added while asleep
 				boolean currentHostUsed = false;
@@ -249,7 +249,7 @@ public final class QueryUnicaster {
 							InetAddress ip = toQuery.getInetAddress();
 							QueryRequest qrToSend = 
 								QueryRequest.createQueryKeyQuery(currQB._qr, 
-																 queryKey);
+																 addressSecurityToken);
                             udpService.send(qrToSend, 
                                             ip, toQuery.getPort());
 							currentHostUsed = true;
@@ -437,14 +437,14 @@ public final class QueryUnicaster {
     }
 
 
-    /** Feed me QueryKey pongs so I can query people....
+    /** Feed me AddressSecurityToken pongs so I can query people....
      *  pre: pr.getQueryKey() != null
      */
     public void handleQueryKeyPong(PingReply pr) {
         if(pr == null) {
             throw new NullPointerException("null pong");
         }
-        QueryKey qk = pr.getQueryKey();
+        AddressSecurityToken qk = pr.getQueryKey();
         if(qk == null) {
             throw new IllegalArgumentException("no key in pong");
         }
@@ -579,14 +579,14 @@ public final class QueryUnicaster {
         public static final long QUERY_KEY_LIFETIME = 2 * ONE_HOUR; // 2 hours
         
         final long _birthTime;
-        final QueryKey _queryKey;
+        final AddressSecurityToken _queryKey;
         
-        public QueryKeyBundle(QueryKey qk) {
+        public QueryKeyBundle(AddressSecurityToken qk) {
             _queryKey = qk;
             _birthTime = System.currentTimeMillis();
         }
 
-        /** Returns true if this QueryKey hasn't been updated in a while and
+        /** Returns true if this AddressSecurityToken hasn't been updated in a while and
          *  should be expired.
          */
         public boolean shouldExpire() {

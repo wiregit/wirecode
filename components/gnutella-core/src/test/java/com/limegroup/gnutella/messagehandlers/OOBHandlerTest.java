@@ -7,7 +7,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.security.InvalidSecurityTokenException;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -138,7 +138,7 @@ public class OOBHandlerTest extends LimeTestCase {
 
         byte[] bytes = new byte[8];
         new Random().nextBytes(bytes);
-        SecurityToken tokenFake = new QueryKey(bytes);
+        SecurityToken tokenFake = new AddressSecurityToken(bytes);
 
         // send back messages with fake token
         QueryReply reply = getReplyWithResults(g.bytes(), 10, address

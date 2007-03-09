@@ -18,7 +18,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.InvalidSecurityTokenException;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -137,7 +137,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Constant for the query key reported for the pong.
      */
-    private final QueryKey QUERY_KEY;
+    private final AddressSecurityToken QUERY_KEY;
     
     /**
      * Constant for the DHT Version. 
@@ -263,10 +263,10 @@ public class PingReply extends Message implements Serializable, IpPort {
      *
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
-     * @param key the <tt>QueryKey</tt> for this reply
+     * @param key the <tt>AddressSecurityToken</tt> for this reply
      */                                   
     public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
-                                                QueryKey key) {
+                                                AddressSecurityToken key) {
         return create(guid, ttl, 
                       RouterService.getPort(),
                       RouterService.getAddress(),
@@ -282,14 +282,14 @@ public class PingReply extends Message implements Serializable, IpPort {
      *
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
-     * @param key the <tt>QueryKey</tt> for this reply
+     * @param key the <tt>AddressSecurityToken</tt> for this reply
      */                                   
     public static PingReply createQueryKeyReply(byte[] guid, byte ttl, 
                                                 int port, byte[] ip,
                                                 long sharedFiles, 
                                                 long sharedSize,
                                                 boolean ultrapeer,
-                                                QueryKey key) {
+                                                AddressSecurityToken key) {
         return create(guid, ttl, 
                       port,
                       ip,
@@ -728,7 +728,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         int freeLeafSlots = -1;
         int freeUltrapeerSlots = -1;
-        QueryKey key = null;
+        AddressSecurityToken key = null;
         
         String locale /** def. val from settings? */
             = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
@@ -770,7 +770,7 @@ public class PingReply extends Message implements Serializable, IpPort {
             if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                    key = new QueryKey(bytes);
+                    key = new AddressSecurityToken(bytes);
                 }
                 catch (InvalidSecurityTokenException e) {
                     throw new BadPacketException("invalid query key");
@@ -935,21 +935,21 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
 
 
-    /** Returns the GGEP payload bytes to encode the given QueryKey */
-    private static GGEP qkGGEP(QueryKey queryKey) {
+    /** Returns the GGEP payload bytes to encode the given AddressSecurityToken */
+    private static GGEP qkGGEP(AddressSecurityToken addressSecurityToken) {
         try {
             GGEP ggep=new GGEP(true);
 
             // get qk bytes....
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            queryKey.write(baos);
+            addressSecurityToken.write(baos);
             // populate GGEP....
             ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, baos.toByteArray());
 
             return ggep;
         } catch (IOException e) {
             //See above.
-            Assert.that(false, "Couldn't encode QueryKey" + queryKey);
+            Assert.that(false, "Couldn't encode AddressSecurityToken" + addressSecurityToken);
             return null;
         }
     }
@@ -1224,12 +1224,12 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
 
 
-    /** Returns the QueryKey (if any) associated with this pong.  May be null!
+    /** Returns the AddressSecurityToken (if any) associated with this pong.  May be null!
      *
-     * @return the <tt>QueryKey</tt> for this pong, or <tt>null</tt> if no
+     * @return the <tt>AddressSecurityToken</tt> for this pong, or <tt>null</tt> if no
      *  key was specified
      */
-    public QueryKey getQueryKey() {
+    public AddressSecurityToken getQueryKey() {
         return QUERY_KEY;
     }
     

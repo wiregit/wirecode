@@ -15,7 +15,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -359,9 +359,9 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                         PingRequest pr = (PingRequest)message;
                         pr.hop();  // need to hop it!!
                         if (pr.isQueryKeyRequest()) {
-                            // send a QueryKey back!!!
-                            QueryKey qk = 
-                                new QueryKey(datagram.getAddress(),
+                            // send a AddressSecurityToken back!!!
+                            AddressSecurityToken qk = 
+                                new AddressSecurityToken(datagram.getAddress(),
                                         datagram.getPort());
                             
                             PingReply pRep = 

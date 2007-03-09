@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.util.CommonUtils;
@@ -52,19 +52,19 @@ public class MiscTests extends LimeTestCase {
                 rand.nextBytes(qk);
                 Arrays.sort(qk);
             }
-            QueryKey queryKey = new QueryKey(qk);
+            AddressSecurityToken addressSecurityToken = new AddressSecurityToken(qk);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            queryKey.write(baos);
+            addressSecurityToken.write(baos);
             GGEP in = new GGEP(false);
             in.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
                    baos.toByteArray());
             baos = new ByteArrayOutputStream();
             in.write(baos);
             GGEP out = new GGEP(baos.toByteArray(), 0, null);
-            QueryKey queryKey2 = 
-            new QueryKey(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
+            AddressSecurityToken queryKey2 = 
+            new AddressSecurityToken(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
             assertEquals("qks not equal, i = " + i,
-                       queryKey, queryKey2);
+                       addressSecurityToken, queryKey2);
         }
     }
 

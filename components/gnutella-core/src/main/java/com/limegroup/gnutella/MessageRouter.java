@@ -30,7 +30,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
@@ -712,12 +712,12 @@ public abstract class MessageRouter {
 
 
     /**
-     * Returns true if the Query has a valid QueryKey. false if it isn't present
+     * Returns true if the Query has a valid AddressSecurityToken. false if it isn't present
      * or valid.
      */
     protected boolean hasValidQueryKey(InetAddress ip, int port, 
                                        QueryRequest qr) {
-        QueryKey qk = qr.getQueryKey();
+        AddressSecurityToken qk = qr.getQueryKey();
         if (qk == null)
             return false;
         
@@ -935,8 +935,8 @@ public abstract class MessageRouter {
     
 
     /**
-     * Generates a QueryKey for the source (described by addr) and sends the
-     * QueryKey to it via a QueryKey pong....
+     * Generates a AddressSecurityToken for the source (described by addr) and sends the
+     * AddressSecurityToken to it via a AddressSecurityToken pong....
      */
     protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
 
@@ -950,11 +950,11 @@ public abstract class MessageRouter {
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
 
-        // generate a QueryKey (quite quick - current impl. (DES) is super
+        // generate a AddressSecurityToken (quite quick - current impl. (DES) is super
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
-        QueryKey key = new QueryKey(address, port);
+        AddressSecurityToken key = new AddressSecurityToken(address, port);
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
@@ -966,7 +966,7 @@ public abstract class MessageRouter {
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
         if (reply.getQueryKey() != null) {
-            // this is a PingReply in reply to my QueryKey Request - 
+            // this is a PingReply in reply to my AddressSecurityToken Request - 
             //consume the Pong and return, don't process as usual....
             OnDemandUnicaster.handleQueryKeyPong(reply);
             return;
@@ -3092,7 +3092,7 @@ public abstract class MessageRouter {
             InetAddress address = addr.getAddress();
             int port = addr.getPort();
             
-            // TODO: compare QueryKey with old generation params.  if it matches
+            // TODO: compare AddressSecurityToken with old generation params.  if it matches
             //send a new one generated with current params 
             if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
                 sendAcknowledgement(addr, msg.getGUID());

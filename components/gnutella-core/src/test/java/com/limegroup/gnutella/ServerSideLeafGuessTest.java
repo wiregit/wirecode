@@ -13,7 +13,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Iterator;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -104,12 +104,12 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         }        
 
         InetAddress localHost = InetAddress.getLocalHost();
-        // first send a QueryKey request....
+        // first send a AddressSecurityToken request....
         send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
 
-        // we should get a QueryKey....
+        // we should get a AddressSecurityToken....
         Message m = null;
-        QueryKey qkToUse = null;
+        AddressSecurityToken qkToUse = null;
         while (true) {
             m = receive();
             if (m instanceof PingReply) {
@@ -143,12 +143,12 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
     public void testGoodURNQuery() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
-        // first send a QueryKey request....
+        // first send a AddressSecurityToken request....
         send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
 
-        // we should get a QueryKey....
+        // we should get a AddressSecurityToken....
         Message m = null;
-        QueryKey qkToUse = null;
+        AddressSecurityToken qkToUse = null;
         while (true) {
             m = receive();
             if (m instanceof PingReply) {
@@ -190,12 +190,12 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
 
     public void testQueryWithNoHit() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
-        // first send a QueryKey request....
+        // first send a AddressSecurityToken request....
         send(PingRequest.createQueryKeyRequest(), localHost, SERVER_PORT);
 
-        // we should get a QueryKey....
+        // we should get a AddressSecurityToken....
         Message m = null;
-        QueryKey qkToUse = null;
+        AddressSecurityToken qkToUse = null;
         while (true) {
             m = receive();
             if (m instanceof PingReply) {
@@ -231,7 +231,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
     public void testBadQueryKey() throws Exception {
         InetAddress localHost = InetAddress.getLocalHost();
 
-        QueryKey qkToUse = new QueryKey(localHost, 0);
+        AddressSecurityToken qkToUse = new AddressSecurityToken(localHost, 0);
         assertNotNull(qkToUse);
 
         {

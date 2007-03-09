@@ -31,7 +31,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
@@ -108,7 +108,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	
         byte[] data = new byte[16];
         new Random().nextBytes(data);
-        _token = new QueryKey(data);
+        _token = new AddressSecurityToken(data);
 	}
 		
 

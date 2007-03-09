@@ -944,7 +944,7 @@ public abstract class MessageDispatcher {
         
         /**
          * A late response is a response that arrived after a timeout.
-         * We rely on the fact that MessageIDs are tagged with a QueryKey
+         * We rely on the fact that MessageIDs are tagged with a AddressSecurityToken
          * so that we can still figure out if we've ever send a request
          * to the remote Node.
          * 

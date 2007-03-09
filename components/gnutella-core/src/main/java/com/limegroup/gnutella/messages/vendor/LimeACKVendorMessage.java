@@ -73,7 +73,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
      *  for this query.  If you want more than 255 just send 255.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
-     *  @param queryKey the query key that is sent along to make sure the 
+     *  @param addressSecurityToken the query key that is sent along to make sure the 
      *  opposite side is not spoofing their ip address
      */
     public LimeACKVendorMessage(GUID replyGUID, 

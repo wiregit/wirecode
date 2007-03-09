@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.I18NConvert;
@@ -138,7 +138,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * The Query Key associated with this query -- can be null.
      */
-    private final QueryKey QUERY_KEY;
+    private final AddressSecurityToken QUERY_KEY;
 
     /**
      * The flag in the 'M' GGEP extension - if non-null, the query is requesting
@@ -767,7 +767,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  argument is zero-length (empty)
      */
     public static QueryRequest 
-        createQueryKeyQuery(String query, QueryKey key) {
+        createQueryKeyQuery(String query, AddressSecurityToken key) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -798,7 +798,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  argument is zero-length (empty)
      */
     public static QueryRequest 
-        createQueryKeyQuery(URN sha1, QueryKey key) {
+        createQueryKeyQuery(URN sha1, AddressSecurityToken key) {
         if(sha1 == null) {
             throw new NullPointerException("null sha1");
         }
@@ -850,12 +850,12 @@ public class QueryRequest extends Message implements Serializable{
 	 * query, except that it includes the specified query key.
 	 *
 	 * @param qr the <tt>QueryRequest</tt> to use
-	 * @param key the <tt>QueryKey</tt> to add
+	 * @param key the <tt>AddressSecurityToken</tt> to add
 	 * @return a new <tt>QueryRequest</tt> from the specified query and
 	 *  key
      */
 	public static QueryRequest 
-		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
+		createQueryKeyQuery(QueryRequest qr, AddressSecurityToken key) {
 		    
         // TODO: Copy the payload verbatim, except add the query-key
         //       into the GGEP section.
@@ -1046,12 +1046,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector) {
         // calls me with the doNotProxy flag set to false
         this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, false, 0);
     }
 
@@ -1075,12 +1075,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
     
@@ -1092,13 +1092,13 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask,
                         boolean normalize) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, normalize);
     }
 
@@ -1122,12 +1122,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, minSpeed, query, richQuery, requestedUrnTypes,
-             queryUrns, queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             queryUrns, addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
     
@@ -1151,7 +1151,7 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask, boolean normalize) {
@@ -1252,7 +1252,7 @@ public class QueryRequest extends Message implements Serializable{
 			tempQueryUrns = URN.NO_URN_SET;
 		}
 
-        this.QUERY_KEY = queryKey;
+        this.QUERY_KEY = addressSecurityToken;
         this._doNotProxy = doNotProxy;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1414,7 +1414,7 @@ public class QueryRequest extends Message implements Serializable{
 			REQUESTED_URN_TYPES =
 			    Collections.unmodifiableSet(parser.requestedUrnTypes);
 		}	
-        QUERY_KEY = parser.queryKey;
+        QUERY_KEY = parser.addressSecurityToken;
 		if(QUERY.length() == 0 &&
 		   parser.richQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
@@ -1684,10 +1684,10 @@ public class QueryRequest extends Message implements Serializable{
 	}
         
     /**
-     * Returns the QueryKey associated with this Request.  May very well be
+     * Returns the AddressSecurityToken associated with this Request.  May very well be
      * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
      */
-    public QueryKey getQueryKey() {
+    public AddressSecurityToken getQueryKey() {
         return QUERY_KEY;
     }
 
@@ -1969,7 +1969,7 @@ public class QueryRequest extends Message implements Serializable{
         int minSpeed = 0;
         Set<URN> queryUrns = null;
         Set<URN.Type> requestedUrnTypes = null;
-        QueryKey queryKey = null;
+        AddressSecurityToken addressSecurityToken = null;
         
         HUGEExtension huge;
         
@@ -2005,7 +2005,7 @@ public class QueryRequest extends Message implements Serializable{
                     try {
                         if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                             byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                            queryKey = new QueryKey(qkBytes);
+                            addressSecurityToken = new AddressSecurityToken(qkBytes);
                         }
                         if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                             featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);

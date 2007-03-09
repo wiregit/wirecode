@@ -12,7 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
@@ -37,8 +37,8 @@ public class OnDemandUnicaster {
     /** IpPorts that we've queried for this GUID. */
     private static final Map<GUID.TimedGUID, Set<IpPort>> _queriedHosts;
 
-    /** GUESSEndpoints => QueryKey. */
-    private static final Map<GUESSEndpoint, QueryKey> _queryKeys;
+    /** GUESSEndpoints => AddressSecurityToken. */
+    private static final Map<GUESSEndpoint, AddressSecurityToken> _queryKeys;
 
     /** Access to UDP traffic. */
     private static final UDPService _udp;
@@ -51,7 +51,7 @@ public class OnDemandUnicaster {
 
     static {
         // static initializers are only called once, right?
-        _queryKeys = new Hashtable<GUESSEndpoint, QueryKey>(); // need sychronization
+        _queryKeys = new Hashtable<GUESSEndpoint, AddressSecurityToken>(); // need sychronization
         _bufferedURNs = new Hashtable<GUESSEndpoint, SendLaterBundle>(); // synchronization handy
         _queriedHosts = new HashMap<GUID.TimedGUID, Set<IpPort>>();
         _udp = UDPService.instance();
@@ -60,7 +60,7 @@ public class OnDemandUnicaster {
         RouterService.schedule(new QueriedHostsExpirer(), QUERIED_HOSTS_CLEAR_TIME, QUERIED_HOSTS_CLEAR_TIME);
      }        
 
-    /** Feed me QueryKey pongs so I can query people....
+    /** Feed me AddressSecurityToken pongs so I can query people....
      *  pre: pr.getQueryKey() != null
      */
     public static void handleQueryKeyPong(PingReply pr) 
@@ -72,7 +72,7 @@ public class OnDemandUnicaster {
         if (pr == null)
             throw new NullPointerException("null pong");
 
-        QueryKey qk = pr.getQueryKey();
+        AddressSecurityToken qk = pr.getQueryKey();
         if (qk == null)
             throw new IllegalArgumentException("no key in pong");
         // ------
@@ -111,9 +111,9 @@ public class OnDemandUnicaster {
             throw new IllegalArgumentException("No urn to look for!");
         // ------
 
-        // see if you have a QueryKey - if not, request one
+        // see if you have a AddressSecurityToken - if not, request one
         // ------
-        QueryKey key = _queryKeys.get(ep);
+        AddressSecurityToken key = _queryKeys.get(ep);
         if (key == null) {
             GUESSEndpoint endpoint = new GUESSEndpoint(ep.getInetAddress(),
                                                        ep.getPort());
@@ -146,7 +146,7 @@ public class OnDemandUnicaster {
         }
     }
     
-    private static void sendQuery(URN urn, QueryKey qk, IpPort ipp) {
+    private static void sendQuery(URN urn, AddressSecurityToken qk, IpPort ipp) {
         QueryRequest query = QueryRequest.createQueryKeyQuery(urn, qk);
         // store the query's GUID -> IPP so that when we get replies over
         // UDP we can allow them without requiring the whole ReplyNumber/ACK

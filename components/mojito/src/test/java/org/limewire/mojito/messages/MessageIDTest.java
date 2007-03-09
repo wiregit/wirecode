@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.security.AbstractSecurityToken;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 public class MessageIDTest extends MojitoTestCase {
@@ -28,7 +28,7 @@ public class MessageIDTest extends MojitoTestCase {
         DefaultMessageID messageId1 = DefaultMessageID.createWithSocketAddress(new InetSocketAddress("localhost", 1024));
         DefaultMessageID messageId2 = DefaultMessageID.createWithSocketAddress(new InetSocketAddress("localhost", 1024));
         
-        // Except for the first four bytes (QueryKey) they shouldn't be equal
+        // Except for the first four bytes (AddressSecurityToken) they shouldn't be equal
         assertNotEquals(messageId1, messageId2);
         for (int i = 0; i < 4; i++) {
             assertEquals(messageId1.getBytes()[i], messageId2.getBytes()[i]);
@@ -45,7 +45,7 @@ public class MessageIDTest extends MojitoTestCase {
     
     public void testEmbeddedQueryKey() throws Exception {
         InetSocketAddress addr1 = new InetSocketAddress("localhost", 1234);
-        AbstractSecurityToken key1 = new QueryKey(addr1);
+        AbstractSecurityToken key1 = new AddressSecurityToken(addr1);
         
         MessageID messageId1 = DefaultMessageID.createWithSocketAddress(addr1);
         AbstractSecurityToken key2 = (AbstractSecurityToken)PrivilegedAccessor.invokeMethod(messageId1, "getSecurityToken", new Object[0]);

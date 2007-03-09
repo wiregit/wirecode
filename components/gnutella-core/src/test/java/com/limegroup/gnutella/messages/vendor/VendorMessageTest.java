@@ -8,7 +8,7 @@ import java.util.Properties;
 import junit.framework.Test;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 import com.limegroup.gnutella.GUID;
@@ -36,7 +36,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.LimeTestCase 
 
     @Override
     protected void setUp() throws Exception {
-        token = new QueryKey(InetAddress.getLocalHost(), 7090);
+        token = new AddressSecurityToken(InetAddress.getLocalHost(), 7090);
     }
 
     public static void main(String[] args) {
