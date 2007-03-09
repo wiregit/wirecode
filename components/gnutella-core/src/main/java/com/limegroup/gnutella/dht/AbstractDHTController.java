@@ -226,7 +226,12 @@ public abstract class AbstractDHTController implements DHTController {
             int port = RouterService.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
-            bootstrapper.bootstrap();
+            
+            // Bootstrap only if we're not a passive leaf node
+            if (!getDHTMode().isPassiveLeaf()) {
+                bootstrapper.bootstrap();
+            }
+            
             dispatcher.dispatchEvent(new DHTEvent(this, Type.STARTING));
         } catch (IOException err) {
             LOG.error("IOException", err);

@@ -16,11 +16,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
 /**
  * The DHT Manager interface currently defines method to start, stop and perform
  * operations related to the maintenance of the DHT (bootstrapping, etc.).
- * It also takes care of switching an active DHT node to a passive DHT node 
- * and vice versa.
- * 
- * TODO: The manager will later expose the methods to use the DHT, i.e. store 
- * and retrieve values.
+ * It also takes care of switching between different DHT modes.
  */
 public interface DHTManager extends ConnectionLifecycleListener, 
         EventDispatcher<DHTEvent, DHTEventListener>{
@@ -87,14 +83,31 @@ public interface DHTManager extends ConnectionLifecycleListener,
             return (byte)(mode & 0xFF);
         }
         
+        /**
+         * Returns true if the Node is inactive (it's DHT capable but 
+         * it's not running)
+         */
+        public boolean isInactive() {
+            return (this == INACTIVE);
+        }
+        
+        /**
+         * Returns true if the Node is in active mode
+         */
         public boolean isActive() {
             return (this == ACTIVE);
         }
         
-        public boolean isPassiveUltrapeer() {
+        /**
+         * Returns true if the Node is in passive mode
+         */
+        public boolean isPassive() {
             return (this == PASSIVE);
         }
         
+        /**
+         * Returns true if the Node is in passive leaf mode
+         */
         public boolean isPassiveLeaf() {
             return (this == PASSIVE_LEAF);
         }
@@ -167,7 +180,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public List<IpPort> getActiveDHTNodes(int maxNodes);
 
     /**
-     * 
+     * Returns the mode of the DHT
      */
     public DHTMode getMode();
     
@@ -187,7 +200,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public boolean isWaitingForNodes();
     
     /**
-     * 
+     * Returns the MojitoDHT instance (null if Node is running in inactive mode!)
      */
     public MojitoDHT getMojitoDHT();
     
@@ -202,7 +215,10 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public Version getVersion();
     
     /**
+     * Callback to notify the manager about new DHT Contacts that
+     * were exchanged over regular Gnutella messages.
      * 
+     * @see com.limegroup.gnutella.messages.vendor.DHTContactsMessage
      */
     public void handleDHTContactsMessage(DHTContactsMessage msg);
 }
