@@ -18,7 +18,7 @@ public class StoreRequestWireImpl extends AbstractMessageWire<StoreRequest>
         return delegate.getDHTValues();
     }
 
-    public SecurityToken<?> getSecurityToken() {
+    public SecurityToken getSecurityToken() {
         return delegate.getSecurityToken();
     }
 }

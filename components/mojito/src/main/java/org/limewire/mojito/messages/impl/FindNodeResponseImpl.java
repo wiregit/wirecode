@@ -57,7 +57,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
             MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, version, in);
         
-        this.securityToken = in.readQueryKey();
+        this.securityToken = in.readSecurityToken();
         this.nodes = in.readContacts();
     }
     

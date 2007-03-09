@@ -29,8 +29,6 @@ import junit.framework.Test;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
@@ -1166,15 +1164,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         query.writePayload(out);
         query = new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, out.toByteArray());
         assertEquals(_token.getBytes(), query.getSecurityToken());
-    }
-    
-    private static QueryReply createReply(byte[] address, Set<IpPort> proxies) {
-        Response[] res = new Response[] { new Response(2, 5, "response") }; 
-        
-        return new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, address, 
-                0, res, GUID.makeGuid(),
-                new byte[0], false, false, true, true, false, false, true,
-                proxies, null);
     }
     
     private void runSignatureTest(QueryReply reply, int[] indexes, byte[] payload) throws Exception {

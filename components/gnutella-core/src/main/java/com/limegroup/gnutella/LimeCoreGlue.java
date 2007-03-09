@@ -81,7 +81,7 @@ public class LimeCoreGlue {
             }
         };
         
-        MACCalculatorRepositoryManager.setSettingsProvider(settingsProvider);
+        MACCalculatorRepositoryManager.setDefaultSettingsProvider(settingsProvider);
     }
 
 }

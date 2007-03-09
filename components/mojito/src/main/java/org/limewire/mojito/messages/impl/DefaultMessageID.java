@@ -170,7 +170,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
      * Extracts and returns the AddressSecurityToken from the GUID
      * @throws InvalidSecurityTokenException 
      */
-    private SecurityToken<DHTTokenData> getSecurityToken() throws InvalidSecurityTokenException {
+    private SecurityToken getSecurityToken() throws InvalidSecurityTokenException {
         byte[] queryKey = new byte[4];
 
         System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
@@ -262,7 +262,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         }
     }
    
-    private static class MessageSecurityToken extends AbstractSecurityToken<DHTTokenData> {
+    private static class MessageSecurityToken extends AbstractSecurityToken {
         
         public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
             super(network);
@@ -272,7 +272,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             super(data);
         }
 
-        protected byte [] getFromMAC(byte [] mac, DHTTokenData ignored) {
+        protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
             return mac;
         }
     }

@@ -5,7 +5,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import org.limewire.security.SecurityToken.TokenData;
 import org.limewire.util.ByteOrder;
 
 /**
@@ -26,7 +25,7 @@ import org.limewire.util.ByteOrder;
  * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
  * to use your new QueryKeyGenerator implementation. 
  */
-public final class AddressSecurityToken extends AbstractSecurityToken<TokenData> {
+public final class AddressSecurityToken extends AbstractSecurityToken {
 
     /** As detailed by the GUESS spec.
      */
@@ -39,6 +38,36 @@ public final class AddressSecurityToken extends AbstractSecurityToken<TokenData>
      * Cached value to make hashCode() much faster.
      */
     private final int _hashCode;
+
+    /** Generates a AddressSecurityToken for a given SocketAddress.
+     *  For a given SocketAddress, using a different SecretKey and/or SecretPad
+     *  will result in a different AddressSecurityToken.  The return value is constructed
+     *  with prepareForNet equal to true.
+     *  
+     * @param ip the IP address of the other node
+     * @param port the port of the other node
+     */
+    public AddressSecurityToken (SocketAddress address) {
+        this(((InetSocketAddress)address).getAddress(),
+                ((InetSocketAddress)address).getPort());
+    }
+    
+    /** Generates a AddressSecurityToken for a given IP:Port combo.
+     *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
+     *  will result in a different AddressSecurityToken.  The return value is constructed
+     *  with prepareForNet equal to true.
+     *  
+     * @param ip the IP address of the other node
+     * @param port the port of the other node
+     */
+    public AddressSecurityToken (InetAddress ip, int port) {
+        this(new AddressTokenData(ip,port));
+    }
+    
+    public AddressSecurityToken(AddressTokenData data) {
+        super(data);
+        _hashCode = genHashCode(getBytes());
+    }    
 
     public AddressSecurityToken(byte[] key) throws InvalidSecurityTokenException {
         super(key.clone());
@@ -92,7 +121,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken<TokenData>
     /** Returns a String with the AddressSecurityToken represented in hexadecimal.
      */
     public String toString() {
-        return "{Query Key: " + (new BigInteger(1, getBytes())).toString(16) + "}";
+        return "{AddressSecurityToken: " + (new BigInteger(1, getBytes())).toString(16) + "}";
     }
 
     //--------------------------------------
@@ -101,52 +130,14 @@ public final class AddressSecurityToken extends AbstractSecurityToken<TokenData>
     /**
      * Determines if the bytes are valid for a qkey.
      */
-    public static boolean isValidQueryKeyBytes(byte[] key) {
+    public static boolean isValidSecurityTokenBytes(byte[] key) {
         return key != null &&
                key.length >= MIN_QK_SIZE_IN_BYTES &&
                key.length <= MAX_QK_SIZE_IN_BYTES;
     }
     
     protected boolean isValidBytes(byte [] key) {
-        return isValidQueryKeyBytes(key);
-    }
-
-
-    /** Generates a AddressSecurityToken for a given SocketAddress.
-     *  For a given SocketAddress, using a different SecretKey and/or SecretPad
-     *  will result in a different AddressSecurityToken.  The return value is constructed
-     *  with prepareForNet equal to true.
-     *  
-     * @param ip the IP address of the other node
-     * @param port the port of the other node
-     */
-    public AddressSecurityToken (SocketAddress address) {
-        this(((InetSocketAddress)address).getAddress(),
-                ((InetSocketAddress)address).getPort());
-    }
-    
-    /** Generates a AddressSecurityToken for a given IP:Port combo.
-     *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
-     *  will result in a different AddressSecurityToken.  The return value is constructed
-     *  with prepareForNet equal to true.
-     *  
-     * @param ip the IP address of the other node
-     * @param port the port of the other node
-     */
-    public AddressSecurityToken (InetAddress ip, int port) {
-        this(new AddressTokenData(ip,port));
-    }
-    
-    public AddressSecurityToken(TokenData data) {
-        super(data);
-        _hashCode = genHashCode(getBytes());
-    }
-    
-    /** Returns a new QueryKeyGenerator with random secret key(s),
-     *  using the default QueryKeyGenerator implementation.
-     */
-    public static MACCalculator createTokenGenerator() {
-        return new TEAMACCalculator();
+        return isValidSecurityTokenBytes(key);
     }
     
     /**

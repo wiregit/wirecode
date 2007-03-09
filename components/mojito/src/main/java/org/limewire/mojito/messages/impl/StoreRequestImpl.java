@@ -37,16 +37,16 @@ import org.limewire.security.SecurityToken;
 /**
  * An implementation of StoreRequest
  */
-public class StoreRequestImpl extends AbstractRequestMessage
-        implements StoreRequest {
+public class StoreRequestImpl extends AbstractRequestMessage implements StoreRequest {
 
-    private final SecurityToken<?> securityToken;
+    private final SecurityToken securityToken;
     
     private final Collection<? extends DHTValueEntity> values;
     
     public StoreRequestImpl(Context context, 
             Contact contact, MessageID messageId,
-            SecurityToken<?> securityToken, Collection<? extends DHTValueEntity> values) {
+            SecurityToken securityToken,
+            Collection<? extends DHTValueEntity> values) {
         super(context, OpCode.STORE_REQUEST, contact, messageId);
 
         this.securityToken = securityToken;
@@ -57,11 +57,11 @@ public class StoreRequestImpl extends AbstractRequestMessage
             MessageID messageId, Version version, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_REQUEST, src, messageId, version, in);
         
-        this.securityToken = in.readQueryKey();
+        this.securityToken = in.readSecurityToken();
         this.values = in.readDHTValueEntities(getContact());
     }
     
-    public SecurityToken<?> getSecurityToken() {
+    public SecurityToken getSecurityToken() {
         return securityToken;
     }
 

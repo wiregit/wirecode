@@ -22,7 +22,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
     public void testKeyGeneratorsAreRotatedAndExpired() {
         
         SchedulingTestThreadPool pool = new SchedulingTestThreadPool();
-        MACCalculatorRotator rotator = new MACCalculatorRotator(pool, new MACCalculatorRepositoryManager.TEAMACCalculatorFactory(),
+        MACCalculatorRotator rotator = new MACCalculatorRotator(pool, new TEAMACCalculatorFactory(),
                 new SettingsProvider() {
                     public long getChangePeriod() {
                         return 1;
@@ -63,7 +63,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
         
         WrappingSchedulingTestThreadPool pool = new WrappingSchedulingTestThreadPool();
         
-        MACCalculatorRotator rotator = new MACCalculatorRotator(pool, new MACCalculatorRepositoryManager.TEAMACCalculatorFactory(),
+        MACCalculatorRotator rotator = new MACCalculatorRotator(pool, new TEAMACCalculatorFactory(),
                 new SettingsProvider() {
                     public long getChangePeriod() {
                         return 500;
@@ -91,7 +91,7 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
     public void testInvalidSettings() throws Exception {
         try {
             new MACCalculatorRotator(new SchedulingTestThreadPool(), 
-                    new MACCalculatorRepositoryManager.TEAMACCalculatorFactory(),
+                    new TEAMACCalculatorFactory(),
                     new SettingsProvider() {
                 public long getChangePeriod() {
                     return 500;

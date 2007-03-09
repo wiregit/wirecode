@@ -300,7 +300,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken<OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
+        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
 
@@ -696,7 +696,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(1, ((QueryReply)message).getResultCount());
         byte[] receivedTokenBytes = ((QueryReply)message).getSecurityToken(); 
         assertNotNull(receivedTokenBytes);
-        SecurityToken<OOBSecurityToken.OOBTokenData> receivedToken = new OOBSecurityToken(receivedTokenBytes);
+        SecurityToken receivedToken = new OOBSecurityToken(receivedTokenBytes);
         assertTrue(receivedToken.isFor(new OOBTokenData(pack.getAddress(),
                 pack.getPort(), message.getGUID(), receivedToken.getBytes()[0] & 0xFF)));
         assertEquals(1, receivedToken.getBytes()[0] & 0XFF);

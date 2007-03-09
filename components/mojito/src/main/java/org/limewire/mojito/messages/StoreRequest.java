@@ -34,7 +34,7 @@ public interface StoreRequest extends RequestMessage {
      * The SecurityToken the remote Node is using to store
      * the DHTValue(s) at our Node.
      */
-    public SecurityToken<?> getSecurityToken();
+    public SecurityToken getSecurityToken();
 
     /**
      * A Collection of DHTValue(s) we're supposed to

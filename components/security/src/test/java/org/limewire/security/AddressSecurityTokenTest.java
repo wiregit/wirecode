@@ -112,7 +112,7 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     
     public void testQueryKeyExpiration() throws Exception {
         NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
-        MACCalculatorRepositoryManager.setSettingsProvider(settings);
+        MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
         
         AddressSecurityToken key = new AddressSecurityToken(InetAddress.getLocalHost(), 4545);
         

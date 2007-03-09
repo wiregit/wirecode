@@ -16,8 +16,9 @@ import com.limegroup.gnutella.ReplyHandler;
 /**
  * A security token to be used in the OOB v3 protocol.
  */
-public class OOBSecurityToken extends AbstractSecurityToken<OOBSecurityToken.OOBTokenData> {
+public class OOBSecurityToken extends AbstractSecurityToken {
     
+
     /** 
      * Creates a security token with the provided data.
      * The query key consists of the # of results followed 
@@ -36,15 +37,21 @@ public class OOBSecurityToken extends AbstractSecurityToken<OOBSecurityToken.OOB
         super(network);
     }
     
-    protected byte [] getFromMAC(byte[] b, OOBTokenData data) {
+    protected byte [] getFromMAC(byte[] b, TokenData data) {
         byte [] ret = new byte[b.length+1];
-        ret[0] = (byte)data.getNumRequests();
+        ret[0] = (byte)((OOBTokenData)data).getNumRequests();
         System.arraycopy(b, 0, ret, 1, b.length);
         return ret;
     }
     
-    public static class OOBTokenData implements SecurityToken.TokenData {
-        
+    /** Returns true if the data is an OOBTokenData. */
+    @Override
+    protected boolean isValidTokenData(TokenData data) {
+        return data instanceof OOBTokenData;
+    }
+    
+    
+    public static class OOBTokenData implements SecurityToken.TokenData {        
         private final int numRequests;
         private final byte [] data;
         

@@ -74,6 +74,7 @@ public class StoreRequestHandler extends AbstractRequestHandler {
             networkStats.STORE_REQUESTS_NO_QK.incrementStat();
             return;
         }
+        
         if (!securityToken.isFor(new AddressSecurityToken.AddressTokenData(request.getContact().getContactAddress()))) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(request.getContact() 
