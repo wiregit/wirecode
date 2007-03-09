@@ -198,7 +198,7 @@ public class MessageOutputStream extends DataOutputStream {
     /**
      * Writes the given AddressSecurityToken to the OutputStream
      */
-    public void writeQueryKey(SecurityToken securityToken) throws IOException {
+    public void writeSecurityToken(SecurityToken securityToken) throws IOException {
         if (securityToken != null) {
             assert (securityToken instanceof AddressSecurityToken);
             byte[] qk = securityToken.getBytes();

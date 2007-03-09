@@ -70,7 +70,7 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     }
 
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeQueryKey(securityToken);
+        out.writeSecurityToken(securityToken);
         out.writeContacts(nodes);
     }
     

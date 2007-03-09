@@ -8,35 +8,17 @@ import java.net.SocketAddress;
 import org.limewire.util.ByteOrder;
 
 /**
- * Abstraction for a Query Key as detailed in the GUESS protocol spec.
- * Provides:
- * - encapsulation of (all, LW and non-LW) Query Keys
- * - generation of Query Keys (hence, it contains the LimeWire QK Algorithm)
- *
- * A Query Key is a credential necessary to perform a GUESS Query.  A Query Key
- * instance is immutable.
- *
- * QueryKeys make spoofing UDP IP addresses about as difficult as spoofing TCP
- * IP addresses by forcing some two-way communication before the heavy data
- * transfer occurs (sending search results).  This prevents the use of the
- * Gnutella network as a huge DDoS botnet.
- *
- * If you want to change the underlying generation algorithm, you need to create
- * a new class that implements QueryKeyGenerator and modify getQueryKey(InetAddress, int)
- * to use your new QueryKeyGenerator implementation. 
+ * A token that embeds an IP address and port, allowing one side to generate
+ * a token for a specific addr/port pair that cannot be easily guessed.
  */
 public final class AddressSecurityToken extends AbstractSecurityToken {
 
-    /** As detailed by the GUESS spec.
-     */
+    /** As detailed by the GUESS spec. */
     public static final int MIN_QK_SIZE_IN_BYTES = 4;
-    /** As detailed by the GUESS spec.
-     */
+    /** As detailed by the GUESS spec. */
     public static final int MAX_QK_SIZE_IN_BYTES = 16;
     
-    /**
-     * Cached value to make hashCode() much faster.
-     */
+    /** Cached value to make hashCode() much faster. */
     private final int _hashCode;
 
     /** Generates a AddressSecurityToken for a given SocketAddress.
@@ -140,10 +122,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
         return isValidSecurityTokenBytes(key);
     }
     
-    /**
-     * Token data necessary for the creation of Query keys for the
-     * GUESS protocol.
-     */
+    /** Embeds the address into data. */
     public static class AddressTokenData implements SecurityToken.TokenData {
         private final byte[] data;
         

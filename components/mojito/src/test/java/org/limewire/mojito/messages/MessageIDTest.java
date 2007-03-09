@@ -43,7 +43,7 @@ public class MessageIDTest extends MojitoTestCase {
         assertEquals(messageId4, messageId3);
     }
     
-    public void testEmbeddedQueryKey() throws Exception {
+    public void testEmbeddedSecurityToken() throws Exception {
         InetSocketAddress addr1 = new InetSocketAddress("localhost", 1234);
         AbstractSecurityToken key1 = new AddressSecurityToken(addr1);
         
