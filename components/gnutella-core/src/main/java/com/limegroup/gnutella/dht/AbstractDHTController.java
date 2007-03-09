@@ -44,6 +44,7 @@ import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.AltLocPublisher;
 import com.limegroup.gnutella.dht.db.LimeDHTValueFactory;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherImpl;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
@@ -110,6 +111,9 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
     
+    /**
+     * The mode of this DHTController
+     */
     private final DHTMode mode;
     
     public AbstractDHTController(Vendor vendor, Version version, 
@@ -145,7 +149,14 @@ public abstract class AbstractDHTController implements DHTController {
 
         DHTValuePublisherProxy proxy = new DHTValuePublisherProxy();
         proxy.add(new AltLocPublisher(dht));
-        //proxy.add(new PushProxiesPublisher(dht));
+        
+        // There's no point in publishing my push proxies if I'm
+        // not a passive leaf Node (ultrapeers and active nodes
+        // do not push proxies as they're not firewalled).
+        if (mode.isPassiveLeaf()) {
+            proxy.add(new PushProxiesPublisher(dht));
+        }
+        
         dht.setDHTValueEntityPublisher(proxy);
         
         this.bootstrapper = new DHTBootstrapperImpl(this);
