@@ -47,7 +47,7 @@ public interface SecurityToken<T extends SecurityToken.TokenData> {
     public static class QueryKeyProvider implements TokenProvider {
 
         public SecurityToken getSecurityToken(SocketAddress addr) {
-            return new QueryKey(addr);
+            return new AddressSecurityToken(addr);
         }
     }
 }

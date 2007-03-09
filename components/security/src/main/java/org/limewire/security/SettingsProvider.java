@@ -1,8 +1,8 @@
 package org.limewire.security;
 
 /**
- * The QueryKey.SettingsProvider provides Settings 
- * for the QueryKey class
+ * The AddressSecurityToken.SettingsProvider provides Settings 
+ * for the AddressSecurityToken class
  */
 public interface SettingsProvider {
     

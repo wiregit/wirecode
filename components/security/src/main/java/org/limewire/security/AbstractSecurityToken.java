@@ -16,7 +16,7 @@ public abstract class AbstractSecurityToken<T extends SecurityToken.TokenData> i
     private byte[] _securityToken;
     
     protected AbstractSecurityToken(T data) {
-        _securityToken = getFromMAC(SecurityTokenSmith.getDefaultTokenSmith().getTokenBytes(data), data);
+        _securityToken = getFromMAC(MACCalculatorRepositoryManager.getDefaultRepositoryManager().getMACBytes(data), data);
     }
     
     protected AbstractSecurityToken(byte [] network) throws InvalidSecurityTokenException {
@@ -27,7 +27,7 @@ public abstract class AbstractSecurityToken<T extends SecurityToken.TokenData> i
     }
     
     public final boolean isFor(T data) {
-        for (byte[] token : SecurityTokenSmith.getDefaultTokenSmith().getAllBytes(data)) {
+        for (byte[] token : MACCalculatorRepositoryManager.getDefaultRepositoryManager().getAllBytes(data)) {
             if (Arrays.equals(_securityToken, getFromMAC(token ,data)))
                 return true;
         }
