@@ -1096,7 +1096,7 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getHops(), proxy.getHops());
         assertEquals(query.getTTL(), proxy.getTTL());
         
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         OOBv2Disabled = true;
         proxy = QueryRequest.createProxyQuery(query,
                 query.getGUID());
@@ -1291,7 +1291,7 @@ public final class QueryRequestTest extends LimeTestCase {
     }
     
     public void testNotUnmarkOOBQuery() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         OOBv2Disabled = true;
         testUnmarkOOBQuery();
     }

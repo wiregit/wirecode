@@ -18,6 +18,10 @@ public class ProbabilisticBooleanSetting extends FloatSetting {
         return value;
     }
 
+    public void setBoolean(boolean b){
+        setValue(b ? 1.0f : 0f);
+    }
+    
     @Override
     protected void loadValue(String sValue) {
         super.loadValue(sValue);

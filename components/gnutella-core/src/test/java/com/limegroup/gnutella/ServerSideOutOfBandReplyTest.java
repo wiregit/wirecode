@@ -353,10 +353,10 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
     }
     
     public void testBasicOutOfBandRequestV3Only() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setValue(1);
         v2disabled = true;
         testBasicOutOfBandRequest();
-        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setValue(0);
         v2disabled = false;
     }
     /**

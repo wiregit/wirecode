@@ -769,7 +769,7 @@ public class ManagedConnection extends Connection
         
         if (isClientSupernodeConnection()
                 && getSupportedOOBProxyControlVersion() == -1
-                && SearchSettings.DISABLE_OOB_V2.getValue()) {
+                && SearchSettings.DISABLE_OOB_V2.getBoolean()) {
             // don't proxy if we are a leaf and the ultrapeer 
             // does not know OOB v3 and they would proxy for us
             query = QueryRequest.createDoNotProxyQuery(query);
@@ -1185,7 +1185,7 @@ public class ManagedConnection extends Connection
 
             // disable oobv2 explicitly.
             if (isClientSupernodeConnection()&&
-                    SearchSettings.DISABLE_OOB_V2.getValue() &&
+                    SearchSettings.DISABLE_OOB_V2.getBoolean() &&
                     getSupportedOOBProxyControlVersion() != -1) {
                 Message stopv2 = 
                     new OOBProxyControlVendorMessage(

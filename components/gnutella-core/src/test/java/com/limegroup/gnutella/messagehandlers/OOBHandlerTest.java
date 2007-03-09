@@ -84,12 +84,12 @@ public class OOBHandlerTest extends LimeTestCase {
     }
 
     public void testMessagesWithoutEchoedTokenAreDiscardedForDisabledOOBV2() {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         testMessagesWithoutEchoedTokenAreHandled(true);
     }
     
     public void testMessagesWithoutEchoedTokenAreNotDiscardedForEnabledOOBV2() {
-        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         testMessagesWithoutEchoedTokenAreHandled(false);
     }
     
@@ -117,12 +117,12 @@ public class OOBHandlerTest extends LimeTestCase {
     }
 
     public void testMessagesWithDifferentTokenAreDiscardedForDisabledOOBV2() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         testMessagesWithDifferentTokenAreHandled(true);
     }
     
     public void testMessagesWithDifferentTokenAreAcceptedForEnabeldOOBV2() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         testMessagesWithDifferentTokenAreHandled(false);
     }
     
@@ -157,12 +157,12 @@ public class OOBHandlerTest extends LimeTestCase {
 
     
     public void testDropsUnAckedForDisabledOOBV2() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         testHandlesUnAcked(true);
     }
     
     public void testAcceptsUnAckedForEnabledOOBV2() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         testHandlesUnAcked(false);
     }
 

@@ -104,7 +104,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         
         SecurityToken token = getVerifiedSecurityToken(reply, handler);
         if (token == null) {
-            if (!SearchSettings.DISABLE_OOB_V2.getValue()) 
+            if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) 
                 router.handleQueryReply(reply, handler);
             return;
         }

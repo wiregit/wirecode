@@ -304,7 +304,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
 
     /** tests that v2 queries are upgraded to v3. */
     public void testProtocolUpgrade() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(false);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(false);
         drainAll();
         QueryRequest nonOOB = QueryRequest.createQuery("badger");
         assertFalse(nonOOB.desiresOutOfBandReplies());
@@ -327,7 +327,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
     
     /** tests that v2 queries are upgraded to v3 and v2 is disabled */
     public void testProtocolUpgradeDisableV2() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         drainAll();
         QueryRequest nonOOB = QueryRequest.createQuery("badger");
         assertFalse(nonOOB.desiresOutOfBandReplies());

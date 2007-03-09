@@ -170,7 +170,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         Thread.sleep(200);
         assertNull(getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
         
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
         testUP[0].send(MessagesSupportedVendorMessage.instance());
         testUP[0].flush();
         Thread.sleep(2000);
@@ -471,7 +471,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     }
     
     public void testNoRNVMSent() throws Exception {
-        SearchSettings.DISABLE_OOB_V2.setValue(true);
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
     	drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.
