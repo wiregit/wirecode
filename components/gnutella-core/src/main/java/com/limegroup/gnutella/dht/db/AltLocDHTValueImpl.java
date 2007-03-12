@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import org.limewire.io.IOUtils;
-import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
@@ -22,12 +21,15 @@ import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RouterService;
 
 /**
- * 
+ *
  */
 public class AltLocDHTValueImpl implements AltLocDHTValue {
     
     private static final long serialVersionUID = 8302182739922310121L;
     
+    /**
+     * An AltLocDHTValue for the localhost
+     */
     public static final DHTValue SELF = new AltLocForSelf();
     
     private final DHTValueType valueType;
@@ -49,32 +51,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     private final int pushProxyPort;
     
     /**
-     * Firewalled leaf Nodes use their Ultrapeer to perform DHT operations.
-     * 
-     * (L)     (L)
-     *   \     /
-     *    \   /
-     *     (UP)--------------(UP/L)
-     *    /
-     *   / 
-     * ---- (firewall)
-     * (L)
-     * 
-     * 
-     *  
-     * TODO: createProxyValue() is a stupid name.
-     * 
-     * @param guid GUID of my leaf Node
-     * @param ipp IpPort of my leaf Node
-     * @param features The supported features of my leaf Node
-     * @param fwtVersion The f2f version of my leaf Node
-     */
-    public static DHTValue createProxyValue(GUID guid, IpPort ipp, int features, int fwtVersion) {
-        return new AltLocDHTValueImpl(guid, ipp, features, fwtVersion);
-    }
-    
-    /**
-     * 
+     * Creates an AltLocDHTValue from the given data
      */
     public static DHTValue createFromData(DHTValueType valueType, 
             Version version, byte[] data) throws DHTValueException {
@@ -82,7 +59,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
     
     /**
-     * Used by LocalDHTValue
+     * Constructor to create an AltLocDHTValue for the localhost
      */
     private AltLocDHTValueImpl() {
         this.valueType = ALT_LOC;
@@ -97,22 +74,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
     
     /**
-     * 
-     */
-    private AltLocDHTValueImpl(GUID guid, IpPort ipp, int features, int fwtVersion) {
-        this.valueType = ALT_LOC;
-        this.version = VERSION;
-        this.guid = guid.bytes();
-        this.port = ipp.getPort();
-        this.firewalled = true;
-        this.features = features;
-        this.fwtVersion = fwtVersion;
-        this.address = ipp.getInetAddress();
-        this.pushProxyPort = RouterService.getPort();
-    }
-    
-    /**
-     * 
+     * Constructor to create AltLocDHTValues that are read from the Network
      */
     private AltLocDHTValueImpl(DHTValueType valueType, Version version, byte[] data) throws DHTValueException {
         if (data == null) {
@@ -258,7 +220,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
     
     /**
-     * 
+     * An AltLocDHTValue for the localhost
      */
     private static class AltLocForSelf extends AltLocDHTValueImpl {
         

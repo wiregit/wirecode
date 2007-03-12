@@ -26,6 +26,9 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     
     private static final long serialVersionUID = -8565050579104508260L;
     
+    /**
+     * The Push Proxy value for the localhost
+     */
     public static final DHTValue FOR_SELF = new PushProxiesForSelf();
     
     private final DHTValueType valueType;
@@ -43,13 +46,16 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     private final Set<? extends IpPort> proxies;
     
     /**
-     * 
+     * Factory method to create PushProxiesDHTValues
      */
     public static DHTValue createFromData(DHTValueType valueType, 
             Version version, byte[] data) throws DHTValueException {
         return new PushProxiesDHTValueImpl(valueType, version, data);
     }
     
+    /**
+     * Constructor to create a PushProxiesDHTValue for the localhost
+     */
     private PushProxiesDHTValueImpl() {
         this.valueType = PUSH_PROXIES;
         this.version = VERSION;
@@ -60,6 +66,9 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         this.proxies = null;
     }
     
+    /**
+     * Constructor to create PushProxiesDHTValues that are read from the Network
+     */
     private PushProxiesDHTValueImpl(DHTValueType valueType, Version version, byte[] data) 
             throws DHTValueException {
         
@@ -185,6 +194,9 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         return baos.toByteArray();
     }
     
+    /**
+     * An implementation of PushProxiesDHTValue for the localhost
+     */
     private static class PushProxiesForSelf extends PushProxiesDHTValueImpl {
         
         private static final long serialVersionUID = -3222117316287224578L;

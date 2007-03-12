@@ -16,6 +16,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
 
 class PassiveLeafRouteTable implements RouteTable {
@@ -130,6 +131,13 @@ class PassiveLeafRouteTable implements RouteTable {
 
     public synchronized int size() {
         return bucket.size() + 1;
+    }
+    
+    public synchronized String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(getLocalNode()).append("\n");
+        buffer.append(bucket);
+        return buffer.toString();
     }
     
     private static class BucketImpl implements Bucket {
@@ -291,6 +299,10 @@ class PassiveLeafRouteTable implements RouteTable {
 
         public Contact updateContact(Contact node) {
             return map.put(node.getNodeID(), node);
+        }
+        
+        public String toString() {
+            return CollectionUtils.toString(map.values());
         }
     }
 }
