@@ -30,13 +30,13 @@ public class FakeProxyServer extends AssertComparisons {
      */ 
     private ServerSocket _destinationServer;
 
-    private boolean _proxyOn;
+    private volatile boolean _proxyOn;
 
-    private int _proxyVersion;
+    private volatile int _proxyVersion;
     
-    private boolean _authentication;
+    private volatile  boolean _authentication;
 
-    private boolean _makeError = false;
+    private volatile boolean _makeError = false;
     
     private boolean _isHTTPRequest = false;
     
@@ -85,6 +85,7 @@ public class FakeProxyServer extends AssertComparisons {
             while(true) {
                 Socket incomingProxy = null;
                 incomingProxy = _proxyServer.accept();
+		boolean savedMakeError = _makeError;
                 if(!_proxyOn)
                     fail("LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
@@ -116,9 +117,9 @@ public class FakeProxyServer extends AssertComparisons {
                 catch (SocketException se) {
                     // in error case socket might have been closed from the other side
                     // swallow exception then
-                    if (!_makeError) {
-                        throw se;
-                    }
+		    if (!savedMakeError) {
+			throw se;
+		    }
                 }
                 if(!incomingProxy.isClosed())
                     incomingProxy.close();
