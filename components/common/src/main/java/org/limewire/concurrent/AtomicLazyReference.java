@@ -7,6 +7,7 @@ package org.limewire.concurrent;
  */
 public abstract class AtomicLazyReference<T> {
     
+    /** The backing object. */
     private T obj;
 
     /** Retrieves the reference, creating it if necessary. */
@@ -17,6 +18,7 @@ public abstract class AtomicLazyReference<T> {
         return obj;
     }
     
+    /** Creates the object this reference will use. */
     public abstract T createObject();
 
 }
