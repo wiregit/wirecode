@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -19,6 +18,11 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.connection.BasicQueue;
+import com.limegroup.gnutella.connection.ConnectionStats;
+import com.limegroup.gnutella.connection.MessageWriter;
+import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.UploadStat;
@@ -48,69 +52,54 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
     public class BrowseResponseEntity extends AbstractHttpNIOEntity {
 
-        private final ByteArrayOutputStream BAOS = new ByteArrayOutputStream();
-
         private HTTPUploader uploader;
 
+        private QueryRequest query;
+
+        private Iterator<Response> iterable;
+
+        MessageWriter sender;
+        
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
 
-            // XXX LW can't acctually handle chunked responses
-            setChunked(true);
+            SentMessageHandler sentMessageHandler = new SentMessageHandler() {
+                public void processSentMessage(Message m) {
+                    // TODO update progress
+                }                
+            };
             
-            initialize();
+            sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
+            sender.setWriteChannel(this);
+            
+            // XXX LW can't actually handle chunked responses
+            setChunked(true);
+
+            query = QueryRequest.createBrowseHostQuery();
+            iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
+                    query.desiresOutOfBandReplies());
         }
         
-        private void initialize() {
-            // create a new indexing query
-            QueryRequest indexingQuery = QueryRequest.createBrowseHostQuery();
-
-            // get responses from file manager
-            Response[] responses = RouterService.getFileManager().query(
-                    indexingQuery);
-            if (responses == null) // we aren't sharing any files....
-                responses = new Response[0];
-
-            // convert to QueryReplies
-            Iterable<QueryReply> iterable = RouterService.getMessageRouter()
-                    .responsesToQueryReplies(responses, indexingQuery);
-
-            try {
-                for (QueryReply queryReply : iterable)
-                    queryReply.write(BAOS);
-            } catch (IOException e) {
-                // if there is an error, do nothing..
-            }
-
-            // UPLOADER.setAmountUploaded(BAOS.size());
-            setContentType(Constants.QUERYREPLY_MIME_TYPE);
-        }
-
-        public InputStream getContent() throws IOException,
-                IllegalStateException {
-            return new ByteArrayInputStream(BAOS.toByteArray());
-        }
-
-        public long getContentLength() {
-            return -1;
-        }
-
-        public boolean isRepeatable() {
-            return false;
-        }
-
-        public boolean isStreaming() {
-            return true;
-        }
-
-        public void writeTo(OutputStream outstream) throws IOException {
-            outstream.write(BAOS.toByteArray());
-        }
-
         @Override
         public boolean handleWrite() throws IOException {
-            // TODO Auto-generated method stub
-            return false;
+            addMessages();
+            
+            boolean more = sender.handleWrite();
+            return more || iterable.hasNext();
+        }
+        
+        private void addMessages() {
+            List<Response> responses = new ArrayList<Response>(10); 
+            for (int i = 0; iterable.hasNext() && i < 10; i++) {
+                responses.add(iterable.next());
+            }
+            
+            Iterable<QueryReply> it = RouterService.getMessageRouter()
+                    .responsesToQueryReplies(responses.toArray(new Response[0]), query);
+
+            for (QueryReply queryReply : it) {
+                sender.send(queryReply);
+            }
         }
 
     }

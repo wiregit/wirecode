@@ -41,13 +41,15 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
         if (status) {
             encoder.requestOutput();
         } else {
-            encoder.suspendOutput();
+            //encoder.suspendOutput();
         }
     }
 
     public void produceContent(final ContentEncoder encoder) throws IOException {
         this.encoder = encoder;
-        handleWrite();
+        if (!handleWrite()) {
+            encoder.complete();
+        }
     }
     
     public int write(ByteBuffer src) throws IOException {

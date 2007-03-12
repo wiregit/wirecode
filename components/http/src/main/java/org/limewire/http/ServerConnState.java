@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/ServerConnState.java $
- * $Revision: 1.1.2.1 $
- * $Date: 2007-03-02 19:39:32 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2007-03-12 18:58:34 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -138,8 +138,6 @@ class ServerConnState {
     }
     
     public void shutdown() {
-        this.inbuffer.shutdown();
-        this.outbuffer.shutdown();
         this.inputState = SHUTDOWN;
         this.outputState = SHUTDOWN;
     }

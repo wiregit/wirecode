@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.3 $
- * $Date: 2007-03-02 19:39:32 $
+ * $Revision: 1.1.2.4 $
+ * $Date: 2007-03-12 18:58:34 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -317,6 +317,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
         // Update connection state
         connState.setOutputState(ServerConnState.RESPONSE_BODY_STREAM);
+        
         try {
             HttpNIOEntity entity = connState.getEntity();
             if (entity != null) {
@@ -441,7 +442,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         
         if (response.getEntity() != null) {
             HttpEntity entity = response.getEntity();
-            if (entity != null) {
+            if (entity != null && !(entity instanceof HttpNIOEntity)) {
                 // XXX
                 ByteArrayOutputStream outstream = new ByteArrayOutputStream();
                 entity.writeTo(outstream);

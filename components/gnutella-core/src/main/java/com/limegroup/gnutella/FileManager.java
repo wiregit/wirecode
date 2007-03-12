@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -2105,6 +2106,58 @@ public abstract class FileManager {
         return ret;
     }
 
+    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
+     *  files of this client.
+     */
+    public Iterator<Response> getIndexingIterator(final boolean includeXML) {
+        //Extract responses for all non-null (i.e., not deleted) files.
+        //Because we ignore all incomplete files, _numFiles continues
+        //to work as the expected size of ret.
+        return new Iterator<Response>() {
+            
+            int index = 0;
+            Response preview;
+            
+            private boolean preview() {
+                assert preview == null;
+                
+                while (index < _files.size()) {
+                    FileDesc desc = _files.get(index);
+                    index++;
+                    
+                    // If the file was unshared or is an incomplete file,
+                    // DO NOT SEND IT.
+                    if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
+                        continue;
+                
+                    preview = new Response(desc);
+                    if(includeXML)
+                        addXMLToResponse(preview, desc);
+                    return true;
+                }
+                return false;                
+            }
+            
+            public boolean hasNext() {
+                return preview != null || preview();
+            }
+
+            public Response next() {
+                if (hasNext()) {
+                    Response item = preview;
+                    preview = null;
+                    return item;
+                }
+                throw new NoSuchElementException();               
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
+        };
+
+    }
     
     /**
      * A normal FileManager will never include XML.
