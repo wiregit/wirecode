@@ -30,7 +30,9 @@ import java.util.Random;
 
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AbstractSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -49,7 +51,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
     /**
      * A random pad we're using to obfuscate the actual
-     * QueryKey. Nodes must do a lookup to get the QK!
+     * AddressSecurityToken. Nodes must do a lookup to get the QK!
      */
     private static final byte[] RANDOM_PAD = new byte[4];
 
@@ -112,12 +114,8 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] queryKey = QueryKey.getQueryKey(dst).getBytes();
-
-            // Obfuscate it with our random pad!
-            for(int i = 0; i < RANDOM_PAD.length; i++) {
-                messageId[i] = (byte)(queryKey[i] ^ RANDOM_PAD[i]);
-            }
+            byte[] token = (new MessageSecurityToken(new DHTTokenData(dst))).getBytes();
+            System.arraycopy(token, 0, messageId, 0, 4);
         }
 
         return new DefaultMessageID(messageId);
@@ -165,17 +163,13 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
     }
     
     /**
-     * Extracts and returns the QueryKey from the GUID
+     * Extracts and returns the AddressSecurityToken from the GUID
+     * @throws InvalidSecurityTokenException 
      */
-    private SecurityToken getSecurityToken() {
-        byte[] queryKey = new byte[4];
-
-        // De-Obfuscate it with our random pad!
-        for(int i = 0; i < RANDOM_PAD.length; i++) {
-            queryKey[i] = (byte)(messageId[i] ^ RANDOM_PAD[i]);
-        }
-
-        return QueryKey.getQueryKey(queryKey, true);
+    private SecurityToken getSecurityToken() throws InvalidSecurityTokenException {
+        byte[] token = new byte[4];
+        System.arraycopy(messageId, 0, token, 0, token.length);
+        return new MessageSecurityToken(token);
     }
     
     /*
@@ -194,8 +188,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         if (!(src instanceof InetSocketAddress)) {
             return false;
         }
-
-        return getSecurityToken().isFor(src);
+        try {
+            return getSecurityToken().isFor(new DHTTokenData(src));
+        }
+        catch (InvalidSecurityTokenException iste) {
+            return false;
+        }
     }
     
     public int compareTo(DefaultMessageID o) {
@@ -242,5 +240,42 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
     public String toString() {
         return "MessageID: " + toHexString();
+    }
+    
+    public static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
+        
+        public DHTTokenData(SocketAddress addr) {
+            super(addr);
+        }
+        
+        public byte [] getData() {
+            byte [] ret = super.getData();
+            for (int i = 0; i < RANDOM_PAD.length; i++)
+                ret[i] ^= RANDOM_PAD[i];
+            return ret;
+        }
+        
+        public String toString() {
+            return "DHTTokenData: " + ArrayUtils.toHexString(getData());
+        }
+    }
+   
+    public static class MessageSecurityToken extends AbstractSecurityToken {
+        
+        public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
+            super(network);
+        }
+
+        public MessageSecurityToken(DHTTokenData data) {
+            super(data);
+        }
+
+        protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
+            return mac;
+        }
+        
+        public String toString() {
+            return "MessageSecurityToken: " + ArrayUtils.toHexString(getBytes());
+        }
     }
 }

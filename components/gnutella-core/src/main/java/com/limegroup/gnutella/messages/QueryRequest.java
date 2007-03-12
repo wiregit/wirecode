@@ -11,9 +11,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.I18NConvert;
@@ -28,6 +29,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
@@ -117,10 +119,11 @@ public class QueryRequest extends Message implements Serializable{
     private boolean _isSecurityTokenRequired;
     
     /**
-     * Whether or not the GGEP header for Do Not Proxy was found.
+     * Whether or not the GGEP header for Do Not Proxy was found and its
+     * field is empty.
      */
     private boolean _doNotProxy = false;
-
+    
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
@@ -135,7 +138,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * The Query Key associated with this query -- can be null.
      */
-    private final QueryKey QUERY_KEY;
+    private final AddressSecurityToken QUERY_KEY;
 
     /**
      * The flag in the 'M' GGEP extension - if non-null, the query is requesting
@@ -157,7 +160,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Constant for the default query TTL.
      */
-    private static final byte DEFAULT_TTL = 6;
+    static final byte DEFAULT_TTL = 6;
 
     /**
      * Cached illegal characters in search strings.
@@ -673,38 +676,81 @@ public class QueryRequest extends Message implements Serializable{
         if (guid.length != 16)
             throw new IllegalArgumentException("bad guid size: " + guid.length);
 
-        // i can't just call a new constructor, i have to recreate stuff
+        // i can't just call a new constructor, since there might be stuff in
+        // the payload we don't understand and would get lost
         byte[] newPayload = new byte[qr.PAYLOAD.length];
         System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
+        // disable old out of band if requested
+        if (SearchSettings.DISABLE_OOB_V2.getBoolean())
+            newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        else
+            newPayload[0] |= SPECIAL_OUTOFBAND_MASK;
+        GGEP ggep = new GGEP(false);
+        // signal oob capability
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
         
         try {
+            newPayload = patchInGGEP(newPayload, ggep);
             return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
-                                      newPayload, qr.getNetwork());
+                    newPayload, qr.getNetwork());
         } catch (BadPacketException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
-
+    
+    /**
+     * Copies a query request and marks it to not be proxied.
+     * 
+     * @throws IllegalArgumentException if the payload is not modifiable
+     * @throws IllegalArgumentException if the query request is not from
+     * a LimeWire
+     * @throws IllegalArgumentException if {@link #isOriginated()} is false 
+     */
+    public static QueryRequest createDoNotProxyQuery(QueryRequest qr) {
+        if (!GUID.isLimeGUID(qr.getGUID())) {
+            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
+        }
+        if (!qr.isOriginated()) {
+            throw new IllegalArgumentException("query not originated from here");
+        }
+        
+        // only used for queries understood by us
+        // so we can use the copy constructor and set OOB to false
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getMinSpeed(),
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                qr.desiresOutOfBandReplies(),
+                qr.getFeatureSelector(), true, // do not proxy
+                qr.getMetaMask(), false); // no normalization
+    }
+    
 	/**
 	 * Creates a new query from the existing query and loses the OOB marking.
+     * 
+     * This should only be used for messages that originated from this client.
 	 *
 	 * @param qr the <tt>QueryRequest</tt> to copy
 	 * @return a new <tt>QueryRequest</tt> with no OOB marking
+     * 
+     * @throws IllegalArgumentException if the payload is not modifiable
+     * @throws IllegalArgumentException if the query request is not from
+     * a LimeWire
 	 */
 	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
-        //modify the payload to not be OOB.
-        byte[] newPayload = new byte[qr.PAYLOAD.length];
-        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
-        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
-        newPayload[0] |= SPECIAL_XML_MASK;
-        
-        try {
-            return createNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
-                                      newPayload, qr.getNetwork());
-        } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
+        if (!GUID.isLimeGUID(qr.getGUID())) {
+            throw new IllegalArgumentException("query request from different vendor cannot not be unmarked");
         }
+        
+        // only used for queries understood by us
+        // so we can use the copy constructor and set OOB to false
+        return new QueryRequest(qr.getGUID(), qr.getTTL(), 
+                qr.getQuery(), qr.getRichQueryString(), 
+                qr.getRequestedUrnTypes(), qr.getQueryUrns(),
+                qr.getQueryKey(), qr.isFirewalledSource(), qr.getNetwork(),
+                false, // set oob to false
+                qr.getFeatureSelector(), qr.doNotProxy(),
+                qr.getMetaMask());
 	}
 
     /**
@@ -721,7 +767,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  argument is zero-length (empty)
      */
     public static QueryRequest 
-        createQueryKeyQuery(String query, QueryKey key) {
+        createQueryKeyQuery(String query, AddressSecurityToken key) {
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -752,7 +798,7 @@ public class QueryRequest extends Message implements Serializable{
 	 *  argument is zero-length (empty)
      */
     public static QueryRequest 
-        createQueryKeyQuery(URN sha1, QueryKey key) {
+        createQueryKeyQuery(URN sha1, AddressSecurityToken key) {
         if(sha1 == null) {
             throw new NullPointerException("null sha1");
         }
@@ -804,12 +850,12 @@ public class QueryRequest extends Message implements Serializable{
 	 * query, except that it includes the specified query key.
 	 *
 	 * @param qr the <tt>QueryRequest</tt> to use
-	 * @param key the <tt>QueryKey</tt> to add
+	 * @param key the <tt>AddressSecurityToken</tt> to add
 	 * @return a new <tt>QueryRequest</tt> from the specified query and
 	 *  key
      */
 	public static QueryRequest 
-		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
+		createQueryKeyQuery(QueryRequest qr, AddressSecurityToken key) {
 		    
         // TODO: Copy the payload verbatim, except add the query-key
         //       into the GGEP section.
@@ -1000,12 +1046,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector) {
         // calls me with the doNotProxy flag set to false
         this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, false, 0);
     }
 
@@ -1029,12 +1075,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
     
@@ -1046,13 +1092,13 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask,
                         boolean normalize) {
         this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
-             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, normalize);
     }
 
@@ -1076,12 +1122,12 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask) {
         this(guid, ttl, minSpeed, query, richQuery, requestedUrnTypes,
-             queryUrns, queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             queryUrns, addressSecurityToken, isFirewalled, network, canReceiveOutOfBandReplies,
              featureSelector, doNotProxy, metaFlagMask, true);
     }
     
@@ -1105,7 +1151,7 @@ public class QueryRequest extends Message implements Serializable{
                         String query, String richQuery, 
                         Set<URN.Type> requestedUrnTypes,
                         Set<? extends URN> queryUrns,
-                        QueryKey queryKey, boolean isFirewalled, 
+                        AddressSecurityToken addressSecurityToken, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int featureSelector, boolean doNotProxy,
                         int metaFlagMask, boolean normalize) {
@@ -1170,7 +1216,7 @@ public class QueryRequest extends Message implements Serializable{
             
             if (!canReceiveOutOfBandReplies) 
                 minSpeed |= SPECIAL_XML_MASK;
-            else // bit 10 flags out-of-band support
+            else if (!SearchSettings.DISABLE_OOB_V2.getBoolean())
                 minSpeed |= SPECIAL_OUTOFBAND_MASK;
         }
 
@@ -1194,7 +1240,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 		Set<URN.Type> tempRequestedUrnTypes = null;
 		Set<URN> tempQueryUrns = null;
-		if(requestedUrnTypes != null) {
+		if(requestedUrnTypes != null && !requestedUrnTypes.isEmpty()) {
 			tempRequestedUrnTypes = EnumSet.copyOf(requestedUrnTypes);
 		} else {
 			tempRequestedUrnTypes = URN.Type.NO_TYPE_SET;
@@ -1206,7 +1252,7 @@ public class QueryRequest extends Message implements Serializable{
 			tempQueryUrns = URN.NO_URN_SET;
 		}
 
-        this.QUERY_KEY = queryKey;
+        this.QUERY_KEY = addressSecurityToken;
         this._doNotProxy = doNotProxy;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1264,16 +1310,22 @@ public class QueryRequest extends Message implements Serializable{
                 ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
             // add a GGEP-block if we shouldn't proxy
-            if (doNotProxy)
+            if (_doNotProxy) {
                 ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+            }
 
             // add a meta flag
             if (_metaMask != null)
                 ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
 
+            // mark oob query to require support of security tokens
+            if (canReceiveOutOfBandReplies) {
+                _isSecurityTokenRequired = true;
+                ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
+            }
+            
             // if there are GGEP headers, write them out...
-            if ((this.QUERY_KEY != null) || (_featureSelector > 0) ||
-                _doNotProxy || (_metaMask != null)) {
+            if (!ggepBlock.isEmpty()) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
@@ -1326,84 +1378,45 @@ public class QueryRequest extends Message implements Serializable{
 			throw new BadPacketException("no payload");
 		}
 		PAYLOAD=payload;
-		String tempQuery = "";
-		String tempRichQuery = "";
-		int tempMinSpeed = 0;
-		Set<URN> tempQueryUrns = null;
-		Set<URN.Type> tempRequestedUrnTypes = null;
-        QueryKey tempQueryKey = null;
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
-			short sp = ByteOrder.leb2short(bais);
-			tempMinSpeed = ByteOrder.ushort2int(sp);
-            tempQuery = new String(readNullTerminatedBytes(bais), "UTF-8");
-            // handle extensions, which include rich query and URN stuff
-            byte[] extsBytes = readNullTerminatedBytes(bais);
-            HUGEExtension huge = new HUGEExtension(extsBytes);
-            GGEP ggep = huge.getGGEP();
+		
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+        
+		QUERY = parser.query;
 
-            if(ggep != null) {
-                try {
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                        byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
-                        tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
-                    }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                        _featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
-                        _doNotProxy = true;
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                        _metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
-                        // if the value is something we can't handle, don't even set it
-                        if ((_metaMask.intValue() < 4) || (_metaMask.intValue() > 248))
-                            _metaMask = null;
-                    }
-                    if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB))
-                        _isSecurityTokenRequired = true;
-                } catch (BadGGEPPropertyException ignored) {}
-            }
-
-            tempQueryUrns = huge.getURNS();
-            tempRequestedUrnTypes = huge.getURNTypes();
-            for(String currMiscBlock : huge.getMiscBlocks()) {
-                if(!tempRichQuery.equals(""))
-                    break;
-                if (currMiscBlock.startsWith("<?xml"))
-                    tempRichQuery = currMiscBlock;                
-            }
-        } catch(UnsupportedEncodingException uee) {
-            //couldn't build query from network due to unsupportedencodingexception
-            //so throw a BadPacketException 
-            throw new BadPacketException(uee.getMessage());
-        } catch (IOException ioe) {
-            ErrorService.error(ioe);
-        }
-		QUERY = tempQuery;
 	    LimeXMLDocument tempDoc = null;
 	    try {
-	        tempDoc = new LimeXMLDocument(tempRichQuery);
+	        tempDoc = new LimeXMLDocument(parser.richQuery);
         } catch(SAXException ignored) {
         } catch(SchemaNotFoundException ignored) {
         } catch(IOException ignored) {
         }
         this.XML_DOC = tempDoc;
-		MIN_SPEED = tempMinSpeed;
-		if(tempQueryUrns == null) {
+		MIN_SPEED = parser.minSpeed;
+        
+		_featureSelector = parser.featureSelector;
+        
+        _doNotProxy = parser.doNotProxy;
+        
+        _metaMask = parser.metaMask;
+        
+        _isSecurityTokenRequired = parser.hasSecurityTokenRequest;
+        
+		if(parser.queryUrns == null) {
 			QUERY_URNS =Collections.emptySet(); 
 		}
 		else {
-			QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+			QUERY_URNS = Collections.unmodifiableSet(parser.queryUrns);
 		}
-		if(tempRequestedUrnTypes == null) {
+		if(parser.requestedUrnTypes == null) {
 			REQUESTED_URN_TYPES = Collections.emptySet();
 		}
 		else {
 			REQUESTED_URN_TYPES =
-			    Collections.unmodifiableSet(tempRequestedUrnTypes);
+			    Collections.unmodifiableSet(parser.requestedUrnTypes);
 		}	
-        QUERY_KEY = tempQueryKey;
+        QUERY_KEY = parser.addressSecurityToken;
 		if(QUERY.length() == 0 &&
-		   tempRichQuery.length() == 0 &&
+		   parser.richQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
 		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
@@ -1414,10 +1427,10 @@ public class QueryRequest extends Message implements Serializable{
             throw new BadPacketException("query too big: " + QUERY);
         }        
 
-        if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
+        if(parser.richQuery.length() > MAX_XML_QUERY_LENGTH) {
             ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             //throw BadPacketException.XML_QUERY_TOO_BIG;
-            throw new BadPacketException("xml too big: " + tempRichQuery);
+            throw new BadPacketException("xml too big: " + parser.richQuery);
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
@@ -1477,7 +1490,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Helper method used internally for getting the rich query string.
      */
-    private String getRichQueryString() {
+    /* package for tests */ String getRichQueryString() {
         if( XML_DOC == null )
             return null;
         else
@@ -1589,7 +1602,7 @@ public class QueryRequest extends Message implements Serializable{
      * 3.
      */
     public boolean desiresOutOfBandRepliesV3() {
-        return _isSecurityTokenRequired; 
+        return isSecurityTokenRequired(); 
     }
     
     /**
@@ -1629,6 +1642,14 @@ public class QueryRequest extends Message implements Serializable{
         return _featureSelector;
     }
     
+    /**
+     * Returns true if the query request has a security token request,
+     * this implies the sender requests OOB replies, protocol version 3.
+     */
+    public boolean isSecurityTokenRequired() {
+        return _isSecurityTokenRequired;
+    }
+
     /** Returns the address to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.
      */
@@ -1679,10 +1700,10 @@ public class QueryRequest extends Message implements Serializable{
     }
         
     /**
-     * Returns the QueryKey associated with this Request.  May very well be
+     * Returns the AddressSecurityToken associated with this Request.  May very well be
      * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
      */
-    public QueryKey getQueryKey() {
+    public AddressSecurityToken getQueryKey() {
         return QUERY_KEY;
     }
 
@@ -1825,7 +1846,7 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * @effects utility function to read null-terminated byte[] from stream
      */
-    protected byte[] readNullTerminatedBytes(InputStream is) 
+    protected static byte[] readNullTerminatedBytes(InputStream is) 
         throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i;
@@ -1876,4 +1897,178 @@ public class QueryRequest extends Message implements Serializable{
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
+
+
+    static byte[] patchInGGEP(byte[] payload, GGEP ggep) throws BadPacketException {
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(payload);
+        HUGEExtension huge = parser.huge;
+        if (huge != null) {
+            // we write in the last modifiable block if available, so our
+            // values are still there in the merged version that is read back 
+            // from the network: this is not good
+            GGEPBlock block = getLastBlock(huge.getGGEPBlocks());
+            if (block != null) {
+                GGEP merge = new GGEP(false);
+                // first merge in original block and then ours, to make sure
+                // our values prevail
+                merge.merge(block.getGGEP());
+                merge.merge(ggep);
+                return insertBytes(payload, parser.hugeStart + block.getStartPos(), parser.hugeStart + block.getEndPos(), merge.toByteArray());
+            }
+        }
+        if (isFirstNullByteAfterOffset(payload, payload.length - 1, 2)) {
+            // if ggep is appended after query string keep 0 delimiter
+            return insertGGEP(payload, payload.length, payload.length, ggep.toByteArray(), true);
+        }
+        else if (payload[payload.length - 1] != 0x1C) {
+            return insertGGEP(payload, payload.length - 1, payload.length - 1, ggep.toByteArray(), true);   
+        }
+        else {
+            return insertGGEP(payload, payload.length, payload.length, ggep.toByteArray(), false);
+        }
+    }
+    
+    /**
+     * Returns true if byte at <code>index</code> is 0 and it's the first
+     * one in the payload signifying the end of the query string.
+     */
+    private static boolean isFirstNullByteAfterOffset(byte[] payload, int index, int offset) {
+        if (payload[index] != 0x00) {
+            return false;
+        }
+        for (int i = offset; i < index; i++) {
+            if (payload[i] == 0x00) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Return the last GGEPBlock in the list or null if there
+     * is none or if the list is empty.
+     */
+    private static GGEPBlock getLastBlock(List<GGEPBlock> blocks) {
+        return blocks.isEmpty() ? null : blocks.get(blocks.size() - 1);
+    }
+    
+    private static byte[] insertGGEP(byte[] payload, int start, int end, byte[] ggepBytes, boolean prependDelimiter) {
+        if (prependDelimiter) {
+            byte[] ggepBlock = new byte[ggepBytes.length  +  1];
+            // set HUGE delimiter
+            ggepBlock[0] = 0x1C;
+            System.arraycopy(ggepBytes, 0, ggepBlock, 1, ggepBytes.length);
+            return insertBytes(payload, start, end, ggepBlock);
+        }
+        else {
+            return insertBytes(payload, start, end, ggepBytes);
+        }
+    }
+    
+    private static byte[] insertBytes(byte[] payload, int start, int end, byte[] ggepBytes) {
+        byte[] newPayload = new byte[payload.length + ggepBytes.length - (end - start)];
+        
+        System.arraycopy(payload, 0, newPayload, 0, start);
+        System.arraycopy(ggepBytes, 0, newPayload, start, ggepBytes.length);
+        
+        if (end < payload.length) {
+            System.arraycopy(payload, end, newPayload, start + ggepBytes.length, payload.length - end);
+        }
+        
+        return newPayload;
+    }
+    
+    static class QueryRequestPayloadParser {
+
+        String query = "";
+        String richQuery = "";
+        int minSpeed = 0;
+        Set<URN> queryUrns = null;
+        Set<URN.Type> requestedUrnTypes = null;
+        AddressSecurityToken addressSecurityToken = null;
+        
+        HUGEExtension huge;
+        
+        int featureSelector;
+        
+        boolean doNotProxy;
+        
+        boolean doNotProxyV3;
+        
+        Integer metaMask;
+        
+        boolean hasSecurityTokenRequest;
+        
+        int hugeStart;
+        
+        int hugeEnd;
+        
+        public QueryRequestPayloadParser(byte[] payload) throws BadPacketException {
+            try {
+                PositionByteArrayInputStream bais = new PositionByteArrayInputStream(payload);
+                short sp = ByteOrder.leb2short(bais);
+                minSpeed = ByteOrder.ushort2int(sp);
+                query = new String(readNullTerminatedBytes(bais), "UTF-8");
+                 
+                // handle extensions, which include rich query and URN stuff
+                hugeStart = bais.getPos();
+                byte[] extsBytes = readNullTerminatedBytes(bais);
+                huge = new HUGEExtension(extsBytes);
+                hugeEnd = bais.getPos();
+                GGEP ggep = huge.getGGEP();
+
+                if(ggep != null) {
+                    try {
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                            byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                            addressSecurityToken = new AddressSecurityToken(qkBytes);
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
+                            featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
+                            doNotProxy = true;
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
+                            metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                            // if the value is something we can't handle, don't even set it
+                            if ((metaMask.intValue() < 4) || (metaMask.intValue() > 248))
+                                metaMask = null;
+                        }
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                            hasSecurityTokenRequest = true;
+                        }
+                    } catch (BadGGEPPropertyException ignored) {}
+                }
+
+                queryUrns = huge.getURNS();
+                requestedUrnTypes = huge.getURNTypes();
+                for(String currMiscBlock : huge.getMiscBlocks()) {
+                    if(!richQuery.equals(""))
+                        break;
+                    if (currMiscBlock.startsWith("<?xml"))
+                        richQuery = currMiscBlock;                
+                }
+            } catch(UnsupportedEncodingException uee) {
+                //couldn't build query from network due to unsupportedencodingexception
+                //so throw a BadPacketException 
+                throw new BadPacketException(uee.getMessage());
+            } catch (IOException ioe) {
+                ErrorService.error(ioe);
+            }
+        }
+        
+        static class PositionByteArrayInputStream extends ByteArrayInputStream {
+
+            public PositionByteArrayInputStream(byte[] buf) {
+                super(buf);
+            }
+            
+            public int getPos() {
+                return pos;
+            }
+            
+        }
+        
+    }
+    
 }

@@ -22,11 +22,13 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.Sockets;
 
@@ -139,6 +141,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         }
         assertEquals(queryGuid, new GUID(ack.getGUID()));
         assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
         
         // now send back some results - they should be accepted.
         Response[] res = new Response[10];
@@ -147,7 +150,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         Message m = 
             new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, ack.getSecurityToken());
         baos = new ByteArrayOutputStream();
         m.write(baos);
         byte [] packet = baos.toByteArray();
@@ -160,6 +163,21 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
         assertEquals(10,RouterService.getSearchResultHandler().getNumResultsForQuery(queryGuid));
     }
 
+    public void testOOBv2Disabled() throws Exception {
+        drainAll();
+        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].flush();
+        Thread.sleep(200);
+        assertNull(getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class));
+        
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
+        testUP[0].send(MessagesSupportedVendorMessage.instance());
+        testUP[0].flush();
+        Thread.sleep(2000);
+        OOBProxyControlVendorMessage m = getFirstInstanceOfMessageType(testUP[0], OOBProxyControlVendorMessage.class);
+        assertNotNull(m);
+        assertEquals(2,m.getMaximumDisabledVersion());
+    }
 
     public void testRemovedQuerySemantics() throws Exception {
         DatagramPacket pack = null;
@@ -453,6 +471,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     }
     
     public void testNoRNVMSent() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
     	drainAll();
 
         // first of all, we should confirm that we are sending out a OOB query.

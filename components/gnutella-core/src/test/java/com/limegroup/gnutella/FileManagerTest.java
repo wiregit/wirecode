@@ -964,7 +964,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.LimeTestCase {
      */
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems", null);
+        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems", (Object)null);
     }
     
     //helper function to create queryrequest with I18N

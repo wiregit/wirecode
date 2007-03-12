@@ -201,7 +201,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     
     private static void readHeaders(HTTPDownloader d) throws Throwable {
         try {
-            PrivilegedAccessor.invokeMethod(d, "parseHeaders", null);
+            PrivilegedAccessor.invokeMethod(d, "parseHeaders", (Object)null);
         } catch(Exception e) {
             if ( e.getCause() != null ) 
                 throw e.getCause();

@@ -1068,6 +1068,16 @@ public class Connection implements IpPort {
     }
     
     /**
+     * Returns the peer's supported version of the out-of-band proxying
+     * control message or -1.
+     */
+    public int getSupportedOOBProxyControlVersion() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsOOBProxyingControl();
+        return -1;
+    }
+    
+    /**
      * Return whether or not the remote host supports feature queries.
      */
     public boolean getRemoteHostSupportsFeatureQueries() {

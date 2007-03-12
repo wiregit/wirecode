@@ -103,8 +103,7 @@ public abstract class ClientSideTestCase
                                                   null);
         callback=
         (ActivityCallback)PrivilegedAccessor.invokeMethod(callingClass,
-                                                         "getActivityCallback",
-                                                         null);
+                                                         "getActivityCallback");
         rs=new RouterService(callback);
         RouterService.preGuiInit();
         assertEquals("unexpected port",
@@ -117,7 +116,7 @@ public abstract class ClientSideTestCase
             SERVER_PORT, ConnectionSettings.PORT.getValue());
         connect();
         Integer numUPs = (Integer)PrivilegedAccessor.invokeMethod(callingClass,
-                                                                 "numUPs", null);
+                                                                 "numUPs");
         if ((numUPs.intValue() < 1) || (numUPs.intValue() > 4))
             throw new IllegalArgumentException("Bad value for numUPs!!!");
         testUP = new Connection[numUPs.intValue()];
@@ -177,7 +176,7 @@ public abstract class ClientSideTestCase
          Boolean shouldReply = Boolean.TRUE;
          try {
              shouldReply = (Boolean)PrivilegedAccessor.invokeMethod(callingClass,
-                                     "shouldRespondToPing", null);
+                                     "shouldRespondToPing");
          } catch(NoSuchMethodException ignored) {}
          
          if(shouldReply.booleanValue())

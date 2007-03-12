@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.TreeMap;
 
 import org.limewire.collection.NameValue;
 import org.limewire.io.IOUtils;
+import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.util.COBSUtil;
@@ -36,7 +38,7 @@ public class GGEP {
     public static final String GGEP_HEADER_VENDOR_INFO = "VC";
     /** The extension header (key) for Ultrapeer support. */
     public static final String GGEP_HEADER_UP_SUPPORT = "UP";
-    /** The extension header (key) for QueryKey support. */
+    /** The extension header (key) for AddressSecurityToken support. */
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
     /** 
      * The extension header (key) for oob query requests to require the new
@@ -44,7 +46,7 @@ public class GGEP {
      * authentication.
      */
     public static final String GGEP_HEADER_SECURE_OOB = "SO";
-    /** The extension header (key) for QueryKey support. */
+    /** The extension header (key) for AddressSecurityToken support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
     /** The extension header (key) for PushProxy support. */
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
@@ -90,7 +92,7 @@ public class GGEP {
     public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
     /** The extension header (key) indiciating the value has a signature in it. */
     public static final String GGEP_HEADER_SIGNATURE = "SIG";
-
+    
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
@@ -362,7 +364,20 @@ public class GGEP {
             }
         }
     }
-
+    
+    /**
+     * Returns the GGEP as a byte array
+     * @return an empty array if GGEP is empty
+     */
+    public byte[] toByteArray() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            write(out);
+        } catch (IOException e) {
+            ErrorService.error(e);
+        }
+        return out.toByteArray();
+    }
 
     private final boolean shouldCOBSEncode(byte[] data) {
         // if nulls are allowed from construction time and if nulls are present
@@ -593,6 +608,13 @@ public class GGEP {
      */
     public Set<String> getHeaders() {
         return _props.keySet();
+    }
+    
+    /**
+     * Returns whether this GGEP is empty or not.
+     */
+    public boolean isEmpty() {
+        return _props.isEmpty();
     }
     
     /**

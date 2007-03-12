@@ -171,7 +171,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         keyPair = new KeyPair(masterKey, null);
         
         executorService = new DefaultDHTExecutorService(getName());
-        tokenProvider = new SecurityToken.QueryKeyProvider();
+        tokenProvider = new SecurityToken.AddressSecurityTokenProvider();
         
         setRouteTable(null);
         setDatabase(null, false);

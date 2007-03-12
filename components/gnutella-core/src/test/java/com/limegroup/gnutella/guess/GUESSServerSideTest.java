@@ -10,7 +10,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 
 import junit.framework.Test;
 
@@ -85,9 +85,9 @@ public class GUESSServerSideTest extends LimeTestCase {
 			//return;
             //}
 
-        // first try to get a QueryKey....
+        // first try to get a AddressSecurityToken....
         PingRequest pr = PingRequest.createQueryKeyRequest();
-        QueryKey qkToUse = null;
+        AddressSecurityToken qkToUse = null;
         send(pr, address, Backend.BACKEND_PORT);
         //try {
             PingReply pRep = (PingReply) receive();
@@ -97,7 +97,7 @@ public class GUESSServerSideTest extends LimeTestCase {
             //catch (Exception damn) {
             //damn.printStackTrace();
             // cleanUp();
-            //assertTrue("Couldn't get a QueryKey!!", false);
+            //assertTrue("Couldn't get a AddressSecurityToken!!", false);
             //}
 
         // send a normal ping, should get a pong....
@@ -113,17 +113,17 @@ public class GUESSServerSideTest extends LimeTestCase {
             //assertTrue("Didn't get a Pong!!", false);
             //}
 
-        // first try a bad QueryKey....
+        // first try a bad AddressSecurityToken....
         byte[] fakeQueryKey = new byte[8];
         (new Random()).nextBytes(fakeQueryKey);
 
 		QueryRequest crapQuery = 
 			QueryRequest.createQueryKeyQuery("susheel", 
-											 QueryKey.getQueryKey(fakeQueryKey, true));
+											 new AddressSecurityToken(fakeQueryKey));
         //QueryRequest crapQuery = 
 		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
 		//                   false, null, null, 
-		//                   QueryKey.getQueryKey(fakeQueryKey, true), false);
+		//                   AddressSecurityToken.getQueryKey(fakeQueryKey, true), false);
         send(crapQuery, address, Backend.BACKEND_PORT);
         try {
             receive();

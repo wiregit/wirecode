@@ -60,9 +60,11 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.OOBProxyControlVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
@@ -73,6 +75,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
@@ -282,6 +285,13 @@ public class ManagedConnection extends Connection
     
     /** If we've received a capVM before. */
     private boolean receivedCapVM = false;
+ 
+	/**
+	 * The maximum protocol version for which OOB proxying has beend turned
+	 * off by leaf peer. Defaults to 0 to allow all OOB versions to be
+	 * proxied.
+	 */
+    private int _maxDisabledOOBProtocolVersion = 0;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -735,7 +745,7 @@ public class ManagedConnection extends Connection
     	int smh = hopsFlowMax;
         if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
             return;
-            
+                    
         _outputRunner.send(m);
     }
 
@@ -749,6 +759,23 @@ public class ManagedConnection extends Connection
      */
     public void originateQuery(QueryRequest query) {
         query.originate();
+        
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("do not proxy condition " + 
+                     isClientSupernodeConnection() + " " +
+                     (getSupportedOOBProxyControlVersion() == -1)  + " " +
+                     SearchSettings.DISABLE_OOB_V2.getValueAsString());
+        }
+        
+        if (isClientSupernodeConnection()
+                && getSupportedOOBProxyControlVersion() == -1
+                && SearchSettings.DISABLE_OOB_V2.getBoolean()) {
+            // don't proxy if we are a leaf and the ultrapeer 
+            // does not know OOB v3 and they would proxy for us
+            query = QueryRequest.createDoNotProxyQuery(query);
+            query.originate();
+        }
+        
         send(query);
     }
  
@@ -887,8 +914,22 @@ public class ManagedConnection extends Connection
         // 3.5) The query originator should not disallow proxying.
         // 4) We must be able to OOB and have great success rate.
         if (remoteHostSupportsLeafGuidance() < 1) return query;
-        if (query.desiresOutOfBandReplies()) return query;
+        if (query.desiresOutOfBandRepliesV3()) return query;
+        
         if (query.doNotProxy()) return query;
+        
+        if (_maxDisabledOOBProtocolVersion >= ReplyNumberVendorMessage.VERSION) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("query not proxied because disabled version is " + _maxDisabledOOBProtocolVersion);
+            }
+            return query;
+        }
+        else {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("query might be proxied for max disabled version " + _maxDisabledOOBProtocolVersion + " " + Arrays.toString(query.getGUID()));
+            }
+        }
+        
         if (!RouterService.isOOBCapable() || 
             !OutOfBandThroughputStat.isSuccessRateGreat() ||
             !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
@@ -1140,6 +1181,22 @@ public class ManagedConnection extends Connection
                 Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
                 send(tcp);
                 _numTCPConnectBackRequests++;
+            }
+
+            // disable oobv2 explicitly.
+            if (isClientSupernodeConnection()&&
+                    SearchSettings.DISABLE_OOB_V2.getBoolean() &&
+                    getSupportedOOBProxyControlVersion() != -1) {
+                Message stopv2 = 
+                    new OOBProxyControlVendorMessage(
+                            OOBProxyControlVendorMessage.Control.DISABLE_VERSION_2);
+                send(stopv2);
+            }
+        }
+        else if (vm instanceof OOBProxyControlVendorMessage) {
+            _maxDisabledOOBProtocolVersion = ((OOBProxyControlVendorMessage)vm).getMaximumDisabledVersion();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("_maxDisabledOOBProtocolVersion set to " + _maxDisabledOOBProtocolVersion);
             }
         }
     }

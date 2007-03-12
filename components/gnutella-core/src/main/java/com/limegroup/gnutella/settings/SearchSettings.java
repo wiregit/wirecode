@@ -5,6 +5,7 @@ import org.limewire.setting.ByteSetting;
 import org.limewire.setting.CharArraySetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
+import org.limewire.setting.ProbabilisticBooleanSetting;
 
 
 /**
@@ -252,6 +253,10 @@ public final class SearchSettings extends LimeProps {
 		FACTORY.createBooleanSetting("OOB_ENABLED", true);
 
 
+    public static final ProbabilisticBooleanSetting DISABLE_OOB_V2
+        = FACTORY.createRemoteProbabilisticBooleanSetting("DISABLE_OOB_V2",
+                0f, "SearchSettings.DisableOOBV2",0f,1f);
+
     /**
      * The TTL for probe queries.
      */
@@ -345,4 +350,6 @@ public final class SearchSettings extends LimeProps {
     public static final IntSetting QUERY_KEY_DELAY = 
         FACTORY.createRemoteIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
+    
+    
 }

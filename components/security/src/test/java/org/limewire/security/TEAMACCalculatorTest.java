@@ -4,23 +4,25 @@ package org.limewire.security;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Random;
 
-import org.limewire.security.TEAQueryKeyGenerator;
+import org.limewire.security.TEAMACCalculator;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.Test;
 
 
-public class TEAQueryKeyGeneratorTest extends BaseTestCase {
+public class TEAMACCalculatorTest extends BaseTestCase {
 
-    public TEAQueryKeyGeneratorTest(String name) {
+    public TEAMACCalculatorTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(TEAQueryKeyGeneratorTest.class);
+        return buildTestSuite(TEAMACCalculatorTest.class);
     }
     
     // Generates 420 QueryKeys using random secret keys 
@@ -35,9 +37,9 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         }
         
         for(int i=20; i > 0; --i) {
-            TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
+            TEAMACCalculator key = new TEAMACCalculator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(addresses[j], 1024 + i);
+                byte[] keyBytes = key.getMACBytes(new AddressSecurityToken.AddressTokenData(addresses[j], 1024 + i));
                 for(int k=keyBytes.length-1; k >= 0; --k) {
                     int keyByte = keyBytes[k];
                     if (keyByte == 0x00 || keyByte == 0x1C) {
@@ -65,10 +67,10 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         }
         
         for(int i=20; i > 0; --i) {
-            TEAQueryKeyGenerator key = new TEAQueryKeyGenerator();
+            TEAMACCalculator key = new TEAMACCalculator();
             for(int j=addresses.length-1; j >= 0; --j) {
-                byte[] keyBytes = key.getKeyBytes(addresses[j], 1024 + i);
-                if (! key.checkKeyBytes(keyBytes, addresses[j], 1024 + i)) {
+                byte[] keyBytes = key.getMACBytes(new AddressSecurityToken.AddressTokenData(addresses[j], 1024 + i));
+                if (! Arrays.equals(keyBytes, key.getMACBytes(new AddressSecurityToken.AddressTokenData(addresses[j], 1024 + i)))) {
                     byte[] printBuf = new byte[keyBytes.length+1];
                     System.arraycopy(keyBytes, 0, printBuf, 1, keyBytes.length);
                     printBuf[0] = (byte) 1;
@@ -91,8 +93,92 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
         key = new TEAVectorTester(0,0,0,0,0,32); 
         assertEquals("TEA test vector failed.", 0x94BAA940, key.encrypt(0,0));
     }
+
+    /**
+     * This test verifies the following identity:
+     * 
+     * Let E be the CBC-CMAC encryption
+     * m1 and m2 two messages and
+     * t1 = E(m1), t2 = E(m2)
+     * 
+     * then the following holds:
+     * 
+     * E(concat(m, t1 ^ m2)) = t2
+     *
+     */
+    public void testEncryptCBCMACIdentity() {
+        TEAMACCalculator generator = new TEAMACCalculator();
+        Random random = new Random();
+        
+        for (int i = 0; i < 100; i++) {
+            byte[] msg1 = new byte[8];
+            random.nextBytes(msg1);
+            byte[] msg2 = new byte[8]; 
+            random.nextBytes(msg2);
+            
+            long tag1 = generator.encryptCBCCMAC(msg1);
+            long tag2 = generator.encryptCBCCMAC(msg2);
+            
+            byte[] concat = new byte[16];
+            System.arraycopy(msg1, 0, concat, 0, msg1.length);
+            byte[] tag1Inbytes = new byte[8];
+            ByteOrder.long2leb(tag1, tag1Inbytes, 0);
+            System.arraycopy(xor(tag1Inbytes, msg2), 0, concat, msg1.length, msg1.length);
+            
+            assertEquals(tag2, generator.encryptCBCCMAC(concat));
+        }
+    }
     
-    private class TEAVectorTester extends TEAQueryKeyGenerator {
+    private static byte[] xor(byte a1, byte... a2) {
+        return xor(new byte[] { a1 }, a2);
+    }
+    
+    private static byte[] xor(byte[] a1, byte... a2) {
+        byte[] xored = new byte[a1.length];
+        for (int i = 0; i < a1.length; i++) {
+            xored[i] = (byte) (a1[i] ^ a2[i]);
+        }
+        return xored;
+    }
+    
+    public void testXor() {
+        assertEquals(new byte[4], xor(new byte[4], new byte[4]));
+        assertEquals(new byte[] { 1 }, xor((byte)1, (byte)0));
+        assertEquals(new byte[] { 0 }, xor((byte)1, (byte)1));
+    }
+    
+    public void testEncryptCBCMACIterations() {
+        // a single iteration on input of length <= 8 should return 
+        // the same as encrypt
+        TEAMACCalculator generator = new TEAMACCalculator();
+        Random random = new Random();
+        
+        for (int i = 1; i <= 8; i++) {
+            byte[] data = new byte[i];
+            random.nextBytes(data);
+            long asLong = ByteOrder.leb2long(data, 0, data.length);
+            assertEquals(generator.encrypt(asLong), generator.encryptCBCCMAC(data));
+        }
+        
+        // ensure multiple iterations are executed and all data is processed
+        for (int i = 9; i <= 16; i++) {
+            byte[] data = new byte[i];
+            random.nextBytes(data);
+            long asLong = ByteOrder.leb2long(data, 0, 8);
+            assertNotSame(generator.encrypt(asLong), generator.encryptCBCCMAC(data));
+        }
+        
+        // ensure multiple iterations are executed and all data is processed
+        for (int i = 9; i <= 16; i++) {
+            byte[] data = new byte[i];
+            random.nextBytes(data);
+            long asLong = ByteOrder.leb2long(data, 0, 8);
+            long asLong2 = ByteOrder.leb2long(data, 8, data.length - 8);
+            assertEquals(generator.encrypt(generator.encrypt(asLong) ^ asLong2), generator.encryptCBCCMAC(data));
+        }
+    }
+    
+    private class TEAVectorTester extends TEAMACCalculator {
         /** Set up a tester with given TEA encryption keys */
         public TEAVectorTester(int k0, int k1, int k2, int k3, 
                 int preRotate, int postRotate) {
@@ -118,7 +204,7 @@ public class TEAQueryKeyGeneratorTest extends BaseTestCase {
                 right >>>= 8;
             }
             
-            byte[] resultBytes = getKeyBytes(InetAddress.getByAddress(ipBytes), left);
+            byte[] resultBytes = getMACBytes(new AddressSecurityToken.AddressTokenData(InetAddress.getByAddress(ipBytes), left));
             
             int byteCount = resultBytes.length;
             int result = 0;

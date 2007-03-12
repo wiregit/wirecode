@@ -86,7 +86,7 @@ public class ID3ReaderTest extends LimeTestCase {
     	
     	protected void parseFile(File f) throws IOException{
     		try {
-    			PrivilegedAccessor.invokeMethod(this,"parseID3v2Data", new Object[]{f});
+    			PrivilegedAccessor.invokeMethod(this,"parseID3v2Data", f);
     		}catch(Exception ex){
     			//have to cast because privileged accessor does not declare IOX
     			if (ex instanceof IOException)

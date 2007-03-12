@@ -332,6 +332,21 @@ public class ByteOrder {
         buf[offset + 6] = (byte)(x >>  8);
         buf[offset + 7] = (byte) x       ;
     }
+
+    /**
+     * Long to little-endian bytes: writes x to buf[offset ..].
+     */
+    public static void long2leb(final long x,
+                                final byte[] buf, final int offset) {
+        buf[offset] = (byte) x       ;
+        buf[offset + 1] = (byte)(x >>  8);
+        buf[offset + 2] = (byte)(x >> 16);
+        buf[offset + 3] = (byte)(x >> 24);
+        buf[offset + 4] = (byte)(x >> 32);
+        buf[offset + 5] = (byte)(x >> 40);
+        buf[offset + 6] = (byte)(x >> 48);
+        buf[offset + 7] = (byte)(x >> 56);
+    }
     
     /**
      * Int to big-endian bytes: writes x to buf[offset ..].

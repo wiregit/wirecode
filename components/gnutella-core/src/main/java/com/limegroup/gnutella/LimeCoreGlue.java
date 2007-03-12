@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
-import org.limewire.security.QueryKey;
+import org.limewire.security.MACCalculatorRepositoryManager;
+import org.limewire.security.SettingsProvider;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -108,17 +109,17 @@ public class LimeCoreGlue {
             }
         });
         
-        QueryKey.SettingsProvider settingsProvider = new QueryKey.SettingsProvider() {
+        SettingsProvider settingsProvider = new SettingsProvider() {
             public long getChangePeriod() {
                 return SecuritySettings.CHANGE_QK_EVERY.getValue();
             }
 
-            public long getGrancePeriod() {
+            public long getGracePeriod() {
                 return SecuritySettings.QK_GRACE_PERIOD.getValue();
             }
         };
         
-        QueryKey.setSettingsProvider(settingsProvider);
+        MACCalculatorRepositoryManager.setDefaultSettingsProvider(settingsProvider);
     }
 
 }

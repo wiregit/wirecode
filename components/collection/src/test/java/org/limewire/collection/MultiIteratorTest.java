@@ -129,4 +129,9 @@ public class MultiIteratorTest extends BaseTestCase {
     	for (int i = 22; i < 30; i++)
     		assertTrue(l3.contains(new Integer(i)));
     }
+    
+    public void testDefaultConstructor() {
+        MultiIterator<Object> iter = new MultiIterator<Object>();
+        assertFalse(iter.hasNext());
+    }
 }

@@ -14,8 +14,7 @@ import java.net.SocketException;
 import java.util.Random;
 
 import org.limewire.io.IOUtils;
-import org.limewire.security.QueryKey;
-import org.limewire.security.QueryKeyGenerator;
+import org.limewire.security.AddressSecurityToken;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -170,7 +169,6 @@ public class UnicastSimulator {
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -183,13 +181,12 @@ public class UnicastSimulator {
                     if (message == null) continue;
                     if (message instanceof QueryRequest) {
                         String query = ((QueryRequest)message).getQuery();
-                        QueryKey queryKey = 
+                        AddressSecurityToken addressSecurityToken = 
                             ((QueryRequest)message).getQueryKey();
-                        QueryKey computed = 
-                            QueryKey.getQueryKey(datagram.getAddress(),
-                                                 datagram.getPort(),
-                                                 secretKey);
-                        if (!computed.equals(queryKey))
+                        AddressSecurityToken computed = 
+                            new AddressSecurityToken(datagram.getAddress(),
+                                    datagram.getPort());
+                        if (!computed.equals(addressSecurityToken))
                             continue; // querykey is invalid!!
                         byte[] inGUID = ((QueryRequest)message).getGUID();
                         Response[] resps = new Response[rand.nextInt(15)];
@@ -214,11 +211,10 @@ public class UnicastSimulator {
                         PingRequest pr = (PingRequest)message;
                         pr.hop();  // need to hop it!!
                         if (pr.isQueryKeyRequest()) {
-                            // send a QueryKey back!!!
-                            QueryKey qk = 
-                                QueryKey.getQueryKey(datagram.getAddress(),
-                                                     datagram.getPort(),
-                                                     secretKey);
+                            // send a AddressSecurityToken back!!!
+                            AddressSecurityToken qk = 
+                                new AddressSecurityToken(datagram.getAddress(),
+                                        datagram.getPort());
                             PingReply pRep =
                                 PingReply.createQueryKeyReply(pr.getGUID(),
                                                               (byte)1,

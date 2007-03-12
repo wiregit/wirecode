@@ -954,8 +954,8 @@ public class ManagedDownloader extends AbstractDownloader
             return false;
             
         MessageRouter mr = RouterService.getMessageRouter();
-        Set<GUESSEndpoint> guessLocs = mr.getGuessLocs(this.originalQueryGUID);
-        if(guessLocs == null || guessLocs.isEmpty())
+        Set<GUESSEndpoint> guessLocs = mr.getQueryLocs(this.originalQueryGUID);
+        if(guessLocs.isEmpty())
             return false;
 
         setState(ITERATIVE_GUESSING, GUESS_WAIT_TIME);

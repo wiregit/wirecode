@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -32,7 +31,8 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -41,6 +41,7 @@ import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -80,7 +81,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
@@ -130,11 +130,6 @@ public abstract class MessageRouter {
     private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
-     * The maximum number of bypassed results to remember per query.
-     */
-    private final int MAX_BYPASSED_RESULTS = 150;
-
-    /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
@@ -164,6 +159,11 @@ public abstract class MessageRouter {
     /** How long to buffer up out-of-band replies.
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    
+    /**
+     * The amount of time after which to expire an OOBSession.
+     */
+    private static final long OOB_SESSION_EXPIRE_TIME = 2 * 60 * 1000;
 
     /** Time between sending HopsFlow messages.
      */
@@ -182,12 +182,9 @@ public abstract class MessageRouter {
     private final Map<GUID.TimedGUID, QueryResponseBundle> _outOfBandReplies =
         new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
 
-    /**
-     * Keeps track of potential sources of content.  Comprised of Sets of GUESS
-     * Endpoints.  Kept tidy when searches/downloads are killed.
-     */
-    private final Map<GUID, Set<GUESSEndpoint>> _bypassedResults = new HashMap<GUID, Set<GUESSEndpoint>>();
-
+    
+    private BypassedResultsCache _bypassedResultsCache;
+    
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
      * UDP.  The size is limited and once the size is reached, no more connect
@@ -456,6 +453,9 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
+        
+		_bypassedResultsCache = new BypassedResultsCache(_callback, RouterService.getDownloadManager());
+        
 	    QRP_PROPAGATOR.start();
 
         // schedule a runner to clear unused out-of-band replies
@@ -496,7 +496,7 @@ public abstract class MessageRouter {
         setMessageHandler(VendorMessage.class, new VendorMessageHandler());
         
         setUDPMessageHandler(QueryRequest.class, new UDPQueryRequestHandler());
-        setUDPMessageHandler(QueryReply.class, oobHandler);
+        setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
         setUDPMessageHandler(PushRequest.class, new UDPPushRequestHandler());
@@ -532,10 +532,7 @@ public abstract class MessageRouter {
     public void queryKilled(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_bypassedResults) {
-        if (!RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-            _bypassedResults.remove(guid);
-        }
+        _bypassedResultsCache.queryKilled(guid);
     }
 
     /** Call this to inform us that a download is finished or whatever.  Useful
@@ -547,25 +544,15 @@ public abstract class MessageRouter {
     public void downloadFinished(GUID guid) throws IllegalArgumentException {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
-        synchronized (_bypassedResults) {
-            if (!_callback.isQueryAlive(guid) && 
-              !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
-                _bypassedResults.remove(guid);
-        }
+        _bypassedResultsCache.downloadFinished(guid);
     }
     
     /** @returns a Set with GUESSEndpoints that had matches for the
      *  original query guid.  may be empty.
      *  @param guid the guid of the query you want endpoints for.
      */
-    public Set<GUESSEndpoint> getGuessLocs(GUID guid) {
-        Set<GUESSEndpoint> clone = new HashSet<GUESSEndpoint>();
-        synchronized (_bypassedResults) {
-            Set<GUESSEndpoint> eps = _bypassedResults.get(guid);
-            if (eps != null)
-                clone.addAll(eps);
-        }
-        return clone;
+    public Set<GUESSEndpoint> getQueryLocs(GUID guid) {
+        return _bypassedResultsCache.getQueryLocs(guid);
     }
     
     public String getPingRouteTableDump() {
@@ -726,12 +713,12 @@ public abstract class MessageRouter {
 
 
     /**
-     * Returns true if the Query has a valid QueryKey. false if it isn't present
+     * Returns true if the Query has a valid AddressSecurityToken. false if it isn't present
      * or valid.
      */
     protected boolean hasValidQueryKey(InetAddress ip, int port, 
                                        QueryRequest qr) {
-        QueryKey qk = qr.getQueryKey();
+        AddressSecurityToken qk = qr.getQueryKey();
         if (qk == null)
             return false;
         
@@ -949,8 +936,8 @@ public abstract class MessageRouter {
     
 
     /**
-     * Generates a QueryKey for the source (described by addr) and sends the
-     * QueryKey to it via a QueryKey pong....
+     * Generates a AddressSecurityToken for the source (described by addr) and sends the
+     * AddressSecurityToken to it via a AddressSecurityToken pong....
      */
     protected void sendQueryKeyPong(PingRequest pr, InetSocketAddress addr) {
 
@@ -964,11 +951,11 @@ public abstract class MessageRouter {
         // after find more sources and OOB queries, everyone can dole out query
         // keys....
 
-        // generate a QueryKey (quite quick - current impl. (DES) is super
+        // generate a AddressSecurityToken (quite quick - current impl. (DES) is super
         // fast!
         InetAddress address = addr.getAddress();
         int port = addr.getPort();
-        QueryKey key = QueryKey.getQueryKey(address, port);
+        AddressSecurityToken key = new AddressSecurityToken(address, port);
         
         // respond with Pong with QK, as GUESS requires....
         PingReply reply = 
@@ -980,7 +967,7 @@ public abstract class MessageRouter {
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
         if (reply.getQueryKey() != null) {
-            // this is a PingReply in reply to my QueryKey Request - 
+            // this is a PingReply in reply to my AddressSecurityToken Request - 
             //consume the Pong and return, don't process as usual....
             OnDemandUnicaster.handleQueryKeyPong(reply);
             return;
@@ -1112,8 +1099,10 @@ public abstract class MessageRouter {
         GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
                                                     TIMED_GUID_LIFETIME);
         QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
-
-        byte [] securityToken = ack.getSecurityToken();
+        
+        // token is null for old oob messages, it will just be ignored then
+        SecurityToken securityToken = ack.getSecurityToken();
+       
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
             int port = addr.getPort();
@@ -1122,9 +1111,9 @@ public abstract class MessageRouter {
             //node wants
             Iterable<QueryReply> iterable;
             if (ack.getNumResults() < bundle._responses.length) {
+                // TODO move selection to responseToQueryReplies methods for randomization
                 Response[] desired = new Response[ack.getNumResults()];
-                for (int i = 0; i < desired.length; i++)
-                    desired[i] = bundle._responses[i];
+                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
                 iterable = responsesToQueryReplies(desired, bundle._query, 1, securityToken);
             } else { 
                 iterable = responsesToQueryReplies(bundle._responses, 
@@ -1138,50 +1127,65 @@ public abstract class MessageRouter {
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
     }
+    
+    /**
+     * Adds the address of <code>handler</code> to the {@link BypassedResultsCache}
+     * if it can receive unsolicited udp.
+     * 
+     * @return true if successfully added to the bypassed results cache
+     */
+    public boolean addBypassedSource(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+        
+        //if the reply cannot receive unsolicited udp, there is no point storing it
+        if (!reply.canReceiveUnsolicited()) {
+            return false;
+        }
 
-    public int getNumOOBToRequest(ReplyNumberVendorMessage reply, ReplyHandler handler) {
+        GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
+        return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
+    }
+    
+    /**
+     * Adds the address of <code>handler</code> to the {@link BypassedResultsCache}
+     * if it is likely to not be firewalled.
+     */
+    public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
+        try {
+            if (reply.getHostData().isFirewalled())
+                return false;
+        } catch (BadPacketException bpe){
+            return false;
+        }
+        GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
+        return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
+    }
+
+    /**
+     * Returns the number of results to request from source of <code>reply</code>.
+     * 
+     * @return -1 if no results are desired
+     */
+    public int getNumOOBToRequest(ReplyNumberVendorMessage reply) {
     	GUID qGUID = new GUID(reply.getGUID());
-    	int numResults = 
+    	
+        int numResults = 
     		RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
-    	if (numResults < 0) // this may be a proxy query
+    	
+        if (numResults < 0) // this may be a proxy query
     		numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
-    	
-    	// see if we need more results for this query....
-    	// if not, remember this location for a future, 'find more sources'
-    	// targeted GUESS query, as long as the other end said they can receive
-    	// unsolicited.
-    	if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-    		OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
-    		
-    		//if the reply cannot receive unsolicited udp, there is no point storing it.
-    		if (!reply.canReceiveUnsolicited())
-    			return -1;
-    		
-    		DownloadManager dManager = RouterService.getDownloadManager();
-    		// only store result if it is being shown to the user or if a
-    		// file with the same guid is being downloaded
-    		if (!_callback.isQueryAlive(qGUID) && 
-    				!dManager.isGuidForQueryDownloading(qGUID))
-    			return -1;
-    		
-    		GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
-    		synchronized (_bypassedResults) {
-    			// this is a quick critical section for _bypassedResults
-    			// AND the set within it
-    			Set<GUESSEndpoint> eps = _bypassedResults.get(qGUID);
-    			if (eps == null) {
-    				eps = new HashSet<GUESSEndpoint>();
-    				_bypassedResults.put(qGUID, eps);
-    			}
-    			if (eps.size() <= MAX_BYPASSED_RESULTS)
-    				eps.add(ep);
-    		}
-    		
-    		return -1;
-    	}
-    	
+
+        if (numResults < 0 || numResults > QueryHandler.ULTRAPEER_RESULTS) {
+            return -1;
+        }
+        
     	return reply.getNumResults();
-    	
+    }
+    
+    /**
+     * @return true if there is still a route for this reply
+     */
+    public boolean isQueryAlive(GUID guid) {
+        return _queryRouteTable.getReplyHandler(guid.bytes()) != null;
     }
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -
@@ -1817,7 +1821,7 @@ public abstract class MessageRouter {
             QueryRequest qrToSend = qr;
             if (wantsOOB && (mc.remoteHostSupportsLeafGuidance() < 0))
                 qrToSend = QueryRequest.unmarkOOBQuery(qr);
-            mc.send(qrToSend);
+            mc.originateQuery(qrToSend);
         }
     }
     
@@ -2306,12 +2310,13 @@ public abstract class MessageRouter {
      * @param queryRequest The query request corresponding to which we are
      * generating query replies.
      * @param REPLY_LIMIT the maximum number of responses to have in each reply.
+     * @param security token might be null
      * @return Iterable of QueryReply
      */
     private Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT,
-                                             byte [] securityToken) {
+                                             final int REPLY_LIMIT, SecurityToken securityToken) {
+
         //List to store Query Replies
         List<QueryReply> queryReplies = new LinkedList<QueryReply>();
         
@@ -2422,6 +2427,9 @@ public abstract class MessageRouter {
     /**
      * Abstract method for creating query hits.  Subclasses must specify
      * how this list is created.
+     * 
+     * @param securityToken might be null, otherwise must be sent in GGEP
+     * of QHD with header "SO"
      *
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
@@ -2433,7 +2441,7 @@ public abstract class MessageRouter {
                                              boolean measuredSpeed, 
                                              boolean isFromMcast,
                                              boolean shouldMarkForFWTransfer,
-                                             byte [] securityToken);
+                                             SecurityToken securityToken);
 
     /**
      * Handles a message to reset the query route table for the given
@@ -2918,8 +2926,12 @@ public abstract class MessageRouter {
         }
     }
     
+    /**
+     * Time after which an OOB session should be expired.
+     * @return
+     */
     public long getOOBExpireTime() {
-    	return CLEAR_TIME;
+    	return OOB_SESSION_EXPIRE_TIME;
     }
     
     /*
@@ -3092,7 +3104,7 @@ public abstract class MessageRouter {
             InetAddress address = addr.getAddress();
             int port = addr.getPort();
             
-            // TODO: compare QueryKey with old generation params.  if it matches
+            // TODO: compare AddressSecurityToken with old generation params.  if it matches
             //send a new one generated with current params 
             if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
                 sendAcknowledgement(addr, msg.getGUID());
@@ -3213,5 +3225,31 @@ public abstract class MessageRouter {
             ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, handler);
         }
+    }
+ 
+    /**
+     * This class handles UDP query replies and forwards them to the 
+     * {@link OOBHandler} if they are not replies to multicast or unicast
+     * queries.
+     */
+    public class UDPQueryReplyHandler implements MessageHandler {
+
+        private final OOBHandler oobHandler;
+        
+        public UDPQueryReplyHandler(OOBHandler oobHandler) {
+            this.oobHandler = oobHandler;
+        }
+        
+        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+            QueryReply reply = (QueryReply)msg;
+            if (reply.isReplyToMulticastQuery()
+                    || isHostUnicastQueried(new GUID(reply.getGUID()), handler)) {
+                handleQueryReply(reply, handler);
+            }
+            else {
+                oobHandler.handleMessage(msg, addr, handler);
+            }
+        }
+        
     }
 }

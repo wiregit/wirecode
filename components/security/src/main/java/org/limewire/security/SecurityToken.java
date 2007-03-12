@@ -2,18 +2,14 @@ package org.limewire.security;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.SocketAddress;
 
 /**
- * A SecurityToken authenticates a host based on its IP:Port.
+ * A SecurityToken authenticates a host based on its IP:Port or a other
+ * pieces of data.
+ * 
  */
 public interface SecurityToken {
-    
-    /**
-     * Returns the length of the SecurityToken in byte
-     */
-    public int getTokenLength();
     
     /**
      * Returns the SecurityToken as byte array
@@ -26,14 +22,9 @@ public interface SecurityToken {
     public void write(OutputStream out) throws IOException;
     
     /** 
-     * Validates that a SecurityToken was generated for the given SocketAddress
+     * Validates that a SecurityToken was generated for the given TokenData
      */
-    public boolean isFor(SocketAddress addr);
-    
-    /** 
-     * Validates that a SecurityToken was generated for the given IP:Port
-     */
-    public boolean isFor(InetAddress addr, int port);
+    public boolean isFor(TokenData data);
     
     /**
      * The TokenProvider is a factory interface to create SecurityTokens
@@ -44,24 +35,19 @@ public interface SecurityToken {
          * Creates and returns a SecurityToken for the given SocketAddress
          */
         public SecurityToken getSecurityToken(SocketAddress addr);
-        
-        /**
-         * Creates and returns a SecurityToken for the given IP:Port
-         */
-        public SecurityToken getSecurityToken(InetAddress addr, int port);
+    }
+    
+    /** A wrapper for data that this SecurityToken uses. */
+    public static interface TokenData {
+        public byte[] getData();
     }
     
     /**
-     * A TokenProvider implmenetation that creates QueryKey based SecurityToken
+     * A TokenProvider implementation that creates AddressSecurityTokens.
      */
-    public static class QueryKeyProvider implements TokenProvider {
-
+    public static class AddressSecurityTokenProvider implements TokenProvider {
         public SecurityToken getSecurityToken(SocketAddress addr) {
-            return QueryKey.getQueryKey(addr);
-        }
-        
-        public SecurityToken getSecurityToken(InetAddress addr, int port) {
-            return QueryKey.getQueryKey(addr, port);
+            return new AddressSecurityToken(addr);
         }
     }
 }

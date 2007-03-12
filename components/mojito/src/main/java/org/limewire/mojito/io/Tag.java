@@ -328,7 +328,7 @@ public class Tag {
         /**
          * Checks if the response is coming from the expected Node.
          */
-        // This is actually not really necessary. The QueryKey in
+        // This is actually not really necessary. The AddressSecurityToken in
         // MessageID should take care of it.
         private boolean compareAddresses(ResponseMessage response) {
             Contact node = response.getContact();

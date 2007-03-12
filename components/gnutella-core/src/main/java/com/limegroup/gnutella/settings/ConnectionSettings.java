@@ -391,7 +391,6 @@ public final class ConnectionSettings extends LimeProps {
     public static final IntSetting STABLE_TOTAL_MESSAGES_THRESHOLD 
         = FACTORY.createIntSetting("STABLE_TOTAL_MESSAGES_THRESHOLD", 45);
     
-    
     /**
      * Helper method left from Settings Manager
      *

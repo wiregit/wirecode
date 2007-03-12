@@ -15,8 +15,7 @@ import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.security.QueryKey;
-import org.limewire.security.QueryKeyGenerator;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -74,7 +73,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     
     public void setUp() throws Exception {
         QueryUnicaster qu = QueryUnicaster.instance();        
-        PrivilegedAccessor.invokeMethod( qu, "resetUnicastEndpointsAndQueries", null );
+        PrivilegedAccessor.invokeMethod(qu, "resetUnicastEndpointsAndQueries", (Object)null);
        
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -346,7 +345,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
 		byte[] datagramBytes = new byte[BUFFER_SIZE];
 		DatagramPacket datagram = new DatagramPacket(datagramBytes, 
                                                      BUFFER_SIZE);
-        QueryKeyGenerator secretKey = QueryKey.createKeyGenerator();
         while (shouldRun()) {
             try {				
                 socket.receive(datagram);
@@ -361,11 +359,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
                         PingRequest pr = (PingRequest)message;
                         pr.hop();  // need to hop it!!
                         if (pr.isQueryKeyRequest()) {
-                            // send a QueryKey back!!!
-                            QueryKey qk = 
-                                QueryKey.getQueryKey(datagram.getAddress(),
-                                                     datagram.getPort(),
-                                                     secretKey);
+                            // send a AddressSecurityToken back!!!
+                            AddressSecurityToken qk = 
+                                new AddressSecurityToken(datagram.getAddress(),
+                                        datagram.getPort());
                             
                             PingReply pRep = 
                                 PingReply.createQueryKeyReply(pr.getGUID(), 

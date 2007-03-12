@@ -24,17 +24,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import junit.framework.Test;
+
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecureMessage;
+import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
-
-import junit.framework.Test;
 
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.Endpoint;
@@ -64,9 +66,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private FileManager fman = null;
     private Object loaded = new Object();
     
-    private static byte [] token = new byte[5];
-        
-    
+    private SecurityToken _token; 
+
 	/**
 	 * Constructs a new test instance for query replies.
 	 */
@@ -87,7 +88,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	
     
     public static void globalSetUp() throws Exception {
-        (new Random()).nextBytes(token);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         try {
             RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
@@ -103,7 +103,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
 	    PrivilegedAccessor.setValue(RouterService.class, "callback", new FManCallback());
-	    
+	
+        byte[] data = new byte[16];
+        new Random().nextBytes(data);
+        _token = new AddressSecurityToken(data);
 	}
 		
 
@@ -685,23 +688,22 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
     }
-
+    
     public void testGGEPUtilWritesSecurityToken() throws Exception {
-        
         // assert token is written
-        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, token), 0, null);
+        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
-        assertTrue(Arrays.equals(token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB)));
+        assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
-        assertTrue(Arrays.equals(token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB)));
+        assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         Set<IpPort> proxies = new HashSet<IpPort>();
         proxies.add(new Endpoint("127.0.0.1:6464"));
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
-        assertTrue(Arrays.equals(token, ggep.get(GGEP.GGEP_HEADER_SECURE_OOB)));
+        assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         // assert token is not written
         try {
@@ -717,7 +719,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, null), 0, null);
         assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
     }
-    
+
+
     public void testBasicPushProxyGGEP() throws Exception {
         basicTest(false, false, false);
         basicTest(false, true, false);
@@ -1148,17 +1151,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         QueryReply query = new QueryReply(GUID.makeGuid(), (byte)1, 1459, 
                 InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r },
                 GUID.makeGuid(), new byte[0], false, false, false, false, false,
-                false, false, IpPort.EMPTY_SET, token);
+                false, false, IpPort.EMPTY_SET, _token);
                 
+        assertEquals(_token.getBytes(), query.getSecurityToken());
+        
         // test copy constructor preserves security bytes
         query = new QueryReply(GUID.makeGuid(), query);
-        assertTrue(Arrays.equals(token, query.getSecurityToken()));
+        assertEquals(_token.getBytes(), query.getSecurityToken());
         
         // test network constructor
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         query.writePayload(out);
         query = new QueryReply(GUID.makeGuid(), (byte)1, (byte)1, out.toByteArray());
-        assertTrue(Arrays.equals(token, query.getSecurityToken()));
+        assertEquals(_token.getBytes(), query.getSecurityToken());
     }
     
     private void runSignatureTest(QueryReply reply, int[] indexes, byte[] payload) throws Exception {

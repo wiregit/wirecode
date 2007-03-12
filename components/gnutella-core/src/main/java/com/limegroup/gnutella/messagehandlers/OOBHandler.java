@@ -1,35 +1,48 @@
 package com.limegroup.gnutella.messagehandlers;
 
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IpPort;
+import org.limewire.collection.IntSet;
+import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.SecurityToken;
 
+import com.limegroup.gnutella.BypassedResultsCache;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 
+/**
+ * Handles {@link ReplyNumberVendorMessage} and {@link QueryReply} for 
+ * out-of-band search results and manages a cache of session objects 
+ * to keep track of the results that have alreay been received.
+ */
 public class OOBHandler implements MessageHandler, Runnable {
     
     private static final Log LOG = LogFactory.getLog(OOBHandler.class);
 	
 	private final MessageRouter router;
 	
-    private final Map<OOBSession, Integer> OOBSessions = 
-    	Collections.synchronizedMap(new HashMap<OOBSession, Integer>(1000));
+    private final Map<Integer,OOBSession> OOBSessions =
+        Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
     
 	public OOBHandler(MessageRouter router) {
 		this.router = router;
@@ -44,140 +57,206 @@ public class OOBHandler implements MessageHandler, Runnable {
 			throw new IllegalArgumentException("can't handle this type of message");
 	}
 	
+    /**
+     * Handles the reply number message, verifying the query for it is still alive
+     * and more results are wanted and sending a {@link LimeACKVendorMessage} in
+     * that case. Otherwise the source of the <code>msg</code> is added to the 
+     * {@link BypassedResultsCache}.
+     */
 	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
-		OOBSession session = new OOBSession(
-				g,
-				handler.getInetAddress(),
-				handler.getPort());
-		
-		int toRequest = router.getNumOOBToRequest(msg, handler);
-		if (toRequest <= 0)
-			return;
-		
-		LimeACKVendorMessage ack =
-			new LimeACKVendorMessage(g, toRequest);
-		synchronized(OOBSessions) {
-			// remove is necessary to refresh the timestamp.
-			Integer previous = OOBSessions.remove(session);
-			if (previous == null)
-				previous = toRequest;
-			else
-				previous += toRequest;
-			OOBSessions.put(session, previous);
-		}
+
+        int toRequest;
+        
+        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) < 0) {
+            // remember as possible GUESS source though
+            router.addBypassedSource(msg, handler);
+            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
+            return;
+        }
+				
+		LimeACKVendorMessage ack;
+        if (msg.isOOBv3()) {
+			ack = new LimeACKVendorMessage(g, toRequest, 
+                    new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest)));
+        } else
+            ack = new LimeACKVendorMessage(g, toRequest);
+        
 		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
 		handler.reply(ack);
 	}
-	
-	private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
+    
+    /**
+     * Handles an out-of-band query reply verifying if its security token is valid
+     * and creating a session object that keeps track of the number of results
+     * received for that security token.
+     * 
+     * Invalid messages with invalid security token or without token or duplicate
+     * messages are ignored.
+     * 
+     * If the query is not alive messages are discarded and added to the
+     *  {@link BypassedResultsCache}.
+     */
+    private void handleOOBReply(QueryReply reply, ReplyHandler handler) {
         if(LOG.isTraceEnabled())
             LOG.trace("Handling reply: " + reply + ", from: " + handler);
         
+        
+        SecurityToken token = getVerifiedSecurityToken(reply, handler);
+        if (token == null) {
+            if (!SearchSettings.DISABLE_OOB_V2.getBoolean()) 
+                router.handleQueryReply(reply, handler);
+            return;
+        }
+        
         ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
-        // only account for OOB stuff if this was response to a 
-        // OOB query, multicast stuff is sent over UDP too....
-        if (!reply.isReplyToMulticastQuery()) {
-            int numResps = reply.getResultCount();
-            OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-            GUID guid = new GUID(reply.getGUID());
-            OOBSession session = new OOBSession(
-                    guid,
-            		handler.getInetAddress(),
-            		handler.getPort());
-            
-            // Allow the router to handle the query reply in the
-            // following scenarios:
-            // a) We sent a Reply# message requesting the results,
-            //    and it sent back <= the number of results we
-            //    wanted.
-            // b) We sent a directed unicast query to that host
-            //    using this specific query GUID.
-    
-            Integer numRequested = OOBSessions.get(session);
-            if (numRequested == null) {
-                LOG.trace("Didn't request any OOB replies for this GUID from host");
-                if(!router.isHostUnicastQueried(guid, session)) {
-                    LOG.trace("Didn't directly unicast this host with this GUID");
-                    return;
+        
+        int numResps = reply.getResultCount();
+        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+        
+        int requestedResponseCount = token.getBytes()[0] & 0xFF;
+        
+        
+        boolean shouldAddBypassedSource = false;
+        /*
+         * Router will handle the reply if it
+         * it has a route && we still expect results for this OOB session
+         */
+        synchronized (OOBSessions) {
+            // if query is not of interest anymore return
+            GUID queryGUID = new GUID(reply.getGUID());
+            if (!router.isQueryAlive(queryGUID)) {
+                shouldAddBypassedSource = true;
+            }
+            else {
+                int hashKey = Arrays.hashCode(token.getBytes());
+                OOBSession session = OOBSessions.get(hashKey);
+                if (session == null) {
+                    session = new OOBSession(token, requestedResponseCount, queryGUID);
+                    OOBSessions.put(hashKey, session);
                 }
-            } else {
-                numRequested -= numResps;
-                if (numRequested > 0) {
+                
+                int remainingCount = session.getRemainingResultsCount() - numResps; 
+                if (remainingCount >= 0) {
                     if(LOG.isTraceEnabled())
-                        LOG.trace("Requested more than got (" + numRequested + " left over)");
-                	OOBSessions.put(session, numRequested);
-                } else {
-                	OOBSessions.remove(session);
-                	if (numRequested < 0) { // too many, ignore.
-                        if(LOG.isTraceEnabled())
-                            LOG.trace("Received more than requested (by" + (-numRequested) + ")");
-                		if(!router.isHostUnicastQueried(guid, session)) {
-                            LOG.trace("Didn't directly unicast this host with this GUID");
-                            return;
+                        LOG.trace("Requested >= than got (" + remainingCount + " left over)");
+                    // parsing of query reply already done here in message dispatcher thread
+                    try {
+                        int added = session.countAddedResponses(reply.getResultsArray());
+                        if (added > 0) {
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Handling the reply.");
+                            }
+                            router.handleQueryReply(reply, handler);
                         }
+                    } 
+                    catch (BadPacketException e) {
+                        // ignore packet
                     }
                 }
             }
         }
         
-        LOG.trace("Handling the reply.");
-        router.handleQueryReply(reply, handler);
+        if (shouldAddBypassedSource) {
+            router.addBypassedSource(reply, handler);
+        }
+    }
+    
+    /**
+     * Reconstructs the security token from the query reply and verifies it
+     * against the handler, the number of results requested and the GUID of
+     * the reply.
+     *
+     * @return null if there is no security token in the reply or the security
+     * token did not validate
+     */
+	private SecurityToken getVerifiedSecurityToken(QueryReply reply, ReplyHandler handler) {
+	    byte[] securityBytes = reply.getSecurityToken();
+        if (securityBytes == null) {
+            return null;
+        }
+
+        try {
+            OOBSecurityToken oobKey = new OOBSecurityToken(securityBytes);
+            OOBSecurityToken.OOBTokenData data = 
+                new OOBSecurityToken.OOBTokenData(handler, reply.getGUID(), securityBytes[0] & 0xFF);
+            if (oobKey.isFor(data)) {
+                return oobKey;
+            }
+        }
+        catch (InvalidSecurityTokenException e) {
+            // invalid security token echoed back
+        }
+        return null;
 	}
-	
-	private class OOBSession implements IpPort {
-    	private final GUID g;
-    	private final InetAddress addr;
-    	private final int port;
-    	private final int hashCode;
-    	private final long now;
-    	OOBSession(GUID g, InetAddress addr, int port) {
-    		this.g = g;
-    		this.addr = addr;
-    		this.port = port;
-    		int hash = g.hashCode();
-    		hash = 17 * hash + addr.hashCode();
-    		hash = 17 * hash + port;
-    		hashCode = hash;
-    		now = System.currentTimeMillis();
-    	}
+
+    /**
+     * Keeps track of how many results have been received for a security
+     * token. 
+     */
+    private class OOBSession {
     	
-    	public int hashCode() {
-    		return hashCode;
-    	}
+        private final SecurityToken token;
+        private final IntSet urnHashCodes;
+        
+        private IntSet responseHashCodes;
+        
+        private final int requestedResponseCount;
+        private final GUID guid;
     	
+        public OOBSession(SecurityToken token, int requestedResponseCount, GUID guid) {
+            this.token = token;
+            this.requestedResponseCount = requestedResponseCount;
+            this.urnHashCodes = new IntSet(requestedResponseCount);
+            this.guid = guid;
+    	}
+        
+        GUID getGUID() {
+            return guid;
+        }
+    	
+        /**
+         * Counts the responses uniquely. 
+         */
+        public int countAddedResponses(Response[] responses) {
+            int added = 0;
+            for (Response response : responses) {
+                Set<URN> urns = response.getUrns();
+                if (!urns.isEmpty()) {
+                    added += urnHashCodes.add(urns.iterator().next().hashCode()) ? 1 : 0;
+                }
+                else {
+                    // create lazily since responses should have urns
+                    if (responseHashCodes == null) {
+                        responseHashCodes = new IntSet();
+                    }
+                    added += responseHashCodes.add(response.hashCode()) ? 1 : 0;
+                }
+            }
+            return added;
+        }
+        
+        /**
+         * Returns the number of results that are still expected to come in.
+         */
+        public final int getRemainingResultsCount() {
+            return requestedResponseCount - urnHashCodes.size() - (responseHashCodes != null ? responseHashCodes.size() : 0); 
+        }
+        
     	public boolean equals(Object o) {
     		if (! (o instanceof OOBSession))
     			return false;
     		OOBSession other = (OOBSession) o;
-    		return g.equals(other.g) && addr.equals(other.addr) && port == other.port;
+    		return Arrays.equals(token.getBytes(), other.token.getBytes());
     	}
-    	
-    	public boolean isExpired(long now) {
-    		return now - this.now > router.getOOBExpireTime();
-    	}
-
-        public String getAddress() {
-            return addr.getHostAddress();
-        }
-
-        public InetAddress getInetAddress() {
-            return addr;
-        }
-
-        public int getPort() {
-            return port;
-        }
 	}
 	
 	private void expire() {
-		long now = System.currentTimeMillis();
 		synchronized (OOBSessions) {
-			for (Iterator<Map.Entry<OOBSession,Integer>> iter = 
-				OOBSessions.entrySet().iterator();
-			iter.hasNext();) {
-				if (iter.next().getKey().isExpired(now))
-					iter.remove();
+			for (Iterator<Map.Entry<Integer, OOBSession>> iter = 
+			    OOBSessions.entrySet().iterator(); iter.hasNext();) {
+			    if (!router.isQueryAlive(iter.next().getValue().getGUID()))
+			        iter.remove();
 			}
 		}
 	}

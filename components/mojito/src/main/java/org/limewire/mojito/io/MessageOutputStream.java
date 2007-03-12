@@ -40,7 +40,7 @@ import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.security.QueryKey;
+import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 
 
@@ -196,11 +196,11 @@ public class MessageOutputStream extends DataOutputStream {
     }
     
     /**
-     * Writes the given QueryKey to the OutputStream
+     * Writes the given AddressSecurityToken to the OutputStream
      */
-    public void writeQueryKey(SecurityToken securityToken) throws IOException {
+    public void writeSecurityToken(SecurityToken securityToken) throws IOException {
         if (securityToken != null) {
-            assert (securityToken instanceof QueryKey);
+            assert (securityToken instanceof AddressSecurityToken);
             byte[] qk = securityToken.getBytes();
             writeByte(qk.length);
             write(qk, 0, qk.length);

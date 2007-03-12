@@ -4,20 +4,24 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.limewire.security.QueryKey;
-import org.limewire.util.OSUtils;
-
 import junit.framework.Test;
+
+import org.limewire.security.InvalidSecurityTokenException;
+import org.limewire.security.AddressSecurityToken;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.OSUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest.QueryRequestPayloadParser;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -51,6 +55,14 @@ public final class QueryRequestTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
+    
+    public void setUp() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.revertToDefault();
+        OOBv2Disabled = false;
+    }
+    
+    private static volatile boolean OOBv2Disabled;
+    
 	/**
 	 * Tests the constructor that most of the other constructors are built
 	 * off of.
@@ -68,7 +80,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 // write the GGEP stuff
                 byte[] bytes = new byte[4];
                 (new Random()).nextBytes(bytes);
-                QueryKey qk = QueryKey.getQueryKey(bytes, true);
+                AddressSecurityToken qk = new AddressSecurityToken(bytes);
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(false); // do COBS
@@ -480,9 +492,10 @@ public final class QueryRequestTest extends LimeTestCase {
 
 	/**
 	 * Tests constructor that only takes a string and a query key.
+	 * @throws InvalidSecurityTokenException 
 	 */
-	public void testStringQueryKeyConstructor() {
-		QueryKey key = QueryKey.getQueryKey(GUID.makeGuid(), true);
+	public void testStringQueryKeyConstructor() throws InvalidSecurityTokenException {
+		AddressSecurityToken key = new AddressSecurityToken(GUID.makeGuid());
 		QueryRequest qr =
 			QueryRequest.createQueryKeyQuery("test", key);
 
@@ -537,7 +550,7 @@ public final class QueryRequestTest extends LimeTestCase {
 	 */
 	private void runStandardChecks(QueryRequest qr, 
 								   boolean multicast, Set urnTypes,
-								   Set urns, QueryKey key) {
+								   Set urns, AddressSecurityToken key) {
 		if(!multicast) {
 			assertTrue("should not be multicast", !qr.isMulticast());
 			assertTrue("should be firewalled", qr.isFirewalledSource());
@@ -1094,6 +1107,285 @@ public final class QueryRequestTest extends LimeTestCase {
         assertFalse(query.desiresOutOfBandReplies());
         QueryRequest proxy = QueryRequest.createProxyQuery(query,
                                                            query.getGUID());
+        assertDesiresOutOfBand(proxy);
+        assertFalse(proxy.doNotProxy());
+        
+        assertEquals(query.getQuery(), proxy.getQuery());
+        assertEquals(query.canDoFirewalledTransfer(), proxy.canDoFirewalledTransfer());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getTTL(), proxy.getTTL());
+        
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
+        OOBv2Disabled = true;
+        proxy = QueryRequest.createProxyQuery(query,
+                query.getGUID());
+        assertDesiresOutOfBand(proxy);
+    }
+    
+    public void testPatchInGGEP() throws Exception {
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
+        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
+        
+        // payload without ggep and huge
+        byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
+        
+        QueryRequest query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.doNotProxy());
+        assertFalse(query.desiresOutOfBandReplies());
+        
+        byte[] newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        QueryRequest proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxy());
         assertTrue(proxy.desiresOutOfBandReplies());
+        
+        // payload with multiple ggeps
+        payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, -61, -126, 78, 80, 64, 0x1c, -61, -126, 78, 80, 64, 0 };
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertTrue(query.doNotProxy());
+        assertFalse(query.desiresOutOfBandReplies());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxy());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        
+
+        // unknown gem
+        PositionByteArrayOutputStream out = new PositionByteArrayOutputStream();
+        int minspeed = new Random().nextInt();
+        minspeed &= QueryRequest.SPECIAL_OUTOFBAND_MASK;
+        ByteOrder.short2leb((short)minspeed, out); // write minspeed
+        out.write("query".getBytes("UTF-8"));              // write query
+        out.write(0);                             // null
+        int startGem = out.getPos();
+        byte[] gemBytes = "unknowngem".getBytes("UTF-8"); 
+        out.write(gemBytes);
+        out.write(0x1c);
+        
+        payload = out.toByteArray();
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.desiresOutOfBandReplies());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxy());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        // verfiy unknown gem is still there
+        byte[] part = new byte[gemBytes.length];
+        System.arraycopy(newPayload, startGem, part, 0, part.length);
+        assertEquals(gemBytes, part);
+        
+        // unknown gem + GGEP with unknown keys
+        GGEP unknownKeysGGEP = new GGEP(false);
+        unknownKeysGGEP.put("FB", "BF");
+        unknownKeysGGEP.put("uk");
+        unknownKeysGGEP.write(out);
+        
+        payload = out.toByteArray();
+        
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, payload, 0);
+        assertFalse(query.desiresOutOfBandReplies());
+        
+        newPayload = QueryRequest.patchInGGEP(payload, ggep);
+        
+        proxy = QueryRequest.createNetworkQuery(query.getGUID(), query.getTTL(), query.getHops(), newPayload, 0);
+        assertTrue(proxy.doNotProxy());
+        assertTrue(proxy.desiresOutOfBandReplies());
+        System.arraycopy(newPayload, startGem, part, 0, part.length);
+        assertEquals(gemBytes, part);
+        
+        QueryRequestPayloadParser parser = new QueryRequestPayloadParser(newPayload);
+        GGEP parsedGGEP = parser.huge.getGGEP();
+        assertEquals("BF", parsedGGEP.getString("FB"));
+        assertTrue(parsedGGEP.hasKey("uk"));
+        
+        byte[] simpleSearchPayload = new byte[] {
+                (byte)0xD8, 00, 0x6C, 0x69, 0x6D, 0x65, 0x77, 0x69, 0x72, 0x65, 00
+        };
+        
+        query = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, simpleSearchPayload, Message.N_UNKNOWN);
+        assertEquals("limewire", query.getQuery());
+        
+        newPayload = QueryRequest.patchInGGEP(query.getPayload(), ggep);
+        
+        QueryRequest patched = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)1, (byte)1, newPayload, Message.N_UNKNOWN);
+        assertEquals(query.getQuery(), patched.getQuery());
+        
+        patched = QueryRequest.createProxyQuery(query, GUID.makeGuid());
+        assertEquals(query.getQuery(), patched.getQuery());
+        assertTrue (patched.desiresOutOfBandRepliesV3());
+    }
+    
+    /**
+     * Tests if the security token key is set for oob query requests and that
+     * it's not set otherwise.
+     * @throws  
+     */
+    public void testOOBSecurityTokenSet() throws Exception {
+        // oob set
+        QueryRequest request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertTrue(request.isSecurityTokenRequired());
+        
+        QueryRequest fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.isSecurityTokenRequired());
+        
+        request = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 4905);
+        assertTrue(request.isSecurityTokenRequired());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.isSecurityTokenRequired());
+        
+        request = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "", MediaType.getAudioMediaType());
+        assertTrue(request.isSecurityTokenRequired());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.isSecurityTokenRequired());
+        
+        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertTrue(request.isSecurityTokenRequired());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.isSecurityTokenRequired());
+        
+        request = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertTrue(request.isSecurityTokenRequired());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertTrue(fromNetwork.isSecurityTokenRequired());
+        
+        // oob not set
+        request = new QueryRequest(GUID.makeGuid(), (byte)1, "query", "", URN.Type.NO_TYPE_SET, URN.NO_URN_SET, (AddressSecurityToken)null, true, Message.N_TCP, false, 0);
+        assertFalse(request.isSecurityTokenRequired());
+        
+        fromNetwork = QueryRequest.createNetworkQuery(request.getGUID(), (byte)1, (byte)1, request.getPayload(), Message.N_UDP);
+        assertFalse(fromNetwork.isSecurityTokenRequired());
+        
+    }
+    
+    public void testUnmarkOOBQuery() throws Exception {
+        QueryRequest query = QueryRequest.createOutOfBandQuery("query", InetAddress.getLocalHost().getAddress(), 5555);
+        assertDesiresOutOfBand(query);
+        
+        QueryRequest copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        
+        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1);
+        assertDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
+        assertEquals(query.getGUID(), copy.getGUID());
+        
+        query = QueryRequest.createWhatIsNewOOBQuery(GUID.makeGuid(), (byte)1, MediaType.getDocumentMediaType());
+        assertDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.isWhatIsNewRequest(), copy.isWhatIsNewRequest());
+        assertEquals(query.getGUID(), copy.getGUID());
+        assertEquals(query.getMetaMask(), copy.getMetaMask());
+        
+        query = QueryRequest.createOutOfBandQuery(GUID.makeGuid(), "query", "");
+        assertDesiresOutOfBand(query);
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getQuery(), copy.getQuery());
+        assertEquals(query.getGUID(), copy.getGUID());
+        
+     
+        query = QueryRequest.createQuery("query");
+        assertNotDesiresOutOfBand(query);
+        
+        copy = QueryRequest.unmarkOOBQuery(query);
+        assertNotDesiresOutOfBand(copy);
+        assertEquals(query.getPayload(), copy.getPayload());
+    }
+    
+    public void testNotUnmarkOOBQuery() throws Exception {
+        SearchSettings.DISABLE_OOB_V2.setBoolean(true);
+        OOBv2Disabled = true;
+        testUnmarkOOBQuery();
+    }
+    
+    public void testCreateDoNotProxyQuery() throws UnknownHostException {
+        QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte)1, 5, "query", "", URN.Type.ANY_TYPE_SET,
+                URN.NO_URN_SET,
+                new AddressSecurityToken(InetAddress.getLocalHost(), 1094),
+                false, Message.N_MULTICAST, false, 0, false, 0, false);
+
+        try {
+            QueryRequest.createDoNotProxyQuery(query);
+            fail("Expected IllegalArgumentException");
+        }
+        catch (IllegalArgumentException iae) {
+        }
+        
+        query.originate();
+        
+        // precondition
+        assertFalse(query.doNotProxy());
+        
+        QueryRequest proxy = QueryRequest.createDoNotProxyQuery(query);
+        
+        // post condition
+        assertTrue(proxy.doNotProxy());
+        
+        assertEquals(query.getGUID(), proxy.getGUID());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getMinSpeed(), proxy.getMinSpeed());
+        assertEquals(query.getRichQueryString(), proxy.getRichQueryString());
+        assertEquals(query.getQueryUrns(), proxy.getQueryUrns());
+        assertEquals(query.getQueryKey(), proxy.getQueryKey());
+        assertEquals(query.isFirewalledSource(), proxy.isFirewalledSource());
+        assertEquals(query.getFeatureSelector(), proxy.getFeatureSelector());
+        assertEquals(query.getMetaMask(), proxy.getMetaMask());
+        assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
+        assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
+        
+        // idempotence
+        proxy.originate();
+        query = QueryRequest.createDoNotProxyQuery(proxy);
+        
+        assertEquals(query.getGUID(), proxy.getGUID());
+        assertEquals(query.getHops(), proxy.getHops());
+        assertEquals(query.getMinSpeed(), proxy.getMinSpeed());
+        assertEquals(query.getRichQueryString(), proxy.getRichQueryString());
+        assertEquals(query.getQueryUrns(), proxy.getQueryUrns());
+        assertEquals(query.getQueryKey(), proxy.getQueryKey());
+        assertEquals(query.isFirewalledSource(), proxy.isFirewalledSource());
+        assertEquals(query.getFeatureSelector(), proxy.getFeatureSelector());
+        assertEquals(query.getMetaMask(), proxy.getMetaMask());
+        assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
+        assertEquals(query.getNetwork(), proxy.getNetwork());
+        assertEquals(query.getRequestedUrnTypes(), proxy.getRequestedUrnTypes());
+    }
+    
+    private void assertDesiresOutOfBand(QueryRequest query) {
+        assertTrue(query.desiresOutOfBandReplies());
+        assertNotEquals(OOBv2Disabled,query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+    }
+    
+    private void assertNotDesiresOutOfBand(QueryRequest query) {
+        assertFalse(query.desiresOutOfBandReplies());
+        assertFalse(query.desiresOutOfBandRepliesV2());
+        assertFalse(query.desiresOutOfBandRepliesV3());
+    }
+    
+    static class PositionByteArrayOutputStream extends ByteArrayOutputStream {
+
+        public int getPos() {
+            return count;
+        }
+        
     }
 }

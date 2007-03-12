@@ -65,7 +65,6 @@ class QueryReplyData {
     /** A secure token, if any */
     private volatile byte[] securityToken = null;
     
-
     public int getBusyFlag() {
         return busyFlag;
     }
