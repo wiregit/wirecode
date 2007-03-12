@@ -6,8 +6,10 @@ import junit.framework.TestSuite;
 
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
+import org.limewire.mojito.messages.impl.DefaultMessageID.MessageSecurityToken;
 import org.limewire.security.AbstractSecurityToken;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
 public class MessageIDTest extends MojitoTestCase {
@@ -45,10 +47,10 @@ public class MessageIDTest extends MojitoTestCase {
     
     public void testEmbeddedSecurityToken() throws Exception {
         InetSocketAddress addr1 = new InetSocketAddress("localhost", 1234);
-        AbstractSecurityToken key1 = new AddressSecurityToken(addr1);
+        SecurityToken key1 = new MessageSecurityToken(new DefaultMessageID.DHTTokenData(addr1));
         
         MessageID messageId1 = DefaultMessageID.createWithSocketAddress(addr1);
-        AbstractSecurityToken key2 = (AbstractSecurityToken)PrivilegedAccessor.invokeMethod(messageId1, "getSecurityToken", new Object[0]);
+        SecurityToken key2 = (SecurityToken)PrivilegedAccessor.invokeMethod(messageId1, "getSecurityToken", new Object[0]);
         
         assertTrue(key1.equals(key2));
         assertTrue(messageId1.isFor(addr1));

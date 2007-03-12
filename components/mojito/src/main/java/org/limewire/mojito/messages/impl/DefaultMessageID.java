@@ -114,12 +114,8 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         GENERATOR.nextBytes(messageId);
 
         if (dst instanceof InetSocketAddress) {
-            byte[] queryKey = (new AddressSecurityToken(dst)).getBytes();
-
-            // Obfuscate it with our random pad!
-            for(int i = 0; i < RANDOM_PAD.length; i++) {
-                messageId[i] = (byte)(queryKey[i] ^ RANDOM_PAD[i]);
-            }
+            byte[] token = (new MessageSecurityToken(new DHTTokenData(dst))).getBytes();
+            System.arraycopy(token, 0, messageId, 0, 4);
         }
 
         return new DefaultMessageID(messageId);
@@ -171,11 +167,9 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
      * @throws InvalidSecurityTokenException 
      */
     private SecurityToken getSecurityToken() throws InvalidSecurityTokenException {
-        byte[] queryKey = new byte[4];
-
-        System.arraycopy(messageId, 0, queryKey, 0, queryKey.length);
-        
-        return new MessageSecurityToken(queryKey);
+        byte[] token = new byte[4];
+        System.arraycopy(messageId, 0, token, 0, token.length);
+        return new MessageSecurityToken(token);
     }
     
     /*
@@ -248,7 +242,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return "MessageID: " + toHexString();
     }
     
-    private static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
+    public static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
         
         public DHTTokenData(SocketAddress addr) {
             super(addr);
@@ -266,7 +260,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         }
     }
    
-    private static class MessageSecurityToken extends AbstractSecurityToken {
+    public static class MessageSecurityToken extends AbstractSecurityToken {
         
         public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
             super(network);
