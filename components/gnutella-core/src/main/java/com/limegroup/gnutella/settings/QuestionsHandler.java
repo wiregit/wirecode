@@ -192,4 +192,11 @@ public class QuestionsHandler extends AbstractLimeWireSettings {
      */
     public static final BooleanSetting BITTORRENT_CUSTOM_SETTINGS =
         FACTORY.createBooleanSetting("BITTORRENT_CUSTOM_SETTINGS", false);
+    
+    /**
+     *  Setting for whether or not LimeWire should display a warning if the user
+     *  chooses to save to a non-home location on Windows Vista.
+     */
+    public static final IntSetting VISTA_SAVE_LOCATION =
+        FACTORY.createIntSetting("VISTA_SAVE_LOCATION", 0);
 }
