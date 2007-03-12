@@ -248,7 +248,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return "MessageID: " + toHexString();
     }
     
-    public static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
+    private static class DHTTokenData extends AddressSecurityToken.AddressTokenData {
         
         public DHTTokenData(SocketAddress addr) {
             super(addr);
@@ -259,6 +259,10 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             for (int i = 0; i < RANDOM_PAD.length; i++)
                 ret[i] ^= RANDOM_PAD[i];
             return ret;
+        }
+        
+        public String toString() {
+            return "DHTTokenData: " + ArrayUtils.toHexString(getData());
         }
     }
    
@@ -274,6 +278,10 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
 
         protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
             return mac;
+        }
+        
+        public String toString() {
+            return "MessageSecurityToken: " + ArrayUtils.toHexString(getBytes());
         }
     }
 }
