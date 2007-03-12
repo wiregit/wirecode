@@ -7,8 +7,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.mojito.messages.impl.DefaultMessageID.MessageSecurityToken;
-import org.limewire.security.AbstractSecurityToken;
-import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.PrivilegedAccessor;
 
