@@ -85,7 +85,9 @@ public class FakeProxyServer extends AssertComparisons {
             while(true) {
                 Socket incomingProxy = null;
                 incomingProxy = _proxyServer.accept();
-		boolean savedMakeError = _makeError;
+                // value has to be saved because field might have been reset in the test code 
+                // before the exception is thrown in this thread
+                boolean savedMakeError = _makeError;
                 if(!_proxyOn)
                     fail("LimeWire connected to proxy server instead of directly");
                 InputStream is = incomingProxy.getInputStream();
@@ -117,9 +119,9 @@ public class FakeProxyServer extends AssertComparisons {
                 catch (SocketException se) {
                     // in error case socket might have been closed from the other side
                     // swallow exception then
-		    if (!savedMakeError) {
-			throw se;
-		    }
+                    if (!savedMakeError) {
+                        throw se;
+                    }
                 }
                 if(!incomingProxy.isClosed())
                     incomingProxy.close();
