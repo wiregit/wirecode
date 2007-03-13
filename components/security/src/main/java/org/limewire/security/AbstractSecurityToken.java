@@ -13,26 +13,36 @@ public abstract class AbstractSecurityToken implements SecurityToken {
     /** 
      * The encrypted data.
      */
-    private byte[] _securityToken;
+    private final byte[] _securityToken;
     
     protected AbstractSecurityToken(TokenData data) {
-        _securityToken = getFromMAC(MACCalculatorRepositoryManager.getDefaultRepositoryManager().getMACBytes(data), data);
+        MACCalculatorRepositoryManager mgr 
+            = MACCalculatorRepositoryManager.getDefaultRepositoryManager();
+        
+        _securityToken = getFromMAC(mgr.getMACBytes(data), data);
     }
     
     protected AbstractSecurityToken(byte [] network) throws InvalidSecurityTokenException {
-        if (!isValidBytes(network))
+        if (!isValidBytes(network)) {
             throw new InvalidSecurityTokenException("invalid data: " + Arrays.toString(network));
+        }
         
         _securityToken = network;
     }
     
     public final boolean isFor(TokenData data) {
-        if(!isValidTokenData(data))
+        if(!isValidTokenData(data)) {
             return false;
+        }
         
-        for (byte[] token : MACCalculatorRepositoryManager.getDefaultRepositoryManager().getAllBytes(data)) {
-            if (Arrays.equals(_securityToken, getFromMAC(token ,data)))
+        MACCalculatorRepositoryManager mgr 
+            = MACCalculatorRepositoryManager.getDefaultRepositoryManager();
+        
+        Iterable<byte[]> tokens = mgr.getAllBytes(data);
+        for (byte[] token : tokens) {
+            if (Arrays.equals(_securityToken, getFromMAC(token, data))) {
                 return true;
+            }
         }
         
         return false;
@@ -51,9 +61,9 @@ public abstract class AbstractSecurityToken implements SecurityToken {
     }
 
     public final byte[] getBytes() {
-        byte[] b = new byte[_securityToken.length];
-        System.arraycopy(_securityToken, 0, b, 0, _securityToken.length);
-        return b;
+        byte[] copy = new byte[_securityToken.length];
+        System.arraycopy(_securityToken, 0, copy, 0, _securityToken.length);
+        return copy;
     }
     
     
