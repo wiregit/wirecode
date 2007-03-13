@@ -7,7 +7,6 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.PrivilegedAccessor;
 
 
 public class AddressSecurityTokenTest extends BaseTestCase {
@@ -112,27 +111,30 @@ public class AddressSecurityTokenTest extends BaseTestCase {
     }
     
     public void testQueryKeyExpiration() throws Exception {
-        NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
         MACCalculatorRepositoryManager previous = 
             MACCalculatorRepositoryManager.getDefaultRepositoryManager();
-        MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
-        
-        AddressSecurityToken key = new AddressSecurityToken(InetAddress.getLocalHost(), 4545);
-        
-        // wait for secret key change
-        Thread.sleep(450);
-        
-        // key should still be valid
-        assertTrue(key.isFor(InetAddress.getLocalHost(), 4545));
-        // different port
-        assertFalse(key.isFor(InetAddress.getLocalHost(), 4544));
-        
-        // wait for grace period to be over
-        Thread.sleep(100);
-        
-        assertFalse(key.isFor(InetAddress.getLocalHost(), 4545));
-        
-        PrivilegedAccessor.setValue(MACCalculatorRepositoryManager.class, "defaultRepositoryManager", previous);
+        try {
+            NotifyingSettingsProvider settings = new NotifyingSettingsProvider();
+            MACCalculatorRepositoryManager.setDefaultSettingsProvider(settings);
+
+            AddressSecurityToken key = new AddressSecurityToken(InetAddress.getLocalHost(), 4545);
+
+            // wait for secret key change
+            Thread.sleep(450);
+
+            // key should still be valid
+            assertTrue(key.isFor(InetAddress.getLocalHost(), 4545));
+            // different port
+            assertFalse(key.isFor(InetAddress.getLocalHost(), 4544));
+
+            // wait for grace period to be over
+            Thread.sleep(100);
+
+            assertFalse(key.isFor(InetAddress.getLocalHost(), 4545));
+
+        } finally {
+            MACCalculatorRepositoryManager.setDefaultRepositoryManager(previous);
+        }
     }
     
     private static class NotifyingSettingsProvider implements SettingsProvider {
