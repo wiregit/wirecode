@@ -362,7 +362,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     
     private static void setOSName(String name) throws Exception {
         System.setProperty("os.name", name);
-        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems", (Object)null);
+        PrivilegedAccessor.invokeMethod(OSUtils.class, "setOperatingSystems");
     }
             
 }

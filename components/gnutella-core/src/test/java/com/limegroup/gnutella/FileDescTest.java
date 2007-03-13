@@ -64,19 +64,17 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
      * Tests the FileDesc construcotor for valid arguments
      */
     public void testValidConstructorArguments() throws Exception {
-        File current = CommonUtils.getCurrentDirectory();
-        File parDir = current.getParentFile(); 
-        File[] allFiles = parDir.listFiles(); 
+        File parent = new File(getCoreDir(), "com/limegroup/gnutella");
+        File[] allFiles = parent.listFiles(); 
         List fileList = new ArrayList(); 
         for(int i=0; i<allFiles.length; i++) { 
-            if(allFiles[i].isFile()
-                    && allFiles[i].length() < MAX_FILE_SIZE) { 
+            if(allFiles[i].isFile() && allFiles[i].length() < MAX_FILE_SIZE) { 
                 fileList.add(allFiles[i]); 
             } 
         }
         
         // Make sure we're running at least one check!
-        assertFalse(fileList.isEmpty());
+        assertFalse("no files to test! base: " + parent, fileList.isEmpty());
         
         Iterator it = fileList.iterator();
         for(int i = 0; it.hasNext(); i++) {

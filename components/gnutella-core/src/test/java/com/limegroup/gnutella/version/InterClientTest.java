@@ -353,7 +353,7 @@ public class InterClientTest extends PeerTestCase {
     
     private static byte[] payload(Message m) throws Exception {
         assertInstanceof("not a vendor message!", VendorMessage.class, m);
-        return (byte[])PrivilegedAccessor.invokeMethod(m, "getPayload", (Object)null);
+        return (byte[])PrivilegedAccessor.invokeMethod(m, "getPayload");
     }
     
     private static Message getCVM(int i) throws Exception {

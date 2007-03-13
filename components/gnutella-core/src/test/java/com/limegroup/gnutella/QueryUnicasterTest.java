@@ -73,7 +73,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
     
     public void setUp() throws Exception {
         QueryUnicaster qu = QueryUnicaster.instance();        
-        PrivilegedAccessor.invokeMethod(qu, "resetUnicastEndpointsAndQueries", (Object)null);
+        PrivilegedAccessor.invokeMethod(qu, "resetUnicastEndpointsAndQueries");
        
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);

@@ -149,7 +149,7 @@ public final class RouteTableTest extends LimeTestCase {
         assertEquals(1, (getMap(rt, "_newMap")).size());
         assertEquals(0, (getMap(rt, "_oldMap")).size());
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
-        PrivilegedAccessor.invokeMethod(rt, "purge", (Object)null);
+        PrivilegedAccessor.invokeMethod(rt, "purge");
         assertEquals(0, (getMap(rt, "_newMap")).size());
         assertEquals(1, (getMap(rt, "_oldMap")).size());
         rrp=rt.getReplyHandler(g1, 3, (short) 0);            //g1 -> <c2, 8+3>
