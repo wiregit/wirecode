@@ -267,7 +267,7 @@ class PassiveLeafRouteTable implements RouteTable {
         }
 
         public Collection<Contact> select(KUID nodeId, int count) {
-            Contact[] nodes = new Contact[count];
+            Contact[] nodes = new Contact[Math.min(count, map.size())];
             int index = 0;
             for (Contact c : map.values()) {
                 nodes[index++] = c;
