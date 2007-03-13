@@ -255,13 +255,8 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         public DHTTokenData(SocketAddress addr) {
             super(addr);
             this.addr = addr;
-        }
-        
-        public byte [] getData() {
-            byte [] ret = super.getData();
             for (int i = 0; i < RANDOM_PAD.length; i++)
-                ret[i] ^= RANDOM_PAD[i];
-            return ret;
+                data[i] ^= RANDOM_PAD[i];
         }
         
         public String toString() {

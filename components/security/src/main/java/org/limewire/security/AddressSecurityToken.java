@@ -124,7 +124,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
     
     /** Embeds the address into data. */
     public static class AddressTokenData implements SecurityToken.TokenData {
-        private final byte[] data;
+        protected final byte[] data;
         
         public AddressTokenData(SocketAddress address) {
             this(((InetSocketAddress)address).getAddress(),
