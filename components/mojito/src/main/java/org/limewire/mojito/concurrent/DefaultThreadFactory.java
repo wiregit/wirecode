@@ -22,6 +22,8 @@ package org.limewire.mojito.concurrent;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.concurrent.ManagedThread;
+
 /**
  * A default implementation of the ThreadFactory.
  */
@@ -36,6 +38,7 @@ public class DefaultThreadFactory implements ThreadFactory {
     }
     
     public Thread newThread(Runnable r) {
-        return new Thread(r, name + "-" + number.getAndIncrement());
+        //return new Thread(r, name + "-" + number.getAndIncrement());
+        return new ManagedThread(r, name + "-" + number.getAndIncrement());
     }
 }
