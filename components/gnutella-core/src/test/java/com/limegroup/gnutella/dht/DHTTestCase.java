@@ -69,7 +69,12 @@ public abstract class DHTTestCase extends LimeTestCase {
         //dht settings:
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
+        
         NetworkSettings.TIMEOUT.setValue(500);
+        
+        // Nothing should take longer than 1.5 seconds. If we start seeing
+        // LockTimeoutExceptions on the loopback then check this Setting!
+        ContextSettings.WAIT_ON_LOCK.setValue(1500); 
     }
     
     public static void globalTearDown() throws Exception {
