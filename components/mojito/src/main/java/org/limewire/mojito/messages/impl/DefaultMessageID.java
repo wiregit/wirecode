@@ -194,7 +194,8 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             DHTTokenData data = new DHTTokenData(src);
             boolean isFor = token.isFor(data);
             if (!isFor) {
-                throw new IllegalStateException(token + ", " + data);
+                SecurityToken token2 = new MessageSecurityToken(data);
+                throw new IllegalStateException(token + ", " + token2 + ", " + data);
             }
             return isFor;
         } catch (InvalidSecurityTokenException iste) {
