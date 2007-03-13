@@ -29,11 +29,12 @@ public class BootstrapManagerTest extends MojitoTestCase {
         System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
     }*/
     
-    protected static MojitoDHT BOOTSTRAP_DHT;
     protected static final int BOOTSTRAP_DHT_PORT = 3000;
 
-    protected static MojitoDHT TEST_DHT;
+    protected static MojitoDHT BOOTSTRAP_DHT;
     
+    protected static MojitoDHT TEST_DHT;
+
     public BootstrapManagerTest(String name){
         super(name);
     }
@@ -70,8 +71,13 @@ public class BootstrapManagerTest extends MojitoTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        BOOTSTRAP_DHT.close();
-        TEST_DHT.close();
+        if (BOOTSTRAP_DHT != null) {
+            BOOTSTRAP_DHT.close();
+        }
+        
+        if (TEST_DHT != null) {
+            TEST_DHT.close();
+        }
     }
     
     public void testBootstrapFailure() throws Exception {
@@ -115,7 +121,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
     @SuppressWarnings("unchecked")
     public void testBootstrapFromRouteTable() throws Exception{
         //try ping from RT
-        RouteTable rt = ((Context)TEST_DHT).getRouteTable();
+        RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
         for(int i= 1; i < 5; i++) {
             node = ContactFactory.createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
@@ -139,7 +145,7 @@ public class BootstrapManagerTest extends MojitoTestCase {
     
     public void testBootstrapPoorRatio() throws Exception{
         //fill RT with bad nodes
-        RouteTable rt = ((Context)TEST_DHT).getRouteTable();
+        RouteTable rt = TEST_DHT.getRouteTable();
         Contact node;
         for(int i= 1; i < 100; i++) {
             node = ContactFactory.createUnknownContact(Vendor.UNKNOWN, Version.UNKNOWN, 
