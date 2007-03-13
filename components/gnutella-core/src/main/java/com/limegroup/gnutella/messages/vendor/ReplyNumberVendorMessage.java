@@ -52,8 +52,12 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         
         // only allow current version to come from network
         // unless OOBv2 is allowed
-        if (version < VERSION && SearchSettings.DISABLE_OOB_V2.getBoolean())
-            throw new BadPacketException("OOB v2 not allowed");
+        if (version < VERSION) {
+            if (SearchSettings.DISABLE_OOB_V2.getBoolean())
+                throw new BadPacketException("OOB v2 not allowed");
+            if (getPayload().length != 2)
+                throw new BadPacketException("v2 message too large");
+        }
         
         // loosen the condition on the message size to allow this message version
         // to have a GGEP in the future

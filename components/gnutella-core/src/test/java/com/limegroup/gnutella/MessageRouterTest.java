@@ -22,6 +22,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
+import org.limewire.security.SecurityToken;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -152,7 +153,7 @@ public final class MessageRouterTest extends LimeTestCase {
             Response[].class, 
             QueryRequest.class,
             Integer.TYPE,
-            byte[].class
+            SecurityToken.class
         };
         
 		Method m = 
@@ -166,7 +167,7 @@ public final class MessageRouterTest extends LimeTestCase {
             res,
             query,
             new Integer(10),
-            new byte[0]
+            null
         };
 
         Iterable iter = (Iterable)m.invoke(ROUTER, params);
