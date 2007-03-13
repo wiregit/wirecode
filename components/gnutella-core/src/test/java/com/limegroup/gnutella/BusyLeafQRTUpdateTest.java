@@ -103,7 +103,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
     }
     
     public void forwardQueryRouteTablesCaller() throws Exception {
-        PrivilegedAccessor.invokeMethod(mr, "forwardQueryRouteTables", (Object)null );
+        PrivilegedAccessor.invokeMethod(mr, "forwardQueryRouteTables");
     }
     
     
