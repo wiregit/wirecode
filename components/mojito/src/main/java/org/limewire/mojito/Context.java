@@ -803,7 +803,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         Contact localNode = getLocalNode();
         localNode.shutdown(true);
         
-        if (isBootstrapped()
+        if (isBootstrapped() && !isFirewalled()
                 && ContextSettings.SEND_SHUTDOWN_MESSAGE.getValue()) {
             
             // We're nice guys and send shutdown messages to the 2*k-closest
