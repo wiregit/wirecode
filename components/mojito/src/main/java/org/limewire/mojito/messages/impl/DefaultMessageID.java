@@ -192,12 +192,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         try {
             SecurityToken token = getSecurityToken();
             DHTTokenData data = new DHTTokenData(src);
-            boolean isFor = token.isFor(data);
-            if (!isFor) {
-                SecurityToken token2 = new MessageSecurityToken(data);
-                throw new IllegalStateException(token + ", " + token2 + ", " + data);
-            }
-            return isFor;
+            return token.isFor(data);
         } catch (InvalidSecurityTokenException iste) {
             return false;
         }
@@ -266,24 +261,20 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
    
     public static class MessageSecurityToken extends AbstractSecurityToken {
         
-        private volatile TokenData data;
-        
         public MessageSecurityToken(byte[] network) throws InvalidSecurityTokenException {
             super(network);
         }
 
         public MessageSecurityToken(DHTTokenData data) {
             super(data);
-            this.data = data;
         }
 
         protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
-            data = ignored;
             return mac;
         }
         
         public String toString() {
-            return "MessageSecurityToken: " + ArrayUtils.toHexString(getBytes())+" data: ("+data+")";
+            return "MessageSecurityToken: " + ArrayUtils.toHexString(getBytes());
         }
     }
 }
