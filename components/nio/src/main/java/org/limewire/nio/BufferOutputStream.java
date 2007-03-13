@@ -61,7 +61,7 @@ import org.limewire.nio.observer.WriteObserver;
             buffer.put((byte)(x & 0xFF));
             
             // there's data in the buffer now, the channel can write it.
-            channel.interest(writeObserver, true);
+            channel.interestWrite(writeObserver, true);
         }
     }
     
@@ -77,7 +77,7 @@ import org.limewire.nio.observer.WriteObserver;
                 len -= available;
             
                 // now that there's data in the buffer, write with the channel
-                channel.interest(writeObserver, true);
+                channel.interestWrite(writeObserver, true);
             }
         }
     }

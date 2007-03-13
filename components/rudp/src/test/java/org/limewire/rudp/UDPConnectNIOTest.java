@@ -305,8 +305,8 @@ public final class UDPConnectNIOTest extends BaseTestCase {
             return source.isOpen();
         }
 
-        public void interest(boolean status) {
-            source.interest(status);
+        public void interestRead(boolean status) {
+            source.interestRead(status);
         }
 
         public void handleRead() throws IOException {
@@ -327,7 +327,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }
-        public void interest(boolean status) { source.interest(status); }
+        public void interestRead(boolean status) { source.interestRead(status); }
     }
     
     private static class RCROAdapter extends RCRAdapter implements ChannelReadObserver {

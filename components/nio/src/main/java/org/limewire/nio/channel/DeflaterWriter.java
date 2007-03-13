@@ -60,7 +60,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
     /** Sets the sink. */
     public void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
-        channel.interest(this, true);
+        channel.interestWrite(this, true);
     }
     
     /**
@@ -72,7 +72,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
      * get the interested party, check for null, and turn off interest
      * (if it was null).
      */
-    public synchronized void interest(WriteObserver observer, boolean status) {
+    public synchronized void interestWrite(WriteObserver observer, boolean status) {
         this.observer = status ? observer : null;
         
         // just always set interest on.  it's easiest & it'll be turned off
@@ -83,7 +83,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
         // locking around incoming & outgoing, which just isn't worth it.
         InterestWritableByteChannel source = channel;
         if(source != null)
-            source.interest(this, true); 
+            source.interestWrite(this, true); 
     }
     
     /**
@@ -191,7 +191,7 @@ public class DeflaterWriter implements ChannelWriter, InterestWritableByteChanne
                         // we got pre-empted and another thread turned on interest.
                         synchronized (this) {
                             if (observer == null) // no observer? good, we can turn interest off
-                                source.interest(this, false);
+                                source.interestWrite(this, false);
                             // else, we've got nothing to write, but our observer might.
                         }
                         return false;

@@ -40,10 +40,10 @@ public final class ThrottleReaderTest extends BaseTestCase {
 	public void testInterestAndBandwidthAvailable() throws Exception {
 	    assertFalse(SOURCE.isInterested());
 	    assertEquals(0, THROTTLE.interests());
-        READER.interest(false);
+        READER.interestRead(false);
 	    assertFalse(SOURCE.isInterested());
 	    assertEquals(0, THROTTLE.interests());
-        READER.interest(true);
+        READER.interestRead(true);
         assertEquals(1, THROTTLE.interests());
 	    assertFalse(SOURCE.isInterested());
 	    
@@ -55,7 +55,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         // Test when data is still left after available.
 
         // set up reader & SOURCE.
-        READER.interest(true);
+        READER.interestRead(true);
         READER.bandwidthAvailable();
         assertTrue(SOURCE.isInterested());
         
@@ -80,7 +80,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
 
     public void testHandleReadSourceEmptiesWithLeftover() throws Exception {
         SOURCE.setBuffer(buffer(data(500)));
-        READER.interest(true);
+        READER.interestRead(true);
         READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(550);        
@@ -96,7 +96,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
 
     public void testHandleReadSourceEmptiesExactly() throws Exception {
         SOURCE.setBuffer(buffer(data(200)));
-        READER.interest(true);
+        READER.interestRead(true);
         READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());
         THROTTLE.setAvailable(200);
@@ -113,7 +113,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
     
     public void testHandleReadSinkFills() throws Exception {
         SOURCE.setBuffer(buffer(data(100)));
-        READER.interest(true);
+        READER.interestRead(true);
         READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests());        
         
@@ -147,11 +147,11 @@ public final class ThrottleReaderTest extends BaseTestCase {
 
     public void testBandwidthAvailableWhenClosed() throws Exception {
         assertFalse(SOURCE.isInterested());
-        READER.interest(true);
+        READER.interestRead(true);
         assertTrue(READER.bandwidthAvailable());
         assertTrue(SOURCE.isInterested());
         
-        SOURCE.interest(false);
+        SOURCE.interestRead(false);
         READER.close();
         assertFalse(READER.bandwidthAvailable());
         assertFalse(SOURCE.isInterested());
@@ -160,7 +160,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
     public void testInterestOffWhenNoBW() throws Exception {
     	assertFalse(SOURCE.isInterested());
         SOURCE.setBuffer(buffer(data(100)));
-        READER.interest(true);
+        READER.interestRead(true);
         READER.bandwidthAvailable();
         assertEquals(1, THROTTLE.interests()); 
         THROTTLE.setAvailable(1);
@@ -193,7 +193,7 @@ public final class ThrottleReaderTest extends BaseTestCase {
         READER.requestBandwidth();
         READER.read(buffer);
         if(interestOff)
-            READER.interest(false);
+            READER.interestRead(false);
         READER.releaseBandwidth();
     }
 }

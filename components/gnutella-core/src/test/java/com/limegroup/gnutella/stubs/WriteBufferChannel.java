@@ -24,7 +24,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     public WriteBufferChannel(ByteBuffer buffer, InterestWritableByteChannel channel) {
         this.buffer = buffer;
         this.channel = channel;
-        channel.interest(this, true);
+        channel.interestWrite(this, true);
     }
     
     public WriteBufferChannel(byte[] data, InterestWritableByteChannel channel) {
@@ -96,7 +96,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     
     public void setBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
-        channel.interest(this, true);
+        channel.interestWrite(this, true);
     }
     
     public void resize(int size) {
@@ -119,7 +119,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
         return channel;
     }
     
-    public void interest(WriteObserver observer, boolean status) {
+    public void interestWrite(WriteObserver observer, boolean status) {
         this.observer = observer;
         this.status = status;
     }
@@ -127,7 +127,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     public boolean handleWrite() throws IOException {
         while(buffer.hasRemaining() && channel.write(buffer) > 0);
         if(!buffer.hasRemaining())
-            channel.interest(this, false);
+            channel.interestWrite(this, false);
         return buffer.hasRemaining();
     }
     

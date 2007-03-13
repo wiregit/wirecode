@@ -74,7 +74,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
      * Tells the Throttle that we're interested in receiving bandwidthAvailable
      * events at some point in time.
      */
-    public void interest(WriteObserver observer, boolean status) {
+    public void interestWrite(WriteObserver observer, boolean status) {
         if(status) {
             this.observer = observer;
             if(channel != null)
@@ -93,7 +93,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         if(channel.isOpen()) {
         	if (!channelInterested) {
         		channelInterested = true;
-        		channel.interest(this, true);
+        		channel.interestWrite(this, true);
         	}
         	return true;
         } else {
@@ -165,7 +165,7 @@ public class ThrottleWriter implements ChannelWriter, InterestWritableByteChanne
         if(chain == null)
             throw new IllegalStateException("writing with no source.");
         WriteObserver interested = observer;
-        chain.interest(this, false);
+        chain.interestWrite(this, false);
         channelInterested = false;
         if (available > 0) {
         	if(interested != null)

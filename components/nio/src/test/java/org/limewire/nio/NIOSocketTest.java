@@ -352,7 +352,7 @@ public final class NIOSocketTest extends BaseTestCase {
             this.buffer = buffer;
             this.channel = channel;
             if(channel != null)
-                channel.interest(this, true);
+                channel.interestWrite(this, true);
         }
         
         public WriteTester(byte[] data, InterestWritableByteChannel channel) {
@@ -371,7 +371,7 @@ public final class NIOSocketTest extends BaseTestCase {
         
         public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
             this.channel = channel;
-            channel.interest(this, true);
+            channel.interestWrite(this, true);
         }
             
         public boolean handleWrite() throws IOException {
@@ -439,8 +439,8 @@ public final class NIOSocketTest extends BaseTestCase {
             return source.isOpen();
         }
 
-        public void interest(boolean status) {
-            source.interest(status);
+        public void interestRead(boolean status) {
+            source.interestRead(status);
         }
 
         public void handleRead() throws IOException {
@@ -461,7 +461,7 @@ public final class NIOSocketTest extends BaseTestCase {
         public int read(ByteBuffer b) throws IOException { return source.read(b); }
         public void close() throws IOException { source.close(); }
         public boolean isOpen() { return source.isOpen(); }
-        public void interest(boolean status) { source.interest(status); }
+        public void interestRead(boolean status) { source.interestRead(status); }
     }
     
     private static class RCROAdapter extends RCRAdapter implements ChannelReadObserver {

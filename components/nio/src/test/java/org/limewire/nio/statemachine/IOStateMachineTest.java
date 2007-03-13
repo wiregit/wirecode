@@ -54,7 +54,7 @@ public class IOStateMachineTest extends BaseTestCase {
         assertFalse(observer.isShutdown());
         
         // First state is reading, so let's see what happens if we set a write hit.
-        readChannel.interest(false);
+        readChannel.interestRead(false);
         shake.handleWrite();
         assertFalse(readChannel.isInterested());
         assertFalse(writeChannel.interested());
@@ -66,7 +66,7 @@ public class IOStateMachineTest extends BaseTestCase {
         assertFalse(observer.isShutdown());
 
         // Now try a correct read...
-        readChannel.interest(true);
+        readChannel.interestRead(true);
         shake.handleRead();
         assertTrue(readChannel.isInterested());
         assertFalse(writeChannel.interested());
@@ -92,7 +92,7 @@ public class IOStateMachineTest extends BaseTestCase {
         assertFalse(observer.isShutdown());
         
         // State is now state2, which is writing.. let's see what happens if we hit a read.
-        writeChannel.interest(null, false);
+        writeChannel.interestWrite(null, false);
         shake.handleRead();
         assertFalse(readChannel.isInterested());
         assertFalse(writeChannel.interested());
@@ -104,7 +104,7 @@ public class IOStateMachineTest extends BaseTestCase {
         assertFalse(observer.isShutdown());
         
         // Now let's try a correct write...
-        writeChannel.interest(null, true);
+        writeChannel.interestWrite(null, true);
         shake.handleWrite();
         assertFalse(readChannel.isInterested());
         assertTrue(writeChannel.interested());

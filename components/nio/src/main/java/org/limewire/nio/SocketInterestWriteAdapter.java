@@ -47,7 +47,7 @@ class SocketInterestWriteAdapter implements InterestWritableByteChannel {
      * Marks the given observer as either interested or not interested in receiving
      * write events from the socket.
      */
-    public synchronized void interest(WriteObserver observer, boolean on) {
+    public synchronized void interestWrite(WriteObserver observer, boolean on) {
         if(!shutdown) {
             interested = on ? observer : null;
             NIODispatcher.instance().interestWrite(channel, on);

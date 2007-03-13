@@ -71,8 +71,8 @@ public class InflaterReader implements ChannelReader, InterestReadableByteChanne
         return channel;
     }
     
-    public void interest(boolean status) {
-        channel.interest(status);
+    public void interestRead(boolean status) {
+        channel.interestRead(status);
     }
     
     /**

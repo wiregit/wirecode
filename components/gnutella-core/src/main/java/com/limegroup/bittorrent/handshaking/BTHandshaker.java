@@ -88,7 +88,7 @@ ChannelWriter, ChannelReadObserver, IpPort {
 				writeChannel.write(outgoingHandshake) > 0);
 		
 		if (!outgoingHandshake.hasRemaining()) 
-			writeChannel.interest(this, false);
+			writeChannel.interestWrite(this, false);
 		
 		tryToFinishHandshakes();
 		
@@ -103,12 +103,12 @@ ChannelWriter, ChannelReadObserver, IpPort {
 	
 	protected final void setReadInterest() {
 		sock.setReadObserver(this);
-		readChannel.interest(true);
+		readChannel.interestRead(true);
 	}
 	
 	protected final void setWriteInterest() {
 		sock.setWriteObserver(this);
-		writeChannel.interest(this, true);
+		writeChannel.interestWrite(this, true);
 	}
 	
 	private void tryToFinishHandshakes() {

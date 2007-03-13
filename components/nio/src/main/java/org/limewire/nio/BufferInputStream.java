@@ -82,7 +82,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
             buffer.compact();
             
             // there's room in the buffer now, the channel needs some data.
-            channel.interest(true);
+            channel.interestRead(true);
             
             // must &, otherwise implicit cast can change value.
             // (for example, reading the byte -1 is very different than
@@ -111,7 +111,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
                 buffer.clear();
             
             // now that there's room in the buffer, fill up the channel
-            channel.interest(true);
+            channel.interestRead(true);
             
             return available; // the amount we read.
         }

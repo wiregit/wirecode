@@ -24,7 +24,7 @@ class SocketInterestReadAdapter implements InterestScatteringByteChannel {
         this.channel = channel;
     }
 
-    public void interest(boolean status) {
+    public void interestRead(boolean status) {
         NIODispatcher.instance().interestRead(channel, status);
     }
 

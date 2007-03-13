@@ -110,14 +110,14 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
             if(currentState.isWriting()) {
                 LOG.warn("Got a read notification while writing.");
                 processCurrentState(null, true); // read up the data into the buffer
-                readSink.interest(false);
+                readSink.interestRead(false);
             } else {
                 processCurrentState(currentState, true);
             }
         } else {
             LOG.warn("Got a read notification with no current state");
             processCurrentState(null, true);
-            readSink.interest(false);
+            readSink.interestRead(false);
         }
     }
     
@@ -129,14 +129,14 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
         if(currentState != null) {
             if(currentState.isReading()) {
                 LOG.warn("Got a write notification while reading");
-                writeSink.interest(this, false);
+                writeSink.interestWrite(this, false);
                 return false;
             } else {
                 return processCurrentState(currentState, false);        
             }
         } else {
             LOG.warn("Got a write notification with no current state");
-            writeSink.interest(this, false);
+            writeSink.interestWrite(this, false);
             return false;
         }
     }
@@ -203,8 +203,8 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     private void nextState(boolean reading, boolean writing) {
         if(states.isEmpty()) {
             LOG.debug("No more states, processing finished.");
-            readSink.interest(false);
-            writeSink.interest(this, false);
+            readSink.interestRead(false);
+            writeSink.interestWrite(this, false);
             observer.handleStatesFinished();
         } else {
             currentState = states.remove(0);
@@ -212,15 +212,15 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
                 LOG.debug("Incrementing state to: " + currentState);
             
             if(currentState.isReading() && !reading) {
-                writeSink.interest(this, false);
+                writeSink.interestWrite(this, false);
                 if(readSink != null)
-                    readSink.interest(true);
+                    readSink.interestRead(true);
             }
             
             if(currentState.isWriting() && !writing) {
-                readSink.interest(false);
+                readSink.interestRead(false);
                 if(writeSink != null)
-                    writeSink.interest(this, true);
+                    writeSink.interestWrite(this, true);
             }
             
             // Process reading immediately, else
@@ -239,7 +239,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public void setWriteChannel(InterestWritableByteChannel newChannel) {
         this.writeSink = newChannel;
         if(currentState != null)
-            writeSink.interest(this, true);
+            writeSink.interestWrite(this, true);
     }
 
     public InterestReadableByteChannel getReadChannel() {
@@ -249,7 +249,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public void setReadChannel(InterestReadableByteChannel newChannel) {
         this.readSink = newChannel;
         if(currentState != null)
-            readSink.interest(true); 
+            readSink.interestRead(true); 
     }
 
     public boolean isOpen() {
@@ -290,9 +290,9 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
         });
     }
 
-    public void interest(boolean status) {
+    public void interestRead(boolean status) {
         if(currentState != null)
-            readSink.interest(status);
+            readSink.interestRead(status);
     }
 
     /**

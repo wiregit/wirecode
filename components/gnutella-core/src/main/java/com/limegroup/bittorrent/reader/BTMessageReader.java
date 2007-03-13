@@ -102,7 +102,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 	 */
 	private void choke(boolean choke) {
 		if (choked != choke) {
-			_channel.interest(!choke);
+			_channel.interestRead(!choke);
 			choked = choke;
 		}
 	}

@@ -71,7 +71,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
      * get the interested party, check for null, and turn off interest
      * (if it was null).
      */
-    public synchronized void interest(WriteObserver observer, boolean status) {
+    public synchronized void interestWrite(WriteObserver observer, boolean status) {
     	if (status) {
     		this.observer = observer;
     		interester.unschedule();
@@ -82,7 +82,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     	
         InterestWritableByteChannel source = sink;
         if(source != null)
-            source.interest(this, true); 
+            source.interestWrite(this, true); 
     }
 
     /** Closes the underlying channel. */
@@ -106,7 +106,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     /** Sets the sink. */
     public void setWriteChannel(InterestWritableByteChannel newChannel) {
         sink = newChannel;
-        newChannel.interest(this,true);
+        newChannel.interestWrite(this,true);
     }
     
 
@@ -177,7 +177,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
         	// and another thread turned on interest.
         	upper = observer;
         	if (upper == null) {
-        		sink.interest(this,false);
+        		sink.interestWrite(this,false);
         		
         		// If still no data after that, we've written everything we want -- exit.
         		if (!hasBufferedData()) 
@@ -237,7 +237,7 @@ public class DelayedBufferWriter implements ChannelWriter, InterestWritableByteC
     					above == null && 
     					buf.position() > 0) {
     				LOG.debug("forcing a flush");
-    				below.interest(me, true);
+    				below.interestWrite(me, true);
     			}
     		}
     	}

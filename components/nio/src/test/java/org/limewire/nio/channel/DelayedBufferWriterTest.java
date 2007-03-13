@@ -257,7 +257,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         
         // buf if in the meantime someone becomes interested in the
         // delayer again the cleaner should be cancelled.
-        delayer.interest(source, true);
+        delayer.interestWrite(source, true);
         assertTrue(scheduler.futures.get(0).isCancelled());
         
         // even if the cancelling happens too late, the interester
@@ -271,7 +271,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
     
     private void setupChain(DelayedBufferWriter delayer) {
         source.setWriteChannel(delayer);
-        delayer.interest(source,true);
+        delayer.interestWrite(source,true);
         delayer.setWriteChannel(sink);
     }
     

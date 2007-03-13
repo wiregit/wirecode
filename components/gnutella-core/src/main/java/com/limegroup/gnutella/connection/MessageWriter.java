@@ -90,7 +90,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
     /** The channel we're writing to. */
     public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
-        channel.interest(this, true);
+        channel.interestWrite(this, true);
     }
     
     /**
@@ -110,7 +110,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
         stats.addSentDropped(dropped);
             
         if(channel != null)
-            channel.interest(this, true);
+            channel.interestWrite(this, true);
     }
         
     /**
@@ -132,7 +132,7 @@ public class MessageWriter implements ChannelWriter, OutputRunner {
             
             // no more messages to send.
             if(m == null) {
-                channel.interest(this, false);
+                channel.interestWrite(this, false);
                 return false;
             }
             

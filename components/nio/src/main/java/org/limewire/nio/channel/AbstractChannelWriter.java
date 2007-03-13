@@ -30,7 +30,7 @@ public abstract class AbstractChannelWriter implements ChannelWriter {
     /** The channel we're writing to. */
     public synchronized void setWriteChannel(InterestWritableByteChannel channel) {
         this.channel = channel;
-        channel.interest(this, true);
+        channel.interestWrite(this, true);
     }
     
     /**
@@ -48,7 +48,7 @@ public abstract class AbstractChannelWriter implements ChannelWriter {
         buffer.put(data);
         
         if(channel != null)
-            channel.interest(this, true);
+            channel.interestWrite(this, true);
     }
     
     
@@ -69,7 +69,7 @@ public abstract class AbstractChannelWriter implements ChannelWriter {
             return true;
         } else {
             buffer.clear();
-            channel.interest(this, false);
+            channel.interestWrite(this, false);
             return false;
         }
     }

@@ -39,10 +39,10 @@ public final class ThrottleWriterTest extends BaseTestCase {
 	public void testInterestAndBandwidthAvailable() throws Exception {
 	    assertFalse(SINK.interested());
 	    assertEquals(0, THROTTLE.interests());
-	    WRITER.interest(SOURCE, false);
+	    WRITER.interestWrite(SOURCE, false);
 	    assertFalse(SINK.interested());
 	    assertEquals(0, THROTTLE.interests());
-	    WRITER.interest(SOURCE, true);
+	    WRITER.interestWrite(SOURCE, true);
         assertEquals(1, THROTTLE.interests());
 	    assertFalse(SINK.interested());
 	    
@@ -139,7 +139,7 @@ public final class ThrottleWriterTest extends BaseTestCase {
         assertTrue(WRITER.bandwidthAvailable());
         assertTrue(SINK.interested());
         
-        SINK.interest(null, false);
+        SINK.interestWrite(null, false);
         assertFalse(SINK.interested());
         SINK.close();
         assertFalse(WRITER.bandwidthAvailable());

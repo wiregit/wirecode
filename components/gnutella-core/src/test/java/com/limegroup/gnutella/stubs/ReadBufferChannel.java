@@ -90,7 +90,7 @@ public class ReadBufferChannel implements InterestReadableByteChannel {
         this.closed = closed;
     }
     
-    public void interest(boolean status) {
+    public void interestRead(boolean status) {
         this.interest = status;
     }
 

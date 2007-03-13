@@ -714,7 +714,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                         throw new IOException("wrong word!");
                     
                     buffer.limit(buffer.position()).position(i+1);
-                    source.interest(false);
+                    source.interestRead(false);
                     RouterService.getConnectionDispatcher().dispatch(word, client, true);
                     return;
                 }

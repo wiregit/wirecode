@@ -145,7 +145,7 @@ public class BTMessageWriter implements BTChannelWriter {
 					if (needsFlush) 
 						needsFlush = !delayer.flush();
 					
-					delayer.interest(this, needsFlush);
+					delayer.interestWrite(this, needsFlush);
 					return false;
 				} 
 			}
@@ -172,7 +172,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	private void sendKeepAlive() {
 		if (_queue.isEmpty() && _out[1] == null) {
 			myKeepAlive.clear();
-			delayer.interest(this, true);
+			delayer.interestWrite(this, true);
 		}
 	}
 	
@@ -193,7 +193,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		if (myKeepAlive.remaining() == 4)
 			myKeepAlive.limit(0);
 		
-		delayer.interest(this, true);
+		delayer.interestWrite(this, true);
 	}
 	
 	private void messageArrived(BTMessage m) {

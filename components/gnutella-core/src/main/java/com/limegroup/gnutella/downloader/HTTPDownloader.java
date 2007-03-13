@@ -1611,7 +1611,7 @@ public class HTTPDownloader implements BandwidthTracker {
     				if(!_incompleteFile.writeBlock(request)) {
     					LOG.debug("Scheduling callback for write.");
     					InterestReadableByteChannel irc = (InterestReadableByteChannel)rc;
-    					irc.interest(false);
+    					irc.interestRead(false);
     					doingWrite = true;
     					_incompleteFile.registerWriteCallback(request,
     							new DownloadRestarter(irc, buffer, this));
@@ -1665,7 +1665,7 @@ public class HTTPDownloader implements BandwidthTracker {
             LOG.debug("Delayed write scheduled");
             buffer.clear();
             downloader.writeDone();
-            irc.interest(true);
+            irc.interestRead(true);
         }
     }
 

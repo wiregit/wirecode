@@ -40,8 +40,8 @@ public abstract class AbstractChannelInterestReader implements ChannelReadObserv
         this.source = newChannel;
     }
 
-    public void interest(boolean status) {
-        source.interest(status);
+    public void interestRead(boolean status) {
+        source.interestRead(status);
     }
 
     public void close() throws IOException {

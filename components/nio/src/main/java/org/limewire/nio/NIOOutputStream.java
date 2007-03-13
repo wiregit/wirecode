@@ -84,7 +84,7 @@ class NIOOutputStream implements WriteObserver {
             // if we were able to write everything, we're not interested in more writing.
             // otherwise, we are interested.
             if(buffer.position() == 0) {
-                channel.interest(this, false);
+                channel.interestWrite(this, false);
                 return false;
             } else {
                 return true;

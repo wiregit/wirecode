@@ -72,13 +72,13 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
      * Tells the Throttle that we're interested in receiving bandwidthAvailable
      * events at some point in time.
      */
-    public void interest(boolean status) {
+    public void interestRead(boolean status) {
         lastInterestState = status;
         if(channel != null) {
             if(status)
                 throttle.interest(this);
             else
-                channel.interest(false);
+                channel.interestRead(false);
         }
     }
     
@@ -89,7 +89,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
      */
     public boolean bandwidthAvailable() {
         if(channel.isOpen() && lastInterestState) {
-            channel.interest(true);
+            channel.interestRead(true);
             return true;
         } else {
             return false;
@@ -124,7 +124,7 @@ public class ThrottleReader implements InterestReadableByteChannel, ChannelReade
         	if (totalRead > 0)
         		available -= totalRead;
         } else {
-        	channel.interest(false);
+        	channel.interestRead(false);
         	if(lastInterestState)
         		throttle.interest(this);
         }

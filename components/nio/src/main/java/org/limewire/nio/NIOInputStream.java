@@ -115,7 +115,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
             if(!buffer.hasRemaining() || read == -1)
-                channel.interest(false);
+                channel.interestRead(false);
         }
     }
     
@@ -164,7 +164,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     /**
      * Does nothing.
      */
-    public void interest(boolean status) {}
+    public void interestRead(boolean status) {}
     
     public InterestReadableByteChannel getReadChannel() {
         return channel;

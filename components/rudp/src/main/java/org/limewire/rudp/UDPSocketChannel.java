@@ -97,7 +97,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     /**
      * Sets read interest on or off in the processor.
      */
-    public void interest(boolean status) {
+    public void interestRead(boolean status) {
         NIODispatcher.instance().interestRead(this, status);
     }
     
@@ -311,7 +311,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     }
 
     /** Sets interest on or off on the channel & stores the interested party for future writing. */
-    public void interest(WriteObserver observer, boolean status) {
+    public void interestWrite(WriteObserver observer, boolean status) {
         if(isOpen()) { 
             writer = observer;
             NIODispatcher.instance().interestWrite(this, status);

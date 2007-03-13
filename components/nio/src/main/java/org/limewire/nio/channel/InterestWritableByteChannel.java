@@ -15,6 +15,6 @@ public interface InterestWritableByteChannel extends WritableByteChannel, WriteO
      * Marks the given observer as interested (or not interested, if status is false)
      * in knowing when a write can be performed on this channel.
      */
-    public void interest(WriteObserver observer, boolean status);
+    public void interestWrite(WriteObserver observer, boolean status);
 
 }
