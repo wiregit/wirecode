@@ -31,8 +31,8 @@ import java.util.Random;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.security.AbstractSecurityToken;
-import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.SecurityToken;
 
 /**
@@ -188,10 +188,16 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         if (!(src instanceof InetSocketAddress)) {
             return false;
         }
+        
         try {
-            return getSecurityToken().isFor(new DHTTokenData(src));
-        }
-        catch (InvalidSecurityTokenException iste) {
+            SecurityToken token = getSecurityToken();
+            DHTTokenData data = new DHTTokenData(src);
+            boolean isFor = token.isFor(data);
+            if (!isFor) {
+                throw new IllegalStateException(token + ", " + data);
+            }
+            return isFor;
+        } catch (InvalidSecurityTokenException iste) {
             return false;
         }
     }
