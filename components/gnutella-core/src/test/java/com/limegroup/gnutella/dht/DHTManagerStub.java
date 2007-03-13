@@ -27,7 +27,7 @@ public class DHTManagerStub implements DHTManager {
         return null;
     }
 
-    public DHTMode getMode() {
+    public DHTMode getDHTMode() {
         return DHTMode.ACTIVE;
     }
 

@@ -914,7 +914,7 @@ public final class MessageRouterTest extends LimeTestCase {
 
         public MojitoDHT getMojitoDHT() { return null; }
 
-        public DHTMode getMode() { 
+        public DHTMode getDHTMode() { 
             return null; 
         }
 

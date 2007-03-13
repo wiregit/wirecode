@@ -59,7 +59,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
             assertEquals(1, executor.getRunners().size());
             Thread.sleep(200);
             assertTrue(manager.isRunning());
-            assertEquals(DHTMode.ACTIVE, manager.getMode());
+            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
             KUID activeLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
             
             // Rry starting again
@@ -70,7 +70,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
             // Try switching mode
             manager.start(DHTMode.PASSIVE);
             Thread.sleep(200);
-            assertEquals(DHTMode.PASSIVE, manager.getMode());
+            assertEquals(DHTMode.PASSIVE, manager.getDHTMode());
             assertTrue(manager.isRunning());
             KUID passiveLocalNodeID = manager.getMojitoDHT().getLocalNodeID();
             assertNotEquals(activeLocalNodeID, passiveLocalNodeID);
@@ -90,7 +90,7 @@ public class LimeDHTManagerTest extends DHTTestCase {
             Thread.sleep(10000);
             
             // We should be in active mode
-            assertEquals(DHTMode.ACTIVE, manager.getMode());
+            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
             
             // The Node ID should be something else than passiveLocalNodeID
             assertNotEquals(passiveLocalNodeID, manager.getMojitoDHT().getLocalNodeID());
@@ -113,10 +113,10 @@ public class LimeDHTManagerTest extends DHTTestCase {
             manager.start(DHTMode.ACTIVE);
             Thread.sleep(200);
             assertTrue(manager.isRunning());
-            assertEquals(DHTMode.ACTIVE, manager.getMode());
+            assertEquals(DHTMode.ACTIVE, manager.getDHTMode());
             manager.start(DHTMode.PASSIVE);
             Thread.sleep(200);
-            assertEquals(DHTMode.PASSIVE, manager.getMode());
+            assertEquals(DHTMode.PASSIVE, manager.getDHTMode());
             assertTrue(manager.isRunning());
             manager.start(DHTMode.ACTIVE);
             manager.start(DHTMode.PASSIVE);

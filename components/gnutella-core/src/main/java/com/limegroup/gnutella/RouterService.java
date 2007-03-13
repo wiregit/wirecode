@@ -1817,7 +1817,7 @@ public class RouterService {
      */
     public static DHTMode getDHTMode() {
         if (dhtManager != null) {
-            return dhtManager.getMode();
+            return dhtManager.getDHTMode();
         }
         return DHTMode.INACTIVE;
     }

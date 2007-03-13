@@ -142,7 +142,7 @@ public class DHTManagerImpl implements DHTManager {
         return controller.getActiveDHTNodes(maxNodes);
     }
     
-    public synchronized DHTMode getMode() {
+    public synchronized DHTMode getDHTMode() {
         return controller.getDHTMode();
     }
     

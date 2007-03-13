@@ -22,7 +22,7 @@ class PassiveLeafController extends AbstractDHTController {
     @Override
     protected MojitoDHT createMojitoDHT(Vendor vendor, Version version) {
         MojitoDHT dht = MojitoFactory.createFirewalledDHT("PassiveLeafDHT", vendor, version);
-
+        
         ((Context)dht).setBootstrapped(true);
         ((Context)dht).setBucketRefresherDisabled(true);
         

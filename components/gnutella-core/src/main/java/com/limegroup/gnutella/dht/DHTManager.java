@@ -182,7 +182,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     /**
      * Returns the mode of the DHT
      */
-    public DHTMode getMode();
+    public DHTMode getDHTMode();
     
     /**
      * Returns whether this Node is running
