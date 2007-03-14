@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.http.HttpResponse;
 import org.limewire.collection.MultiRRIterator;
 
 import com.limegroup.gnutella.RouterService;
@@ -49,6 +50,10 @@ public class AltLocTracker {
     private boolean wantsFalts;
 
     public AltLocTracker(URN urn) {
+        if (urn == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.urn = urn;
     }
 
@@ -56,7 +61,7 @@ public class AltLocTracker {
      * Returns an AlternateLocationCollection of alternates that have not been
      * sent out already.
      */
-    Set<DirectAltLoc> getNextSetOfAltsToSend() {
+    public Set<DirectAltLoc> getNextSetOfAltsToSend() {
         AlternateLocationCollection<DirectAltLoc> coll = RouterService
                 .getAltlocManager().getDirect(urn);
         Set<DirectAltLoc> ret = null;
@@ -86,7 +91,7 @@ public class AltLocTracker {
 
     }
 
-    Set<PushAltLoc> getNextSetOfPushAltsToSend() {
+    public Set<PushAltLoc> getNextSetOfPushAltsToSend() {
         if (!wantsFalts)
             return Collections.emptySet();
 
@@ -164,6 +169,21 @@ public class AltLocTracker {
 
     public void setFwtVersion(int fwtVersion) {
         this.fwtVersion = fwtVersion;
+    }
+
+    public void addAltLocHeaders(HttpResponse response) {
+        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(urn));
+        Set<? extends AlternateLocation> alts = getNextSetOfAltsToSend();
+        if(alts.size() > 0) {
+            response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+        }
+
+        if (wantsFalts) {
+            alts = getNextSetOfPushAltsToSend();
+            if (alts.size() > 0) {
+                response.addHeader(HTTPHeaderName.FALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
+            }
+        }
     }
 
 }

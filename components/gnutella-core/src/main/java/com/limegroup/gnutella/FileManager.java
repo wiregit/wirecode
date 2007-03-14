@@ -2114,28 +2114,34 @@ public abstract class FileManager {
         //Because we ignore all incomplete files, _numFiles continues
         //to work as the expected size of ret.
         return new Iterator<Response>() {
-            
+            int startRevision = _revision;
             int index = 0;
             Response preview;
             
             private boolean preview() {
                 assert preview == null;
-                
-                while (index < _files.size()) {
-                    FileDesc desc = _files.get(index);
-                    index++;
-                    
-                    // If the file was unshared or is an incomplete file,
-                    // DO NOT SEND IT.
-                    if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
-                        continue;
-                
-                    preview = new Response(desc);
-                    if(includeXML)
-                        addXMLToResponse(preview, desc);
-                    return true;
+
+                if (_revision != startRevision) {
+                    return false;
                 }
-                return false;                
+
+                synchronized (FileManager.this) {
+                    while (index < _files.size()) {
+                        FileDesc desc = _files.get(index);
+                        index++;
+
+                        // If the file was unshared or is an incomplete file,
+                        // DO NOT SEND IT.
+                        if (desc == null || desc instanceof IncompleteFileDesc || isForcedShare(desc)) 
+                            continue;
+
+                        preview = new Response(desc);
+                        if(includeXML)
+                            addXMLToResponse(preview, desc);
+                        return true;
+                    }
+                    return false;
+                }
             }
             
             public boolean hasNext() {

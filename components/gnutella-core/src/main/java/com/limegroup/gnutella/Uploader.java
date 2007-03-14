@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.net.InetAddress;
-
 import com.limegroup.gnutella.uploader.UploadType;
 
 /**

@@ -11,6 +11,7 @@ import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionRequest;
+import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
@@ -63,12 +64,12 @@ public class HttpIOReactor implements ConnectingIOReactor {
         return sessionRequest;
     }
     
-    public SessionRequest connect(SocketAddress remoteAddress,
-            SocketAddress localAddress, final Object attachment) {
-        HttpSessionRequest sessionRequest = createSession(remoteAddress, localAddress, attachment);
-        connect(sessionRequest);
-        return sessionRequest;
-    }
+//    public SessionRequest connect(SocketAddress remoteAddress,
+//            SocketAddress localAddress, final Object attachment) {
+//        HttpSessionRequest sessionRequest = createSession(remoteAddress, localAddress, attachment);
+//        connect(sessionRequest);
+//        return sessionRequest;
+//    }
     
     public void connect(final HttpSessionRequest sessionRequest) {
         try {
@@ -133,7 +134,6 @@ public class HttpIOReactor implements ConnectingIOReactor {
         return session;
     }
 
-
     public void acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);
@@ -141,6 +141,15 @@ public class HttpIOReactor implements ConnectingIOReactor {
         } catch (IOException e) {
             IOUtils.close(socket);
         }
+    }
+
+    public SessionRequest connect(SocketAddress remoteAddress,
+            SocketAddress localAddress, Object attachment,
+            SessionRequestCallback callback) {
+        HttpSessionRequest sessionRequest = createSession(remoteAddress, localAddress, attachment);
+        sessionRequest.setCallback(callback);
+        connect(sessionRequest);
+        return sessionRequest;
     }
     
 }

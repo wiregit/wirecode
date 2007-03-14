@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 
@@ -29,24 +28,19 @@ public abstract class AbstractUploader implements Uploader {
 
     private final UploadSession session;
 
-    private int _totalAmountReadBefore;
+    private long totalAmountReadBefore;
 
-    private int _totalAmountRead;
+    private long totalAmountRead;
 
-    private int _amountRead;
+    private long amountRead;
 
-    // useful so we don't have to do _uploadEnd - _uploadBegin everywhere
-    private int _amountRequested;
+    private long fileSize;
 
-    private int _fileSize;
+    private int index;
 
-    private final int _index;
+    private String userAgent;
 
-    private String _userAgent;
-
-    private boolean _headersParsed;
-
-    private final String _fileName;
+    private final String _filename;
 
     private int _stateNum = CONNECTING;
 
@@ -54,16 +48,14 @@ public abstract class AbstractUploader implements Uploader {
 
     private boolean _firstReply = true;
 
-    private boolean _chatEnabled;
+    private boolean chatEnabled;
 
-    private boolean _browseEnabled;
-
-    private boolean _supportsQueueing = false;
+    private boolean browseEnabled;
 
     /**
      * True if this is a forcibly shared network file.
      */
-    private boolean _isForcedShare = false;
+    private boolean isForcedShare = false;
 
     /**
      * True if this is an uploader with high priority.
@@ -71,40 +63,29 @@ public abstract class AbstractUploader implements Uploader {
     private boolean priorityShare = false;
 
     /**
-     * The URN specified in the X-Gnutella-Content-URN header, if any.
-     */
-    private URN _requestedURN;
-
-    /**
      * The descriptor for the file we're uploading.
      */
-    private FileDesc _fileDesc;
-
-    /**
-     * Indicates that the client to which we are uploading is capable of
-     * accepting Queryreplies in the response.
-     */
-    private boolean _clientAcceptsXGnutellaQueryreplies = false;
+    private FileDesc fileDesc;
 
     /**
      * The address as described by the "X-Node" header.
      */
-    private InetAddress _nodeAddress = null;
+    private InetAddress nodeAddress = null;
 
     /**
      * The port as described by the "X-Node" header.
      */
-    private int _nodePort = -1;
+    private int nodePort = -1;
 
     /** The upload type of this uploader. */
     private UploadType _uploadType;
 
     public AbstractUploader(String fileName, UploadSession session, int index) {
         this.session = session;
-        _fileName = fileName;
-        _index = index;
-        _totalAmountRead = 0;
-        _amountRead = 0;
+        _filename = fileName;
+        this.index = index;
+        totalAmountRead = 0;
+        amountRead = 0;
         reinitialize();
     }
 
@@ -115,17 +96,11 @@ public abstract class AbstractUploader implements Uploader {
      * @param params the parameter list to change to.
      */
     public void reinitialize() {
-        _amountRequested = 0;
-        _headersParsed = false;
         _stateNum = CONNECTING;
-        _nodePort = 0;
-        _supportsQueueing = false;
-        _requestedURN = null;
-        _clientAcceptsXGnutellaQueryreplies = false;
-        _totalAmountReadBefore = 0;
-        _totalAmountRead += _amountRead;
-        _amountRead = 0;
-
+        nodePort = 0;
+        totalAmountReadBefore = 0;
+        totalAmountRead += amountRead;
+        amountRead = 0;
     }
 
     /**
@@ -138,11 +113,11 @@ public abstract class AbstractUploader implements Uploader {
         if (LOG.isDebugEnabled())
             LOG.debug("trying to set the fd for uploader " + this + " with "
                     + fd);
-        _fileDesc = fd;
-        _fileSize = (int) fd.getFileSize();
+        fileDesc = fd;
+        fileSize = (int) fd.getFileSize();
 
-        _isForcedShare = FileManager.isForcedShare(_fileDesc);
-        priorityShare = FileManager.isApplicationSpecialShare(_fileDesc
+        isForcedShare = FileManager.isForcedShare(fileDesc);
+        priorityShare = FileManager.isApplicationSpecialShare(fileDesc
                 .getFile());
     }
 
@@ -167,8 +142,8 @@ public abstract class AbstractUploader implements Uploader {
      * 
      * @param amount the number of bytes that have been uploaded
      */
-    void setAmountUploaded(int amount) {
-        int newData = amount - _amountRead;
+    void setAmountUploaded(long amount) {
+        int newData = (int) (amount - amountRead);
         if (newData > 0) {
             if (isForcedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
@@ -176,7 +151,7 @@ public abstract class AbstractUploader implements Uploader {
             else
                 BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
         }
-        _amountRead = amount;
+        amountRead = amount;
     }
 
     /**
@@ -199,27 +174,19 @@ public abstract class AbstractUploader implements Uploader {
     // implements the Uploader interface
     public long getFileSize() {
         if (_stateNum == THEX_REQUEST)
-            return _fileDesc.getHashTree().getOutputLength();
+            return fileDesc.getHashTree().getOutputLength();
         else
-            return _fileSize;
-    }
-
-    // implements the Uploader interface
-    public long getAmountRequested() {
-        if (_stateNum == THEX_REQUEST)
-            return _fileDesc.getHashTree().getOutputLength();
-        else
-            return _amountRequested;
+            return fileSize;
     }
 
     // implements the Uploader interface
     public int getIndex() {
-        return _index;
+        return index;
     }
 
     // implements the Uploader interface
     public String getFileName() {
-        return _fileName;
+        return _filename;
     }
 
     // implements the Uploader interface
@@ -239,32 +206,25 @@ public abstract class AbstractUploader implements Uploader {
 
     // implements the Uploader interface
     public boolean isChatEnabled() {
-        return _chatEnabled;
+        return chatEnabled;
     }
 
     // implements the Uploader interface
     public boolean isBrowseHostEnabled() {
-        return _browseEnabled;
+        return browseEnabled;
     }
 
     // implements the Uploader interface
     public int getGnutellaPort() {
-        return _nodePort;
+        return nodePort;
     }
 
-    // implements the Uploader interface
     public String getUserAgent() {
-        return _userAgent;
+        return userAgent;
     }
 
-    // implements the Uploader interface
-    public boolean isHeaderParsed() {
-        return _headersParsed;
-    }
-
-    // is a forced network share?
     public boolean isForcedShare() {
-        return _isForcedShare;
+        return isForcedShare;
     }
 
     // uploader with high priority?
@@ -272,31 +232,16 @@ public abstract class AbstractUploader implements Uploader {
         return priorityShare;
     }
 
-    public boolean supportsQueueing() {
-        return _supportsQueueing && isValidQueueingAgent();
-    }
-
-    /**
-     * Blocks certain vendors from being queued, because of buggy downloading
-     * implementations on their side.
-     */
-    private boolean isValidQueueingAgent() {
-        if (_userAgent == null)
-            return true;
-
-        return !_userAgent.startsWith("Morpheus 3.0.2");
-    }
-
     protected boolean isFirstReply() {
         return _firstReply;
     }
 
     public InetAddress getNodeAddress() {
-        return _nodeAddress;
+        return nodeAddress;
     }
 
     public int getNodePort() {
-        return _nodePort;
+        return nodePort;
     }
 
     /**
@@ -310,7 +255,7 @@ public abstract class AbstractUploader implements Uploader {
         if (_stateNum == THEX_REQUEST) {
             return getAmountWritten();
         } else
-            return _amountRead;
+            return amountRead;
     }
 
     /**
@@ -323,10 +268,10 @@ public abstract class AbstractUploader implements Uploader {
         if (_stateNum == THEX_REQUEST) {
             return getAmountWritten();
         } else {
-            if (_totalAmountReadBefore > 0)
-                return _totalAmountReadBefore + _amountRead;
+            if (totalAmountReadBefore > 0)
+                return totalAmountReadBefore + amountRead;
             else
-                return _totalAmountRead + _amountRead;
+                return totalAmountRead + amountRead;
         }
     }
 
@@ -338,22 +283,11 @@ public abstract class AbstractUploader implements Uploader {
      *         from the shared files
      */
     public FileDesc getFileDesc() {
-        return _fileDesc;
-    }
-
-    boolean getClientAcceptsXGnutellaQueryreplies() {
-        return _clientAcceptsXGnutellaQueryreplies;
-    }
-
-    /**
-     * Returns the content URN that the client asked for.
-     */
-    public URN getRequestedURN() {
-        return _requestedURN;
+        return fileDesc;
     }
 
     public void measureBandwidth() {
-        int written = _totalAmountRead + getAmountWritten();
+        long written = totalAmountRead + getAmountWritten();
         session.measureBandwidth(written);
     }
 
@@ -379,9 +313,37 @@ public abstract class AbstractUploader implements Uploader {
         _uploadType = type;
     }
 
+    public void setBrowseEnabled(boolean browseEnabled) {
+        this.browseEnabled = browseEnabled;
+    }
+    
+    public void setChatEnabled(boolean chatEnabled) {
+        this.chatEnabled = chatEnabled;
+    }
+    
+    public void setNodeAddress(InetAddress nodeAddress) {
+        this.nodeAddress = nodeAddress;
+    }
+    
+    public void setNodePort(int nodePort) {
+        this.nodePort = nodePort;
+    }
+    
+    public void setTotalAmountReadBefore(int totalAmountReadBefore) {
+        this.totalAmountReadBefore = totalAmountReadBefore;
+    }
+    
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+    
     // overrides Object.toString
     public String toString() {
-        return "<" + getHost() + ":" + _index + ">";
+        return "<" + getHost() + ":" + index + ">";
         // return "HTTPUploader:\r\n"+
         // "File Name: "+_fileName+"\r\n"+
         // "Host Name: "+_hostName+"\r\n"+

@@ -2,6 +2,9 @@ package com.limegroup.gnutella.http;
 
 import java.util.Locale;
 
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
+
 /** All HTTPHeaderNames. */
 public enum HTTPHeaderName {
     
@@ -201,4 +204,17 @@ public enum HTTPHeaderName {
 	public String toString() {
 		return NAME;
 	}
+    
+    public boolean matches(Header header) {
+        return header.getName().equalsIgnoreCase(NAME);
+    }
+
+    public Header create(String value) {
+        return new BasicHeader(httpStringValue(), value);
+    }
+
+    public Header create(HTTPHeaderValue value) {
+        return new BasicHeader(httpStringValue(), value.httpStringValue());
+    }
+
 }

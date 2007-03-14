@@ -36,6 +36,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
+import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
@@ -149,6 +150,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/update.xml", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
+                // FIXME filter freeloader
+                
                 UploadStat.UPDATE_FILE.incrementStat();
                 UploadSession session = getSession(context);
                 HTTPUploader uploader = getOrCreateUploader(context,
@@ -169,12 +172,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        acceptor.registerHandler("/get*", new HttpRequestHandler() {
-            public void handle(HttpRequest request, HttpResponse response,
-                    HttpContext context) throws HttpException, IOException {
-                response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
-            }
-        });
+        acceptor.registerHandler("/get*", new FileRequestHandler(this));
 
         // unsupported requests
         HttpRequestHandler notFoundHandler = new HttpRequestHandler() {
