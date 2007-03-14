@@ -24,10 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/**
- * This class provides static functions to load/store the files.
- * @author Anurag Singla
- */
+/** Utilities for dealing with Files. */
 public class FileUtils {
     
     private static final Log LOG = LogFactory.getLog(FileUtils.class);

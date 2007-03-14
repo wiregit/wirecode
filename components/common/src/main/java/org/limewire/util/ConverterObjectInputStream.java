@@ -17,6 +17,7 @@ import java.util.Map;
  *  com.limegroup.gnutella.util.FileComparator -> org.limewire.collection.FileComparator
  *  com.limegroup.gnutella.downloader.Interval -> org.limewire.collection.Interval
  *  com.limegroup.gnutella.util.IntervalSet -> org.limewire.collection.IntervalSet
+ *  com.limegroup.gnutella.util.StringComparator  -> org.limewire.collection.StringComparator
  *  
  * None of the earlier forms of the class need to exist on the classpath.
  * 

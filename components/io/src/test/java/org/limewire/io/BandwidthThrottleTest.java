@@ -19,20 +19,20 @@ public class BandwidthThrottleTest extends BaseTestCase {
     }
 
     /** Time per test. */
-    final int TIME=1000;        //1 second
+    private final int TIME=1000;        //1 second
     /** bytesSent should be the desired value + or - FUDGE_FACTOR */
-    final float FUDGE_FACTOR=0.12f;  //12 percent
+    private final float FUDGE_FACTOR=0.12f;  //12 percent
 
-    BandwidthThrottle throttle;
-    Random random;
-    long startTime;
-    long stopTime;       
-    int bytesSent;
+    private BandwidthThrottle throttle;
+    private Random random;
+    private long startTime;
+    private long stopTime;       
+    private int bytesSent;
 
     /** The following are not used for testBandwidthThrottle */
-    PipedOutputStream pout;
-    PipedInputStream pin;
-    OutputStream out;
+    private PipedOutputStream pout;
+    private PipedInputStream pin;
+    private OutputStream out;
     
     public static Test suite() {
         return buildTestSuite(BandwidthThrottleTest.class);

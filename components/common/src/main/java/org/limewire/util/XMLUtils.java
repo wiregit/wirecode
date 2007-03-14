@@ -16,6 +16,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+/** A collection of utilities for retrieving XML documents. */
 public class XMLUtils {
 
     private static Log LOG = LogFactory.getLog(XMLUtils.class);
