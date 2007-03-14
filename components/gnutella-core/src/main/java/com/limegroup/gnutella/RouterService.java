@@ -265,16 +265,14 @@ public class RouterService {
     private static UDPSelectorProvider UDP_SELECTOR_PROVIDER;
 
     /**
-     * Initialize the class that manages the DHT.
+     * The DHTManager that manages the DHT and its various modes
      */
-    private static DHTManager dhtManager = 
-        new DHTManagerImpl(ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+    private static DHTManager dhtManager;
     
     /**
-     * 
+     * The AltLocFinder utilitizes the DHT to find Alternate Locations
      */
-    private static AltLocFinder altLocFinder 
-        = new AltLocFinder(dhtManager);
+    private static AltLocFinder altLocFinder;
     
     private static MessageDispatcher messageDispatcher;
     
@@ -380,6 +378,10 @@ public class RouterService {
 		RouterService.callback = callback;
         fileManager.addFileEventListener(callback);
         RouterService.setMessageRouter(router);
+        
+        dhtManager = new DHTManagerImpl(
+                ExecutorsHelper.newProcessingQueue("DHT-Processor"));
+        altLocFinder = new AltLocFinder(dhtManager);
         
         manager.addEventListener(callback);
         manager.addEventListener(dhtManager);
