@@ -5,7 +5,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.GUIBaseTestCase;
+import com.limegroup.gnutella.gui.GUIBaseTestCase;
 
 public class FilteredTreeModelTest extends GUIBaseTestCase {
 

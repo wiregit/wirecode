@@ -2,7 +2,6 @@ package com.limegroup.gnutella.gui;
 
 import java.util.Locale;
 
-import com.limegroup.gnutella.util.GUIBaseTestCase;
 
 public class ResourceManagerTest extends GUIBaseTestCase {
 

@@ -7,7 +7,6 @@ import junit.framework.Test;
 
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.util.GUIBaseTestCase;
 
 public class GUIUtilsTest extends GUIBaseTestCase {
 

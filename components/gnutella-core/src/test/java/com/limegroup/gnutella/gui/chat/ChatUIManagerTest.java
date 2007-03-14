@@ -8,10 +8,10 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.chat.InstantMessenger;
+import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GUIMediator;
 import com.limegroup.gnutella.gui.GUITestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.GUIBaseTestCase;
 
 public class ChatUIManagerTest extends GUIBaseTestCase {
 

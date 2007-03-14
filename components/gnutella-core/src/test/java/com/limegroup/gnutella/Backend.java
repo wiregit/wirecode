@@ -332,11 +332,6 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	//private Backend(boolean reject) throws IOException {
 	private Backend(int port) throws IOException {
         super("Backend");
-		System.out.println(port == REJECT_PORT ? "STARTING REJECT BACKEND" :
-                           port == LEAF_PORT ? "STARTING LEAF BACKEND" :
-                           port == BACKEND_PORT ? "STARTING NORMAL BACKEND" :
-                           "STARTING UNKNOWN BACKEND");
-        
         int shutdownPort = (port == BACKEND_PORT ? SHUTDOWN_PORT : 
                             port == REJECT_PORT ? SHUTDOWN_REJECT_PORT :
                             port == LEAF_PORT ? SHUTDOWN_LEAF_PORT :
@@ -391,7 +386,6 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
                 String host = sock.getInetAddress().getHostAddress();
                 sock.close();
                 if (host.equals("127.0.0.1")) break;
-                System.out.println("Ignoring shutdown request from" + host);
             }
         } catch (IOException ex) {
             try { if (sock != null) sock.close(); } catch (IOException ex2) {}
@@ -451,10 +445,6 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
 	private void doShutdown(boolean reject, String msg) {
-        String message = (reject ? "REJECT BACKEND SHUTDOWN"
-                                 : "NORMAL BACKEND SHUTDOWN");
-        if (msg != null) message = message + ": " + msg;                                 
-		System.out.println(message); 
 		RouterService.shutdown();
 		System.exit(0);
 	}

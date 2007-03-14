@@ -256,7 +256,6 @@ public class NodeAssignerTest extends LimeTestCase {
                 try {
                     ServerSocket ss=new ServerSocket(TEST_PORT+1);
                     socket = ss.accept();
-                    System.out.println("got a connection!");
                     ss.close();
                     socket.setSoTimeout(1000);
                     UP = new Connection(socket);

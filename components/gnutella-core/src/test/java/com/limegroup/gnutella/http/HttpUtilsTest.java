@@ -189,7 +189,6 @@ public final class HttpUtilsTest extends LimeTestCase {
         StringWriter writer = new StringWriter();
         HTTPUtils.writeDate(writer);
         String header = writer.toString();
-        System.out.println(header);
         assertTrue("should start with Date", header.startsWith("Date"));
         
         assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
