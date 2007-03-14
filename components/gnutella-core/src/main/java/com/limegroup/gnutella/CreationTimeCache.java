@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.io.IOUtils;
-import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
@@ -331,7 +330,7 @@ public final class CreationTimeCache {
                     new BufferedOutputStream(new FileOutputStream(CTIME_CACHE_FILE)));
             oos.writeObject(URN_TO_TIME_MAP);
         } catch (IOException e) {
-            ErrorService.error(e);
+            LOG.error("Unable to write creation cache", e);
         } finally {
             IOUtils.close(oos);
         }

@@ -130,7 +130,7 @@ public class BootstrapServerManagerTest extends LimeTestCase {
                      s3.getRequest());
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&urlfile=1 HTTP/1.1", 
                      s2.getRequest());
-        assertEquals(null, s1.getRequest());   //wasn't contacted
+        assertNull(s1.getRequest());   //wasn't contacted
         //Check that we got the right results.  First make sure we kept the old
         //server list...
         Iterator iter=bman.getBootstrapServers().iterator();
