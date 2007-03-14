@@ -270,11 +270,11 @@ class PassiveLeafRouteTable implements RouteTable {
             Contact[] nodes = new Contact[Math.min(count, map.size())];
             int index = 0;
             for (Contact c : map.values()) {
-                nodes[index++] = c;
-                
                 if (index >= nodes.length) {
                     break;
                 }
+                
+                nodes[index++] = c;
             }
             return Arrays.asList(nodes);
         }
