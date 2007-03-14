@@ -49,6 +49,7 @@ import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.SecurityToken;
 
 
 /**
@@ -247,7 +248,7 @@ public class MessageInputStream extends DataInputStream {
     /**
      * Reads a AddressSecurityToken from the InputStream 
      */
-    public AddressSecurityToken readSecurityToken() throws IOException {
+    public SecurityToken readSecurityToken() throws IOException {
         int length = readUnsignedByte();
         if (length == 0) {
             return null;
