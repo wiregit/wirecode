@@ -1,3 +1,4 @@
+<!-- top level ant file -->
 <project name="limewire" default="compile-src" basedir=".">
 
     <property name="limewire.home" location="${basedir}"/>
