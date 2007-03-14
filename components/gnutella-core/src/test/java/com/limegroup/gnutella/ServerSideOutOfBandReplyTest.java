@@ -12,7 +12,6 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -25,7 +24,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.messagehandlers.OOBSecurityToken;
-import static com.limegroup.gnutella.messagehandlers.OOBSecurityToken.OOBTokenData;
+import com.limegroup.gnutella.messagehandlers.OOBSecurityToken.OOBTokenData;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -887,6 +886,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         final int MAX_BUFFERED_REPLIES = 10;
 
         // ok, we need to set MAX_BUFFERED_REPLIES in MessageRouter
+        int oldMaxBufferedReplies = MessageRouter.MAX_BUFFERED_REPLIES;
         MessageRouter.MAX_BUFFERED_REPLIES = MAX_BUFFERED_REPLIES;
 
         // clear stored results from other tests
@@ -894,27 +894,58 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                 "_outOfBandReplies");
         table.clear();
 
-        // send 10 queries
-        Random rand = new Random();
-        int numReplyNumberVMs = 0;
-        for (int i = 0; i < MAX_BUFFERED_REPLIES; i++) {
-            QueryRequest query = 
-                QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
-                        InetAddress.getLocalHost().getAddress(),
-                        UDP_ACCESS.getLocalPort());
-            query.hop();
-            
-            if (rand.nextInt(2) == 0) {
-                ULTRAPEER[1].send(query);
-                ULTRAPEER[1].flush();
+        try {
+            // send 10 queries
+            Random rand = new Random();
+            int numReplyNumberVMs = 0;
+            for (int i = 0; i < MAX_BUFFERED_REPLIES; i++) {
+                QueryRequest query = 
+                    QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                            InetAddress.getLocalHost().getAddress(),
+                            UDP_ACCESS.getLocalPort());
+                query.hop();
+
+                if (rand.nextInt(2) == 0) {
+                    ULTRAPEER[1].send(query);
+                    ULTRAPEER[1].flush();
+                }
+                else {
+                    ULTRAPEER[0].send(query);
+                    ULTRAPEER[0].flush();
+                }
+
+                Thread.sleep(1250);
+                // count 10 ReplyNumberVMs
+                try {
+                    while (true) {
+                        UDP_ACCESS.setSoTimeout(500);
+                        pack = new DatagramPacket(new byte[1000], 1000);
+                        UDP_ACCESS.receive(pack);
+                        InputStream in = new ByteArrayInputStream(pack.getData());
+                        Message message = MessageFactory.read(in);
+                        if (message instanceof ReplyNumberVendorMessage)
+                            numReplyNumberVMs++;
+                    }
+                }
+                catch (IOException expected) {}
             }
-            else {
+
+            assertEquals("Didn't get all VMs!!", MAX_BUFFERED_REPLIES,
+                    numReplyNumberVMs);
+
+            // send 2 new queries that shouldn't be ACKed
+            for (int i = 0; i < 2; i++) {
+                QueryRequest query = 
+                    QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
+                            InetAddress.getLocalHost().getAddress(),
+                            UDP_ACCESS.getLocalPort());
+                query.hop();
+
                 ULTRAPEER[0].send(query);
                 ULTRAPEER[0].flush();
             }
 
-            Thread.sleep(1250);
-            // count 10 ReplyNumberVMs
+            // should not get any more ReplyNumberVMs
             try {
                 while (true) {
                     UDP_ACCESS.setSoTimeout(500);
@@ -922,40 +953,14 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
                     UDP_ACCESS.receive(pack);
                     InputStream in = new ByteArrayInputStream(pack.getData());
                     Message message = MessageFactory.read(in);
-                    if (message instanceof ReplyNumberVendorMessage)
-                        numReplyNumberVMs++;
+                    assertNotInstanceof( ReplyNumberVendorMessage.class, message );
                 }
             }
             catch (IOException expected) {}
         }
-
-        assertEquals("Didn't get all VMs!!", MAX_BUFFERED_REPLIES,
-            numReplyNumberVMs);
-
-        // send 2 new queries that shouldn't be ACKed
-        for (int i = 0; i < 2; i++) {
-            QueryRequest query = 
-                QueryRequest.createOutOfBandQuery((i%2==0) ? "berkeley" : "susheel",
-                        InetAddress.getLocalHost().getAddress(),
-                        UDP_ACCESS.getLocalPort());
-            query.hop();
-            
-            ULTRAPEER[0].send(query);
-            ULTRAPEER[0].flush();
+        finally {
+            MessageRouter.MAX_BUFFERED_REPLIES = oldMaxBufferedReplies;
         }
-
-        // should not get any more ReplyNumberVMs
-        try {
-            while (true) {
-                UDP_ACCESS.setSoTimeout(500);
-                pack = new DatagramPacket(new byte[1000], 1000);
-                UDP_ACCESS.receive(pack);
-                InputStream in = new ByteArrayInputStream(pack.getData());
-                Message message = MessageFactory.read(in);
-                assertNotInstanceof( ReplyNumberVendorMessage.class, message );
-            }
-        }
-        catch (IOException expected) {}
     }   
 
     // make sure that the Ultrapeer discards out-of-band query requests that
