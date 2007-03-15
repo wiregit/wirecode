@@ -1274,6 +1274,8 @@ public abstract class MessageRouter {
         if (!shouldServiceRedirect(_udpConnectBacks,addrString))
             return;
 
+        // mutating twice restores the original guid
+        UDPService.mutateGUID(guidToUse.bytes(), addrToContact, portToContact);
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
         UDPService.instance().send(pr, addrToContact, portToContact);

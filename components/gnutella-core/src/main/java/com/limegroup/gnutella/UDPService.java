@@ -381,7 +381,7 @@ public class UDPService implements ReadWriteObserver {
             _lastUnsolicitedIncomingTime = _lastReceivedAny;
 	}
 	
-    private void mutateGUID(byte[] guid, InetAddress ip, int port) {
+    public static void mutateGUID(byte[] guid, InetAddress ip, int port) {
         byte[] qk = PING_GENERATOR.getMACBytes(new AddressSecurityToken.AddressTokenData(ip,port));
         for (int i = 0; i < qk.length; i++)
             guid[i] =(byte)(guid[i] ^ qk[i]);
