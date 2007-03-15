@@ -47,7 +47,7 @@ public class AltLocTracker {
 
     private final URN urn;
 
-    private boolean wantsFalts;
+    private boolean wantsFAlts;
 
     public AltLocTracker(URN urn) {
         if (urn == null) {
@@ -92,7 +92,7 @@ public class AltLocTracker {
     }
 
     public Set<PushAltLoc> getNextSetOfPushAltsToSend() {
-        if (!wantsFalts)
+        if (!wantsFAlts)
             return Collections.emptySet();
 
         AlternateLocationCollection<PushAltLoc> fwt = RouterService
@@ -151,12 +151,12 @@ public class AltLocTracker {
                                                     // existing pushloc
     }
 
-    public boolean isWantsFalts() {
-        return wantsFalts;
+    public boolean wantsFAlts() {
+        return wantsFAlts;
     }
 
-    public void setWantsFalts(boolean wantsFalts) {
-        this.wantsFalts = wantsFalts;
+    public void setWantsFAlts(boolean wantsFAlts) {
+        this.wantsFAlts = wantsFAlts;
     }
 
     public URN getUrn() {
@@ -178,7 +178,7 @@ public class AltLocTracker {
             response.addHeader(HTTPHeaderName.ALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));
         }
 
-        if (wantsFalts) {
+        if (wantsFAlts) {
             alts = getNextSetOfPushAltsToSend();
             if (alts.size() > 0) {
                 response.addHeader(HTTPHeaderName.FALT_LOCATION.create(new HTTPHeaderValueCollection(alts)));

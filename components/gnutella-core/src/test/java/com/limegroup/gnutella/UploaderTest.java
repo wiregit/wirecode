@@ -141,9 +141,9 @@ public class UploaderTest extends LimeTestCase {
     /**
      * - Bandwidth tracker works properly.
      */
-    public void testLegacy() {
-        HTTPUploadManager.tBandwidthTracker(new HTTPUploadManager(null));
-    }
+//    public void testLegacy() {
+//        HTTPUploadManager.tBandwidthTracker(new HTTPUploadManager(null));
+//    }
     
     /** 
      * Tests that an upload triggers a validation.

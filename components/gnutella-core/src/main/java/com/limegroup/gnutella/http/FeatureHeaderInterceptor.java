@@ -256,12 +256,12 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
                 uploader.setSupportsQueueing(true);
             else if (protocol.equals(HTTPConstants.PUSH_LOCS))
-                uploader.getAltLocTracker().setWantsFalts(true);
+                uploader.getAltLocTracker().setWantsFAlts(true);
             else if (protocol.equals(HTTPConstants.FW_TRANSFER)) {
                 try {
                     // for this header we care about the version
                     uploader.getAltLocTracker().setFwtVersion((int) HTTPUtils.parseFeatureToken(feature));
-                    uploader.getAltLocTracker().setWantsFalts(true);
+                    uploader.getAltLocTracker().setWantsFAlts(true);
                 } catch (ProblemReadingHeaderException prhe) {
                     continue;
                 }

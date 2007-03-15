@@ -27,6 +27,10 @@ import com.limegroup.gnutella.statistics.UploadStat;
 
 public class PushProxyRequestHandler implements HttpRequestHandler {
 
+    public static final String P_SERVER_ID = "ServerId";
+    public static final String P_GUID = "guid";
+    public static final String P_FILE = "file";
+
     public PushProxyRequestHandler() {
     }
 
@@ -72,7 +76,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         while (t.hasMoreTokens()) {
             final String key = t.nextToken();
             final String val = t.nextToken();
-            if (key.equalsIgnoreCase(PushProxyUploadState.P_SERVER_ID)) {
+            if (key.equalsIgnoreCase(P_SERVER_ID)) {
                 if (clientGUID != null) // already have a name?
                     return null;
                 // must convert from base32 to base 16.
@@ -80,12 +84,12 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
                 if (base16.length != 16)
                     return null;
                 clientGUID = new GUID(base16).toHexString();
-            } else if (key.equalsIgnoreCase(PushProxyUploadState.P_GUID)) {
+            } else if (key.equalsIgnoreCase(P_GUID)) {
                 if (clientGUID != null || val.length() != 32)
                     return null;
                 // already in base16
                 clientGUID = val;
-            } else if (key.equalsIgnoreCase(PushProxyUploadState.P_FILE)) {
+            } else if (key.equalsIgnoreCase(P_FILE)) {
                 if (fileIndex != 0)
                     return null;
                 try {

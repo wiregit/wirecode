@@ -49,10 +49,10 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
@@ -591,8 +591,8 @@ public class UploadTest extends LimeTestCase {
 		                assertEquals(1,l.size());
 		                u = (HTTPUploader)l.get(0);
 		            }
-		            assertFalse(u.wantsFAlts());
-		            assertEquals(0,u.wantsFWTAlts());
+		            assertFalse(u.getAltLocTracker().wantsFAlts());
+		            assertEquals(0,u.getAltLocTracker().getFwtVersion());
                 }
             }
         );
@@ -642,8 +642,8 @@ public class UploadTest extends LimeTestCase {
                         assertEquals(1,l.size());
 	                    u = (HTTPUploader)l.get(0);
 	                }
-		            assertTrue(u.wantsFAlts());
- 		            assertEquals(0,u.wantsFWTAlts());        
+		            assertTrue(u.getAltLocTracker().wantsFAlts());
+ 		            assertEquals(0,u.getAltLocTracker().getFwtVersion());        
                 }
             }
        );
@@ -692,8 +692,8 @@ public class UploadTest extends LimeTestCase {
                         assertEquals(1,l.size());
                         u = (HTTPUploader)l.get(0);
                     }
-                    assertTrue(u.wantsFAlts());
-                    assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
+                    assertTrue(u.getAltLocTracker().wantsFAlts());
+                    assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.getAltLocTracker().getFwtVersion());
                 }
             }
        );

@@ -40,7 +40,7 @@ import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
-import com.limegroup.gnutella.uploader.LimitReachedUploadState;
+import com.limegroup.gnutella.uploader.LimitReachedRequestHandler;
 import com.limegroup.gnutella.uploader.PushProxyRequestHandler;
 import com.limegroup.gnutella.uploader.UploadSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -806,7 +806,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         // another request after our initial LIMIT_REACHED reply
         // must be greater than or equal to what we send in our RetryAfter
         // header, otherwise we'll incorrectly mark guys as greedy.
-        static long WAIT_TIME = LimitReachedUploadState.RETRY_AFTER_TIME * 1000;
+        static long WAIT_TIME = LimitReachedRequestHandler.RETRY_AFTER_TIME * 1000;
 
         // time to wait before checking for hammering: 30 seconds.
         // if the averge number of requests per time frame exceeds MAX_REQUESTS

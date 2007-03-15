@@ -32,11 +32,11 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
         } else if (HTTPHeaderName.FALT_LOCATION.matches(header)) {
             AltLocTracker tracker = uploader.getAltLocTracker();
             parseAlternateLocations(tracker, header.getValue(), true);
-            tracker.setWantsFalts(true);
+            tracker.setWantsFAlts(true);
         } else if (HTTPHeaderName.BFALT_LOCATION.matches(header)) {
             AltLocTracker tracker = uploader.getAltLocTracker();
             parseAlternateLocations(tracker, header.getValue(), false);
-            tracker.setWantsFalts(false);
+            tracker.setWantsFAlts(false);
         }
     }
 
