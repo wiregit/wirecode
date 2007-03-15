@@ -588,6 +588,11 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
     }
 
+    public static PingReply 
+    createFromNetwork(byte[] guid, byte ttl, byte hops, byte[] payload) 
+    throws BadPacketException {
+        return createFromNetwork(guid, ttl, hops, payload, Message.N_UNKNOWN);
+    }
 
     /**
      * Creates a new <tt>PingReply</tt> instance from the network.
