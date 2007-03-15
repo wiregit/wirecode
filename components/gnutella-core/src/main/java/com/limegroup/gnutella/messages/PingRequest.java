@@ -31,7 +31,10 @@ public class PingRequest extends Message {
     public static final byte SCP_LEAF = 0x0;
     public static final byte SCP_ULTRAPEER = 0x1;
     
-   
+    /**
+     * GUID to send out for UDP pings.
+     */
+    public static final GUID UDP_GUID = new GUID();
 
     /**
      * With the Big Ping and Big Pong extensions pings may have a payload
@@ -144,7 +147,7 @@ public class PingRequest extends Message {
     private static GUID populateUDPGGEPList(List<NameValue<?>> l) {
         GUID guid;
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
-            guid = new GUID();
+            guid = UDP_GUID;
         } else {
             l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
             guid = UDPService.instance().getSolicitedGUID();

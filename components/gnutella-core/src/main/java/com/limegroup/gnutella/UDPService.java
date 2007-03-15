@@ -19,6 +19,9 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
+import org.limewire.security.AddressSecurityToken;
+import org.limewire.security.MACCalculator;
+import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -50,6 +53,9 @@ public class UDPService implements ReadWriteObserver {
 	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private final static UDPService INSTANCE = new UDPService();
+    
+    private static final MACCalculator PING_GENERATOR = 
+        MACCalculatorRepositoryManager.createDefaultCalculatorFactory().createMACCalculator();
 	
 	/**
 	 * The DatagramChannel we're reading from & writing to.
@@ -328,6 +334,8 @@ public class UDPService implements ReadWriteObserver {
 	 * Processes a single message.
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
+        if (message instanceof PingReply) 
+            mutateGUID(message.getGUID(), addr.getAddress(), addr.getPort());
         updateState(message, addr);
         RouterService.getMessageDispatcher().dispatchUDP(message, addr);
     }
@@ -373,6 +381,12 @@ public class UDPService implements ReadWriteObserver {
             _lastUnsolicitedIncomingTime = _lastReceivedAny;
 	}
 	
+    private void mutateGUID(byte[] guid, InetAddress ip, int port) {
+        byte[] qk = PING_GENERATOR.getMACBytes(new AddressSecurityToken.AddressTokenData(ip,port));
+        for (int i = 0; i < qk.length; i++)
+            guid[i] =(byte)(guid[i] ^ qk[i]);
+    }
+    
 	/**
 	 * Determines whether or not the specified message is valid for setting
 	 * LimeWire as accepting UDP messages (solicited or unsolicited).
@@ -453,6 +467,8 @@ public class UDPService implements ReadWriteObserver {
         }
        
         buffer.flip();
+        if (msg instanceof PingRequest)
+            mutateGUID(buffer.array(), addr.getAddress(), addr.getPort());
         send(buffer, addr, false);
     }
     

@@ -317,7 +317,7 @@ public class MessageFactory {
     private static class PingReplyParser extends GnutellaMessageParser {
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, int network) throws BadPacketException {
-            return PingReply.createFromNetwork(guid, ttl, hops, payload);
+            return PingReply.createFromNetwork(guid, ttl, hops, payload, network);
         }
     }
     
