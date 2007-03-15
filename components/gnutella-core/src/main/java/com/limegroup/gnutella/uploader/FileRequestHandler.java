@@ -107,6 +107,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             HttpResponse response, HttpContext context,
             FileRequest fileRequest, FileDesc fd) throws IOException,
             HttpException {
+        // create uploader
         UploadType type = (FileManager.isForcedShare(fd)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
         HTTPUploader uploader = sessionManager.getOrCreateUploader(context,
@@ -115,6 +116,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         uploader.setIndex(fileRequest.index);
         uploader.setState(Uploader.CONNECTING);
 
+        // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader));
@@ -142,24 +144,23 @@ public class FileRequestHandler implements HttpRequestHandler {
             return;
         }
 
+        // start upload
         if (uploader.getState() == Uploader.THEX_REQUEST) {
-            response.setEntity(new FileResponseEntity(uploader));
-            sessionManager.enqueue(context, request, response);
-            handleFileUpload(context, request, response);
+            handleTHEXRequest(request, response, context, uploader, fd);
         } else {
-            handleTHEXRequest();
+            handleFileUpload(context, request, response, uploader, fd);            
         }
     }
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
-            HttpResponse response) {
-        // TODO Auto-generated method stub
-        
+            HttpResponse response, HTTPUploader uploader, FileDesc fd) {
+        response.setEntity(new FileResponseEntity(uploader));
+        sessionManager.enqueue(context, request, response);
     }
 
-    private void handleTHEXRequest() {
-        // TODO Auto-generated method stub
-        
+    private void handleTHEXRequest(HttpRequest request, HttpResponse response,
+            HttpContext context, HTTPUploader uploader, FileDesc fd) throws HttpException, IOException {
+        new THEXRequestHandler(uploader, fd).handle(request, response, context);
     }
 
     private void handleFreeLoader(HttpRequest request, HttpResponse response,

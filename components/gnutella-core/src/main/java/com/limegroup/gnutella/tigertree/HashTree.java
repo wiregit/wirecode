@@ -374,6 +374,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         return HashTreeNodeManager.instance().getAllNodes(this);
     }
 
+    public ThexWriter createAsyncWriter() {
+        return getTreeWriter().createAsyncWriter();
+    }
+    
     /**
      * Writes this HashTree to the specified OutputStream using DIME.
      */
