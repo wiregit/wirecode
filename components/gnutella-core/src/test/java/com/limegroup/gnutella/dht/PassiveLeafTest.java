@@ -107,9 +107,7 @@ public class PassiveLeafTest extends DHTTestCase {
             }
             
         } finally {
-            for (MojitoDHT dht : dhts) {
-                dht.close();
-            }
+            close(dhts);
             
             if (passiveLeaf != null) {
                 passiveLeaf.close();

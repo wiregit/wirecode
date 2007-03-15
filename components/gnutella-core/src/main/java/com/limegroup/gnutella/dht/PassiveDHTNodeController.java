@@ -24,18 +24,12 @@ import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.routing.RouteTable.RouteTableEvent;
-import org.limewire.mojito.routing.RouteTable.RouteTableListener;
 import org.limewire.mojito.util.ContactUtils;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 

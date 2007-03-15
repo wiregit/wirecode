@@ -150,7 +150,7 @@ public class DHTManagerImpl implements DHTManager {
      * This method has to be synchronized to make sure the
      * DHT actually gets stopped and persisted when it is called.
      */
-    public synchronized void stop(){
+    public synchronized void stop() {
         stopped = true;
         controller.stop();
         controller = new NullDHTController();

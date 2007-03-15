@@ -240,6 +240,10 @@ public class NodeAssigner {
             return;
         }
         
+        if (RouterService.isSupernode()) {
+            return;
+        }
+        
         boolean isUltrapeerCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime OR current uptime high enough?

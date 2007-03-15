@@ -53,7 +53,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /**
      * The capabilities supported.
      */
-    private final Set<SupportedMessageBlock> _capabilitiesSupported = new HashSet<SupportedMessageBlock>();
+    private final Set<SupportedMessageBlock> _capabilitiesSupported;
 
     /**
      * The current instance of this CVM that this node will forward to others
@@ -68,14 +68,17 @@ public final class CapabilitiesVM extends VendorMessage {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_CAPABILITIES, version,
               payload);
 
+        _capabilitiesSupported = new HashSet<SupportedMessageBlock>();
+        
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
             int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             // constructing the SMB will cause a BadPacketException if the
             // network data is invalid
-            for (int i = 0; i < vectorSize; i++)
+            for (int i = 0; i < vectorSize; i++) {
                 _capabilitiesSupported.add(new SupportedMessageBlock(bais));
+            }
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
         }
@@ -86,17 +89,15 @@ public final class CapabilitiesVM extends VendorMessage {
      * Internal constructor for creating the sole instance of our 
      * CapabilitiesVM.
      */
-    private CapabilitiesVM() {
-        super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload());
-        addSupportedMessages(_capabilitiesSupported);
+    private CapabilitiesVM(Set<SupportedMessageBlock> _capabilitiesSupported) {
+        super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload(_capabilitiesSupported));
+        this._capabilitiesSupported = _capabilitiesSupported;
     }
-
+    
     /**
      * Generates the default payload, using all our supported messages.
      */
-    private static byte[] derivePayload() {
-        Set<SupportedMessageBlock> hashSet = new HashSet<SupportedMessageBlock>();
-        addSupportedMessages(hashSet);
+    private static byte[] derivePayload(Set<SupportedMessageBlock> hashSet) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ByteOrder.short2leb((short)hashSet.size(), baos);
@@ -109,41 +110,44 @@ public final class CapabilitiesVM extends VendorMessage {
         }
 
     }
-
-    // ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
+    
+    //  ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
     /**
      * Adds all supported capabilities to the given set.
      */
-    private static void addSupportedMessages(Set<? super SupportedMessageBlock> hashSet) {
-        SupportedMessageBlock smp = null;
-        smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
+    private static Set<SupportedMessageBlock> getSupportedMessages() {
+        Set<SupportedMessageBlock> supported = new HashSet<SupportedMessageBlock>();
+        
+        SupportedMessageBlock smb = null;
+        smb = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
                                         FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
-        hashSet.add(smp);
+        supported.add(smb);
         
-        smp = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
+        smb = new SupportedMessageBlock(SIMPP_CAPABILITY_BYTES,
                                         SimppManager.instance().getVersion());
-        hashSet.add(smp);
+        supported.add(smb);
         
-        smp = new SupportedMessageBlock(LIME_UPDATE_BYTES,
+        smb = new SupportedMessageBlock(LIME_UPDATE_BYTES,
                                         UpdateHandler.instance().getLatestId());
-        hashSet.add(smp);
+        supported.add(smb);
         
         if(RouterService.isMemberOfDHT()) {
             DHTMode mode = RouterService.getDHTMode();
             assert (mode != null);
-            smp = new SupportedMessageBlock(mode.getCapabilityName(),
+            smb = new SupportedMessageBlock(mode.getCapabilityName(),
                     RouterService.getDHTManager().getVersion().getVersion());
-            hashSet.add(smp);
+            supported.add(smb);
         }
+        
+        return supported;
     }
-
-
+    
     /** @return A CapabilitiesVM with the set of messages 
      *  this client supports.
      */
     public static CapabilitiesVM instance() {
         if (_instance == null)
-            _instance = new CapabilitiesVM();
+            _instance = new CapabilitiesVM(getSupportedMessages());
         return _instance;
     }
 
@@ -234,7 +238,7 @@ public final class CapabilitiesVM extends VendorMessage {
     public static void reconstructInstance() {
         //replace _instance with a newer one, which will be created with the
         //correct simppVersion, a new _capabilitiesSupported will be created
-        _instance = new CapabilitiesVM();
+        _instance = new CapabilitiesVM(getSupportedMessages());
     }
 
     
