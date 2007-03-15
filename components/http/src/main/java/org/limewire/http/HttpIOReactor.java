@@ -78,7 +78,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
                     new ConnectObserver() {
                         public void handleConnect(Socket socket) throws IOException {                          
                             prepareSocket(socket);
-                            HttpIOSession session = connectSocket((NIOSocket) socket, sessionRequest.getAttachment());
+                            HttpIOSession session = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
                             sessionRequest.connected(session);
                         }
 
@@ -109,7 +109,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
         }
     }
     
-    protected HttpIOSession connectSocket(AbstractNBSocket socket, Object attachment) throws IOException {
+    protected HttpIOSession connectSocket(AbstractNBSocket socket, Object attachment, String word) throws IOException {
         final HttpIOSession session = new HttpIOSession(socket);        
         int timeout = 0;
         try {
@@ -123,7 +123,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
         session.setSocketTimeout(timeout);
 
-        HttpChannel channel = new HttpChannel(session, eventDispatch);
+        HttpChannel channel = new HttpChannel(session, eventDispatch, word);
         session.setHttpChannel(channel);
         
         this.eventDispatch.connected(session);
@@ -137,7 +137,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
     public void acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);
-            connectSocket((NIOSocket) socket, null);
+            connectSocket((NIOSocket) socket, null, word);
         } catch (IOException e) {
             IOUtils.close(socket);
         }

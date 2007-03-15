@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.limewire.nio.BufferUtils;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -31,12 +32,24 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
 
     private boolean readInterest;
 
-    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch) {
+    private ByteBuffer methodBuffer;
+
+    public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
         this.session = session;
         this.eventDispatch = eventDispatch;
+        this.methodBuffer = ByteBuffer.wrap((method + " ").getBytes());
+        //methodBuffer.flip();
     }
 
     public int read(ByteBuffer buffer) throws IOException {
+        if (methodBuffer.hasRemaining()) {
+            // XXX need to read as much as we can
+            int read = BufferUtils.transfer(methodBuffer, buffer, false);
+            if (methodBuffer.hasRemaining()) {
+                throw new RuntimeException();
+            }
+            return read + readSource.read(buffer);
+        }
         return readSource.read(buffer);
     }
 

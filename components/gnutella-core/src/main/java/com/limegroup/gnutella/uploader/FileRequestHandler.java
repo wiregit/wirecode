@@ -317,11 +317,10 @@ public class FileRequestHandler implements HttpRequestHandler {
             index = java.lang.Integer.parseInt(str_index);
             // get the filename, which should be right after
             // the "/", and before the next " ".
-            int f = requestLine.indexOf(" HTTP/", d);
             try {
-                fileName = URLDecoder.decode(requestLine.substring((d + 1), f));
+                fileName = URLDecoder.decode(requestLine.substring(d + 1));
             } catch (IllegalArgumentException e) {
-                fileName = requestLine.substring((d + 1), f);
+                fileName = requestLine.substring(d + 1);
             }
             UploadStat.TRADITIONAL_GET.incrementStat();
 

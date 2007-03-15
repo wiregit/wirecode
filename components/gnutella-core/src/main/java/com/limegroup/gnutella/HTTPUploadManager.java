@@ -199,7 +199,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Push uploads from firewalled clients.
      */
     public void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan) {
-        // TODO redirect to acceptor
+        acceptor.acceptConnection(get.getMethod(), socket);
     }
 
     /**
@@ -469,7 +469,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized int uploadsInProgress() {
-        return _activeUploadList.size() - _forcedUploads;
+        // FIXME return _activeUploadList.size() - _forcedUploads;
+        return 0;
     }
 
     public synchronized int getNumQueuedUploads() {
@@ -886,11 +887,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
     }
 
-    public void acceptConnection(String word, Socket s) {
-        // TODO Auto-generated method stub
-
-    }
-
     public UploadSlotManager getSlotManager() {
         return slotManager;
     }
@@ -937,10 +933,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public void responseSent(NHttpServerConnection conn, HttpResponse response) {
-        HTTPUploader uploader = getUploader(conn.getContext());
-        if (response.getEntity() == null) {
-            // not sending a body
-            uploader.setState(Uploader.COMPLETE);
+        UploadSession session = getSession(conn.getContext());
+        if (session != null) {
+            HTTPUploader uploader = session.getUploader();
+            assert uploader != null;
+            if (response.getEntity() == null) {
+                // not sending a body
+                uploader.setState(Uploader.COMPLETE);
+            }
         }
     }
 
