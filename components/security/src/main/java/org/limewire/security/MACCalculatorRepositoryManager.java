@@ -65,4 +65,8 @@ public class MACCalculatorRepositoryManager {
         return l;
     }
     
+    public static MACCalculatorFactory createDefaultCalculatorFactory() {
+        return new TEAMACCalculatorFactory();
+    }
+    
 }
