@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -50,17 +52,18 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);
     	someFileMatches.add(APP_TXT);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/GUIBaseTestCase.java"), textFile);
+    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/gui/GUIBaseTestCase.java"), textFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
-        RouterService.getFileManager().addFileAlways(textFile);
-        RouterService.getFileManager().addFileAlways(torrentFile);
-        RouterService.getFileManager().addFileAlways(userTorrentFile);
-        RouterService.getFileManager().addFileAlways(appTextFile);
-        RouterService.getFileManager().addFileAlways(appTorrentFile);
-    	Thread.sleep(500);
+        FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
+        RouterService.getFileManager().addFileAlways(textFile, waiter);
+        RouterService.getFileManager().addFileAlways(torrentFile, waiter);
+        RouterService.getFileManager().addFileAlways(userTorrentFile, waiter);
+        RouterService.getFileManager().addFileAlways(appTextFile, waiter);
+        RouterService.getFileManager().addFileAlways(appTorrentFile, waiter);
+        waiter.waitForLoad();
     	assertEquals(5, RouterService.getFileManager().getNumFiles());
     }
     
@@ -182,6 +185,23 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(1, responses.size());
     	assertEquals(TORRENT_FILE, responses.get(0).getName());
+    }
+    
+    private static class FileEventListenerWaiter implements FileEventListener {
+        private final CountDownLatch latch;
+        
+        public FileEventListenerWaiter(int waitings) {
+            this.latch = new CountDownLatch(waitings);
+        }
+
+        public void handleFileEvent(FileManagerEvent evt) {
+            latch.countDown();            
+        }
+        
+        public void waitForLoad() throws Exception {
+            latch.await(5, TimeUnit.SECONDS);
+        }
+        
     }
 }
 

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -212,7 +213,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SharingSettings.setSaveDirectory(_savedDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
-        UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
+        if(!GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadlessInstance())
+            UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         setSharedDirectories( new File[] { _sharedDir } );
         LimeCoreGlue.install();
