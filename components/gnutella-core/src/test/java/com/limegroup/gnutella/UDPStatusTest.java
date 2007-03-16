@@ -42,8 +42,9 @@ public class UDPStatusTest extends ClientSideTestCase {
         s.setSoTimeout(1000);
         
         try {
-            PingReply pong = PingReply.create(RouterService.getUdpService().getSolicitedGUID().bytes(),
+            PingReply pong = PingReply.create(RouterService.getUdpService().getSolicitedGUID().bytes().clone(),
                     (byte)1,6346,InetAddress.getLocalHost().getAddress());
+            UDPService.mutateGUID(pong.getGUID(), InetAddress.getLocalHost(), 6346);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pong.write(baos);
             byte []buf = baos.toByteArray();
