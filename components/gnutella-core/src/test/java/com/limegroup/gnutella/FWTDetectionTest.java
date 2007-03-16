@@ -478,13 +478,10 @@ public class FWTDetectionTest extends LimeTestCase {
         public PingReply reply;
         public boolean shouldAsk;
         
-        private GUID _solGUID;
+        private byte [] lastReceived;
         
         public UDPPonger(int port) {
             try {
-                _solGUID=(GUID) PrivilegedAccessor.getValue(
-                    UDPService.instance(),"SOLICITED_PING_GUID");
-            
             
                 _sock = new DatagramSocket(port);
                 _sock.setSoTimeout(5000);
@@ -501,8 +498,9 @@ public class FWTDetectionTest extends LimeTestCase {
                 _lastAddress = pack.getSocketAddress();
                 
                 ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-                    
-                return (PingRequest) MessageFactory.read(bais); 
+                PingRequest ret = (PingRequest) MessageFactory.read(bais);
+                lastReceived = ret.getGUID();
+                return ret;
         }
         
         /**
@@ -511,10 +509,11 @@ public class FWTDetectionTest extends LimeTestCase {
          */
         public void reply(IpPort reply) throws Exception{
             PingReply toSend;
+                
             if (reply==null)
-                toSend = PingReply.create(_solGUID.bytes(),(byte)1);
+                toSend = PingReply.create(lastReceived,(byte)1);
             else
-                toSend = PingReply.create(_solGUID.bytes(),(byte)1,reply);
+                toSend = PingReply.create(lastReceived,(byte)1,reply);
          
             replyPong(toSend);
             
