@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 import org.limewire.collection.Interval;
 
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
@@ -37,6 +39,14 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
     
     @Override
+    public void setFileDesc(FileDesc fd) throws IOException {
+        super.setFileDesc(fd);
+        
+        setUploadBegin(0);
+        setUploadEnd(getFileSize());
+    }
+    
+    @Override
     public int getAmountWritten() {
         // TODO Auto-generated method stub
         return 0;
@@ -61,6 +71,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         return this.uploadBegin;
     }
 
+    /**
+     * Exclusive index of the last byte.
+     */
     public long getUploadEnd() {
         return this.uploadEnd;
     }
@@ -70,27 +83,34 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     public boolean validateRange() {
+        long first = getUploadBegin();
+        long last = getUploadEnd();
+
         if (getFileDesc() instanceof IncompleteFileDesc) {
             // If we are allowing, see if we have the range.
             IncompleteFileDesc ifd = (IncompleteFileDesc) getFileDesc();
-            long upStart = getUploadBegin();
-            // uploader.getUploadEnd() is exclusive!
-            long upEnd = getUploadEnd() - 1;
             // If the request contained a 'Range:' header, then we can
             // shrink the request to what we have available.
             if (containedRangeRequest()) {
-                Interval request = ifd.getAvailableSubRange((int)upStart, (int)upEnd);
+                Interval request = ifd.getAvailableSubRange((int)first, (int)last - 1);
                 if (request == null) {
                     return false;
                 }
                 setUploadBegin(request.low);
                 setUploadEnd(request.high + 1);
             } else {
-                if (!ifd.isRangeSatisfiable((int) upStart, (int) upEnd)) {
+                if (!ifd.isRangeSatisfiable((int) first, (int) last - 1)) {
                     return false;
                 }
             }
+        } else {
+            if (containedRangeRequest()) {
+                setUploadEnd(Math.min(last, getFileSize())); 
+            } else  if (first < 0 || last > getFileSize()) {
+                return false;
+            }
         }
+
         return true;
     }
 

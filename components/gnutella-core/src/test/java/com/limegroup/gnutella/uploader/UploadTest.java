@@ -2311,8 +2311,11 @@ public class UploadTest extends LimeTestCase {
                                            String requiredHeader,
                                            Applyable f) 
             throws IOException {
+        // FIXME why send 1.0 header and expect 1.1?
+//        return downloadInternal("GET", makeRequest(file), header,
+//                                    out, in, requiredHeader, false, true, f);        
         return downloadInternal("GET", makeRequest(file), header,
-                                    out, in, requiredHeader, false, true, f);
+              out, in, requiredHeader, false, false, f);
 	}
 
     /** 

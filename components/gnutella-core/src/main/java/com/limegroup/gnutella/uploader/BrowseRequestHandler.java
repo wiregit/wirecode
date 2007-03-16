@@ -22,6 +22,7 @@ import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -74,7 +75,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             
             // XXX LW can't actually handle chunked responses
             setChunked(true);
-
+            setContentType(Constants.QUERYREPLY_MIME_TYPE);
+            
             query = QueryRequest.createBrowseHostQuery();
             iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());

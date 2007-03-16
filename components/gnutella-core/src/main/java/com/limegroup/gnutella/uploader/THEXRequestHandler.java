@@ -54,8 +54,9 @@ public class THEXRequestHandler implements HttpRequestHandler {
         public THEXResponseEntity(HTTPUploader uploader, HashTree tree) {
             this.uploader = uploader;
             this.tree = tree;
-            this.contentType = HTTPHeaderName.CONTENT_TYPE.create(tree.getOutputType());
             this.writer = tree.createAsyncWriter();
+
+            setContentType(tree.getOutputType());
         }
 
         @Override

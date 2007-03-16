@@ -37,12 +37,13 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     public HttpChannel(HttpIOSession session, IOEventDispatch eventDispatch, String method) {
         this.session = session;
         this.eventDispatch = eventDispatch;
-        this.methodBuffer = ByteBuffer.wrap((method + " ").getBytes());
-        //methodBuffer.flip();
+        if (method != null) {
+            this.methodBuffer = ByteBuffer.wrap((method + " ").getBytes());
+        }
     }
 
     public int read(ByteBuffer buffer) throws IOException {
-        if (methodBuffer.hasRemaining()) {
+        if (methodBuffer != null && methodBuffer.hasRemaining()) {
             // XXX need to read as much as we can
             int read = BufferUtils.transfer(methodBuffer, buffer, false);
             if (methodBuffer.hasRemaining()) {

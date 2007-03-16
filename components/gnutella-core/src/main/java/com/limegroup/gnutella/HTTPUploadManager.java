@@ -199,7 +199,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Push uploads from firewalled clients.
      */
     public void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan) {
-        acceptor.acceptConnection(get.getMethod(), socket);
+        acceptor.acceptConnection((get != null) ? get.getMethod() : null, socket);
     }
 
     /**

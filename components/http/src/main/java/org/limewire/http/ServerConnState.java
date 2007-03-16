@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/ServerConnState.java $
- * $Revision: 1.1.2.2 $
- * $Date: 2007-03-12 18:58:34 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2007-03-16 23:06:23 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -128,13 +128,14 @@ class ServerConnState {
 
     public void setResponse(final HttpResponse response) {
         this.response = response;
-        this.entity = (response.getEntity() instanceof HttpNIOEntity) 
-                ? (HttpNIOEntity)response.getEntity()
-                : null;
     }
 
     public HttpNIOEntity getEntity() {
         return entity;
+    }
+
+    public void setEntity(HttpNIOEntity entity) {
+        this.entity = entity;
     }
     
     public void shutdown() {
@@ -151,6 +152,7 @@ class ServerConnState {
     public void resetOutput() {
         this.outbuffer.reset();
         this.response = null;
+        this.entity = null;
         this.outputState = READY;
     }
 

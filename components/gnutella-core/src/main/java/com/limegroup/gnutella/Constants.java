@@ -16,7 +16,13 @@ public final class Constants {
      */
     public static final String QUERYREPLY_MIME_TYPE = 
         "application/x-gnutella-packets";
-    
+
+    /**
+     * Mime Type to be used when uploading files.
+     */
+    public static final String FILE_MIME_TYPE = 
+        "application/binary";
+
     /**
      * Constant for the timeout to use on sockets.
      */

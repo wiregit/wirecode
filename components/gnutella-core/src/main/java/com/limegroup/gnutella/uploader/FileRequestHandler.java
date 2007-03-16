@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -18,27 +17,22 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.io.IpPort;
+import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
-import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.connection.BasicQueue;
-import com.limegroup.gnutella.connection.ConnectionStats;
-import com.limegroup.gnutella.connection.MessageWriter;
-import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -154,8 +148,9 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd) {
-        response.setEntity(new FileResponseEntity(uploader));
-        sessionManager.enqueue(context, request, response);
+        response.setEntity(new FileResponseEntity(uploader, fd));
+        // FIXME queue request
+        //sessionManager.enqueue(context, request, response);
     }
 
     private void handleTHEXRequest(HttpRequest request, HttpResponse response,
@@ -428,55 +423,33 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         private HTTPUploader uploader;
 
-        private QueryRequest query;
+        private FileDesc fd;
 
-        private Iterator<Response> iterable;
+        private ByteBuffer buffer;
 
-        MessageWriter sender;
-
-        public FileResponseEntity(HTTPUploader uploader) {
+        public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
             this.uploader = uploader;
+            this.fd = fd;
+            
+            setContentType(Constants.FILE_MIME_TYPE);
 
-            SentMessageHandler sentMessageHandler = new SentMessageHandler() {
-                public void processSentMessage(Message m) {
-                    // TODO update progress
-                }
-            };
-
-            sender = new MessageWriter(new ConnectionStats(), new BasicQueue(),
-                    sentMessageHandler);
-            sender.setWriteChannel(this);
-
-            // XXX LW can't actually handle chunked responses
-            setChunked(true);
-
-            query = QueryRequest.createBrowseHostQuery();
-            iterable = RouterService.getFileManager().getIndexingIterator(
-                    query.desiresXMLResponses()
-                            || query.desiresOutOfBandReplies());
+            byte[] content = FileUtils.readFileFully(fd.getFile());
+            
+            int begin = (int) uploader.getUploadBegin();
+            int end = (int) uploader.getUploadEnd();
+            
+            buffer = ByteBuffer.wrap(content, begin, end - begin);
         }
 
         @Override
-        public boolean handleWrite() throws IOException {
-            addMessages();
-
-            boolean more = sender.handleWrite();
-            return more || iterable.hasNext();
+        public long getContentLength() {
+            return fd.getFileSize();
         }
-
-        private void addMessages() {
-            List<Response> responses = new ArrayList<Response>(10);
-            for (int i = 0; iterable.hasNext() && i < 10; i++) {
-                responses.add(iterable.next());
-            }
-
-            Iterable<QueryReply> it = RouterService.getMessageRouter()
-                    .responsesToQueryReplies(
-                            responses.toArray(new Response[0]), query);
-
-            for (QueryReply queryReply : it) {
-                sender.send(queryReply);
-            }
+        
+        @Override
+        public boolean handleWrite() throws IOException {
+            write(buffer);
+            return buffer.hasRemaining();
         }
 
     }
