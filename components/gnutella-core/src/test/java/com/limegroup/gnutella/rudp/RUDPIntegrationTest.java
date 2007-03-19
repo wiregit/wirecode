@@ -20,6 +20,7 @@ import org.limewire.util.PrivilegedAccessor;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.StandardMessageRouter;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
@@ -39,7 +40,6 @@ public class RUDPIntegrationTest extends LimeTestCase {
     private MessageHandler finHandler;
     private MessageHandler keepAliveHandler;
     private MessageHandler synHandler;
-    private static DatagramSocket UDP_SOCKET;
 
     public RUDPIntegrationTest(String name) {
         super(name);
@@ -69,16 +69,10 @@ public class RUDPIntegrationTest extends LimeTestCase {
         RouterService rs = new RouterService(new ActivityCallbackStub(), new StandardMessageRouter());
         rs.start();
         Thread.sleep(1000);
-        UDP_SOCKET = new DatagramSocket();
     }
     
     public void setUp() throws Exception {
         setSettings();
-    }
-    
-    public static void globalTearDown() throws Exception {
-        if(UDP_SOCKET != null)
-            UDP_SOCKET.close();
     }
     
     public void testLimeRUDPMessageHandlerIsInstalled() throws Exception {
@@ -113,7 +107,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         NIODispatcher.instance().register(channel,  new StubIOErrorObserver());
         Thread.sleep(100);
         assertNotEquals(0, stub.id);
-        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", UDP_SOCKET.getLocalPort());
+        InetSocketAddress addr = new InetSocketAddress("127.0.0.1", RouterService.getNonForcedPort());
         stub.addr = addr;
         stub.isConnecting = false;
         checkMessage(stub, LimeRUDPMessageHelper.getAck(stub.id));
@@ -147,8 +141,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     private void sendToUDP(Message m) throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         m.write(out);
-        DatagramPacket p = new DatagramPacket(out.toByteArray(), out.size(), new InetSocketAddress("127.0.0.1", PORT));
-        UDP_SOCKET.send(p);
+        UDPService.instance().send(m, new InetSocketAddress("127.0.0.1", PORT));
     }
     
     private void storeHandlers() throws Exception {

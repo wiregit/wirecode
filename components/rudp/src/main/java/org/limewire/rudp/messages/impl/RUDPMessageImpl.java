@@ -131,7 +131,11 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
      * @see org.limewire.rudp.RUDPMessage#getDataLength()
      */
     public int getDataLength() {
-        return _data1.remaining() + _data2.capacity();
+        return _data1.limit() + _data2.limit();
+    }
+    
+    public int getLength() {
+        return 23 + _data2.limit();
     }
     
     public OpCode getOpCode() {

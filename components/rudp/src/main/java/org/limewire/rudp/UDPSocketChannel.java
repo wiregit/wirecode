@@ -47,7 +47,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     private volatile WriteObserver writer;
     
     /** The list of buffered chunks that need to be written out. */
-    private ArrayList<ByteBuffer> chunks;
+    private final ArrayList<ByteBuffer> chunks;
     
     /** The current chunk we're writing to. */
     private ByteBuffer activeChunk;

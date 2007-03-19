@@ -82,5 +82,8 @@ public interface RUDPMessage {
 
     /** Return the length of data stored in this message. */
     public int getDataLength();
+    
+    /** Returns the length of the message. */
+    public int getLength();
 
 }

@@ -14,7 +14,7 @@ import com.limegroup.gnutella.util.DataUtils;
  */
 public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage> 
         extends Message implements RUDPMessage {
-    
+
     /** 
      * An empty GUID, it's never written to Network.
      * See overwritten write-methods for more info!
@@ -44,6 +44,11 @@ public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage>
 
     public OpCode getOpCode() {
         return delegate.getOpCode();
+    }
+    
+    @Override
+    public int getTotalLength() {
+        return delegate.getLength();
     }
     
     @Override
