@@ -29,4 +29,8 @@ public class StubRUDPMessage implements RUDPMessage {
     public void write(OutputStream out) throws IOException {
     }
 
+    public int getLength() {
+        return 0;
+    }
+
 }
