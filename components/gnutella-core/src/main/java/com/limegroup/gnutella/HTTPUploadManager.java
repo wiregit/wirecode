@@ -172,7 +172,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         acceptor.registerHandler("/gnet/push-proxy", pushProxyHandler);
 
         // uploads
-        acceptor.registerHandler("/get*", new FileRequestHandler(this));
+        FileRequestHandler fileRequestHandler = new FileRequestHandler(this);
+        acceptor.registerHandler("/get*", fileRequestHandler);
+        acceptor.registerHandler("/uri-res/*", fileRequestHandler);
 
         // unsupported requests
         HttpRequestHandler notFoundHandler = new HttpRequestHandler() {

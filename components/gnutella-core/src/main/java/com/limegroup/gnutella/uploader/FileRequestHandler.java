@@ -26,6 +26,7 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.UploaderTest;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -142,24 +143,34 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (uploader.getState() == Uploader.THEX_REQUEST) {
             handleTHEXRequest(request, response, context, uploader, fd);
         } else {
-            handleFileUpload(context, request, response, uploader, fd);            
+            handleFileUpload(context, request, response, uploader, fd);
         }
     }
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd) {
+
+        if (uploader.containedRangeRequest()) {
+            String value = "bytes " + uploader.getUploadBegin() + "-"
+                    + (uploader.getUploadEnd() - 1) + "/"
+                    + uploader.getFileSize();
+            response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
+        }
+
         response.setEntity(new FileResponseEntity(uploader, fd));
         // FIXME queue request
-        //sessionManager.enqueue(context, request, response);
+        // sessionManager.enqueue(context, request, response);
     }
 
     private void handleTHEXRequest(HttpRequest request, HttpResponse response,
-            HttpContext context, HTTPUploader uploader, FileDesc fd) throws HttpException, IOException {
+            HttpContext context, HTTPUploader uploader, FileDesc fd)
+            throws HttpException, IOException {
         new THEXRequestHandler(uploader, fd).handle(request, response, context);
     }
 
     private void handleFreeLoader(HttpRequest request, HttpResponse response,
-            HttpContext context, HTTPUploader uploader) throws HttpException, IOException {
+            HttpContext context, HTTPUploader uploader) throws HttpException,
+            IOException {
         uploader.setState(Uploader.FREELOADER);
         new FreeLoaderRequestHandler().handle(request, response, context);
     }
@@ -258,7 +269,7 @@ public class FileRequestHandler implements HttpRequestHandler {
      */
     private FileRequest parseURNGet(final String requestLine)
             throws IOException {
-        URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
+        URN urn = URN.createSHA1UrnFromHttpRequest(requestLine + " HTTP/1.1");
 
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy. URI scheme names are not case-sensitive.
@@ -430,14 +441,14 @@ public class FileRequestHandler implements HttpRequestHandler {
         public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
             this.uploader = uploader;
             this.fd = fd;
-            
+
             setContentType(Constants.FILE_MIME_TYPE);
 
             byte[] content = FileUtils.readFileFully(fd.getFile());
-            
+
             int begin = (int) uploader.getUploadBegin();
             int end = (int) uploader.getUploadEnd();
-            
+
             buffer = ByteBuffer.wrap(content, begin, end - begin);
         }
 
@@ -445,7 +456,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         public long getContentLength() {
             return fd.getFileSize();
         }
-        
+
         @Override
         public boolean handleWrite() throws IOException {
             write(buffer);
