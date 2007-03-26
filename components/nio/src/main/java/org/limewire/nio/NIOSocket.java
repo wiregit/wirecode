@@ -29,34 +29,28 @@ public class NIOSocket extends AbstractNBSocket {
     /** The Socket that this delegates to */
     private final Socket socket;
 
-    /**
-     * The host we're connected to. (Necessary because Sockets retrieved from channels null out the host when
-     * disconnected)
-     */
-    private InetAddress connectedTo;
-    
-    /** The port we're connecting/connected to. */
-    private int port;
+    /** The remote socket address. */
+    private SocketAddress remoteSocketAddress;
 
     /**
-     * Constructs an NIOSocket using a pre-existing Socket. To be used by NIOServerSocket while accepting incoming
-     * connections.
+     * Constructs an NIOSocket using a pre-existing Socket.
+     * To be used by NIOServerSocket while accepting incoming connections.
      */
-    NIOSocket(Socket s) {
+    protected NIOSocket(Socket s) {
         channel = s.getChannel();
         socket = s;
+        remoteSocketAddress = s.getRemoteSocketAddress();
+        initIncomingSocket();
         setInitialReader();
         setInitialWriter();
         NIODispatcher.instance().register(channel, this);
-        connectedTo = s.getInetAddress();
-        port = s.getPort();
     }
 
     /** Creates an unconnected NIOSocket. */
     public NIOSocket() throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
-        init();
+        initOutgoingSocket();
         setInitialReader();
         setInitialWriter();
     }
@@ -65,7 +59,7 @@ public class NIOSocket extends AbstractNBSocket {
     public NIOSocket(InetAddress addr, int port) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
-        init();
+        initOutgoingSocket();
         setInitialReader();
         setInitialWriter();
         connect(new InetSocketAddress(addr, port));
@@ -75,7 +69,7 @@ public class NIOSocket extends AbstractNBSocket {
     public NIOSocket(InetAddress addr, int port, InetAddress localAddr, int localPort) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
-        init();
+        initOutgoingSocket();
         setInitialReader();
         setInitialWriter();
         bind(new InetSocketAddress(localAddr, localPort));
@@ -91,11 +85,14 @@ public class NIOSocket extends AbstractNBSocket {
     public NIOSocket(String addr, int port, InetAddress localAddr, int localPort) throws IOException {
         this(InetAddress.getByName(addr), port, localAddr, localPort);
     }
+    
+    /** Performs initialization for an incoming Socket.  Does nothing right now. */
+    protected void initIncomingSocket() {
+        
+    }
 
-    /**
-     * Performs initialization for this NIOSocket. Currently just makes the channel non-blocking.
-     */
-    private void init() throws IOException {
+    /** Performs initialization for this NIOSocket. Currently just makes the channel non-blocking. */
+    protected void initOutgoingSocket() throws IOException {
         channel.configureBlocking(false);
     }
 
@@ -106,25 +103,28 @@ public class NIOSocket extends AbstractNBSocket {
 
     /** Stores the connecting address so we can retrieve it later. */
     public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
-        InetSocketAddress a = (InetSocketAddress)addr;
-        connectedTo = a.getAddress();
-        port = a.getPort();
+        remoteSocketAddress = addr;
         return super.connect(addr, timeout, observer);
     }
-
+    
+    @Override
+    public SocketAddress getRemoteSocketAddress() {
+        return remoteSocketAddress;
+    }
+    
     /**
      * Retrieves the host this is connected to. The separate variable for storage is necessary because Sockets created
      * with SocketChannel.open() return null when there's no connection.
      */
     public InetAddress getInetAddress() {
-        return connectedTo;
+        return ((InetSocketAddress)remoteSocketAddress).getAddress();
     }
     
     /**
      * Returns the port this socket is connecting or connected to.
      */
     public int getPort() {
-        return port;
+        return ((InetSocketAddress)remoteSocketAddress).getPort();
     }
 
     /** Constructs an InterestReadChannel adapter around the SocketChannel. */
@@ -290,6 +290,6 @@ public class NIOSocket extends AbstractNBSocket {
     }
 
     public String toString() {
-        return "NIOSocket::" + connectedTo + ", channel: " + channel.toString();
+        return "NIOSocket::" + remoteSocketAddress + ", channel: " + channel.toString();
     }
 }

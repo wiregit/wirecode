@@ -51,6 +51,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
 
     /** The writer. */
     protected volatile WriteObserver writer;
+    
+    /** The NIOOutputStream object, if we're using blocking writing. */
+    protected volatile NIOOutputStream nioOutputStream;
 
     /** The connecter. */
     protected volatile ConnectObserver connecter;
@@ -70,6 +73,13 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     /**
      * Retrives the channel which should be used as the base channel
      * for all writing operations.
+     * 
+     * If the base write channel is chained (that is, if there are multiple
+     * writing layers that will always be used) then this must return
+     * the top-most layer.  That layer will be installed beneath the
+     * bottom layer that is set on the Socket.  All layers except the last
+     * must implement ChannelWriter, so they can be iterated over in order
+     * to set the last writer.
      */
     protected abstract InterestWritableByteChannel getBaseWriteChannel();
     
@@ -90,7 +100,20 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Sets the initial writer value.
      */
     public final void setInitialWriter() {
-        writer = new NIOOutputStream(this, getBaseWriteChannel());
+        InterestWritableByteChannel base = getBaseWriteChannel();
+        writer = getBottomFromChain(base);
+        nioOutputStream = new NIOOutputStream(this, base);
+    }
+    
+    private InterestWritableByteChannel getBottomFromChain(InterestWritableByteChannel top) {
+        if(top instanceof ChannelWriter) {
+            ChannelWriter lastChannel = (ChannelWriter)top;
+            while(lastChannel.getWriteChannel() instanceof ChannelWriter)
+                lastChannel = (ChannelWriter)lastChannel.getWriteChannel();
+            return (InterestWritableByteChannel)lastChannel;
+        } else {
+            return top;
+        }
     }
     
     /**
@@ -173,6 +196,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     if(writer.handleWrite())
                         throw new IllegalStateException("data still in old writer!");
                     writer.shutdown();
+                    // Guarantee the NIOOutputStream is closed, if it existed.
+                    if(nioOutputStream  != null)
+                        nioOutputStream.shutdown();
 
                     ChannelWriter lastChannel = newWriter;
                     while(lastChannel.getWriteChannel() instanceof ChannelWriter) {
@@ -189,7 +215,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                             source.shutdown();
                             return;
                         }
-                        writer = source;
+                        nioOutputStream = null;
+                        writer = getBottomFromChain(source);
                     }
                 } catch(IOException iox) {
                     shutdown();
@@ -278,7 +305,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Returns true if this was able to connect immediately.  The observer is still
      * notified about the success even it it was immediate.
      */
-    public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
+    public boolean connect(SocketAddress addr, int timeout, final ConnectObserver observer) {
         synchronized(LOCK) {
             if(shutdown) {
                 observer.shutdown();
@@ -299,7 +326,20 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 throw new IOException("unresolved: " + addr);
             
             if(getChannel().connect(addr)) {
-                observer.handleConnect(this);
+                // Make sure connecting callbacks are always on the NIO thread.
+                NIODispatcher.instance().invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            observer.handleConnect(AbstractNBSocket.this);
+                        } catch(IOException iox) {
+                            NIODispatcher.instance().invokeReallyLater(new Runnable() {
+                                public void run() {
+                                    shutdown();
+                                }
+                            });
+                        }
+                    }
+                });
                 return true;
             } else {
                 NIODispatcher.instance().registerConnect(getChannel(), this, timeout);
@@ -369,20 +409,13 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(isClosed() || isShutdown())
             throw new IOException("Socket closed.");
         
-        // Retrieve the writer within the lock, guaranteeing
-        // that it is not going to change to a NoOp if it was
-        // shutdown after we got it.
-        WriteObserver localWriter;
-        synchronized(LOCK) {
-            if(isShutdown())
-                throw new IOException("Socket closed.");
-            localWriter = writer;
-        }
+        // Grab a handle to the stream, to ensure it can't become null.
+        NIOOutputStream output = nioOutputStream;
         
-        if(localWriter instanceof NIOOutputStream)
-            return ((NIOOutputStream)localWriter).getOutputStream();
+        if(output != null)
+            return output.getOutputStream();
         else
-            throw new IllegalStateException("writer not NIOOutputStream, it's a: " + writer);
+            throw new IllegalStateException("blocking I/O not in use!");
     }
     
     /** Gets the read timeout for this socket. */
@@ -434,6 +467,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         
         NIODispatcher.instance().invokeLater(new Runnable() {
             public void run() {
+                if(nioOutputStream != null)
+                    nioOutputStream.shutdown();
+                nioOutputStream = null;
                 reader = new NoOpReader();
                 writer = new NoOpWriter();
                 connecter = null;

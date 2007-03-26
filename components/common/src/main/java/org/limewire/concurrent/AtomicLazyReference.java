@@ -12,9 +12,8 @@ public abstract class AtomicLazyReference<T> {
 
     /** Retrieves the reference, creating it if necessary. */
     public synchronized T get() {
-        if(obj == null) {
-            obj = createObject();
-        }
+        if(obj == null)
+            obj = createObject();                
         return obj;
     }
     

@@ -90,7 +90,10 @@ public class BufferUtils {
                 if (src.position() > 0) {
                     src.flip();
                     read = doTransfer(src, dst);
-                    src.compact();
+                    if(src.hasRemaining())
+                        src.compact();
+                    else
+                        src.clear();
                 }
             } else {
                 if (src.hasRemaining())

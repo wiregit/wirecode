@@ -77,7 +77,7 @@ class NIOOutputStream implements WriteObserver {
             } else // == 0 if it couldn't write anything
                 buffer.position(buffer.limit()).limit(buffer.capacity());
             
-            // If there's room in the buffer, we're interested in reading.
+            // If there's room in the buffer, we're interested in writing.
             if(buffer.hasRemaining())
                 bufferLock.notify();
             
