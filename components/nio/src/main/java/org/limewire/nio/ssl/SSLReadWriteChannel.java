@@ -16,7 +16,6 @@ import javax.net.ssl.SSLEngineResult.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
@@ -186,7 +185,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                         try {
                             read(BufferUtils.getEmptyBuffer());
                         } catch(IOException iox) {
-                            IOUtils.close(SSLReadWriteChannel.this);
+                            try {
+                                close();
+                            } catch(IOException ignored) {}
                         }
                     }
                 });
