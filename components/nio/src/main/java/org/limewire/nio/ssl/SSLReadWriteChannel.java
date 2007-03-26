@@ -180,7 +180,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             readSink.interestRead(true);
             writeSink.interestWrite(null, false);
             // If we had previously buffered read data, force a read.
-            if(readDataLeft)
+            if(readDataLeft && !reading)
                 NIODispatcher.instance().invokeLater(new Runnable() {
                     public void run() {
                         try {
