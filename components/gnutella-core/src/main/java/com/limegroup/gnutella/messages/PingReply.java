@@ -1032,7 +1032,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         byte[] payload = new byte[3];
         
         // put version
-        int version = RouterService.getDHTManager().getVersion().getVersion();
+        int version = RouterService.getDHTManager().getVersion().shortValue();
         ByteOrder.short2beb((short)version, payload, 0);
         
         if(RouterService.isMemberOfDHT()) {

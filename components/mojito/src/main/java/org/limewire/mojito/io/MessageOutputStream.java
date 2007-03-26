@@ -269,13 +269,13 @@ public class MessageOutputStream extends DataOutputStream {
      * Writes the Vendor to the OutputStream
      */
     public void writeVendor(Vendor vendor) throws IOException {
-        writeInt(vendor.getVendor());
+        writeInt(vendor.intValue());
     }
     
     /**
      * Writes the Version to the OutputStream
      */
     public void writeVersion(Version version) throws IOException {
-        writeShort(version.getVersion());
+        writeShort(version.shortValue());
     }
 }

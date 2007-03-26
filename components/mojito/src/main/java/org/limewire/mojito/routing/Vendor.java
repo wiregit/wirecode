@@ -40,7 +40,10 @@ public class Vendor implements Serializable, Comparable<Vendor> {
         this.vendorId = vendorId;
     }
     
-    public int getVendor() {
+    /**
+     * Returns the vendor ID as an integer
+     */
+    public int intValue() {
         return vendorId;
     }
     

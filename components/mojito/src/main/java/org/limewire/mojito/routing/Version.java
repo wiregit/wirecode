@@ -38,20 +38,29 @@ public class Version implements Serializable, Comparable<Version> {
         this.version = version;
     }
     
+    /**
+     * Returns the major version
+     */
     public int getMajor() {
         return (version >> 8) & 0xFF;
     }
     
+    /**
+     * Returns the minor version
+     */
     public int getMinor() {
         return version & 0xFF;
     }
     
-    public int getVersion() {
+    /**
+     * Returns the version as an unsigned short
+     */
+    public int shortValue() {
         return version;
     }
     
     public int hashCode() {
-        return getVersion();
+        return version;
     }
     
     public int compareTo(Version o) {

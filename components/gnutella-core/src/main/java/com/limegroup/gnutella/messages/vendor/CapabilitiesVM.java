@@ -131,10 +131,10 @@ public final class CapabilitiesVM extends VendorMessage {
         if(RouterService.isMemberOfDHT()) {
             if(RouterService.isActiveDHTNode()) {
                 smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.ACTIVE),
-                        RouterService.getDHTManager().getVersion().getVersion());
+                        RouterService.getDHTManager().getVersion().shortValue());
             } else {
                 smp = new SupportedMessageBlock(DHTMode.getCapabilitiesVMBytes(DHTMode.PASSIVE),
-                        RouterService.getDHTManager().getVersion().getVersion());
+                        RouterService.getDHTManager().getVersion().shortValue());
             }
             hashSet.add(smp);
         }

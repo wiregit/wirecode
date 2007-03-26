@@ -134,7 +134,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
         
         messageId.write(out); // 0-15
         out.writeByte(DHTMessage.F_DHT_MESSAGE); // 16
-        out.writeShort(getContact().getVersion().getVersion()); //17-18
+        out.writeShort(getContact().getVersion().shortValue()); //17-18
         
         // Length is in Little-Endian!
         out.write((payload.length      ) & 0xFF); // 19-22
@@ -166,7 +166,7 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
-        out.writeInt(getContact().getVendor().getVendor()); // 1-3
+        out.writeInt(getContact().getVendor().intValue()); // 1-3
         out.writeKUID(getContact().getNodeID()); // 4-23
         out.writeSocketAddress(getContact().getContactAddress()); // 24-31
         out.writeByte(getContact().getInstanceID()); // 32
