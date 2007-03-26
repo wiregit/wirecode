@@ -166,9 +166,9 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     protected void writeHeader(MessageOutputStream out) throws IOException {
         out.writeOpCode(getOpCode()); // 0
-        out.writeInt(getContact().getVendor().intValue()); // 1-3
-        out.writeKUID(getContact().getNodeID()); // 4-23
-        out.writeSocketAddress(getContact().getContactAddress()); // 24-31
+        out.writeVendor(getContact().getVendor()); // 1-4
+        out.writeKUID(getContact().getNodeID()); // 5-24
+        out.writeSocketAddress(getContact().getContactAddress()); // 25-31
         out.writeByte(getContact().getInstanceID()); // 32
         out.writeByte(getContact().getFlags()); // 33
         
