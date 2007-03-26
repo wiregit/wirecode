@@ -24,6 +24,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.util.BufferUtils;
+import org.limewire.util.FileUtils;
 
 /**
  * An SSL-capable layer that can transform incoming and outgoing
@@ -185,9 +186,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                         try {
                             read(BufferUtils.getEmptyBuffer());
                         } catch(IOException iox) {
-                            try {
-                                close();
-                            } catch(IOException ignored) {}
+                            FileUtils.close(SSLReadWriteChannel.this);
                         }
                     }
                 });
