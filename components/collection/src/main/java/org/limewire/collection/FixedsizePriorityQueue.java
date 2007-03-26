@@ -3,8 +3,6 @@ package org.limewire.collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A priority queue with bounded size.  Similar to BinaryHeap, but implemented
@@ -35,58 +33,11 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * INVARIANT: tree.size()<=capacity 
      * INVARIANT: all elements of tree instanceof Node
      */
-    private SortedSet<Node> tree;
+    private SortedList<E> tree;
     /** The maximum number of elements to hold. */
     private int capacity;
-    /** Used to sort data.  Note that tree is actually sorted by Node'
-     *  natural ordering. */
-    private Comparator<? super E> comparator;
 
-    /** Used to allocate Node.myID. */
-    private static int nextID=0;
-
-    /**
-     * Wraps data to guarantee that no two Nodes are ever equal.  This
-     * is necessary to allow multiple nodes with same priority.  See
-     * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
-     */
-    private final class Node implements Comparable<Node> {
-        /** The underlying data. */
-        private final E data;     
-        /** Used to guarantee two nodes are never equal. */
-        private final int myID;
-
-        Node(E data) {
-            this.data=data;
-            this.myID=nextID++;  //allocate unique ID
-        }
-        
-        public E getData() {
-            return data;
-        }
-
-        public int compareTo(Node other) {
-            //Compare by priority (primary key).
-            int c=comparator.compare(this.getData(), other.getData());
-            if (c!=0)
-                return c;
-            else
-                //Compare by ID.
-                return this.myID-other.myID;
-        }
-        
-        public boolean equals(Object o) {
-            if (! (o instanceof FixedsizePriorityQueue.Node))
-                return false;
-            return compareTo((Node)o)==0;
-        }
-
-        public String toString() {
-            return data.toString();
-        }
-    }
-
-    /**
+       /**
      * Creates a new FixedsizePriorityQueue that will hold at most 
      * <tt>capacity</tt> elements.
      * @param comparator expresses priority.  Note that
@@ -96,10 +47,9 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      */
     public FixedsizePriorityQueue(Comparator<? super E> comparator, int capacity) 
             throws IllegalArgumentException {
-        this.comparator=comparator;
         if (capacity<=0)
             throw new IllegalArgumentException();
-        tree=new TreeSet<Node>();
+        tree=new SortedList<E>(comparator);
         this.capacity=capacity;
     }
 
@@ -114,22 +64,21 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * @return the element ejected, possibly x, or null if none 
      */
     public E insert(E x) {
-        Node node=new Node(x);       
         if (size()<capacity()) {
             //a) Size less than capacity.  Just add x.
-            boolean added=tree.add(node);
+            boolean added=tree.add(x);
             assert added;
             return null;
         } else {
             //Ensure size does not exceeed capacity.    
             //Micro-optimizations are possible.
-            Node smallest = tree.first();
-            if (node.compareTo(smallest)>0) {
+            E smallest = tree.first();
+            if (tree.comparator().compare(x,smallest)>0) {
                 //b) x larger than smallest of this: remove smallest and add x
                 tree.remove(smallest);
-                boolean added=tree.add(node);
+                boolean added=tree.add(x);
                 assert added;
-                return smallest.getData();
+                return smallest;
             } else {
                 //c) Otherwise do nothing.
                 return x;
@@ -142,7 +91,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * @exception NoSuchElementException this.size()==0
      */
     public E getMax() throws NoSuchElementException {
-        return tree.last().getData();
+        return tree.last();
     }
 
    /**
@@ -150,7 +99,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * @exception NoSuchElementException this.size()==0
      */
     public E getMin() throws NoSuchElementException {
-        return tree.first().getData();
+        return tree.first();
     }
 
     /** 
@@ -161,13 +110,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      *  priority is ignored in this operation.
      */
     public boolean contains(Object o) {
-        //You can't just look up o in tree, as tree is sorted by priority, which
-        //isn't necessarily consistent with equals.
-        for(Node node : tree) {
-            if(o.equals(node.getData()))
-                return true;
-        }
-        return false;
+        return tree.contains(o);
     }
 
     /** 
@@ -180,8 +123,8 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
     public boolean remove(Object o) {
         //You can't just look up o in tree, as tree is sorted by priority, which
         //isn't necessarily consistent with equals.
-        for (Iterator<Node> iter=tree.iterator(); iter.hasNext(); ) {
-            if (o.equals(iter.next().getData())) {
+        for (Iterator<E> iter=tree.iterator(); iter.hasNext(); ) {
+            if (o.equals(iter.next())) {
                 iter.remove();
                 return true;
             }
@@ -193,24 +136,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
      * Returns an iterator of the elements in this, from <b>worst to best</b>.
      */
     public Iterator<E> iterator() {
-        return new DataIterator();            
-    }
-
-    /** Applies getData() to elements of tree.iterator(). */
-    private class DataIterator implements Iterator<E> {
-        Iterator<Node> delegate=tree.iterator();
-
-        public boolean hasNext() {
-            return delegate.hasNext();
-        }
-
-        public E next() {
-            return delegate.next().getData();
-        }
-
-        public void remove() {
-            delegate.remove();
-        }
+        return tree.iterator();            
     }
 
     /**
