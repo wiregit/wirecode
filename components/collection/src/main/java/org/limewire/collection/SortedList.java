@@ -1,12 +1,11 @@
 package org.limewire.collection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
-public class SortedList<E> extends ArrayList<E> {
+public class SortedList<E> extends TreeList<E> {
     private final Comparator<? super E> comparator;
     
     public SortedList() {
@@ -25,15 +24,6 @@ public class SortedList<E> extends ArrayList<E> {
     
     public SortedList(Collection<? extends E> c, Comparator<? super E>comparator) {
         super(c);
-        this.comparator = comparator;
-    }
-
-    public SortedList(int initialCapacity) {
-        this(initialCapacity, new DefaultComparator<E>());
-    }
-    
-    public SortedList(int initialCapacity, Comparator<? super E> comparator) {
-        super(initialCapacity);
         this.comparator = comparator;
     }
 
@@ -65,6 +55,7 @@ public class SortedList<E> extends ArrayList<E> {
         return comparator;
     }
     
+    @SuppressWarnings("unchecked")
     private static class DefaultComparator<E> implements Comparator<E> {
         public int compare(E a, E b) {
             Comparable<? super E> ac = (Comparable <? super E>)a;
