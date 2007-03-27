@@ -37,9 +37,11 @@ import java.util.TreeSet;
 
 import org.limewire.collection.Interval;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import junit.framework.AssertionFailedError;
@@ -101,6 +103,7 @@ public class UploadTest extends LimeTestCase {
     private static String incName = "partial alphabet.txt";
     private static String fileName="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
+    private static String otherFile="upperAlphabet.txt";
     /** The file contents. */
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
     /** The hash of the file contents. */
@@ -264,6 +267,31 @@ public class UploadTest extends LimeTestCase {
 			": "+ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue();        
 	}
 
+    /**
+     * Tests the case of requests for different file over the same http session
+     */
+    public void testMultipleUploadSession() throws Exception {
+        File testDir = CommonUtils.getResourceFile(testDirName);
+        assertTrue("test directory could not be found", testDir.isDirectory());
+        File testFile = new File(testDir, otherFile);
+        assertTrue("test file should exist", testFile.exists());
+        File sharedFile = new File(_sharedDir, otherFile);
+        FileUtils.copy(testFile, sharedFile);
+        RouterService.getFileManager().addFileAlways(sharedFile);
+        Thread.sleep(1000);
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        assertEquals(alphabet,downloadInternal1("GET","/get/0/"+fileName,null,out,in,alphabet.length()));
+        assertEquals(alphabet.toUpperCase(),downloadInternal1("GET","/get/2/"+otherFile,null,out,in,alphabet.length()));
+        IOUtils.close(s);
+        RouterService.getFileManager().stopSharingFile(sharedFile);
+    }
+    
     //public void testAll() {
         //UploadTest works fine in isolation, but this sleep seems to be
         //needed to work as part of AllTests.  I'm not sure why.
@@ -1839,7 +1867,7 @@ public class UploadTest extends LimeTestCase {
         s.close();
         return ret;
     }
-
+    
     private static boolean download(String file,String header,String expResp) 
             throws IOException {
         return download(file, header, expResp, null, null);

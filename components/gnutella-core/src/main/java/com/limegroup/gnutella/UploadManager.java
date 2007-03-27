@@ -325,14 +325,15 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
                         // Because queueing is per-socket (and not per file),
                         // we do not want to reset the queue status if they're
                         // requesting a new file.
-                        if(queued != QUEUED)
+                        if(queued != QUEUED) {
                             queued = -1;
+                            slotManager.requestDone(session);
                         // However, we DO want to make sure that the old file
                         // is interpreted as interrupted.  Otherwise,
                         // the GUI would show two lines with the the same slot
                         // until the newer line finished, at which point
                         // the first one would display as a -1 queue position.
-                        else
+                        } else
                             uploader.setState(Uploader.INTERRUPTED);
 
                         cleanupFinishedUploader(uploader, startTime);
@@ -643,7 +644,7 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
             // If the name they want isn't the name we have, FNF.
             if(!uploader.getFileName().equals(fd.getFileName())) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug(uploader + " wrong file name");
+                    LOG.debug(uploader + " wrong file name "+uploader.getFileName()+" vs "+fd.getFileName());
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -1006,7 +1007,7 @@ public class UploadManager implements FileLocker, ConnectionAcceptor, BandwidthT
         		session.getUploader().isPriorityShare());
         
         if (LOG.isDebugEnabled())
-        	LOG.debug("queued at "+queued);
+        	LOG.debug("queued at "+queued+" by "+slotManager);
         
         if (queued == -1) // not accepted nor queued.
         	return REJECTED;
