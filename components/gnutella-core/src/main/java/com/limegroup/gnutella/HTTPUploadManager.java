@@ -53,8 +53,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private static final Log LOG = LogFactory.getLog(HTTPUploadManager.class);
 
-    private enum QueueStatus { BYPASS, REJECTED, QUEUED, ACCEPTED, BANNED };
-
     /**
      * This is a <tt>List</tt> of all of the current <tt>Uploader</tt>
      * instances (all of the uploads in progress).
@@ -384,10 +382,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     /**
      * Adds an accepted HTTPUploader to the internal list of active downloads.
      */
-    protected synchronized void addAcceptedUploader(HTTPUploader uploader) {
-        if (uploader.isForcedShare())
+    public synchronized void addAcceptedUploader(HTTPUploader uploader) {
+        if (uploader.isForcedShare()) {
+            forceAllowedUploads.add(uploader);
             _forcedUploads++;
+        }
         _activeUploadList.add(uploader);
+        uploader.setStartTime(System.currentTimeMillis());
     }
 
     /**
@@ -918,9 +919,33 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             UploadType type, String filename, int index) {
         UploadSession session = getOrCreateSession(context);
         HTTPUploader uploader = session.getUploader();
-        if (uploader == null || !uploader.getFileName().equals(filename)) {
+        if (uploader != null) {
+            if (!uploader.getFileName().equals(filename)) {
+                // start new file
+                slotManager.requestDone(session);
+                                
+                // Because queueing is per-socket (and not per file),
+                // we do not want to reset the queue status if they're
+                // requesting a new file.
+                if (session.isQueued()) {
+                    // However, we DO want to make sure that the old file
+                    // is interpreted as interrupted.  Otherwise,
+                    // the GUI would show two lines with the the same slot
+                    // until the newer line finished, at which point
+                    // the first one would display as a -1 queue position.
+                    uploader.setState(Uploader.INTERRUPTED);
+                } else {
+                    slotManager.requestDone(session);
+                }
+                
+                cleanupFinishedUploader(uploader, uploader.getStartTime());
+
+                uploader = new HTTPUploader(filename, session, index);
+            }
+        } else {
             uploader = new HTTPUploader(filename, session, index);
         }
+        
         uploader.setUploadType(type);
         session.setUploader(uploader);
         addToGUI(uploader);
@@ -934,6 +959,22 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return uploader;
     }
 
+    public QueueStatus enqueue(HttpContext context, HttpRequest request, HttpResponse response) {
+        UploadSession session = getSession(context);
+        
+        if (shouldBypassQueue(request, session.getUploader())) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("bypassing queue");
+            session.setQueueStatus(QueueStatus.BYPASS);
+        } else if (HttpContextParams.isLocal(context)) {
+            session.setQueueStatus(QueueStatus.ACCEPTED);
+        } else {
+            System.out.println("trying enqueue");
+            session.setQueueStatus(checkAndQueue(session));
+        }
+        return session.getQueueStatus();
+    }
+
     public void responseSent(NHttpServerConnection conn, HttpResponse response) {
         UploadSession session = getSession(conn.getContext());
         if (session != null) {
@@ -941,51 +982,23 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             assert uploader != null;
             if (response.getEntity() == null) {
                 // not sending a body
-                uploader.setState(Uploader.COMPLETE);
+                boolean stillInQueue = slotManager.positionInQueue(session) > -1;
+                slotManager.cancelRequest(session);
+                if(stillInQueue)
+                    uploader.setState(Uploader.INTERRUPTED);
+                else 
+                    uploader.setState(Uploader.COMPLETE);
+                System.out.println("complete");
+                removeFromList(uploader);
             }
         }
     }
 
-    public void enqueue(HttpContext context, HttpRequest request, HttpResponse response) {
-        UploadSession session = getSession(context);
-        
-        QueueStatus queued;
-        if (shouldBypassQueue(request, session.getUploader())) {
-            if (LOG.isDebugEnabled())
-                LOG.debug("bypassing queue");
-            queued = QueueStatus.BYPASS;
-        } else if (HttpContextParams.isLocal(context)) {
-            queued = QueueStatus.ACCEPTED;
-            forceAllowedUploads.add(session.getUploader()); 
-        } else {
-            queued = checkAndQueue(session);
-        }
-        
-        switch(queued) {
-        case REJECTED:
-            session.getUploader().setState(Uploader.LIMIT_REACHED);
-            response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-            // FIXME add alt locations etc.
-            break;
-        case BANNED:
-            session.getUploader().setState(Uploader.BANNED_GREEDY);
-            response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-            response.setReasonPhrase("Banned");
-            break;
-        case QUEUED:
-            session.getUploader().setState(Uploader.QUEUED);
-            response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-            // FIXME add X-Queue header, alt locations etc.
-            break;
-        case ACCEPTED:
-            addAcceptedUploader(session.getUploader());
-            response.setStatusCode(HttpStatus.SC_OK);
-            break;
-        case BYPASS:
-            // TODO reset session poll state?
-            response.setStatusCode(HttpStatus.SC_OK);
-            // ignore.
-            break;
+    public void sessionClosed(NHttpServerConnection conn) {
+        UploadSession session = getSession(conn.getContext());
+        if (session != null) {
+            slotManager.cancelRequest(session);
+            System.out.println("closed"); 
         }
     }
 

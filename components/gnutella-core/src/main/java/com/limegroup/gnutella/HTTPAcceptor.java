@@ -122,6 +122,11 @@ public class HTTPAcceptor implements ConnectionAcceptor {
             ServerConnectionEventListener {
 
         public void connectionClosed(NHttpServerConnection conn) {
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+            .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.sessionClosed(conn);
+            }
         }
 
         public void connectionOpen(NHttpServerConnection conn) {
@@ -142,15 +147,20 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
         public void responseContentSent(NHttpServerConnection conn,
                 HttpResponse response) {
-            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
-                    .toArray(new HttpResponseListener[0]);
-            for (HttpResponseListener listener : listeners) {
-                listener.responseSent(conn, response);
-            }
+//            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+//                    .toArray(new HttpResponseListener[0]);
+//            for (HttpResponseListener listener : listeners) {
+//                listener.responseSent(conn, response);
+//            }
         }
 
         public void responseSent(NHttpServerConnection conn,
                 HttpResponse response) {
+            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
+            .toArray(new HttpResponseListener[0]);
+            for (HttpResponseListener listener : listeners) {
+                listener.responseSent(conn, response);
+            }
         }
 
     }

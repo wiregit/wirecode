@@ -95,8 +95,6 @@ public class HttpIOSession implements IOSession {
             return;
         }
         this.eventMask = ops;
-        System.out.println("read:  " + ((ops & EventMask.READ) != 0));
-        System.out.println("write:  " + ((ops & EventMask.WRITE) != 0));
         channel.requestRead((ops & EventMask.READ) != 0);
         channel.requestWrite((ops & EventMask.WRITE) != 0);
     }

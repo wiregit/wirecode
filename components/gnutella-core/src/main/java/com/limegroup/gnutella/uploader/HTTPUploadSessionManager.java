@@ -5,10 +5,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HttpContext;
 
 public interface HTTPUploadSessionManager {
+    
+    enum QueueStatus { UNKNOWN, BYPASS, REJECTED, QUEUED, ACCEPTED, BANNED };
 
     HTTPUploader getOrCreateUploader(HttpContext context,
             UploadType type, String filename);
 
-    void enqueue(HttpContext context, HttpRequest request, HttpResponse response);
+    QueueStatus enqueue(HttpContext context, HttpRequest request, HttpResponse response);
+
+    void addAcceptedUploader(HTTPUploader uploader);
 
 }

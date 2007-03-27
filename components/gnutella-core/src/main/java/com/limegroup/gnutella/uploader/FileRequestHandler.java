@@ -26,16 +26,15 @@ import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.UploaderTest;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 import com.limegroup.gnutella.util.URLDecoder;
 
 public class FileRequestHandler implements HttpRequestHandler {
@@ -149,17 +148,46 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd) {
+        if (!uploader.isAccepted()) {
+            QueueStatus queued = sessionManager.enqueue(context, request, response);
+            switch(queued) {
+            case REJECTED:
+                uploader.setState(Uploader.LIMIT_REACHED);
+                response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+                // FIXME add alt locations etc.
+                break;
+            case BANNED:
+                uploader.setState(Uploader.BANNED_GREEDY);
+                response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+                response.setReasonPhrase("Banned");
+                break;
+            case QUEUED:
+                System.out.println("queued");
+                uploader.setState(Uploader.QUEUED);
+                response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+                // FIXME add X-Queue header, alt locations etc.
+                break;
+            case ACCEPTED:
+            case BYPASS: // TODO reset session poll state?
+                sessionManager.addAcceptedUploader(uploader);
+                uploader.setAccepted(true);
+                break;
+            }
 
-        if (uploader.containedRangeRequest()) {
-            String value = "bytes " + uploader.getUploadBegin() + "-"
-                    + (uploader.getUploadEnd() - 1) + "/"
-                    + uploader.getFileSize();
-            response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
         }
+        
+        if (uploader.isAccepted()) {
+            if (uploader.containedRangeRequest()) {
+                String value = "bytes " + uploader.getUploadBegin() + "-"
+                        + (uploader.getUploadEnd() - 1) + "/"
+                        + uploader.getFileSize();
+                response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
+            }
 
-        response.setEntity(new FileResponseEntity(uploader, fd));
-        // FIXME queue request
-        // sessionManager.enqueue(context, request, response);
+            response.setEntity(new FileResponseEntity(uploader, fd));
+            uploader.setState(Uploader.CONNECTING);
+            response.setStatusCode(HttpStatus.SC_OK);
+        }
     }
 
     private void handleTHEXRequest(HttpRequest request, HttpResponse response,

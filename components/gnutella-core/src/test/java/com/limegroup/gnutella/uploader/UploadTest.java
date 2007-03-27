@@ -2677,7 +2677,7 @@ public class UploadTest extends LimeTestCase {
         	super(new UploadSlotManager());
         }
         
-        protected synchronized void addAcceptedUploader(HTTPUploader uploader) {
+        public synchronized void addAcceptedUploader(HTTPUploader uploader) {
             activeUploads.add(uploader);
             super.addAcceptedUploader(uploader);
         }

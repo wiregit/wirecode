@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.6 $
- * $Date: 2007-03-19 22:24:27 $
+ * $Revision: 1.1.2.7 $
+ * $Date: 2007-03-27 22:20:16 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -52,7 +52,6 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
-import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.NHttpServiceHandler;
 import org.apache.http.nio.protocol.BufferedContent;
@@ -141,6 +140,11 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             }
             this.eventListener.connectionOpen(address);
         }
+        
+        // LW
+        if (connectionListener != null) {
+            connectionListener.connectionOpen(conn);
+        }
     }
 
     public void requestReceived(final NHttpServerConnection conn) {
@@ -224,6 +228,11 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 address = ((HttpInetConnection) conn).getRemoteAddress();
             }
             this.eventListener.connectionClosed(address);
+        }
+        
+        // LW
+        if (connectionListener != null) {
+            connectionListener.connectionClosed(conn);
         }
     }
 
@@ -354,10 +363,20 @@ public class HttpServiceHandler implements NHttpServiceHandler {
                 address = ((HttpInetConnection) conn).getRemoteAddress();
             }
             this.eventListener.connectionTimeout(address);
+            
+            if (connectionListener != null) {
+                System.err.println("connection error");
+                connectionListener.connectionClosed(conn);
+            }
         }
     }
 
-    private void shutdownConnection(final NHttpConnection conn) {
+    private void shutdownConnection(final NHttpServerConnection conn) {
+        if (connectionListener != null) {
+            System.err.println("connection error");
+            connectionListener.connectionClosed(conn);
+        }
+        
         try {
             conn.shutdown();
         } catch (IOException ignore) {
@@ -564,13 +583,18 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         return connectionListener;
     }
 
+    public void responseContentSent(DefaultNHttpServerConnection conn,
+            HttpResponse response) {
+        if (connectionListener != null) {
+            connectionListener.responseContentSent(conn, response);
+        }
+    }
+    
     public void responseSent(DefaultNHttpServerConnection conn,
             HttpResponse response) {
         if (connectionListener != null) {
             connectionListener.responseSent(conn, response);
         }
-    }
-    
-    
+    }    
     
 }

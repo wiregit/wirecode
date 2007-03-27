@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.net.InetAddress;
 
 import com.limegroup.gnutella.BandwidthTrackerImpl;
+import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
 public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUser {
 
@@ -22,6 +23,8 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
 
     /** The last time this session was polled if queued */
     private volatile long lastPollTime;
+
+    private QueueStatus queueStatus = QueueStatus.UNKNOWN;
 
     public UploadSession(UploadSlotManager slotManager, InetAddress host) {
         this.slotManager = slotManager;
@@ -56,14 +59,32 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         return tooSoon;
     }
 
+    /**
+     * HTTP uploads are not interruptable.
+     */
     public void releaseSlot() {
-        // TODO Auto-generated method stub
-        
+        throw new UnsupportedOperationException();        
     }
 
     public void measureBandwidth() {
         // TODO Auto-generated method stub
         
+    }
+
+    public QueueStatus getQueueStatus() {
+        return queueStatus;
+    }
+    
+    public void setQueueStatus(QueueStatus status) {
+        this.queueStatus  = status;
+    }
+
+    public boolean isAccepted() {
+        return queueStatus == QueueStatus.ACCEPTED;
+    }
+
+    public boolean isQueued() {
+        return queueStatus == QueueStatus.QUEUED;
     }
 
 }

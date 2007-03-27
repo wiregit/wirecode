@@ -27,6 +27,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     private boolean containedRangeRequest;
 
+    private long startTime = -1;
+
+    private boolean accepted;
+
     public HTTPUploader(String fileName, UploadSession session, int index) {
         super(fileName, session, index);
     }
@@ -163,5 +167,20 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         this.containedRangeRequest = containedRangeRequest;
     }
 
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public boolean isAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(boolean accepted) {
+        this.accepted = accepted;
+    }
     
 }

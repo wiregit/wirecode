@@ -7,4 +7,6 @@ public interface HttpResponseListener {
 
     void responseSent(NHttpServerConnection conn, HttpResponse response);
 
+    void sessionClosed(NHttpServerConnection conn);
+    
 }
