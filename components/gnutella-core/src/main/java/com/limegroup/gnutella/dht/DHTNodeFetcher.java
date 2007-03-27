@@ -64,12 +64,12 @@ public class DHTNodeFetcher {
     /**
      * A lock for the TimerTask
      */
-    private Object fetcherTaskLock = new Object();
+    private final Object fetcherTaskLock = new Object();
     
     /**
      * Whether or the fethcer is currently pinging a single host
      */
-    private AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
+    private final AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
     /**
      * The pinger used to send out the UDP pings.

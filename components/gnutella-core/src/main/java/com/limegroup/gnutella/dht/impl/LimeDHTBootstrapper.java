@@ -35,6 +35,11 @@ import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.EventDispatcher;
 
+/**
+ * The LimeDHTBootstrapper is a LimeWire specific implementation of DHTBootstrapper. 
+ * It tries to bootstrap the DHT Node based on information it gathers over the 
+ * Gnutella Network. 
+ */
 class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     
     private static final Log LOG = LogFactory.getLog(LimeDHTBootstrapper.class);
@@ -43,7 +48,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      * A list of DHT bootstrap hosts comming from the Gnutella network. 
      * Limit size to 50 for now.
      */
-    private Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
+    private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50);
     
     /**
      * A flag that indicates whether or not we've tried to
@@ -71,7 +76,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     /**
      * The DHT controller
      */
-    private DHTController controller;
+    private final DHTController controller;
 
     /**
      * The DHTNodeFetcher instance
@@ -81,7 +86,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
     /**
      * The lock Object
      */
-    private Object lock = new Object();
+    private final Object lock = new Object();
     
     /**
      * The DHT event dispatcher
@@ -295,7 +300,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
      * 
      * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
-    SocketAddress getSimppHost(){
+    SocketAddress getSimppHost() {
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
         List<SocketAddress> list = new ArrayList<SocketAddress>(simppHosts.length);
 
@@ -419,7 +424,10 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
 
                 ResultType type = result.getResultType();
                 
-                LOG.debug("Future success type: "+ type);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Future success type: " + type);
+                }
+                
                 switch(type) {
                     case BOOTSTRAP_SUCCEEDED:
                         finish();
