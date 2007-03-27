@@ -99,23 +99,29 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
      * Notification that a read can happen on the SocketChannel.
      */
     public void handleRead() throws IOException {
-        synchronized(bufferLock) {
-            int read = 0;
-            
-            // read everything we can.
-            while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
-            
-            if(read == -1)
-                source.finished();
-            
-            // If there's data in the buffer, we're interested in writing.
-            if(buffer.position() > 0 || read == -1)
-                bufferLock.notify();
-    
-            // if there's room in the buffer, we're interested in more reading ...
-            // if not, we're not interested in more reading.
-            if(!buffer.hasRemaining() || read == -1)
-                channel.interestRead(false);
+        // This is a hack to allow TLSNIOSockets to handshake
+        // without init'ing the whole InputStream.
+        if(bufferLock == null) {
+            channel.read(BufferUtils.getEmptyBuffer());
+        } else {
+            synchronized(bufferLock) {
+                int read = 0;
+                
+                // read everything we can.
+                while(buffer.hasRemaining() && (read = channel.read(buffer)) > 0);
+                
+                if(read == -1)
+                    source.finished();
+                
+                // If there's data in the buffer, we're interested in writing.
+                if(buffer.position() > 0 || read == -1)
+                    bufferLock.notify();
+        
+                // if there's room in the buffer, we're interested in more reading ...
+                // if not, we're not interested in more reading.
+                if(!buffer.hasRemaining() || read == -1)
+                    channel.interestRead(false);
+            }
         }
     }
     

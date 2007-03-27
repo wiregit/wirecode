@@ -62,12 +62,16 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      * @param cipherSuites
      */
     void initialize(SocketAddress addr, String[] cipherSuites, boolean clientMode, boolean needClientAuth) {
-        if(!(addr instanceof InetSocketAddress))
-            throw new IllegalArgumentException("unsupported SocketAddress");
-        InetSocketAddress iaddr = (InetSocketAddress)addr;
-        String host = iaddr.getAddress().getHostAddress();
-        int port = iaddr.getPort();
-        engine = context.createSSLEngine(host, port);
+        if(addr != null) {
+            if(!(addr instanceof InetSocketAddress))
+                throw new IllegalArgumentException("unsupported SocketAddress");
+            InetSocketAddress iaddr = (InetSocketAddress)addr;
+            String host = iaddr.getAddress().getHostAddress();
+            int port = iaddr.getPort();
+            engine = context.createSSLEngine(host, port);
+        } else {
+            engine = context.createSSLEngine();
+        }
         engine.setEnabledCipherSuites(cipherSuites);
         engine.setUseClientMode(clientMode);
         if(!clientMode) {
@@ -105,8 +109,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             }
             
             // If we couldn't read anything, there's nothing to unwrap.
-            if(readIncoming.position() == 0)
+            if(readIncoming.position() == 0) {
+                LOG.debug("Unable to read anything, exiting read loop");
                 return 0;
+            }
             
             readIncoming.flip();
 

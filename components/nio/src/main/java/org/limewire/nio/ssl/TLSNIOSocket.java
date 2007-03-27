@@ -16,7 +16,6 @@ import org.limewire.nio.observer.ConnectObserver;
  * 
  * This is currently hardcoded to only support the cipher suite:
  *  - TLS_DH_anon_WITH_AES_128_CBC_SHA
- *  
  */
 public class TLSNIOSocket extends NIOSocket {
     

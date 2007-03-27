@@ -21,6 +21,14 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
         buffer = ByteBuffer.allocate(size);
     }
     
+    public WriteBufferChannel(ByteBuffer buffer) {
+        this.buffer = buffer;
+    }
+    
+    public WriteBufferChannel(byte[] data) {
+        this.buffer = ByteBuffer.wrap(data);
+    }
+    
     public WriteBufferChannel(ByteBuffer buffer, InterestWritableByteChannel channel) {
         this.buffer = buffer;
         this.channel = channel;

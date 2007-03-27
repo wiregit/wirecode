@@ -47,19 +47,19 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     private final Object LOCK = new Object();
 
     /** The reader. */
-    protected volatile ReadObserver reader;
+    private volatile ReadObserver reader;
 
     /** The writer. */
-    protected volatile WriteObserver writer;
+    private volatile WriteObserver writer;
     
     /** The NIOOutputStream object, if we're using blocking writing. */
-    protected volatile NIOOutputStream nioOutputStream;
+    private volatile NIOOutputStream nioOutputStream;
 
     /** The connecter. */
-    protected volatile ConnectObserver connecter;
+    private volatile ConnectObserver connecter;
     
     /** An observer for being shutdown. */
-    protected volatile Shutdownable shutdownObserver;
+    private volatile Shutdownable shutdownObserver;
 
     /** Whether or not we've shutdown the socket. */
     private boolean shutdown = false;
