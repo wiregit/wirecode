@@ -149,7 +149,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 // FIXME filter freeloader
-                
+
                 UploadStat.UPDATE_FILE.incrementStat();
                 UploadSession session = getSession(context);
                 HTTPUploader uploader = getOrCreateUploader(context,
@@ -199,7 +199,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
      * Push uploads from firewalled clients.
      */
     public void acceptUpload(HTTPRequestMethod get, Socket socket, boolean lan) {
-        acceptor.acceptConnection((get != null) ? get.getMethod() : null, socket);
+        acceptor.acceptConnection((get != null) ? get.getMethod() : null,
+                socket);
     }
 
     /**
@@ -314,70 +315,70 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     // }
     // }
 
-//    /**
-//     * Sets the uploader's state based off values read in the headers.
-//     */
-//    private void setUploaderStateOffHeaders(HTTPUploader uploader) {
-//        FileDesc fd = uploader.getFileDesc();
-//
-//        // If it's still trying to connect, do more checks ...
-//        if (uploader.getState() == HTTPUploader.CONNECTING) {
-//            // If it's the wrong URN, File Not Found it.
-//            URN urn = uploader.getRequestedURN();
-//            if (fd != null && urn != null && !fd.containsUrn(urn)) {
-//                if (LOG.isDebugEnabled())
-//                    LOG.debug(uploader + " wrong content urn");
-//                uploader.setState(HTTPUploader.FILE_NOT_FOUND);
-//                return;
-//            }
-//
-//            // handling THEX Requests
-//            if (uploader.isTHEXRequest()) {
-//                if (uploader.getFileDesc().getHashTree() != null)
-//                    uploader.setState(HTTPUploader.THEX_REQUEST);
-//                else
-//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
-//                return;
-//            }
-//
-//            // Special handling for incomplete files...
-//            if (fd instanceof IncompleteFileDesc) {
-//                // Check to see if we're allowing PFSP.
-//                if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
-//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
-//                    return;
-//                }
-//
-//                // cannot service THEXRequests for partial files
-//                if (uploader.isTHEXRequest()) {
-//                    uploader.setState(HTTPUploader.FILE_NOT_FOUND);
-//                    return;
-//                }
-//
-//                // If we are allowing, see if we have the range.
-//                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-//                int upStart = uploader.getUploadBegin();
-//                // uploader.getUploadEnd() is exclusive!
-//                int upEnd = uploader.getUploadEnd() - 1;
-//                // If the request contained a 'Range:' header, then we can
-//                // shrink the request to what we have available.
-//                if (uploader.containedRangeRequest()) {
-//                    Interval request = ifd.getAvailableSubRange(upStart, upEnd);
-//                    if (request == null) {
-//                        uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
-//                        return;
-//                    }
-//                    uploader
-//                            .setUploadBeginAndEnd(request.low, request.high + 1);
-//                } else {
-//                    if (!ifd.isRangeSatisfiable(upStart, upEnd)) {
-//                        uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
-//                        return;
-//                    }
-//                }
-//            }
-//        }
-//    }
+    // /**
+    // * Sets the uploader's state based off values read in the headers.
+    // */
+    // private void setUploaderStateOffHeaders(HTTPUploader uploader) {
+    // FileDesc fd = uploader.getFileDesc();
+    //
+    // // If it's still trying to connect, do more checks ...
+    // if (uploader.getState() == HTTPUploader.CONNECTING) {
+    // // If it's the wrong URN, File Not Found it.
+    // URN urn = uploader.getRequestedURN();
+    // if (fd != null && urn != null && !fd.containsUrn(urn)) {
+    // if (LOG.isDebugEnabled())
+    // LOG.debug(uploader + " wrong content urn");
+    // uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+    // return;
+    // }
+    //
+    // // handling THEX Requests
+    // if (uploader.isTHEXRequest()) {
+    // if (uploader.getFileDesc().getHashTree() != null)
+    // uploader.setState(HTTPUploader.THEX_REQUEST);
+    // else
+    // uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+    // return;
+    // }
+    //
+    // // Special handling for incomplete files...
+    // if (fd instanceof IncompleteFileDesc) {
+    // // Check to see if we're allowing PFSP.
+    // if (!UploadSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+    // uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+    // return;
+    // }
+    //
+    // // cannot service THEXRequests for partial files
+    // if (uploader.isTHEXRequest()) {
+    // uploader.setState(HTTPUploader.FILE_NOT_FOUND);
+    // return;
+    // }
+    //
+    // // If we are allowing, see if we have the range.
+    // IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+    // int upStart = uploader.getUploadBegin();
+    // // uploader.getUploadEnd() is exclusive!
+    // int upEnd = uploader.getUploadEnd() - 1;
+    // // If the request contained a 'Range:' header, then we can
+    // // shrink the request to what we have available.
+    // if (uploader.containedRangeRequest()) {
+    // Interval request = ifd.getAvailableSubRange(upStart, upEnd);
+    // if (request == null) {
+    // uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
+    // return;
+    // }
+    // uploader
+    // .setUploadBeginAndEnd(request.low, request.high + 1);
+    // } else {
+    // if (!ifd.isRangeSatisfiable(upStart, upEnd)) {
+    // uploader.setState(HTTPUploader.UNAVAILABLE_RANGE);
+    // return;
+    // }
+    // }
+    // }
+    // }
+    // }
 
     /**
      * Adds an accepted HTTPUploader to the internal list of active downloads.
@@ -897,16 +898,20 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public UploadSession getOrCreateSession(HttpContext context) {
         HttpInetConnection conn = (HttpInetConnection) context
                 .getAttribute(HttpExecutionContext.HTTP_CONNECTION);
-        assert context.getAttribute(SESSION_KEY) == null;
-        UploadSession session = new UploadSession(getSlotManager(),
-                conn.getRemoteAddress());
-        context.setAttribute(SESSION_KEY, session);
+        UploadSession session = (UploadSession) context
+                .getAttribute(SESSION_KEY);
+        if (session == null) {
+            session = new UploadSession(getSlotManager(), conn
+                    .getRemoteAddress());
+            context.setAttribute(SESSION_KEY, session);
+        }
         return session;
     }
 
     public UploadSession getSession(HttpContext context) {
         UploadSession session = (UploadSession) context
                 .getAttribute(SESSION_KEY);
+        assert context.getAttribute(SESSION_KEY) != null;
         return session;
     }
 
@@ -923,13 +928,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             if (!uploader.getFileName().equals(filename)) {
                 // start new file
                 slotManager.requestDone(session);
-                                
+
                 // Because queueing is per-socket (and not per file),
                 // we do not want to reset the queue status if they're
                 // requesting a new file.
                 if (session.isQueued()) {
                     // However, we DO want to make sure that the old file
-                    // is interpreted as interrupted.  Otherwise,
+                    // is interpreted as interrupted. Otherwise,
                     // the GUI would show two lines with the the same slot
                     // until the newer line finished, at which point
                     // the first one would display as a -1 queue position.
@@ -937,7 +942,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 } else {
                     slotManager.requestDone(session);
                 }
-                
+
                 cleanupFinishedUploader(uploader, uploader.getStartTime());
 
                 uploader = new HTTPUploader(filename, session, index);
@@ -945,7 +950,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         } else {
             uploader = new HTTPUploader(filename, session, index);
         }
-        
+
         uploader.setUploadType(type);
         session.setUploader(uploader);
         addToGUI(uploader);
@@ -959,9 +964,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         return uploader;
     }
 
-    public QueueStatus enqueue(HttpContext context, HttpRequest request, HttpResponse response) {
+    public QueueStatus enqueue(HttpContext context, HttpRequest request,
+            HttpResponse response) {
         UploadSession session = getSession(context);
-        
+
         if (shouldBypassQueue(request, session.getUploader())) {
             if (LOG.isDebugEnabled())
                 LOG.debug("bypassing queue");
@@ -972,6 +978,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             System.out.println("trying enqueue");
             session.setQueueStatus(checkAndQueue(session));
         }
+        System.out.println("status: " + session.getQueueStatus());
         return session.getQueueStatus();
     }
 
@@ -984,9 +991,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 // not sending a body
                 boolean stillInQueue = slotManager.positionInQueue(session) > -1;
                 slotManager.cancelRequest(session);
-                if(stillInQueue)
+                if (stillInQueue)
                     uploader.setState(Uploader.INTERRUPTED);
-                else 
+                else
                     uploader.setState(Uploader.COMPLETE);
                 System.out.println("complete");
                 removeFromList(uploader);
@@ -998,7 +1005,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         UploadSession session = getSession(conn.getContext());
         if (session != null) {
             slotManager.cancelRequest(session);
-            System.out.println("closed"); 
+            System.out.println("closed");
         }
     }
 

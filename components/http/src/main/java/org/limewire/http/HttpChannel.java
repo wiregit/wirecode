@@ -79,8 +79,10 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
     }
 
     public void shutdown() {
-        closed = true;
-        eventDispatch.disconnected(session);
+        if (!closed) {
+            closed = true;
+            eventDispatch.disconnected(session);
+        }
     }
 
     public InterestReadableByteChannel getReadChannel() {
