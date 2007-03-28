@@ -238,22 +238,34 @@ public class NodeAssigner {
             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
-
-        if(RouterService.isSupernode()) {
-            //if we're already an ultrapeer, connect to the DHT in passive mode
-            //or if we were connected as active node before, switch to passive mode
-            if(RouterService.isActiveSuperNode()
+        
+        if (RouterService.isSupernode()) {
+            // If we're already an ultrapeer, connect to the DHT in passive mode
+            // or if we were connected as active node before, switch to passive mode
+            if (RouterService.isActiveSuperNode()
                     && !DHTSettings.DISABLE_DHT_NETWORK.getValue()
-                    && !DHTSettings.DISABLE_DHT_USER.getValue()
-                    && (!RouterService.isDHTNode() || RouterService.isActiveDHTNode())) {
-
-                NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
-                RouterService.startDHT(false);
+                    && !DHTSettings.DISABLE_DHT_USER.getValue()) {
                 
+                // Shutdown the passive DHT if the setting is set and 
+                // we're running in passive mode
+                if (DHTSettings.DISABLE_PASSIVE_DHT.getValue()) {
+                    if (RouterService.isDHTNode() 
+                            && !RouterService.isActiveDHTNode()) {
+                        NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
+                        RouterService.shutdownDHT();
+                    }
+                    
+                // Otherwise start the DHT in passive mode if it's not
+                // already doing so
+                } else if (!RouterService.isDHTNode() 
+                        || RouterService.isActiveDHTNode()) {
+                    NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
+                    RouterService.startDHT(false);
+                }
             }
             return;
         }
-
+        
         boolean isUltrapeerCapable = 
             (_isHardcoreCapable &&
             //AND is my average uptime OR current uptime high enough?

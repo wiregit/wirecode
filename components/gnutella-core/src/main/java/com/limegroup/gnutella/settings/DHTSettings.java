@@ -48,6 +48,13 @@ public class DHTSettings extends LimeProps{
         FACTORY.createRemoteBooleanSetting("DISABLE_DHT_NETWORK", true, "DHTSettings.DisableDHT");
     
     /**
+     * Setting for whether or not the passive DHT mode should be active at all.
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final BooleanSetting DISABLE_PASSIVE_DHT
+        = FACTORY.createRemoteBooleanSetting("DISABLE_PASSIVE_DHT", false, "disable_passive_dht");
+    
+    /**
      * Setting for the minimum average uptime (in ms) required to join the DHT.
      * WARNING : DO NOT MANUALLY CHANGE THIS 
      */
