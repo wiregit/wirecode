@@ -1,139 +1,105 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 
 /**
- * An implementation of the UploadState that sends an error message 
- * for the limit of uploads allowed has been reached. This is an
- * HTTP 503 error.
+ * An implementation of the UploadState that sends an error message for the
+ * limit of uploads allowed has been reached. This is an HTTP 503 error.
  */
 public class LimitReachedRequestHandler implements HttpRequestHandler {
 
-    private static final Log LOG = LogFactory.getLog(LimitReachedRequestHandler.class);
-	
-
     /** Time to wait for a retry-after because we're validating the file */
     public static final String RETRY_AFTER_VALIDATING = 20 + "";
-    
+
     /**
      * The time to wait for a normal retry after.
      */
     public static final int RETRY_AFTER_TIME = 60 * 15;
 
     /**
-     * Number of seconds the remote host should wait before retrying in
-     * case we don't have any alt-locs left to send. (20 minutes)
+     * Number of seconds the remote host should wait before retrying in case we
+     * don't have any alt-locs left to send. (20 minutes)
      */
     private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 20);
 
     /**
-     * Number of seconds the remote host should wait before retrying in
-     * case we still have alt-locs left to send. (15 minute)
+     * Number of seconds the remote host should wait before retrying in case we
+     * still have alt-locs left to send. (15 minute)
      */
     private static final String NORMAL_RETRY_AFTER = "" + RETRY_AFTER_TIME;
 
-	/**
-	 * The error message to send in the message body.
-	 */
-	private static final byte[] ERROR_MESSAGE = 
-		"Server busy.  Too many active uploads.".getBytes();
-    
+    /**
+     * The error message to send in the message body.
+     */
+    private static final String ERROR_MESSAGE = "Server busy.  Too many active uploads.";
+
     /** Error msg to use when validating. */
-    private static final byte[] VALIDATING_MSG = "Validating file.  One moment please.".getBytes();
-    
+    private static final String VALIDATING_MSG = "Validating file.  One moment please.";
+
     /** True if this is a LimitReached state because we're validating the file */
     private final boolean validating;
 
-	/**
-	 * Creates a new <tt>LimitReachedUploadState</tt> with the specified
-	 * <tt>FileDesc</tt>.
-	 *
-	 * @param fd the <tt>FileDesc</tt> for the upload
-	 */
-	public LimitReachedRequestHandler(HTTPUploader uploader) {
+    private HTTPUploader uploader;
+
+    private FileDesc fd;
+
+    /**
+     * Creates a new <tt>LimitReachedUploadState</tt> with the specified
+     * <tt>FileDesc</tt>.
+     * 
+     * @param fd the <tt>FileDesc</tt> for the upload
+     */
+    public LimitReachedRequestHandler(HTTPUploader uploader) {
         this(uploader, false);
     }
-    
+
+    // FIXME never used
     public LimitReachedRequestHandler(HTTPUploader uploader, boolean validating) {
+        this.uploader = uploader;
         this.validating = validating;
-
-		LOG.debug("creating limit reached state");
-	}
-
-	public void writeMessageHeaders(OutputStream ostream) throws IOException {
-//		LOG.debug("writing headers");
-//		String str;
-//		str = "HTTP/1.1 503 Service Unavailable\r\n";
-//		ostream.write(str.getBytes());
-//		str = "Server: " + LimeWireUtils.getHttpServer() + "\r\n";
-//		ostream.write(str.getBytes());
-//		str = "Content-Type: text/plain\r\n";
-//		ostream.write(str.getBytes());
-//		writeProxies(ostream);
-//		writeAlts(ostream);
-//        byte[] errorMsg = ERROR_MESSAGE;
-//        
-//		if(FILE_DESC != null) {
-//			URN sha1 = FILE_DESC.getSHA1Urn();
-//            if(validating) {
-//                errorMsg = VALIDATING_MSG;
-//                HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER, RETRY_AFTER_VALIDATING, ostream);
-//            } else if(sha1 != null) {
-//				// write the Retry-After header, using different values
-//				// depending on if we had any alts to send or not.
-//				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-//				    ! RouterService.getAltlocManager().hasAltlocs(sha1) ? 
-//				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
-//				    ostream);
-//                ostream.write(str.getBytes());
-//                writeRanges(ostream);
-//			} else {
-//			    HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-//			                          NO_ALT_LOCS_RETRY_AFTER,
-//			                          ostream);
-//            }
-//		}
-//        
-//        ostream.write(str.getBytes());
-//        str = "Content-Length: " + errorMsg.length + "\r\n";        
-//		
-//		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
-//		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
-//		                      ostream);
-//		                      
-//		str = "\r\n";
-//		ostream.write(str.getBytes());
-	}
-
-	public void writeMessageBody(OutputStream ostream) throws IOException {
-		LOG.debug("writing body");
-		ostream.write(ERROR_MESSAGE);
-	}
-	
-	public boolean getCloseConnection() {
-	    return true;
-	}
+        this.fd = uploader.getFileDesc();
+    }
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        // TODO Auto-generated method stub
-        
+        HTTPHeaderUtils.addProxyHeader(response);
+        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+
+        String errorMsg = ERROR_MESSAGE;
+        if (fd != null) {
+            URN sha1 = fd.getSHA1Urn();
+            if (validating) {
+                errorMsg = VALIDATING_MSG;
+                response.addHeader(HTTPHeaderName.RETRY_AFTER
+                        .create(RETRY_AFTER_VALIDATING));
+            } else if (sha1 != null) {
+                // write the Retry-After header, using different values
+                // depending on if we had any alts to send or not.
+                String retry = !RouterService.getAltlocManager().hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
+                        : NORMAL_RETRY_AFTER;
+                response.addHeader(HTTPHeaderName.RETRY_AFTER.create(retry));
+                HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+            } else {
+                response.addHeader(HTTPHeaderName.RETRY_AFTER.create(NO_ALT_LOCS_RETRY_AFTER));
+            }
+        }
+
+        uploader.setState(Uploader.LIMIT_REACHED);
+        response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
+        response.setEntity(new StringEntity(errorMsg));
     }
 }

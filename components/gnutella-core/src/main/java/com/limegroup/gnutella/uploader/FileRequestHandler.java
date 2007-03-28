@@ -2,9 +2,7 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,10 +14,11 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.BasicHeaderProcessor;
-import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -30,6 +29,7 @@ import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -147,14 +147,15 @@ public class FileRequestHandler implements HttpRequestHandler {
     }
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
-            HttpResponse response, HTTPUploader uploader, FileDesc fd) {
+            HttpResponse response, HTTPUploader uploader, FileDesc fd)
+            throws IOException, HttpException {
         if (!uploader.isAccepted()) {
-            QueueStatus queued = sessionManager.enqueue(context, request, response);
-            switch(queued) {
+            QueueStatus queued = sessionManager.enqueue(context, request,
+                    response);
+            switch (queued) {
             case REJECTED:
-                uploader.setState(Uploader.LIMIT_REACHED);
-                response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-                // FIXME add alt locations etc.
+                new LimitReachedRequestHandler(uploader).handle(request,
+                        response, context);
                 break;
             case BANNED:
                 uploader.setState(Uploader.BANNED_GREEDY);
@@ -163,9 +164,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 break;
             case QUEUED:
                 System.out.println("queued");
-                uploader.setState(Uploader.QUEUED);
-                response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-                // FIXME add X-Queue header, alt locations etc.
+                handleQueued(context, request, response, uploader, fd);
                 break;
             case ACCEPTED:
             case BYPASS: // TODO reset session poll state?
@@ -175,17 +174,72 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
 
         }
-        
-        if (uploader.isAccepted()) {
-            if (uploader.containedRangeRequest()) {
-                String value = "bytes " + uploader.getUploadBegin() + "-"
-                        + (uploader.getUploadEnd() - 1) + "/"
-                        + uploader.getFileSize();
-                response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
-            }
 
-            response.setEntity(new FileResponseEntity(uploader, fd));
-            uploader.setState(Uploader.CONNECTING);
+        if (uploader.isAccepted()) {
+            handleAccept(context, request, response, uploader, fd);
+        }
+    }
+
+    private void handleAccept(HttpContext context, HttpRequest request,
+            HttpResponse response, HTTPUploader uploader, FileDesc fd)
+            throws IOException, HttpException {
+
+        response
+                .addHeader(HTTPHeaderName.DATE.create(HTTPUtils.getDateValue()));
+        response.addHeader(HTTPHeaderName.CONTENT_DISPOSITION
+                .create("attachment; filename=\""
+                        + HTTPUtils.encode(uploader.getFileName(), "US-ASCII")
+                        + "\""));
+
+        if (uploader.containedRangeRequest()) {
+            // uploadEnd is an EXCLUSIVE index internally, but HTTP uses an
+            // INCLUSIVE index.
+            String value = "bytes " + uploader.getUploadBegin() + "-"
+                    + (uploader.getUploadEnd() - 1) + "/"
+                    + uploader.getFileSize();
+            response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
+        }
+
+        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+        HTTPHeaderUtils.addProxyHeader(response);
+
+        if (fd != null) {
+            URN urn = fd.getSHA1Urn();
+            if (uploader.isFirstReply()) {
+                // write the creation time if this is the first reply.
+                // if this is just a continuation, we don't need to send
+                // this information again.
+                // it's possible t do that because we don't use the same
+                // uploader for different files
+                CreationTimeCache cache = CreationTimeCache.instance();
+                if (cache.getCreationTime(urn) != null) {
+                    response.addHeader(HTTPHeaderName.CREATION_TIME
+                            .create(cache.getCreationTime(urn).toString()));
+                }
+            }
+        }
+
+        // write x-features header once because the downloader is
+        // supposed to cache that information anyway
+        if (uploader.isFirstReply()) {
+            HTTPHeaderUtils.addFeatures(response);
+        }
+
+        // write X-Thex-URI header with root hash if we have already
+        // calculated the tigertree
+        if (fd.getHashTree() != null) {
+            response
+                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        }
+
+        response.setEntity(new FileResponseEntity(uploader, fd));
+        uploader.setState(Uploader.CONNECTING);
+
+        if (uploader.getUploadEnd() - uploader.getUploadBegin() < uploader
+                .getFileSize()) {
+            response.setStatusCode(HttpStatus.SC_PARTIAL_CONTENT);
+        } else {
             response.setStatusCode(HttpStatus.SC_OK);
         }
     }
@@ -206,8 +260,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private void handleInvalidRange(HttpResponse response,
             HTTPUploader uploader, FileDesc fd) {
         uploader.getAltLocTracker().addAltLocHeaders(response);
-        addRangeHeader(response, uploader, fd);
-        addProxyHeader(response);
+        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
+        HTTPHeaderUtils.addProxyHeader(response);
 
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
@@ -221,45 +275,36 @@ public class FileRequestHandler implements HttpRequestHandler {
         response.setStatusCode(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
     }
 
-    private void addRangeHeader(HttpResponse response, HTTPUploader uploader,
-            FileDesc fd) {
-        if (fd instanceof IncompleteFileDesc) {
-            URN sha1 = uploader.getFileDesc().getSHA1Urn();
-            if (sha1 != null) {
-                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-                response.addHeader(HTTPHeaderName.AVAILABLE_RANGES.create(ifd));
-            }
-        }
-    }
+    private void handleQueued(HttpContext context, HttpRequest request,
+            HttpResponse response, HTTPUploader uploader, FileDesc fd)
+            throws IOException, HttpException {
+        // FIXME add X-Queue header, alt locations etc.
 
-    /**
-     * Writes out the X-Push-Proxies header as specified by section 4.2 of the
-     * Push Proxy proposal, v. 0.7
-     */
-    private void addProxyHeader(HttpResponse response) {
-        if (RouterService.acceptedIncomingConnection())
-            return;
+        // if not queued, this should never be the state
+        int position = uploader.getQueuePosition();
+        Assert.that(position != -1);
 
-        Set<IpPort> proxies = RouterService.getConnectionManager()
-                .getPushProxies();
+        String value = "position=" + (position + 1) + ", pollMin="
+                + (HTTPSession.MIN_POLL_TIME / 1000) + /* mS to S */
+                ", pollMax=" + (HTTPSession.MAX_POLL_TIME / 1000) /* mS to S */;
+        response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
-        StringBuilder buf = new StringBuilder();
-        int proxiesWritten = 0;
-        for (Iterator<IpPort> iter = proxies.iterator(); iter.hasNext()
-                && proxiesWritten < 4;) {
-            IpPort current = iter.next();
-            buf.append(current.getAddress()).append(":").append(
-                    current.getPort()).append(",");
+        HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);
+        HTTPHeaderUtils.addRangeHeader(response, uploader, fd);
 
-            proxiesWritten++;
+        if (uploader.isFirstReply()) {
+            HTTPHeaderUtils.addFeatures(response);
         }
 
-        if (proxiesWritten > 0)
-            buf.deleteCharAt(buf.length() - 1);
-        else
-            return;
+        // write X-Thex-URI header with root hash if we have already
+        // calculated the tigertree
+        if (fd.getHashTree() != null) {
+            response
+                    .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
+        }
 
-        response.addHeader(HTTPHeaderName.PROXIES.create(buf.toString()));
+        uploader.setState(Uploader.QUEUED);
+        response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     /**

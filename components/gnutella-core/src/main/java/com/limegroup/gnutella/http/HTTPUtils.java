@@ -286,7 +286,7 @@ public final class HTTPUtils {
     /**
      * Utlity method for getting the currently supported features.
      */
-    private static Set<HTTPHeaderValue> getFeaturesValue() {
+    public static Set<HTTPHeaderValue> getFeaturesValue() {
         Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>(4);
         features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
         if (ChatSettings.CHAT_ENABLED.getValue())
@@ -326,7 +326,7 @@ public final class HTTPUtils {
      * @return the current date as a standardized date string -- see 
      *  RFC 2616 section 14.18
      */
-    private static String getDateValue() {
+    public static String getDateValue() {
         DateFormat df = 
             new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.US);
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -336,7 +336,7 @@ public final class HTTPUtils {
     /**
      * Encodes a name using URLEncoder, using %20 instead of + for spaces.
      */
-    private static String encode(String name, String encoding) throws IOException {
+    public static String encode(String name, String encoding) throws IOException {
         return StringUtils.replace(URLEncoder.encode(name, encoding), "+", "%20");
     }
 }

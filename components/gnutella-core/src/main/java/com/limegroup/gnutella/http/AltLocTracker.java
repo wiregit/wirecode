@@ -20,13 +20,13 @@ public class AltLocTracker {
     /**
      * The alternate locations that have been written out (as good) locations.
      */
-    private Set<DirectAltLoc> writtenLocs;
+    private Set<DirectAltLoc> writtenLocs = new HashSet<DirectAltLoc>();
 
     /**
      * The firewalled alternate locations that have been written out as good
      * locations.
      */
-    private Set<PushAltLoc> writtenPushLocs;
+    private Set<PushAltLoc> writtenPushLocs = new HashSet<PushAltLoc>();
 
     /**
      * The maximum number of alts to write per http transfer.

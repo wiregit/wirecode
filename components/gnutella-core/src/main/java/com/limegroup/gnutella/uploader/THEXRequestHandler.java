@@ -37,7 +37,8 @@ public class THEXRequestHandler implements HttpRequestHandler {
         HashTree tree = fd.getHashTree();
         assert tree != null;
 
-        response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
+        // see CORE-174
+        //response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
         
         response.setStatusCode(HttpStatus.SC_OK);
         response.setEntity(new THEXResponseEntity(uploader, tree));

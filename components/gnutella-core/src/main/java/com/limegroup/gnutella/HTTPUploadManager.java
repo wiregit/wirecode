@@ -473,8 +473,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public synchronized int uploadsInProgress() {
-        // FIXME return _activeUploadList.size() - _forcedUploads;
-        return 0;
+        return _activeUploadList.size() - _forcedUploads;
     }
 
     public synchronized int getNumQueuedUploads() {
@@ -911,7 +910,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public UploadSession getSession(HttpContext context) {
         UploadSession session = (UploadSession) context
                 .getAttribute(SESSION_KEY);
-        assert context.getAttribute(SESSION_KEY) != null;
         return session;
     }
 
@@ -985,27 +983,37 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public void responseSent(NHttpServerConnection conn, HttpResponse response) {
         UploadSession session = getSession(conn.getContext());
         if (session != null) {
-            HTTPUploader uploader = session.getUploader();
-            assert uploader != null;
-            if (response.getEntity() == null) {
-                // not sending a body
-                boolean stillInQueue = slotManager.positionInQueue(session) > -1;
-                slotManager.cancelRequest(session);
-                if (stillInQueue)
-                    uploader.setState(Uploader.INTERRUPTED);
-                else
-                    uploader.setState(Uploader.COMPLETE);
-                System.out.println("complete");
-                removeFromList(uploader);
-            }
+            // HTTPUploader uploader = session.getUploader();
+            // assert uploader != null;
+            // if (response.getEntity() == null) {
+            // // not sending a body
+            // boolean stillInQueue = slotManager.positionInQueue(session) > -1;
+            // slotManager.cancelRequest(session);
+            // if (stillInQueue)
+            // uploader.setState(Uploader.INTERRUPTED);
+            // else
+            // uploader.setState(Uploader.COMPLETE);
+            // System.out.println("complete");
+            // removeFromList(uploader);
+            // }
         }
     }
 
     public void sessionClosed(NHttpServerConnection conn) {
         UploadSession session = getSession(conn.getContext());
         if (session != null) {
-            slotManager.cancelRequest(session);
-            System.out.println("closed");
+            HTTPUploader uploader = session.getUploader();
+            if (uploader != null) {
+                boolean stillInQueue = slotManager.positionInQueue(session) > -1;
+                slotManager.cancelRequest(session);
+                if (stillInQueue)
+                    uploader.setState(Uploader.INTERRUPTED);
+                else
+                    uploader.setState(Uploader.COMPLETE);
+                removeFromList(uploader);
+
+                System.out.println("closed");
+            }
         }
     }
 

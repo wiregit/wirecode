@@ -502,7 +502,7 @@ public class UploadTest extends LimeTestCase {
         vb.add(iv);
         passed = download1(incompleteHash, "Range: bytes 2-5", "cdef", true);
         assertTrue("incomplete range did not work", passed);
-        
+
         passed = download1(incompleteHash, "Range: bytes 1-3", "cd", true);
         assertTrue("didn't shrink wanted ranges, low", passed);
         
