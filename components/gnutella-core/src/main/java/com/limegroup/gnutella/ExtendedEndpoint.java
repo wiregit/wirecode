@@ -577,4 +577,8 @@ public class ExtendedEndpoint extends Endpoint {
         return super.equals(other);
         //TODO: implement
     }
+    
+    public String toString() {
+        return super.toString() +" uptime: "+getDailyUptime();
+    }
 }

@@ -28,7 +28,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
-import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.collection.FixedSizeSortedList;
+import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomOrderHashSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -194,10 +195,12 @@ public class HostCatcher {
      * INVARIANT: permanentHosts contains no duplicates and contains exactly
      *  the same elements and permanentHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue<ExtendedEndpoint> permanentHosts=
-        new FixedsizePriorityQueue<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
+    private final FixedSizeSortedList<ExtendedEndpoint> permanentHosts=
+        new FixedSizeSortedList<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
+    private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
+        new ListPartitioner<ExtendedEndpoint>(permanentHosts, 3);
+    private final Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
 
     
     /** The GWebCache bootstrap system. */
@@ -481,9 +484,14 @@ public class HostCatcher {
                     continue;
                 } catch (ParseException ignore) { }
     
-                //Is it a normal endpoint?
                 try {
-                    add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
+                    ExtendedEndpoint e = ExtendedEndpoint.read(line); 
+                    if(e.isUDPHostCache())
+                        addUDPHostCache(e);
+                    else {
+                        addPermanent(e);
+                        endpointAdded();
+                    }
                 } catch (ParseException pe) {
                     continue;
                 }
@@ -796,21 +804,24 @@ public class HostCatcher {
         
         boolean ret = false;
         synchronized(this) {
-            //Add to permanent list, regardless of whether it's actually in queue.
-            //Note that this modifies e.
-            addPermanent(e);
-            
-            if (! (ENDPOINT_SET.contains(e))) {
-                ret=true;
-                //Add to temporary list. Adding e may eject an older point from
-                //queue, so we have to cleanup the set to maintain
-                //rep. invariant.
-                ENDPOINT_SET.add(e);
-                ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
-                if (ejected!=null) {
-                    ENDPOINT_SET.remove(ejected);
-                }         
-                
+            // if already contained in permanent, don't add.
+            if (!permanentHostsSet.contains(e)) {
+                //Add to permanent list, regardless of whether it's actually in queue.
+                //Note that this modifies e.
+                addPermanent(e);
+
+                if (! (ENDPOINT_SET.contains(e))) {
+                    ret=true;
+                    //Add to temporary list. Adding e may eject an older point from
+                    //queue, so we have to cleanup the set to maintain
+                    //rep. invariant.
+                    ENDPOINT_SET.add(e);
+                    ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
+                    if (ejected!=null) {
+                        ENDPOINT_SET.remove(ejected);
+                    }         
+
+                }
             }
         }
         
@@ -1065,15 +1076,22 @@ public class HostCatcher {
             FREE_LEAF_SLOTS_SET.remove(ee);
             return ee;
         } 
-        if (! ENDPOINT_QUEUE.isEmpty()) {
+        else if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e= ENDPOINT_QUEUE.extractMax();
             boolean ok=ENDPOINT_SET.remove(e);
-            
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
-        } else {
+        } 
+        else if (!permanentHosts.isEmpty()) {
+            // highest partition has highest uptimes
+            List<ExtendedEndpoint> best = uptimePartitions.getLastPartition();
+            ExtendedEndpoint e = best.remove((int)(Math.random() * best.size()));
+            permanentHostsSet.remove(e);
+            return e;
+        }
+        else {
             return null;
         }
     }

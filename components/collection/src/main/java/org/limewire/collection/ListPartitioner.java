@@ -37,4 +37,12 @@ public class ListPartitioner<E> {
         
         return list.subList(partitionSize * index, end);
     }
+    
+    public List<E> getLastPartition() {
+        return getPartition(numPartitions - 1);
+    }
+    
+    public List<E> getFirstPartition() {
+        return getPartition(0);
+    }
 }
