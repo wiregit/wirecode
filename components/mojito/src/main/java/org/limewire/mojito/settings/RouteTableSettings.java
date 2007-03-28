@@ -19,7 +19,6 @@
  
 package org.limewire.mojito.settings;
 
-import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 
@@ -69,7 +68,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final LongSetting MIN_RECONNECTION_TIME
         = FACTORY.createRemoteLongSetting("MIN_RECONNECTION_TIME", 30L*1000L, 
-                "min_reconnect_time", 0, 5L*60L*1000L);
+                "min_reconnect_time", 0L, 5L*60L*1000L);
     
     /**
      * The symbol size, i.e. the number of bits improved at each step.
@@ -84,21 +83,6 @@ public final class RouteTableSettings extends MojitoProps {
     public static final LongSetting BUCKET_REFRESH_PERIOD
         = FACTORY.createRemoteLongSetting("BUCKET_REFRESH_PERIOD", 30L*60L*1000L, 
                 "bucket_refresh_period", 10L*60L*1000L, 2L*60L*60L*1000L);
-    
-    /**
-     * The delay of the RandomBucketRefresher
-     */
-    public static final LongSetting RANDOM_REFRESHER_DELAY
-        = FACTORY.createRemoteLongSetting("RANDOM_REFRESHER_DELAY", 1L*60L*1000L, 
-                "random_refresher_delay", 1L*60L*1000L, 2L*60L*60L*1000L);
-    
-    /**
-     * This setting is primarily for testing. It makes sure that
-     * the run-times of the BucketRefreshers are uniformly
-     * distributed. 
-     */
-    public static final BooleanSetting UNIFORM_BUCKET_REFRESH_DISTRIBUTION
-        = FACTORY.createBooleanSetting("UNIFORM_BUCKET_REFRESH_DISTRIBUTION", false);
     
     /**
      * A minimum time (in sec) to pass before pinging the least recently

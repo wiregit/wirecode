@@ -17,7 +17,7 @@ import java.util.Set;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
-import org.limewire.mojito.settings.RouteTableSettings;
+import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.util.MojitoUtils;
 
 import com.limegroup.gnutella.ActivityCallback;
@@ -83,7 +83,7 @@ public class Main {
     
     private static List<MojitoDHT> standalone(InetAddress addr, int port, int count) {
         if (count > 1) {
-            RouteTableSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
+            BucketRefresherSettings.UNIFORM_BUCKET_REFRESH_DISTRIBUTION.setValue(true);
         }
         
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>(count);
