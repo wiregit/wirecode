@@ -15,9 +15,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.limewire.collection.IntSet;
 import org.limewire.util.ByteOrder;
 
 /**
@@ -388,7 +389,7 @@ public final class NetworkUtils {
      */
     public static <T extends IpPort>Collection<T> filterUnique(Collection<T> c, int netmask) {
         ArrayList<T> ret = new ArrayList<T>(c.size());
-        IntSet ips = new IntSet();
+        Set<Integer> ips = new HashSet<Integer>();
         for (T ip : c) {
             if (ips.add( ByteOrder.beb2int(ip.getInetAddress().getAddress(),0) & netmask))
                 ret.add(ip);
