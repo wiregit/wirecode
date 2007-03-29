@@ -21,8 +21,6 @@ import org.apache.http.nio.protocol.EventListener;
 import org.apache.http.nio.protocol.HttpRequestExecutionHandler;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.http.HttpTestClient;
-import org.limewire.http.HttpTestServer;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Acceptor;
