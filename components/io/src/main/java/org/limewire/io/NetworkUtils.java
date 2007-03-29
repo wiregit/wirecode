@@ -391,12 +391,16 @@ public final class NetworkUtils {
         ArrayList<T> ret = new ArrayList<T>(c.size());
         Set<Integer> ips = new HashSet<Integer>();
         for (T ip : c) {
-            if (ips.add( ByteOrder.beb2int(ip.getInetAddress().getAddress(),0) & netmask))
+            if (ips.add( getMaskedIP(ip.getInetAddress(), netmask) ))
                 ret.add(ip);
             
         }
         ret.trimToSize();
         return ret;
+    }
+    
+    public static int getMaskedIP(InetAddress addr, int netmask) {
+        return ByteOrder.beb2int(addr.getAddress(),0) & netmask;
     }
     
     /**

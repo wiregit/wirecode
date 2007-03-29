@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeSortedList;
+import org.limewire.collection.IntSet;
 import org.limewire.collection.ListPartitioner;
 import org.limewire.collection.RandomOrderHashSet;
 import org.limewire.io.IpPort;
@@ -129,6 +130,11 @@ public class HostCatcher {
      * Constant for the index of non-Ultrapeer hosts.
      */
     public static final int NORMAL_PRIORITY = 0;
+    
+    /**
+     * netmask for pongs that we accept and send.
+     */
+    private static final int PONG_MASK = 0xFFFFFF00;
     
     private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {
@@ -631,7 +637,7 @@ public class HostCatcher {
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         Collection<IpPort> packed = 
-            NetworkUtils.filterUnique(pr.getPackedIPPorts(), 0xFFFFFF00);
+            NetworkUtils.filterUnique(pr.getPackedIPPorts(), PONG_MASK);
         rank(packed);
         for(IpPort ipp : packed) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
@@ -1215,13 +1221,15 @@ public class HostCatcher {
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
         Set<IpPort> hosts = new HashSet<IpPort>(num);
+        IntSet masked = new IntSet();
         
         Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
         if(locales != null) {
             for(ExtendedEndpoint e : locales) {
                 if(hosts.size() >= num)
                     break;
-                if(base.contains(e))
+                if(base.contains(e) && 
+                        masked.add(NetworkUtils.getMaskedIP(e.getInetAddress(), PONG_MASK)))
                     hosts.add(e);
             }
         }
@@ -1229,7 +1237,8 @@ public class HostCatcher {
         for(IpPort ipp : base) {
             if(hosts.size() >= num)
                 break;
-            hosts.add(ipp);
+            if (masked.add(NetworkUtils.getMaskedIP(ipp.getInetAddress(), PONG_MASK)))
+                hosts.add(ipp);
         }
         
         return hosts;
