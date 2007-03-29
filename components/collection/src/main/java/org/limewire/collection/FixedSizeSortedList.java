@@ -35,6 +35,8 @@ public class FixedSizeSortedList<E> extends SortedList<E> {
         E ret = null;
         if (size() == capacity) {
             ret = last();
+            if (comparator().compare(e, ret) < 0)
+                return e;
             remove(ret);
         }
         add(e);

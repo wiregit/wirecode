@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -166,7 +167,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         
         for(int i=0; i<250; i++) {
-            Endpoint curHost = new Endpoint(startAddress+i, 6346);
+            Endpoint curHost = new ExtendedEndpoint(startAddress+i, 6346);
             hc.doneWithConnect(curHost, false);
         }
         
@@ -436,12 +437,16 @@ public class HostCatcherTest extends LimeTestCase {
         hc.read(tmp);
         assertEquals(2, uhc.getSize());        
         assertEquals(5, hc.getNumHosts());
-        assertEquals(new Endpoint("18.239.0.142", 6342),
-                     hc.getAnEndpoint());
-        assertEquals(new Endpoint("18.239.0.141", 6341),
-                     hc.getAnEndpoint());
-        assertEquals(new Endpoint("18.239.0.143", 6343),
-                     hc.getAnEndpoint());
+        // the highest uptime hosts should be given out first,
+        // but not in order
+        Set<Endpoint> s = new HashSet<Endpoint>();
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        assertTrue(s.contains(new Endpoint("18.239.0.142", 6342)));
+        assertTrue(s.contains(new Endpoint("18.239.0.141", 6341)));
+        assertTrue(s.contains(new Endpoint("18.239.0.143", 6343)));
+        
         ExtendedEndpoint xep = (ExtendedEndpoint) hc.getAnEndpoint();
         assertTrue(xep.supportsDHT());
         assertEquals(xep.getDHTVersion(), 2);
@@ -480,20 +485,56 @@ public class HostCatcherTest extends LimeTestCase {
         HostCatcher.DEBUG=false;  //Too darn slow
         hc.read(tmp);
         assertEquals(0, hc.getNumUltrapeerHosts());
-        assertEquals(new Endpoint("18.239.0.142", 1),
-                     hc.getAnEndpoint());
 
+        Set<Endpoint> s = new HashSet<Endpoint>();
         // Note that we only go to 1 (not 0) because we already extracted
         // a host in the line before this.
-        for (int i=N; i > 1; i--) {
-            assertGreaterThan("No more hosts after "+i, 0, hc.getNumHosts());
-            assertEquals(new Endpoint("18.239.0.142", i+1),
-                         hc.getAnEndpoint());
-        }
+        for (int i=N; i > 0; i--) 
+            s.add(hc.getAnEndpoint());
+        
+        // the bad host should not be in there
+        assertFalse(s.contains(new Endpoint("18.239.0.142",N+2)));
+        // the good one should
+        assertTrue(s.contains(new Endpoint("18.239.0.142",1)));
+        
         assertEquals("some hosts leftover", 0, hc.getNumHosts());
 
         //Cleanup.
         tmp.delete();
+    }
+    
+    /**
+     * tests that when reading from disk, the best third of the hosts
+     * will be given out first
+     */
+    public void testBestRestored() throws Exception {
+        // add a bunch of bad hosts
+        for (int i = 0; i < 10; i++)
+            hc.add(new ExtendedEndpoint("1.1.1.1", 100+i, i), false);
+        // a bunch of average hosts
+        for (int i = 0; i < 10; i++)
+            hc.add(new ExtendedEndpoint("2.2.2.2", 200+i, 200+i), false);
+        // a bunch of good hosts
+        for (int i = 0; i < 20; i++)
+            hc.add(new ExtendedEndpoint("3.3.3.3", 300+i, 300+i), false);
+
+        // reload
+        File tmp=File.createTempFile("hc_test", ".net" );
+        hc.write(tmp);            
+        setUp();
+        hc.read(tmp);
+        tmp.delete();
+        
+        // the first 10 hosts should all be good
+        for (int i = 0; i < 10; i++) 
+            assertEquals("3.3.3.3",hc.getAnEndpoint().getAddress());
+        
+        // the next 10 should not have any bad ones
+        Set<Endpoint> s = new HashSet<Endpoint>();
+        for (int i = 0; i < 10; i++) 
+            s.add(hc.getAnEndpoint());
+        for (int i = 0; i < 10; i++) 
+            assertFalse(s.contains(new Endpoint("1.1.1.1", 100+i)));
     }
 
     /** Test that connection history is recorded. */
@@ -552,10 +593,11 @@ public class HostCatcherTest extends LimeTestCase {
         //2. Read and verify
         setUp();
         hc.read(tmp);
-        assertEquals("unexpected host",
-            new Endpoint("18.239.0.142", 6342), hc.getAnEndpoint());
-        assertEquals("unexpected host",
-            new Endpoint("18.239.0.141", 6346), hc.getAnEndpoint());
+        Set<Endpoint> s = new HashSet<Endpoint>();
+        s.add(hc.getAnEndpoint());
+        s.add(hc.getAnEndpoint());
+        assertTrue(s.contains(new Endpoint("18.239.0.142", 6342)));
+        assertTrue(s.contains(new Endpoint("18.239.0.141", 6346)));
         assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
         assertEquals("unexpected number of ultrapeers",
             0, hc.getNumUltrapeerHosts());

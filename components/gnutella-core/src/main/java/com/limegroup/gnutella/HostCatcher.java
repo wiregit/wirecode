@@ -198,9 +198,21 @@ public class HostCatcher {
     private final FixedSizeSortedList<ExtendedEndpoint> permanentHosts=
         new FixedSizeSortedList<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
-    private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
-        new ListPartitioner<ExtendedEndpoint>(permanentHosts, 3);
     private final Set<ExtendedEndpoint> permanentHostsSet=new HashSet<ExtendedEndpoint>();
+    
+    /**
+     * List of the hosts that were restored from disk.
+     * INVARIANT: a subset of permanentHosts.  
+     */
+    private final FixedSizeSortedList<ExtendedEndpoint> restoredHosts=
+        new FixedSizeSortedList<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
+                                   PERMANENT_SIZE);
+    
+    /** 
+     * Partition view of the list of restored hosts.
+     */
+    private final ListPartitioner<ExtendedEndpoint> uptimePartitions = 
+        new ListPartitioner<ExtendedEndpoint>(restoredHosts, 3);
 
     
     /** The GWebCache bootstrap system. */
@@ -404,6 +416,7 @@ public class HostCatcher {
         hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
         hosts.addAll(FREE_LEAF_SLOTS_SET);
         hosts.addAll(ENDPOINT_SET);
+        hosts.addAll(restoredHosts);
         return hosts;
     }
     
@@ -490,6 +503,7 @@ public class HostCatcher {
                         addUDPHostCache(e);
                     else {
                         addPermanent(e);
+                        restoredHosts.add(e);
                         endpointAdded();
                     }
                 } catch (ParseException pe) {
@@ -804,24 +818,21 @@ public class HostCatcher {
         
         boolean ret = false;
         synchronized(this) {
-            // if already contained in permanent, don't add.
-            if (!permanentHostsSet.contains(e)) {
-                //Add to permanent list, regardless of whether it's actually in queue.
-                //Note that this modifies e.
-                addPermanent(e);
+            //Add to permanent list, regardless of whether it's actually in queue.
+            //Note that this modifies e.
+            addPermanent(e);
 
-                if (! (ENDPOINT_SET.contains(e))) {
-                    ret=true;
-                    //Add to temporary list. Adding e may eject an older point from
-                    //queue, so we have to cleanup the set to maintain
-                    //rep. invariant.
-                    ENDPOINT_SET.add(e);
-                    ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
-                    if (ejected!=null) {
-                        ENDPOINT_SET.remove(ejected);
-                    }         
+            if (! (ENDPOINT_SET.contains(e))) {
+                ret=true;
+                //Add to temporary list. Adding e may eject an older point from
+                //queue, so we have to cleanup the set to maintain
+                //rep. invariant.
+                ENDPOINT_SET.add(e);
+                ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
+                if (ejected!=null) {
+                    ENDPOINT_SET.remove(ejected);
+                }         
 
-                }
             }
         }
         
@@ -1084,11 +1095,10 @@ public class HostCatcher {
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
         } 
-        else if (!permanentHosts.isEmpty()) {
+        else if (!restoredHosts.isEmpty()) {
             // highest partition has highest uptimes
             List<ExtendedEndpoint> best = uptimePartitions.getLastPartition();
             ExtendedEndpoint e = best.remove((int)(Math.random() * best.size()));
-            permanentHostsSet.remove(e);
             return e;
         }
         else {
@@ -1134,7 +1144,7 @@ public class HostCatcher {
      */
     public synchronized int getNumHosts() {
         return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
-            FREE_ULTRAPEER_SLOTS_SET.size();
+            FREE_ULTRAPEER_SLOTS_SET.size()+restoredHosts.size();
     }
 
     /**

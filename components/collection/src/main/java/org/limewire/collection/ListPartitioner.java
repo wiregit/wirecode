@@ -26,7 +26,7 @@ public class ListPartitioner<E> {
         if (list.isEmpty())
             return Collections.emptyList();
         
-        int partitionSize = list.size() / Math.min(list.size(), numPartitions);
+        int partitionSize = list.size() / numActivePartitions();
         if (partitionSize * index >= list.size())
             return Collections.emptyList();
         
@@ -39,7 +39,11 @@ public class ListPartitioner<E> {
     }
     
     public List<E> getLastPartition() {
-        return getPartition(numPartitions - 1);
+        return getPartition(numActivePartitions() - 1);
+    }
+    
+    private int numActivePartitions() {
+        return Math.min(list.size(), numPartitions);
     }
     
     public List<E> getFirstPartition() {
