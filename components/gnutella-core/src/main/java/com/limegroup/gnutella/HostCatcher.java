@@ -134,7 +134,7 @@ public class HostCatcher {
     /**
      * netmask for pongs that we accept and send.
      */
-    private static final int PONG_MASK = 0xFFFFFF00;
+    public static final int PONG_MASK = 0xFFFFFF00;
     
     private static final Comparator<ExtendedEndpoint> DHT_COMPARATOR = 
         new Comparator<ExtendedEndpoint>() {

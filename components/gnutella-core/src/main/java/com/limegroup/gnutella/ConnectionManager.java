@@ -1955,7 +1955,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 continue;
             }
         }
-        _catcher.add(hosts);        
+        _catcher.add(NetworkUtils.filterUnique(hosts, HostCatcher.PONG_MASK));        
     }
 
 
