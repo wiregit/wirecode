@@ -2,6 +2,8 @@ package com.limegroup.gnutella.gui.chat;
 
 import java.awt.event.WindowEvent;
 
+import org.limewire.io.NetworkUtils;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Acceptor;
@@ -17,6 +19,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
 
     private static final int CHAT_PORT = 9999;
     private static Acceptor acceptThread;
+    private static String localAddress;
     private ChatUIManager chatManager;
     private ChatFrame outgoing;
     private ChatFrame incoming;
@@ -47,7 +50,9 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         
         try {
             Thread.sleep(2000);
-        } catch (InterruptedException ex) {}                
+        } catch (InterruptedException ex) {}
+        
+        localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
     }
 
     public static void globealTearDown() throws Exception {
@@ -74,7 +79,7 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         InstantMessenger chat = new InstantMessenger("localhost", CHAT_PORT, ChatManager.instance(), RouterService.getCallback());
         outgoing = new ChatFrame(chat);
         chat.start();
-        Thread.sleep(2000);
+        Thread.sleep(4000);
         incoming = getIncomingChat();
     }
     
@@ -92,8 +97,8 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
     }
       
     public void testChatLocalhost() throws Exception {
-        ChatFrame chatter = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
-        Thread.sleep(4000);
+        ChatFrame chatter = GUIMediator.createChat(localAddress, CHAT_PORT);
+        Thread.sleep(500);
         assertTrue(!chatter.getChat().isConnected());
     }
 

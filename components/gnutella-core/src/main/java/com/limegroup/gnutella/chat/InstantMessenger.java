@@ -381,4 +381,9 @@ public class InstantMessenger implements Chatter {
         return !stopped;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName() + "[host=" + host + ":" + port + ",outgoing=" + outgoing + "]";
+    }
+    
 }
