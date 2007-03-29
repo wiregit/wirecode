@@ -7,13 +7,13 @@ import org.limewire.nio.observer.ReadWriteObserver;
 
 public class StubReadWriteObserver implements IOErrorObserver, ReadWriteObserver {
     
-    private int amtToUse = Integer.MAX_VALUE;
-    private int read = 0;
-    private int wrote = 0;
-    private boolean shutdown = false;
-    private IOException iox = null;
-    private int amountGiven = 0;
-    private int amountLeft = 0;
+    private volatile int amtToUse = Integer.MAX_VALUE;
+    private volatile int read = 0;
+    private volatile int wrote = 0;
+    private volatile boolean shutdown = false;
+    private volatile IOException iox = null;
+    private volatile int amountGiven = 0;
+    private volatile int amountLeft = 0;
     
     public void setAmountGiven(int given) {
         amountGiven = given;
