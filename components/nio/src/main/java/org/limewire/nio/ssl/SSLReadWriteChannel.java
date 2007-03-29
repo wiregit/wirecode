@@ -349,7 +349,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         this.writeWanter = status ? observer : null;
         InterestWritableByteChannel source = writeSink;
         if(source != null)
-            source.interestWrite(this, true); 
+            source.interestWrite(this, true);
     }
 
 }

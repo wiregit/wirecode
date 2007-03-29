@@ -95,6 +95,55 @@ public class TLSNIOSocketTest extends BaseTestCase {
         server.close();
     }
     
+    public void testConnectAndReadWriteSwitchBlockingMode() throws Exception {
+        SSLContext context = SSLContext.getInstance("TLS");
+        context.init(null, null, null);
+        SSLServerSocketFactory factory = context.getServerSocketFactory();
+        SSLServerSocket server = (SSLServerSocket)factory.createServerSocket(9999);
+        server.setNeedClientAuth(false);
+        server.setWantClientAuth(false);
+        server.setEnabledCipherSuites(new String[] {"TLS_DH_anon_WITH_AES_128_CBC_SHA"});
+        
+        TLSNIOSocket socket = new TLSNIOSocket("127.0.0.1", 9999);        
+        Socket accepted = server.accept();
+        
+        OutputStream clientOutB = socket.getOutputStream();
+        clientOutB.write("TEST TEST\r\n".getBytes());
+        clientOutB.write("\r\n".getBytes());        
+        byte[] serverB = new byte[16];
+        int serverRead = accepted.getInputStream().read(serverB);
+        assertEquals(13, serverRead);
+        assertEquals("TEST TEST\r\n\r\n", new String(serverB, 0, 13));
+        
+        accepted.getOutputStream().write("HELLO THIS IS A TEST!".getBytes());        
+        InputStream clientInB = socket.getInputStream();
+        byte[] clientReadB = new byte[15];
+        int clientRead = clientInB.read(clientReadB);
+        assertEquals(15, clientRead);
+        assertEquals("HELLO THIS IS A", new String(clientReadB, 0, 15));
+        
+        WriteBufferChannel clientOutNB = new WriteBufferChannel();
+        socket.setWriteObserver(clientOutNB);
+        NIODispatcher.instance().invokeAndWait(new Runnable() {public void run() {}}); //wait for write to set
+        clientOutNB.setBuffer(ByteBuffer.wrap("MORE TEST\r\n".getBytes()));
+        serverB = new byte[16];
+        serverRead = accepted.getInputStream().read(serverB);
+        assertEquals(11, serverRead);
+        assertEquals("MORE TEST\r\n", new String(serverB, 0, 11));
+                
+        ReadTester reader = new ReadTester();
+        socket.setReadObserver(reader);
+        Thread.sleep(500);
+        ByteBuffer read = reader.getRead();
+        assertEquals(6, read.limit());
+        assertEquals(" TEST!", new String(read.array(), 0, 6));
+        
+        socket.close();
+        accepted.close();
+        server.close();       
+    }
+    
+    
    private static class ReadTester implements ChannelReadObserver {        
         private InterestReadableByteChannel source;
         private ByteBuffer readData = ByteBuffer.allocate(128 * 1024);

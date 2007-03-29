@@ -144,7 +144,7 @@ public class WriteBufferChannel implements ChannelWriter, InterestWritableByteCh
     }
     
     public void handleIOException(IOException iox) {
-        throw (RuntimeException)new UnsupportedOperationException("not implemented").initCause(iox);
+        throw new UnsupportedOperationException("not implemented", iox);
     }
     
     public int position() {
