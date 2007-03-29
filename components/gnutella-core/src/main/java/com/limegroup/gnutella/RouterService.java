@@ -635,7 +635,8 @@ public class RouterService {
     public static void setFullPower(boolean newValue) {
         if(_fullPower != newValue) {
             _fullPower = newValue;
-            NormalUploadState.setThrottleSwitching(!newValue);
+            // FIXME
+            //NormalUploadState.setThrottleSwitching(!newValue);
             HTTPDownloader.setThrottleSwitching(!newValue);
         }
     }

@@ -17,9 +17,6 @@ import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIOSocket;
-import org.limewire.nio.observer.ConnectObserver;
-
-import com.limegroup.gnutella.util.Sockets;
 
 public class HttpIOReactor implements ConnectingIOReactor {
 
@@ -70,33 +67,35 @@ public class HttpIOReactor implements ConnectingIOReactor {
 //        connect(sessionRequest);
 //        return sessionRequest;
 //    }
-    
+
+    // FIXME move Sockets class to NIO component
     public void connect(final HttpSessionRequest sessionRequest) {
-        try {
-            Sockets.connect((InetSocketAddress) sessionRequest.getRemoteAddress(), 
-                    sessionRequest.getConnectTimeout(),
-                    new ConnectObserver() {
-                        public void handleConnect(Socket socket) throws IOException {                          
-                            prepareSocket(socket);
-                            HttpIOSession session = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
-                            sessionRequest.connected(session);
-                        }
-
-                        public void handleIOException(IOException e) {
-                            LOG.error("Unexpected exception", e);
-                            sessionRequest.failed(e);
-                        }
-
-                        public void shutdown() {
-                            sessionRequest.shutdown();
-                        }
-
-                    });
-        } catch (IOException e) {
-            // should never happen since we are connecting in the background
-            LOG.error("Unexpected exception", e);
-            sessionRequest.failed(e);
-        }
+//        try {
+//            Sockets.connect((InetSocketAddress) sessionRequest.getRemoteAddress(), 
+//                    sessionRequest.getConnectTimeout(),
+//                    new ConnectObserver() {
+//                        public void handleConnect(Socket socket) throws IOException {                          
+//                            prepareSocket(socket);
+//                            HttpIOSession session = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
+//                            sessionRequest.connected(session);
+//                        }
+//
+//                        public void handleIOException(IOException e) {
+//                            LOG.error("Unexpected exception", e);
+//                            sessionRequest.failed(e);
+//                        }
+//
+//                        public void shutdown() {
+//                            sessionRequest.shutdown();
+//                        }
+//
+//                    });
+//        } catch (IOException e) {
+//            // should never happen since we are connecting in the background
+//            LOG.error("Unexpected exception", e);
+//            sessionRequest.failed(e);
+//        }
+        throw new UnsupportedOperationException();
     }
 
     protected void prepareSocket(final Socket socket) throws IOException {
