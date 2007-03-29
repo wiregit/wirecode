@@ -24,6 +24,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
@@ -59,29 +60,29 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
+        FileRequest fileRequest = null;
         HTTPUploader uploader;
-        FileRequest fileRequest;
-
+        
         // parse request
-        String uri = request.getRequestLine().getUri();
-        if (isURNGet(uri)) {
-            fileRequest = parseURNGet(uri);
-            if (fileRequest == null) {
-                uploader = sessionManager.getOrCreateUploader(context,
-                        UploadType.INVALID_URN, "Invalid URN query");
-                uploader.setState(Uploader.FILE_NOT_FOUND);
-                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+        try {
+            String uri = request.getRequestLine().getUri();
+            if (isURNGet(uri)) {
+                fileRequest = parseURNGet(uri);
+                if (fileRequest == null) {
+                    uploader = sessionManager.getOrCreateUploader(context,
+                            UploadType.INVALID_URN, "Invalid URN query");
+                    uploader.setState(Uploader.FILE_NOT_FOUND);
+                    response.setStatusCode(HttpStatus.SC_NOT_FOUND);
+                }
+            } else {
+                fileRequest = parseTraditionalGet(uri);
+                assert fileRequest != null;
             }
-        } else {
-            fileRequest = parseTraditionalGet(uri);
-            if (fileRequest == null) {
-                uploader = sessionManager.getOrCreateUploader(context,
-                        UploadType.MALFORMED_REQUEST, "Malformed Request");
-                uploader.setState(Uploader.MALFORMED_REQUEST);
-                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
-            }
+        } catch (IOException e) {
+            handleMalformedRequest(response, sessionManager.getOrCreateUploader(context,
+                    UploadType.MALFORMED_REQUEST, "Malformed Request"));
         }
-
+        
         // process request
         if (fileRequest != null) {
             FileDesc fd = getFileDesc(fileRequest);
@@ -89,10 +90,8 @@ public class FileRequestHandler implements HttpRequestHandler {
                 findFileAndProcessHeaders(request, response, context,
                         fileRequest, fd);
             } else {
-                uploader = sessionManager.getOrCreateUploader(context,
-                        UploadType.MALFORMED_REQUEST, "Malformed Request");
-                uploader.setState(Uploader.MALFORMED_REQUEST);
-                response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+                handleMalformedRequest(response, sessionManager.getOrCreateUploader(context,
+                        UploadType.MALFORMED_REQUEST, "Malformed Request"));
             }
         }
     }
@@ -110,6 +109,10 @@ public class FileRequestHandler implements HttpRequestHandler {
         uploader.setIndex(fileRequest.index);
         uploader.setState(Uploader.CONNECTING);
 
+        if (HTTPConstants.NAME_TO_THEX.equals(fileRequest.serviceID)) {
+            uploader.setThexRequest(true);
+        }
+        
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
@@ -120,8 +123,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         try {
             processor.process(request, context);
         } catch (ProblemReadingHeaderException e) {
-            uploader.setState(Uploader.MALFORMED_REQUEST);
-            response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+            handleMalformedRequest(response, uploader);
             return;
         } catch (FreeloaderUploadingException e) {
             handleFreeLoader(request, response, context, uploader);
@@ -144,6 +146,12 @@ public class FileRequestHandler implements HttpRequestHandler {
         } else {
             handleFileUpload(context, request, response, uploader, fd);
         }
+    }
+
+    private void handleMalformedRequest(HttpResponse response, HTTPUploader uploader) {
+        uploader.setState(Uploader.MALFORMED_REQUEST);
+        response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
+        response.setReasonPhrase("Malformed Request");
     }
 
     private void handleFileUpload(HttpContext context, HttpRequest request,
@@ -273,6 +281,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         uploader.setState(Uploader.UNAVAILABLE_RANGE);
         response.setStatusCode(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+        response.setReasonPhrase("Requested Range Unavailable");
     }
 
     private void handleQueued(HttpContext context, HttpRequest request,
@@ -339,6 +348,7 @@ public class FileRequestHandler implements HttpRequestHandler {
      *        request
      * @return a new <tt>RequestLine</tt> instance containing all of the data
      *         for the get request
+     * @throws IOException
      */
     private FileRequest parseURNGet(final String requestLine)
             throws IOException {
@@ -405,9 +415,9 @@ public class FileRequestHandler implements HttpRequestHandler {
 
             return new FileRequest(index, fileName);
         } catch (NumberFormatException e) {
-            return null;
+            throw new IOException();
         } catch (IndexOutOfBoundsException e) {
-            return null;
+            throw new IOException();
         }
     }
 
@@ -499,6 +509,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         int index;
 
+        // TODO only used to determine if this is a THEX request, make this an enum?
         String serviceID;
 
     }
@@ -511,6 +522,8 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         private ByteBuffer buffer;
 
+        private int length;
+
         public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
             this.uploader = uploader;
             this.fd = fd;
@@ -521,13 +534,14 @@ public class FileRequestHandler implements HttpRequestHandler {
 
             int begin = (int) uploader.getUploadBegin();
             int end = (int) uploader.getUploadEnd();
+            length = end - begin;
 
-            buffer = ByteBuffer.wrap(content, begin, end - begin);
+            buffer = ByteBuffer.wrap(content, begin, length);
         }
 
         @Override
         public long getContentLength() {
-            return fd.getFileSize();
+            return length;
         }
 
         @Override

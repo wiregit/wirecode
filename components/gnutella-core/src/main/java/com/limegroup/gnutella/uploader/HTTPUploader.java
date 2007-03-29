@@ -31,6 +31,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     private boolean accepted;
 
+    private boolean thexRequest;
+
     public HTTPUploader(String fileName, UploadSession session, int index) {
         super(fileName, session, index);
     }
@@ -67,10 +69,13 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     public boolean isTHEXRequest() {
-        // TODO Auto-generated method stub
-        return false;
+        return thexRequest;
     }
 
+    public void setThexRequest(boolean thexRequest) {
+        this.thexRequest = thexRequest;
+    }
+    
     public long getUploadBegin() {
         return this.uploadBegin;
     }

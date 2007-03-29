@@ -1012,7 +1012,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                     uploader.setState(Uploader.COMPLETE);
                 removeFromList(uploader);
 
-                System.out.println("closed");
+                System.out.println("session closed");
             }
         }
     }

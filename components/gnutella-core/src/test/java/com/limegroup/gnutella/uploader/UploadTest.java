@@ -182,6 +182,11 @@ public class UploadTest extends LimeTestCase {
     }
     
 	protected void setUp() throws Exception {
+	    // allows to run single tests from Eclipse
+	    if (ROUTER_SERVICE == null) {
+	        globalSetUp();
+	    }
+	    
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
 		    new String[] {"*.*.*.*"});
@@ -209,7 +214,7 @@ public class UploadTest extends LimeTestCase {
 		File testFile = new File(testDir, fileName);
 		assertTrue("test file should exist", testFile.exists());
 		File sharedFile = new File(_sharedDir, fileName);
-		// we must use a seperate copy method
+		// we must use a separate copy method
 		// because the filename has a # in it which can't be a resource.
 		copyFile(testFile, sharedFile);
 		assertTrue("should exist", new File(_sharedDir, fileName).exists());
@@ -1133,23 +1138,6 @@ public class UploadTest extends LimeTestCase {
         assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
     }
     
-    public void testAltsDontExpire() throws Exception {
-        UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float)Math.E/4);
-        // test that an altloc will not expire if given out less often
-        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
-        AlternateLocation al = AlternateLocation.create(loc);
-        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
-        RouterService.getAltlocManager().add(al, null);
-        
-        for (int i = 0; i < 10; i++) {
-            assertTrue(download("/uri-res/N2R?" + hash, null,
-                    "abcdefghijklmnopqrstuvwxyz",
-            "X-Alt: 1.1.1.1:1"));
-            Thread.sleep(8*1000);
-        }
-        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
-    }
-    
     /**
      * tests that when an altloc has expired from all the meshes it is removed.
      */
@@ -1569,11 +1557,9 @@ public class UploadTest extends LimeTestCase {
     }
     
     public void testHTTP10WrongURI() throws Exception {
-        // note that the header will be returned with 1.1
-        // even though we sent with 1.0
         tFailureHeaderRequired(
             "/uri-res/N2R?" + badHash, null, false, false,
-                "HTTP/1.1 404 Not Found");
+                "HTTP/1.0 404 Not Found");
     }
     
     public void testHTTP11MalformedURI() throws Exception {
@@ -1585,7 +1571,7 @@ public class UploadTest extends LimeTestCase {
     public void testHTTP10MalformedURI() throws Exception {
         tFailureHeaderRequired(
             "/uri-res/N2R?" + "no more school", null, false, false,
-                "HTTP/1.1 400 Malformed Request");
+                "HTTP/1.0 400 Malformed Request");
     }
     
 	public void testHTTP11MalformedGet() throws Exception {
@@ -1796,6 +1782,22 @@ public class UploadTest extends LimeTestCase {
         // this is just checking to make sure we sent the right tree.
     }
                        
+    public void testAltsDontExpire() throws Exception {
+        UploadSettings.LEGACY_EXPIRATION_DAMPER.setValue((float)Math.E/4);
+        // test that an altloc will not expire if given out less often
+        String loc = "http://1.1.1.1:1/uri-res/N2R?" + hash;
+        AlternateLocation al = AlternateLocation.create(loc);
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
+        RouterService.getAltlocManager().add(al, null);
+        
+        for (int i = 0; i < 10; i++) {
+            assertTrue(download("/uri-res/N2R?" + hash, null,
+                    "abcdefghijklmnopqrstuvwxyz",
+            "X-Alt: 1.1.1.1:1"));
+            Thread.sleep(8*1000);
+        }
+        assertTrue(al.canBeSent(AlternateLocation.MESH_LEGACY));
+    }
     
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
@@ -1862,7 +1864,7 @@ public class UploadTest extends LimeTestCase {
 
         String req = makeRequest(file);
         byte[] ret = getBytes("GET", req, header,
-                             out, in, expheader, false, true);
+                             out, in, expheader, false, false);
         in.close();
         out.close();
         s.close();
@@ -2545,17 +2547,25 @@ public class UploadTest extends LimeTestCase {
                                                           s.getOutputStream()));
             //2. Send GET request in URI form
             downloadInternal("GET", file, sendHeader, out, in, 
-                             requiredHeader, http11, true, null);
+                             requiredHeader, http11, http11, null);
             
             //3. If the connection should remain open, make sure we
             //   can request again.
             if( repeat ) {
                 downloadInternal("GET", file, sendHeader, out, in,
-                                 requiredHeader, http11, true, null);
+                                 requiredHeader, http11, http11, null);
             } else {
+                assertEquals(-1, in.read());
+                
+                // the output channel on our side is still open since we have only
+                // received a FIN, sending another packet will trigger a RST
+                // @see http://java.sun.com/j2se/1.5.0/docs/guide/net/articles/connection_release.html
+                out.write("a");
+                out.flush();
+                
                 try {
                     downloadInternal("GET", file, sendHeader, out, in,
-                                     requiredHeader, http11, false, null);
+                                     requiredHeader, http11, http11, null);
                     fail("Connection should be closed");
                 } catch(InterruptedIOException good) {
                     // good.

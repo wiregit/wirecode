@@ -63,13 +63,7 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
      *        locations should be added to
      */
     private void parseAlternateLocations(AltLocTracker tracker,
-            final String altHeader, boolean isGood) {
-        final String alternateLocations = HTTPUtils
-                .extractHeaderValue(altHeader);
-        if (alternateLocations == null) {
-            return;
-        }
-
+            final String alternateLocations, boolean isGood) {
         StringTokenizer st = new StringTokenizer(alternateLocations, ",");
         while (st.hasMoreTokens()) {
             try {
@@ -84,6 +78,7 @@ public class AltLocHeaderInterceptor implements HeaderInterceptor {
 
                 if (al instanceof PushAltLoc)
                     ((PushAltLoc) al).updateProxies(isGood);
+                
                 // Note: if this thread gets preempted at this point,
                 // the AlternateLocationCollectioin may contain a PE
                 // without any proxies.

@@ -112,13 +112,11 @@ public class HttpIOSession implements IOSession {
     }
 
     public boolean hasBufferedInput() {
-        // TODO Auto-generated method stub
-        return false;
+        return this.bufferStatus != null && this.bufferStatus.hasBufferedInput();
     }
-
+    
     public boolean hasBufferedOutput() {
-        // TODO Auto-generated method stub
-        return false;
+        return this.bufferStatus != null && this.bufferStatus.hasBufferedOutput();
     }
     
 }

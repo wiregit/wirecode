@@ -19,7 +19,7 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     }
 
     public long getContentLength() {
-        return 0;
+        return -1;
     }
 
     public boolean isRepeatable() {
@@ -68,8 +68,7 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     public abstract boolean handleWrite() throws IOException;
 
     public void handleIOException(IOException iox) {
-        // TODO Auto-generated method stub
-        
+        throw new UnsupportedOperationException();
     }
 
     public void shutdown() {
