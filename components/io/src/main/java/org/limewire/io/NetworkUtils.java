@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.limewire.collection.IntSet;
 import org.limewire.util.ByteOrder;
 
 /**
@@ -380,6 +381,21 @@ public final class NetworkUtils {
     	}
     	
     	return Collections.unmodifiableList(ret);
+    }
+    
+    /**
+     * Filters unique ips based on a netmask.
+     */
+    public static <T extends IpPort>Collection<T> filterUnique(Collection<T> c, int netmask) {
+        ArrayList<T> ret = new ArrayList<T>(c.size());
+        IntSet ips = new IntSet();
+        for (T ip : c) {
+            if (ips.add( ByteOrder.beb2int(ip.getInetAddress().getAddress(),0) & netmask))
+                ret.add(ip);
+            
+        }
+        ret.trimToSize();
+        return ret;
     }
     
     /**
