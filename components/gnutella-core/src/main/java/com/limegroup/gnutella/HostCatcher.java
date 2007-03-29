@@ -637,7 +637,7 @@ public class HostCatcher {
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         Collection<IpPort> packed = 
-            NetworkUtils.filterUnique(pr.getPackedIPPorts(), PONG_MASK);
+            NetworkUtils.filterOnePerClassC(pr.getPackedIPPorts());
         rank(packed);
         for(IpPort ipp : packed) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());

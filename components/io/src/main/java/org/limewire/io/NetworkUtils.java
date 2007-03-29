@@ -384,6 +384,10 @@ public final class NetworkUtils {
     	return Collections.unmodifiableList(ret);
     }
     
+    public static <T extends IpPort>Collection<T> filterOnePerClassC(Collection<T> c) {
+        return filterUnique(c, 0xFFFFFF00);
+    }
+    
     /**
      * Filters unique ips based on a netmask.
      */
