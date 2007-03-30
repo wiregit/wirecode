@@ -34,7 +34,7 @@ public final class MutableGUIDFilter extends SpamFilter {
      */
     public synchronized void addGUID(byte[] guid) {
         Set<byte[]> guids = new TreeSet<byte[]>(new GUID.GUIDByteComparator());
-        guids.addAll(guids);
+        guids.addAll(_guids);
         guids.add(guid);
         _guids = guids;
     }
