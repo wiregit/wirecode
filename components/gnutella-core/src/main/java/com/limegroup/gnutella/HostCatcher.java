@@ -455,7 +455,7 @@ public class HostCatcher {
     /**
      * Determines if UDP Pongs need to be sent out.
      */
-    private boolean needsPongRanking() {
+    private synchronized boolean needsPongRanking() {
         if(RouterService.isFullyConnected())
             return false;
         int have = RouterService.getConnectionManager().
