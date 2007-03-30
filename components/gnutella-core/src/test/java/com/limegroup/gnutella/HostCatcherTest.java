@@ -652,6 +652,7 @@ public class HostCatcherTest extends LimeTestCase {
         GGEP ggep = new GGEP(true);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 1, 1, 2, 1, 0 } ); // same class C - filtered
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
