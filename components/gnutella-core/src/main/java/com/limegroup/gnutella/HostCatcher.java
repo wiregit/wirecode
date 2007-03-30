@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.BucketQueue;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedsizePriorityQueue;
-import org.limewire.collection.RandomOrderHashSet;
+import org.limewire.collection.RandomOrderHashMap;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.MessageService;
@@ -146,6 +146,10 @@ public class HostCatcher {
             }
         };
 
+    // NOTE: ENDPOINT_SET, FREE_ULTRAPEER_SLOTS_SET & FREE_LEAF_SLOTS_SET
+    //       are actually Maps that point to themselves so that we can
+    //       retrieve Endpoints from them based on an ip/port.
+        
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
      * normal, then private addresses.  Within each priority level, recent hosts
@@ -159,19 +163,19 @@ public class HostCatcher {
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue<ExtendedEndpoint> ENDPOINT_QUEUE = 
         new BucketQueue<ExtendedEndpoint>(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
-    private final Set<ExtendedEndpoint> ENDPOINT_SET = new HashSet<ExtendedEndpoint>();
+    private final Map<ExtendedEndpoint, ExtendedEndpoint> ENDPOINT_SET = new HashMap<ExtendedEndpoint, ExtendedEndpoint>();
     
     /**
      * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
      */
-    private final Set<ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
-        new RandomOrderHashSet<ExtendedEndpoint>(200);
+    private final Map<ExtendedEndpoint, ExtendedEndpoint> FREE_ULTRAPEER_SLOTS_SET = 
+        new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
     
     /**
      * <tt>Set</tt> of hosts advertising free leaf connection slots.
      */
-    private final Set<ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
-        new RandomOrderHashSet<ExtendedEndpoint>(200);
+    private final Map<ExtendedEndpoint, ExtendedEndpoint> FREE_LEAF_SLOTS_SET = 
+        new RandomOrderHashMap<ExtendedEndpoint, ExtendedEndpoint>(200);
     
     /**
      * map of locale (string) to sets (of endpoints).
@@ -367,7 +371,7 @@ public class HostCatcher {
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
-            List<Endpoint> l = new ArrayList<Endpoint>(ENDPOINT_SET);
+            List<Endpoint> l = new ArrayList<Endpoint>(ENDPOINT_SET.keySet());
             Collections.shuffle(l);
             rank(l); 
         }
@@ -396,11 +400,11 @@ public class HostCatcher {
     }
     
     private synchronized Collection<ExtendedEndpoint> getAllHosts() {
-        //keep them ordered
-        LinkedHashSet<ExtendedEndpoint> hosts = new LinkedHashSet<ExtendedEndpoint>(getNumHosts());
-        hosts.addAll(FREE_ULTRAPEER_SLOTS_SET);
-        hosts.addAll(FREE_LEAF_SLOTS_SET);
-        hosts.addAll(ENDPOINT_SET);
+        //keep them ordered -- TODO: Why?
+        Collection<ExtendedEndpoint> hosts = new LinkedHashSet<ExtendedEndpoint>(getNumHosts());
+        hosts.addAll(FREE_ULTRAPEER_SLOTS_SET.keySet());
+        hosts.addAll(FREE_LEAF_SLOTS_SET.keySet());
+        hosts.addAll(ENDPOINT_SET.keySet());
         return hosts;
     }
     
@@ -626,6 +630,9 @@ public class HostCatcher {
         // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache())
             return addUDPHostCache(endpoint);
+        
+        if(pr.isTLSCapable())
+            endpoint.setTLSCapable(true);
 
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
@@ -672,9 +679,9 @@ public class HostCatcher {
      * @param host the host to add
      * @param hosts the <tt>Set</tt> to add it to
      */
-    private void addToFreeSlotSet(ExtendedEndpoint host, Set<? super ExtendedEndpoint> hosts) {
+    private void addToFreeSlotSet(ExtendedEndpoint host, Map<? super ExtendedEndpoint, ? super ExtendedEndpoint> hosts) {
         synchronized(this) {
-            hosts.add(host);
+            hosts.put(host, host);
             
             // Also add it to the list of permanent hosts stored on disk.
             addPermanent(host);
@@ -800,12 +807,12 @@ public class HostCatcher {
             //Note that this modifies e.
             addPermanent(e);
             
-            if (! (ENDPOINT_SET.contains(e))) {
+            if (! (ENDPOINT_SET.containsKey(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
                 //queue, so we have to cleanup the set to maintain
                 //rep. invariant.
-                ENDPOINT_SET.add(e);
+                ENDPOINT_SET.put(e, e);
                 ExtendedEndpoint ejected = ENDPOINT_QUEUE.insert(e, priority);
                 if (ejected!=null) {
                     ENDPOINT_SET.remove(ejected);
@@ -916,6 +923,28 @@ public class HostCatcher {
         }
         
         return true;
+    }
+    
+    /**
+     * Returns true if the given IpPort is TLS-capable.
+     */
+    public boolean isHostTLSCapable(IpPort ipp) {
+        Endpoint p;
+        if(ipp instanceof Endpoint)
+            p = (Endpoint)ipp;
+        else
+            p = new Endpoint(ipp.getAddress(), ipp.getPort());
+        
+        ExtendedEndpoint ee = ENDPOINT_SET.get(p);
+        if(ee == null)
+            ee = FREE_ULTRAPEER_SLOTS_SET.get(p);
+        if(ee == null)
+            ee = FREE_LEAF_SLOTS_SET.get(p);
+        
+        if(ee == null)
+            return false;
+        else
+            return ee.isTLSCapable();
     }
     
     ///////////////////////////////////////////////////////////////////////
@@ -1060,7 +1089,7 @@ public class HostCatcher {
         // Otherwise, might as well use the leaf slots hosts up as well
         // since we added them to the size and they can give us other info
         else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
-            Iterator<ExtendedEndpoint> iter = FREE_LEAF_SLOTS_SET.iterator();
+            Iterator<ExtendedEndpoint> iter = FREE_LEAF_SLOTS_SET.keySet().iterator();
             ExtendedEndpoint ee = iter.next();
             FREE_LEAF_SLOTS_SET.remove(ee);
             return ee;
@@ -1068,10 +1097,10 @@ public class HostCatcher {
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e= ENDPOINT_QUEUE.extractMax();
-            boolean ok=ENDPOINT_SET.remove(e);
+            ExtendedEndpoint removed=ENDPOINT_SET.remove(e);
             
             //check that e actually was in set.
-            Assert.that(ok, "Rep. invariant for HostCatcher broken.");
+            Assert.that(removed == e, "Rep. invariant for HostCatcher broken.");
             return e;
         } else {
             return null;
@@ -1083,7 +1112,7 @@ public class HostCatcher {
      * tries to return an endpoint that matches the locale of this client
      * from the passed in set.
      */
-    private ExtendedEndpoint preferenceWithLocale(Set<ExtendedEndpoint> base) {
+    private ExtendedEndpoint preferenceWithLocale(Map<ExtendedEndpoint, ExtendedEndpoint> base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
         ExtendedEndpoint ret = null;
@@ -1091,7 +1120,7 @@ public class HostCatcher {
         if(!RouterService.getConnectionManager().isLocaleMatched()) {
             if(LOCALE_SET_MAP.containsKey(loc)) {
                 Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
-                for(ExtendedEndpoint e : base) {
+                for(ExtendedEndpoint e : base.keySet()) {
                     if(locales.contains(e)) {
                         locales.remove(e);
                         ret = e;
@@ -1102,7 +1131,7 @@ public class HostCatcher {
         }
         
         if (ret == null) 
-            ret = base.iterator().next();
+            ret = base.keySet().iterator().next();
         
         base.remove(ret);
         return ret;
@@ -1180,7 +1209,7 @@ public class HostCatcher {
      * preference the set so we try to return those endpoints that match
      * passed in locale "loc"
      */
-    private Collection<IpPort> getPreferencedCollection(Set<? extends IpPort> base, String loc, int num) {
+    private Collection<IpPort> getPreferencedCollection(Map<? extends ExtendedEndpoint, ? extends ExtendedEndpoint> base, String loc, int num) {
         if(loc == null || loc.equals(""))
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
@@ -1191,12 +1220,12 @@ public class HostCatcher {
             for(ExtendedEndpoint e : locales) {
                 if(hosts.size() >= num)
                     break;
-                if(base.contains(e))
+                if(base.containsKey(e))
                     hosts.add(e);
             }
         }
         
-        for(IpPort ipp : base) {
+        for(IpPort ipp : base.keySet()) {
             if(hosts.size() >= num)
                 break;
             hosts.add(ipp);
@@ -1268,7 +1297,7 @@ public class HostCatcher {
         synchronized(this) {
             //Check ENDPOINT_SET == ENDPOINT_QUEUE
             outer:
-            for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
+            for (Iterator iter=ENDPOINT_SET.keySet().iterator(); iter.hasNext(); ) {
                 Object e=iter.next();
                 for (Iterator iter2=ENDPOINT_QUEUE.iterator(); 
                      iter2.hasNext();) {
@@ -1280,7 +1309,7 @@ public class HostCatcher {
             for (Iterator iter=ENDPOINT_QUEUE.iterator(); iter.hasNext(); ) {
                 Object e=iter.next();
                 Assert.that(e instanceof ExtendedEndpoint);
-                Assert.that(ENDPOINT_SET.contains(e));
+                Assert.that(ENDPOINT_SET.containsKey(e));
             }
         
             //Check permanentHosts === permanentHostsSet

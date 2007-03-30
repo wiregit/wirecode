@@ -88,6 +88,9 @@ public class ExtendedEndpoint extends Endpoint {
     private int _dhtVersion = -1;
     
     private DHTMode _dhtMode;
+    
+    /** If this host supports TLS. */
+    private boolean tlsCapable;
         
     /**
      * The number of times this has failed while attempting to connect
@@ -181,6 +184,16 @@ public class ExtendedEndpoint extends Endpoint {
      */
     public void setDailyUptime(int uptime) {
     	dailyUptime = uptime;
+    }
+    
+    /** A setter for supporting TLS. */
+    public void setTLSCapable(boolean capable) {
+        this.tlsCapable = capable;
+    }
+    
+    /** A getter for supporting TLS. */
+    public boolean isTLSCapable() {
+        return tlsCapable;
     }
 
     /** Records that we just successfully connected to this. */
@@ -362,7 +375,14 @@ public class ExtendedEndpoint extends Endpoint {
             if(_dhtVersion > -1 && _dhtMode!= null) {
                 out.write(_dhtMode.toString());
             }
+        } else {
+            // ensure the # of separators is always equal
+            out.write(FIELD_SEPARATOR);
         }
+        
+        out.write(FIELD_SEPARATOR);
+        if(tlsCapable)
+            out.write(1);
         out.write(FIELD_SEPARATOR);
         out.write(EOL);
     }
@@ -475,8 +495,8 @@ public class ExtendedEndpoint extends Endpoint {
                     ret.udpHostCacheFailures = i;
             } catch(NumberFormatException nfe) {}
         }
-        //8. DHT host
-        if(linea.length>=8) {
+        //8&9. DHT host -- requires two parameters
+        if(linea.length>=9) {
             try {
                 int i = Integer.parseInt(linea[7]);
                 if(i >= -1) {
@@ -487,6 +507,14 @@ public class ExtendedEndpoint extends Endpoint {
             } 
             catch(NumberFormatException nfe) {}
             catch(IllegalArgumentException iae) {};
+        }
+        //10. supports TLS
+        if(linea.length>=10) {
+            try {
+                int i = Integer.parseInt(linea[9]);
+                if(i == 1)
+                    ret.setTLSCapable(true);
+            } catch(NumberFormatException nfe) {}
         }
         
         // validate address if numeric.

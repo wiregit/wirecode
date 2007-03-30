@@ -37,6 +37,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
@@ -433,6 +434,8 @@ public class QueryReply extends Message implements SecureMessage {
         _data.setProxies(proxies);
         _data.setSupportsFWTransfer(supportsFWTransfer);
         _data.setSecurityToken(securityToken != null ? securityToken.getBytes() : null);
+        boolean supportsTLS = ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue();
+        _data.setTLSCapable(supportsTLS);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -465,7 +468,7 @@ public class QueryReply extends Message implements SecureMessage {
                 
                 // size of standard, no options, ggep block...
                 int ggepLen=
-                    _ggepUtil.getQRGGEP(false, false, false,
+                    _ggepUtil.getQRGGEP(false, false, false, false,
                                         IpPort.EMPTY_SET, null).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
@@ -483,8 +486,9 @@ public class QueryReply extends Message implements SecureMessage {
                            | (finishedUpload ? UPLOADED_MASK : 0)
                            | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
                            | (supportsBH || isMulticastReply || hasProxies ||
-                              (supportsFWTransfer || securityToken != null) ? 
-                              GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+                              supportsFWTransfer || securityToken != null ||
+                              supportsTLS ? 
+                                      GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
                 baos.write(flags);
                 baos.write(controls);
                 
@@ -503,6 +507,7 @@ public class QueryReply extends Message implements SecureMessage {
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
                                                        isMulticastReply,
                                                        supportsFWTransfer,
+                                                       supportsTLS,
                                                        proxies, securityToken);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
@@ -793,6 +798,12 @@ public class QueryReply extends Message implements SecureMessage {
     public synchronized void setSecureStatus(int secureStatus) {
         this._secureStatus = secureStatus;
     }    
+    
+    /** Returns true iff this client supports TLS. */
+    public boolean isTLSCapable() {
+        parseResults();
+        return _data.isTLSCapable();
+    }
 
     /** 
      * Returns true iff the client supports chat.
@@ -1013,6 +1024,7 @@ public class QueryReply extends Message implements SecureMessage {
             boolean replyToMulticastT=false;
             Set<IpPort> proxies = IpPort.EMPTY_SET;
             byte[] securityToken = null;
+            boolean supportsTLST = false;
             
             //a) extract vendor code
             try {
@@ -1066,6 +1078,7 @@ public class QueryReply extends Message implements SecureMessage {
                                     throw new BadPacketException("Message had empty OOB security token");
                                 }
                             }
+                            supportsTLST = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
                         } catch (BadGGEPPropertyException bgpe) {
                         }
                     }
@@ -1126,7 +1139,7 @@ public class QueryReply extends Message implements SecureMessage {
             _data.setProxies(proxies);
             _data.setSecurityToken(securityToken);
             _data.setHostData(new HostData(this));
-
+            _data.setTLSCapable(supportsTLST);
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -1273,60 +1286,52 @@ public class QueryReply extends Message implements SecureMessage {
          */
         private final byte[] _standardGGEP;
         
-        /** A GGEP block that has the 'Browse Host' extension.  Useful for Query
-         *  Replies.
-         */
+        /** A GGEP block that has the 'Browse Host' extension. */
         private final byte[] _bhGGEP;
+        
+        /** A GGEP Block with BH & TLS */
+        private final byte[] _bhTLSGGEP;
         
         /** A GGEP block that has the 'Multicast Source' extension.  
          *  Useful for Query Replies for a Query from a multicast source.
          */
         private final byte[] _mcGGEP;
         
-        /** A GGEP block that has everything a QR could possible need.
-         */
-        private final byte[] _comboGGEP;
+        /** A GGEP Block with MC + TLS. */
+        private final byte[] _mcTLSGGEP;
+        
+        /** A GGEP Block with BH & MC. */
+        private final byte[] _bhAndMC;
+        
+        /** A GGEP Block with BH, MC & TLS. */
+        private final byte[] _bhMCAndTLS;
+        
+        /** A TLS GGEP Block only. */
+        private final byte[] _tlsGGEP;
         
         public GGEPUtil() {
-            ByteArrayOutputStream oStream = new ByteArrayOutputStream();
-            
-            // the standard GGEP has nothing.
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            _standardGGEP = create(out);
+            _bhGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST);
+            _mcGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+            _mcTLSGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhAndMC = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+            _bhTLSGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhMCAndTLS = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _tlsGGEP = create(out, GGEP.GGEP_HEADER_TLS_CAPABLE);
+        }
+        
+        private byte[] create(ByteArrayOutputStream out, String... headers) {
+            out.reset();
+            GGEP combo = new GGEP(false);
+            for(String header : headers)
+                combo.put(header);
             try {
-                GGEP standard = new GGEP(false);
-                standard.write(oStream);
+                combo.write(out);
             } catch (IOException writeError) {}
-            _standardGGEP = oStream.toByteArray();
-            
-            // a GGEP block with JUST BHOST
-            oStream.reset();
-            try {
-                GGEP bhost = new GGEP(false);
-                bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
-                bhost.write(oStream);
-            } catch (IOException writeError) {}
-            _bhGGEP = oStream.toByteArray();
-            Assert.that(_bhGGEP != null);
-
-            // a GGEP block with JUST MCAST
-            oStream.reset();
-            try {
-                GGEP mcast = new GGEP(false);
-                mcast.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-                mcast.write(oStream);
-            } catch (IOException writeError) {}
-            _mcGGEP = oStream.toByteArray();
-            Assert.that(_mcGGEP != null);
-
-            // a GGEP block with everything....
-            oStream.reset();
-            try {
-                GGEP combo = new GGEP(false);
-                combo.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-                combo.put(GGEP.GGEP_HEADER_BROWSE_HOST);
-                combo.write(oStream);
-            } catch (IOException writeError) {}
-            _comboGGEP = oStream.toByteArray();
-            Assert.that(_comboGGEP != null);
+            byte[] data = out.toByteArray();
+            assert data != null;
+            return data;
         }
         
         /** @return The appropriate byte[] corresponding to the GGEP block you
@@ -1335,6 +1340,7 @@ public class QueryReply extends Message implements SecureMessage {
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
                                 boolean supportsFWTransfer,
+                                boolean supportsTLS,
                                 Set<? extends IpPort> proxies,
                                 SecurityToken securityToken) {
             byte[] retGGEPBlock = _standardGGEP;
@@ -1352,6 +1358,8 @@ public class QueryReply extends Message implements SecureMessage {
                     retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
                 if (isMulticastResponse)
                     retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                if (supportsTLS)
+                    retGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
                 if (supportsFWTransfer)
                     retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
                                 new byte[] {UDPConnection.VERSION});
@@ -1400,12 +1408,22 @@ public class QueryReply extends Message implements SecureMessage {
             // else if (supportsBH && supportsFWTransfer &&
             // isMulticastResponse), since supportsFWTransfer is only helpful
             // if we have proxies
+            else if (supportsBH && isMulticastResponse && supportsTLS)
+                retGGEPBlock = _bhMCAndTLS;
             else if (supportsBH && isMulticastResponse)
-                retGGEPBlock = _comboGGEP;
+                retGGEPBlock = _bhAndMC;
+            else if (supportsBH && supportsTLS)
+                retGGEPBlock = _bhTLSGGEP;
             else if (supportsBH)
                 retGGEPBlock = _bhGGEP;
-            else if (isMulticastResponse)
+            else if(isMulticastResponse && supportsTLS)
+                retGGEPBlock = _mcTLSGGEP;
+            else if(isMulticastResponse)
                 retGGEPBlock = _mcGGEP;
+            else if(supportsTLS)
+                retGGEPBlock = _tlsGGEP;
+            else
+                retGGEPBlock = _standardGGEP;
             return retGGEPBlock;
         }
         

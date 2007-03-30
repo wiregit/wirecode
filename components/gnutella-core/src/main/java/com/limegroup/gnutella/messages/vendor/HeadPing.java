@@ -46,6 +46,7 @@ public class HeadPing extends VendorMessage {
 	public static final int PUSH_ALTLOCS=0x4;
 	public static final int FWT_PUSH_ALTLOCS=0x8;
 	public static final int GGEP_PING=0x10;
+    public static final int TLS = 0x20;
 	
 	
 	/** 
@@ -58,7 +59,7 @@ public class HeadPing extends VendorMessage {
 	/**
 	 * the feature mask.
 	 */
-	public static final int FEATURE_MASK=0x1F;
+	public static final int FEATURE_MASK=0x3F;
 
 	/** The URN of the file being requested */
 	private final URN _urn;
@@ -221,6 +222,10 @@ public class HeadPing extends VendorMessage {
 	public boolean requestsFWTPushLocs() {
 		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
 	}
+    
+    public boolean isTLSCapable() {
+        return (_features & TLS) == TLS;
+    }
 	
 	public byte getFeatures() {
 		return _features;

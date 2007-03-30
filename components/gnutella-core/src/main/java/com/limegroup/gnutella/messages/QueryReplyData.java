@@ -65,6 +65,9 @@ class QueryReplyData {
     /** A secure token, if any */
     private volatile byte[] securityToken = null;
     
+    /** Whether or not this QueryReply supports TLS. */
+    private volatile boolean supportsTLS;
+    
     public int getBusyFlag() {
         return busyFlag;
     }
@@ -207,5 +210,13 @@ class QueryReplyData {
     
     public byte[] getSecurityToken() {
         return securityToken;
+    }
+    
+    public void setTLSCapable(boolean capable) {
+        supportsTLS = capable;
+    }
+    
+    public boolean isTLSCapable() {
+        return supportsTLS;
     }
 }

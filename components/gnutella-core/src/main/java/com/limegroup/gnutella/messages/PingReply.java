@@ -24,14 +24,17 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -148,6 +151,9 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Contant for the DHT mode (active/passive/none)
      */
     private final DHTMode DHT_MODE;
+    
+    /** True if the remote host supports TLS. */
+    private final boolean TLS_CAPABLE;
 
     /**
      * Constant boolean for whether or not this pong contains any GGEP
@@ -734,6 +740,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         int freeLeafSlots = -1;
         int freeUltrapeerSlots = -1;
         AddressSecurityToken key = null;
+        boolean tlsCapable = false;
         
         String locale /** def. val from settings? */
             = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
@@ -883,6 +890,8 @@ public class PingReply extends Message implements Serializable, IpPort {
                     packedCaches = listCaches(data);
                 } catch(BadGGEPPropertyException bad) {}
             }
+            
+            tlsCapable = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
         }
         
         MY_IP = myIP;
@@ -907,6 +916,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         PACKED_UDP_HOST_CACHES = packedCaches;
         DHT_VERSION = dhtVersion;
         DHT_MODE = dhtMode;
+        TLS_CAPABLE = tlsCapable;
     }
 
 
@@ -935,6 +945,10 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         // all pongs should have vendor info
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
+        
+        // add our support of TLS
+        if(ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
+            ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;
     }
@@ -991,6 +1005,11 @@ public class PingReply extends Message implements Serializable, IpPort {
         
         if(gnutHosts != null && !gnutHosts.isEmpty()) {
             ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils.packIpPorts(gnutHosts));
+            if(ConnectionSettings.TLS_ALLOWED.getValue()) {
+                byte[] data = getTLSData(gnutHosts);
+                if(data.length != 0)
+                    ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
+            }
         }
         
         if(dhtHosts != null && !dhtHosts.isEmpty()) {
@@ -998,6 +1017,33 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
         
         return ggep;
+    }
+    
+    private static byte[] getTLSData(Collection<? extends IpPort> hosts) {
+        HostCatcher catcher = RouterService.getHostCatcher();
+        if(catcher == null)
+            return DataUtils.EMPTY_BYTE_ARRAY;
+        
+        byte[] b = new byte[(int)Math.ceil((hosts.size() / 8d))];
+        boolean found = false;
+        int i = 0;
+        int bit = 0;
+        for(IpPort ipp : hosts) {
+            if(catcher.isHostTLSCapable(ipp)) {
+                found = true;
+                b[i] |= bit;
+            }
+            if(bit == 0x80) {
+                i++;
+                bit = 0;
+            } else {
+                bit <<= 1;
+            }
+        }
+        if(!found)
+            return DataUtils.EMPTY_BYTE_ARRAY;
+        else
+            return b;
     }
 
     /**
@@ -1509,6 +1555,11 @@ public class PingReply extends Message implements Serializable, IpPort {
      */
     public String getUDPCacheAddress() {
         return UDP_CACHE_ADDRESS;
+    }
+    
+    /** Returns true if the host supports TLS. */
+    public boolean isTLSCapable() {
+        return TLS_CAPABLE;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

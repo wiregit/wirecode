@@ -463,7 +463,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         qr.write(out);
 
         byte[] bytes=out.toByteArray();
-        int ggepLen = _ggepUtil.getQRGGEP(true, false, false,
+        int ggepLen = _ggepUtil.getQRGGEP(true, false, false, false, 
                                           new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -507,7 +507,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, false,
+        ggepLen = _ggepUtil.getQRGGEP(true, false, false,false,
                                       new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -562,7 +562,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         qr.write(out);
 
         bytes=out.toByteArray();
-        ggepLen = _ggepUtil.getQRGGEP(true, false, true,
+        ggepLen = _ggepUtil.getQRGGEP(true, false, true,false,
                                       proxies, null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
@@ -656,7 +656,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         // test standard null GGEP....
         try {
             // this shouldn't even work....
-            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,
+            testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false,
                                                     new HashSet(), null), 
                                 0, null);
             assertTrue(false);
@@ -664,7 +664,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         catch (BadGGEPBlockException expected) {}
 
         // test just BH GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,false,
                                                 new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -672,7 +672,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test just multicast GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,false,
                                                 new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
@@ -680,7 +680,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test combo GGEP....
-        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,
+        testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,false,
                                                 new HashSet(), null),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
@@ -691,50 +691,51 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     
     public void testGGEPUtilWritesSecurityToken() throws Exception {
         // assert token is written
-        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, _token), 0, null);
+        GGEP ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, false,null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, _token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,null, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         Set<IpPort> proxies = new HashSet<IpPort>();
         proxies.add(new Endpoint("127.0.0.1:6464"));
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, _token), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,proxies, _token), 0, null);
         assertTrue(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         assertEquals(_token.getBytes(), ggep.get(GGEP.GGEP_HEADER_SECURE_OOB));
         
         // assert token is not written
         try {
-            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false, null, null), 0, null);
+            ggep = new GGEP(_ggepUtil.getQRGGEP(false, false, false,false, null, null), 0, null);
             fail("exception should have been thrown");
         }
         catch (BadGGEPBlockException bgbe) {
         }
                 
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, null, null), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, false,null, null), 0, null);
         assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
         
-        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true, proxies, null), 0, null);
+        ggep = new GGEP(_ggepUtil.getQRGGEP(true, true, true,false, proxies, null), 0, null);
         assertFalse(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB));
     }
 
 
     public void testBasicPushProxyGGEP() throws Exception {
-        basicTest(false, false, false);
-        basicTest(false, true, false);
-        basicTest(true, false, false);
-        basicTest(true, true, false);
-        basicTest(false, false, true);
-        basicTest(false, true, true);
-        basicTest(true, false, true);
-        basicTest(true, true, true);
+        basicTest(false, false, false, false);
+        basicTest(false, true, false, false);
+        basicTest(true, false, false, false);
+        basicTest(true, true, false, false);
+        basicTest(false, false, true, false);
+        basicTest(false, true, true, false);
+        basicTest(true, false, true, false);
+        basicTest(true, true, true, false);
     }
 
     public void basicTest(final boolean browseHost, 
                           final boolean multicast,
-                          final boolean fwTransfer) throws Exception {
+                          final boolean fwTransfer,
+                          final boolean tls) throws Exception {
         int numHeaders = 1;
 
         // first take input of proxies
@@ -744,7 +745,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     fwTransfer, proxies, null), 
+                                                     fwTransfer, tls, proxies, null), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
@@ -758,6 +759,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             numHeaders++;
             assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_FW_TRANS));
         }
+        if (tls) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE));
+        }
+        
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
         assertEquals(numHeaders, testGGEP.getHeaders().size());
         Set retProxies = _ggepUtil.getPushProxies(testGGEP);

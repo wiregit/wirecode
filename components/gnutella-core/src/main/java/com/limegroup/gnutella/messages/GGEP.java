@@ -60,6 +60,10 @@ public class GGEP {
     public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
     /** The extension header (key) for packed IP/Ports */
     public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension header (key) for which packed IP/Ports support TLS. */
+    public static final String GGEP_HEADER_PACKED_IPPORTS_TLS="TLSIPP";
+    /** The extension header (key) for understanding TLS. */
+    public static final String GGEP_HEADER_TLS_CAPABLE="TLS";
     /** The extension header (key) for packed UDP Host Caches */
     public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
     /** The extension header (key) for SHA1 urns. */

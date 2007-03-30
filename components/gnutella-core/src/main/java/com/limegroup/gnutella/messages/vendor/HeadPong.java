@@ -41,6 +41,7 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 
 /**
@@ -157,6 +158,9 @@ public class HeadPong extends VendorMessage {
 	 * whether the other host is currently downloading the file
 	 */
 	private boolean _isDownloading;
+    
+    /** Whether the remote host supports TLS. */
+    private boolean _tlsCapable;
 	
 	/**
 	 * creates a message object with data from the network.
@@ -182,6 +186,8 @@ public class HeadPong extends VendorMessage {
     		
     		//read and mask the features
     		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
+            
+            _tlsCapable = (_features & HeadPing.TLS) == HeadPing.TLS;
     		
     		//read the response code
     		byte code = dais.readByte();
@@ -256,7 +262,10 @@ public class HeadPong extends VendorMessage {
 		
 		try {
     		byte features = ping.getFeatures();
-    		features &= ~HeadPing.GGEP_PING; 
+    		features &= ~HeadPing.GGEP_PING;
+            features &= ~HeadPing.TLS;
+            if(ConnectionSettings.TLS_ALLOWED.getValue() && ConnectionSettings.INCOMING_TLS_ENABLED.getValue())
+                features |= HeadPing.TLS;
     		daos.write(features);
     		if (LOG.isDebugEnabled())
     			LOG.debug("writing features "+features);
@@ -413,6 +422,11 @@ public class HeadPong extends VendorMessage {
 	public Set<PushEndpoint> getPushLocs() {
 		return _pushLocs;
 	}
+    
+    /** Whether or not this pong supports TLS. */
+    public boolean isTLSCapable() {
+        return _tlsCapable;
+    }
 	
 	/**
 	 * @return all altlocs carried in the pong as 
