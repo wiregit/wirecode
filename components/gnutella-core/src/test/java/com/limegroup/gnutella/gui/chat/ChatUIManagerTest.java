@@ -19,7 +19,6 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
 
     private static final int CHAT_PORT = 9999;
     private static Acceptor acceptThread;
-    private static String localAddress;
     private ChatUIManager chatManager;
     private ChatFrame outgoing;
     private ChatFrame incoming;
@@ -51,8 +50,6 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException ex) {}
-        
-        localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
     }
 
     public static void globealTearDown() throws Exception {
@@ -95,11 +92,13 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
         
         chatManager.clear();
     }
-      
+
+    // tests that chats to localhost are closed right away, test case fails on  
     public void testChatLocalhost() throws Exception {
-        ChatFrame chatter = GUIMediator.createChat(localAddress, CHAT_PORT);
-        Thread.sleep(500);
-        assertTrue(!chatter.getChat().isConnected());
+        String localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
+        outgoing = GUIMediator.createChat(localAddress, CHAT_PORT);
+        Thread.sleep(1000);
+        assertTrue(!outgoing.getChat().isConnected());
     }
 
     public void testChatThroughAcceptor() throws Exception {
