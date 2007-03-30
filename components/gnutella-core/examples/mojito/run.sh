@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ulimit -n 1024
+ulimit -n 2048
 
 PATH_SEPARATOR=":"
 ROOT="../../.."
@@ -29,6 +29,7 @@ done
 export CLASSPATH
 
 javac org/limewire/mojito/Main.java
-java -ea org.limewire.mojito.Main $*
+java -ea -Djava.nio.preferSelect=true org.limewire.mojito.Main $*
+#java -ea org.limewire.mojito.Main $*
 
 exit 0
