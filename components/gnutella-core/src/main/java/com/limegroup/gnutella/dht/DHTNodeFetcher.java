@@ -24,6 +24,7 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
@@ -256,8 +257,9 @@ public class DHTNodeFetcher {
         }
         
         PingReply reply = (PingReply) m;
-        Collection<IpPort> list = 
-            NetworkUtils.filterOnePerClassC(reply.getPackedDHTIPPorts());
+        Collection<IpPort> list = ConnectionSettings.FILTER_CLASS_C.getValue() ?
+            NetworkUtils.filterOnePerClassC(reply.getPackedDHTIPPorts()) :
+                reply.getPackedDHTIPPorts();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Received ping reply from "+reply.getAddress());

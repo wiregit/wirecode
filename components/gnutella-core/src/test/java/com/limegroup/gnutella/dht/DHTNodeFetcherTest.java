@@ -25,6 +25,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 
@@ -52,6 +53,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
     @Override
     protected void setUp() throws Exception {
         setSettings();
+        ConnectionSettings.FILTER_CLASS_C.setValue(false);
         dhtBootstrapper = new DHTBootstrapperStub();
         
         UDP_ACCESS = new DatagramSocket[10];

@@ -446,7 +446,8 @@ public class HostCatcher {
         for(ExtendedEndpoint host : getAllHosts()) {
             if(host.supportsDHT() 
                     && host.getDHTVersion() >= minVersion &&
-                    classC.add(NetworkUtils.getMaskedIP(host.getInetAddress(), PONG_MASK))) {
+                    (!ConnectionSettings.FILTER_CLASS_C.getValue() ||
+                    classC.add(NetworkUtils.getMaskedIP(host.getInetAddress(), PONG_MASK)))) {
                 hostsList.add(host);
             }
         }
@@ -646,7 +647,9 @@ public class HostCatcher {
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
         Collection<IpPort> packed = 
-            NetworkUtils.filterOnePerClassC(pr.getPackedIPPorts());
+            ConnectionSettings.FILTER_CLASS_C.getValue() ?
+                    NetworkUtils.filterOnePerClassC(pr.getPackedIPPorts()) :
+                        pr.getPackedIPPorts();
         rank(packed);
         for(IpPort ipp : packed) {
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
@@ -1233,12 +1236,14 @@ public class HostCatcher {
         IntSet masked = new IntSet();
         
         Set<ExtendedEndpoint> locales = LOCALE_SET_MAP.get(loc);
+        boolean filter = ConnectionSettings.FILTER_CLASS_C.getValue();
         if(locales != null) {
             for(ExtendedEndpoint e : locales) {
                 if(hosts.size() >= num)
                     break;
                 if(base.contains(e) && 
-                        masked.add(NetworkUtils.getMaskedIP(e.getInetAddress(), PONG_MASK)))
+                        (!filter ||
+                        masked.add(NetworkUtils.getMaskedIP(e.getInetAddress(), PONG_MASK))))
                     hosts.add(e);
             }
         }
@@ -1246,7 +1251,7 @@ public class HostCatcher {
         for(IpPort ipp : base) {
             if(hosts.size() >= num)
                 break;
-            if (masked.add(NetworkUtils.getMaskedIP(ipp.getInetAddress(), PONG_MASK)))
+            if (!filter || masked.add(NetworkUtils.getMaskedIP(ipp.getInetAddress(), PONG_MASK)))
                 hosts.add(ipp);
         }
         

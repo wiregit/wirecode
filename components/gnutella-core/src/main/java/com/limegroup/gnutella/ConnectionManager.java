@@ -1955,7 +1955,9 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
                 continue;
             }
         }
-        _catcher.add(NetworkUtils.filterOnePerClassC(hosts));        
+        _catcher.add(ConnectionSettings.FILTER_CLASS_C.getValue() ? 
+                NetworkUtils.filterOnePerClassC(hosts) :
+                    hosts);        
     }
 
 
