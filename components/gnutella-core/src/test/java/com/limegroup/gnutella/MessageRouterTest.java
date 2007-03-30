@@ -603,7 +603,8 @@ public final class MessageRouterTest extends LimeTestCase {
         assertEquals(0, reply.getPackedIPPorts().size());
         
         // add some hosts with free leaf slots (just 3), make sure we get'm back.
-        addFreeLeafSlotHosts(3);
+        addFreeLeafSlotHosts(3); // these 3 will be returned as 1
+        addFreeLeafSlotHostsClassB(2);
         hosts = RouterService.getPreferencedHosts(false, null,10);
         assertEquals(hosts.toString(), 3, hosts.size());
         pr = PingRequest.createUDPPing();
@@ -617,7 +618,7 @@ public final class MessageRouterTest extends LimeTestCase {
         
         // add 20 more free leaf slots, make sure we only get as many we request.
         int requested = 10;
-        addFreeLeafSlotHosts(20);
+        addFreeLeafSlotHostsClassB(20);
         hosts = RouterService.getPreferencedHosts(false, null,requested);
         assertEquals(hosts.toString(), requested, hosts.size());
         pr = PingRequest.createUDPPing();
@@ -630,7 +631,7 @@ public final class MessageRouterTest extends LimeTestCase {
         assertEquals(requested, reply.getPackedIPPorts().size());
         
         clearFreeLeafSlotHosts();
-        addFreeLeafSlotHosts(2); // odd number, to make sure it isn't impacting other tests.
+        addFreeLeafSlotHostsClassB(2); // odd number, to make sure it isn't impacting other tests.
         
         // now test if we're an ultrapeer.
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -638,7 +639,7 @@ public final class MessageRouterTest extends LimeTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         assertTrue(RouterService.isSupernode());
-        addFreeUltrapeerSlotHosts(4);
+        addFreeUltrapeerSlotHostsClassB(4);
         hosts = RouterService.getPreferencedHosts(true, null,10);
         assertEquals(hosts.toString(), 4, hosts.size());
         pr = PingRequest.createUDPPing();
@@ -651,7 +652,7 @@ public final class MessageRouterTest extends LimeTestCase {
         assertEquals(4, reply.getPackedIPPorts().size());
         
         // and add a lot again, make sure we only get as many we reqeust.
-        addFreeUltrapeerSlotHosts(20);
+        addFreeUltrapeerSlotHostsClassB(20);
         requested = 15;
         int original = ConnectionSettings.NUM_RETURN_PONGS.getValue();
         ConnectionSettings.NUM_RETURN_PONGS.setValue(requested);
@@ -740,7 +741,8 @@ public final class MessageRouterTest extends LimeTestCase {
         
         //now try adding some gnutella IPPs
         ConnectionSettings.DHT_TO_GNUT_HOSTS_PONG.setValue(60);
-        addFreeLeafSlotHosts(20);
+        addFreeLeafSlotHosts(20); // filtered - class C
+        addFreeLeafSlotHostsClassB(20);
         guid = new GUID();
         l = new LinkedList<NameValue>();
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[] {PingRequest.SCP_LEAF}));
@@ -823,11 +825,18 @@ public final class MessageRouterTest extends LimeTestCase {
             set.add(new Endpoint("1.2.3." + i, i+1));
     }
     
-    private void addFreeUltrapeerSlotHosts(int num) throws Exception {
+    private void addFreeLeafSlotHostsClassB(int num) throws Exception {
+        HostCatcher hc = RouterService.getHostCatcher();
+        Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_LEAF_SLOTS_SET");
+        for(int i = 0; i < num; i++)
+            set.add(new Endpoint("1.2." + i+".3", i+1));
+    }
+    
+    private void addFreeUltrapeerSlotHostsClassB(int num) throws Exception {
         HostCatcher hc = RouterService.getHostCatcher();
         Set set = (Set)PrivilegedAccessor.getValue(hc, "FREE_ULTRAPEER_SLOTS_SET");
         for(int i = 0; i < num; i++)
-            set.add(new Endpoint("1.2.3." + i, i+1));
+            set.add(new Endpoint("1.2." + i+".3", i+1));
     }
     
     private void clearFreeLeafSlotHosts() throws Exception {
