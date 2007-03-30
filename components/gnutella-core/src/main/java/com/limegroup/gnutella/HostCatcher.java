@@ -209,10 +209,12 @@ public class HostCatcher {
     /**
      * List of the hosts that were restored from disk.
      * INVARIANT: a subset of permanentHosts.  
+     * LOCKING: this
      */
-    private final FixedSizeSortedList<ExtendedEndpoint> restoredHosts=
-        new FixedSizeSortedList<ExtendedEndpoint>(ExtendedEndpoint.priorityComparator(),
-                                   PERMANENT_SIZE);
+    private final List<ExtendedEndpoint> restoredHosts=
+        new FixedSizeSortedList<ExtendedEndpoint>(
+                ExtendedEndpoint.priorityComparator(),
+                PERMANENT_SIZE);
     
     /** 
      * Partition view of the list of restored hosts.
@@ -513,8 +515,10 @@ public class HostCatcher {
                     if(e.isUDPHostCache())
                         addUDPHostCache(e);
                     else {
-                        addPermanent(e);
-                        restoredHosts.add(e);
+                        synchronized(this) {
+                            addPermanent(e);
+                            restoredHosts.add(e);
+                        }
                         endpointAdded();
                     }
                 } catch (ParseException pe) {
