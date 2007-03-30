@@ -387,11 +387,14 @@ public class HostCatcher {
      */
     public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
+        List<Endpoint> l; 
         synchronized(this) {
-            List<Endpoint> l = new ArrayList<Endpoint>(ENDPOINT_SET);
-            Collections.shuffle(l);
-            rank(l); 
+            l = new ArrayList<Endpoint>(ENDPOINT_SET.size()+restoredHosts.size()); 
+            l.addAll(ENDPOINT_SET);
+            l.addAll(restoredHosts);
         }
+        Collections.shuffle(l);
+        rank(l); 
     }
     
     /**
