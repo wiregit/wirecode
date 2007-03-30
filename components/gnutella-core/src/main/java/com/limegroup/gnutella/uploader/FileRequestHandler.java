@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 
@@ -10,6 +12,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AbstractHttpNIOEntity;
@@ -24,7 +27,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
 import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
@@ -287,10 +289,8 @@ public class FileRequestHandler implements HttpRequestHandler {
     private void handleQueued(HttpContext context, HttpRequest request,
             HttpResponse response, HTTPUploader uploader, FileDesc fd)
             throws IOException, HttpException {
-        // FIXME add X-Queue header, alt locations etc.
-
         // if not queued, this should never be the state
-        int position = uploader.getQueuePosition();
+        int position = uploader.getSession().positionInQueue();
         Assert.that(position != -1);
 
         String value = "position=" + (position + 1) + ", pollMin="
@@ -312,6 +312,8 @@ public class FileRequestHandler implements HttpRequestHandler {
                     .addHeader(HTTPHeaderName.THEX_URI.create(fd.getHashTree()));
         }
 
+        response.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
+        
         uploader.setState(Uploader.QUEUED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
@@ -522,21 +524,19 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         private ByteBuffer buffer;
 
-        private int length;
+        private long length;
+
+        private long begin;
 
         public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
             this.uploader = uploader;
             this.fd = fd;
 
             setContentType(Constants.FILE_MIME_TYPE);
-
-            byte[] content = FileUtils.readFileFully(fd.getFile());
-
-            int begin = (int) uploader.getUploadBegin();
-            int end = (int) uploader.getUploadEnd();
+            
+            begin = uploader.getUploadBegin();
+            long end = uploader.getUploadEnd();
             length = end - begin;
-
-            buffer = ByteBuffer.wrap(content, begin, length);
         }
 
         @Override
@@ -546,6 +546,17 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         @Override
         public boolean handleWrite() throws IOException {
+            if (buffer == null) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                InputStream in = fd.createInputStream();
+                int i;
+                while ((i = in.read()) != -1) {
+                    out.write(i);
+                }
+
+                buffer = ByteBuffer.wrap(out.toByteArray(),(int) begin, (int) length);
+            }
+            
             write(buffer);
             return buffer.hasRemaining();
         }

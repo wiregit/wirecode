@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.1.2.8 $
- * $Date: 2007-03-30 00:14:19 $
+ * $Revision: 1.1.2.9 $
+ * $Date: 2007-03-30 19:54:24 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -33,6 +33,7 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.InetAddress;
 
 import org.apache.http.ConnectionReuseStrategy;
@@ -231,12 +232,14 @@ public class HttpServiceHandler implements NHttpServiceHandler {
         }
         
         // LW
+        System.out.println("connection closed");
         if (connectionListener != null) {
             connectionListener.connectionClosed(conn);
         }
     }
 
     public void exception(final NHttpServerConnection conn, final HttpException httpex) {
+        httpex.printStackTrace();
         HttpContext context = conn.getContext();
         try {
             HttpResponse response = this.responseFactory.newHttpResponse(
@@ -259,6 +262,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
     }
 
     public void exception(final NHttpServerConnection conn, final IOException ex) {
+        ex.printStackTrace();
         shutdownConnection(conn);
         if (this.eventListener != null) {
             this.eventListener.fatalIOException(ex);
@@ -365,7 +369,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
             this.eventListener.connectionTimeout(address);
             
             if (connectionListener != null) {
-                System.err.println("connection error");
+                System.out.println("connection timeout");
                 connectionListener.connectionClosed(conn);
             }
         }
@@ -373,7 +377,7 @@ public class HttpServiceHandler implements NHttpServiceHandler {
 
     private void shutdownConnection(final NHttpServerConnection conn) {
         if (connectionListener != null) {
-            System.err.println("connection error");
+            System.out.println("connection error");
             connectionListener.connectionClosed(conn);
         }
         

@@ -26,6 +26,7 @@ import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
 import org.limewire.http.HttpResponseListener;
 import org.limewire.http.HttpServiceHandler;
+import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.ServerConnectionEventListener;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -79,7 +80,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         // processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
-        processor.addInterceptor(new ResponseConnControl());
+        processor.addInterceptor(new LimeResponseConnControl());
 
         HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
                 new DefaultHttpResponseFactory(),

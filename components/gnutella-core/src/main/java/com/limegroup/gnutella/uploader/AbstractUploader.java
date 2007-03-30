@@ -11,6 +11,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /**
  * Maintains state for an HTTP upload request.
@@ -352,4 +353,9 @@ public abstract class AbstractUploader implements Uploader {
         // "State: "+_state;
 
     }
+    
+    public UploadSession getSession() {
+        return session;
+    }
+
 }
