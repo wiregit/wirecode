@@ -437,9 +437,11 @@ public class HostCatcher {
      */
     public synchronized List<ExtendedEndpoint> getDHTSupportEndpoint(int minVersion) {
         List<ExtendedEndpoint> hostsList = new ArrayList<ExtendedEndpoint>();
+        IntSet classC = new IntSet();
         for(ExtendedEndpoint host : getAllHosts()) {
             if(host.supportsDHT() 
-                    && host.getDHTVersion() >= minVersion) {
+                    && host.getDHTVersion() >= minVersion &&
+                    classC.add(NetworkUtils.getMaskedIP(host.getInetAddress(), PONG_MASK))) {
                 hostsList.add(host);
             }
         }

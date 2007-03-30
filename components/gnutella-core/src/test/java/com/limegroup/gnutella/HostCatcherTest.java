@@ -748,6 +748,7 @@ public class HostCatcherTest extends LimeTestCase {
     public void testGetDHTSupportEndpoint() throws Exception {
         assertEquals(0, hc.getDHTSupportEndpoint(0).size());
         
+        // add a bunch of nodes from the same class C network
         ExtendedEndpoint ep;
         //dht nodes
         for(int i=6300; i < 6309 ; i++) {
@@ -761,16 +762,29 @@ public class HostCatcherTest extends LimeTestCase {
             hc.add(ep, false);
         }
         
+        List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
+        assertEquals(1, hostList.size());
+        
+        // add nodes from different class C networks
+        for(int i=1; i < 9 ; i++) {
+            ep = new ExtendedEndpoint("18.239."+i+".100", 6000);
+            ep.setDHTVersion(2);
+            if((i % 2) == 0) {
+                ep.setDHTMode(DHTMode.INACTIVE);
+            } else {
+                ep.setDHTMode(DHTMode.PASSIVE);
+            }
+            hc.add(ep, false);
+        }
         //dht active node
-        ep = new ExtendedEndpoint("18.239.0.101", 6322);
+        ep = new ExtendedEndpoint("18.239.10.101", 6322);
         ep.setDHTVersion(1);
         ep.setDHTMode(DHTMode.ACTIVE);
         hc.add(ep, false);
         
-        List<ExtendedEndpoint> hostList = hc.getDHTSupportEndpoint(0);
-        assertEquals(10, hostList.size());
+        hostList = hc.getDHTSupportEndpoint(0);
         ep = hostList.get(0);
-        assertEquals("18.239.0.101", ep.getAddress());
+        assertEquals("18.239.10.101", ep.getAddress());
         assertTrue(ep.getDHTMode().equals(DHTMode.ACTIVE));
         
         hostList.remove(0);
@@ -783,7 +797,7 @@ public class HostCatcherTest extends LimeTestCase {
         //try excluding version
         hostList = hc.getDHTSupportEndpoint(2);
         assertEquals(9, hostList.size());
-        assertEquals("18.239.0.100", hostList.get(0).getAddress());
+        assertTrue(hostList.get(0).getAddress().endsWith(".100"));
     }
         
    
