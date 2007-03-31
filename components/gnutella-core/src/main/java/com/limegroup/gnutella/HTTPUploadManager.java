@@ -976,6 +976,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             System.out.println("trying enqueue");
             session.setQueueStatus(checkAndQueue(session));
         }
+        
         System.out.println("status: " + session.getQueueStatus());
         return session.getQueueStatus();
     }

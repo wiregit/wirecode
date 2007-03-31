@@ -69,6 +69,11 @@ public class UploaderTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
+        // allow running single tests from Eclipse
+        if (rs == null) {
+            globalSetUp();
+        }
+        
         Map urns = new HashMap();
         Vector descs = new Vector();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");

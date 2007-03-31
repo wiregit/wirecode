@@ -111,8 +111,11 @@ public class FileRequestHandler implements HttpRequestHandler {
         uploader.setIndex(fileRequest.index);
         uploader.setState(Uploader.CONNECTING);
 
-        if (HTTPConstants.NAME_TO_THEX.equals(fileRequest.serviceID)) {
-            uploader.setThexRequest(true);
+        boolean thexRequest = HTTPConstants.NAME_TO_THEX.equals(fileRequest.serviceID); 
+        if (thexRequest) {
+            // XXX reset range to size of THEX tree
+            uploader.setUploadBegin(0);
+            uploader.setUploadEnd(fd.getHashTree().getOutputLength());
         }
         
         // process headers
@@ -131,7 +134,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             handleFreeLoader(request, response, context, uploader);
         }
 
-        if (!validateHeaders(uploader)) {
+        if (!validateHeaders(uploader, thexRequest)) {
             uploader.setState(Uploader.FILE_NOT_FOUND);
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return;
@@ -460,7 +463,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         return fd;
     }
 
-    private boolean validateHeaders(HTTPUploader uploader) {
+    private boolean validateHeaders(HTTPUploader uploader, boolean thexRequest) {
         FileDesc fd = uploader.getFileDesc();
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
@@ -471,7 +474,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         // handling THEX Requests
-        if (uploader.isTHEXRequest()) {
+        if (thexRequest) {
             if (uploader.getFileDesc().getHashTree() != null) {
                 uploader.setState(Uploader.THEX_REQUEST);
             } else {
@@ -487,7 +490,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             }
 
             // cannot service THEXRequests for partial files
-            if (uploader.isTHEXRequest()) {
+            if (thexRequest) {
                 return false;
             }
         }

@@ -77,6 +77,10 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
     
     public void setQueueStatus(QueueStatus status) {
         this.queueStatus  = status;
+        
+        if (status == QueueStatus.ACCEPTED || status == QueueStatus.BYPASS) {
+            lastPollTime = 0;
+        }
     }
 
     public boolean isAccepted() {
