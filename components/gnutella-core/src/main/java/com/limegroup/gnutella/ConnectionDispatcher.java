@@ -66,6 +66,12 @@ public class ConnectionDispatcher {
     	}
     }
     
+    /** Determines if the word is valid for the understood protocols. */
+    public boolean isValidProtocolWord(String word) {
+        return protocols.containsKey(word);
+    }
+    
+    
     /**
      * Dispatches this incoming connection to the appropriate manager, depending
      * on the word that was read.

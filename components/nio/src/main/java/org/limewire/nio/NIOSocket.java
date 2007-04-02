@@ -38,7 +38,7 @@ public class NIOSocket extends AbstractNBSocket {
      */
     protected NIOSocket(Socket s) {
         channel = s.getChannel();
-        socket = s;
+        socket = channel.socket();
         remoteSocketAddress = s.getRemoteSocketAddress();
         initIncomingSocket();
         setInitialReader();

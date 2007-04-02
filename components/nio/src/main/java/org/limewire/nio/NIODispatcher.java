@@ -501,6 +501,12 @@ public class NIODispatcher implements Runnable {
     private void registerImpl(Selector selector, SelectableChannel channel, int op,
                               IOErrorObserver attachment, int timeout) {
         try {
+            SelectionKey existing = channel.keyFor(selector);
+            if(existing != null) {
+                Attachment old = (Attachment)existing.attachment();
+                old.discard();
+            }
+            
             Attachment guard = new Attachment(attachment);
             SelectionKey key = channel.register(selector, op, guard);
             guard.setKey(key);
@@ -893,6 +899,8 @@ public class NIODispatcher implements Runnable {
         private long storedTimeoutLength = Long.MAX_VALUE;
         private long storedExpireTime = Long.MAX_VALUE;
         
+        private volatile boolean discarded;
+        
         Attachment(IOErrorObserver attachment) {
             this.attachment = attachment;
         }
@@ -901,73 +909,85 @@ public class NIODispatcher implements Runnable {
             return "Attachment for: " + attachment;
         }
         
+        void discard() {
+            discarded = true;
+        }
+        
         synchronized void clearTimeout() {
             timeoutActive = false;
         }
         
         synchronized void updateReadTimeout(long now) {
-            if(attachment instanceof ReadTimeout) {
-                long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
-                if(timeoutLength != 0) {
-                    long expireTime = now + timeoutLength;
-                    // We need to add a new timeout if none is scheduled or we need
-                    // to timeout before the next one.
-                    if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
-                        addTimeout(now, timeoutLength);
+            if(!discarded) {
+                if(attachment instanceof ReadTimeout) {
+                    long timeoutLength = ((ReadTimeout)attachment).getReadTimeout();
+                    if(timeoutLength != 0) {
+                        long expireTime = now + timeoutLength;
+                        // We need to add a new timeout if none is scheduled or we need
+                        // to timeout before the next one.
+                        if(expireTime < storedExpireTime || storedExpireTime == -1 || storedExpireTime < now) {
+                            addTimeout(now, timeoutLength);
+                        } else {
+                            // Otherwise, store the timeout info so when we get notified
+                            // we can reschedule it for the future.
+                            storedExpireTime = expireTime;
+                            storedTimeoutLength = timeoutLength;
+                            timeoutActive = true;
+                        }
                     } else {
-                        // Otherwise, store the timeout info so when we get notified
-                        // we can reschedule it for the future.
-                        storedExpireTime = expireTime;
-                        storedTimeoutLength = timeoutLength;
-                        timeoutActive = true;
+                        clearTimeout();
                     }
-                } else {
-                    clearTimeout();
                 }
             }
         }
         
         synchronized void changeReadStatus(boolean reading) {
-            if(reading)
-                updateReadTimeout(System.currentTimeMillis());
-            else
-                clearTimeout();
+            if(!discarded) {
+                if(reading)
+                    updateReadTimeout(System.currentTimeMillis());
+                else
+                    clearTimeout();
+            }
         }
 
         synchronized void addTimeout(long now, long timeoutLength) {
-            timeoutActive = true;
-            storedTimeoutLength = timeoutLength;
-            storedExpireTime = now + timeoutLength;
-            TIMEOUTER.addTimeout(this, now, timeoutLength);
+            if(!discarded) {
+                timeoutActive = true;
+                storedTimeoutLength = timeoutLength;
+                storedExpireTime = now + timeoutLength;
+                TIMEOUTER.addTimeout(this, now, timeoutLength);
+            }
         }
         
         public void notifyTimeout(long now, long expireTime, long timeoutLength) {
-            boolean cancel = false;
-            long timeToUse = 0;
-            synchronized(this) {
-                if(timeoutActive) {
-                    if(expireTime == storedExpireTime) {
-                        cancel = true;
-                        timeoutActive = false;
-                        timeToUse = storedTimeoutLength;
+            if(!discarded) {
+                boolean cancel = false;
+                long timeToUse = 0;
+                synchronized(this) {
+                    if(timeoutActive) {
+                        if(expireTime == storedExpireTime) {
+                            cancel = true;
+                            timeoutActive = false;
+                            timeToUse = storedTimeoutLength;
+                            storedExpireTime = -1;
+                        } else if(expireTime < storedExpireTime) {
+                            TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
+                        } else { // expireTime > storedExpireTime
+                            storedExpireTime = -1;
+                            if(LOG.isWarnEnabled())
+                                LOG.warn("Ignoring extra timeout for: " + attachment);
+                        }
+                    } else {
                         storedExpireTime = -1;
-                    } else if(expireTime < storedExpireTime) {
-                        TIMEOUTER.addTimeout(this, now, storedExpireTime - now);
-                    } else { // expireTime > storedExpireTime
-                        storedExpireTime = -1;
-                        if(LOG.isWarnEnabled())
-                            LOG.warn("Ignoring extra timeout for: " + attachment);
+                        storedTimeoutLength = -1;
                     }
-                } else {
-                    storedExpireTime = -1;
-                    storedTimeoutLength = -1;
                 }
-            }
-            
-            // must do cancel & IOException outside of the lock.
-            if(cancel) {
-                cancel(key, attachment);
-                attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
+                
+                // must do cancel & IOException outside of the lock.
+                if(cancel) {
+                    cancel(key, attachment);
+                    attachment.handleIOException(new SocketTimeoutException("operation timed out (" + timeToUse + ")"));
+                }
             }
         }
         

@@ -22,6 +22,7 @@ import org.limewire.nio.SocketFactory;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
+import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsHandler;
 import org.limewire.util.BufferUtils;
@@ -709,21 +710,47 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
             // See if we have a full word.
             for(int i = 0; i < buffer.position(); i++) {
                 if(buffer.get(i) == ' ') {
+                    ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
                     String word = new String(buffer.array(), 0, i);
-                    if(allowedWord != null && !allowedWord.equals(word))
-                        throw new IOException("wrong word!");
-                    
-                    buffer.limit(buffer.position()).position(i+1);
-                    source.interestRead(false);
-                    RouterService.getConnectionDispatcher().dispatch(word, client, true);
-                    return;
+                    if(dispatcher.isValidProtocolWord(word)) {                        
+                        if(allowedWord != null && !allowedWord.equals(word))
+                            throw new IOException("wrong word!");
+                        
+                        buffer.limit(buffer.position()).position(i+1);
+                        source.interestRead(false);
+                        RouterService.getConnectionDispatcher().dispatch(word, client, true);
+                        return;
+                    } else if(client instanceof TLSNIOSocket) {
+                        close();
+                        return;
+                    } else {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Attempting to use TLS socket with invalid word: " + word);
+                        // Maybe it's a TLS socket, try wrapping it in that.
+                        buffer.flip();
+                        TLSNIOSocket tls = TLSNIOSocket.wrap(client, buffer);
+                        tls.setReadObserver(new AsyncConnectionDispatcher(tls, allowedWord));
+                        return;
+                    }
                 }
             }
             
             // If there's no room to read more or there's nothing left to read,
-            // we aren't going to read our word.
-            if(!buffer.hasRemaining() || read == -1)
+            // we aren't going to read our word. Try TLS and/or close
+            if(!buffer.hasRemaining()) {
+                if(client instanceof TLSNIOSocket) {
+                    close();
+                } else {
+                    LOG.debug("Buffer filled, attempting to use TLS socket.");
+                    buffer.flip();
+                    TLSNIOSocket tls = TLSNIOSocket.wrap(client, buffer);
+                    tls.setReadObserver(new AsyncConnectionDispatcher(tls, allowedWord));
+                }
+                return;
+            } else if(read == -1) {
                 close();
+                return;
+            }
         }
         
         public int read(ByteBuffer dst) {
@@ -732,6 +759,10 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
 
         public long read(ByteBuffer [] dst) {
         	return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
+        }
+        
+        public long read(ByteBuffer [] dst, int offset, int length) {
+            return BufferUtils.transfer(buffer, dst, offset, length, false);
         }
     }
 

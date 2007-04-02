@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -46,6 +47,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     private WriteObserver writeWanter;
     private volatile boolean needsHandshakeWrap = false;
     private volatile boolean readDataLeft = false;
+    private AtomicBoolean firstReadDone = new AtomicBoolean(false);
     
     public SSLReadWriteChannel(SSLContext context, Executor executor) {
         this.executor = executor;
@@ -91,15 +93,17 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         // If data was left in readOutgoing, pre-transfer it.
         if(readOutgoing != null && readOutgoing.position() > 0) {
             transferred += BufferUtils.transfer(readOutgoing, dst);
-        }        
+        }
         
         while(true) {
             // If we're not handshaking and there's no space to read into, exit early.
-            if(!dst.hasRemaining() && engine.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING) {
+            // Must check separately for 'first read' and 'not handshaking', because
+            // the engine isn't put into handshaking mode until a single read is done.
+            if(firstReadDone.getAndSet(true) && !dst.hasRemaining() && engine.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING) {
                 LOG.debug("No space to read into, leaving");
                 return transferred;
             }
-            
+
             int read = -1;
             while(readIncoming.hasRemaining() && (read = readSink.read(readIncoming)) > 0);
             // if we last read EOF & nothing was put in sourceBuffer, EOF
@@ -107,13 +111,13 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 LOG.debug("Read EOF, no data to transfer.  Connection finished");
                 return -1;
             }
-            
+
             // If we couldn't read anything, there's nothing to unwrap.
             if(readIncoming.position() == 0) {
                 LOG.debug("Unable to read anything, exiting read loop");
                 return 0;
             }
-            
+
             readIncoming.flip();
 
             // Try unwrapping directly into dst first.

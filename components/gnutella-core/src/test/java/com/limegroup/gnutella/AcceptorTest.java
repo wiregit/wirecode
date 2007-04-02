@@ -1,8 +1,14 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.limewire.nio.ssl.TLSNIOSocket;
 
 import junit.framework.Test;
 
@@ -49,7 +55,9 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
         //shut off the various services,
         //if an exception is thrown, something bad happened.
         acceptThread.setListeningPort(0);
-    }        
+    }
+    
+    
         
     /**
      * This test checks to ensure that Acceptor.setListeningPort
@@ -64,7 +72,7 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
                 udp = new DatagramSocket(portToTry);
                 break;
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 portToTry++;
                 continue;
             }
@@ -92,7 +100,7 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
                 tcp = new ServerSocket(portToTry);
                 break;
             }
-            catch (Exception e) {
+            catch (IOException e) {
                 portToTry++;
                 continue;
             }
@@ -100,7 +108,7 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
 
         try {
             acceptThread.setListeningPort(portToTry);
-            assertTrue("had no trouble binding TCP port!", false);
+            fail("had no trouble binding TCP port!");
         }
         catch (IOException expected) {
             try {
@@ -130,18 +138,66 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
         try {
             DatagramSocket udp = new DatagramSocket(portToTry);
             udp.close();
-            assertTrue("had no trouble binding UDP to occupied port!",
-                       false);
+            fail("had no trouble binding UDP to occupied port!");
         }
-        catch (Exception good) {}
+        catch (IOException good) {}
         
         try {
             ServerSocket tcp = new ServerSocket(portToTry);
             tcp.close();
-            assertTrue("had no trouble binding TCP to occupied port!",
-                       false);
+            fail("had no trouble binding TCP to occupied port!");
         }
-        catch (Exception good) {}
+        catch (IOException good) {}
     }
+     
+     public void testIncomingTLS() throws Exception {
+         int port = bindAcceptor();
+         
+         MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
+         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, new String[] { "BLOCKING" }, false, true);
+         
+         TLSNIOSocket tls = new TLSNIOSocket("localhost", port);
+         tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
+         acceptor.waitForAccept();
+     }
+     
+     private int bindAcceptor() throws Exception {
+         for(int p = 2000; p < Integer.MAX_VALUE; p++) {
+             try {
+                 acceptThread.setListeningPort(p);
+                 return p;
+             } catch(IOException ignored) {}
+         }
+         throw new IOException("unable to bind acceptor");
+     }
 
+     private static class MyConnectionAcceptor implements ConnectionAcceptor {
+         private final String word;
+         private CountDownLatch latch = new CountDownLatch(1);
+         
+         MyConnectionAcceptor(String word) {
+             this.word = word;
+         }
+         
+         public void acceptConnection(String word, Socket s) {
+            assertEquals(this.word, word);
+            if("BLOCKING".equals(word)) {
+                try {
+                    InputStream in = s.getInputStream();
+                    byte[] b = new byte[1000];
+                    int read = in.read(b);
+                    assertEquals("MORE DATA", new String(b, 0, read));
+                    latch.countDown();
+                } catch(IOException iox) {
+                    throw new RuntimeException(iox);
+                }
+            }
+         }
+         
+         void waitForAccept() throws Exception {
+             latch.await(5, TimeUnit.SECONDS);
+         }
+         
+     }
+     
 }

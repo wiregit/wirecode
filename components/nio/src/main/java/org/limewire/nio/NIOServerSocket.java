@@ -110,11 +110,11 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     
     /**
      * Initializes the connection.
-     * Currently this sets the channel to blocking & reuse addr to true.
+     * Currently this sets the channel to blocking.
      */
     private void init() throws IOException {
         channel.configureBlocking(false);
-        socket.setReuseAddress(true);
+       // socket.setReuseAddress(true);
     }
 
     /**
