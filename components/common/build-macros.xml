@@ -333,7 +333,7 @@
         <attribute name="component"/>
         <element name="more-xml-locations" optional="true"/>
         <sequential>
-	        <junitreport todir="${tests.limewire.components.@{component}.xml}">
+	        <junitreport todir="${tests.limewire.components.@{component}.xml}\..">
 	        	<fileset dir="${tests.limewire.components.@{component}.xml}">
 				    <include name="TEST-*.xml"/>
 				</fileset>
