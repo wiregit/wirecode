@@ -62,7 +62,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     }
 
     public void stop() {
-        // TODO Auto-generated method stub
+        // FIXME
         
     }
 

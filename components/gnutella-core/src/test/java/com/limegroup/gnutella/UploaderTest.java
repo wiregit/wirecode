@@ -125,7 +125,7 @@ public class UploaderTest extends LimeTestCase {
         
         fm = new FileManagerStub(urns,descs);
         RouterService.getContentManager().initialize();
-        upManager = new HTTPUploadManager(new UploadSlotManager());
+        upManager = new HTTPUploadManager(new HTTPAcceptor(), new UploadSlotManager());
 
         PrivilegedAccessor.setValue(rs,"fileManager",fm);
         PrivilegedAccessor.setValue(rs,"uploadManager", upManager);

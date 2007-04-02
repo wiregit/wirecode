@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -130,9 +131,10 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private HTTPAcceptor acceptor;
 
-    public HTTPUploadManager(UploadSlotManager slotManager) {
+    public HTTPUploadManager(HTTPAcceptor acceptor,
+            UploadSlotManager slotManager) {
+        this.acceptor = acceptor;
         this.slotManager = slotManager;
-        this.acceptor = new HTTPAcceptor();
 
         FileUtils.addFileLocker(this);
         acceptor.addResponseListener(this);
@@ -895,13 +897,24 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     }
 
     public UploadSession getOrCreateSession(HttpContext context) {
-        HttpInetConnection conn = (HttpInetConnection) context
-                .getAttribute(HttpExecutionContext.HTTP_CONNECTION);
         UploadSession session = (UploadSession) context
                 .getAttribute(SESSION_KEY);
         if (session == null) {
-            session = new UploadSession(getSlotManager(), conn
-                    .getRemoteAddress());
+            HttpInetConnection conn = (HttpInetConnection) context
+                    .getAttribute(HttpExecutionContext.HTTP_CONNECTION);
+            InetAddress host;
+            if (conn != null) {
+                host = conn.getRemoteAddress();
+            } else {
+                // XXX this is a bad work around to make request processing
+                // testable without having an underlying connection
+                try {
+                    host = InetAddress.getLocalHost();
+                } catch (UnknownHostException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            session = new UploadSession(getSlotManager(), host);
             context.setAttribute(SESSION_KEY, session);
         }
         return session;
@@ -976,7 +989,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             System.out.println("trying enqueue");
             session.setQueueStatus(checkAndQueue(session));
         }
-        
+
         System.out.println("status: " + session.getQueueStatus());
         return session.getQueueStatus();
     }
@@ -1017,5 +1030,13 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             }
         }
     }
-
+    
+    /** For testing. */
+    public void cleanup() {
+        for (HTTPUploader uploader : _activeUploadList.toArray(new HTTPUploader[0])) {
+            slotManager.cancelRequest(uploader.getSession());
+            removeFromList(uploader);
+        }
+    }
+    
 }

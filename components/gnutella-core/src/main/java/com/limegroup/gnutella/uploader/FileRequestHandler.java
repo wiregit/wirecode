@@ -92,8 +92,10 @@ public class FileRequestHandler implements HttpRequestHandler {
                 findFileAndProcessHeaders(request, response, context,
                         fileRequest, fd);
             } else {
-                handleMalformedRequest(response, sessionManager.getOrCreateUploader(context,
-                        UploadType.MALFORMED_REQUEST, "Malformed Request"));
+                uploader = sessionManager.getOrCreateUploader(context,
+                        UploadType.SHARED_FILE, fileRequest.filename);
+                uploader.setState(Uploader.FILE_NOT_FOUND);
+                response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
         }
     }
@@ -331,14 +333,14 @@ public class FileRequestHandler implements HttpRequestHandler {
      *         <tt>false</tt> otherwise
      */
     private boolean isURNGet(final String requestLine) {
-        // int slash1Index = requestLine.indexOf("/");
-        // int slash2Index = requestLine.indexOf("/", slash1Index+1);
-        // if((slash1Index==-1) || (slash2Index==-1)) {
-        // return false;
-        // }
-        // String idString = requestLine.substring(slash1Index+1, slash2Index);
-        // return idString.equalsIgnoreCase("uri-res");
-        return requestLine.startsWith("/uri-res/");
+         int slash1Index = requestLine.indexOf("/");
+         int slash2Index = requestLine.indexOf("/", slash1Index+1);
+         if((slash1Index==-1) || (slash2Index==-1)) {
+         return false;
+         }
+         String idString = requestLine.substring(slash1Index+1, slash2Index);
+         return idString.equalsIgnoreCase("uri-res");
+        //return requestLine.startsWith("/uri-res/");
     }
 
     /**

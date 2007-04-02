@@ -28,6 +28,10 @@ public class HttpIOSession implements IOSession {
     private int eventMask;
     
     public HttpIOSession(AbstractNBSocket socket) {
+        if (socket == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.attributes = Collections.synchronizedMap(new HashMap<String, Object>());
         this.socketTimeout = 0;
         this.socket = socket;

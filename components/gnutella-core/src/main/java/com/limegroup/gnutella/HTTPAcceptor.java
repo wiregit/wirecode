@@ -1,34 +1,45 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpInetConnection;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestFactory;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.DefaultHttpRequestFactory;
 import org.apache.http.impl.DefaultHttpResponseFactory;
+import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
+import org.apache.http.message.BasicRequestLine;
 import org.apache.http.nio.NHttpServerConnection;
 import org.apache.http.nio.reactor.IOEventDispatch;
+import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpExecutionContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
-import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
+import org.limewire.http.HttpIOSession;
 import org.limewire.http.HttpResponseListener;
 import org.limewire.http.HttpServiceHandler;
 import org.limewire.http.LimeResponseConnControl;
 import org.limewire.http.ServerConnectionEventListener;
 
+import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -46,6 +57,10 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
     private List<HttpResponseListener> responseListeners = Collections
             .synchronizedList(new ArrayList<HttpResponseListener>());
+
+    private BasicHttpProcessor processor;
+
+    private DefaultHttpResponseFactory responseFactory;
 
     public HTTPAcceptor() {
         initializeReactor();
@@ -76,15 +91,16 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         this.connectionListener = new ConnectionEventListener();
 
         // intercepts http requests and responses
-        BasicHttpProcessor processor = new BasicHttpProcessor();
+        processor = new BasicHttpProcessor();
         // processor.addInterceptor(new ResponseDate());
         processor.addInterceptor(new ResponseServer());
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new LimeResponseConnControl());
 
+        responseFactory = new DefaultHttpResponseFactory();
+
         HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
-                new DefaultHttpResponseFactory(),
-                new DefaultConnectionReuseStrategy(), params);
+                responseFactory, new DefaultConnectionReuseStrategy(), params);
         serviceHandler.setConnectionListener(connectionListener);
         serviceHandler.setHandlerResolver(this.registry);
 
@@ -110,6 +126,36 @@ public class HTTPAcceptor implements ConnectionAcceptor {
         responseListeners.add(listener);
     }
 
+    /** For testing. */
+    public HttpResponse process(HttpRequest request) throws IOException,
+            HttpException {
+        HttpExecutionContext context = new HttpExecutionContext(null);
+        HttpResponse response = responseFactory.newHttpResponse(request
+                .getRequestLine().getHttpVersion(), HttpStatus.SC_OK, context);
+        response.getParams().setDefaults(this.params);
+
+        //HttpContextParams.setLocal(context, true);
+        context.setAttribute(HttpExecutionContext.HTTP_REQUEST, request);
+        context.setAttribute(HttpExecutionContext.HTTP_RESPONSE, response);
+
+        processor.process(request, context);
+
+        HttpRequestHandler handler = null;
+        if (this.registry != null) {
+            String requestURI = request.getRequestLine().getUri();
+            handler = this.registry.lookup(requestURI);
+        }
+        if (handler != null) {
+            handler.handle(request, response, context);
+        } else {
+            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
+        }
+
+        
+        
+        return response;
+    }
+
     public void removeResponseListener(HttpResponseListener listener) {
         responseListeners.remove(listener);
     }
@@ -124,7 +170,7 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
         public void connectionClosed(NHttpServerConnection conn) {
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
-            .toArray(new HttpResponseListener[0]);
+                    .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
                 listener.sessionClosed(conn);
             }
@@ -148,17 +194,18 @@ public class HTTPAcceptor implements ConnectionAcceptor {
 
         public void responseContentSent(NHttpServerConnection conn,
                 HttpResponse response) {
-//            HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
-//                    .toArray(new HttpResponseListener[0]);
-//            for (HttpResponseListener listener : listeners) {
-//                listener.responseSent(conn, response);
-//            }
+            // HttpResponseListener[] listeners =
+            // HTTPAcceptor.this.responseListeners
+            // .toArray(new HttpResponseListener[0]);
+            // for (HttpResponseListener listener : listeners) {
+            // listener.responseSent(conn, response);
+            // }
         }
 
         public void responseSent(NHttpServerConnection conn,
                 HttpResponse response) {
             HttpResponseListener[] listeners = HTTPAcceptor.this.responseListeners
-            .toArray(new HttpResponseListener[0]);
+                    .toArray(new HttpResponseListener[0]);
             for (HttpResponseListener listener : listeners) {
                 listener.responseSent(conn, response);
             }

@@ -164,6 +164,11 @@ public class RouterService {
     private static DownloadManager downloadManager = new DownloadManager();
     
     /**
+     * Acceptor for HTTP connections.
+     */    
+    private static com.limegroup.gnutella.HTTPAcceptor httpUploadAcceptor = new com.limegroup.gnutella.HTTPAcceptor();
+    
+    /**
      * <tt>UploadSlotManager</tt> for controlling upload slots.
      */
     private static UploadSlotManager uploadSlotManager = new UploadSlotManager();
@@ -172,7 +177,7 @@ public class RouterService {
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
     private static HTTPUploadManager uploadManager = 
-    	new HTTPUploadManager(uploadSlotManager);
+    	new HTTPUploadManager(httpUploadAcceptor, uploadSlotManager);
     
     /**
      * <tt>PushManager</tt> for handling push requests.
@@ -711,7 +716,16 @@ public class RouterService {
 	public static ConnectionManager getConnectionManager() {
 		return manager;
 	}
-	
+
+    /** 
+     * Accessor for the <tt>HTTPAcceptor</tt> instance.
+     *
+     * @return the <tt>HTTPAcceptor</tt> in use
+     */
+    public static com.limegroup.gnutella.HTTPAcceptor getHTTPUploadAcceptor() {
+        return httpUploadAcceptor;
+    }
+
     /** 
      * Accessor for the <tt>UploadManager</tt> instance.
      *

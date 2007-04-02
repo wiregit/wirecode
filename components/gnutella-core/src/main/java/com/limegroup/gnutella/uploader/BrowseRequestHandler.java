@@ -75,7 +75,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             sender.setWriteChannel(this);
             
             // XXX LW can't actually handle chunked responses
-            setChunked(true);
+            //setChunked(true);
             setContentType(Constants.QUERYREPLY_MIME_TYPE);
             
             query = QueryRequest.createBrowseHostQuery();

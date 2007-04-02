@@ -136,7 +136,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
     public void acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);
-            connectSocket((NIOSocket) socket, null, word);
+            connectSocket((AbstractNBSocket) socket, null, word);
         } catch (IOException e) {
             IOUtils.close(socket);
         }

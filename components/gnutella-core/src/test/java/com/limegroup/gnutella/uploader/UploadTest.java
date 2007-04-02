@@ -52,6 +52,7 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.ManagedConnectionStub;
 import com.limegroup.gnutella.ReplyHandler;
@@ -2684,7 +2685,7 @@ public class UploadTest extends LimeTestCase {
         private List activeUploads = new ArrayList();
         
         public TestUploadManager() {
-        	super(new UploadSlotManager());
+        	super(new HTTPAcceptor(), new UploadSlotManager());
         }
         
         public synchronized void addAcceptedUploader(HTTPUploader uploader) {
