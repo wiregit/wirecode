@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.Version;
 
 
 /**
@@ -104,6 +105,9 @@ public interface DHTMessage {
     
     /** Returns the Message ID of the Message */
     public MessageID getMessageID();
+    
+    /** Returns the Version of the Message */
+    public Version getMessageVersion();
     
     /** Writes this Message to the OutputStream */
     public void write(OutputStream out) throws IOException;

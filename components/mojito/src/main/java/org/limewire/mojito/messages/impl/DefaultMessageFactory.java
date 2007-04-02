@@ -33,6 +33,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
@@ -156,8 +157,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact contact, SocketAddress dst, 
-            KUID lookupId, Collection<KUID> keys) {
-        return new FindValueRequestImpl(context, contact, createMessageID(dst), lookupId, keys);
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
+        return new FindValueRequestImpl(context, contact, createMessageID(dst), lookupId, keys, valueType);
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, Contact dst, 

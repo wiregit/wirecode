@@ -19,6 +19,7 @@
  
 package org.limewire.mojito.messages.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketAddress;
@@ -53,10 +54,17 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     private final MessageID messageId;
     
+    private final Version messageVersion;
+    
     private byte[] payload;
     
     public AbstractDHTMessage(Context context, 
             OpCode opcode, Contact contact, MessageID messageId) {
+        this(context, opcode, contact, messageId, Version.valueOf(1));
+    }
+    
+    public AbstractDHTMessage(Context context, 
+            OpCode opcode, Contact contact, MessageID messageId, Version messageVersion) {
 
         if (opcode == null) {
             throw new NullPointerException("OpCode is null");
@@ -70,10 +78,15 @@ abstract class AbstractDHTMessage implements DHTMessage {
             throw new NullPointerException("MessageID is null");
         }
         
+        if (messageVersion == null) {
+            throw new NullPointerException("Version is null");
+        }
+        
         this.context = context;
         this.opcode = opcode;
         this.contact = contact;
         this.messageId = messageId;
+        this.messageVersion = messageVersion;
     }
 
     public AbstractDHTMessage(Context context, OpCode opcode, SocketAddress src, 
@@ -105,8 +118,15 @@ abstract class AbstractDHTMessage implements DHTMessage {
         this.contact = ContactFactory.createLiveContact(src, vendor, version, 
                 nodeId, contactAddress, instanceId, flags);
         
-        int extensions = in.readUnsignedShort();
-        in.skip(extensions);
+        Version messageVersion = Version.ZERO;
+        int extensionsLength = in.readUnsignedShort();
+        if (extensionsLength > 0) {
+            messageVersion = in.readVersion();
+            extensionsLength -= Version.LENGTH;
+        }
+        this.messageVersion = messageVersion;
+        
+        in.skip(extensionsLength);
     }
     
     public Context getContext() {
@@ -123,6 +143,10 @@ abstract class AbstractDHTMessage implements DHTMessage {
     
     public MessageID getMessageID() {
         return messageId;
+    }
+    
+    public Version getMessageVersion() {
+        return messageVersion;
     }
     
     public void write(OutputStream os) throws IOException {
@@ -172,8 +196,19 @@ abstract class AbstractDHTMessage implements DHTMessage {
         out.writeByte(getContact().getInstanceID()); // 32
         out.writeByte(getContact().getFlags()); // 33
         
-        // We don't support any header extensions so write none
-        out.writeShort(0); // 34-35
+        // Write the extended header
+        writeExtendedHeader(out); // 34-
+    }
+    
+    private void writeExtendedHeader(MessageOutputStream out) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(2);
+        MessageOutputStream mos = new MessageOutputStream(baos);
+        mos.writeVersion(getMessageVersion());
+        mos.close();
+        
+        byte[] extendedHeader = baos.toByteArray();
+        out.writeShort(extendedHeader.length); // 34-35
+        out.write(extendedHeader); // 36-
     }
     
     protected abstract void writeBody(MessageOutputStream out) throws IOException;

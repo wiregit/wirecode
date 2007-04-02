@@ -19,10 +19,13 @@
 
 package org.limewire.mojito.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.settings.DatabaseSettings;
@@ -108,5 +111,26 @@ public class DatabaseUtils {
         long time = lastRepublishingTime + nextPublishTime;
         
         return System.currentTimeMillis() >= time;
+    }
+
+    public static boolean isDHTValueType(DHTValueType valueType, DHTValueEntity entity) {
+        return valueType.equals(DHTValueType.ANY) 
+                || valueType.equals(entity.getValue().getValueType());
+    }
+
+    public static Collection<? extends DHTValueEntity> filter(DHTValueType valueType, 
+            Collection<? extends DHTValueEntity> entities) {
+        
+        if (valueType.equals(DHTValueType.ANY)) {
+            return entities;
+        }
+        
+        List<DHTValueEntity> filtered = new ArrayList<DHTValueEntity>(entities.size());
+        for (DHTValueEntity entity : entities) {
+            if (isDHTValueType(valueType, entity)) {
+                filtered.add(entity);
+            }
+        }
+        return filtered;
     }
 }

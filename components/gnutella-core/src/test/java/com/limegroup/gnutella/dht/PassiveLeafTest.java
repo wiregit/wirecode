@@ -83,7 +83,7 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Try to get the value which should fail
             try {
-                FindValueResult r = passiveLeaf.get(key).get();
+                FindValueResult r = passiveLeaf.get(key, DHTValueType.ANY).get();
                 if (!r.getEntities().isEmpty()) {
                     fail("Should not have got DHTValue: " + r);
                 }
@@ -98,7 +98,7 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Try again and it should work now
             try {
-                FindValueResult r = passiveLeaf.get(key).get();
+                FindValueResult r = passiveLeaf.get(key, DHTValueType.ANY).get();
                 if (r.getEntities().isEmpty()) {
                     fail("Should have found DHTValue");
                 }

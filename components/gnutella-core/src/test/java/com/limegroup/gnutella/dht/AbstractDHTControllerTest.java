@@ -20,6 +20,7 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.messages.MessageFactory;
@@ -119,7 +120,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
 
         public void bind(SocketAddress address) throws IOException {}
 
-        public DHTFuture<FindValueResult> get(KUID key) {
+        public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
             return null;
         }
 
