@@ -27,15 +27,15 @@ public class ContactTest extends MojitoTestCase {
     }
     
     public void testEquals() {
-        LocalContact lc1 = (LocalContact)ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, false);
-        LocalContact lc2 = (LocalContact)ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, false);
+        LocalContact lc1 = (LocalContact)ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, false);
+        LocalContact lc2 = (LocalContact)ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, false);
         
         RemoteContact rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         
         RemoteContact rc2 = (RemoteContact)ContactFactory
-            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     KUID.createRandomID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         
         // Initial state
@@ -65,19 +65,19 @@ public class ContactTest extends MojitoTestCase {
         // Two RemoteContacts with the same KUID and SocketAddress are
         // considered to be equal
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     rc2.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertEquals(rc1, rc2);
         
         // But if their SocketAddress is different they're not equal
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     rc2.getNodeID(), new InetSocketAddress(2000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(rc1, rc2);
         
         // A Local- and RemoteContact cannot be equal!
         rc1 = (RemoteContact)ContactFactory
-            .createLiveContact(null, Vendor.UNKNOWN, Version.UNKNOWN, 
+            .createLiveContact(null, Vendor.UNKNOWN, Version.ZERO, 
                     lc1.getNodeID(), new InetSocketAddress(1000), 0, Contact.DEFAULT_FLAG);
         assertNotEquals(lc1, rc1);
     }

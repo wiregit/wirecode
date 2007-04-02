@@ -56,7 +56,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
         dhtFile.delete();
         //start the node controller
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         try {
             Context context = (Context) controller.getMojitoDHT();
@@ -81,7 +81,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
             controller.start();
             controller.stop();
             
-            controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+            controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
             context = (Context) controller.getMojitoDHT();
             rt = context.getRouteTable();
             //should have the same nodeID as before
@@ -97,7 +97,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     public void testGetActiveDHTNodes() throws Exception{
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
-        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.UNKNOWN, dispatcherStub);
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         try {
             controller.start();

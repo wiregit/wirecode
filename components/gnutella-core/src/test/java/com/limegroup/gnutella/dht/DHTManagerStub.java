@@ -56,7 +56,7 @@ public class DHTManagerStub implements DHTManager {
     }
     
     public Version getVersion() {
-        return Version.UNKNOWN;
+        return Version.ZERO;
     }
 
     public void handleDHTContactsMessage(DHTContactsMessage msg) {

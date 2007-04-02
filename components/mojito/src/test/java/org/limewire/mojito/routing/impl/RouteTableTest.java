@@ -495,7 +495,7 @@ public class RouteTableTest extends MojitoTestCase {
             SocketAddress src = new InetSocketAddress("localhost", PORT+i);
             KUID nodeId = KUID.createWithHexString(NODE_IDS[i]);
             Vendor vendor = Vendor.UNKNOWN;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             SocketAddress con = new InetSocketAddress("localhost", PORT+i);
             int instanceId = 0;
             int flags = Contact.DEFAULT_FLAG;
@@ -681,7 +681,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> liveContacts = new ArrayList<Contact>();
         for(int i = 0; i < 10; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 3000+i), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
             liveContacts.add(node);
@@ -690,7 +690,7 @@ public class RouteTableTest extends MojitoTestCase {
         List<Contact> deadContacts = new ArrayList<Contact>();;
         for(int i = 0; i < 400; i++) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(),
                     new InetSocketAddress("localhost", 4000+i), 0, Contact.DEFAULT_FLAG);
             node.handleFailure();
             node.handleFailure();
@@ -733,7 +733,7 @@ public class RouteTableTest extends MojitoTestCase {
         int port = 3000;
         for(String nodeId : NODE_IDS) {
             Contact node = ContactFactory.createLiveContact(null,
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createWithHexString(nodeId),
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createWithHexString(nodeId),
                     new InetSocketAddress("localhost", port++), 0, Contact.DEFAULT_FLAG);
             routeTable.add(node);
         }

@@ -156,7 +156,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
         }
 
         public Version getVersion() {
-            return Version.UNKNOWN;
+            return Version.ZERO;
         }
 
         public boolean isBootstrapping() {

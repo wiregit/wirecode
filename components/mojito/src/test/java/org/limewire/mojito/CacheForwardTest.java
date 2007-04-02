@@ -193,7 +193,7 @@ public class CacheForwardTest extends MojitoTestCase {
             MojitoDHT creator = dhts.get(idsByXorDistance.get(idsByXorDistance.size()-1));
             
             // Store the value
-            DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "Hello World".getBytes());
+            DHTValue value = new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "Hello World".getBytes());
             StoreResult evt = creator.put(valueId, value).get();
             assertEquals(k, evt.getNodes().size());
             

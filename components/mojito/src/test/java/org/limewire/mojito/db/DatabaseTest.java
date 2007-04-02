@@ -72,9 +72,9 @@ public class DatabaseTest extends MojitoTestCase {
     }
     
     private static DHTValueEntity createLocalDHTValue(KUID nodeId, KUID valueId, byte[] value) {
-        Contact node = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 0, false);
+        Contact node = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, nodeId, 0, false);
         return new DHTValueEntityImpl(node, node, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), true);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), true);
     }
     
     private static DHTValueEntity createDirectDHTValue(byte[] value) {
@@ -84,11 +84,11 @@ public class DatabaseTest extends MojitoTestCase {
     
     private static DHTValueEntity createDirectDHTValue(KUID nodeId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
-        Contact node = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact node = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 nodeId, addr, 0, Contact.DEFAULT_FLAG);
         
         return new DHTValueEntityImpl(node, node, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), false);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), false);
     }
     
     private static DHTValueEntity createIndirectDHTValue(byte[] value) {
@@ -99,13 +99,13 @@ public class DatabaseTest extends MojitoTestCase {
     private static DHTValueEntity createIndirectDHTValue(KUID creatorId, KUID senderId, KUID valueId, byte[] value) {
         SocketAddress addr = new InetSocketAddress(6666);
         
-        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact creator = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 creatorId, addr, 0, Contact.DEFAULT_FLAG);
-        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.UNKNOWN, 
+        Contact sender = ContactFactory.createLiveContact(addr, Vendor.UNKNOWN, Version.ZERO, 
                 senderId, addr, 0, Contact.DEFAULT_FLAG);  
         
         return new DHTValueEntityImpl(creator, sender, valueId, 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value), false);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value), false);
     }
     
     public void testLocalAdd() throws Exception {
@@ -406,7 +406,7 @@ public class DatabaseTest extends MojitoTestCase {
                 ContextSettings.getVersion(), KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 2000));
         
-        DHTValue value = new DHTValueImpl(DHTValueType.BINARY, Version.UNKNOWN, new byte[1]);
+        DHTValue value = new DHTValueImpl(DHTValueType.BINARY, Version.ZERO, new byte[1]);
         DHTValueEntity entity1 = new DHTValueEntityImpl(
                 dht.getLocalNode(), dht.getLocalNode(), key, value, true);
         
@@ -458,24 +458,24 @@ public class DatabaseTest extends MojitoTestCase {
         //this should accept
         Contact badHost = ContactFactory.createLiveContact(
                 new InetSocketAddress("169.0.1.1", 1111), 
-                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                 new InetSocketAddress("169.0.1.1", 1111), 1, 0);
         
         Contact goodHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                new InetSocketAddress("169.0.1.2", 1111), Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), new InetSocketAddress("169.0.1.2", 1111), 1, 0);
 
         DHTValueEntity value = null;
         //should allow x direct values
         for(int i = 0; i < DatabaseSettings.MAX_KEY_PER_IP.getValue(); i++) {
             value = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                        new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+                        new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             
             assertTrue(db.store(value));
         }
         //and reject after that
         DHTValueEntity newValue = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should make some space for a new one
@@ -484,29 +484,29 @@ public class DatabaseTest extends MojitoTestCase {
         
         //should also reject an indirect one coming from the bad host
         newValue = new DHTValueEntityImpl(badHost, goodHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         assertFalse(db.store(newValue));
         
         //should not allow more, even if it is coming indirectly        
         newValue = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);;
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);;
         assertFalse(db.store(newValue));
         
         //but should allow one created by a good host
         DHTValueEntity goodValue = new DHTValueEntityImpl(goodHost, goodHost, KUID.createRandomID(), 
-                new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+                new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
         
         assertTrue(db.store(goodValue));
 
         //test banning now
         badHost = ContactFactory.createLiveContact(
-                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.UNKNOWN, 
+                new InetSocketAddress("169.0.1.3", 1111), Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), 
                 new InetSocketAddress("169.0.1.3", 1111), 1, 0);
         
         for(int i = 0; i <= DatabaseSettings.MAX_KEY_PER_IP_BAN_LIMIT.getValue(); i++) {
             value = new DHTValueEntityImpl(badHost, badHost, KUID.createRandomID(), 
-                    new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, "test".getBytes()), false);
+                    new DHTValueImpl(DHTValueType.TEST, Version.ZERO, "test".getBytes()), false);
             db.store(value);
         }
         //should have banned the host

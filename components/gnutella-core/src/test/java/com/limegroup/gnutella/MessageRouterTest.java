@@ -935,7 +935,7 @@ public final class MessageRouterTest extends LimeTestCase {
         }
         
         public Version getVersion() {
-            return Version.UNKNOWN;
+            return Version.ZERO;
         }
 
         public void addEventListener(DHTEventListener listener) {

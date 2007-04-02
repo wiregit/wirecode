@@ -28,7 +28,7 @@ public class Version implements Serializable, Comparable<Version> {
 
     private static final long serialVersionUID = -4652316695244961502L;
 
-    public static final Version UNKNOWN = new Version(0);
+    public static final Version ZERO = Version.valueOf(0);
     
     private final int version;
     

@@ -68,7 +68,7 @@ public class PassiveLeafTest extends DHTTestCase {
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = DefaultDHTValueFactory.FACTORY.createDHTValue(
-                    DHTValueType.BINARY, Version.UNKNOWN, "Hello World".getBytes());
+                    DHTValueType.BINARY, Version.ZERO, "Hello World".getBytes());
             StoreResult result = dhts.get(0).put(key, value).get();
             assertEquals(k, result.getNodes().size());
             
@@ -76,7 +76,7 @@ public class PassiveLeafTest extends DHTTestCase {
             passiveLeaf = MojitoFactory.createDHT("PassiveLeaf");
             ((Context)passiveLeaf).setBootstrapped(true);
             ((Context)passiveLeaf).setBucketRefresherDisabled(true);
-            RouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.UNKNOWN);
+            RouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
             passiveLeaf.setRouteTable(routeTable);
             passiveLeaf.bind(4000);
             passiveLeaf.start();
@@ -119,7 +119,7 @@ public class PassiveLeafTest extends DHTTestCase {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         PassiveLeafController controller = new PassiveLeafController(
-                Vendor.UNKNOWN, Version.UNKNOWN, new DHTEventDispatcherStub());
+                Vendor.UNKNOWN, Version.ZERO, new DHTEventDispatcherStub());
         try {
             controller.start();
             
@@ -134,7 +134,7 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Add a Contact
             Contact c = ContactFactory.createUnknownContact(
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 3000));
             controller.addContact(c);
             
@@ -170,7 +170,7 @@ public class PassiveLeafTest extends DHTTestCase {
             
             // Add a Contact through handleDHTContactsMessage(Contact)
             Contact c = ContactFactory.createUnknownContact(
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 3000));
             DHTContactsMessage msg = new DHTContactsMessage(c);
             manager.handleDHTContactsMessage(msg);

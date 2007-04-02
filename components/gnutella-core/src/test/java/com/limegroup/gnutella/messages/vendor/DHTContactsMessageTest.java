@@ -31,11 +31,11 @@ public class DHTContactsMessageTest extends LimeTestCase {
     
     public void testSerialization() throws Exception {
         Contact c1 = ContactFactory.createUnknownContact(
-                Vendor.UNKNOWN, Version.UNKNOWN, 
+                Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), new InetSocketAddress("localhost", 3000));
         
         Contact c2 = ContactFactory.createUnknownContact(
-                Vendor.UNKNOWN, Version.UNKNOWN, 
+                Vendor.UNKNOWN, Version.ZERO, 
                 KUID.createRandomID(), new InetSocketAddress("localhost", 3001));
         
         DHTContactsMessage msg1 = new DHTContactsMessage(Arrays.asList(c1, c2));

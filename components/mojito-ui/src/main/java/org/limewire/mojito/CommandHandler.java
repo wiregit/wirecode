@@ -251,7 +251,7 @@ public class CommandHandler {
                 }
             });*/
             
-            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.UNKNOWN, value)).get();
+            StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value)).get();
             StringBuilder buffer = new StringBuilder();
             buffer.append("STORE RESULT:\n");
             buffer.append(evt.toString());

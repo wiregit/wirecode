@@ -124,7 +124,7 @@ public class RouteTableImpl implements RouteTable {
      * for the local Node
      */
     public RouteTableImpl(KUID nodeId) {
-        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.UNKNOWN, nodeId, 0, false);
+        localNode = ContactFactory.createLocalContact(Vendor.UNKNOWN, Version.ZERO, nodeId, 0, false);
         bucketTrie = new PatriciaTrie<KUID, Bucket>(KUID.KEY_ANALYZER);
         init();
     }

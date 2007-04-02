@@ -85,7 +85,7 @@ public class DHTValueTest extends MojitoTestCase {
             
             KUID key = KUID.createRandomID();
             DHTValueType type = DHTValueType.TEST;
-            Version version = Version.UNKNOWN;
+            Version version = Version.ZERO;
             byte[] b = "Hello World".getBytes();
             
             long time = System.currentTimeMillis();

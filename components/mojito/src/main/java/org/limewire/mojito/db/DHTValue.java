@@ -83,7 +83,7 @@ public interface DHTValue extends Serializable {
         }
 
         public Version getVersion() {
-            return Version.UNKNOWN;
+            return Version.ZERO;
         }
 
         public boolean isEmpty() {

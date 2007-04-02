@@ -34,12 +34,12 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
     public void testPassiveLeafRouteTable() {
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
-        PassiveLeafRouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.UNKNOWN);
+        PassiveLeafRouteTable routeTable = new PassiveLeafRouteTable(Vendor.UNKNOWN, Version.ZERO);
         
         List<Contact> list = new ArrayList<Contact>();
         for (int i = 0; i < 2*k; i++) {
             Contact c = ContactFactory.createUnknownContact(
-                    Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                    Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                     new InetSocketAddress("localhost", 2000+i));
             
             list.add(c);
@@ -90,7 +90,7 @@ public class PassiveLeafRouteTableTest extends DHTTestCase {
         
         // Now add a new Contact to the LRU List
         Contact c = ContactFactory.createUnknownContact(
-                Vendor.UNKNOWN, Version.UNKNOWN, KUID.createRandomID(), 
+                Vendor.UNKNOWN, Version.ZERO, KUID.createRandomID(), 
                 new InetSocketAddress("localhost", 3000));
         
         list.add(c);
