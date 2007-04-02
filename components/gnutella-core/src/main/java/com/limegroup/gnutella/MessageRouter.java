@@ -1074,6 +1074,7 @@ public abstract class MessageRouter {
         QueryResponseBundle bundle = 
             (QueryResponseBundle) _outOfBandReplies.remove(refGUID);
 
+        byte [] securityToken = ack.getSecurityToken();
         if ((bundle != null) && (ack.getNumResults() > 0)) {
             InetAddress iaddr = addr.getAddress();
             int port = addr.getPort();
@@ -1085,11 +1086,11 @@ public abstract class MessageRouter {
                 Response[] desired = new Response[ack.getNumResults()];
                 for (int i = 0; i < desired.length; i++)
                     desired[i] = bundle._responses[i];
-                iterator = responsesToQueryReplies(desired, bundle._query, 1);
+                iterator = responsesToQueryReplies(desired, bundle._query, 1, securityToken);
             }
             else 
                 iterator = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1); 
+                                                   bundle._query, 1, securityToken); 
             //send the query replies
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
@@ -2235,7 +2236,7 @@ public abstract class MessageRouter {
      */
     public Iterator responsesToQueryReplies(Response[] responses,
                                             QueryRequest queryRequest) {
-        return responsesToQueryReplies(responses, queryRequest, 10);
+        return responsesToQueryReplies(responses, queryRequest, 10, null);
     }
 
 
@@ -2254,7 +2255,7 @@ public abstract class MessageRouter {
      */
     private Iterator responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
-                                             final int REPLY_LIMIT) {
+                                             final int REPLY_LIMIT, byte [] securityToken) {
         //List to store Query Replies
         List /*<QueryReply>*/ queryReplies = new LinkedList();
         
@@ -2350,7 +2351,7 @@ public abstract class MessageRouter {
                 createQueryReply(guid, ttl, speed, res, 
                                  _clientGUID, busy, uploaded, 
                                  measuredSpeed, mcast,
-                                 fwTransfer);
+                                 fwTransfer, securityToken);
 
             //add to the list
             queryReplies.addAll(replies);
@@ -2373,7 +2374,8 @@ public abstract class MessageRouter {
                                              boolean uploaded, 
                                              boolean measuredSpeed, 
                                              boolean isFromMcast,
-                                             boolean shouldMarkForFWTransfer);
+                                             boolean shouldMarkForFWTransfer,
+                                             byte [] securityToken);
 
     /**
      * Handles a message to reset the query route table for the given

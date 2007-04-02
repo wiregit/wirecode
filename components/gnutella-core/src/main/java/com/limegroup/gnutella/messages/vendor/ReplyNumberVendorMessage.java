@@ -27,7 +27,8 @@ import com.limegroup.gnutella.statistics.SentMessageStatHandler;
  */
 public final class ReplyNumberVendorMessage extends VendorMessage {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
+    public static final int OLD_VERSION = 2;
     
     /**
      * whether we can receive unsolicited udp
@@ -48,9 +49,14 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
         if ((getVersion() == 1) && (getPayload().length != 1))
             throw new BadPacketException("VERSION 1 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
-        if ((getVersion() == 2) && (getPayload().length != 2))
+        if ((getVersion() == OLD_VERSION) && (getPayload().length != 2))
             throw new BadPacketException("VERSION 2 UNSUPPORTED PAYLOAD LEN: " +
                                          getPayload().length);
+        // loosen the condition on the message size to allow this message version
+        // to have a GGEP in the future
+        if ((getVersion() == VERSION) && getPayload().length < 2)
+            throw new BadPacketException("VERSION 3 UNSUPPORTED PAYLOAD LEN: " +
+                    getPayload().length);
     }
 
     /**
@@ -60,10 +66,26 @@ public final class ReplyNumberVendorMessage extends VendorMessage {
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
-    public ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
-        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, VERSION,
+    public ReplyNumberVendorMessage(GUID replyGUID, int version, int numResults) {
+        super(F_LIME_VENDOR_ID, F_REPLY_NUMBER, version,
               derivePayload(numResults));
         setGUID(replyGUID);
+    }
+    
+    /**
+     * Constructs a new ReplyNumberVendorMessage with the current version
+     * number.
+     */
+    public ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+        this(replyGUID, VERSION, numResults);
+    }
+
+    public static ReplyNumberVendorMessage createV2ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+        return new ReplyNumberVendorMessage(replyGUID, OLD_VERSION, numResults);
+    }
+
+    public static ReplyNumberVendorMessage  createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+        return new ReplyNumberVendorMessage(replyGUID, VERSION, numResults);
     }
 
     /** @return an int (1-255) representing the amount of results that a host

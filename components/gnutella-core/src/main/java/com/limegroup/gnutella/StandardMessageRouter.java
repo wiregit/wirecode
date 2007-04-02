@@ -268,9 +268,9 @@ public class StandardMessageRouter extends MessageRouter {
                     // wants the whole shebang
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
-                    ReplyNumberVendorMessage vm = 
-                        new ReplyNumberVendorMessage(new GUID(query.getGUID()),
-                                                     resultCount);
+                    ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
+                            ReplyNumberVendorMessage.createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
+                                ReplyNumberVendorMessage.createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
                     UDPService.instance().send(vm, addr, port);
                     return true;
                 }
@@ -323,7 +323,8 @@ public class StandardMessageRouter extends MessageRouter {
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
                                     boolean isFromMcast,
-                                    boolean isFWTransfer) {
+                                    boolean isFWTransfer,
+                                    byte [] securityToken) {
         
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
@@ -436,7 +437,8 @@ public class StandardMessageRouter extends MessageRouter {
                                                 measuredSpeed, 
                                                 ChatSettings.CHAT_ENABLED.getValue(),
                                                 isFromMcast, isFWTransfer,
-                                                proxies);
+                                                proxies,
+                                                securityToken);
                     queryReplies.add(queryReply);
                 }
             }
@@ -458,7 +460,7 @@ public class StandardMessageRouter extends MessageRouter {
                                         measuredSpeed, 
                                         ChatSettings.CHAT_ENABLED.getValue(),
                                         isFromMcast, isFWTransfer,
-                                        proxies);
+                                        proxies, securityToken);
             queryReplies.add(queryReply);
         }
 
