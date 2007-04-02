@@ -115,6 +115,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         	Assert.that(handler instanceof UDPReplyHandler);
         	UDPReplyHandler udpHandler = (UDPReplyHandler)handler;
         	reply.setOOBAddress(udpHandler.getInetAddress(),udpHandler.getPort());
+            if (handler.isPersonalSpam(reply)) // check again after adding OOB address
+                return;
         }
         
         // XML must be added to the response first, so that
