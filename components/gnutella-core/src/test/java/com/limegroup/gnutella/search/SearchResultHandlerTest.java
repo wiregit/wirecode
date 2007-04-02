@@ -125,6 +125,7 @@ public class SearchResultHandlerTest extends BaseTestCase {
                              , false
                              , false
                              , Collections.EMPTY_SET
+                             , null
                              );
         PrivilegedAccessor.invokeMethod(ForMeReplyHandler.instance(), "addXMLToResponses", reply);
         return reply;

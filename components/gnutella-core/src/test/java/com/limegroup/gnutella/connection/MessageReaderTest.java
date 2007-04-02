@@ -59,7 +59,7 @@ public final class MessageReaderTest extends BaseTestCase {
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);
+                                           null, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         Message[] allOut = new Message[] { out1, out2, out3, out4, out5 };
@@ -89,7 +89,7 @@ public final class MessageReaderTest extends BaseTestCase {
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);
+                                           null, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
@@ -120,7 +120,7 @@ public final class MessageReaderTest extends BaseTestCase {
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);
+                                           null, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);
@@ -157,7 +157,7 @@ public final class MessageReaderTest extends BaseTestCase {
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);
+                                           null, null);
         Message out4 = new PushRequest(GUID.makeGuid(), (byte)0, GUID.makeGuid(), 0, IP, 6346);
         Message out5 = PingReply.create(GUID.makeGuid(),(byte)1, new Endpoint("1.2.3.4", 5));
         ByteBuffer b1 = buffer(out1);

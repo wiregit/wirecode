@@ -129,7 +129,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -220,7 +220,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // the test Leaf
         m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -233,7 +233,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -359,7 +359,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // the test Leaf
         m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -372,7 +372,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -512,7 +512,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         // the test Leaf
         m = new QueryReply(guid, (byte) 1, SERVER_PORT, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -525,7 +525,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             m = new QueryReply(guid, (byte) 1, testUP[0].getPort(), 
                                myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -653,7 +653,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -782,7 +782,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -916,7 +916,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Response[] res = new Response[] { new Response(10, 10, "whatever") };
             m = new QueryReply(qr.getGUID(), (byte) 1, UPLOADER_PORT+1, myIP(), 
                                0, res, GUID.makeGuid(), new byte[0], false, 
-                               false, true, true, false, false, null);
+                               false, true, true, false, false, null, null);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             m.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
@@ -974,7 +974,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1123,7 +1123,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -1265,7 +1265,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
                 res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
             m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }

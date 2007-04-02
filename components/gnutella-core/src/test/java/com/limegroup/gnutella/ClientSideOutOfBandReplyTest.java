@@ -286,7 +286,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             Message m = 
                 new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
 
             testUP[i].send(m);
             testUP[i].flush();

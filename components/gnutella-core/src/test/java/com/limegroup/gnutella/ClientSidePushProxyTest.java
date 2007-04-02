@@ -183,7 +183,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], true, false, true,
-                           true, false, false, proxies);
+                           true, false, false, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -290,7 +290,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         res[0] = new Response(10, 10, "golf is awesome");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -340,7 +340,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         res[0] = new Response(10, 10, "berkeley.edu");
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, myIP(), 0, res, 
                            clientGUID, new byte[0], true, false, true,
-                           true, false, false, proxies);
+                           true, false, false, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 

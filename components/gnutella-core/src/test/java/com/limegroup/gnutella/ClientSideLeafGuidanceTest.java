@@ -100,7 +100,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             };
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -152,7 +152,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             testUP[i].send(m);
             testUP[i].flush();
         }
@@ -185,7 +185,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
             res[j] = new Response(10, 10, "anita is pretty"+j);
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         testUP[0].send(m);
         testUP[0].flush();
@@ -220,7 +220,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -241,7 +241,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         testUP[2].send(m);
         testUP[2].flush();
@@ -259,7 +259,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         testUP[1].send(m);
         testUP[1].flush();
@@ -291,7 +291,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         testUP[0].send(m);
         testUP[0].flush();
@@ -345,7 +345,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
 
         m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         testUP[0].send(m);
         testUP[0].flush();

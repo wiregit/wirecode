@@ -330,7 +330,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             Message m = 
                 new QueryReply(proxiedGuid, (byte) 3, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             sendF(ULTRAPEER[0], m);
             
             Thread.sleep(1000); // processing wait
@@ -355,7 +355,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             Message m = 
                 new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             
             exchangeRNVMACK(proxiedGuid);
             
@@ -395,7 +395,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
             Message m = 
                 new QueryReply(proxiedGuid, (byte) 3, 6356, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
-                               true, false, false, null);
+                               true, false, false, null, null);
             
             // send a ReplyNumberVM
             ReplyNumberVendorMessage replyNum = 
@@ -476,7 +476,7 @@ public final class ServerSideOOBProxyTest extends ServerSideTestCase {
         Message m = 
             new QueryReply(query.getGUID(), (byte) 3, 6356, myIP(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         // and send them OOB 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

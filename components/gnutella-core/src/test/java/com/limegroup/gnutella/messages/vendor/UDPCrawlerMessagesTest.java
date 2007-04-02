@@ -562,7 +562,7 @@ public class UDPCrawlerMessagesTest extends BaseTestCase {
         Message reply = 
             new QueryReply(GUID.makeGuid(), (byte) 3, 6356, InetAddress.getLocalHost().getAddress(), 0, res,
                            GUID.makeGuid(), new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null, null);
         
         int [] sent = new int[]{1,2,3,1,2,3};
         LEAF_1.send(reply);LEAF_1.flush();

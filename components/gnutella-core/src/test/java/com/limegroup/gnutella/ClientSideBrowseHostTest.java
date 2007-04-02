@@ -89,7 +89,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
-                           true, false, false, null);
+                           true, false, false, null,null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -188,7 +188,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         m = new QueryReply(m.getGUID(), (byte) 1, 6999, 
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
-                           true, false, false, proxies);
+                           true, false, false, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 
@@ -322,7 +322,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         m = new QueryReply(m.getGUID(), (byte) 1, 7000, 
                            InetAddress.getLocalHost().getAddress(), 0, res, 
                            clientGUID, new byte[0], false, false, true,
-                           true, false, false, proxies);
+                           true, false, false, proxies, null);
         testUP[0].send(m);
         testUP[0].flush();
 

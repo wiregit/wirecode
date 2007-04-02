@@ -443,7 +443,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         byte[] bytes=out.toByteArray();
         int ggepLen = _ggepUtil.getQRGGEP(true, false, false,
-                                          new HashSet()).length;
+                                          new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
@@ -487,7 +487,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         bytes=out.toByteArray();
         ggepLen = _ggepUtil.getQRGGEP(true, false, false,
-                                      new HashSet()).length;
+                                      new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals(
@@ -524,7 +524,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           0xFFFF, ip, u4, responses,
                           guid, new byte[0],
                           true, false, false, true, false, false, true,
-                          proxies);
+                          proxies, null);
         
         assertEquals("LIME", qr.getVendor());
         assertTrue(qr.getNeedsPush());
@@ -542,7 +542,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         bytes=out.toByteArray();
         ggepLen = _ggepUtil.getQRGGEP(true, false, true,
-                                      proxies).length;
+                                      proxies, null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
         assertEquals(
@@ -636,7 +636,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             // this shouldn't even work....
             testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, false, false,
-                                                    new HashSet()), 
+                                                    new HashSet(), null), 
                                 0, null);
             assertTrue(false);
         }
@@ -644,7 +644,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test just BH GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false, false,
-                                                new HashSet()), 
+                                                new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -652,7 +652,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test just multicast GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true, false,
-                                                new HashSet()), 
+                                                new HashSet(), null), 
                             0, null);
         assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -660,7 +660,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test combo GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true, false,
-                                                new HashSet()),
+                                                new HashSet(), null),
                             0, null);
         assertEquals(2, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
@@ -691,7 +691,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new IpPortImpl(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     fwTransfer, proxies), 
+                                                     fwTransfer, proxies, null), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
@@ -879,7 +879,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                                            6346, IP, 0, new Response[0],
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           proxies);
+                                           proxies, null);
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qr.write(baos);
@@ -944,7 +944,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                                            6346, IP, 0, hits,
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);			    
+                                           null, null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
@@ -997,7 +997,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                                            6346, IP, 0, hits,
                                            GUID.makeGuid(), new byte[0],
                                            false, false, true, true, true, false,
-                                           null);			    
+                                           null, null);			    
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             qReply.write(baos);
             ByteArrayInputStream bais = 
