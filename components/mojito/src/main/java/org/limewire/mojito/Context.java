@@ -47,6 +47,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.DHTValueManager;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.db.impl.DatabaseImpl;
 import org.limewire.mojito.db.impl.DefaultDHTValueEntityPublisher;
@@ -997,12 +998,13 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         }
     }
     
-    /** 
-     * Starts a value lookup for the given KUID 
+    /*
+     * (non-Javadoc)
+     * @see org.limewire.mojito.MojitoDHT#get(org.limewire.mojito.KUID, org.limewire.mojito.db.DHTValueType)
      */
-    public DHTFuture<FindValueResult> get(KUID key) {
+    public DHTFuture<FindValueResult> get(KUID key, DHTValueType valueType) {
         throwExceptionIfNotBootstrapped("get()");
-        return findValueManager.lookup(key);
+        return findValueManager.lookup(key, valueType);
     }
     
     /*
@@ -1017,7 +1019,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * Starts a Node lookup for the given KUID 
      */
     public DHTFuture<FindNodeResult> lookup(KUID lookupId) {
-        return findNodeManager.lookup(lookupId);
+        return findNodeManager.lookup(lookupId, null);
     }
     
     /*

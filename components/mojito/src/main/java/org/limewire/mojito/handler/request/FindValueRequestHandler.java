@@ -21,6 +21,7 @@ package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -30,11 +31,13 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.FindValueRequest;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.util.CollectionUtils;
+import org.limewire.mojito.util.DatabaseUtils;
 
 
 /**
@@ -47,7 +50,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
     /**
      * Delegate to the FIND_NODE request handler
      */
-    private FindNodeRequestHandler findNodeDelegate;
+    private final FindNodeRequestHandler findNodeDelegate;
     
     public FindValueRequestHandler(Context context, 
             FindNodeRequestHandler findNodeDelegate) {
@@ -60,18 +63,19 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
     protected void request(RequestMessage message) throws IOException {
         FindValueRequest request = (FindValueRequest)message;
         
-        KUID lookup = request.getLookupID();
+        KUID lookupId = request.getLookupID();
+        DHTValueType valueType = request.getDHTValueType();
         
         Map<KUID, DHTValueEntity> bag = null;
         float requestLoad = 0f;
         
         DHTValueEntityPublisher publisher = context.getDHTValueEntityPublisher();
-        DHTValueEntity localValueEntity = publisher.get(lookup);
+        DHTValueEntity localValueEntity = publisher.get(lookupId);
         
         Database database = context.getDatabase();
         synchronized (database) {
-            bag = database.get(lookup);
-            requestLoad = database.getRequestLoad(lookup, true);
+            bag = database.get(lookupId);
+            requestLoad = database.getRequestLoad(lookupId, true);
         }
         
         // The keys and values we'll return
@@ -84,7 +88,9 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         if (localValueEntity != null) {
             if (secondaryKeys.isEmpty() 
                     || secondaryKeys.contains(context.getLocalNodeID())) {
-                valuesToReturn.add(localValueEntity);
+                
+                valuesToReturn.addAll(DatabaseUtils.filter(valueType, 
+                        Collections.singleton(localValueEntity)));
             } else {
                 availableKeys.add(context.getLocalNodeID());
             }
@@ -94,7 +100,8 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             if (secondaryKeys.isEmpty()) {
                 if (valuesToReturn.isEmpty()
                         && bag.size() == 1) {
-                    valuesToReturn.addAll(bag.values());
+                    valuesToReturn.addAll(DatabaseUtils.filter(valueType, bag.values()));
+                    
                 } else {
                     availableKeys.addAll(bag.keySet());
                 }
@@ -102,9 +109,9 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
                 for (KUID secondaryKey : secondaryKeys) {
-                    DHTValueEntity value = bag.get(secondaryKey);
-                    if (value != null) {
-                        valuesToReturn.add(value);
+                    DHTValueEntity entity = bag.get(secondaryKey);
+                    if (entity != null && DatabaseUtils.isDHTValueType(valueType, entity)) {
+                        valuesToReturn.add(entity);
                     }
                 }
             }   
@@ -114,7 +121,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
                 && availableKeys.isEmpty()) {
             
             if (LOG.isInfoEnabled()) {
-                LOG.info("No values for " + lookup + ", returning Contacts instead to " + request.getContact());
+                LOG.info("No values for " + lookupId + ", returning Contacts instead to " + request.getContact());
             }
             
             // OK, send Contacts instead!
@@ -125,7 +132,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Return " + CollectionUtils.toString(valuesToReturn) + " and " 
                         + CollectionUtils.toString(availableKeys) + " for " 
-                        + lookup + " to " + request.getContact());
+                        + lookupId + " to " + request.getContact());
             }
             
             context.getNetworkStats().FIND_VALUE_REQUESTS.incrementStat();

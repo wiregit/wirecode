@@ -333,7 +333,7 @@ public class CommandHandler {
                 }
             });*/
             
-            FindValueResult evt = dht.get(key).get();
+            FindValueResult evt = dht.get(key, DHTValueType.ANY).get();
             out.println(evt.toString());
             
         } catch (Exception e) {

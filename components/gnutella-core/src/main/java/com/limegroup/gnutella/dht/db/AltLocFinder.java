@@ -58,7 +58,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(urn);
-            DHTFuture<FindValueResult> future = dht.get(key);
+            DHTFuture<FindValueResult> future = dht.get(key, AltLocDHTValue.ALT_LOC);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key));
             return true;
         }
@@ -79,7 +79,7 @@ public class AltLocFinder {
             }
             
             KUID key = KUIDUtils.toKUID(guid);
-            DHTFuture<FindValueResult> future = dht.get(key);
+            DHTFuture<FindValueResult> future = dht.get(key, PushProxiesDHTValue.PUSH_PROXIES);
             future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key));
             return true;
         }

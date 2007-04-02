@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.messages.impl.DefaultMessageFactory;
@@ -93,9 +94,8 @@ public class MessageHelper {
     }
 
     public FindValueRequest createFindValueRequest(SocketAddress dst, KUID lookupId, 
-            Collection<KUID> keys) {
-        
-        return factory.createFindValueRequest(getLocalNode(), dst, lookupId, keys);
+            Collection<KUID> keys, DHTValueType valueType) {
+        return factory.createFindValueRequest(getLocalNode(), dst, lookupId, keys, valueType);
     }
 
     public FindValueResponse createFindValueResponse(RequestMessage request, 

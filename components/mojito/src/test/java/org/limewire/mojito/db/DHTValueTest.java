@@ -36,7 +36,6 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.DatabaseUtils;
-import org.limewire.mojito.util.MojitoUtils;
 
 public class DHTValueTest extends MojitoTestCase {
     
@@ -70,17 +69,17 @@ public class DHTValueTest extends MojitoTestCase {
         try {
             for (int i = 0; i < 2*k; i++) {
                 MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(new InetSocketAddress("localhost", 2000 + i));
+                dht.bind(new InetSocketAddress(2000 + i));
                 dht.start();
                 
                 if (i > 0) {
-                    MojitoUtils.bootstrap(dht, new InetSocketAddress("localhost", 2000)).get();
+                    dht.bootstrap(new InetSocketAddress("localhost", 2000)).get();
                 } else {
                     first = dht;
                 }
                 dhts.put(dht.getLocalNodeID(), dht);
             }
-            MojitoUtils.bootstrap(first, new InetSocketAddress("localhost", 2000+1)).get();
+            first.bootstrap(new InetSocketAddress("localhost", 2000+1)).get();
             Thread.sleep(250);
             
             KUID key = KUID.createRandomID();

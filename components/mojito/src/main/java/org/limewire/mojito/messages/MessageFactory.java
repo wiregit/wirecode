@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
 import org.limewire.mojito.messages.StoreResponse.Status;
 import org.limewire.mojito.routing.Contact;
@@ -99,9 +100,10 @@ public interface MessageFactory {
      * 
      * @param src The contact information of the issuing Node
      * @param dst The destination address to where the request will be send
+     * @param valueType TODO
      */
     public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
-            KUID lookupId, Collection<KUID> keys);
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType);
 
     /**
      * Creates and returns a FindValueResponse Message

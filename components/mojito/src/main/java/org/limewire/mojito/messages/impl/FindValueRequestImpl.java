@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.FindValueRequest;
@@ -41,13 +42,16 @@ public class FindValueRequestImpl extends AbstractLookupRequest
     
     private final Collection<KUID> keys;
     
+    private final DHTValueType valueType;
+    
     public FindValueRequestImpl(Context context, 
             Contact contact, MessageID messageId, 
-            KUID lookupId, Collection<KUID> keys) {
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
         super(context, OpCode.FIND_VALUE_REQUEST, 
                 contact, messageId, lookupId);
         
         this.keys = keys;
+        this.valueType = valueType;
     }
     
     public FindValueRequestImpl(Context context, SocketAddress src, 
@@ -55,16 +59,27 @@ public class FindValueRequestImpl extends AbstractLookupRequest
         super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
         
         this.keys = in.readKUIDs();
+        
+        DHTValueType valueType = DHTValueType.ANY;
+        if (getMessageVersion().compareTo(Version.ZERO) > 0) {
+            valueType = in.readValueType();
+        }
+        this.valueType = valueType;
     }
     
     public Collection<KUID> getSecondaryKeys() {
         return keys;
     }
     
+    public DHTValueType getDHTValueType() {
+        return valueType;
+    }
+    
     @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         super.writeBody(out);
-        out.writeKUIDs(keys);
+        out.writeKUIDs(getSecondaryKeys());
+        out.writeDHTValueType(getDHTValueType());
     }
 
     public String toString() {

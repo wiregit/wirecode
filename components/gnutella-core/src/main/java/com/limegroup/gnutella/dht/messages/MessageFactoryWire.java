@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.DHTMessage;
 import org.limewire.mojito.messages.FindNodeRequest;
 import org.limewire.mojito.messages.FindNodeResponse;
@@ -98,9 +99,9 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public FindValueRequest createFindValueRequest(Contact src, SocketAddress dst, 
-            KUID lookupId, Collection<KUID> keys) {
+            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
         return new FindValueRequestWireImpl(
-                delegate.createFindValueRequest(src, dst, lookupId, keys));
+                delegate.createFindValueRequest(src, dst, lookupId, keys, valueType));
     }
 
     public FindValueResponse createFindValueResponse(Contact src, Contact dst, 

@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.FindNodeResponse;
 import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.messages.LookupRequest;
@@ -40,6 +41,7 @@ import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.statistics.FindValueLookupStatisticContainer;
+import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
 
 
@@ -53,15 +55,25 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     /** Whether or not this is an exhaustive lookup. */
     private boolean exchaustive = false;
     
-    private FindValueLookupStatisticContainer lookupStat;
+    private final FindValueLookupStatisticContainer lookupStat;
+    
+    /** */
+    private final DHTValueType valueType;
     
     /** Collection of FindValueResponses if this is a FIND_VALUE lookup  */
     private Collection<FindValueResponse> valueResponses = null;
     
-    public FindValueResponseHandler(Context context, KUID lookupId) {
+    public FindValueResponseHandler(Context context, KUID lookupId, 
+            DHTValueType valueType) {
         super(context, lookupId);
+        this.valueType = valueType;
+        
         setExhaustive(KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
+    }
+    
+    public DHTValueType getDHTValueType() {
+        return valueType;
     }
     
     @Override
@@ -134,9 +146,11 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         Contact sender = response.getContact();
         
         Collection<KUID> keys = response.getSecondaryKeys();
-        Collection<? extends DHTValueEntity> values = response.getDHTValueEntities();
         
-        if (keys.isEmpty() && values.isEmpty()) {
+        Collection<? extends DHTValueEntity> entities 
+            = DatabaseUtils.filter(valueType, response.getDHTValueEntities());
+        
+        if (keys.isEmpty() && entities.isEmpty()) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(sender + " returned neither keys nor values for " + lookupId);
             }
@@ -174,6 +188,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     
     protected LookupRequest createLookupRequest(SocketAddress addr) {
         Collection<KUID> noKeys = Collections.emptySet();
-        return context.getMessageHelper().createFindValueRequest(addr, lookupId, noKeys);
+        return context.getMessageHelper().createFindValueRequest(addr, lookupId, noKeys, valueType);
     }
 }

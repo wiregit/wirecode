@@ -27,6 +27,7 @@ import java.util.Map;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
 import org.limewire.mojito.exceptions.DHTNoSuchElementException;
@@ -59,11 +60,11 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
         Contact node = entityKey.getContact();
         KUID primaryKey = entityKey.getPrimaryKey();
         KUID secondaryKey = entityKey.getSecondaryKey();
-        //DHTValueType valueType = entityKey.getDHTValueType();
+        DHTValueType valueType = entityKey.getDHTValueType();
         
         FindValueRequest request = context.getMessageHelper()
             .createFindValueRequest(node.getContactAddress(), 
-                    primaryKey, Collections.singleton(secondaryKey));
+                    primaryKey, Collections.singleton(secondaryKey), valueType);
         
         try {
             context.getMessageDispatcher().send(node, request, this);
