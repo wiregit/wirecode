@@ -190,8 +190,4 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         Collection<KUID> noKeys = Collections.emptySet();
         return context.getMessageHelper().createFindValueRequest(addr, lookupId, noKeys, valueType);
     }
-    
-    /*private static Collection<DHTValueEntity> filter(DHTValueType valueType, Collection<? extends DHTValueEntity> entities) {
-        
-    }*/
 }
