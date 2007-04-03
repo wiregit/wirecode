@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
-import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 public interface UploadManager extends BandwidthTracker {
@@ -13,7 +12,7 @@ public interface UploadManager extends BandwidthTracker {
 
     int getNumQueuedUploads();
 
-    int getPositionInQueue(HTTPSession session);
+//    int getPositionInQueue(HTTPSession session);
 
     float getUploadSpeed();
 

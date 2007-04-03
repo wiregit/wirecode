@@ -54,9 +54,7 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
      */
     public boolean poll() {
         long now = System.currentTimeMillis();
-        boolean tooSoon = lastPollTime + MIN_POLL_TIME > now;
-        lastPollTime = now;
-        return tooSoon;
+        return lastPollTime + MIN_POLL_TIME > now;
     }
 
     /**
@@ -80,6 +78,8 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         
         if (status == QueueStatus.ACCEPTED || status == QueueStatus.BYPASS) {
             lastPollTime = 0;
+        } else if (status == QueueStatus.QUEUED) {
+            lastPollTime = System.currentTimeMillis();
         }
     }
 

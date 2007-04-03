@@ -149,6 +149,10 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // start upload
         if (uploader.getState() == Uploader.THEX_REQUEST) {
+            // XXX need this to reset UploadSession.lastPollTime
+            QueueStatus status = sessionManager.enqueue(context, request,
+                    response);
+            assert status == QueueStatus.BYPASS;
             handleTHEXRequest(request, response, context, uploader, fd);
         } else {
             handleFileUpload(context, request, response, uploader, fd);
@@ -299,8 +303,8 @@ public class FileRequestHandler implements HttpRequestHandler {
         Assert.that(position != -1);
 
         String value = "position=" + (position + 1) + ", pollMin="
-                + (HTTPSession.MIN_POLL_TIME / 1000) + /* mS to S */
-                ", pollMax=" + (HTTPSession.MAX_POLL_TIME / 1000) /* mS to S */;
+                + (UploadSession.MIN_POLL_TIME / 1000) + /* mS to S */
+                ", pollMax=" + (UploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
         HTTPHeaderUtils.addAltLocationsHeader(response, uploader, fd);

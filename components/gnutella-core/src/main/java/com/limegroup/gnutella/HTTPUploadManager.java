@@ -38,7 +38,6 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
-import com.limegroup.gnutella.uploader.HTTPSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.LimitReachedRequestHandler;
@@ -593,11 +592,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             rqc.startedUpload(sha1);
             return QueueStatus.ACCEPTED;
         }
-    }
-
-    public int getPositionInQueue(HTTPSession session) {
-        // return _queuedUploads.indexOf(session);
-        return slotManager.positionInQueue(session);
     }
 
     /**
