@@ -21,12 +21,14 @@ package org.limewire.mojito.handler.response;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTBackendException;
 import org.limewire.mojito.exceptions.DHTException;
@@ -37,6 +39,7 @@ import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.ResponseMessage;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.DatabaseUtils;
 import org.limewire.security.SecurityToken;
 
 
@@ -78,9 +81,17 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
         if (message instanceof FindValueResponse) {
             FindValueResponse response = (FindValueResponse)message;
             
+            // Make sure the DHTValueEntities have the expected
+            // value type.
+            Collection<? extends DHTValueEntity> entities 
+                = DatabaseUtils.filter(entityKey.getDHTValueType(), 
+                        response.getDHTValueEntities());
+            
             Map<? extends Contact, ? extends SecurityToken> path = Collections.emptyMap();
+            Collection<EntityKey> entityKeys = Collections.emptySet();
+            
             FindValueResult result = new FindValueResult(entityKey.getPrimaryKey(), 
-                    path, Collections.singleton(response), time, 1);
+                    entityKey.getDHTValueType(), path, entities, entityKeys, time, 1);
             
             setReturnValue(result);
             

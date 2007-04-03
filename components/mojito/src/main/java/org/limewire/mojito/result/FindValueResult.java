@@ -19,7 +19,6 @@
 
 package org.limewire.mojito.result;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,7 +27,6 @@ import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.messages.FindValueResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.security.SecurityToken;
@@ -45,35 +43,23 @@ public class FindValueResult extends LookupResult {
     
     private final int hop;
     
-    private final Collection<DHTValueEntity> entities;
+    private final Collection<? extends DHTValueEntity> entities;
     
-    private final Collection<EntityKey> entityKeys;
+    private final Collection<? extends EntityKey> entityKeys;
     
     public FindValueResult(KUID lookupId, 
+            DHTValueType valueType,
             Map<? extends Contact, ? extends SecurityToken> path,
-            Collection<? extends FindValueResponse> responses, 
+            Collection<? extends DHTValueEntity> entities,
+            Collection<? extends EntityKey> entityKeys,
             long time, int hop) {
         super(lookupId);
         
         this.path = path;
         this.time = time;
         this.hop = hop;
-        
-        entities = new ArrayList<DHTValueEntity>();
-        entityKeys = new ArrayList<EntityKey>();
-        
-        for (FindValueResponse response : responses) {
-            entities.addAll(response.getDHTValueEntities());
-            
-            Contact sender = response.getContact();
-            
-            for (KUID secondaryKey : response.getSecondaryKeys()) {
-                EntityKey key = EntityKey.createEntityKey(
-                        sender, lookupId, secondaryKey, DHTValueType.ANY);
-                
-                entityKeys.add(key);
-            }
-        }
+        this.entities = entities;
+        this.entityKeys = entityKeys;
     }
     
     /*
@@ -103,14 +89,14 @@ public class FindValueResult extends LookupResult {
     /**
      * 
      */
-    public Collection<DHTValueEntity> getEntities() {
+    public Collection<? extends DHTValueEntity> getEntities() {
         return entities;
     }
     
     /**
      * 
      */
-    public Collection<EntityKey> getEntityKeys() {
+    public Collection<? extends EntityKey> getEntityKeys() {
         return entityKeys;
     }
 

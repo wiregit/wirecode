@@ -21,7 +21,6 @@ package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -83,38 +82,43 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Collection<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
         
         // The keys the remote Node is requesting
-        Collection<KUID> secondaryKeys = request.getSecondaryKeys();
+        Collection<KUID> requestedSecondaryKeys = request.getSecondaryKeys();
         
-        if (localValueEntity != null) {
-            if (secondaryKeys.isEmpty() 
-                    || secondaryKeys.contains(context.getLocalNodeID())) {
+        if (localValueEntity != null 
+                && DatabaseUtils.isDHTValueType(valueType, localValueEntity)) {
+            
+            if (requestedSecondaryKeys.isEmpty() 
+                    || requestedSecondaryKeys.contains(context.getLocalNodeID())) {
+                valuesToReturn.add(localValueEntity);
                 
-                valuesToReturn.addAll(DatabaseUtils.filter(valueType, 
-                        Collections.singleton(localValueEntity)));
             } else {
                 availableKeys.add(context.getLocalNodeID());
             }
         }
         
         if (bag != null && !bag.isEmpty()) {
-            if (secondaryKeys.isEmpty()) {
+            Collection<? extends DHTValueEntity> filtered 
+                = DatabaseUtils.filter(valueType, bag.values());
+            
+            if (requestedSecondaryKeys.isEmpty()) {
                 if (valuesToReturn.isEmpty()
-                        && bag.size() == 1) {
-                    valuesToReturn.addAll(DatabaseUtils.filter(valueType, bag.values()));
-                    
+                        && filtered.size() == 1) {
+                    valuesToReturn.addAll(filtered);
                 } else {
-                    availableKeys.addAll(bag.keySet());
+                    for (DHTValueEntity entity : filtered) {
+                        availableKeys.add(entity.getSecondaryKey());
+                    }
                 }
             } else {
                 // Send all requested values back.
                 // TODO: http://en.wikipedia.org/wiki/Knapsack_problem
-                for (KUID secondaryKey : secondaryKeys) {
-                    DHTValueEntity entity = bag.get(secondaryKey);
-                    if (entity != null && DatabaseUtils.isDHTValueType(valueType, entity)) {
+                for (DHTValueEntity entity : filtered) {
+                    KUID secondaryKey = entity.getSecondaryKey();
+                    if (requestedSecondaryKeys.contains(secondaryKey)) {
                         valuesToReturn.add(entity);
                     }
                 }
-            }   
+            }
         }
         
         if (valuesToReturn.isEmpty() 

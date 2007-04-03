@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
@@ -57,11 +58,16 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     
     private final FindValueLookupStatisticContainer lookupStat;
     
-    /** */
+    /** The type of value we're looking for */
     private final DHTValueType valueType;
     
-    /** Collection of FindValueResponses if this is a FIND_VALUE lookup  */
-    private Collection<FindValueResponse> valueResponses = null;
+    /** Collection of EntityKeys */
+    private final Collection<EntityKey> entityKeys
+        = new ArrayList<EntityKey>();
+
+    /** Collection of DHTValueEntities */
+    private final Collection<DHTValueEntity> entities 
+        = new ArrayList<DHTValueEntity>();
     
     public FindValueResponseHandler(Context context, KUID lookupId, 
             DHTValueType valueType) {
@@ -70,10 +76,6 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         
         setExhaustive(KademliaSettings.EXHAUSTIVE_VALUE_LOOKUP.getValue());
         lookupStat = new FindValueLookupStatisticContainer(context, lookupId);
-    }
-    
-    public DHTValueType getDHTValueType() {
-        return valueType;
     }
     
     @Override
@@ -110,27 +112,38 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         long time = getElapsedTime();
         
         Map<Contact, SecurityToken> path = getPath();
-        Collection<FindValueResponse> values = getValues();
+        Collection<DHTValueEntity> entities = getDHTValueEntities();
+        Collection<EntityKey> entityKeys = getEntityKeys();
         
-        if (values.isEmpty()) {
+        if (entities.isEmpty() && entityKeys.isEmpty()) {
             lookupStat.FIND_VALUE_FAILURE.incrementStat();
         } else {
             lookupStat.FIND_VALUE_OK.incrementStat();
         }
         
-        setReturnValue(new FindValueResult(getLookupID(), path, values, time, currentHop));
+        setReturnValue(new FindValueResult(
+                getLookupID(), valueType, path, entities, entityKeys, time, currentHop));
     }
     
     /**
-     * Returns a Collection of FindValueResponse if this was 
-     * a FIND_VALUE lookup
+     * Returns the type of value we're looking for
      */
-    public Collection<FindValueResponse> getValues() {
-        
-        if (valueResponses != null) {
-            return valueResponses;
-        }
-        return Collections.emptyList();
+    public DHTValueType getDHTValueType() {
+        return valueType;
+    }
+    
+    /**
+     * 
+     */
+    public Collection<DHTValueEntity> getDHTValueEntities() {
+        return entities;
+    }
+    
+    /**
+     * 
+     */
+    public Collection<EntityKey> getEntityKeys() {
+        return entityKeys;
     }
     
     protected boolean nextStep(ResponseMessage message) throws IOException {
@@ -143,28 +156,12 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
         }
         
         FindValueResponse response = (FindValueResponse)message;
-        Contact sender = response.getContact();
         
-        Collection<KUID> keys = response.getSecondaryKeys();
-        
-        Collection<? extends DHTValueEntity> entities 
-            = DatabaseUtils.filter(valueType, response.getDHTValueEntities());
-        
-        if (keys.isEmpty() && entities.isEmpty()) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(sender + " returned neither keys nor values for " + lookupId);
-            }
-            
-            // Continue with the lookup...
-            return true;
-        }
-        
-        if (valueResponses == null) {
-            valueResponses = new ArrayList<FindValueResponse>();
+        if (!extractDataFromResponse(response)) {
+            return false;
         }
         
         addToResponsePath(response);
-        valueResponses.add(response);
         
         // Terminate the FIND_VALUE lookup if it isn't
         // an exhaustive lookup
@@ -189,5 +186,51 @@ public class FindValueResponseHandler extends LookupResponseHandler<FindValueRes
     protected LookupRequest createLookupRequest(SocketAddress addr) {
         Collection<KUID> noKeys = Collections.emptySet();
         return context.getMessageHelper().createFindValueRequest(addr, lookupId, noKeys, valueType);
+    }
+    
+    private boolean extractDataFromResponse(FindValueResponse response) {
+        
+        Contact sender = response.getContact();
+        
+        Collection<KUID> availableSecondaryKeys = response.getSecondaryKeys();
+        Collection<? extends DHTValueEntity> entities = response.getDHTValueEntities();
+        
+        // No keys and no values? In other words the remote Node sent us
+        // a FindValueResponse even though it doesn't have a value for
+        // the given KUID!? Continue with the lookup if so...!
+        if (availableSecondaryKeys.isEmpty() && entities.isEmpty()) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(sender + " returned neither keys nor values for " + lookupId);
+            }
+            
+            // Continue with the lookup...
+            return false;
+        }
+        
+        Collection<? extends DHTValueEntity> filtered 
+            = DatabaseUtils.filter(valueType, entities);
+    
+        // The filtered Set is empty and the unfiltered isn't?
+        // The remote Node send us unrequested Value(s)!
+        // Continue with the lookup if so...!
+        if (filtered.isEmpty() && !entities.isEmpty()) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(sender + " returned unrequested types of values for " + lookupId);
+            }
+            
+            // Continue with the lookup...
+            return false;
+        }
+        
+        this.entities.addAll(filtered);
+        
+        for (KUID secondaryKey : availableSecondaryKeys) {
+            EntityKey key = EntityKey.createEntityKey(
+                    sender, lookupId, secondaryKey, valueType);
+            
+            this.entityKeys.add(key);
+        }
+        
+        return true;
     }
 }
