@@ -289,7 +289,8 @@ public abstract class AbstractUploader implements Uploader {
 
     public void measureBandwidth() {
         long written = totalAmountRead + getAmountWritten();
-        session.measureBandwidth(written);
+        // FIXME type conversion
+        session.measureBandwidth((int) written);
     }
 
     public abstract int getAmountWritten();
