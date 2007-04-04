@@ -366,4 +366,8 @@ public final class SearchSettings extends LimeProps {
                 "AAAAAAAAAAAAAAAAAAAAAAA", 
                 "SearchSettings.limeSignedResponse");
     
+    public static final StringArraySetting LIME_QRP_ENTRIES =
+        FACTORY.createRemoteStringArraySetting("LIME_QRP_ENTRIES", 
+                new String[]{"limewire", "pro", "limewirepro"}, "SearchSettings.limeQRPEntries");
+    
 }

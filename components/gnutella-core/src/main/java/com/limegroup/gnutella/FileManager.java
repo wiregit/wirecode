@@ -40,6 +40,7 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -1950,9 +1951,8 @@ public abstract class FileManager {
     protected synchronized void buildQRT() {
 
         _queryRouteTable = new QueryRouteTable();
-        _queryRouteTable.addIndivisible("limewire");
-        _queryRouteTable.addIndivisible("pro");
-        _queryRouteTable.addIndivisible("limewirepro");
+        for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
+            _queryRouteTable.addIndivisible(entry);
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
             if (fds[i] instanceof IncompleteFileDesc)
