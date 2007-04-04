@@ -22,4 +22,11 @@
     <module>lib</module>
   </modules>
 
+  <distributionManagement>
+    <site>
+      <id>limewire-website</id>
+      <url>scp://localhost//var/www/maven/</url>
+    </site>
+  </distributionManagement>
+
 </project>

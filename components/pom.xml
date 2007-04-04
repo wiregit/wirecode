@@ -64,6 +64,13 @@
     </repository>
   </repositories>
 
+  <distributionManagement>
+    <site>
+      <id>limewire-website</id>
+      <url>scp://localhost//var/www/maven/</url>
+    </site>
+  </distributionManagement>
+
   <build>
     <sourceDirectory>src/main/java</sourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>

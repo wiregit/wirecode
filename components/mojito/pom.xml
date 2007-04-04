@@ -48,6 +48,13 @@
     </repository>
   </repositories>
 
+  <distributionManagement>
+    <site>
+      <id>limewire-website</id>
+      <url>scp://localhost//var/www/maven/mojito/</url>
+    </site>
+  </distributionManagement>
+
   <dependencies> 
 	<!-- LimeWire Components -->
     <dependency>

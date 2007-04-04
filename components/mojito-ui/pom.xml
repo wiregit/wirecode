@@ -6,7 +6,7 @@
   <artifactId>mojito-ui</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>LimeWire Mojito DHT</name>
+  <name>LimeWire Mojito DHT UI</name>
 
   <properties>
     <lw-components.version>4.13.1-SNAPSHOT</lw-components.version>
@@ -47,6 +47,13 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <site>
+      <id>limewire-website</id>
+      <url>scp://localhost//var/www/maven/mojito-ui/</url>
+    </site>
+  </distributionManagement>
 
   <dependencies> 
 	<!-- LimeWire Components -->
