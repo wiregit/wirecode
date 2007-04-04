@@ -2305,9 +2305,26 @@ public abstract class FileManager {
     
     private class QRPUpdater implements SimppListener {
         private final AtomicInteger version = new AtomicInteger(-1);
+        private final Set<String> qrpWords = Collections.synchronizedSet(new HashSet<String>());
+        public QRPUpdater() {
+            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
+                qrpWords.add(entry);
+        }
         public void simppUpdated(int newVersion) {
             if (!version.compareAndSet(-1, newVersion))
                 return;
+            
+            Set<String> newWords = new HashSet<String>();
+            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
+                newWords.add(entry);
+            
+            // any change in words?
+            if (newWords.containsAll(qrpWords) && qrpWords.containsAll(newWords))
+                return;
+            
+            qrpWords.clear();
+            qrpWords.addAll(newWords);
+            
             // schedule a rebuild sometime in the next hour
             RouterService.schedule(new Runnable() {
                 public void run() {
