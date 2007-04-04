@@ -92,13 +92,12 @@ public class ChatUIManagerTest extends GUIBaseTestCase {
     }
 
     // tests that chats to localhost are closed right away
-    // disabled since it keeps failing for the nightly builds
-//    public void testChatLocalhost() throws Exception {
-//        String localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
-//        outgoing = GUIMediator.createChat(localAddress, CHAT_PORT);
-//        Thread.sleep(1000);
-//        assertTrue(!outgoing.getChat().isConnected());
-//    }
+    public void testChatLocalhost() throws Exception {
+        //String localAddress = NetworkUtils.ip2string(acceptThread.getAddress(false));
+        outgoing = GUIMediator.createChat("127.0.0.1", CHAT_PORT);
+        Thread.sleep(4000);
+        assertTrue(!outgoing.getChat().isConnected());
+    }
 
     public void testChatThroughAcceptor() throws Exception {
         setupChat();
