@@ -181,7 +181,7 @@ public class SimppManager {
                 }
                 // 5. Notify listeners
                 for (SimppListener listener : listeners)
-                    listener.simppUpdated(0);
+                    listener.simppUpdated(version);
             }
         };
         _processingQueue.execute(simppHandler);
