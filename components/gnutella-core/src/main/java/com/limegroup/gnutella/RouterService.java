@@ -435,7 +435,7 @@ public class RouterService {
                 }
             });
             SimppManager.instance().addListener(new SimppListener() {
-                public void simppUpdated() {
+                public void simppUpdated(int newVersion) {
                     reloadIPFilter();
                 }
             });

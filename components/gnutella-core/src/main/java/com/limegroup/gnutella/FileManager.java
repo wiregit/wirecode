@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,8 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -348,6 +351,8 @@ public abstract class FileManager {
             return false;
         }
     }
+    
+    private final QRPUpdater qrpUpdater = new QRPUpdater();
 
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
@@ -392,10 +397,12 @@ public abstract class FileManager {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
+        SimppManager.instance().addListener(qrpUpdater);
     }
     
     public void stop() {
         save();
+        SimppManager.instance().removeListener(qrpUpdater);
         shutdown = true;
     }
 
@@ -1934,6 +1941,7 @@ public abstract class FileManager {
      */
     public synchronized QueryRouteTable getQRT() {
         if(_needRebuild) {
+            qrpUpdater.cancelRebuild();
             buildQRT();
             _needRebuild = false;
         }
@@ -2292,6 +2300,25 @@ public abstract class FileManager {
     protected void dispatchFileEvent(FileManagerEvent evt) {
         for(FileEventListener listener : eventListeners) {
             listener.handleFileEvent(evt);
+        }
+    }
+    
+    private class QRPUpdater implements SimppListener {
+        private final AtomicInteger version = new AtomicInteger(-1);
+        public void simppUpdated(int newVersion) {
+            if (!version.compareAndSet(-1, newVersion))
+                return;
+            // schedule a rebuild sometime in the next hour
+            RouterService.schedule(new Runnable() {
+                public void run() {
+                    if (version.getAndSet(-1) != -1)
+                        _needRebuild = true;
+                }
+            }, (int)(Math.random() * 60 * 60 * 1000), 0);
+        }
+        
+        public void cancelRebuild() {
+            version.set(-1);
         }
     }
 }

@@ -37,7 +37,7 @@ public class UDPCrawlerPingHandler implements MessageHandler, SimppListener {
         } catch (IllegalArgumentException badSimpp) {}
     }
     
-    public void simppUpdated() {
+    public void simppUpdated(int newVersion) {
         updateCrawlers();
     }
     

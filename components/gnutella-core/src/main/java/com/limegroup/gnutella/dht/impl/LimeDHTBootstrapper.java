@@ -286,7 +286,7 @@ class LimeDHTBootstrapper implements DHTBootstrapper, SimppListener {
         }
     }
     
-    public void simppUpdated() {
+    public void simppUpdated(int newVersion) {
         SocketAddress simpp = null;
         if((simpp = getSimppHost()) != null) {
             addBootstrapHost(simpp);

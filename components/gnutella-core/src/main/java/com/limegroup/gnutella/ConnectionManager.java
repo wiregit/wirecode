@@ -293,7 +293,7 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
         
         // send new capabilities when simpp updates.
         SimppManager.instance().addListener(new SimppListener() {
-            public void simppUpdated() {
+            public void simppUpdated(int newVersion) {
                 CapabilitiesVM.reconstructInstance();
                 sendUpdatedCapabilities();
             }

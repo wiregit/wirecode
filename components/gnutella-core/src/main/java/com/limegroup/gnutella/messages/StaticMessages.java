@@ -27,7 +27,7 @@ public final class StaticMessages {
     public static void initialize() {
         reloadMessages();
         SimppManager.instance().addListener(new SimppListener() {
-            public void simppUpdated() {
+            public void simppUpdated(int newVersion) {
                 reloadMessages();
             }
         });
