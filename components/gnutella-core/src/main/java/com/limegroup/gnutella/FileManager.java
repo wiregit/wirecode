@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -2304,14 +2303,18 @@ public abstract class FileManager {
     }
     
     private class QRPUpdater implements SimppListener {
-        private final AtomicInteger version = new AtomicInteger(-1);
-        private final Set<String> qrpWords = Collections.synchronizedSet(new HashSet<String>());
+        private boolean buildInProgress;
+        private final Set<String> qrpWords = new HashSet<String>();
         public QRPUpdater() {
-            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
-                qrpWords.add(entry);
+            synchronized(this) {
+                for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
+                    qrpWords.add(entry);
+            }
         }
-        public void simppUpdated(int newVersion) {
-            if (!version.compareAndSet(-1, newVersion))
+        
+        public synchronized void simppUpdated(int newVersion) {
+            
+            if (buildInProgress)
                 return;
             
             Set<String> newWords = new HashSet<String>();
@@ -2319,23 +2322,29 @@ public abstract class FileManager {
                 newWords.add(entry);
             
             // any change in words?
-            if (newWords.containsAll(qrpWords) && qrpWords.containsAll(newWords))
+            if (newWords.containsAll(qrpWords) && qrpWords.containsAll(newWords)) 
                 return;
-            
+
             qrpWords.clear();
             qrpWords.addAll(newWords);
+
+            buildInProgress = true;
             
             // schedule a rebuild sometime in the next hour
             RouterService.schedule(new Runnable() {
                 public void run() {
-                    if (version.getAndSet(-1) != -1)
+                    synchronized(QRPUpdater.this) {
+                        if (!buildInProgress)
+                            return;
+                        buildInProgress = false;
                         _needRebuild = true;
+                    }
                 }
             }, (int)(Math.random() * 60 * 60 * 1000), 0);
         }
         
-        public void cancelRebuild() {
-            version.set(-1);
+        public synchronized void cancelRebuild() {
+            buildInProgress = false;
         }
     }
 }
