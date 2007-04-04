@@ -6,6 +6,8 @@ import org.limewire.setting.CharArraySetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
+import org.limewire.setting.StringArraySetting;
+import org.limewire.setting.StringSetting;
 
 
 /**
@@ -351,5 +353,17 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createRemoteIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
     
+    public static final StringArraySetting LIME_SEARCH_TERMS =
+        FACTORY.createRemoteStringArraySetting("LIME_SEARCH_TERMS", 
+                new String[]{"limewire"}, "SearchSettings.limeSearchTerms");
+    
+    public static final StringSetting LIME_SIGNED_RESPONSE = 
+        FACTORY.createRemoteStringSetting("LIME_SIGNED_RESPONSE", 
+                "VTWQABLTOIACAY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZ2XI2LMFZCGC5DBD4HW4LDZA65LCAQAAFNQABDEMF2GC5AAAJNUE6DQOVZAAAS3IKWPGF7YAYEFJYACAAAHQ4AAAAAUMAOKDBAD2GNL77776777"+
+                "77776AAEAAAEY2LNMVLWS4TFEBIFETZAIF3GC2LMMFRGYZJAMF2CATDJNVSVO2LSMUXGG33NAAAEYSKNIUCDYONUAAAMHASCJBAMGASTIJAIGU2JI5XDALACCR5UR6XTYJEZVCPOYJWXZXF2ESOLUKXMM4BBIFF5"+
+                "T7EFWL6YYKMY3SK65A6WH5DA53GIAPB7PBWWYIDWMVZHG2LPNY6SEMJOGARD6PR4MF2WI2LPOMQHQ43JHJXG6TTBNVSXG4DBMNSVGY3IMVWWCTDPMNQXI2LPNY6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3P"+
+                "NUXXGY3IMVWWC4ZPMF2WI2LPFZ4HGZBCHY6GC5LENFXSAYLDORUW63R5EJUHI5DQHIXS653XO4XGY2LNMV3WS4TFFZRW63JPOVYGIYLUMU7WS3TDNRUWK3TUEIQGS3TEMV4D2IRQEIXT4PBPMF2WI2LPOM7AAAAA"+
+                "AAAAAAAAAAAAAAAAAAAAAAA", 
+                "SearchSettings.limeSignedResponse");
     
 }

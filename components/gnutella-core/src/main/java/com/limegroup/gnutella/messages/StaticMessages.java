@@ -13,6 +13,9 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.Data;
 
 public final class StaticMessages {
@@ -22,6 +25,15 @@ public final class StaticMessages {
     private static volatile QueryReply updateReply, limeReply;
     
     public static void initialize() {
+        reloadMessages();
+        SimppManager.instance().addListener(new SimppListener() {
+            public void simppUpdated() {
+                reloadMessages();
+            }
+        });
+    }
+    
+    private static void reloadMessages() {
         updateReply = readUpdateReply();
         limeReply = createLimeReply();
     }
@@ -35,11 +47,7 @@ public final class StaticMessages {
     }
     
     private static QueryReply createLimeReply() {
-        byte [] reply = Base32.decode("VTWQABLTOIACAY3PNUXGY2LNMVTXE33VOAXGO3TVORSWY3DBFZ2XI2LMFZCGC5DBD4HW4LDZA65LCAQAAFNQABDEMF2GC5AAAJNUE6DQOVZAAAS3IKWPGF7YAYEFJYACAAAHQ4AAAAAUMAOKDBAD2GNL77776777"+
-                "77776AAEAAAEY2LNMVLWS4TFEBIFETZAIF3GC2LMMFRGYZJAMF2CATDJNVSVO2LSMUXGG33NAAAEYSKNIUCDYONUAAAMHASCJBAMGASTIJAIGU2JI5XDALACCR5UR6XTYJEZVCPOYJWXZXF2ESOLUKXMM4BBIFF5"+
-                "T7EFWL6YYKMY3SK65A6WH5DA53GIAPB7PBWWYIDWMVZHG2LPNY6SEMJOGARD6PR4MF2WI2LPOMQHQ43JHJXG6TTBNVSXG4DBMNSVGY3IMVWWCTDPMNQXI2LPNY6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3P"+
-                "NUXXGY3IMVWWC4ZPMF2WI2LPFZ4HGZBCHY6GC5LENFXSAYLDORUW63R5EJUHI5DQHIXS653XO4XGY2LNMV3WS4TFFZRW63JPOVYGIYLUMU7WS3TDNRUWK3TUEIQGS3TEMV4D2IRQEIXT4PBPMF2WI2LPOM7AAAAA"+
-                "AAAAAAAAAAAAAAAAAAAAAAA");
+        byte [] reply = Base32.decode(SearchSettings.LIME_SIGNED_RESPONSE.getValue());
         return createReply(new ByteArrayInputStream(reply));
     }
     

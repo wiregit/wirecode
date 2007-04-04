@@ -1687,14 +1687,16 @@ public class QueryRequest extends Message implements Serializable{
      * @return true if this is likely a query for LimeWire.
      */
     public boolean isQueryForLW() {
-        if (getQuery().length() > 0 &&
-            getQuery().toLowerCase().contains("limewire"))
-            return true;
-        
-        if (getRichQuery() != null) {
-            for (String keyword : getRichQuery().getKeyWords())
-                if (keyword.toLowerCase().contains("limewire"))
-                    return true;
+        for (String term : SearchSettings.LIME_SEARCH_TERMS.getValue()) {
+            if (getQuery().length() > 0 &&
+                    getQuery().toLowerCase().contains(term))
+                return true;
+
+            if (getRichQuery() != null) {
+                for (String keyword : getRichQuery().getKeyWords())
+                    if (keyword.toLowerCase().contains(term))
+                        return true;
+            }
         }
         return false;
     }
