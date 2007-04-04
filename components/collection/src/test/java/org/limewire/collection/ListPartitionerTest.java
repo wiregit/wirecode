@@ -8,6 +8,7 @@ import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 
+@SuppressWarnings("unchecked")
 public class ListPartitionerTest extends BaseTestCase {
 
     public ListPartitionerTest(String name) {
