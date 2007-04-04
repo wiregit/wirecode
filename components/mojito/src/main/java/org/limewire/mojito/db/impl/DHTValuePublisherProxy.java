@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -69,17 +70,17 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
-    public DHTValueEntity get(KUID primaryKey) {
-        DHTValueEntity entity = null;
+    public Collection<DHTValueEntity> get(KUID primaryKey) {
+        List<DHTValueEntity> entities = new ArrayList<DHTValueEntity>();
         synchronized (proxy) {
             for (DHTValueEntityPublisher publisher : proxy) {
-                entity = publisher.get(primaryKey);
-                if (entity != null) {
-                    return entity;
+                Collection<DHTValueEntity> c = publisher.get(primaryKey);
+                if (c != null) {
+                    entities.addAll(c);
                 }
             }
         }
-        return null;
+        return entities;
     }
 
     /*

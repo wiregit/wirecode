@@ -106,8 +106,12 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
      * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
-    public DHTValueEntity get(KUID primaryKey) {
-        return values.get(primaryKey);
+    public Collection<DHTValueEntity> get(KUID primaryKey) {
+        DHTValueEntity entity = values.get(primaryKey);
+        if (entity == null) {
+            return Collections.emptySet();
+        }
+        return Collections.singleton(entity);
     }
     
     /*

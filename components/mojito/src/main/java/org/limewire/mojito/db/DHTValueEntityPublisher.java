@@ -39,10 +39,8 @@ public interface DHTValueEntityPublisher {
     /**
      * Returns a DHTValueEntity for the given KUID or null if
      * no such DHTValueEntity exists
-     * 
-     * TODO: Add a second argument to specify the DHTValueType
      */
-    public DHTValueEntity get(KUID primaryKey);
+    public Collection<DHTValueEntity> get(KUID primaryKey);
     
     /**
      * Returns all DHTValueEntities

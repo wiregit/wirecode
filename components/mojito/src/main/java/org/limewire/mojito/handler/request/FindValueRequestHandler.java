@@ -69,7 +69,7 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         float requestLoad = 0f;
         
         DHTValueEntityPublisher publisher = context.getDHTValueEntityPublisher();
-        DHTValueEntity localValueEntity = publisher.get(lookupId);
+        Collection<DHTValueEntity> localEntities = publisher.get(lookupId);
         
         Database database = context.getDatabase();
         synchronized (database) {
@@ -84,15 +84,17 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         // The keys the remote Node is requesting
         Collection<KUID> requestedSecondaryKeys = request.getSecondaryKeys();
         
-        if (localValueEntity != null 
-                && DatabaseUtils.isDHTValueType(valueType, localValueEntity)) {
+        if (localEntities != null && !localEntities.isEmpty()) {
+            DHTValueEntity entity = DatabaseUtils.getFirstEntityFor(valueType, localEntities);
             
-            if (requestedSecondaryKeys.isEmpty() 
-                    || requestedSecondaryKeys.contains(context.getLocalNodeID())) {
-                valuesToReturn.add(localValueEntity);
-                
-            } else {
-                availableKeys.add(context.getLocalNodeID());
+            if (entity != null) {
+                if (requestedSecondaryKeys.isEmpty() 
+                        || requestedSecondaryKeys.contains(context.getLocalNodeID())) {
+                    valuesToReturn.add(entity);
+                    
+                } else {
+                    availableKeys.add(context.getLocalNodeID());
+                }
             }
         }
         

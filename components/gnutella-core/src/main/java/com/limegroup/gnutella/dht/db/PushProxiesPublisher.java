@@ -49,13 +49,13 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
         return localhost;
     }
     
-    public DHTValueEntity get(KUID primaryKey) {
+    public Collection<DHTValueEntity> get(KUID primaryKey) {
         DHTValueEntity localhost = getPushProxyForSelf();
         if (localhost != null 
                 && localhost.getKey().equals(primaryKey)) {
-            return localhost;
+            return Collections.singleton(localhost);
         }
-        return null;
+        return Collections.emptySet();
     }
     
     public Collection<DHTValueEntity> getValues() {

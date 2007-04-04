@@ -133,4 +133,14 @@ public class DatabaseUtils {
         }
         return filtered;
     }
+    
+    public static DHTValueEntity getFirstEntityFor(DHTValueType valueType, 
+            Collection<? extends DHTValueEntity> entities) {
+        for (DHTValueEntity entity : entities) {
+            if (isDHTValueType(valueType, entity)) {
+                return entity;
+            }
+        }
+        return null;
+    }
 }
