@@ -185,6 +185,8 @@ public class SimppManager {
                 CapabilitiesVM.reconstructInstance();
                 // 5. Send the new CapabilityVM to all our connections. 
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
+                // 6. Refresh ip filters
+                RouterService.adjustSpamFilters();
             }
         };
         _processingQueue.add(simppHandler);

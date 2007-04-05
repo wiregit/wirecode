@@ -19,6 +19,7 @@ public final class IPFilter extends SpamFilter {
     
     private final IPList badHosts = new IPList();
     private final IPList goodHosts = new IPList();
+    private final IPList hostileHosts;
 
     /** Constructs a new BlackListFilter containing the addresses listed
      *  in the SettingsManager. */
@@ -29,7 +30,20 @@ public final class IPFilter extends SpamFilter {
         
         allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++)
-            goodHosts.add(allHosts[i]);        
+            goodHosts.add(allHosts[i]);      
+        
+        // Load hostile, making sure the list is valid
+        IPList newHostile = new IPList();
+        allHosts = FilterSettings.HOSTILE_IPS.getValue();
+        try {
+            for (int i = 0; i < allHosts.length; i++)
+                newHostile.add(new IP(allHosts[i]));
+            if (!newHostile.isValidFilter(false))
+                newHostile = new IPList();
+        } catch (IllegalArgumentException badSimpp){
+            newHostile = new IPList();
+        }
+        hostileHosts = newHostile;
     }
     
     /**
@@ -80,7 +94,8 @@ public final class IPFilter extends SpamFilter {
                 return false;
             }
         }        
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contains(ip) || 
+        !(badHosts.contains(ip) || hostileHosts.contains(ip));
     }
     
     /**
@@ -94,7 +109,8 @@ public final class IPFilter extends SpamFilter {
         } catch(IllegalArgumentException badHost) {
             return false;
         }
-        return goodHosts.contains(ip) || !badHosts.contains(ip);
+        return goodHosts.contains(ip) || 
+        !(badHosts.contains(ip) || hostileHosts.contains(ip));
     }
 
     /** 

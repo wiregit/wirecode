@@ -109,4 +109,11 @@ public class FilterSettings extends LimeProps {
         FACTORY.createSettableStringSetting("MESSAGE_KEY_SHA1", 
                 "AYXIX7L4KOPYUM5YSZMZ7IRYF6ORSJFW", 
                 "FilterSettings.MESSAGE_KEY_SHA1");
+    
+    /**
+     * An array of hostile ip addresses.   
+     */
+    public static final StringArraySetting HOSTILE_IPS =
+        FACTORY.createSettableStringArraySetting("HOSTILE_IPS", new String[0], 
+        "FilterSettings.hostileIps");
 }
