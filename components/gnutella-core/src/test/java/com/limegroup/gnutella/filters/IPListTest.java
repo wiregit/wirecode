@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.filters;
 
-import org.limewire.io.IP;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
+
+import com.limegroup.gnutella.util.BaseTestCase;
+
+public class IPListTest extends BaseTestCase {
     public IPListTest(String name) {
         super(name);
     }
