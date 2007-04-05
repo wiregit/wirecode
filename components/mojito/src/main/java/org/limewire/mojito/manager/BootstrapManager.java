@@ -43,6 +43,8 @@ import org.limewire.mojito.result.FindNodeResult;
 import org.limewire.mojito.result.PingResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.routing.RouteTable;
+import org.limewire.mojito.settings.BootstrapSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.CollectionUtils;
 
@@ -349,7 +351,7 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                     
                     // Did it happen again? If so give up!
                     if (retriedToBootstrap) {
-                        return false;
+                        return determinateIfBootstrapped();
                     }
                     
                     // Fire a StaleRouteTableException otherwise...
@@ -369,7 +371,10 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
         }
     }
     
-    /*private boolean determinateIfBootstrapped() {
+    /**
+     * Determinates whether or not we're bootstrapped.
+     */
+    private boolean determinateIfBootstrapped() {
         if (bootstrapped) {
             return true;
         }
@@ -385,11 +390,11 @@ public class BootstrapManager extends AbstractManager<BootstrapResult> {
                 }
             }
             
+            // Check what percentage of the Contacts is alive
             float ratio = ((float)alive)/((float)active.size());
-            System.out.println("ratio: " + ratio);
-            return ratio >= 0.5f;
+            return ratio >= BootstrapSettings.IS_BOOTSTRAPPED_RATIO.getValue();
         }
-    }/*
+    }
     
     /**
      * A bootstrap specific implementation of DHTFuture
