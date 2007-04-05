@@ -46,13 +46,13 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		return false;
 	}
 
-	public boolean containsAll(Collection<?> c) {
-		for (Object obj : c) {
-			if (contains(obj))
-				return true;
-		}
-		return false;
-	}
+    public boolean containsAll(Collection<?> c) { 
+        for (Object obj : c) { 
+            if (!contains(obj)) 
+                return false; 
+        } 
+        return true; 
+    } 
 
 	public boolean isEmpty() {
 		for (Collection c : collections) {
