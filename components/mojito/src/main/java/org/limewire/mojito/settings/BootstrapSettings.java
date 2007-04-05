@@ -27,5 +27,5 @@ public class BootstrapSettings extends MojitoProps {
     
     public static final FloatSetting IS_BOOTSTRAPPED_RATIO
         = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
-                0.5f, "is_bootstrapped_ratio", 0.1f, 1.0f);
+                0.5f, "is_bootstrapped_ratio", 0f, 1.0f);
 }
