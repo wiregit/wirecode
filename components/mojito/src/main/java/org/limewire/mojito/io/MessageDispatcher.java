@@ -257,6 +257,11 @@ public abstract class MessageDispatcher {
     }
     
     /**
+     * 
+     */
+    public abstract boolean isBound();
+    
+    /**
      * Returns whether or not the MessageDispatcher is running
      */
     public abstract boolean isRunning();

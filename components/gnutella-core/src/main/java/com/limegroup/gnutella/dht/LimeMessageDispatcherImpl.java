@@ -91,6 +91,11 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     }
     
     @Override
+    public boolean isBound() {
+        return true;
+    }
+
+    @Override
     public void start() {
         running = true;
         super.start();

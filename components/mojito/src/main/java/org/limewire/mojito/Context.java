@@ -106,32 +106,29 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     private final String name;
     
+    private final DHTValueManager valueManager;
+    private final BucketRefresher bucketRefresher;
+    
+    private final PingManager pingManager;
+    private final FindNodeManager findNodeManager;
+    private final FindValueManager findValueManager;
+    private final StoreManager storeManager;
+    private final BootstrapManager bootstrapManager;
+    private final GetValueManager getValueManager;
+    
+    private final DHTStats stats;
+    private final NetworkStatisticContainer networkStats;
+    private final GlobalLookupStatisticContainer globalLookupStats;
+    private final DatabaseStatisticContainer databaseStats;
+    
     private volatile KeyPair keyPair;
     
-    private Database database;
-    private RouteTable routeTable;
-    private MessageDispatcher messageDispatcher;
-    private MessageHelper messageHelper;
-    private DHTValueManager valueManager;
-    private BucketRefresher bucketRefresher;
+    private volatile Database database;
+    private volatile RouteTable routeTable;
+    private volatile MessageDispatcher messageDispatcher;
+    private volatile MessageHelper messageHelper;
     
-    private PingManager pingManager;
-    private FindNodeManager findNodeManager;
-    private FindValueManager findValueManager;
-    private StoreManager storeManager;
-    private BootstrapManager bootstrapManager;
-    private GetValueManager getValueManager;
-    
-    private volatile boolean running = false;
-    
-    private volatile boolean bound = false;
-    
-    private DHTStats stats;
-    private NetworkStatisticContainer networkStats;
-    private GlobalLookupStatisticContainer globalLookupStats;
-    private DatabaseStatisticContainer databaseStats;
-    
-    private DHTSizeEstimator estimator;
+    private volatile DHTSizeEstimator estimator;
     
     /** The ExecutorService we're using to schedule tasks */
     private volatile DHTExecutorService executorService;
@@ -144,17 +141,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      */
     Context(String name, Vendor vendor, Version version, boolean firewalled) {
         this.name = name;
-        init();
         
-        getLocalNode().setVendor(vendor);
-        getLocalNode().setVersion(version);
-        getLocalNode().setFirewalled(firewalled);
-    }
-    
-    /**
-     * Initializes the Context
-     */
-    private void init() {
         PublicKey masterKey = null;
         try {
             File file = new File(ContextSettings.MASTER_KEY.getValue());
@@ -176,7 +163,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         setRouteTable(null);
         setDatabase(null, false);
         
-        initStats();
+        // Init the Stats
+        stats = DHTStatsManager.getInstance(getLocalNodeID());
+        networkStats = new NetworkStatisticContainer(getLocalNodeID());
+        globalLookupStats = new GlobalLookupStatisticContainer(getLocalNodeID());
+        databaseStats = new DatabaseStatisticContainer(getLocalNodeID());
         
         setMessageDispatcher(null);
         
@@ -191,16 +182,10 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         storeManager = new StoreManager(this);
         bootstrapManager = new BootstrapManager(this);
         getValueManager = new GetValueManager(this);
-    }
-    
-    /**
-     * Initializes the Stats package
-     */
-    private void initStats() {
-        stats = DHTStatsManager.getInstance(getLocalNodeID());
-        networkStats = new NetworkStatisticContainer(getLocalNodeID());
-        globalLookupStats = new GlobalLookupStatisticContainer(getLocalNodeID());
-        databaseStats = new DatabaseStatisticContainer(getLocalNodeID());
+        
+        getLocalNode().setVendor(vendor);
+        getLocalNode().setVersion(version);
+        getLocalNode().setFirewalled(firewalled);
     }
     
     /*
@@ -425,7 +410,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getRouteTable()
      */
-    public synchronized RouteTable getRouteTable() {
+    public RouteTable getRouteTable() {
         return routeTable;
     }
 
@@ -441,7 +426,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#getDatabase()
      */
-    public synchronized Database getDatabase() {
+    public Database getDatabase() {
         return database;
     }
     
@@ -663,8 +648,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isRunning()
      */
-    public synchronized boolean isRunning() {
-        return running;
+    public boolean isRunning() {
+        return messageDispatcher.isRunning();
     }
 
     /**
@@ -678,7 +663,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see org.limewire.mojito.MojitoDHT#isBootstrapping()
      */
-    public synchronized boolean isBootstrapping() {
+    public boolean isBootstrapping() {
         return isRunning() && bootstrapManager.isBootstrapping();
     }
     
@@ -686,7 +671,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isBootstrapped()
      */
-    public synchronized boolean isBootstrapped() {
+    public boolean isBootstrapped() {
         return isRunning() && bootstrapManager.isBootstrapped();
     }
     
@@ -694,8 +679,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#isBound()
      */
-    public synchronized boolean isBound() {
-        return bound;
+    public boolean isBound() {
+        return messageDispatcher.isBound();
     }
     
     /*
@@ -718,32 +703,31 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * (non-Javadoc)
      * @see com.limegroup.mojito.MojitoDHT#bind(java.net.SocketAddress)
      */
-    public synchronized void bind(SocketAddress localAddress) throws IOException {
+    public synchronized void bind(SocketAddress bindAddr) throws IOException {
         if (isBound()) {
             throw new IOException(getName() + " is already bound");
         }
         
-        int port = ((InetSocketAddress)localAddress).getPort();
+        final int port = ((InetSocketAddress)bindAddr).getPort();
         if (port == 0) {
-            throw new IllegalArgumentException("Cannot bind Socket to Port " + port);
+            throw new IOException("Cannot bind Socket to Port " + port);
         }
         
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Binding " + getName() + " to address: " + localAddress);
+            LOG.debug("Binding " + getName() + " to address: " + bindAddr);
         }
         
         // If we not firewalled and the external port has not 
         // been set yet then set it to the same port as the 
         // local address.
         if (!isFirewalled() && getExternalPort() == 0) {
-            setExternalPort(((InetSocketAddress)localAddress).getPort());
+            setExternalPort(port);
         }
         
-        getLocalNode().setSourceAddress(localAddress);
+        getLocalNode().setSourceAddress(bindAddr);
         getLocalNode().nextInstanceID();
         
-        messageDispatcher.bind(localAddress);
-        bound = true;
+        messageDispatcher.bind(bindAddr);
     }
     
     /*
@@ -770,8 +754,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         pingManager.init();
         findNodeManager.init();
         findValueManager.init();
-        
-        running = true;
         
         estimator = new DHTSizeEstimator();
         messageDispatcher.start();
@@ -836,8 +818,6 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
             }
         }
         
-        running = false;
-        
         executorService.stop();
         messageDispatcher.stop();
     }
@@ -849,19 +829,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     public synchronized void close() {
         stop();
         
-        if (!isBound()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(getName() + " is not bound");
-            }
-            return;
-        }
-        
         messageDispatcher.close();
         bootstrapManager.setBootstrapped(false);
         estimator.clear();
         
         setExternalPort(0);
-        bound = false;
     }
     
     /**

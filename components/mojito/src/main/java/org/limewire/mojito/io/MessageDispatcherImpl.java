@@ -131,6 +131,13 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         }
     }
     
+    @Override
+    public boolean isBound() {
+        synchronized (getDatagramChannelLock()) {
+            return channel != null && channel.socket().isBound();
+        }
+    }
+    
     /**
      * Returns the DatagramChannel
      */
@@ -266,7 +273,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     public boolean isRunning() {
         return running;
     }
-
+    
     @Override
     protected void process(Runnable runnable) {
         synchronized (getDatagramChannelLock()) {

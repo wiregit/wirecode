@@ -48,9 +48,9 @@ public class BucketRefresher implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(BucketRefresher.class);
     
-    private Context context;
+    private final Context context;
     
-    private RefreshTask refreshTask = new RefreshTask();
+    private final RefreshTask refreshTask = new RefreshTask();
     
     private ScheduledFuture future;
     
