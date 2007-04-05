@@ -996,8 +996,13 @@ public class RouterService {
         for (Iterator iter=manager.getConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            c.setPersonalFilter(SpamFilter.newPersonalFilter());
-            c.setRouteFilter(SpamFilter.newRouteFilter());
+            if (c.isClientSupernodeConnection() && 
+                    !IPFilter.instance().allow(c.getAddress()))
+                c.close();
+            else {
+                c.setPersonalFilter(SpamFilter.newPersonalFilter());
+                c.setRouteFilter(SpamFilter.newRouteFilter());
+            }
         }
         
         UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
