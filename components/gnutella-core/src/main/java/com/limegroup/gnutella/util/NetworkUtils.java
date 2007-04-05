@@ -21,6 +21,7 @@ import java.util.Iterator;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.IPPortCombo;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -114,7 +115,13 @@ public final class NetworkUtils {
             return false;
         }
     }
-	
+
+    public static boolean isValidAddress(IP ip) {
+        int b = ip.addr >> 24;
+        return (b != INVALID_ADDRESSES_BYTE[0]) && 
+            (b != INVALID_ADDRESSES_BYTE[1]);
+    }
+    
 	/**
 	 * Returns whether or not the supplied address is a local address.
 	 */

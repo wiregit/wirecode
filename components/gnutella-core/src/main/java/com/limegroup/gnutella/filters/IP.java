@@ -17,8 +17,8 @@ import com.limegroup.gnutella.ByteOrder;
 public class IP {
     private static final String MSG = "Could not parse: ";
 
-    private final int addr;
-    private final int mask;
+    public final int addr;
+    public final int mask;
     
     /**
      * Creates an IP object out of a four byte array of the IP in

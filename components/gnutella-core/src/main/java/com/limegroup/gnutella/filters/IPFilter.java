@@ -15,7 +15,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
  */
 public final class IPFilter extends SpamFilter {
     
-    private static IPFilter _instance;
+    private volatile static IPFilter _instance;
     
     private final IPList badHosts = new IPList();
     private final IPList goodHosts = new IPList();
