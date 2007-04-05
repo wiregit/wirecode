@@ -32,7 +32,6 @@ import org.limewire.mojito.Context;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.exceptions.DHTException;
-import org.limewire.mojito.manager.BootstrapManager;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.statistics.DatabaseStatisticContainer;
@@ -48,13 +47,13 @@ public class DHTValueManager implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(DHTValueManager.class);
     
-    private Context context;
+    private final Context context;
     
-    private RepublishTask republishTask = new RepublishTask();
+    private final RepublishTask republishTask = new RepublishTask();
+    
+    private final DatabaseStatisticContainer databaseStats;
     
     private ScheduledFuture future;
-    
-    private DatabaseStatisticContainer databaseStats;
     
     public DHTValueManager(Context context) {
         this.context = context;
@@ -93,19 +92,6 @@ public class DHTValueManager implements Runnable {
     
     public void run() {
         synchronized (republishTask) {
-            // There is no point in running the DHTValueManager
-            // if we're not bootstrapped!
-            BootstrapManager bootstrapManager = context.getBootstrapManager();
-            synchronized (bootstrapManager) {
-                if (!bootstrapManager.isBootstrapped() 
-                        || bootstrapManager.isBootstrapping()) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(context.getName() + " is not bootstrapped");
-                    }
-                    return;
-                }
-            }
-            
             // Republish but make sure the task from the previous
             // run() has finished as we don't want parallel republishing
             if (republishTask.isDone()) {
@@ -216,6 +202,16 @@ public class DHTValueManager implements Runnable {
                         return false;
                     }
                 }
+            }
+            
+            // Do not publish local values if we're not bootstrapped or
+            // are bootstrapping.
+            if (!context.isBootstrapped() || context.isBootstrapping()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info(context.getName() + " is not bootstrapped");
+                }
+                
+                return false;
             }
             
             databaseStats.REPUBLISHED_VALUES.incrementStat();
