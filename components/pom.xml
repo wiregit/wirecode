@@ -15,7 +15,7 @@
 
   <organization>
     <name>Lime Wire LLC</name>
-    <url>http://limewire.org</url>
+    <url>http://www.limewire.org</url>
   </organization>
 
   <licenses>
@@ -57,7 +57,7 @@
       <id>limewire</id>
       <name>LimeWire Repository</name>
       <layout>default</layout>
-      <url>http://limewire.org/repository</url>
+      <url>http://www.limewire.org/repository</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -152,6 +152,29 @@
 	  <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+	        <maxmemory>512m</maxmemory>
+        	<links>
+		        <link>http://java.sun.com/javase/6/docs/api/</link>
+		        <link>http://jakarta.apache.org/commons/httpclient/2.0/apidocs/</link>
+		        <link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+		        <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
+				<link>http://www.icu-project.org/apiref/icu4j/</link>
+				<link>http://www.limewire.org/nightly/modules/collection/api/</link>
+				<link>http://www.limewire.org/nightly/modules/common/api/</link>
+				<link>http://www.limewire.org/nightly/modules/core/api/</link>
+				<link>http://www.limewire.org/nightly/modules/gui/api/</link>
+				<link>http://www.limewire.org/nightly/modules/io/api/</link>
+				<link>http://www.limewire.org/nightly/modules/mojito/api/</link>
+				<link>http://www.limewire.org/nightly/modules/mojito-ui/api/</link>
+				<link>http://www.limewire.org/nightly/modules/nio/api/</link>
+				<link>http://www.limewire.org/nightly/modules/rudp/api/</link>
+				<link>http://www.limewire.org/nightly/modules/security/api/</link>
+				<link>http://www.limewire.org/nightly/modules/setting/api/</link>
+				<link>http://www.limewire.org/nightly/modules/statistic/api/</link>
+				<link>http://www.limewire.org/nightly/modules/test-util/api/</link>
+			</links>
+		</configuration>
       </plugin>
 	  <plugin>
         <groupId>org.codehaus.mojo</groupId>

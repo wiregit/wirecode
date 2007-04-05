@@ -28,5 +28,25 @@
       <url>scp://localhost//var/www/maven/</url>
     </site>
   </distributionManagement>
+  
+    <reporting>
+    <outputDirectory>target/site</outputDirectory>
+    <plugins>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+	        <maxmemory>512m</maxmemory>
+        	<links>
+		        <link>http://java.sun.com/javase/6/docs/api/</link>
+		        <link>http://jakarta.apache.org/commons/httpclient/2.0/apidocs/</link>
+		        <link>http://jakarta.apache.org/commons/logging/apidocs/</link>
+		        <link>http://jakarta.apache.org/commons/pool/apidocs/</link>
+				<link>http://www.icu-project.org/apiref/icu4j/</link>
+			</links>
+		</configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
