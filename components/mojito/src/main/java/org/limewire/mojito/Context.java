@@ -649,7 +649,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#isRunning()
      */
     public boolean isRunning() {
-        return messageDispatcher.isRunning();
+        MessageDispatcher messageDispatcher = this.messageDispatcher;
+        if (messageDispatcher != null) {
+            return messageDispatcher.isRunning();
+        }
+        return false;
     }
 
     /**
@@ -680,7 +684,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
      * @see com.limegroup.mojito.MojitoDHT#isBound()
      */
     public boolean isBound() {
-        return messageDispatcher.isBound();
+        MessageDispatcher messageDispatcher = this.messageDispatcher;
+        if (messageDispatcher != null) {
+            return messageDispatcher.isBound();
+        }
+        return false;
     }
     
     /*
