@@ -38,6 +38,7 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.BrowseRequestHandler;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
+import com.limegroup.gnutella.uploader.FileResponseEntity;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.LimitReachedRequestHandler;
@@ -152,16 +153,14 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 // FIXME filter freeloader
 
                 UploadStat.UPDATE_FILE.incrementStat();
-                UploadSession session = getSession(context);
                 HTTPUploader uploader = getOrCreateUploader(context,
-                        UploadType.UPDATE_FILE, "update.xml");
-                addToGUI(uploader);
+                        UploadType.UPDATE_FILE, "Update-File Request");
 
                 File file = new File(CommonUtils.getUserSettingsDir(),
                         "update.xml");
-                // TODO is the returned mime-type correct?
-                response.setEntity(new FileEntity(file,
-                        Constants.QUERYREPLY_MIME_TYPE));
+                uploader.setFile(file);
+                // TODO set mime-type to Constants.QUERYREPLY_MIME_TYPE?
+                response.setEntity(new FileResponseEntity(uploader, file));
             }
         });
 

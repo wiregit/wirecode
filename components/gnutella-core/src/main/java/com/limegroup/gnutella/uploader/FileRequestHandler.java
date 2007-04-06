@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Locale;
 
 import org.apache.commons.logging.Log;
@@ -15,12 +12,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -64,7 +59,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             HttpContext context) throws HttpException, IOException {
         FileRequest fileRequest = null;
         HTTPUploader uploader;
-        
+
         // parse request
         try {
             String uri = request.getRequestLine().getUri();
@@ -81,10 +76,11 @@ public class FileRequestHandler implements HttpRequestHandler {
                 assert fileRequest != null;
             }
         } catch (IOException e) {
-            handleMalformedRequest(response, sessionManager.getOrCreateUploader(context,
-                    UploadType.MALFORMED_REQUEST, "Malformed Request"));
+            handleMalformedRequest(response, sessionManager
+                    .getOrCreateUploader(context, UploadType.MALFORMED_REQUEST,
+                            "Malformed Request"));
         }
-        
+
         // process request
         if (fileRequest != null) {
             FileDesc fd = getFileDesc(fileRequest);
@@ -113,13 +109,14 @@ public class FileRequestHandler implements HttpRequestHandler {
         uploader.setIndex(fileRequest.index);
         uploader.setState(Uploader.CONNECTING);
 
-        boolean thexRequest = HTTPConstants.NAME_TO_THEX.equals(fileRequest.serviceID); 
+        boolean thexRequest = HTTPConstants.NAME_TO_THEX
+                .equals(fileRequest.serviceID);
         if (thexRequest) {
             // XXX reset range to size of THEX tree
             uploader.setUploadBegin(0);
             uploader.setUploadEnd(fd.getHashTree().getOutputLength());
         }
-        
+
         // process headers
         BasicHeaderProcessor processor = new BasicHeaderProcessor();
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
@@ -159,7 +156,8 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
     }
 
-    private void handleMalformedRequest(HttpResponse response, HTTPUploader uploader) {
+    private void handleMalformedRequest(HttpResponse response,
+            HTTPUploader uploader) {
         uploader.setState(Uploader.MALFORMED_REQUEST);
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase("Malformed Request");
@@ -322,7 +320,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         response.setHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_KEEP_ALIVE);
-        
+
         uploader.setState(Uploader.QUEUED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
@@ -337,14 +335,14 @@ public class FileRequestHandler implements HttpRequestHandler {
      *         <tt>false</tt> otherwise
      */
     private boolean isURNGet(final String requestLine) {
-         int slash1Index = requestLine.indexOf("/");
-         int slash2Index = requestLine.indexOf("/", slash1Index+1);
-         if((slash1Index==-1) || (slash2Index==-1)) {
-         return false;
-         }
-         String idString = requestLine.substring(slash1Index+1, slash2Index);
-         return idString.equalsIgnoreCase("uri-res");
-        //return requestLine.startsWith("/uri-res/");
+        int slash1Index = requestLine.indexOf("/");
+        int slash2Index = requestLine.indexOf("/", slash1Index + 1);
+        if ((slash1Index == -1) || (slash2Index == -1)) {
+            return false;
+        }
+        String idString = requestLine.substring(slash1Index + 1, slash2Index);
+        return idString.equalsIgnoreCase("uri-res");
+        // return requestLine.startsWith("/uri-res/");
     }
 
     /**
@@ -520,55 +518,9 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         int index;
 
-        // TODO only used to determine if this is a THEX request, make this an enum?
+        // TODO only used to determine if this is a THEX request, make this an
+        // enum?
         String serviceID;
-
-    }
-
-    private class FileResponseEntity extends AbstractHttpNIOEntity {
-
-        private HTTPUploader uploader;
-
-        private FileDesc fd;
-
-        private ByteBuffer buffer;
-
-        private long length;
-
-        private long begin;
-
-        public FileResponseEntity(HTTPUploader uploader, FileDesc fd) {
-            this.uploader = uploader;
-            this.fd = fd;
-
-            setContentType(Constants.FILE_MIME_TYPE);
-            
-            begin = uploader.getUploadBegin();
-            long end = uploader.getUploadEnd();
-            length = end - begin;
-        }
-
-        @Override
-        public long getContentLength() {
-            return length;
-        }
-
-        @Override
-        public boolean handleWrite() throws IOException {
-            if (buffer == null) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                InputStream in = fd.createInputStream();
-                int i;
-                while ((i = in.read()) != -1) {
-                    out.write(i);
-                }
-
-                buffer = ByteBuffer.wrap(out.toByteArray(),(int) begin, (int) length);
-            }
-            
-            write(buffer);
-            return buffer.hasRemaining();
-        }
 
     }
 

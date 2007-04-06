@@ -46,7 +46,10 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
     }
 
     public void produceContent(final ContentEncoder encoder) throws IOException {
-        this.encoder = encoder;
+        if (this.encoder == null) {
+            this.encoder = encoder;
+            initialize();
+        }
         if (!handleWrite()) {
             encoder.complete();
         }
@@ -65,6 +68,8 @@ public abstract class AbstractHttpNIOEntity extends AbstractHttpEntity implement
         return false;
     }
 
+    public abstract void initialize() throws IOException;
+    
     public abstract boolean handleWrite() throws IOException;
 
     public void handleIOException(IOException iox) {

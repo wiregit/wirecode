@@ -65,6 +65,13 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
 
+            // XXX LW can't actually handle chunked responses
+            //setChunked(true);
+            setContentType(Constants.QUERYREPLY_MIME_TYPE);
+        }
+
+        @Override
+        public void initialize() throws IOException {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {
                     // TODO update progress
@@ -73,10 +80,6 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(this);
-            
-            // XXX LW can't actually handle chunked responses
-            //setChunked(true);
-            setContentType(Constants.QUERYREPLY_MIME_TYPE);
             
             query = QueryRequest.createBrowseHostQuery();
             iterable = RouterService.getFileManager().getIndexingIterator(query.desiresXMLResponses() || 
@@ -102,6 +105,8 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
+                // TODO we should set this to the amount that has acctually been written to the network
+                uploader.addAmountUploaded(queryReply.getTotalLength());
             }
         }
 

@@ -11,7 +11,6 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 /**
  * Maintains state for an HTTP upload request.
@@ -29,11 +28,9 @@ public abstract class AbstractUploader implements Uploader {
 
     private final UploadSession session;
 
-    private long totalAmountReadBefore;
+    private long totalAmountUploadedBefore;
 
-    private long totalAmountRead;
-
-    private long amountRead;
+    private long amountUploaded;
 
     private long fileSize;
 
@@ -85,8 +82,7 @@ public abstract class AbstractUploader implements Uploader {
         this.session = session;
         _filename = fileName;
         this.index = index;
-        totalAmountRead = 0;
-        amountRead = 0;
+        amountUploaded = 0;
         reinitialize();
     }
 
@@ -99,9 +95,8 @@ public abstract class AbstractUploader implements Uploader {
     public void reinitialize() {
         _stateNum = CONNECTING;
         nodePort = 0;
-        totalAmountReadBefore = 0;
-        totalAmountRead += amountRead;
-        amountRead = 0;
+        totalAmountUploadedBefore = 0;
+        amountUploaded = 0;
     }
 
     /**
@@ -115,7 +110,7 @@ public abstract class AbstractUploader implements Uploader {
             LOG.debug("trying to set the fd for uploader " + this + " with "
                     + fd);
         fileDesc = fd;
-        fileSize = (int) fd.getFileSize();
+        fileSize = fd.getFileSize();
 
         isForcedShare = FileManager.isForcedShare(fileDesc);
         priorityShare = FileManager.isApplicationSpecialShare(fileDesc
@@ -144,7 +139,7 @@ public abstract class AbstractUploader implements Uploader {
      * @param amount the number of bytes that have been uploaded
      */
     void setAmountUploaded(long amount) {
-        int newData = (int) (amount - amountRead);
+        int newData = (int) (amount - amountUploaded);
         if (newData > 0) {
             if (isForcedShare())
                 BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
@@ -152,7 +147,7 @@ public abstract class AbstractUploader implements Uploader {
             else
                 BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
         }
-        amountRead = amount;
+        amountUploaded = amount;
     }
 
     /**
@@ -253,10 +248,11 @@ public abstract class AbstractUploader implements Uploader {
      * Implements the Uploader interface.
      */
     public long amountUploaded() {
-        if (_stateNum == THEX_REQUEST) {
-            return getAmountWritten();
-        } else
-            return amountRead;
+        return amountUploaded;
+    }
+
+    public void addAmountUploaded(int written) {
+        amountUploaded += written;
     }
 
     /**
@@ -266,14 +262,7 @@ public abstract class AbstractUploader implements Uploader {
      * Implements the Uploader interface.
      */
     public long getTotalAmountUploaded() {
-        if (_stateNum == THEX_REQUEST) {
-            return getAmountWritten();
-        } else {
-            if (totalAmountReadBefore > 0)
-                return totalAmountReadBefore + amountRead;
-            else
-                return totalAmountRead + amountRead;
-        }
+        return totalAmountUploadedBefore + amountUploaded;
     }
 
     /**
@@ -288,12 +277,9 @@ public abstract class AbstractUploader implements Uploader {
     }
 
     public void measureBandwidth() {
-        long written = totalAmountRead + getAmountWritten();
         // FIXME type conversion
-        session.measureBandwidth((int) written);
+        session.measureBandwidth((int) getTotalAmountUploaded());
     }
-
-    public abstract int getAmountWritten();
 
     public float getMeasuredBandwidth() throws InsufficientDataException {
         return session.getMeasuredBandwidth();
@@ -332,7 +318,7 @@ public abstract class AbstractUploader implements Uploader {
     }
     
     public void setTotalAmountReadBefore(int totalAmountReadBefore) {
-        this.totalAmountReadBefore = totalAmountReadBefore;
+        this.totalAmountUploadedBefore = totalAmountReadBefore;
     }
     
     public void setUserAgent(String userAgent) {
@@ -359,4 +345,8 @@ public abstract class AbstractUploader implements Uploader {
         return session;
     }
 
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+    }
+    
 }

@@ -47,6 +47,10 @@ public class UploadSession extends BandwidthTrackerImpl implements UploadSlotUse
         return host.getHostAddress();
     }
 
+    public InetAddress getConnectedHost() {
+        return host;
+    }
+
     /**
      * Notifies the session of a queue poll.
      * 

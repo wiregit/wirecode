@@ -55,7 +55,6 @@ public class THEXRequestHandler implements HttpRequestHandler {
         public THEXResponseEntity(HTTPUploader uploader, HashTree tree) {
             this.uploader = uploader;
             this.tree = tree;
-            this.writer = tree.createAsyncWriter();
 
             setContentType(tree.getOutputType());
         }
@@ -66,8 +65,15 @@ public class THEXRequestHandler implements HttpRequestHandler {
         }
 
         @Override
+        public void initialize() throws IOException {
+            this.writer = tree.createAsyncWriter();            
+        }
+
+        @Override
         public boolean handleWrite() throws IOException {
-            return writer.process(this, null);
+            boolean more = writer.process(this, null);
+            // TODO uploader.addAmountUploaded(...);
+            return more;
         }
 
     }

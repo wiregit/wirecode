@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 
 import org.limewire.collection.Interval;
 
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
@@ -22,7 +24,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     private AltLocTracker altLocTracker;
 
     private long uploadBegin;
-    
+
     private long uploadEnd;
 
     private boolean containedRangeRequest;
@@ -38,40 +40,42 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     @Override
     public void reinitialize() {
         super.reinitialize();
-        
+
         requestedURN = null;
     }
-    
+
     @Override
     public void setFileDesc(FileDesc fd) throws IOException {
         super.setFileDesc(fd);
-        
+
         setUploadBegin(0);
         setUploadEnd(getFileSize());
     }
-    
-    @Override
-    public int getAmountWritten() {
-        // TODO Auto-generated method stub
-        return 0;
+
+    public void setFile(File file) {
+        setFileSize(file.length());
+        setUploadBegin(0);
+        setUploadEnd(getFileSize());
     }
 
     public InetAddress getConnectedHost() {
-        // TODO Auto-generated method stub
-        return null;
+        return getSession().getConnectedHost();
     }
 
     public void stop() {
         // FIXME
-        
+
     }
 
+    /**
+     * Returns the index of the first byte of the file to upload.
+     */
     public long getUploadBegin() {
         return this.uploadBegin;
     }
 
     /**
-     * Exclusive index of the last byte.
+     * Returns the exclusive index of the last byte to upload.
      */
     public long getUploadEnd() {
         return this.uploadEnd;
@@ -81,6 +85,12 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         return containedRangeRequest;
     }
 
+    /**
+     * Validates the byte range to upload. Shrinks the range to a valid range if
+     * it was explicitly requested.
+     * 
+     * @return true, if the upload end and upload begin are set to valid values
+     */
     public boolean validateRange() {
         long first = getUploadBegin();
         long last = getUploadEnd();
@@ -91,7 +101,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
             // If the request contained a 'Range:' header, then we can
             // shrink the request to what we have available.
             if (containedRangeRequest()) {
-                Interval request = ifd.getAvailableSubRange((int)first, (int)last - 1);
+                Interval request = ifd.getAvailableSubRange((int) first,
+                        (int) last - 1);
                 if (request == null) {
                     return false;
                 }
@@ -104,8 +115,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
             }
         } else {
             if (containedRangeRequest()) {
-                setUploadEnd(Math.min(last, getFileSize())); 
-            } else  if (first < 0 || last > getFileSize()) {
+                setUploadEnd(Math.min(last, getFileSize()));
+            } else if (first < 0 || last > getFileSize()) {
                 return false;
             }
         }
@@ -123,7 +134,7 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public void setRequestedURN(URN requestedURN) {
         this.requestedURN = requestedURN;
     }
-    
+
     public boolean supportsQueueing() {
         return supportsQueueing && isValidQueueingAgent();
     }
@@ -153,15 +164,18 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public void setUploadBegin(long uploadBegin) {
         this.uploadBegin = uploadBegin;
     }
-    
+
     public void setUploadEnd(long uploadEnd) {
         this.uploadEnd = uploadEnd;
     }
-    
+
     public void setContainedRangeRequest(boolean containedRangeRequest) {
         this.containedRangeRequest = containedRangeRequest;
     }
 
+    /**
+     * Returns the time when the upload of content was started.
+     */
     public long getStartTime() {
         return startTime;
     }
@@ -170,6 +184,10 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         this.startTime = startTime;
     }
 
+    /**
+     * Returns true, if this upload's queue status has been set to accepted.
+     * TODO move to session
+     */
     public boolean isAccepted() {
         return accepted;
     }
@@ -177,5 +195,5 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public void setAccepted(boolean accepted) {
         this.accepted = accepted;
     }
-    
+
 }
