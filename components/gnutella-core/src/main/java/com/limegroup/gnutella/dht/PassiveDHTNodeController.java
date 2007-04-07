@@ -82,9 +82,12 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                                 new SecureInputStream(
                                     new FileInputStream(FILE))));
                 
-                Contact node = null;
-                while((node = (Contact)ois.readObject()) != null){
-                    routeTable.add(node);
+                int routeTableVersion = ois.readInt();
+                if (routeTableVersion >= DHTSettings.ROUTETABLE_VERSION.getValue()) {
+                    Contact node = null;
+                    while((node = (Contact)ois.readObject()) != null){
+                        routeTable.add(node);
+                    }
                 }
             } catch (Throwable ignored) {
             } finally {
@@ -152,6 +155,8 @@ public class PassiveDHTNodeController extends AbstractDHTController {
                             new BufferedOutputStream(
                                 new SecureOutputStream(
                                     new FileOutputStream(FILE))));
+                
+                oos.writeInt(DHTSettings.ROUTETABLE_VERSION.getValue());
                 
                 // Sort by MRS and save only some Nodes
                 contacts = ContactUtils.sort(contacts, DHTSettings.MAX_PERSISTED_NODES.getValue());

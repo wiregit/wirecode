@@ -48,6 +48,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#get(org.limewire.mojito.KUID)
      */
     public Collection<DHTValueEntity> get(KUID primaryKey) {
+        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
+            return Collections.emptySet();
+        }
+        
         DHTValueEntity entity = values.get(primaryKey);
         if (entity != null) {
             return Collections.singleton(entity);
@@ -60,6 +64,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValues()
      */
     public Collection<DHTValueEntity> getValues() {
+        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
+            return Collections.emptySet();
+        }
+        
         FileManager fileManager = RouterService.getFileManager();
         FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
         
@@ -96,6 +104,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToPublish()
      */
     public Collection<DHTValueEntity> getValuesToPublish() {
+        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
+            return Collections.emptySet();
+        }
+        
         FileManager fileManager = RouterService.getFileManager();
         List<DHTValueEntity> publish = new ArrayList<DHTValueEntity>();
         
@@ -133,6 +145,10 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
      */
     public Collection<DHTValueEntity> getValuesToForward() {
+        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
+            return Collections.emptySet();
+        }
+        
         FileManager fileManager = RouterService.getFileManager();
         List<DHTValueEntity> forward = new ArrayList<DHTValueEntity>();
         synchronized (values) {
@@ -179,7 +195,7 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
     }
     
     public String toString() {
-        StringBuilder buffer = new StringBuilder();
+        StringBuilder buffer = new StringBuilder("AltLocPublisher: ");
         synchronized (values) {
             buffer.append(CollectionUtils.toString(getValues()));
         }

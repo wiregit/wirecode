@@ -86,9 +86,10 @@ public class NodeAssignerTest extends LimeTestCase {
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
-        DHTSettings.ACTIVE_DHT_CAPABLE.setValue(false);
         DHTSettings.EXCLUDE_ULTRAPEERS.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(false);
+        DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_DHT_LEAF_MODE.setValue(true);
     }
 
     protected void tearDown() throws Exception {
@@ -113,7 +114,7 @@ public class NodeAssignerTest extends LimeTestCase {
     
     private void setDHTCapabilities() throws Exception{
         setHardcoreCapabilities();
-        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_DHT_AVG_UPTIME.getValue());
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_DHT_AVERAGE_UPTIME.getValue());
         PrivilegedAccessor.setValue(ASSIGNER,"_currentUptime",
                                     new Long(DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
     }
@@ -137,7 +138,6 @@ public class NodeAssignerTest extends LimeTestCase {
         sleep();
         sleep();
         assertTrue("should be connected", RouterService.isConnected());
-        
     }
     
     public void testUltrapeerConnection() throws Exception{
@@ -283,5 +283,4 @@ public class NodeAssignerTest extends LimeTestCase {
         }
         
     }
-    
 }

@@ -63,40 +63,20 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureInputStream(
                                 new FileInputStream(FILE))));
                 
-                RouteTable routeTable = (RouteTable)in.readObject();
-                Database database = (Database)in.readObject();
-
-                dht.setRouteTable(routeTable);
-                dht.setDatabase(database);
-                
+                int routeTableVersion = in.readInt();
+                if (routeTableVersion >= DHTSettings.ROUTETABLE_VERSION.getValue()) {
+                    RouteTable routeTable = (RouteTable)in.readObject();
+                    Database database = (Database)in.readObject();
+    
+                    dht.setRouteTable(routeTable);
+                    dht.setDatabase(database);
+                }
             } catch (Throwable ignored) {
             } finally {
                 IOUtils.close(in);
             }
         }
         return dht;
-    }
-
-
-    /**
-     * @see AbstractDHTController.start
-     * 
-     * Adds the following precondition to start an active DHT node: 
-     * We are not an ultrapeer while excluding ultrapeers from the active network
-     * 
-     */
-    @Override
-    public void start() {
-        //if we want to connect actively, we should be active DHT capable
-        if (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
-                && !DHTSettings.ACTIVE_DHT_CAPABLE.getValue()) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot initialize ACTIVE DHT - node is not DHT active capable");
-            }
-            return;
-        }
-        
-        super.start();
     }
 
     @Override
@@ -118,6 +98,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureOutputStream(
                                 new FileOutputStream(FILE))));
                 
+                out.writeInt(DHTSettings.ROUTETABLE_VERSION.getValue());
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
                     out.writeObject(dht.getDatabase());

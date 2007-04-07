@@ -9,11 +9,13 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.routing.Contact;
+import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.DatabaseUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
  * This class has currently no practical use-case.
@@ -50,6 +52,10 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
     }
     
     public Collection<DHTValueEntity> get(KUID primaryKey) {
+        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
+            return Collections.emptySet();
+        }
+        
         DHTValueEntity localhost = getPushProxyForSelf();
         if (localhost != null 
                 && localhost.getKey().equals(primaryKey)) {
@@ -59,6 +65,10 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
     }
     
     public Collection<DHTValueEntity> getValues() {
+        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
+            return Collections.emptySet();
+        }
+        
         DHTValueEntity localhost = getPushProxyForSelf();
         if (localhost != null) {
             return Collections.singleton(localhost);
@@ -67,10 +77,18 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
     }
 
     public Collection<DHTValueEntity> getValuesToForward() {
+        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
+            return Collections.emptySet();
+        }
+        
         return getValues();
     }
 
     public Collection<DHTValueEntity> getValuesToPublish() {
+        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
+            return Collections.emptySet();
+        }
+        
         DHTValueEntity localhost = getPushProxyForSelf();
         if (localhost != null 
                 && DatabaseUtils.isPublishingRequired(localhost)) {
@@ -81,5 +99,11 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
     
     public synchronized void changeContact(Contact node) {
         this.localhost = null;
+    }
+    
+    public String toString() {
+        StringBuilder buffer = new StringBuilder("PushProxiesPublisher: ");
+        buffer.append(CollectionUtils.toString(getValues()));
+        return buffer.toString();
     }
 }
