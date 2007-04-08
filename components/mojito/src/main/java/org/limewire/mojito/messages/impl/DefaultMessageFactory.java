@@ -83,7 +83,7 @@ public class DefaultMessageFactory implements MessageFactory {
                 throw new MessageFormatException("Unknown function ID: " + func);
             }
             
-            Version version = in.readVersion();
+            Version msgVersion = in.readVersion();
             //byte[] length = in.readBytes(4); // Little-Endian!
             in.skip(4);
             
@@ -92,25 +92,25 @@ public class DefaultMessageFactory implements MessageFactory {
             
             switch(opcode) {
                 case PING_REQUEST:
-                    return new PingRequestImpl(context, src, messageId, version, in);
+                    return new PingRequestImpl(context, src, messageId, msgVersion, in);
                 case PING_RESPONSE:
-                    return new PingResponseImpl(context, src, messageId, version, in);
+                    return new PingResponseImpl(context, src, messageId, msgVersion, in);
                 case FIND_NODE_REQUEST:
-                    return new FindNodeRequestImpl(context, src, messageId, version, in);
+                    return new FindNodeRequestImpl(context, src, messageId, msgVersion, in);
                 case FIND_NODE_RESPONSE:
-                    return new FindNodeResponseImpl(context, src, messageId, version, in);
+                    return new FindNodeResponseImpl(context, src, messageId, msgVersion, in);
                 case FIND_VALUE_REQUEST:
-                    return new FindValueRequestImpl(context, src, messageId, version, in);
+                    return new FindValueRequestImpl(context, src, messageId, msgVersion, in);
                 case FIND_VALUE_RESPONSE:
-                    return new FindValueResponseImpl(context, src, messageId, version, in);
+                    return new FindValueResponseImpl(context, src, messageId, msgVersion, in);
                 case STORE_REQUEST:
-                    return new StoreRequestImpl(context, src, messageId, version, in);
+                    return new StoreRequestImpl(context, src, messageId, msgVersion, in);
                 case STORE_RESPONSE:
-                    return new StoreResponseImpl(context, src, messageId, version, in);
+                    return new StoreResponseImpl(context, src, messageId, msgVersion, in);
                 case STATS_REQUEST:
-                    return new StatsRequestImpl(context, src, messageId, version, in);
+                    return new StatsRequestImpl(context, src, messageId, msgVersion, in);
                 case STATS_RESPONSE:
-                    return new StatsResponseImpl(context, src, messageId, version, in);
+                    return new StatsResponseImpl(context, src, messageId, msgVersion, in);
                 default:
                     throw new IOException("Unhandled OpCode " + opcode);
             }

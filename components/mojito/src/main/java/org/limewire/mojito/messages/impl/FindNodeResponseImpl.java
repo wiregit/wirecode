@@ -47,15 +47,15 @@ public class FindNodeResponseImpl extends AbstractLookupResponse
     public FindNodeResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             SecurityToken securityToken, Collection<? extends Contact> nodes) {
-        super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId);
+        super(context, OpCode.FIND_NODE_RESPONSE, contact, messageId, Version.ZERO);
 
         this.securityToken = securityToken;
         this.nodes = nodes;
     }
     
     public FindNodeResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_NODE_RESPONSE, src, messageId, msgVersion, in);
         
         this.securityToken = in.readQueryKey();
         this.nodes = in.readContacts();

@@ -40,35 +40,30 @@ import org.limewire.mojito.routing.Version;
 public class FindValueRequestImpl extends AbstractLookupRequest
         implements FindValueRequest {
     
-    private final Collection<KUID> keys;
+    private final Collection<KUID> secondaryKeys;
     
     private final DHTValueType valueType;
     
     public FindValueRequestImpl(Context context, 
             Contact contact, MessageID messageId, 
-            KUID lookupId, Collection<KUID> keys, DHTValueType valueType) {
+            KUID lookupId, Collection<KUID> secondaryKeys, DHTValueType valueType) {
         super(context, OpCode.FIND_VALUE_REQUEST, 
-                contact, messageId, lookupId);
+                contact, messageId, Version.ZERO, lookupId);
         
-        this.keys = keys;
+        this.secondaryKeys = secondaryKeys;
         this.valueType = valueType;
     }
     
     public FindValueRequestImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.FIND_VALUE_REQUEST, src, messageId, msgVersion, in);
         
-        this.keys = in.readKUIDs();
-        
-        DHTValueType valueType = DHTValueType.ANY;
-        if (getMessageVersion().compareTo(Version.ZERO) > 0) {
-            valueType = in.readValueType();
-        }
-        this.valueType = valueType;
+        this.secondaryKeys = in.readKUIDs();
+        this.valueType = in.readValueType();
     }
     
     public Collection<KUID> getSecondaryKeys() {
-        return keys;
+        return secondaryKeys;
     }
     
     public DHTValueType getDHTValueType() {

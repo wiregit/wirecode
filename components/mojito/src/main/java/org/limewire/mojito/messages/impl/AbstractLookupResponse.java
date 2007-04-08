@@ -37,13 +37,13 @@ abstract class AbstractLookupResponse extends AbstractResponseMessage
 	implements LookupResponse {
 
     public AbstractLookupResponse(Context context, 
-            OpCode opcode, Contact contact, MessageID messageId) {
-        super(context, opcode, contact, messageId);
+            OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
+        super(context, opcode, contact, messageId, msgVersion);
     }
     
     public AbstractLookupResponse(Context context, 
             OpCode opcode, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, opcode, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, opcode, src, messageId, msgVersion, in);
     }
 }

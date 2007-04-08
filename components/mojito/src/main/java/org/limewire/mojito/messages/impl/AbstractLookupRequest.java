@@ -42,16 +42,16 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
     
     public AbstractLookupRequest(Context context, 
             OpCode opcode, Contact contact, 
-            MessageID messageId, KUID lookupId) {
-        super(context, opcode, contact, messageId);
+            MessageID messageId, Version msgVersion, KUID lookupId) {
+        super(context, opcode, contact, messageId, msgVersion);
         
         this.lookupId = lookupId;
     }
     
     public AbstractLookupRequest(Context context, 
             OpCode opcode, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, opcode, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, opcode, src, messageId, msgVersion, in);
         
         switch(opcode) {
             case FIND_NODE_REQUEST:

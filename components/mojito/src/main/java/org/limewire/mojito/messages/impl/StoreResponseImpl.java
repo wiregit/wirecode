@@ -45,14 +45,14 @@ public class StoreResponseImpl extends AbstractResponseMessage
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
             Collection<? extends Entry<KUID, Status>> status) {
-        super(context, OpCode.STORE_RESPONSE, contact, messageId);
+        super(context, OpCode.STORE_RESPONSE, contact, messageId, Version.ZERO);
 
         this.status = status;
     }
 
     public StoreResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.STORE_RESPONSE, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.STORE_RESPONSE, src, messageId, msgVersion, in);
         
         this.status = in.readStoreStatus();
     }

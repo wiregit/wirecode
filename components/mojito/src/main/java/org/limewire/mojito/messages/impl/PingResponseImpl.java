@@ -45,15 +45,15 @@ public class PingResponseImpl extends AbstractResponseMessage
     public PingResponseImpl(Context context, 
 	    Contact contact, MessageID messageId, 
 	    SocketAddress externalAddress, BigInteger estimatedSize) {
-        super(context, OpCode.PING_RESPONSE, contact, messageId);
+        super(context, OpCode.PING_RESPONSE, contact, messageId, Version.ZERO);
 
         this.externalAddress = externalAddress;
         this.estimatedSize = estimatedSize;
     }
 
     public PingResponseImpl(Context context, SocketAddress src, 
-            MessageID messageId, Version version, MessageInputStream in) throws IOException {
-        super(context, OpCode.PING_RESPONSE, src, messageId, version, in);
+            MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
+        super(context, OpCode.PING_RESPONSE, src, messageId, msgVersion, in);
         
         this.externalAddress = in.readSocketAddress();
         this.estimatedSize = in.readDHTSize();

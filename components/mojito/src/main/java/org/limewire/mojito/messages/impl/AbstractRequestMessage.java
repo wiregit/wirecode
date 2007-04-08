@@ -37,13 +37,13 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
         implements RequestMessage {
 
     public AbstractRequestMessage(Context context, 
-            OpCode opcode, Contact contact, MessageID messageId) {
-        super(context, opcode, contact, messageId);
+            OpCode opcode, Contact contact, MessageID messageId, Version msgVersion) {
+        super(context, opcode, contact, messageId, msgVersion);
     }
 
     public AbstractRequestMessage(Context context, OpCode opcode, 
-            SocketAddress src, MessageID messageId, Version version, MessageInputStream in) 
+            SocketAddress src, MessageID messageId, Version msgVersion, MessageInputStream in) 
             throws IOException {
-        super(context, opcode, src, messageId, version, in);
+        super(context, opcode, src, messageId, msgVersion, in);
     }
 }
