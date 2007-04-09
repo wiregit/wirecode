@@ -114,9 +114,9 @@ public class NodeAssignerTest extends LimeTestCase {
     
     private void setDHTCapabilities() throws Exception{
         setHardcoreCapabilities();
-        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_DHT_AVERAGE_UPTIME.getValue());
+        ApplicationSettings.AVERAGE_CONNECTION_TIME.setValue(DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue());
         PrivilegedAccessor.setValue(ASSIGNER,"_currentUptime",
-                                    new Long(DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()));
+                                    new Long(DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()));
     }
     
     private void setHardcoreCapabilities() throws Exception{

@@ -199,9 +199,8 @@ public class NodeAssigner {
     }
     
     /**
-     * Returns wether or not a node is capable of handling a special
+     * Determinates whether or not a node is capable of handling a special
      * function such as beeing an ultrapeer or connecting to the dht
-     * 
      */
     private static void setHardcoreCapable() {
         _isHardcoreCapable = 
@@ -402,21 +401,18 @@ public class NodeAssigner {
         if (!isUltrapeer || !DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
             
             // Make sure that the node has had the time to try to connect as an ultrapeer
-            assert ((DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L) 
+            assert ((DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L) 
                     > UltrapeerSettings.MIN_CONNECT_TIME.getValue()) : "Wrong minimum initial uptime";
                     
-            long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+            final long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
                     ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
             
             // This is the minimum requirement to connect to the DHT in passive mode
-            boolean passiveCapable = _isHardcoreCapable
-                && (averageTime >= DHTSettings.MIN_DHT_AVERAGE_UPTIME.getValue()
-                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L))
-                    && UDPService.instance().canReceiveSolicited();
+            boolean passiveCapable = isPassiveLeafDHTCapable();
         
             // In order to be able to connect to the DHT in active mode you
             // must not be firewalled (must be able to receive unsolicited UDP)
-            boolean activeCapable = passiveCapable && UDPService.instance().canReceiveUnsolicited();
+            boolean activeCapable = isActiveDHTCapable();
             
             if (LOG.isDebugEnabled()) {
                 if (passiveCapable && !activeCapable) {
@@ -431,15 +427,14 @@ public class NodeAssigner {
                 }
             }
             
-            if (passiveCapable) {
-                // Switch to active mode if possible!
-                if (activeCapable) {
-                    mode = DHTMode.ACTIVE;
-                    
-                // Only leafs can become passive leaf nodes!
-                } else if (!isUltrapeer) {
-                    mode = DHTMode.PASSIVE_LEAF;
-                }
+            // Only leafs can become passive leaf nodes!
+            if (passiveCapable && !isUltrapeer) {
+                mode = DHTMode.PASSIVE_LEAF;
+            }
+            
+            // Switch to active mode if possible!
+            if (activeCapable) {
+                mode = DHTMode.ACTIVE;
             }
         }
         
@@ -507,6 +502,32 @@ public class NodeAssigner {
         };
         
         ThreadExecutor.startThread(init, "DHT-InitializeThread");
+    }
+    
+    /**
+     * Returns whether ot not a Node is PASSIVE_LEAF capable
+     */
+    private static boolean isPassiveLeafDHTCapable() {
+        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        
+        return ULTRAPEER_OS
+                && (averageTime >= DHTSettings.MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME.getValue()
+                && _currentUptime >= (DHTSettings.MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && UDPService.instance().canReceiveSolicited();
+    }
+    
+    /**
+     * Returns whether ot not a Node is ACTIVE capable
+     */
+    private static boolean isActiveDHTCapable() {
+        long averageTime = Math.max(RouterService.getConnectionManager().getCurrentAverageUptime(),
+                ApplicationSettings.AVERAGE_CONNECTION_TIME.getValue());
+        
+        return _isHardcoreCapable
+                && (averageTime >= DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()
+                && _currentUptime >= (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
+                && RouterService.isGUESSCapable();
     }
     
     /**
