@@ -52,6 +52,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     
     private volatile boolean running = false;
     
+    private volatile boolean bound = false;
+    
     public LimeMessageDispatcherImpl(Context context) {
         super(context);
         
@@ -88,11 +90,13 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
 
     @Override
     public void bind(SocketAddress address) throws IOException {
+        assert (!bound);
+        bound = true;
     }
     
     @Override
     public boolean isBound() {
-        return true;
+        return bound;
     }
 
     @Override
@@ -105,6 +109,12 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher
     public void stop() {
         running = false;
         super.stop();
+    }
+
+    @Override
+    public void close() {
+        bound = false;
+        super.close();
     }
 
     /* 
