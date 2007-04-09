@@ -339,11 +339,11 @@ public class RouterService {
 	    MYGUID=myguid;
 	    
 	    byte []mybtguid = new byte[20];
-	    mybtguid[0] = '-'; 
+	    mybtguid[0] = 0x2D; // - 
 	    mybtguid[1] = 0x4C; // L
-	    mybtguid[2] = 0x49; // I
+	    mybtguid[2] = 0x57; // W
 	    System.arraycopy(LimeWireUtils.BT_REVISION.getBytes(),0, mybtguid,3, 4);
-        mybtguid[7] = '-';
+        mybtguid[7] = 0x2D; // -
 	    System.arraycopy(MYGUID,0,mybtguid,8,12);
 	    MYBTGUID = mybtguid;
 	}
