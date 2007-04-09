@@ -332,21 +332,27 @@ public class NodeAssigner {
      * @return true if we switched, false otherwise
      */
     private static boolean switchFromActiveDHTNodeToUltrapeer() {
-        if((RouterService.getDHTMode() == DHTMode.ACTIVE) 
-                && DHTSettings.EXCLUDE_ULTRAPEERS.getValue()) {
-            
-            if(Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue()){
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Randomly switching from DHT node to ultrapeer!");
-                }
-                NodeAssignerStat.UP_TO_DHT_SWITCHES.incrementStat();
-                return true;
-            } else {
-                return false;
-            }
-        } else {
+        
+        // If I'm not a DHT Node running in ACTIVE mode then
+        // try to become an Ultrapeer
+        if (RouterService.getDHTMode() != DHTMode.ACTIVE) {
             return true;
         }
+        
+        // If I'm in ACTIVE mode and Ultrapeers are excluded
+        // from running in ACTIVE mode then switch with a
+        // certain probability...
+        if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && acceptUltrapeer()) {
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Randomly switching from DHT node to ultrapeer!");
+            }
+            NodeAssignerStat.UP_TO_DHT_SWITCHES.incrementStat();
+            return true;
+        }
+        
+        // Don't switch from ACTIVE mode to Ultrapeer+PASSIVE
+        return false;
     }
     
     /**
@@ -361,26 +367,27 @@ public class NodeAssigner {
     }
     
     /**
-     * 
+     * This method assigns a DHT mode based on the local Node's
+     * Ultrapeer, uptime and firewall status.
      */
-    private static void assignDHTMode() {
+    private static DHTMode assignDHTMode() {
         
         // Remember the old mode as we're only going to switch
         // if the new mode is different from the old mode!
         final DHTMode current = RouterService.getDHTMode();
         
+        // Initial mode is to turn off the DHT
+        DHTMode mode = DHTMode.INACTIVE;
+        
         // Check if the DHT was disabled by somebody. If so shut it
         // down and return
         if (DHTSettings.DISABLE_DHT_USER.getValue() 
                 || DHTSettings.DISABLE_DHT_NETWORK.getValue()) {
-            if (current != DHTMode.INACTIVE) {
-                switchDHTMode(current, DHTMode.INACTIVE);
+            if (current != mode) {
+                switchDHTMode(current, mode);
             }
-            return;
+            return mode;
         }
-        
-        // Initial mode is to turn off the DHT
-        DHTMode mode = DHTMode.INACTIVE;
         
         // If we're an Ultrapeer, connect to the DHT in passive mode or if 
         // we were connected as active node before, switch to passive mode
@@ -404,11 +411,12 @@ public class NodeAssigner {
             // This is the minimum requirement to connect to the DHT in passive mode
             boolean passiveCapable = _isHardcoreCapable
                 && (averageTime >= DHTSettings.MIN_DHT_AVERAGE_UPTIME.getValue()
-                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L));
+                    && _currentUptime >= (DHTSettings.MIN_DHT_INITIAL_UPTIME.getValue()/1000L))
+                    && UDPService.instance().canReceiveSolicited();
         
             // In order to be able to connect to the DHT in active mode you
-            // must not be firewalled and able to receive unsolicited UDP
-            boolean activeCapable = passiveCapable && RouterService.isGUESSCapable();
+            // must not be firewalled (must be able to receive unsolicited UDP)
+            boolean activeCapable = passiveCapable && UDPService.instance().canReceiveUnsolicited();
             
             if (LOG.isDebugEnabled()) {
                 if (passiveCapable && !activeCapable) {
@@ -452,8 +460,13 @@ public class NodeAssigner {
         if ((isUltrapeer || acceptDHTNode()) && (mode != current)) {
             switchDHTMode(current, mode);
         }
+        
+        return mode;
     }
     
+    /**
+     * Switches the mode of the DHT
+     */
     private static void switchDHTMode(final DHTMode from, final DHTMode to) {
         switch(from) {
             case ACTIVE:
@@ -496,7 +509,21 @@ public class NodeAssigner {
         ThreadExecutor.startThread(init, "DHT-InitializeThread");
     }
     
+    /**
+     * Returns true based on a certain probability. 
+     * 
+     * See DHTSetting.DHT_ACCEPT_PROBABILITY for more info!
+     */
     private static boolean acceptDHTNode() {
         return (Math.random() < DHTSettings.DHT_ACCEPT_PROBABILITY.getValue());
+    }
+    
+    /**
+     * Returns true based on a certain probability.
+     * 
+     * See DHTSetting.DHT_TO_ULTRAPEER_PROBABILITY for more info!
+     */
+    private static boolean acceptUltrapeer() {
+        return (Math.random() < DHTSettings.DHT_TO_ULTRAPEER_PROBABILITY.getValue());
     }
 }
