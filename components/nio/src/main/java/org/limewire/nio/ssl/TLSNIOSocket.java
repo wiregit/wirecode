@@ -5,15 +5,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 
-import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIOSocket;
-import org.limewire.nio.channel.BufferReader;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.observer.ConnectObserver;
-import org.limewire.util.BufferUtils;
 
 /**
  * A version of NIOSocket that uses TLS for transfer encoding.
@@ -51,31 +47,6 @@ public class TLSNIOSocket extends NIOSocket {
         super(socket);
     }
     
-    /**
-     * Wraps an existing socket in a TLS-enabled socket.
-     * Useful for STARTTLS or otherwise converting an existing connection
-     * to a secure one.
-     * 
-     * This currently only works for creating server-side TLS sockets.
-     */ 
-    public static TLSNIOSocket wrap(Socket socket, ByteBuffer data) throws IOException {
-        if(socket instanceof AbstractNBSocket) {
-            TLSNIOSocket tlsSocket = new TLSNIOSocket(socket);
-            if(data.hasRemaining()) {
-                InterestReadableByteChannel oldReader = tlsSocket.tlsLayer.getReadChannel();
-                tlsSocket.tlsLayer.setReadChannel(new BufferReader(data));
-                tlsSocket.tlsLayer.read(BufferUtils.getEmptyBuffer());
-                if(data.hasRemaining())
-                    throw new IllegalStateException("unable to read all prebuffered data in one pass!");
-                tlsSocket.tlsLayer.setReadChannel(oldReader);
-            }
-            return tlsSocket;
-        } else {
-            throw new IllegalArgumentException("cannot wrap non AbstractNBSocket");
-        }
-        
-    }
-    
     @Override
     public boolean connect(SocketAddress addr, int timeout, ConnectObserver observer) {
         return super.connect(addr, timeout, new TLSConnectInitializer(addr, observer));
@@ -110,6 +81,10 @@ public class TLSNIOSocket extends NIOSocket {
     protected void initOutgoingSocket() throws IOException {
         super.initOutgoingSocket();
         tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
+    }
+    
+    /* package */ SSLReadWriteChannel getSSLChannel() {
+        return tlsLayer;
     }
     
     /**

@@ -15,7 +15,7 @@ import org.limewire.nio.channel.InterestScatteringByteChannel;
 class SocketInterestReadAdapter implements InterestScatteringByteChannel {
     
 	/** Mask OOM as this exception */
-	private static final IOException OOM = new IOException();
+	private static final IOException OOM = new IOException("Out Of Memory");
 	
     /** the SocketChannel this is proxying. */
     private SocketChannel channel;
@@ -58,5 +58,9 @@ class SocketInterestReadAdapter implements InterestScatteringByteChannel {
 	public long read(ByteBuffer[] arg0) throws IOException {
 		return channel.read(arg0);
 	}
+    
+    public String toString() {
+        return "InterestAdapter for channel: " + channel;
+    }
 
 }

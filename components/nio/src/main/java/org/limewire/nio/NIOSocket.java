@@ -161,7 +161,7 @@ public class NIOSocket extends AbstractNBSocket {
     // /////////////////////////////////////////////
 
     public SocketChannel getChannel() {
-        return socket.getChannel();
+        return channel;
     }
 
     public int getLocalPort() {

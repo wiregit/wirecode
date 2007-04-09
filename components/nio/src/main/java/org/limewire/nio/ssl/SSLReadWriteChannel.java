@@ -49,6 +49,21 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     private volatile boolean readDataLeft = false;
     private AtomicBoolean firstReadDone = new AtomicBoolean(false);
     
+    /**
+     * The last state of who interested us in readinng must be kept,
+     * so that after handshaking finishes, we can put reading into
+     * the correct interest state.  otherwise, our options are:
+     *  1) leave interest on, which could potentially loop forever
+     *     if the connected socket closes.
+     *  2) turn interest off, which could confuse any callers that
+     *     had wanted to read data.
+     * 
+     * Note that we don't have to do this for writing because writing
+     * can succesfully turn itself off.
+     */
+    private boolean readInterest = false;
+    private final Object readInterestLock = new Object();
+    
     public SSLReadWriteChannel(SSLContext context, Executor executor) {
         this.executor = executor;
         this.context = context;
@@ -100,7 +115,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             // Must check separately for 'first read' and 'not handshaking', because
             // the engine isn't put into handshaking mode until a single read is done.
             if(firstReadDone.getAndSet(true) && !dst.hasRemaining() && engine.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING) {
-                LOG.debug("No space to read into, leaving");
+                LOG.debug("No room left to transfer data, exiting");
                 return transferred;
             }
 
@@ -202,8 +217,11 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 });
             return reading;
         case FINISHED:
-            // ensure we're ready for everything.
-            readSink.interestRead(true);
+            synchronized(readInterestLock) {
+                LOG.debug("Handshaking finished for readSink: " + readSink + ", setting readSink interest to: " + readInterest);
+                // ensure we're ready for everything.
+                readSink.interestRead(readInterest);
+            }
             writeSink.interestWrite(this, true);
         case NOT_HANDSHAKING:
         default: 
@@ -346,7 +364,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
     
     public void interestRead(boolean status) {
-        readSink.interestRead(status);
+        synchronized(readInterestLock) {
+            readInterest = status;
+            readSink.interestRead(status);
+        }
     }
 
     public synchronized void interestWrite(WriteObserver observer, boolean status) {

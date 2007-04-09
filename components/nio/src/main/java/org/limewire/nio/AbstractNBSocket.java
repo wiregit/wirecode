@@ -161,13 +161,16 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                     
                     if(oldReader instanceof InterestReadableByteChannel && oldReader != newReader) {
                         lastChannel.setReadChannel((InterestReadableByteChannel)oldReader);
-                        reader.handleRead(); // read up any buffered data.
+                        reader.handleRead(); // read up any buffered data from the old reader chain.
                         oldReader.shutdown(); // shutdown the now unused reader.
                     }
                     
                     InterestReadableByteChannel source = getBaseReadChannel();
                     lastChannel.setReadChannel(source);
-                    NIODispatcher.instance().interestRead(getChannel(), true);
+                    reader.handleRead(); // read up any buffered data from the current reader chain.
+                                         // this is done here (in addition to above) because elements
+                                         // from the base read-channel might have buffered data.
+                    source.interestRead(true);
                 } catch(IOException iox) {
                     shutdown();
                     oldReader.shutdown(); // in case we lost it.
@@ -375,9 +378,10 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         }
         
         if(localReader instanceof NIOInputStream) {
+            NIOInputStream nis = (NIOInputStream)localReader;
             // Ensure the stream is initialized before we interest it.
-            InputStream stream = ((NIOInputStream)localReader).getInputStream();
-            NIODispatcher.instance().interestRead(getChannel(), true);
+            InputStream stream = nis.getInputStream();
+            nis.interestRead(true);
             return stream;
         } else {
             Callable<InputStream> callable = new Callable<InputStream>() {
@@ -388,6 +392,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             };
             
+            LOG.debug("Submitting future to convert reader to NIOInputStream");
             Future<InputStream> future = NIODispatcher.instance().submit(callable);
             try {
                 return future.get();

@@ -121,16 +121,18 @@ public class ConnectionDispatcher {
     		this.blocking = blocking;
     	}
     	
-    	public void delegate(final String word, 
-    			final Socket sock, 
-    			boolean newThread) {
+    	public void delegate(final String word,  final Socket sock, boolean newThread) {
     		boolean localHost = NetworkUtils.isLocalHost(sock);
     		boolean drop = false;
-    		if (localOnly && !localHost)
+    		if (localOnly && !localHost) {
+                LOG.debug("Dropping because we want a local connection, and this isn't localhost");
     			drop = true;
-    		if (!localOnly && localHost && 
-    				ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            }
+            
+    		if (!localOnly && localHost && ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+                LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
+            }
     		
     		if (drop) {
     			IOUtils.close(sock);

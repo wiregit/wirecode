@@ -18,15 +18,15 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.SocketFactory;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
-import org.limewire.nio.ssl.TLSNIOSocket;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.MessageService;
 import org.limewire.setting.SettingsHandler;
 import org.limewire.util.BufferUtils;
-
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.HTTPStat;
@@ -712,44 +712,55 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 if(buffer.get(i) == ' ') {
                     ConnectionDispatcher dispatcher = RouterService.getConnectionDispatcher();
                     String word = new String(buffer.array(), 0, i);
-                    if(dispatcher.isValidProtocolWord(word)) {                        
-                        if(allowedWord != null && !allowedWord.equals(word))
+                    if(dispatcher.isValidProtocolWord(word)) {
+                        if(allowedWord != null && !allowedWord.equals(word)) {
+                            if(LOG.isDebugEnabled())
+                                LOG.debug("Legal but wrong word: " + word);
                             throw new IOException("wrong word!");
-                        
+                        }
+
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Dispatching word: " + word + ", buffer: " + buffer + ", contents: " + new String(buffer.array()));
                         buffer.limit(buffer.position()).position(i+1);
                         source.interestRead(false);
                         RouterService.getConnectionDispatcher().dispatch(word, client, true);
-                        return;
-                    } else if(client instanceof TLSNIOSocket) {
-                        close();
-                        return;
                     } else {
-                        if(LOG.isDebugEnabled())
-                            LOG.debug("Attempting to use TLS socket with invalid word: " + word);
-                        // Maybe it's a TLS socket, try wrapping it in that.
-                        buffer.flip();
-                        TLSNIOSocket tls = TLSNIOSocket.wrap(client, buffer);
-                        tls.setReadObserver(new AsyncConnectionDispatcher(tls, allowedWord));
-                        return;
+                        startTLS();
                     }
+                    return;
                 }
             }
             
             // If there's no room to read more or there's nothing left to read,
-            // we aren't going to read our word. Try TLS and/or close
+            // we aren't going to read our word.  Attempt to switch to TLS, or
+            // close if we EOF'd early.
             if(!buffer.hasRemaining()) {
-                if(client instanceof TLSNIOSocket) {
-                    close();
-                } else {
-                    LOG.debug("Buffer filled, attempting to use TLS socket.");
-                    buffer.flip();
-                    TLSNIOSocket tls = TLSNIOSocket.wrap(client, buffer);
-                    tls.setReadObserver(new AsyncConnectionDispatcher(tls, allowedWord));
-                }
+                startTLS();
                 return;
             } else if(read == -1) {
                 close();
                 return;
+            }
+        }
+        
+        /**
+         * Attempts to start TLS encoding on the socket.
+         * If any data was buffered but not used, the data will be read as part
+         * of the TLS handshake.  If the socket is not capable of switching to TLS,
+         * the socket is closed.
+         * 
+         * @throws IOException if there was an error starting TLS
+         */
+        private void startTLS() throws IOException {
+            if(!SSLUtils.isTLSEnabled(client) && SSLUtils.isTLSCapable(client)) {
+                LOG.debug("Attempting to start TLS");
+                buffer.flip();
+                AbstractNBSocket socket = SSLUtils.startTLS(client, buffer);
+                LOG.debug("TLS started -- setting new dispatcher");
+                socket.setReadObserver(new AsyncConnectionDispatcher(socket, allowedWord));
+                LOG.debug("New dispatcher set");
+            } else {
+                close();
             }
         }
         

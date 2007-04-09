@@ -170,7 +170,9 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
     /**
      * Does nothing.
      */
-    public void interestRead(boolean status) {}
+    public void interestRead(boolean status) {
+        channel.interestRead(status);
+    }
     
     public InterestReadableByteChannel getReadChannel() {
         return channel;

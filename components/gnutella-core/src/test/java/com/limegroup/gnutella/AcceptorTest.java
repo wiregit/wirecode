@@ -8,13 +8,19 @@ import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.nio.ssl.TLSNIOSocket;
-
 import junit.framework.Test;
 
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.ssl.TLSNIOSocket;
 
-public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.LimeTestCase;
+
+public class AcceptorTest extends LimeTestCase {
+    
+    private static final Log LOG = LogFactory.getLog(AcceptorTest.class);
     
     private static Acceptor acceptThread;
 
@@ -29,8 +35,13 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+    
+    private static void setSettings() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+    }
 
     public static void globalSetUp() throws Exception {
+        setSettings();
         new RouterService(new ActivityCallbackStub());
         RouterService.getConnectionManager().initialize();
         
@@ -46,6 +57,7 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     public void setUp() throws Exception {
+        setSettings();
         //shut off the various services,
         //if an exception is thrown, something bad happened.
         acceptThread.setListeningPort(0);
@@ -156,9 +168,11 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
          RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, new String[] { "BLOCKING" }, false, true);
          
-         TLSNIOSocket tls = new TLSNIOSocket("localhost", port);
+         Socket tls = new TLSNIOSocket("localhost", port);
          tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
-         acceptor.waitForAccept();
+         tls.getOutputStream().flush();
+         assertTrue(acceptor.waitForAccept());
+         tls.close();
      }
      
      private int bindAcceptor() throws Exception {
@@ -180,22 +194,27 @@ public class AcceptorTest extends com.limegroup.gnutella.util.LimeTestCase {
          }
          
          public void acceptConnection(String word, Socket s) {
+            LOG.debug("Got connection for word: " + word + ", socket: " + s);
             assertEquals(this.word, word);
             if("BLOCKING".equals(word)) {
                 try {
+                    LOG.debug("Getting IS");
                     InputStream in = s.getInputStream();
                     byte[] b = new byte[1000];
+                    LOG.debug("Reading");
                     int read = in.read(b);
+                    LOG.debug("read");
                     assertEquals("MORE DATA", new String(b, 0, read));
                     latch.countDown();
+                    s.close();
                 } catch(IOException iox) {
                     throw new RuntimeException(iox);
                 }
             }
          }
          
-         void waitForAccept() throws Exception {
-             latch.await(5, TimeUnit.SECONDS);
+         boolean waitForAccept() throws Exception {
+             return latch.await(5, TimeUnit.SECONDS);
          }
          
      }
