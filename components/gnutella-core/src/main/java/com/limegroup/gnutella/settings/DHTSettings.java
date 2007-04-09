@@ -147,23 +147,26 @@ public class DHTSettings extends LimeProps {
         = FACTORY.createRemoteLongSetting("RARE_FILE_TIME", 
                 0L, "rare_file_time", 0L, 24L*60L*60L*1000L);
     
-    public static final BooleanSetting ENABLE_DHT_REQUERIES
-        = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_REQUERIES", 
-                false, "enable_dht_requeries");
+    /**
+     * Whether or not DHT querying is enabled 
+     */
+    public static final BooleanSetting ENABLE_DHT_QUERIES
+        = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_QUERIES", 
+                false, "enable_dht_queries");
     
     /**
      * The maximum number of DHT requery attempts
      */
-    public static final IntSetting MAX_DHT_REQUERY_ATTEMPTS
-        = FACTORY.createRemoteIntSetting("MAX_DHT_REQUERY_ATTEMPTS", 
-                1, "max_dht_requery_attempts", 1, Integer.MAX_VALUE);
+    public static final IntSetting MAX_DHT_QUERY_ATTEMPTS
+        = FACTORY.createRemoteIntSetting("MAX_DHT_QUERY_ATTEMPTS", 
+                1, "max_dht_query_attempts", 1, Integer.MAX_VALUE);
     
     /**
      * The minimum time between two DHT requeries
      */
-    public static final LongSetting TIME_BETWEEN_DHT_REQUERIES
-        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_REQUERIES", 
-                5L*60L*1000L, "time_between_dht_requeries", 30L*1000L, 24L*60L*60L*1000L);
+    public static final LongSetting TIME_BETWEEN_DHT_QUERIES
+        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_QUERIES", 
+                5L*60L*1000L, "time_between_dht_queries", 30L*1000L, 24L*60L*60L*1000L);
     
     /**
      * Setting for whether or not the passive DHT mode should be active at all.
