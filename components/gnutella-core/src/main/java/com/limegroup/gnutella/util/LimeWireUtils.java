@@ -390,13 +390,14 @@ public final class LimeWireUtils {
             url += "?";
         else
             url += "&";
-        url += "pro="   + LimeWireUtils.isPro() + 
-               "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
-               "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
-               "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
-               "&os="   + EncodingUtils.encode(OSUtils.getOS()) +
-               "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion()) +
-               "&guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString());
+        url += "guid=" + EncodingUtils.encode(new GUID(RouterService.getMyGUID()).toHexString())+ 
+            "&pro="   + LimeWireUtils.isPro() + 
+            "&lang=" + EncodingUtils.encode(ApplicationSettings.getLanguage()) +
+            "&lv="   + EncodingUtils.encode(LimeWireUtils.getLimeWireVersion()) +
+            "&jv="   + EncodingUtils.encode(VersionUtils.getJavaVersion()) +
+            "&os="   + EncodingUtils.encode(OSUtils.getOS()) +
+            "&osv="  + EncodingUtils.encode(OSUtils.getOSVersion());
+               
         return url;
     }
 

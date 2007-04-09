@@ -35,6 +35,46 @@ public class LimeXMLUtilsTest extends LimeTestCase {
         assertSame(test, LimeXMLUtils.encodeXML(test));
     }
 
+    public void testParseAction() throws Exception {
+        String queryString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
+            "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
+            "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
+            "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
+            "comments=\"test\" action=\"test\"" +
+            "></audio></audios>";
+        LimeXMLDocument doc = new LimeXMLDocument(queryString);
+        assertTrue(doc.getAction().equals("test"));
+        assertFalse(doc.actionDetailRequested());
+        
+        queryString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
+            "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
+            "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
+            "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
+            "comments=\"test\" action=\"test\" actionDetailRequested=\"false\"" +
+            "></audio></audios>";
+        
+        doc = new LimeXMLDocument(queryString);
+        assertTrue(doc.getAction().equals("test"));
+        assertFalse(doc.actionDetailRequested());
+        
+        queryString = 
+            "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=" +
+            "\"http://www.limewire.com/schemas/audio.xsd\"><audio title=" +
+            "\"test\" artist=\"test\" album=\"test\" track=\"test\" type=" +
+            "\"song\" year=\"test\" seconds=\"test\" language=\"test\" " +
+            "SHA1=\"test\" bitrate=\"test\" price=\"test\" link=\"test\" " +
+            "comments=\"test\" action=\"test\" addActionDetail=\"True\"" +
+            "></audio></audios>";
+        
+        doc = new LimeXMLDocument(queryString);
+        assertTrue(doc.getAction().equals("test"));
+        assertTrue(doc.actionDetailRequested());
+    }
+    
     /**
      * Tests the method for matching two XML documents -- used for incoming
      * searches.

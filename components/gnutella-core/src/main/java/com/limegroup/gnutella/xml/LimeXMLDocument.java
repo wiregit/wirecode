@@ -34,6 +34,7 @@ public class LimeXMLDocument implements Serializable {
 
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
+    public static final String XML_ACTION_INFO = "addActionDetail__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
     public static final String XML_LICENSE_ATTRIBUTE = "license__";
     public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
@@ -81,6 +82,8 @@ public class LimeXMLDocument implements Serializable {
      * The action that this doc has.
      */
     private transient String action;
+    
+    private transient String actionDetail;
     
     /**
      * The version of this LimeXMLDocument.
@@ -304,6 +307,10 @@ public class LimeXMLDocument implements Serializable {
         else
             return action;
     }
+    
+    public boolean actionDetailRequested() {
+        return "true".equalsIgnoreCase(actionDetail);
+    }
 
     /**
      * Returns a Set of Map.Entry, where each key-value corresponds to a
@@ -475,7 +482,6 @@ public class LimeXMLDocument implements Serializable {
             tag.append(LimeXMLUtils.encodeXML(nv.getValue()));
             tag.append("\"");
         }
-        
         return tag.toString();
     }
 
@@ -499,6 +505,8 @@ public class LimeXMLDocument implements Serializable {
 				 schemaUri.equals(xmlDoc.schemaUri)) &&
 				(action == null ? xmlDoc.action == null :
 				 action.equals(xmlDoc.action)) &&
+                 (actionDetail == null ? xmlDoc.actionDetail == null :
+                     actionDetail.equals(xmlDoc.actionDetail)) &&
 				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
 				 fieldToValue.equals(xmlDoc.fieldToValue)));
 	}
@@ -518,6 +526,8 @@ public class LimeXMLDocument implements Serializable {
 				result = 37*result + schemaUri.hashCode();
 			if(action != null)
 				result = 37*result + action.hashCode();
+            if (actionDetail != null)
+                result = 37*result + actionDetail.hashCode();
 			hashCode = result;
 		} 
 		return hashCode;
@@ -550,6 +560,7 @@ public class LimeXMLDocument implements Serializable {
     private void setFields(String prefix) {
         // store action.
         action = fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
+        actionDetail = fieldToValue.get(prefix + XML_ACTION_INFO);
 
         // deal with updating license_type based on the license
         String license = fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
