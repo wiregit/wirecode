@@ -353,6 +353,9 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createRemoteIntSetting("QUERY_KEY_DELAY",500,
                 "MessageRouter.QueryKeyDelay",10,10000);
     
+    public static final ProbabilisticBooleanSetting SEND_LIME_RESPONSES =
+        FACTORY.createRemoteProbabilisticBooleanSetting("SEND_LIME_RESPONSES", 1.0f, "SearchSettings.sendLimeResponses", 0f, 1.0f);
+    
     public static final StringArraySetting LIME_SEARCH_TERMS =
         FACTORY.createRemoteStringArraySetting("LIME_SEARCH_TERMS", 
                 new String[]{"limewire"}, "SearchSettings.limeSearchTerms");

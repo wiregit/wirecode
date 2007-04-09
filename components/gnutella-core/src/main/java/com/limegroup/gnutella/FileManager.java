@@ -1958,8 +1958,10 @@ public abstract class FileManager {
     protected synchronized void buildQRT() {
 
         _queryRouteTable = new QueryRouteTable();
-        for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
-            _queryRouteTable.addIndivisible(entry);
+        if (SearchSettings.SEND_LIME_RESPONSES.getBoolean()) {
+            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
+                _queryRouteTable.addIndivisible(entry);
+        }
         FileDesc[] fds = getAllSharedFileDescriptors();
         for(int i = 0; i < fds.length; i++) {
             if (fds[i] instanceof IncompleteFileDesc)
