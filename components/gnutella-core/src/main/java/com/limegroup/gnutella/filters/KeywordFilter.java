@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -17,13 +18,13 @@ import com.limegroup.gnutella.messages.QueryRequest;
 public class KeywordFilter extends SpamFilter {
     /** INVARIANT: strings in ban contain only lowercase */
     private List<String> ban=new ArrayList<String>();
-
+    
     /** 
      * @modifies this
      * @effects bans the given phrase.  Capitalization does not matter.
      */
     public void disallow(String phrase) { 
-        String canonical = phrase.toLowerCase();
+        String canonical = phrase.toLowerCase(Locale.US);
         if (!ban.contains(canonical))
             ban.add(canonical);
     }
@@ -33,9 +34,11 @@ public class KeywordFilter extends SpamFilter {
      * @effects bans several well-known "adult" words.
      */
     public void disallowAdult() {
+        disallow("adult");
         disallow("anal");
         disallow("anul");
-        disallow("asshole");
+        disallow("ass");
+        disallow("boob");
         disallow("blow");
         disallow("blowjob");
         disallow("bondage");
@@ -43,13 +46,16 @@ public class KeywordFilter extends SpamFilter {
         disallow("cock");
         disallow("cum");
         disallow("cunt");
+        disallow("dick");
         disallow("facial");
         disallow("fuck");
         disallow("gangbang");
         disallow("hentai");
+        disallow("horny");
         disallow("incest");
         disallow("jenna");
         disallow("masturbat");
+        disallow("milf");
         disallow("nipple");
         disallow("penis");
         disallow("playboy");
@@ -58,6 +64,8 @@ public class KeywordFilter extends SpamFilter {
         disallow("rape");
         disallow("sex");
         disallow("slut");
+        disallow("squirt");
+        disallow("stripper");
         disallow("suck");
         disallow("tittie");
         disallow("titty");
@@ -105,7 +113,7 @@ public class KeywordFilter extends SpamFilter {
     protected boolean allow(QueryRequest qr) {
         //return false iff any of the words in query are in ban
         String query=qr.getQuery();
-        return ! matches(query);
+        return !matches(query);
     }
 
     boolean allow(QueryReply qr) {
@@ -126,15 +134,14 @@ public class KeywordFilter extends SpamFilter {
      * Returns true if phrase matches any of the entries in ban.
      */
     protected boolean matches(String phrase) {
-        String canonical=phrase.toLowerCase();
+        String canonical=phrase.toLowerCase(Locale.US);
         for (int i=0; i<ban.size(); i++) {
             String badWord = ban.get(i);
-            //phrase contains badWord?
-            //Hopefully indexOf uses some reasonably efficient 
-            //algorithm, such as Knuth-Morris-Pratt.
             if (canonical.indexOf(badWord)!=-1)
                 return true;
         }
         return false;
     }
+    
+   
 }

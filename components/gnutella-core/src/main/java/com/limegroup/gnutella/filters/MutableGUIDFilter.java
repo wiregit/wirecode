@@ -27,7 +27,7 @@ public final class MutableGUIDFilter extends SpamFilter {
     /**
      * The underlying filter.
      */
-    private final KeywordFilter FILTER = new KeywordFilter();
+    private final KeywordFilter FILTER = new XMLDocFilter();
     
     /**
      * Adds a guid to be scanned for keyword filters.

@@ -97,8 +97,6 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	}
 	
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
-		if(handler != null && handler.isPersonalSpam(reply)) return;
-		
         // do not allow a faked multicast reply.
         if(reply.isFakeMulticast())
             return;
@@ -126,6 +124,9 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         // responses invalid?  exit.
         if(!validResponses)
             return;
+
+        // check for unwanted results after xml has been constructed
+        if(handler != null && handler.isPersonalSpam(reply)) return;
         
         if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
             RouterService.getSecureMessageVerifier().verify(reply, this);
