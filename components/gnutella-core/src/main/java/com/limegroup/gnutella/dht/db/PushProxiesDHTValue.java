@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.net.InetAddress;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
@@ -21,12 +20,7 @@ public interface PushProxiesDHTValue extends DHTValue {
     /**
      * Version of PushProxiesDHTValue
      */
-    public static final Version VERSION = Version.valueOf(0, 0);
-    
-    /**
-     * The InetAddress of the Gnutella Node
-     */
-    public InetAddress getInetAddress();
+    public static final Version VERSION = Version.valueOf(0);
     
     /**
      * The Port number of the Gnutella Node

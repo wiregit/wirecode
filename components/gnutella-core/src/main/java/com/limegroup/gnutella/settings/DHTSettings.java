@@ -148,25 +148,33 @@ public class DHTSettings extends LimeProps {
                 0L, "rare_file_time", 0L, 24L*60L*60L*1000L);
     
     /**
+     * Whether or not AlternativeLocations should be published.
+     * WARNING: DO NOT MANUALLY CHANGE THIS
+     */
+    public static final BooleanSetting PUBLISH_ALT_LOCS
+        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
+                false, "publish_alt_locs");
+    
+    /**
      * Whether or not DHT querying is enabled 
      */
-    public static final BooleanSetting ENABLE_DHT_QUERIES
-        = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_QUERIES", 
-                false, "enable_dht_queries");
+    public static final BooleanSetting ENABLE_DHT_ALT_LOC_QUERIES
+        = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_ALT_LOC_QUERIES", 
+                false, "enable_dht_alt_loc_queries");
     
     /**
      * The maximum number of DHT requery attempts
      */
-    public static final IntSetting MAX_DHT_QUERY_ATTEMPTS
-        = FACTORY.createRemoteIntSetting("MAX_DHT_QUERY_ATTEMPTS", 
-                1, "max_dht_query_attempts", 1, Integer.MAX_VALUE);
+    public static final IntSetting MAX_DHT_ALT_LOC_QUERY_ATTEMPTS
+        = FACTORY.createRemoteIntSetting("MAX_DHT_ALT_LOC_QUERY_ATTEMPTS", 
+                1, "max_dht_alt_loc_query_attempts", 1, Integer.MAX_VALUE);
     
     /**
      * The minimum time between two DHT requeries
      */
-    public static final LongSetting TIME_BETWEEN_DHT_QUERIES
-        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_QUERIES", 
-                5L*60L*1000L, "time_between_dht_queries", 30L*1000L, 24L*60L*60L*1000L);
+    public static final LongSetting TIME_BETWEEN_DHT_ALT_LOC_QUERIES
+        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_DHT_ALT_LOC_QUERIES", 
+                5L*60L*1000L, "time_between_dht_alt_loc_queries", 30L*1000L, 24L*60L*60L*1000L);
     
     /**
      * Setting for whether or not the passive DHT mode should be active at all.
@@ -185,20 +193,19 @@ public class DHTSettings extends LimeProps {
                 false, "enable_passive_dht_leaf_mode");
     
     /**
-     * Whether or not AlternativeLocations should be published.
-     * WARNING: DO NOT MANUALLY CHANGE THIS
-     */
-    public static final BooleanSetting PUBLISH_ALT_LOCS
-        = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
-                false, "publish_alt_locs");
-    
-    /**
      * Whether or not PushProxies should be published.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final BooleanSetting PUBLISH_PUSH_PROXIES
         = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
                 false, "publish_push_proxies");
+    
+    /**
+     * Whether or not we query for PushProxies
+     */
+    public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
+        = FACTORY.createRemoteBooleanSetting("ENABLE_PUSH_PROXY_QUERIES", 
+                false, "enable_push_proxy_queries");
     
     /**
      * This setting is storing the most recent DHT mode for debugging purposes.

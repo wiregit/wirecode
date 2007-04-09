@@ -3,7 +3,6 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +28,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
+import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
  * The AltLocFinder queries the DHT for Alternate Locations
@@ -68,6 +68,13 @@ public class AltLocFinder {
      * Finds push AlternateLocations for the given GUID and URN
      */
     public boolean findPushAltLocs(GUID guid, URN urn) {
+        return findPushAltLocs(guid, urn, null);
+    }
+    
+    /**
+     * 
+     */
+    private boolean findPushAltLocs(GUID guid, URN urn, DHTValueEntity altLocEntity) {
         if (guid == null || urn == null) {
             return false;
         }
@@ -80,7 +87,7 @@ public class AltLocFinder {
             
             KUID key = KUIDUtils.toKUID(guid);
             DHTFuture<FindValueResult> future = dht.get(key, PushProxiesDHTValue.PUSH_PROXIES);
-            future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key));
+            future.addDHTFutureListener(new PushAltLocsHandler(dht, guid, urn, key, altLocEntity));
             return true;
         }
     }
@@ -130,60 +137,37 @@ public class AltLocFinder {
         }
 
         private void handleDHTValueEntity(DHTValueEntity entity) {
-            AltLocManager altLocManager = AltLocManager.instance();
-            
             DHTValue value = entity.getValue();
-            if (value instanceof AltLocDHTValue) {
-                AltLocDHTValue altLoc = (AltLocDHTValue)value;
-                Contact creator = entity.getCreator();
+            if (!(value instanceof AltLocDHTValue)) {
+                return;
+            }
+            
+            AltLocDHTValue altLoc = (AltLocDHTValue)value;
+            
+            // If the AltLoc is firewalled then do a lookup for
+            // its PushProxies
+            if (altLoc.isFirewalled()) {
+                if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
+                    GUID guid = new GUID(altLoc.getGUID());
+                    findPushAltLocs(guid, urn, entity);
+                }
                 
-                // The IP-Address of the Value creator. It can be
-                // two things! It's either the address of the Host
-                // who has the actual file (a non-firewalled Node that's
-                // connected to the DHT) or it's the address of a
-                // Node's Ultrapeer who published the value for the
-                // firewalled Node.
+            // If it's not then create just an AlternateLocation
+            // from the info
+            } else {
+                Contact creator = entity.getCreator();
                 InetAddress addr = ((InetSocketAddress)
                         creator.getContactAddress()).getAddress();
                 
-                AlternateLocation location = null;
-                
-                if (altLoc.isFirewalled()) {
-                    // The firewalled Leaf
-                    byte[] guid = altLoc.getGUID();
-                    int features = altLoc.getFeatures();
-                    int fwtVersion = altLoc.getFwtVersion();
-                    IpPort ipp = new IpPortImpl(altLoc.getInetAddress(), altLoc.getPort());
-                    
-                    // Its Ultrapeer that published the Value. If they're 
-                    // still connected then we're pretty much done. If no
-                    // you must probably do a second lookup for SHA-1(GUID)
-                    // to find the Leaf's Push Proxies
-                    IpPort proxy = new IpPortImpl(addr, altLoc.getPushProxyPort());
-                    PushEndpoint pe = new PushEndpoint(
-                            guid, Collections.singleton(proxy), features, fwtVersion, ipp);
-                    
-                    try {
-                        location = AlternateLocation.createPushAltLoc(pe, urn);
-                        //findPushAltLocs(urn, new GUID(guid));
-                    } catch (IOException e) {
-                        // Impossible. Thrown if URN or PushEndpoint is null
-                        LOG.error("IOException", e);
-                    }
-                    
-                } else {
-                    IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
-                    try {
-                        location = AlternateLocation.createDirectAltLoc(ipp, urn);
-                    } catch (IOException e) {
-                        // As above but possible if IpPort is not a 
-                        // valid external address
-                        LOG.error("IOException", e);
-                    }
-                }
-                
-                if (location != null) {
-                    altLocManager.add(location, this);
+                IpPort ipp = new IpPortImpl(addr, altLoc.getPort());
+                try {
+                    AlternateLocation location 
+                        = AlternateLocation.createDirectAltLoc(ipp, urn);
+                    AltLocManager.instance().add(location, this);
+                } catch (IOException e) {
+                    // As above but possible if IpPort is not a 
+                    // valid external address
+                    LOG.error("IOException", e);
                 }
             }
         }
@@ -233,11 +217,15 @@ public class AltLocFinder {
         
         private final KUID key;
         
-        private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, KUID key) {
+        private final DHTValueEntity altLocEntity;
+        
+        private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, 
+                KUID key, DHTValueEntity altLocEntity) {
             this.dht = dht;
             this.guid = guid;
             this.urn = urn;
             this.key = key;
+            this.altLocEntity = altLocEntity;
         }
         
         @Override
@@ -247,7 +235,7 @@ public class AltLocFinder {
             }
             
             for (EntityKey entityKey : result.getEntityKeys()) {
-                if (!entityKey.equals(AltLocDHTValue.ALT_LOC)) {
+                if (!entityKey.equals(PushProxiesDHTValue.PUSH_PROXIES)) {
                     continue;
                 }
                     
@@ -266,32 +254,48 @@ public class AltLocFinder {
         }
         
         private void handleDHTValueEntity(DHTValueEntity entity) {
-            AltLocManager altLocManager = AltLocManager.instance();
-            
+
             DHTValue value = entity.getValue();
-            if (value instanceof PushProxiesDHTValue) {
-                PushProxiesDHTValue proxiesValue = (PushProxiesDHTValue)value;
+            if (!(value instanceof PushProxiesDHTValue)) {
+                return;
+            }
+            
+            Contact creator = entity.getCreator();
+            InetAddress addr = ((InetSocketAddress)creator).getAddress();
+            
+            PushProxiesDHTValue pushProxies = (PushProxiesDHTValue)value;
+            
+            // Make some sanity checks
+            if (altLocEntity != null) {
                 
-                byte[] guid = this.guid.bytes();
-                Set<? extends IpPort> proxies = proxiesValue.getPushProxies();
-                int features = proxiesValue.getFeatures();
-                int fwtVersion = proxiesValue.getFwtVersion();
-                IpPort ipp = new IpPortImpl(proxiesValue.getInetAddress(), proxiesValue.getPort());
-                
-                PushEndpoint pe = new PushEndpoint(guid, proxies, features, fwtVersion, ipp);
-                
-                AlternateLocation location = null;
-                
-                try {
-                    location = AlternateLocation.createPushAltLoc(pe, urn);
-                } catch (IOException e) {
-                    // Impossible. Thrown if URN or PushEndpoint is null
-                    LOG.error("IOException", e);
+                // So we made a lookup for AltLocs, the found AltLoc was 
+                // firewalled and we made a lookup for its PushProxies.
+                // In any case the creator of both values should be the 
+                // same Node!
+                if (!creator.equals(altLocEntity.getCreator())) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Creator of " + altLocEntity 
+                                + " and found " + entity + " do not match!");
+                    }
+                    return;
                 }
-                
-                if (location != null) {
-                    altLocManager.add(location, this);
-                }
+            }
+
+            byte[] guid = this.guid.bytes();
+            Set<? extends IpPort> proxies = pushProxies.getPushProxies();
+            int features = pushProxies.getFeatures();
+            int fwtVersion = pushProxies.getFwtVersion();
+            IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
+            
+            PushEndpoint pe = new PushEndpoint(guid, proxies, features, fwtVersion, ipp);
+            
+            try {
+                AlternateLocation location 
+                    = AlternateLocation.createPushAltLoc(pe, urn);
+                AltLocManager.instance().add(location, this);
+            } catch (IOException e) {
+                // Impossible. Thrown if URN or PushEndpoint is null
+                LOG.error("IOException", e);
             }
         }
         

@@ -7,7 +7,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.limewire.io.IOUtils;
@@ -22,6 +21,9 @@ import org.limewire.mojito.routing.Version;
 import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RouterService;
 
+/**
+ * An implementation of PushProxiesDHTValue
+ */
 public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     
     private static final long serialVersionUID = -8565050579104508260L;
@@ -31,48 +33,65 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
      */
     public static final DHTValue FOR_SELF = new PushProxiesForSelf();
     
-    private final DHTValueType valueType;
-    
+    /**
+     * The version of the value
+     */
     private final Version version;
     
+    /**
+     * Gnutella features bit-field
+     */
     private final int features;
     
+    /**
+     * Gnutella Firewall-2-Firewall Transfer Protocol version
+     */
     private final int fwtVersion;
     
-    private final InetAddress address;
-    
+    /**
+     * The port number which may differ from the Contact addresse's
+     * port number
+     */
     private final int port;
     
+    /**
+     * A Set of PushProxy IpPorts
+     */
     private final Set<? extends IpPort> proxies;
     
     /**
      * Factory method to create PushProxiesDHTValues
      */
-    public static DHTValue createFromData(DHTValueType valueType, 
-            Version version, byte[] data) throws DHTValueException {
-        return new PushProxiesDHTValueImpl(valueType, version, data);
+    public static DHTValue createFromData(Version version, byte[] data) 
+            throws DHTValueException {
+        return new PushProxiesDHTValueImpl(version, data);
     }
     
     /**
      * Constructor to create a PushProxiesDHTValue for the localhost
      */
     private PushProxiesDHTValueImpl() {
-        this.valueType = PUSH_PROXIES;
         this.version = VERSION;
         this.features = 0;
         this.fwtVersion = 0;
         this.port = -1;
-        this.address = null;
         this.proxies = null;
     }
     
     /**
      * Constructor to create PushProxiesDHTValues that are read from the Network
      */
-    private PushProxiesDHTValueImpl(DHTValueType valueType, Version version, byte[] data) 
+    private PushProxiesDHTValueImpl(Version version, byte[] data) 
             throws DHTValueException {
         
-        this.valueType = valueType;
+        if (version == null) {
+            throw new DHTValueException("Version is null");
+        }
+        
+        if (data == null) {
+            throw new DHTValueException("Data is null");
+        }
+        
         this.version = version;
         
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
@@ -80,11 +99,6 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         try {
             this.features = in.readInt();
             this.fwtVersion = in.readInt();
-            
-            byte[] addr = new byte[in.readUnsignedByte()];
-            in.readFully(addr);
-            this.address = InetAddress.getByAddress(addr);
-            
             this.port = in.readUnsignedShort();
             
             Set<IpPort> proxies = new IpPortSet();
@@ -118,10 +132,6 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         return port;
     }
     
-    public InetAddress getInetAddress() {
-        return address;
-    }
-    
     public Set<? extends IpPort> getPushProxies() {
         return proxies;
     }
@@ -135,7 +145,7 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     }
     
     public DHTValueType getValueType() {
-        return valueType;
+        return PUSH_PROXIES;
     }
     
     public Version getVersion() {
@@ -162,7 +172,6 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
     }
     
     private byte[] value() {
-        Set<? extends IpPort> proxies = getPushProxies();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(baos);
         
@@ -170,12 +179,9 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
             out.writeInt(getFeatures());
             out.writeInt(getFwtVersion());
             
-            byte[] addr = getInetAddress().getAddress();
-            out.writeByte(addr.length);
-            out.write(addr);
-            
             out.writeShort(getPort());
             
+            Set<? extends IpPort> proxies = getPushProxies();
             out.writeInt(proxies.size());
             for (IpPort proxy : proxies) {
                 byte[] proxyAddr = proxy.getInetAddress().getAddress();
@@ -210,16 +216,7 @@ public class PushProxiesDHTValueImpl implements PushProxiesDHTValue {
         public int getFwtVersion() {
             return PushEndpointForSelf.instance().supportsFWTVersion();
         }
-
-        @Override
-        public InetAddress getInetAddress() {
-            try {
-                return InetAddress.getByAddress(RouterService.getExternalAddress());
-            } catch (UnknownHostException err) {
-                return null;
-            }
-        }
-
+        
         @Override
         public int getPort() {
             return RouterService.getPort();

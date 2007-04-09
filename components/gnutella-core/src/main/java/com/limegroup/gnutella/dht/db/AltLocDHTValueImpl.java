@@ -6,8 +6,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
@@ -17,11 +15,10 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushEndpointForSelf;
 import com.limegroup.gnutella.RouterService;
 
 /**
- *
+ * An implementation of AltLocDHTValue
  */
 public class AltLocDHTValueImpl implements AltLocDHTValue {
     
@@ -32,8 +29,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
      */
     public static final DHTValue SELF = new AltLocForSelf();
     
-    private final DHTValueType valueType;
-    
     private final Version version;
     
     private final byte[] guid;
@@ -42,46 +37,36 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     
     private final boolean firewalled;
     
-    private final InetAddress address;
-    
-    private final int features;
-    
-    private final int fwtVersion;
-    
-    private final int pushProxyPort;
-    
     /**
      * Creates an AltLocDHTValue from the given data
      */
-    public static DHTValue createFromData(DHTValueType valueType, 
-            Version version, byte[] data) throws DHTValueException {
-        return new AltLocDHTValueImpl(valueType, version, data);
+    public static DHTValue createFromData(Version version, byte[] data) 
+            throws DHTValueException {
+        return new AltLocDHTValueImpl(version, data);
     }
     
     /**
      * Constructor to create an AltLocDHTValue for the localhost
      */
     private AltLocDHTValueImpl() {
-        this.valueType = ALT_LOC;
         this.version = VERSION;
         this.guid = null;
         this.port = -1;
         this.firewalled = true;
-        this.address = null;
-        this.features = 0;
-        this.fwtVersion = 0;
-        this.pushProxyPort = -1;
     }
     
     /**
      * Constructor to create AltLocDHTValues that are read from the Network
      */
-    private AltLocDHTValueImpl(DHTValueType valueType, Version version, byte[] data) throws DHTValueException {
+    private AltLocDHTValueImpl(Version version, byte[] data) throws DHTValueException {
+        if (version == null) {
+            throw new DHTValueException("Version is null");
+        }
+        
         if (data == null) {
             throw new DHTValueException("Data is null");
         }
         
-        this.valueType = valueType;
         this.version = version;
         
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
@@ -90,22 +75,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
             in.readFully(guid);
             this.port = in.readUnsignedShort();
             this.firewalled = in.readBoolean();
-            if (firewalled) {
-                this.features = in.readInt();
-                this.fwtVersion = in.readInt();
-                
-                int length = in.readUnsignedByte();
-                byte[] addr = new byte[length];
-                in.readFully(addr);
-                this.address = InetAddress.getByAddress(addr);
-                
-                this.pushProxyPort = in.readUnsignedShort();
-            } else {
-                this.features = 0;
-                this.fwtVersion = 0;
-                this.address = null;
-                this.pushProxyPort = -1;
-            }
         } catch (IOException err) {
             throw new DHTValueException(err);
         } finally {
@@ -114,10 +83,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         
         if (!NetworkUtils.isValidPort(port)) {
             throw new DHTValueException("Illegal port: " + port);
-        }
-        
-        if (firewalled && !NetworkUtils.isValidPort(pushProxyPort)) {
-            throw new DHTValueException("Illegal push proxy port: " + pushProxyPort);
         }
     }
     
@@ -133,22 +98,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         return firewalled;
     }
     
-    public int getFeatures() {
-        return features;
-    }
-    
-    public int getFwtVersion() {
-        return fwtVersion;
-    }
-    
-    public InetAddress getInetAddress() {
-        return address;
-    }
-    
-    public int getPushProxyPort() {
-        return pushProxyPort;
-    }
-    
     public byte[] getValue() {
         return value();
     }
@@ -158,7 +107,7 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
     }
 
     public DHTValueType getValueType() {
-        return valueType;
+        return ALT_LOC;
     }
 
     public Version getVersion() {
@@ -178,13 +127,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         buffer.append("AltLoc: guid=").append(new GUID(getGUID()))
             .append(", port=").append(getPort())
             .append(", firewalled=").append(isFirewalled());
-            
-        if (isFirewalled()) {
-            buffer.append(", features=").append(getFeatures())
-                .append(", fwtVersion=").append(getFwtVersion())
-                .append(", address=").append(getInetAddress())
-                .append(", pushProxyPort=").append(getPushProxyPort());
-        }
         
         if (isAltLocForSelf()) {
             buffer.append(", local=true");
@@ -200,16 +142,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
             out.write(getGUID());
             out.writeShort(getPort());
             out.writeBoolean(isFirewalled());
-            if (isFirewalled()) {
-                out.writeInt(getFeatures());
-                out.writeInt(getFwtVersion());
-                
-                byte[] addr = getInetAddress().getAddress();
-                out.writeByte(addr.length);
-                out.write(addr);
-                
-                out.writeShort(getPushProxyPort());
-            }
         } catch (IOException err) {
             // Impossible
             throw new RuntimeException(err);
@@ -239,30 +171,6 @@ public class AltLocDHTValueImpl implements AltLocDHTValue {
         @Override
         public boolean isFirewalled() {
             return RouterService.acceptedIncomingConnection();
-        }
-        
-        @Override
-        public int getFeatures() {
-            return PushEndpointForSelf.instance().getFeatures();
-        }
-
-        @Override
-        public int getFwtVersion() {
-            return PushEndpointForSelf.instance().supportsFWTVersion();
-        }
-
-        @Override
-        public InetAddress getInetAddress() {
-            try {
-                return InetAddress.getByAddress(RouterService.getExternalAddress());
-            } catch (UnknownHostException err) {
-                return null;
-            }
-        }
-
-        @Override
-        public int getPushProxyPort() {
-            return RouterService.getPort();
         }
 
         @Override

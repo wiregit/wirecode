@@ -893,7 +893,7 @@ public class ManagedDownloader extends AbstractDownloader
      */
     private boolean shouldGiveUp() {
         return numGnutellaQueries >= GNUTELLA_REQUERY_ATTEMPTS
-                && (numDHTQueries >= DHTSettings.MAX_DHT_QUERY_ATTEMPTS.getValue()
+                && (numDHTQueries >= DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.getValue()
                         || !RouterService.isMemberOfDHT());
     }
     

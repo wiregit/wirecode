@@ -1142,8 +1142,8 @@ public class DownloadManager implements BandwidthTracker {
      */
     public synchronized boolean sendDHTQuery(ManagedDownloader requerier) {
         long elapsed = System.currentTimeMillis() - lastDHTRequeryTime;
-        if (elapsed < DHTSettings.TIME_BETWEEN_DHT_QUERIES.getValue()
-                || !DHTSettings.ENABLE_DHT_QUERIES.getValue()) {
+        if (elapsed < DHTSettings.TIME_BETWEEN_DHT_ALT_LOC_QUERIES.getValue()
+                || !DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.getValue()) {
             return false;
         }
         

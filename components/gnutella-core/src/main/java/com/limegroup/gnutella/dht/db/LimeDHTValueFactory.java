@@ -16,10 +16,10 @@ public class LimeDHTValueFactory implements DHTValueFactory {
             throws DHTValueException {
         
         if (valueType.equals(AltLocDHTValueImpl.ALT_LOC)) {
-            return AltLocDHTValueImpl.createFromData(valueType, version, value);
+            return AltLocDHTValueImpl.createFromData(version, value);
             
         } else if (valueType.equals(PushProxiesDHTValueImpl.PUSH_PROXIES)) {
-            return PushProxiesDHTValueImpl.createFromData(valueType, version, value);
+            return PushProxiesDHTValueImpl.createFromData(version, value);
         }
         
         return DefaultDHTValueFactory.FACTORY.createDHTValue(valueType, version, value);
