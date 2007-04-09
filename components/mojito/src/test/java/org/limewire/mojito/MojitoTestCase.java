@@ -7,6 +7,10 @@ import org.limewire.util.BaseTestCase;
 
 public abstract class MojitoTestCase extends BaseTestCase {
     
+    static {
+        System.setProperty("java.nio.preferSelect", "true");
+    }
+    
     private static final MojitoLocalSocketAddressProvider PROVIDER 
         = new MojitoLocalSocketAddressProvider();
     

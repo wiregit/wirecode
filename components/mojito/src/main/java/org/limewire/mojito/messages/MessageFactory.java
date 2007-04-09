@@ -24,13 +24,12 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
@@ -130,7 +129,7 @@ public interface MessageFactory {
      * @param dst The destination information to where the request will be send
      */
     public StoreResponse createStoreResponse(Contact src, Contact dst, 
-            MessageID messageId, Collection<? extends Entry<KUID, Status>> status);
+            MessageID messageId, Collection<StoreStatusCode> status);
 
     /**
      * Creates and returns a StatsRequest Message

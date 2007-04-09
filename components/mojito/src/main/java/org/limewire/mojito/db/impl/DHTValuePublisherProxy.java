@@ -113,20 +113,6 @@ public class DHTValuePublisherProxy implements DHTValueEntityPublisher, DHTFutur
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
-     */
-    public Collection<DHTValueEntity> getValuesToForward() {
-        Collection<DHTValueEntity> forward = new ArrayList<DHTValueEntity>();
-        synchronized (proxy) {
-            for (DHTValueEntityPublisher publisher : proxy) {
-                forward.addAll(publisher.getValuesToForward());
-            }
-        }
-        return forward;
-    }
-    
-    /*
-     * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#handleContactChange(org.limewire.mojito.routing.Contact)
      */
     public void changeContact(Contact node) {

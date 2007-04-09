@@ -21,6 +21,7 @@ package org.limewire.mojito.handler.request;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -29,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueEntityPublisher;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.FindValueRequest;
@@ -68,9 +68,6 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         Map<KUID, DHTValueEntity> bag = null;
         float requestLoad = 0f;
         
-        DHTValueEntityPublisher publisher = context.getDHTValueEntityPublisher();
-        Collection<DHTValueEntity> localEntities = publisher.get(lookupId);
-        
         Database database = context.getDatabase();
         synchronized (database) {
             bag = database.get(lookupId);
@@ -78,27 +75,16 @@ public class FindValueRequestHandler extends AbstractRequestHandler {
         }
         
         // The keys and values we'll return
-        Collection<KUID> availableKeys = new HashSet<KUID>();
-        Collection<DHTValueEntity> valuesToReturn = new HashSet<DHTValueEntity>();
+        Collection<KUID> availableKeys = Collections.emptySet();
+        Collection<DHTValueEntity> valuesToReturn = Collections.emptySet();
         
         // The keys the remote Node is requesting
         Collection<KUID> requestedSecondaryKeys = request.getSecondaryKeys();
         
-        if (localEntities != null && !localEntities.isEmpty()) {
-            DHTValueEntity entity = DatabaseUtils.getFirstEntityFor(valueType, localEntities);
-            
-            if (entity != null) {
-                if (requestedSecondaryKeys.isEmpty() 
-                        || requestedSecondaryKeys.contains(context.getLocalNodeID())) {
-                    valuesToReturn.add(entity);
-                    
-                } else {
-                    availableKeys.add(context.getLocalNodeID());
-                }
-            }
-        }
-        
         if (bag != null && !bag.isEmpty()) {
+            availableKeys = new HashSet<KUID>();
+            valuesToReturn = new HashSet<DHTValueEntity>();
+            
             Collection<? extends DHTValueEntity> filtered 
                 = DatabaseUtils.filter(valueType, bag.values());
             

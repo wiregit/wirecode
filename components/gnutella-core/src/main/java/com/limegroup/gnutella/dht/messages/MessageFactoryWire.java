@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -25,7 +24,7 @@ import org.limewire.mojito.messages.StatsResponse;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
 
@@ -138,7 +137,7 @@ public class MessageFactoryWire implements MessageFactory {
     }
 
     public StoreResponse createStoreResponse(Contact src, Contact dst, 
-            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
+            MessageID messageId, Collection<StoreStatusCode> status) {
         return new StoreResponseWireImpl(
                 delegate.createStoreResponse(src, dst, messageId, status));
     }

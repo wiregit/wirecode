@@ -497,7 +497,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         // for the values again. Even if we are there's no way
         // to test it until we've fully re-bootstrapped in
         // which case the other guys will send us the values
-        // anyways as from there perspective we're just a new
+        // anyways as from their perspective we're just a new
         // node.
         database.clear();
         

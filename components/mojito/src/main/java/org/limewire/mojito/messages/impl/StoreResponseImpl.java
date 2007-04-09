@@ -22,16 +22,15 @@ package org.limewire.mojito.messages.impl;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.io.MessageInputStream;
 import org.limewire.mojito.io.MessageOutputStream;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.util.CollectionUtils;
 
 
 /**
@@ -40,38 +39,32 @@ import org.limewire.mojito.routing.Version;
 public class StoreResponseImpl extends AbstractResponseMessage
         implements StoreResponse {
 
-    private final Collection<? extends Entry<KUID, Status>> status;
+    private final Collection<StoreStatusCode> statusCodes;
 
     public StoreResponseImpl(Context context, 
             Contact contact, MessageID messageId, 
-            Collection<? extends Entry<KUID, Status>> status) {
+            Collection<StoreStatusCode> statusCodes) {
         super(context, OpCode.STORE_RESPONSE, contact, messageId, Version.ZERO);
 
-        this.status = status;
+        this.statusCodes = statusCodes;
     }
 
     public StoreResponseImpl(Context context, SocketAddress src, 
             MessageID messageId, Version msgVersion, MessageInputStream in) throws IOException {
         super(context, OpCode.STORE_RESPONSE, src, messageId, msgVersion, in);
         
-        this.status = in.readStoreStatus();
+        this.statusCodes = in.readStoreStatusCodes();
     }
 
+    public Collection<StoreStatusCode> getStoreStatusCodes() {
+        return statusCodes;
+    }
+    
     protected void writeBody(MessageOutputStream out) throws IOException {
-        out.writeStoreStatus(status);
-    }
-
-    public Collection<? extends Entry<KUID, Status>> getStatus() {
-        return status;
+        out.writeStoreStatusCodes(statusCodes);
     }
     
     public String toString() {
-        StringBuilder buffer = new StringBuilder("StoreResponse:\n");
-        int i = 0;
-        for (Entry<KUID, Status> e : status) {
-            buffer.append(i++).append(": valueId=").append(e.getKey())
-                .append(", status=").append(e.getValue()).append("\n");
-        }
-        return buffer.toString();
+        return "StoreResponse:\n" + CollectionUtils.toString(statusCodes);
     }
 }

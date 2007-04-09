@@ -142,14 +142,6 @@ public class DefaultDHTValueEntityPublisher implements DHTValueEntityPublisher {
     
     /*
      * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
-     */
-    public Collection<DHTValueEntity> getValuesToForward() {
-        return getValues();
-    }
-    
-    /*
-     * (non-Javadoc)
      * @see org.limewire.mojito.db.DHTValueEntityPublisher#handleContactChange(org.limewire.mojito.routing.Contact)
      */
     public void changeContact(Contact node) {

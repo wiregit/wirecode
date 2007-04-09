@@ -19,10 +19,12 @@
  
 package org.limewire.mojito.messages;
 
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.StatusCode;
+import org.limewire.mojito.db.DHTValueEntity;
 
 
 /**
@@ -31,62 +33,108 @@ import org.limewire.mojito.KUID;
 public interface StoreResponse extends ResponseMessage {
 
     /**
-     * The Status tells whether or not the remote 
-     * Node was able to store a DHTValue
+     * The remote Node was able to store the DHTValue
      */
-    public static enum Status {
+    public static final StatusCode OK = StatusCode.valueOf(0x01, "OK");
+    
+    /**
+     * The remote Node was NOT able to store the DHTValue. 
+     * Note: This is a very generic error message/code. If you're working
+     * with StoreRespones and StoreStatusCodes respectively then consider 
+     * checking against the OK StatusCode only.
+     */
+    public static final StatusCode ERROR = StatusCode.valueOf(0x02, "ERROR");
+    
+    /**
+     * Returns a Collection of StoreStatusCode(s)
+     */
+    public Collection<StoreStatusCode> getStoreStatusCodes();
+    
+    /**
+     * A StoreStatusCode represents the result of a STORE operation
+     * and contains information about the value as well as whether 
+     * or not it was stored at the remote Node
+     */
+    public static final class StoreStatusCode implements Serializable {
+        
+        private static final long serialVersionUID = -3753019724686307068L;
+
+        /**
+         * The primary key of the DHTValue
+         */
+        private final KUID primaryKey;
         
         /**
-         * The remote Node was NOT able to store the DHTValue
+         * The secondary key of a DHTValue
          */
-        FAILED(0x01),
+        private final KUID secondaryKey;
         
         /**
-         * The remote Node was able to store the DHTValue
+         * The StatusCode (result) of the STORE operation
          */
-        SUCCEEDED(0x02);
+        private final StatusCode statusCode;
         
-        private int status;
-        
-        private Status(int status) {
-            this.status = status;
+        public StoreStatusCode(DHTValueEntity entity, StatusCode statusCode) {
+            this(entity.getKey(), entity.getSecondaryKey(), statusCode);
         }
         
-        public int toByte() {
-            return status;
+        public StoreStatusCode(KUID primaryKey, KUID secondaryKey, StatusCode statusCode) {
+            this.primaryKey = primaryKey;
+            this.secondaryKey = secondaryKey;
+            this.statusCode = statusCode;
+        }
+        
+        /**
+         * Returns true if this StoreStatusCode is for the
+         * given DHTValueEntity
+         */
+        public boolean isFor(DHTValueEntity entity) {
+            return primaryKey.equals(entity.getKey())
+                    && secondaryKey.equals(entity.getSecondaryKey());
+        }
+        
+        /**
+         * Returns the primary key
+         */
+        public KUID getPrimaryKey() {
+            return primaryKey;
+        }
+        
+        /**
+         * Returns the secondary key
+         */
+        public KUID getSecondaryKey() {
+            return secondaryKey;
+        }
+        
+        /**
+         * Returns the StatusCode
+         */
+        public StatusCode getStatusCode() {
+            return statusCode;
+        }
+        
+        public int hashCode() {
+            return primaryKey.hashCode() ^ secondaryKey.hashCode();
+        }
+        
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            } else if (!(o instanceof StoreStatusCode)) {
+                return false;
+            }
+            
+            StoreStatusCode other = (StoreStatusCode)o;
+            return primaryKey.equals(other.primaryKey)
+                    && secondaryKey.equals(other.secondaryKey)
+                    && statusCode.equals(other.statusCode);
         }
         
         public String toString() {
-            return name() + " (" + toByte() + ")";
-        }
-        
-        private static Status[] STATUS;
-        
-        static {
-            Status[] values = values();
-            STATUS = new Status[values.length];
-            for (Status s : values) {
-                int index = s.status % STATUS.length;
-                if (STATUS[index] != null) {
-                    // Check the enums for duplicate states
-                    throw new IllegalStateException("Status collision: index=" + index 
-                            + ", STATUS=" + STATUS[index] + ", s=" + s);
-                }
-                STATUS[index] = s;
-            }
-        }
-        
-        public static Status valueOf(int status) throws MessageFormatException {
-            Status s = STATUS[status % STATUS.length];
-            if (s != null && s.status == status) {
-                return s;
-            }
-            throw new MessageFormatException("Unknown StoreStatus: " + status);
+            return "PrimaryKey=" + primaryKey 
+                        + ", secondaryKey=" + secondaryKey 
+                        + ", statusCode=" + statusCode;
         }
     }
-    
-    /**
-     * Returns a Collection of KUID-Status Tuples.
-     */
-    public Collection<? extends Entry<KUID, Status>> getStatus();
 }

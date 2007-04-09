@@ -23,20 +23,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
-import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.messages.RequestMessage;
 import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.statistics.NetworkStatisticContainer;
-import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 
 
@@ -84,39 +81,19 @@ public class StoreRequestHandler extends AbstractRequestHandler {
         
         Collection<? extends DHTValueEntity> values = request.getDHTValues();
         
-        List<Entry<KUID,Status>> status 
-            = new ArrayList<Entry<KUID,Status>>(values.size());
+        List<StoreStatusCode> status 
+            = new ArrayList<StoreStatusCode>(values.size());
         
         Database database = context.getDatabase();
         
-        for (DHTValueEntity value : values) {
-            KUID valueId = value.getKey();
+        for (DHTValueEntity entity : values) {
             
-            // under the assumption that the requester sent us a lookup before
-            // check if we are part of the closest alive nodes to this value
-            /*int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-            List<Contact> nodes = context.getRouteTable().select(valueId, k, false);
-            
-            if (!nodes.contains(context.getLocalNode())) {
-                //try getting only nodes that have never failed, i.e. a larger key-space
-                nodes = context.getRouteTable().select(valueId, k, true);
-                if (!nodes.contains(context.getLocalNode())) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("We are not nearby to " + valueId 
-                                + ". The value will expire faster!");
-                    }
-                    
-                    context.getDatabaseStats().NOT_MEMBER_OF_CLOSEST_SET.incrementStat();
-                    value.setNearby(false);
-                }
-            }*/
-            
-            if (database.store(value)) {
+            if (database.store(entity)) {
                 networkStats.STORE_REQUESTS_OK.incrementStat();
-                status.add(new EntryImpl<KUID,StoreResponse.Status>(valueId, Status.SUCCEEDED));
+                status.add(new StoreStatusCode(entity, StoreResponse.OK));
             } else {
                 networkStats.STORE_REQUESTS_FAILURE.incrementStat();
-                status.add(new EntryImpl<KUID,StoreResponse.Status>(valueId, Status.FAILED));
+                status.add(new StoreStatusCode(entity, StoreResponse.ERROR));
             }
         }
         

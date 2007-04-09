@@ -139,35 +139,6 @@ public class AltLocPublisher implements DHTValueEntityPublisher {
         
         return publish;
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValueEntityPublisher#getValuesToForward()
-     */
-    public Collection<DHTValueEntity> getValuesToForward() {
-        if (!DHTSettings.PUBLISH_ALT_LOCS.getValue()) {
-            return Collections.emptySet();
-        }
-        
-        FileManager fileManager = RouterService.getFileManager();
-        List<DHTValueEntity> forward = new ArrayList<DHTValueEntity>();
-        synchronized (values) {
-            Collection<DHTValueEntity> entities = getValues();
-            for (DHTValueEntity entity : entities) {
-                KUID primaryKey = entity.getKey();
-                URN urn = KUIDUtils.toURN(primaryKey);
-                
-                // For each URN check if the FileDesc still exists
-                FileDesc fd = fileManager.getFileDescForUrn(urn);
-                
-                // And forward only if it still exists and is rare
-                if (fd != null && isRareFile(fd)) {
-                    forward.add(entity);
-                }
-            }
-        }
-        return forward;
-    }
 
     public void changeContact(Contact node) {
         synchronized (values) {

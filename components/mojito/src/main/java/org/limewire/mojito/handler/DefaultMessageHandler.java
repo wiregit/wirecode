@@ -211,32 +211,21 @@ public class DefaultMessageHandler {
         
         List<DHTValueEntity> valuesToForward = new ArrayList<DHTValueEntity>();
         
-        Collection<DHTValueEntity> entities = context
-                .getDHTValueEntityPublisher().getValuesToForward();
-        for (DHTValueEntity entity : entities) {
-            Operation op = getOperation(node, existing, entity.getKey());
-            if (op.equals(Operation.FORWARD)) {
-                databaseStats.STORE_FORWARD_COUNT.incrementStat();
-                valuesToForward.add(entity);
-            }
-        }
-        
         Database database = context.getDatabase();
         synchronized(database) {
-            for(KUID valueId : database.keySet()) {
+            for(KUID primaryKey : database.keySet()) {
                 
-                Operation op = getOperation(node, existing, valueId);
+                Operation op = getOperation(node, existing, primaryKey);
                 
                 if (op.equals(Operation.FORWARD)) {
-                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     valuesToForward.addAll(bag.values());
                     databaseStats.STORE_FORWARD_COUNT.incrementStat();
                     
                 } else if (op.equals(Operation.DELETE)
                         && DatabaseSettings.DELETE_VALUE_IF_FURTHEST_NODE.getValue()) {
-                    Map<KUID, DHTValueEntity> bag = database.get(valueId);
+                    Map<KUID, DHTValueEntity> bag = database.get(primaryKey);
                     for (DHTValueEntity entity : bag.values()) {
-                        assert (!entity.isLocalValue());
                         //System.out.println("REMOVING: " + entity + "\n");
                         database.remove(entity.getKey(), entity.getSecondaryKey());
                     }

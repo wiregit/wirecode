@@ -31,9 +31,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.KUID;
+import org.limewire.mojito.StatusCode;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueFactory;
@@ -41,13 +41,12 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.MessageID;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.messages.impl.DefaultMessageID;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.QueryKey;
 
 
@@ -287,22 +286,30 @@ public class MessageInputStream extends DataInputStream {
     }
     
     /**
-     * 
+     * Reads a StatusCode from the InputStream
      */
-    @SuppressWarnings("unchecked")
-    public Collection<Entry<KUID, Status>> readStoreStatus() throws IOException {
+    public StatusCode readStatusCode() throws IOException {
+        return StatusCode.valueOf(readUnsignedShort(), readUTF());
+    }
+    
+    /**
+     * Reats and returns a Collection of StoreStatusCode(s)
+     */
+    public Collection<StoreStatusCode> readStoreStatusCodes() throws IOException {
         int size = readUnsignedByte();
         if (size == 0) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         
-        Entry<KUID, Status>[] entries = new Entry[size];
-        for (int i = 0; i < entries.length; i++) {
-            KUID valueId = readKUID();
-            Status status = Status.valueOf( readUnsignedByte() );
-            entries[i] = new EntryImpl<KUID, Status>(valueId, status);
+        StoreStatusCode[] status = new StoreStatusCode[size];
+        for (int i = 0; i < size; i++) {
+            KUID primaryKey = readKUID();
+            KUID secondaryKey = readKUID();
+            StatusCode statusCode = readStatusCode();
+            status[i] = new StoreStatusCode(primaryKey, secondaryKey, statusCode);
         }
-        return Arrays.asList(entries);
+        
+        return Arrays.asList(status);
     }
     
     /**

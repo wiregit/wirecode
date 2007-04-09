@@ -22,14 +22,13 @@ package org.limewire.mojito.messages;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.messages.impl.DefaultMessageFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.security.SecurityToken;
@@ -112,7 +111,7 @@ public class MessageHelper {
     }
 
     public StoreResponse createStoreResponse(RequestMessage request, 
-            Collection<? extends Entry<KUID, Status>> status) {
+            Collection<StoreStatusCode> status) {
         
         return factory.createStoreResponse(getLocalNode(), request.getContact(), 
                 request.getMessageID(), status);

@@ -76,14 +76,6 @@ public class PushProxiesPublisher implements DHTValueEntityPublisher {
         return Collections.emptySet();
     }
 
-    public Collection<DHTValueEntity> getValuesToForward() {
-        if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
-            return Collections.emptySet();
-        }
-        
-        return getValues();
-    }
-
     public Collection<DHTValueEntity> getValuesToPublish() {
         if (!DHTSettings.PUBLISH_PUSH_PROXIES.getValue()) {
             return Collections.emptySet();

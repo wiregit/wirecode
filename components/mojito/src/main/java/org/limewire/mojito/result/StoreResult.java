@@ -20,10 +20,10 @@
 package org.limewire.mojito.result;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 import org.limewire.mojito.db.DHTValueEntity;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 
 
@@ -32,19 +32,15 @@ import org.limewire.mojito.routing.Contact;
  */
 public class StoreResult implements Result {
     
-    private final Collection<? extends Contact> nodes;
+    private final Map<Contact, Collection<StoreStatusCode>> nodes;
     
     private final Collection<? extends DHTValueEntity> values;
 
-    private final Collection<? extends DHTValueEntity> failed;
-    
-    public StoreResult(Collection<? extends Contact> nodes, 
-            Collection<? extends DHTValueEntity> values, 
-            Collection<? extends DHTValueEntity> failed) {
+    public StoreResult(Map<Contact, Collection<StoreStatusCode>> nodes, 
+            Collection<? extends DHTValueEntity> values) {
         
         this.nodes = nodes;
         this.values = values;
-        this.failed = failed;
     }
     
     /**
@@ -52,7 +48,7 @@ public class StoreResult implements Result {
      * stored
      */
     public Collection<? extends Contact> getNodes() {
-        return nodes;
+        return nodes.keySet();
     }
     
     /**
@@ -62,45 +58,18 @@ public class StoreResult implements Result {
         return values;
     }
     
-    /**
-     * Returns a Collection of DHTValue(s) that couldn't
-     * be stored on the DHT
-     */
-    public Collection<? extends DHTValueEntity> getFailed() {
-        return failed;
-    }
-    
-    /**
-     * Returns a Collection of DHTValue(s) that were successfully 
-     * stored on the DHT
-     */
-    public Collection<DHTValueEntity> getSucceeded() {
-        Set<DHTValueEntity> succeeded = new HashSet<DHTValueEntity>(getValues());
-        succeeded.removeAll(getFailed());
-        return succeeded;
-    }
-    
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         
-        buffer.append("SUCEEDED").append("\n");
+        buffer.append("VALUES").append("\n");
         int i = 0;
-        for (DHTValueEntity value : getSucceeded()) {
+        for (DHTValueEntity value : getValues()) {
             buffer.append("  ").append(i++).append(": ").append(value).append("\n");
-        }
-        
-        Collection<? extends DHTValueEntity> failed = getFailed();
-        if (!failed.isEmpty()) {
-            buffer.append("FAILED:").append("\n");
-            i = 0;
-            for (DHTValueEntity value : failed) {
-                buffer.append("  ").append(i++).append(": ").append(value).append("\n");
-            }
         }
         
         buffer.append("NODES:").append("\n");
         i = 0;
-        for (Contact node : nodes) {
+        for (Contact node : getNodes()) {
             buffer.append("  ").append(i++).append(": ").append(node).append("\n");
         }
         return buffer.toString();

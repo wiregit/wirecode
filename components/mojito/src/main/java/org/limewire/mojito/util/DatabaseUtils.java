@@ -43,11 +43,6 @@ public class DatabaseUtils {
      * Returns the expiration time of the given DHTValue
      */
     public static long getExpirationTime(RouteTable routeTable, DHTValueEntity entity) {
-        // Local DHTValues don't expire
-        if (entity.isLocalValue()) {
-            return Long.MAX_VALUE;
-        }
-        
         KUID primaryKey = entity.getKey();
         
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();

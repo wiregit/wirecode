@@ -101,10 +101,7 @@ public class DHTValueTest extends MojitoTestCase {
             StoreResult result = ((Context)first).store(value).get();
             
             // Post-Condition
-            assertEquals(0, result.getFailed().size());
-            assertEquals(result.getValues().size(), result.getSucceeded().size());
-            
-            assertSame(value, result.getSucceeded().iterator().next());
+            assertSame(value, result.getValues().iterator().next());
             assertEquals(k, value.getLocations().size());
             assertGreaterThanOrEquals(time, value.getPublishTime());
             assertFalse(DatabaseUtils.isPublishingRequired(value));

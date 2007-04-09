@@ -286,7 +286,9 @@ public class DHTValueEntityImpl implements DHTValueEntity {
         buffer.append("Primary Key: ").append(getKey()).append("\n");
         buffer.append("Secondary Key: ").append(getSecondaryKey()).append("\n");
         buffer.append("Local: ").append(isLocalValue()).append("\n");
-        buffer.append("Locations: ").append(getLocations()).append("\n");
+        buffer.append("Locations[").append(getLocations().size()).append("]: ")
+            .append(getLocations()).append("\n");
+        
         buffer.append("Creation time: ").append(getCreationTime()).append("\n");
         buffer.append("Publish time: ").append(getPublishTime()).append("\n");
         buffer.append("---\n").append(getValue()).append("\n");

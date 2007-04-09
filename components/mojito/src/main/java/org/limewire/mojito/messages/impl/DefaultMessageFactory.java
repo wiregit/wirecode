@@ -25,7 +25,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
-import java.util.Map.Entry;
 
 import org.limewire.io.ByteBufferInputStream;
 import org.limewire.io.ByteBufferOutputStream;
@@ -51,7 +50,7 @@ import org.limewire.mojito.messages.StoreRequest;
 import org.limewire.mojito.messages.StoreResponse;
 import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.mojito.messages.StatsRequest.StatisticType;
-import org.limewire.mojito.messages.StoreResponse.Status;
+import org.limewire.mojito.messages.StoreResponse.StoreStatusCode;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.security.SecurityToken;
@@ -162,7 +161,8 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public FindValueResponse createFindValueResponse(Contact contact, Contact dst, 
-            MessageID messageId, float requestLoad, Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
+            MessageID messageId, float requestLoad, 
+            Collection<? extends DHTValueEntity> entities, Collection<KUID> secondaryKeys) {
         return new FindValueResponseImpl(context, contact, messageId, requestLoad, entities, secondaryKeys);
     }
 
@@ -190,7 +190,7 @@ public class DefaultMessageFactory implements MessageFactory {
     }
 
     public StoreResponse createStoreResponse(Contact contact, Contact dst, 
-            MessageID messageId, Collection<? extends Entry<KUID, Status>> status) {
+            MessageID messageId, Collection<StoreStatusCode> status) {
         return new StoreResponseImpl(context, contact, messageId, status);
     }
 }

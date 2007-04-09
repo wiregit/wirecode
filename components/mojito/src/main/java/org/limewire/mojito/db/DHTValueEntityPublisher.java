@@ -53,11 +53,6 @@ public interface DHTValueEntityPublisher {
     public Collection<DHTValueEntity> getValuesToPublish();
     
     /**
-     * Returns all DHTValueEntities that can be forwared
-     */
-    public Collection<DHTValueEntity> getValuesToForward();
-    
-    /**
      * A callback method that notifies the Publisher that the
      * Node ID of the local Node changed. Use it to rebuild
      * your underlying data structure if necessary!
