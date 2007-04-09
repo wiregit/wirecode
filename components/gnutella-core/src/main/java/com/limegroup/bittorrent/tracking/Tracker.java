@@ -67,11 +67,19 @@ class Tracker {
 	private final ManagedTorrent torrent;
 	
 	private int failures;
+    
+    /** The key, as required by some trackers */
+    private final String key;
 	
 	public Tracker(URI uri, TorrentContext context, ManagedTorrent torrent) {
 		this.uri = uri;
 		this.context = context;
 		this.torrent = torrent;
+        String k = Integer.toHexString((int)(Math.random() * Integer.MAX_VALUE));
+        while(k.length() < 8) // make sure length is 8 bytes
+            k = k+"0";
+        key = k;
+            
 	}
 
 	/**
@@ -134,7 +142,7 @@ class Tracker {
 							Constants.ASCII_ENCODING);
 			addGetField(buf, "peer_id", peerId);
 
-			addGetField(buf, "key", peerId + infoHash);
+			addGetField(buf, "key", key);
 
 		} catch (UnsupportedEncodingException uee) {
 			ErrorService.error(uee);
