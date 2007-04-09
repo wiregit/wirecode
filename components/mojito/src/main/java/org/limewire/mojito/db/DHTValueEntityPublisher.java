@@ -33,17 +33,26 @@ import org.limewire.mojito.routing.Contact;
  * interface for StoreResults as well. The DHTValueManager checks 
  * if the publisher implements the DHTFutureListener and registers
  * it with the DHTValueManager's internal DHTFuture if it does.
+ * 
+ * TODO: Change the interface so that we don't have to deal with 
+ * DHTValueEntities.
  */
 public interface DHTValueEntityPublisher {
     
     /**
      * Returns a DHTValueEntity for the given KUID or null if
      * no such DHTValueEntity exists
+     * 
+     * TODO: I think we don't need this method anymore but I'm leaving
+     * it for now
      */
     public Collection<DHTValueEntity> get(KUID primaryKey);
     
     /**
      * Returns all DHTValueEntities
+     * 
+     * TODO: I think we don't need this method anymore but I'm leaving
+     * it for now
      */
     public Collection<DHTValueEntity> getValues();
     
