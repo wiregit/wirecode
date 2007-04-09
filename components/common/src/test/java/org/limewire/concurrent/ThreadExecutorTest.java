@@ -1,6 +1,9 @@
 package org.limewire.concurrent;
 
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.util.BaseTestCase;
 
@@ -20,22 +23,21 @@ public class ThreadExecutorTest extends BaseTestCase {
     public void testThreadStarts() throws Exception {
         Runner r1 = new Runner();
         ThreadExecutor.startThread(r1, "Name");
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertEquals("Name", r1.getName());
     }
     
     public void testReuseThreads() throws Exception {
         Runner r1 = new Runner();
-        Runner r2 = new Runner();
         ThreadExecutor.startThread(r1, "Name1");
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertEquals("Name1", r1.getName());
+        Thread.sleep(100); // let the thread rename happen.
         assertEquals("IdleThread", r1.getThread().getName());
+        
+        Runner r2 = new Runner();
         ThreadExecutor.startThread(r2, "Name2");
-        Thread.sleep(100);
-        assertTrue(r2.isRan());
+        assertTrue(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertSame(r1.getThread(), r2.getThread());
         assertEquals("Name2", r2.getName());
     }
@@ -43,9 +45,9 @@ public class ThreadExecutorTest extends BaseTestCase {
     public void testThreadLingers() throws Exception {
         Runner r1 = new Runner();
         ThreadExecutor.startThread(r1, "Name");
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         Thread thread = r1.getThread();
+        Thread.sleep(100); // let the thread rename happen.
         assertEquals("IdleThread", r1.getThread().getName());
         assertTrue(thread.isAlive());
         Thread.sleep(3500);
@@ -56,52 +58,64 @@ public class ThreadExecutorTest extends BaseTestCase {
     }
     
     public void testManyThreadsAtOnce() throws Exception {
-        Runner r1 = new Runner(5000);
-        Runner r2 = new Runner(5000);
+        CountDownLatch runLatch = new CountDownLatch(1);
+        Runner r1 = new Runner(runLatch);
+        Runner r2 = new Runner(runLatch);
         ThreadExecutor.startThread(r1, "Name1");
         ThreadExecutor.startThread(r2, "Name2");
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
-        assertTrue(r2.isRan());
+        assertTrue(r1.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+        assertTrue(r2.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+        assertFalse(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+        assertFalse(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertNotSame(r1.getThread(), r2.getThread());
         assertEquals("Name1", r1.getName());        
         assertEquals("Name2", r2.getName());
+        runLatch.countDown();
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+        assertTrue(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
     }
     
     public void testDaemonThread() throws Exception {
         Runner r1 = new Runner();
         ThreadExecutor.startThread(r1, "Name");
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertTrue(r1.getThread().isDaemon());
     }    
     
     private static class Runner implements Runnable {
-        private boolean ran;
-        private Thread thread;
-        private String name;
-        private long waitLength = -1;
+        private volatile Thread thread;
+        private volatile String name;
+        private final CountDownLatch startedLatch = new CountDownLatch(1);
+        private final CountDownLatch ranLatch = new CountDownLatch(1);
+        private final CountDownLatch runLatch;
     
-        public Runner() {            
+        public Runner() {
+            runLatch = null;
         }
         
-        public Runner(long waitLength) {
-            this.waitLength = waitLength;
+        public Runner(CountDownLatch runLatch) {
+            this.runLatch = runLatch;
         }
         
         public void run() {
-            ran = true;
             thread = Thread.currentThread();
             name = thread.getName();
-            if(waitLength != -1) {
-                try {
-                    Thread.sleep(waitLength);
-                } catch(InterruptedException ix) {}
+            startedLatch.countDown();
+            if(runLatch != null) {
+                try {   
+                    if(!runLatch.await(10, TimeUnit.SECONDS))
+                        fail("never got notified!");
+                } catch(InterruptedException ie) {}
             }
+            ranLatch.countDown();
+        }
+        
+        public CountDownLatch getRanLatch() {
+            return ranLatch;
         }
 
-        public boolean isRan() {
-            return ran;
+        public CountDownLatch getStartedLatch() {
+            return startedLatch;
         }
 
         public Thread getThread() {

@@ -2,6 +2,7 @@ package org.limewire.concurrent;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -24,8 +25,7 @@ public class ExecutorsHelperTest extends BaseTestCase {
         Runner r1 = new Runner();
         ExecutorService service = ExecutorsHelper.newProcessingQueue("Sam");
         service.execute(r1);
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertEquals("Sam", r1.getName());
     }
     
@@ -34,13 +34,12 @@ public class ExecutorsHelperTest extends BaseTestCase {
         Runner r2 = new Runner();
         ExecutorService service = ExecutorsHelper.newProcessingQueue("Sammy");
         service.execute(r1);
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertEquals("Sammy", r1.getName());
+        Thread.sleep(100); // let any potential renaming happen.
         assertEquals("Sammy", r1.getThread().getName());
         service.execute(r2);
-        Thread.sleep(100);
-        assertTrue(r2.isRan());
+        assertTrue(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertSame(r1.getThread(), r2.getThread());
         assertEquals("Sammy", r2.getName());
     }
@@ -49,8 +48,7 @@ public class ExecutorsHelperTest extends BaseTestCase {
         Runner r1 = new Runner();
         ExecutorService service = ExecutorsHelper.newProcessingQueue("SammyB");
         service.execute(r1);
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         Thread thread = r1.getThread();
         assertEquals("SammyB", r1.getThread().getName());
         assertTrue(thread.isAlive());
@@ -62,17 +60,18 @@ public class ExecutorsHelperTest extends BaseTestCase {
     }
     
     public void testProcessingQueueGoesSequentially() throws Exception {
-        Runner r1 = new Runner(2000);
-        Runner r2 = new Runner(2000);
+        CountDownLatch runLatch = new CountDownLatch(1);
+        Runner r1 = new Runner(runLatch);
+        Runner r2 = new Runner();
         ExecutorService service = ExecutorsHelper.newProcessingQueue("SammyB");
         service.execute(r1);
         service.execute(r2);
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
-        assertFalse(r2.isRan());
-        r1.waitForDone();
-        Thread.sleep(100);
-        assertTrue(r2.isRan());
+        assertTrue(r1.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+        assertFalse(r2.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+        assertFalse(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+        runLatch.countDown();
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+        assertTrue(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertSame(r1.getThread(), r2.getThread());
         assertEquals("SammyB", r1.getName());        
         assertEquals("SammyB", r2.getName());
@@ -82,8 +81,7 @@ public class ExecutorsHelperTest extends BaseTestCase {
         Runner r1 = new Runner();
         ExecutorService service = ExecutorsHelper.newProcessingQueue("B");
         service.execute(r1);
-        Thread.sleep(100);
-        assertTrue(r1.isRan());
+        assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
         assertTrue(r1.getThread().isDaemon());
     }
     
@@ -93,20 +91,21 @@ public class ExecutorsHelperTest extends BaseTestCase {
             ErrorCallbackStub testCallback = new ErrorCallbackStub();
             ErrorService.setErrorCallback(testCallback);
             assertEquals(0, testCallback.getExceptionCount());
-            Runner r1 = new Runner(1000, true);
-            Runner r2 = new Runner(1000);
+            CountDownLatch runLatch = new CountDownLatch(1);
+            Runner r1 = new Runner(runLatch, true);
+            Runner r2 = new Runner();
             ExecutorService service = ExecutorsHelper.newProcessingQueue("Exceptionary");
             service.execute(r1);
             service.execute(r2);
-            Thread.sleep(100);
-            assertTrue(r1.isRan());
-            assertFalse(r2.isRan());
-            r1.waitForDone();
-            Thread.sleep(100);
+            assertTrue(r1.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+            assertFalse(r2.getStartedLatch().await(100, TimeUnit.MILLISECONDS));
+            assertFalse(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+            assertEquals(0, testCallback.getExceptionCount());
+            runLatch.countDown();
+            assertTrue(r1.getRanLatch().await(100, TimeUnit.MILLISECONDS));
+            Thread.sleep(100); // let the exception propogate.
             assertEquals(1, testCallback.getExceptionCount());
-            Thread.sleep(100);
-            assertTrue(r2.isRan());
-            r2.waitForDone();
+            assertTrue(r2.getRanLatch().await(100, TimeUnit.MILLISECONDS));
             assertEquals(1, testCallback.getExceptionCount());
         } finally {
             ErrorService.setErrorCallback(oldCallback);
@@ -115,47 +114,51 @@ public class ExecutorsHelperTest extends BaseTestCase {
     
 
     private static class Runner implements Runnable {
-        private volatile boolean ran;
         private volatile Thread thread;
         private volatile String name;
-        private volatile long waitLength;
+        private final CountDownLatch startedLatch = new CountDownLatch(1);
+        private final CountDownLatch ranLatch = new CountDownLatch(1);
+        private final CountDownLatch runLatch;
         private final boolean throwException;
-        private final CountDownLatch latch;
     
         public Runner() {
-            this(-1);
+            this(null);
         }
         
-        public Runner(long waitLength) {
-            this(waitLength, false);
+        public Runner(CountDownLatch runLatch) {
+            this(runLatch, false);
         }
         
         public Runner(boolean throwException) {
-            this(-1, throwException);
+            this(null, throwException);
         }
         
-        public Runner(long waitLength, boolean throwException) {
+        public Runner(CountDownLatch runLatch, boolean throwException) {
             this.throwException = throwException;
-            this.waitLength = waitLength;
-            latch = new CountDownLatch(1);
+            this.runLatch = runLatch;
         }
         
         public void run() {
-            ran = true;
             thread = Thread.currentThread();
             name = thread.getName();
-            if(waitLength != -1) {
-                try {
-                    Thread.sleep(waitLength);
-                } catch(InterruptedException ix) {}
+            startedLatch.countDown();
+            if(runLatch != null) {
+                try {   
+                    if(!runLatch.await(10, TimeUnit.SECONDS))
+                        fail("never got notified!");
+                } catch(InterruptedException ie) {}
             }
-           latch.countDown();
+            ranLatch.countDown();
            if(throwException)
                throw new RuntimeException("Abandon Hope.");
         }
+        
+        public CountDownLatch getRanLatch() {
+            return ranLatch;
+        }
 
-        public boolean isRan() {
-            return ran;
+        public CountDownLatch getStartedLatch() {
+            return startedLatch;
         }
 
         public Thread getThread() {
@@ -164,10 +167,6 @@ public class ExecutorsHelperTest extends BaseTestCase {
         
         public String getName() {
             return name;
-        }
-        
-        public void waitForDone() throws Exception {
-            latch.await();
         }
     }    
     
