@@ -25,6 +25,13 @@ public final class LimeWireUtils {
 	 * Constant for the current version of LimeWire.
 	 */
 	private static final String LIMEWIRE_VERSION = "@version@";
+    
+    /**
+     * The current revision of the BitTorrent protocol implementation.
+     * For an up-to-date mapping to LimeWire versions, check out
+     * http://www.limewire.org/wiki/index.php?title=BitTorrentRevision
+     */
+	public static final String BT_REVISION = "0001";
 
     /**
      * Variable used for testing only, it's value is set to whatever the test

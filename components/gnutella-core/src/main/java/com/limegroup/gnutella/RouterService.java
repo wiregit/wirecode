@@ -79,6 +79,7 @@ import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.uploader.NormalUploadState;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.MetaFileManager;
@@ -338,11 +339,12 @@ public class RouterService {
 	    MYGUID=myguid;
 	    
 	    byte []mybtguid = new byte[20];
-	    mybtguid[0] = 0x4C; // L
-	    mybtguid[1] = 0x49; // I
-	    mybtguid[2] = 0x4D; // M
-	    mybtguid[3] = 0x45; // E
-	    System.arraycopy(MYGUID,0,mybtguid,4,16);
+	    mybtguid[0] = '-'; 
+	    mybtguid[1] = 0x4C; // L
+	    mybtguid[2] = 0x49; // I
+	    System.arraycopy(LimeWireUtils.BT_REVISION.getBytes(),0, mybtguid,3, 4);
+        mybtguid[7] = '-';
+	    System.arraycopy(MYGUID,0,mybtguid,8,12);
 	    MYBTGUID = mybtguid;
 	}
 
