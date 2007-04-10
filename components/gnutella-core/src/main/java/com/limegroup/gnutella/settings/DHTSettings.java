@@ -16,6 +16,15 @@ public class DHTSettings extends LimeProps {
 
     private DHTSettings() {}
     
+    // How to reset the RouteTable/DHT
+    //  1) Set disable_dht_network to true
+    //  2) SIMPP out the message and wait a bit
+    //  3) Increment routetable_version by one
+    //  4) SIMPP out the message and wait a bit
+    //  5) Re-bootstrap the DHT
+    // Do not try to SIMPP out both values in one
+    // message as there are race conditions.
+    
     /**
      * Setting for wether or not the DHT should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
