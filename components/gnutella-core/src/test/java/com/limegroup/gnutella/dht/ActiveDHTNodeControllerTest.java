@@ -117,15 +117,20 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     public void testResetRouteTable() {
         DHTSettings.PERSIST_DHT.setValue(true);
         
+        File dhtFile = new File(CommonUtils.getUserSettingsDir(), "active.mojito");
+        dhtFile.delete();
+        
         ActiveDHTNodeController controller = new ActiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         
         Contact localNode1 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
         controller.stop();
         
         controller = new ActiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         Contact localNode2 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
         controller.stop();
         
         assertEquals(localNode1.getNodeID(), localNode2.getNodeID());
@@ -134,6 +139,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         controller = new ActiveDHTNodeController(
                 Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
         Contact localNode3 = controller.getMojitoDHT().getLocalNode();
+        controller.start();
         controller.stop();
         
         assertNotEquals(localNode1.getNodeID(), localNode3.getNodeID());
