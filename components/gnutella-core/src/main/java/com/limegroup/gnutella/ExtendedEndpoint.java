@@ -192,6 +192,7 @@ public class ExtendedEndpoint extends Endpoint {
     }
     
     /** A getter for supporting TLS. */
+    @Override
     public boolean isTLSCapable() {
         return tlsCapable;
     }
@@ -257,6 +258,7 @@ public class ExtendedEndpoint extends Endpoint {
     /**
      * Determines if this is an ExtendedEndpoint for a UDP Host Cache.
      */
+    @Override
     public boolean isUDPHostCache() {
         return udpHostCacheFailures != -1;
     }

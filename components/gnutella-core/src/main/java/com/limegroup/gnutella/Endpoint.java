@@ -385,10 +385,13 @@ public class Endpoint implements Cloneable, IpPort, java.io.Serializable {
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
     
-    /**
-     * Determines if this is a UDP host cache.
-     */
+    /** Determines if this is a UDP host cache. */
     public boolean isUDPHostCache() {
+        return false;
+    }
+    
+    /** Determines if this endpoint supports TLS. */
+    public boolean isTLSCapable() {
         return false;
     }
 }

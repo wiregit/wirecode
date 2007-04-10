@@ -81,6 +81,7 @@ import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
@@ -302,6 +303,19 @@ public class ManagedConnection extends Connection
      */
     public ManagedConnection(String host, int port) {
         super(host, port);
+        _manager = RouterService.getConnectionManager();
+    }
+    
+    /**
+     * Creates a new outgoing connection to the specified host on the
+     * specified port, using the specified kind of ConnectType.
+     *
+     * @param host the address of the host we're connecting to
+     * @param port the port the host is listening on
+     * @param type the type of outgoing connection we want to make (TLS, PLAIN, etc)
+     */
+    public ManagedConnection(String host, int port, ConnectType type) {
+        super(host, port, type);
         _manager = RouterService.getConnectionManager();
     }
       

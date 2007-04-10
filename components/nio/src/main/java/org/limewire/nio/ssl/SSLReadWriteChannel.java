@@ -62,6 +62,12 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     /** True only after a single read has been performed. */
     private AtomicBoolean firstReadDone = new AtomicBoolean(false);
     
+    /* Statistic gathering variables. */
+    private volatile long readConsumed;
+    private volatile long readProduced;
+    private volatile long writeConsumed;
+    private volatile long writeProduced;
+    
     /**
      * Whether or not this has been shutdown.
      * Shutting down must be atomic wrt initializing, so that
@@ -172,6 +178,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
 
             // Try unwrapping directly into dst first.
             SSLEngineResult result = engine.unwrap(readIncoming, dst);
+            readProduced += result.bytesProduced();
+            readConsumed += result.bytesConsumed();
             transferred += result.bytesProduced();
             SSLEngineResult.Status status = result.getStatus();
             
@@ -187,6 +195,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                     }
                 }
                 result = engine.unwrap(readIncoming, readOutgoing);
+                readProduced += result.bytesProduced();
+                readConsumed += result.bytesConsumed();
                 status = result.getStatus();
                 if(status == Status.BUFFER_OVERFLOW)
                     throw new IllegalStateException("not enough room in fallback TLS buffer!");
@@ -304,6 +314,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         do {
             boolean wasEmpty = writeOutgoing.position() == 0;
             SSLEngineResult result = engine.wrap(src, writeOutgoing);
+            writeProduced += result.bytesProduced();
+            writeConsumed += result.bytesConsumed();
             if(LOG.isDebugEnabled())
                 LOG.debug("Wrap result: " + result);
             consumed += result.bytesConsumed();
@@ -453,5 +465,24 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         if(source != null)
             source.interestWrite(this, true);
     }
-
+    
+    /** Returns the total number of bytes that this has produced from unwrapping reads. */
+    long getReadBytesProduced() {
+        return readProduced;
+    }
+    
+    /** Returns the total number of bytes that this has consumed while unwrapping reads. */
+    long getReadBytesConsumed() {
+        return readConsumed;
+    }
+    
+    /** Returns the total number of bytes that this has produced from wrapping writes. */
+    long getWrittenBytesProduced() {
+        return writeProduced;
+    }
+    
+    /** Returns the total number of bytes that this has consumed while wrapping writes. */
+    long getWrittenBytesConsumed() {
+        return writeConsumed;
+    }
 }

@@ -43,6 +43,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.EventDispatcher;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating
@@ -2271,7 +2272,8 @@ EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>{
             }
 
             this.endpoint = endpoint;
-            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort());
+            ConnectType type = endpoint.isTLSCapable() ? ConnectType.TLS : ConnectType.PLAIN;
+            connection = new ManagedConnection(endpoint.getAddress(), endpoint.getPort(), type);
             connection.setLocalePreferencing(_pref);
             doConnectionCheck();
             _connectionAttempts++;

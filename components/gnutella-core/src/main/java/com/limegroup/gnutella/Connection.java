@@ -25,6 +25,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
 import org.limewire.io.UncompressingInputStream;
 import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.ssl.SSLBandwidthTracker;
 import org.limewire.nio.ssl.SSLUtils;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
@@ -49,6 +50,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.CompressionStat;
 import com.limegroup.gnutella.statistics.ConnectionStat;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.Sockets.ConnectType;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -116,13 +118,16 @@ public class Connection implements IpPort {
      * synchronization reasons, it is important that this only be modified by
      * the send(m) and receive() methods.
      */
-    private final boolean _tls;
+    private final ConnectType _connectType;
     private final String _host;
     private int _port;
     protected volatile Socket _socket;
     private volatile InputStream _in;
     private volatile OutputStream _out;
     private final boolean OUTGOING;
+    
+    /** The bandwidth tracker managing the stats for the SSL connection. */
+    private volatile SSLBandwidthTracker _sslTracker;
     
     /**
      * The Inflater to use for inflating read streams, initialized
@@ -243,7 +248,7 @@ public class Connection implements IpPort {
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public Connection(String host, int port) {
-        this(host, port, false);
+        this(host, port, ConnectType.PLAIN);
     }
     
     /**
@@ -252,12 +257,12 @@ public class Connection implements IpPort {
      *
      * @param host the name of the host to connect to
      * @param port the port of the remote host
-     * @param tls if the outgoing connection should be TLS-encoded
+     * @param connectType the type of connection that should be made
      * @throws <tt>NullPointerException</tt> if any of the arguments are
      *  <tt>null</tt>
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Connection(String host, int port, boolean tls) {
+    public Connection(String host, int port, ConnectType connectType) {
 		if(host == null)
 			throw new NullPointerException("null host");
 		if(!NetworkUtils.isValidPort(port))
@@ -266,7 +271,7 @@ public class Connection implements IpPort {
         _host = host;
         _port = port;
         OUTGOING = true;
-        _tls = tls;
+        _connectType = connectType;
 		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -293,7 +298,8 @@ public class Connection implements IpPort {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
-        _tls = SSLUtils.isTLSEnabled(socket);
+        _connectType = SSLUtils.isTLSEnabled(socket) ? ConnectType.TLS : ConnectType.PLAIN;
+        _sslTracker = SSLUtils.getSSLBandwidthTracker(socket);
 		ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -388,8 +394,10 @@ public class Connection implements IpPort {
         if(isOutgoing()) {
             if(observer != null) {
                 _socket = connect(_host, _port, timeout, createAsyncConnectObserver(requestHeaders, responder, observer));
+                _sslTracker = SSLUtils.getSSLBandwidthTracker(_socket);
             } else {
                 _socket = connect(_host, _port, timeout);
+                _sslTracker = SSLUtils.getSSLBandwidthTracker(_socket);
                 preHandshakeInitialize(requestHeaders, responder, observer);
             }
         } else {
@@ -398,11 +406,11 @@ public class Connection implements IpPort {
     }
     
     protected Socket connect(String addr, int port, int timeout) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout);
+        return Sockets.connect(new InetSocketAddress(addr, port), timeout, _connectType);
     }
 
     protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
-        return Sockets.connect(new InetSocketAddress(addr, port), timeout, observer);
+        return Sockets.connect(new InetSocketAddress(addr, port), timeout, observer, _connectType);
     }
 
     /**
@@ -805,11 +813,14 @@ public class Connection implements IpPort {
     
     /**
      * Returns the number of bytes sent on this connection.
-     * If the outgoing stream is compressed, the return value indicates
-     * the compressed number of bytes sent.
+     * If SSL is enabled, this number includes the overhead
+     * of the SSL wrapping.  This value will be reduced if compression
+     * is enabled for sending on this connection.
      */
     public long getBytesSent() {
-        if(isWriteDeflated())
+        if(isSSLEnabled())
+            return _sslTracker.getWrittenBytesProduced();
+        else if(isWriteDeflated())
             return _compressedBytesSent;
         else            
             return _bytesSent;
@@ -817,8 +828,7 @@ public class Connection implements IpPort {
     
     /**
      * Returns the number of uncompressed bytes sent on this connection.
-     * If the outgoing stream is not compressed, this is effectively the same
-     * as calling getBytesSent()
+     * This is equal to the size of the number of messages sent on this connection.
      */
     public long getUncompressedBytesSent() {
         return _bytesSent;
@@ -826,11 +836,14 @@ public class Connection implements IpPort {
     
     /** 
      * Returns the number of bytes received on this connection.
-     * If the incoming stream is compressed, the return value indicates
-     * the number of compressed bytes received.
+     * If SSL is enabled, this number includes the overhead of incoming
+     * SSL wrapped messages.  This value will be reduced if compression
+     * is enabled for receiving on this connection.
      */
     public long getBytesReceived() {
-        if(isReadDeflated())
+        if(isSSLEnabled())
+            return _sslTracker.getReadBytesConsumed();
+        else if(isReadDeflated())
             return _compressedBytesReceived;
         else
             return _bytesReceived;
@@ -838,8 +851,7 @@ public class Connection implements IpPort {
     
     /**
      * Returns the number of uncompressed bytes read on this connection.
-     * If the incoming stream is not compressed, this is effectively the same
-     * as calling getBytesReceived()
+     * This is equal to the size of all messages received through this connection.
      */
     public long getUncompressedBytesReceived() {
         return _bytesReceived;
@@ -852,16 +864,36 @@ public class Connection implements IpPort {
      * then.
      */
     public float getSentSavedFromCompression() {
-        if( !isWriteDeflated() || _bytesSent == 0 ) return 0;
-        return 1-((float)_compressedBytesSent/(float)_bytesSent);
+        if( !isWriteDeflated() || _bytesSent == 0 )
+            return 0;
+        else
+            return 1-((float)_compressedBytesSent/(float)_bytesSent);
     }
     
     /**
      * Returns the percentage saved from having the incoming data compressed.
      */
     public float getReadSavedFromCompression() {
-        if( !isReadDeflated() || _bytesReceived == 0 ) return 0;
-        return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
+        if( !isReadDeflated() || _bytesReceived == 0 )
+            return 0;
+        else
+            return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
+    }
+    
+    /** Returns the percentage lost from outgoing SSL transformations. */
+    public float getSentLostFromSSL() {
+        if( !isSSLEnabled() || _sslTracker == null || _sslTracker.getWrittenBytesConsumed() == 0 )
+            return 0;
+        else
+            return 1-((float)_sslTracker.getWrittenBytesProduced() / (float)_sslTracker.getWrittenBytesConsumed());
+    }
+    
+    /** Returns the percentage lost from incoming SSL transformations. */
+    public float getReadLostFromSSL() {
+        if( !isSSLEnabled() || _sslTracker == null || _sslTracker.getReadBytesProduced() == 0 )
+            return 0;
+        else
+            return 1-((float)_sslTracker.getReadBytesConsumed() / (float)_sslTracker.getReadBytesProduced());
     }
 
    /**
@@ -1251,6 +1283,14 @@ public class Connection implements IpPort {
      */
     public boolean isReadDeflated() {
         return _headersRead.isDeflateEnabled();
+    }
+    
+    /**
+     * Returns true if this connection is using SSL/TLS.
+     * @return
+     */
+    public boolean isSSLEnabled() {
+        return _connectType == ConnectType.TLS;
     }
 
     // inherit doc comment

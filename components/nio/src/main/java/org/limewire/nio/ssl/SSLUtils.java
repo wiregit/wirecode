@@ -85,4 +85,47 @@ public class SSLUtils {
             throw new IllegalArgumentException("cannot wrap non AbstractNBSocket");
         }
     }
+    
+    /** Returns a tracker for the given socket. */
+    public static SSLBandwidthTracker getSSLBandwidthTracker(Socket socket) {
+        if(socket instanceof TLSNIOSocket) {
+           return new SSLChannelTracker(((TLSNIOSocket)socket).getSSLChannel());
+        } else {
+            return EmptyTracker.instance();
+        }
+    }
+    
+    private static class EmptyTracker implements SSLBandwidthTracker {
+        private static final EmptyTracker instance = new EmptyTracker();
+        public static final EmptyTracker instance() { return instance; }
+        private EmptyTracker() {}
+        public long getReadBytesConsumed() { return 0; }
+        public long getReadBytesProduced() { return 0; }
+        public long getWrittenBytesConsumed() { return 0; }
+        public long getWrittenBytesProduced() { return 0; }
+    }
+    
+    private static class SSLChannelTracker implements SSLBandwidthTracker {
+        private final SSLReadWriteChannel channel;
+        
+        SSLChannelTracker(SSLReadWriteChannel channel) {
+            this.channel = channel;
+        }
+
+        public long getReadBytesConsumed() {
+            return channel.getReadBytesConsumed();
+        }
+
+        public long getReadBytesProduced() {
+            return channel.getReadBytesProduced();
+        }
+
+        public long getWrittenBytesConsumed() {
+            return channel.getWrittenBytesConsumed();
+        }
+
+        public long getWrittenBytesProduced() {
+            return channel.getWrittenBytesProduced();
+        }
+    }
 }
