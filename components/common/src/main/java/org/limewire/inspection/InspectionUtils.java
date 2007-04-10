@@ -12,7 +12,26 @@ import org.limewire.inspection.Inspectable.InspectablePrimitive;
 
 
 public class InspectionUtils {
-    
+    /**
+     * 
+     * Inspects an encoded field and returns a String representation of that
+     * field.  The field must
+     * 
+     * a) implement the Inspectable interface, or else
+     * b) be annotated with @InspectablePrimitive, or else
+     * c) be annotated with @InspectableForSize and have a size() method.
+     * 
+     * @param encodedField - name of the field we want to get, starting with
+     * a fully qualified class name, and followed by comma-separated
+     * field names that will help us reach the target field.
+     *
+     * Example:
+     * "com.limegroup.gnutella.RouterService,downloadManager,active"
+     * will return the list of active downloads.
+     *
+     * @return the object pointed to by the last field, or an Exception
+     * object if such was thrown trying to get it.
+     */
     public static String inspectValue(String encodedField) {
         try {
             StringTokenizer t = new StringTokenizer(encodedField, ",");
@@ -29,7 +48,16 @@ public class InspectionUtils {
             return e.toString();
         }
     }
-    
+
+    /**
+     * Gets a string representation of an object.
+     * 
+     * @param o the object to be inspected
+     * @param annotations annotations that were found in the last field traversed 
+     * while looking for this object
+     * @return a String representation taken either from Inspectable.inspect(),
+     * String.valueOf or size() depending on the annotation or type of the field.
+     */
     private static String inspect(Object o, List<Annotation> annotations) {
         if (o instanceof Inspectable) {
             Inspectable i = (Inspectable) o;
@@ -56,6 +84,11 @@ public class InspectionUtils {
         return "object of class "+o.getClass()+" is not inspectable";
     }
     
+    /**
+     * Finds a field with the specified name in an object, storing any
+     * annotations the field had in the annotations list.
+     * @return the object pointed to by the field, boxed if primitive.
+     */
     private static Object getValue(Object instance, String fieldName, 
             List<Annotation> annotations )     
     throws IllegalAccessException, NoSuchFieldException {
@@ -65,9 +98,12 @@ public class InspectionUtils {
         else
             field = getFieldImpl(instance.getClass(), fieldName);
         field.setAccessible(true);
+        
+        // clear the list of annotations and add any we find
         annotations.clear();
         for (Annotation a : field.getAnnotations())
             annotations.add(a);
+        
         return field.get(instance);
     }
 
