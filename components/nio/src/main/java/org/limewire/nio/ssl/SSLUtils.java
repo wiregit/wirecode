@@ -28,6 +28,7 @@ public class SSLUtils {
                 try {
                     SSLContext context = SSLContext.getInstance("TLS");
                     context.init(null, null, null);
+                    // TODO: Set the SSLSessionContext cache size, or timeout?
                     return context;
                 } catch (NoSuchAlgorithmException e) {
                     throw new IllegalStateException(e);

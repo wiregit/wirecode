@@ -2,6 +2,7 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -217,15 +218,15 @@ public class HttpClientManager {
 
         public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) 
           throws IOException, UnknownHostException {
-            return Sockets.connect(host,port,0);
+            return Sockets.connect(new InetSocketAddress(host,port),0);
         }
 
         public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-            return Sockets.connect(host,port,0);
+            return Sockets.connect(new InetSocketAddress(host,port),0);
         }
         
         public Socket createSocket(String host, int port, int timeout) throws IOException, UnknownHostException {
-            return Sockets.connect(host,port, timeout);
+            return Sockets.connect(new InetSocketAddress(host,port), timeout);
         }
         
     }

@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -420,7 +421,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void connectTCP(int timeout) throws IOException {
         if (_socket == null) {
             long curTime = System.currentTimeMillis();
-            _socket = Sockets.connect(_host, _port, timeout);
+            _socket = Sockets.connect(new InetSocketAddress(_host, _port), timeout);
             NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System.currentTimeMillis() - curTime));
         }
         

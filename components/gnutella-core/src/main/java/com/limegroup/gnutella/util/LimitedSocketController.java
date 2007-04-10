@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.nio.NBSocket;
-import org.limewire.nio.SocketFactory;
+import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 
@@ -50,8 +50,9 @@ class LimitedSocketController extends SimpleSocketController {
      * If observer is null, this will block until this connection attempt finishes.
      * Otherwise, observer will be notified of success or failure.
      */
-    protected Socket connectPlain(InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
-        NBSocket socket = SocketFactory.newSocket();
+    @Override
+    protected Socket connectPlain(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
+        NBSocket socket = factory.createSocket();
         bindSocket(socket);
         
         if(observer == null) {

@@ -5,6 +5,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,7 +143,7 @@ public class BrowseHostHandler {
                 // simply try connecting and getting results....
                 setState(DIRECTLY_CONNECTING);
                 LOG.trace("Attempting direct connection");
-                Socket socket = Sockets.connect(host, port,
+                Socket socket = Sockets.connect(new InetSocketAddress(host, port),
                                                 DIRECT_CONNECT_TIME);
                 LOG.trace("Direct connect successful");
                 browseExchange(socket);

@@ -18,7 +18,7 @@ import org.limewire.nio.observer.ConnectObserver;
  *  - TLS_DH_anon_WITH_AES_128_CBC_SHA
  */
 public class TLSNIOSocket extends NIOSocket {
-    
+
     private volatile SSLReadWriteChannel tlsLayer;
     private volatile InterestReadableByteChannel baseReader;
     private volatile InterestWritableByteChannel baseWriter;
@@ -83,9 +83,19 @@ public class TLSNIOSocket extends NIOSocket {
         tlsLayer = new SSLReadWriteChannel(SSLUtils.getTLSContext(), SSLUtils.getExecutor());
     }
     
+    
+    /** Ensures the TLS layer is closed properly. */
+    @Override
+    protected void shutdownImpl() {
+        super.shutdownImpl();
+        if(tlsLayer != null)
+            tlsLayer.shutdown();
+    }
+    
     /* package */ SSLReadWriteChannel getSSLChannel() {
         return tlsLayer;
     }
+    
     
     /**
      * A delegating connector that forces the TLS Layer to be initialized

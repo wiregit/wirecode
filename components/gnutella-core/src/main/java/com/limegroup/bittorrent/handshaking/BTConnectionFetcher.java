@@ -4,6 +4,7 @@ package com.limegroup.bittorrent.handshaking;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -157,8 +158,8 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 		connecting.add(connector);
 		++_triedHosts;
 		try {
-			connector.toCancel = Sockets.connect(ep.getAddress(),
-					ep.getPort(), Constants.TIMEOUT, connector);
+			connector.toCancel = Sockets.connect(new InetSocketAddress(ep.getAddress(), ep.getPort()),
+                                                 Constants.TIMEOUT, connector);
 		} catch (IOException impossible) {
 			connecting.remove(connector); // remove just in case
 		}

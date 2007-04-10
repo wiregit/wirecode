@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,6 +25,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
 import org.limewire.io.UncompressingInputStream;
 import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.nio.ssl.SSLUtils;
 
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.handshaking.BadHandshakeException;
@@ -114,6 +116,7 @@ public class Connection implements IpPort {
      * synchronization reasons, it is important that this only be modified by
      * the send(m) and receive() methods.
      */
+    private final boolean _tls;
     private final String _host;
     private int _port;
     protected volatile Socket _socket;
@@ -235,15 +238,26 @@ public class Connection implements IpPort {
      *
      * @param host the name of the host to connect to
      * @param port the port of the remote host
-     * @param requestHeaders the headers to be sent after "GNUTELLA CONNECT"
-     * @param responder a function returning the headers to be sent
-     *  after the server's "GNUTELLA OK".  Typically this returns only
-     *  vendor-specific properties.
 	 * @throws <tt>NullPointerException</tt> if any of the arguments are
 	 *  <tt>null</tt>
 	 * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
     public Connection(String host, int port) {
+        this(host, port, false);
+    }
+    
+    /**
+     * Creates an uninitialized outgoing Gnutella 0.6 connection with the
+     * desired outgoing properties that may use TLS.
+     *
+     * @param host the name of the host to connect to
+     * @param port the port of the remote host
+     * @param tls if the outgoing connection should be TLS-encoded
+     * @throws <tt>NullPointerException</tt> if any of the arguments are
+     *  <tt>null</tt>
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     */
+    public Connection(String host, int port, boolean tls) {
 		if(host == null)
 			throw new NullPointerException("null host");
 		if(!NetworkUtils.isValidPort(port))
@@ -251,7 +265,8 @@ public class Connection implements IpPort {
 
         _host = host;
         _port = port;
-        OUTGOING = true;     
+        OUTGOING = true;
+        _tls = tls;
 		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -278,6 +293,7 @@ public class Connection implements IpPort {
         _port = socket.getPort();
         _socket = socket;
         OUTGOING = false;
+        _tls = SSLUtils.isTLSEnabled(socket);
 		ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
@@ -382,11 +398,11 @@ public class Connection implements IpPort {
     }
     
     protected Socket connect(String addr, int port, int timeout) throws IOException {
-        return Sockets.connect(addr, port, timeout);
+        return Sockets.connect(new InetSocketAddress(addr, port), timeout);
     }
 
     protected Socket connect(String addr, int port, int timeout, ConnectObserver observer) throws IOException {
-        return Sockets.connect(addr, port, timeout, observer);
+        return Sockets.connect(new InetSocketAddress(addr, port), timeout, observer);
     }
 
     /**

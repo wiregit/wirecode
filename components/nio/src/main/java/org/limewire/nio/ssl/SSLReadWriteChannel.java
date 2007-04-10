@@ -17,6 +17,7 @@ import javax.net.ssl.SSLEngineResult.Status;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReader;
 import org.limewire.nio.channel.ChannelWriter;
@@ -36,18 +37,42 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     
     private static final Log LOG = LogFactory.getLog(SSLReadWriteChannel.class);
 
+    /** The context from which to retrieve a new SSLEngine. */
     private final SSLContext context;
+    /** An executor to perform blocking tasks. */
     private final Executor executor;
+    /** The engine managing this SSL session. */
     private SSLEngine engine;
+    /** A temporary buffer which data is unwrapped to. */
     private ByteBuffer readIncoming;
+    /** The buffer which the underlying readSink is read into. */
     private ByteBuffer readOutgoing;
+    /** The buffer which we wrap writes to. */
     private ByteBuffer writeOutgoing;
+    /** The underlying channel to read from. */
     private volatile InterestReadableByteChannel readSink;
+    /** The underlying channel to write to. */
     private volatile InterestWritableByteChannel writeSink;
+    /** The last WriteObserver that indicated write interested. */
     private WriteObserver writeWanter;
+    /** True if handshaking indicated we need to immediately perform a wrap. */
     private volatile boolean needsHandshakeWrap = false;
+    /** True if a read finished and data was still buffered. */
     private volatile boolean readDataLeft = false;
+    /** True only after a single read has been performed. */
     private AtomicBoolean firstReadDone = new AtomicBoolean(false);
+    
+    /**
+     * Whether or not this has been shutdown.
+     * Shutting down must be atomic wrt initializing, so that
+     * we can guarantee all allocated buffers are released
+     * properly.
+     * 
+     * Shutdown is volatile so read/write/handleWrite can quickly
+     * get it w/o locking.
+     */
+    private volatile boolean shutdown = false;
+    private final Object initLock = new Object();
     
     /**
      * The last state of who interested us in readinng must be kept,
@@ -79,30 +104,40 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
      * @param cipherSuites
      */
     void initialize(SocketAddress addr, String[] cipherSuites, boolean clientMode, boolean needClientAuth) {
-        if(addr != null) {
-            if(!(addr instanceof InetSocketAddress))
-                throw new IllegalArgumentException("unsupported SocketAddress");
-            InetSocketAddress iaddr = (InetSocketAddress)addr;
-            String host = iaddr.getAddress().getHostAddress();
-            int port = iaddr.getPort();
-            engine = context.createSSLEngine(host, port);
-        } else {
-            engine = context.createSSLEngine();
+        synchronized(initLock) {
+            if(shutdown) {
+                LOG.debug("Not initializing because already shutdown.");
+                return;
+            }
+            
+            if(addr != null) {
+                if(!(addr instanceof InetSocketAddress))
+                    throw new IllegalArgumentException("unsupported SocketAddress");
+                InetSocketAddress iaddr = (InetSocketAddress)addr;
+                String host = iaddr.getAddress().getHostAddress();
+                int port = iaddr.getPort();
+                engine = context.createSSLEngine(host, port);
+            } else {
+                engine = context.createSSLEngine();
+            }
+            engine.setEnabledCipherSuites(cipherSuites);
+            engine.setUseClientMode(clientMode);
+            if(!clientMode) {
+                engine.setWantClientAuth(needClientAuth);
+                engine.setNeedClientAuth(needClientAuth);
+            }
+            SSLSession session = engine.getSession();
+            readIncoming = NIODispatcher.instance().getBufferCache().getHeap(session.getApplicationBufferSize());
+            writeOutgoing = NIODispatcher.instance().getBufferCache().getHeap(session.getPacketBufferSize());
+            if(LOG.isTraceEnabled())
+                LOG.trace("Initialized engine: " + engine + ", session: " + session);
         }
-        engine.setEnabledCipherSuites(cipherSuites);
-        engine.setUseClientMode(clientMode);
-        if(!clientMode) {
-            engine.setWantClientAuth(needClientAuth);
-            engine.setNeedClientAuth(needClientAuth);
-        }
-        SSLSession session = engine.getSession();
-        readIncoming = ByteBuffer.allocate(session.getApplicationBufferSize());
-        writeOutgoing = ByteBuffer.allocate(session.getPacketBufferSize());
-        if(LOG.isTraceEnabled())
-            LOG.trace("Initialized engine: " + engine + ", session: " + session);
     }
 
     public int read(ByteBuffer dst) throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         int transferred = 0;
         
         // If data was left in readOutgoing, pre-transfer it.
@@ -142,8 +177,15 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             
             // If dst didn't have enough space, use an intermediate buffer.
             if(status == Status.BUFFER_OVERFLOW) {
-                if(readOutgoing == null)
-                    readOutgoing = ByteBuffer.allocate(engine.getSession().getPacketBufferSize());
+                // Initialize readOutgoing only if not shutdown,
+                // but grab the lock after we've checked to make sure
+                // it's non-null, to avoid lock every read.
+                if(readOutgoing == null) {
+                    synchronized(initLock) {
+                        if(!shutdown)
+                            readOutgoing = NIODispatcher.instance().getBufferCache().getHeap(engine.getSession().getPacketBufferSize());
+                    }
+                }
                 result = engine.unwrap(readIncoming, readOutgoing);
                 status = result.getStatus();
                 if(status == Status.BUFFER_OVERFLOW)
@@ -218,8 +260,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
             return reading;
         case FINISHED:
             synchronized(readInterestLock) {
-                LOG.debug("Handshaking finished for readSink: " + readSink + ", setting readSink interest to: " + readInterest);
-                // ensure we're ready for everything.
+                // set interest to what our observer wanted.
                 readSink.interestRead(readInterest);
             }
             writeSink.interestWrite(this, true);
@@ -254,7 +295,10 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
     }
 
-    public int write(ByteBuffer src) throws IOException {        
+    public int write(ByteBuffer src) throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         int consumed = 0;
         // do...while because we want to force one write even with empty buffers
         do {
@@ -280,6 +324,9 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     }
 
     public boolean handleWrite() throws IOException {
+        if(shutdown)
+            throw new ClosedChannelException();
+        
         InterestWritableByteChannel source = writeSink;
         if(source == null)
             throw new IllegalStateException("writing with no source.");
@@ -327,7 +374,37 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
         }
     }
 
+    /**
+     * Releases any resources that were acquired by the channel.
+     * If the underlying channels are still open, this method only propogates
+     * the shutdown call, instead of shutting down this channel, as it can
+     * still be used by other channels.
+     */
     public void shutdown() {
+        synchronized(initLock) {
+            if(shutdown)
+                return;
+            
+            if(!isOpen()) {
+                LOG.debug("Shutting down SSL channel");
+                shutdown = true;
+            }
+        }
+        
+        if(shutdown) {
+            NIODispatcher.instance().invokeLater(new Runnable() {
+                public void run() {
+                    ByteBufferCache cache = NIODispatcher.instance().getBufferCache();
+                    if(readIncoming != null)
+                        cache.release(readIncoming);
+                    if(readOutgoing != null)
+                        cache.release(readOutgoing);
+                    if(writeOutgoing != null)
+                        cache.release(writeOutgoing);
+                }
+            });
+        }
+        
         Shutdownable observer = writeWanter;
         if(observer != null)
             observer.shutdown();

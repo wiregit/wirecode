@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.NoSuchElementException;
@@ -729,7 +730,7 @@ public class DownloadWorker {
                 LOG.trace("WORKER: attempt asynchronous direct connection to: " + _rfd);
             _connectObserver = observer;
             try {
-                Socket socket = Sockets.connect(_rfd.getHost(), _rfd.getPort(), NORMAL_CONNECT_TIME, observer);
+                Socket socket = Sockets.connect(new InetSocketAddress(_rfd.getHost(), _rfd.getPort()), NORMAL_CONNECT_TIME, observer);
                 if(!observer.isShutdown())
                     observer.setSocket(socket);
             } catch (IOException iox) {

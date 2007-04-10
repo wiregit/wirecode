@@ -392,7 +392,6 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
                 }
             };
             
-            LOG.debug("Submitting future to convert reader to NIOInputStream");
             Future<InputStream> future = NIODispatcher.instance().submit(callable);
             try {
                 return future.get();

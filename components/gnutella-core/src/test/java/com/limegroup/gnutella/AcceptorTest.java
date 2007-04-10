@@ -3,15 +3,20 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -162,13 +167,30 @@ public class AcceptorTest extends LimeTestCase {
         catch (IOException good) {}
     }
      
-     public void testIncomingTLS() throws Exception {
+     public void testIncomingTLSHomemadeTLS() throws Exception {
          int port = bindAcceptor();
          
          MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
          RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, new String[] { "BLOCKING" }, false, true);
          
          Socket tls = new TLSNIOSocket("localhost", port);
+         tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
+         tls.getOutputStream().flush();
+         assertTrue(acceptor.waitForAccept());
+         tls.close();
+     }
+     
+     public void testIncomingTLSBuiltIn() throws Exception {
+         int port = bindAcceptor();
+         
+         MyConnectionAcceptor acceptor = new MyConnectionAcceptor("BLOCKING");
+         RouterService.getConnectionDispatcher().addConnectionAcceptor(acceptor, new String[] { "BLOCKING" }, false, true);
+         
+         SSLContext context = SSLUtils.getTLSContext();
+         SSLSocket tls = (SSLSocket)context.getSocketFactory().createSocket();
+         tls.setUseClientMode(true);
+         tls.setEnabledCipherSuites(new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" } );
+         tls.connect(new InetSocketAddress("localhost", port));
          tls.getOutputStream().write("BLOCKING MORE DATA".getBytes());
          tls.getOutputStream().flush();
          assertTrue(acceptor.waitForAccept());

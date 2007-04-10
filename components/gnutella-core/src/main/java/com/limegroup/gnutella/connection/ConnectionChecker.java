@@ -3,6 +3,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
@@ -300,7 +301,7 @@ public final class ConnectionChecker implements Runnable {
         	InetAddress.getByName(host); // die fast if unresolvable
             Observer observer = new Observer();
             synchronized(observer) {
-                Socket s = Sockets.connect(host, 80, 6000, observer);
+                Socket s = Sockets.connect(new InetSocketAddress(host, 80), 6000, observer);
                 LOG.debug("Waiting for callback...");
                 try {
                     observer.wait(12000);

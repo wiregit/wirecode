@@ -93,7 +93,7 @@ public final class PushManager {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                Sockets.connect(host, port, CONNECT_TIMEOUT, new PushObserver(data, false));
+                Sockets.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false));
             } catch(IOException iox) {
                 UploadStat.PUSH_FAILED.incrementStat();
             }

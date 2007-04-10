@@ -720,7 +720,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                         }
 
                         if(LOG.isDebugEnabled())
-                            LOG.debug("Dispatching word: " + word + ", buffer: " + buffer + ", contents: " + new String(buffer.array()));
+                            LOG.debug("Dispatching word: " + word);
                         buffer.limit(buffer.position()).position(i+1);
                         source.interestRead(false);
                         RouterService.getConnectionDispatcher().dispatch(word, client, true);
@@ -756,9 +756,7 @@ public class Acceptor implements ConnectionAcceptor, SocketProcessor {
                 LOG.debug("Attempting to start TLS");
                 buffer.flip();
                 AbstractNBSocket socket = SSLUtils.startTLS(client, buffer);
-                LOG.debug("TLS started -- setting new dispatcher");
                 socket.setReadObserver(new AsyncConnectionDispatcher(socket, allowedWord));
-                LOG.debug("New dispatcher set");
             } else {
                 close();
             }

@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Collections;
@@ -2635,7 +2636,7 @@ public class DownloadTest extends LimeTestCase {
                 
                 LOG.debug("received a push request");
                 
-                Socket s = Sockets.connect("127.0.0.1",_portC,500);
+                Socket s = Sockets.connect(new InetSocketAddress("127.0.0.1",_portC),500);
                 
                 OutputStream os = s.getOutputStream();
                 

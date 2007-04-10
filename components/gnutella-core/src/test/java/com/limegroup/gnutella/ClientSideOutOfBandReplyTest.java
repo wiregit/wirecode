@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.limewire.service.ErrorService;
@@ -430,8 +431,8 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             Socket sock = null;
             OutputStream os = null;
             try {
-                sock=Sockets.connect(InetAddress.getLocalHost().getHostAddress(),
-                                     SERVER_PORT, 12);
+                sock=Sockets.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(),
+                                     SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("\n\n".getBytes());
             } catch (IOException ignored) {
