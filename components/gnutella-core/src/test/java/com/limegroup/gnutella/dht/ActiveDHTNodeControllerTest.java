@@ -113,4 +113,29 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
             controller.stop();
         }
     }
+    
+    public void testResetRouteTable() {
+        DHTSettings.PERSIST_DHT.setValue(true);
+        
+        ActiveDHTNodeController controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        
+        Contact localNode1 = controller.getMojitoDHT().getLocalNode();
+        controller.stop();
+        
+        controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        Contact localNode2 = controller.getMojitoDHT().getLocalNode();
+        controller.stop();
+        
+        assertEquals(localNode1, localNode2);
+        
+        DHTSettings.ROUTETABLE_VERSION.setValue(1);
+        controller = new ActiveDHTNodeController(
+                Vendor.UNKNOWN, Version.ZERO, dispatcherStub);
+        Contact localNode3 = controller.getMojitoDHT().getLocalNode();
+        controller.stop();
+        
+        assertNotEquals(localNode1, localNode3);
+    }
 }
