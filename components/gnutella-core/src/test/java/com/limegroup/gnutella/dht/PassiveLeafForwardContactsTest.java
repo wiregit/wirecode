@@ -96,7 +96,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
-        DHTSettings.ENABLE_PASSIVE_DHT_LEAF_MODE.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(true);
         DHTSettings.PERSIST_DHT.setValue(false);
         KademliaSettings.SHUTDOWN_MULTIPLIER.setValue(0);
         NetworkSettings.TIMEOUT.setValue(500);

@@ -89,7 +89,7 @@ public class NodeAssignerTest extends LimeTestCase {
         DHTSettings.EXCLUDE_ULTRAPEERS.setValue(true);
         DHTSettings.FORCE_DHT_CONNECT.setValue(false);
         DHTSettings.ENABLE_PASSIVE_DHT_MODE.setValue(true);
-        DHTSettings.ENABLE_PASSIVE_DHT_LEAF_MODE.setValue(true);
+        DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(true);
     }
 
     protected void tearDown() throws Exception {

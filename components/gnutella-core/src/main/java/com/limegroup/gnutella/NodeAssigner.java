@@ -436,7 +436,7 @@ public class NodeAssigner {
                 && !DHTSettings.ENABLE_PASSIVE_DHT_MODE.getValue()) {
             mode = DHTMode.INACTIVE;
         } else if (mode == DHTMode.PASSIVE_LEAF
-                && !DHTSettings.ENABLE_PASSIVE_DHT_LEAF_MODE.getValue()) {
+                && !DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
             mode = DHTMode.INACTIVE;
         }
         

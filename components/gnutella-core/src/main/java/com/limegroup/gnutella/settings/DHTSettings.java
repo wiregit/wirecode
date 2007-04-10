@@ -217,9 +217,9 @@ public class DHTSettings extends LimeProps {
      * Setting for whether or not the passive leaf DHT mode should be active at all.
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
-    public static final BooleanSetting ENABLE_PASSIVE_DHT_LEAF_MODE
-        = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_DHT_LEAF_MODE", 
-                false, "enable_passive_dht_leaf_mode");
+    public static final BooleanSetting ENABLE_PASSIVE_LEAF_DHT_MODE
+        = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_LEAF_DHT_MODE", 
+                false, "enable_passive_leaf_dht_mode");
     
     /**
      * Whether or not PushProxies should be published.

@@ -187,7 +187,7 @@ public abstract class AbstractDHTController implements DHTController {
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
     
     private void forwardContact(Contact node) {
-        if (!DHTSettings.ENABLE_PASSIVE_DHT_LEAF_MODE.getValue()) {
+        if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
             return;
         }
         
