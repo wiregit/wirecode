@@ -64,7 +64,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                                 new FileInputStream(FILE))));
                 
                 int routeTableVersion = in.readInt();
-                if (routeTableVersion >= DHTSettings.ROUTETABLE_VERSION.getValue()) {
+                if (routeTableVersion >= getRouteTableVersion()) {
                     RouteTable routeTable = (RouteTable)in.readObject();
                     Database database = (Database)in.readObject();
     
@@ -98,7 +98,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                             new SecureOutputStream(
                                 new FileOutputStream(FILE))));
                 
-                out.writeInt(DHTSettings.ROUTETABLE_VERSION.getValue());
+                out.writeInt(getRouteTableVersion());
                 synchronized (dht) {
                     out.writeObject(dht.getRouteTable());
                     out.writeObject(dht.getDatabase());

@@ -116,6 +116,11 @@ public abstract class AbstractDHTController implements DHTController {
      */
     private final DHTMode mode;
     
+    /**
+     * Get and save the current RouteTable version
+     */
+    private final int routeTableVersion = DHTSettings.ROUTETABLE_VERSION.getValue();
+    
     public AbstractDHTController(Vendor vendor, Version version, 
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
             DHTMode mode) {
@@ -181,6 +186,13 @@ public abstract class AbstractDHTController implements DHTController {
         DHTStatsManager.clear();
     }
 
+    /**
+     * Returns the current RouteTable version
+     */
+    protected final int getRouteTableVersion() {
+        return routeTableVersion;
+    }
+    
     /**
      * A factory method to create MojitoDHTs
      */
